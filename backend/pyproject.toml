@@ -41,6 +41,10 @@ DJANGO_SETTINGS_MODULE = "config.settings.test"
 python_files = ["test_*.py"]
 # Migrations run in tests on purpose: they must work on SQLite and PostgreSQL (docs/05 §4 rule 8).
 addopts = "-ra --strict-markers"
+filterwarnings = [
+    # Every paginated list needs a stable order.
+    "error::django.core.paginator.UnorderedObjectListWarning",
+]
 testpaths = ["."]
 
 [tool.ruff]
@@ -52,9 +56,13 @@ extend-exclude = ["*/migrations/*"]
 select = ["E", "F", "W", "I", "B", "UP", "DJ", "S", "SIM", "RUF"]
 ignore = [
     "RUF012", # mutable class attributes are idiomatic in Django/DRF (Meta, fields)
+    "RUF001", # Arabic text is legitimate content, not confusable Latin
+    "RUF002",
+    "RUF003",
 ]
 
 [tool.ruff.lint.per-file-ignores]
 "**/tests/**" = ["S101", "S105", "S106"]
+"conftest.py" = ["S105", "S106"]
 "config/settings/dev.py" = ["S105"]
 "config/settings/test.py" = ["S105"]

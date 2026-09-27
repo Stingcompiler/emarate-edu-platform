@@ -65,9 +65,7 @@ def start_registration(university_number: str, full_name: str, email: str) -> Re
             request.otp = code_row
             request.save(update_fields=["otp", "updated_at"])
             transaction.on_commit(
-                lambda: emails.registration_code(
-                    email, code, SystemSettings.load().otp_ttl_minutes
-                )
+                lambda: emails.registration_code(email, code, SystemSettings.load().otp_ttl_minutes)
             )
     return request
 
@@ -89,9 +87,7 @@ def verify_registration(request: RegistrationRequest, code: str) -> None:
 def complete_registration(request: RegistrationRequest, password: str) -> User:
     """Step 3. Creates the account. Active immediately, or pending approval."""
     if request.status != RegistrationRequest.Status.VERIFIED:
-        raise ValidationError(
-            {"request_id": ["Verify your email first."]}, code="not_verified"
-        )
+        raise ValidationError({"request_id": ["Verify your email first."]}, code="not_verified")
     student = request.student_record
     password_validation.validate_password(password, User(email=request.email))
     config = SystemSettings.load()
@@ -165,9 +161,7 @@ def decide_registration(
             student.user = None
             student.save(update_fields=["user", "updated_at"])
             user.delete()
-        request.save(
-            update_fields=["status", "decided_by", "decided_at", "reason", "updated_at"]
-        )
+        request.save(update_fields=["status", "decided_by", "decided_at", "reason", "updated_at"])
         record(
             meta,
             "registration.approve" if approve else "registration.reject",
@@ -206,13 +200,9 @@ def login(identifier: str, password: str) -> User:
     user = authenticate(email=email, password=password) if email else None
     if user is None:
         # Pending accounts are inactive: explain instead of a generic error.
-        pending = (
-            User.objects.filter(email=email, is_active=False).first() if email else None
-        )
+        pending = User.objects.filter(email=email, is_active=False).first() if email else None
         if pending is not None and pending.check_password(password):
-            raise PermissionDenied(
-                "Your account is waiting for approval.", code="pending_approval"
-            )
+            raise PermissionDenied("Your account is waiting for approval.", code="pending_approval")
         cache.set(key, failures + 1, timeout=settings.LOGIN_LOCKOUT_SECONDS)
         raise ValidationError(
             {"non_field_errors": ["Incorrect email/university number or password."]},

@@ -1,4 +1,5 @@
 from django.db.models import Count, Prefetch, Q
+from django.http import Http404
 from django.shortcuts import get_object_or_404
 from drf_spectacular.utils import extend_schema
 from rest_framework import mixins, status, viewsets
@@ -98,9 +99,9 @@ class OfferingViewSet(ScopedModelViewSet):
         self.queryset = (
             CourseOffering.objects.select_related("course", "term")
             .prefetch_related(_INSTRUCTORS)
-            .annotate(
-                enrolled_count=Count("enrollments", filter=Q(enrollments__status="active"))
-            )
+            .annotate(enrolled_count=Count("enrollments", filter=Q(enrollments__status="active")))
+            # GROUP BY drops the model's default ordering; restate it for pagination.
+            .order_by("course__code", "section", "id")
         )
         return super().get_queryset()
 
@@ -153,7 +154,7 @@ class DepartmentMembersView(APIView):
         name = "courses.view" if request.method == "GET" else "membership.manage"
         if not rbac.can(request.user, name, department.pk):
             # Hide departments outside the caller's scope entirely.
-            raise_not_found()
+            raise Http404
         return department
 
     @extend_schema(responses=MembershipSerializer(many=True))
@@ -185,20 +186,12 @@ class DepartmentMemberDetailView(APIView):
             DepartmentMembership, pk=membership_id, department_id=department_id
         )
         if not rbac.can(request.user, "courses.view", membership.department_id):
-            raise_not_found()
+            raise Http404
         services.remove_member(RequestMeta.from_request(request), membership)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-def raise_not_found():
-    from django.http import Http404
-
-    raise Http404
-
-
-class EnrollmentViewSet(
-    mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet
-):
+class EnrollmentViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
     """Enrollment is created (single or bulk) and dropped — never deleted."""
 
     serializer_class = EnrollmentSerializer
@@ -209,7 +202,11 @@ class EnrollmentViewSet(
     def get_queryset(self):
         queryset = Enrollment.objects.select_related(
             "student_record", "offering__course", "offering__term"
-        ).prefetch_related(Prefetch("offering__instructors", queryset=OfferingInstructor.objects.select_related("user")))
+        ).prefetch_related(
+            Prefetch(
+                "offering__instructors", queryset=OfferingInstructor.objects.select_related("user")
+            )
+        )
         scope = rbac.scope_for(self.request.user, "enrollment.manage")
         return scope.filter(queryset, "offering__course__department")
 

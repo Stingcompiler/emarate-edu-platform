@@ -156,7 +156,11 @@ SPECTACULAR_SETTINGS = {
     "SERVE_INCLUDE_SCHEMA": False,
     "COMPONENT_SPLIT_REQUEST": True,
     "SCHEMA_PATH_PREFIX": r"/api/(v1|public|visitor)",
-    "ENUM_NAME_OVERRIDES": {"CheckResultEnum": ["ok", "error"]},
+    "ENUM_NAME_OVERRIDES": {
+        "CheckResultEnum": ["ok", "error"],
+        "RoleEnum": "accounts.rbac.Role",
+        "TeachingKindEnum": "academic.models.DepartmentMembership.Kind",
+    },
 }
 
 # ─── Authentication (docs/05 §7, §8.2) ────────────────────────────────────

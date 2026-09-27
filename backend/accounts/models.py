@@ -62,6 +62,7 @@ class User(PublicIdModel, AbstractUser):
 
     class Meta(AbstractUser.Meta):
         swappable = "AUTH_USER_MODEL"
+        ordering = ["email"]
         db_table = "accounts_user"
 
     def __str__(self) -> str:
@@ -91,6 +92,7 @@ class RoleAssignment(TimestampedModel):
     )
 
     class Meta:
+        ordering = ["id"]
         constraints = [
             models.UniqueConstraint(
                 fields=["user", "role", "department"],
@@ -106,10 +108,7 @@ class RoleAssignment(TimestampedModel):
             models.CheckConstraint(
                 condition=(
                     models.Q(role__in=_SCOPED, department__isnull=False)
-                    | (
-                        ~models.Q(role__in=_SCOPED)
-                        & models.Q(department__isnull=True)
-                    )
+                    | (~models.Q(role__in=_SCOPED) & models.Q(department__isnull=True))
                 ),
                 name="role_department_scope",
             ),

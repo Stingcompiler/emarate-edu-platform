@@ -2,7 +2,7 @@ from drf_spectacular.utils import extend_schema
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
-from rest_framework.parsers import MultiPartParser
+from rest_framework.parsers import JSONParser, MultiPartParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
@@ -45,8 +45,13 @@ class StudentImportViewSet(
     permission_classes = [IsAuthenticated, capability("students.import")]
     lookup_field = "public_id"
     queryset = StudentImportBatch.objects.select_related("uploaded_by")
+    # Parsers are chosen before the action is known, so declare both here.
+    parser_classes = [MultiPartParser, JSONParser]
 
-    @extend_schema(request={"multipart/form-data": ImportUploadSerializer}, responses={201: ImportBatchSerializer})
+    @extend_schema(
+        request={"multipart/form-data": ImportUploadSerializer},
+        responses={201: ImportBatchSerializer},
+    )
     def create(self, request):
         upload = ImportUploadSerializer(data=request.data)
         upload.is_valid(raise_exception=True)
@@ -58,11 +63,6 @@ class StudentImportViewSet(
         except UnicodeDecodeError:
             raise ValidationError({"file": ["Save the CSV as UTF-8."]}) from None
         return Response(ImportBatchSerializer(batch).data, status=status.HTTP_201_CREATED)
-
-    def get_parsers(self):
-        if getattr(self, "action", None) == "create":
-            return [MultiPartParser()]
-        return super().get_parsers()
 
     @extend_schema(responses=ImportRowSerializer(many=True))
     @action(detail=True, methods=["get"])

@@ -113,9 +113,7 @@ CAPABILITIES: dict[str, frozenset[Role]] = {
 GRANTS: dict[Role, frozenset[Role]] = {
     R.SYSTEM_ADMIN: frozenset(Role),
     R.HEAD_REGISTRAR: frozenset({R.REGISTRAR}),
-    R.ACADEMIC_AFFAIRS: frozenset(
-        {R.DEPARTMENT_MANAGER, R.DEPARTMENT_SUPERVISOR, R.TEACHER, R.TA}
-    ),
+    R.ACADEMIC_AFFAIRS: frozenset({R.DEPARTMENT_MANAGER, R.DEPARTMENT_SUPERVISOR, R.TEACHER, R.TA}),
     R.SITE_MANAGER: frozenset({R.EVENTS_MANAGER}),
 }
 
@@ -153,7 +151,9 @@ class Scope:
     def q(self, department_field: str) -> Q:
         if self.everything:
             return Q()
-        return Q(**{f"{department_field}__in": self.departments}) if self.departments else Q(pk__in=[])
+        return (
+            Q(**{f"{department_field}__in": self.departments}) if self.departments else Q(pk__in=[])
+        )
 
 
 def _assignments(user) -> list[tuple[str, int | None]]:

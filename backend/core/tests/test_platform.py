@@ -18,7 +18,9 @@ def test_custom_user_model_is_active():
 
 @pytest.mark.django_db
 def test_users_get_a_public_id():
-    user = get_user_model().objects.create_user(username="u1", password="x")
+    user = get_user_model().objects.create_user(
+        email="u1@ecst.test", password="x", full_name_ar="م"
+    )
 
     assert user.public_id is not None
 
@@ -58,7 +60,10 @@ def test_development_settings_need_no_external_services():
     assert dev.MAILERS["default"]["BACKEND"] == "core.mail.DevEmailBackend"
 
 
-def test_deploy_check_flags_local_private_storage():
+@pytest.mark.django_db
+def test_deploy_check_flags_local_private_storage(settings):
+    base = importlib.import_module("config.settings.base")
+    settings.STORAGES = base.STORAGES
     ids = {message.id for message in run_checks(include_deployment_checks=True)}
 
     assert "core.W001" in ids

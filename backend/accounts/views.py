@@ -1,11 +1,13 @@
 """Account endpoints: auth (cookies), /me, public registration, users and roles."""
 
+import contextlib
+
 from django.conf import settings
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
-from django.views.decorators.csrf import ensure_csrf_cookie
 from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import ensure_csrf_cookie
 from drf_spectacular.utils import extend_schema
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
@@ -121,9 +123,7 @@ class RefreshView(APIView):
             user = User.objects.get(pk=old["user_id"], is_active=True)
             old.blacklist()
         except (TokenError, User.DoesNotExist):
-            response = Response(
-                {"detail": "Session expired."}, status=status.HTTP_401_UNAUTHORIZED
-            )
+            response = Response({"detail": "Session expired."}, status=status.HTTP_401_UNAUTHORIZED)
             _clear_auth_cookies(response)
             return response
         response = Response({"detail": "ok"})
@@ -139,10 +139,8 @@ class LogoutView(APIView):
     def post(self, request):
         raw = request.COOKIES.get(settings.AUTH_COOKIE_REFRESH)
         if raw:
-            try:
+            with contextlib.suppress(TokenError):
                 RefreshToken(raw).blacklist()
-            except TokenError:
-                pass
         response = Response({"detail": "ok"})
         _clear_auth_cookies(response)
         return response
@@ -187,7 +185,11 @@ class RegistrationVerifyView(APIView):
     authentication_classes = []
     throttle_classes = [OTPIPThrottle]
 
-    @extend_schema(request=RegistrationVerifySerializer, responses={200: DetailSerializer}, tags=["registration"])
+    @extend_schema(
+        request=RegistrationVerifySerializer,
+        responses={200: DetailSerializer},
+        tags=["registration"],
+    )
     def post(self, request):
         data = RegistrationVerifySerializer(data=request.data)
         data.is_valid(raise_exception=True)
@@ -222,7 +224,9 @@ class PasswordForgotView(APIView):
     authentication_classes = []
     throttle_classes = [OTPIPThrottle, OTPTargetThrottle]
 
-    @extend_schema(request=PasswordForgotSerializer, responses={200: DetailSerializer}, tags=["auth"])
+    @extend_schema(
+        request=PasswordForgotSerializer, responses={200: DetailSerializer}, tags=["auth"]
+    )
     def post(self, request):
         data = PasswordForgotSerializer(data=request.data)
         data.is_valid(raise_exception=True)
@@ -235,7 +239,9 @@ class PasswordResetView(APIView):
     authentication_classes = []
     throttle_classes = [OTPIPThrottle]
 
-    @extend_schema(request=PasswordResetSerializer, responses={200: DetailSerializer}, tags=["auth"])
+    @extend_schema(
+        request=PasswordResetSerializer, responses={200: DetailSerializer}, tags=["auth"]
+    )
     def post(self, request):
         data = PasswordResetSerializer(data=request.data)
         data.is_valid(raise_exception=True)
@@ -361,7 +367,9 @@ class RegistrationRequestViewSet(
         scope = rbac.scope_for(self.request.user, "registration.approve")
         return scope.filter(queryset, "student_record__department")
 
-    @extend_schema(request=RegistrationDecisionSerializer, responses={200: RegistrationRequestSerializer})
+    @extend_schema(
+        request=RegistrationDecisionSerializer, responses={200: RegistrationRequestSerializer}
+    )
     @action(detail=True, methods=["post"])
     def decide(self, request, public_id=None):
         data = RegistrationDecisionSerializer(data=request.data)

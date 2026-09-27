@@ -252,8 +252,11 @@ def validate_file(meta: RequestMeta, name: str, uploaded) -> StudentImportBatch:
         row_objects.append(
             StudentImportRow(
                 row_no=index,
-                raw={k: (v.isoformat() if isinstance(v, (date, datetime)) else v) for k, v in raw.items()
-                     if k != "national_id"},
+                raw={
+                    k: (v.isoformat() if isinstance(v, (date, datetime)) else v)
+                    for k, v in raw.items()
+                    if k != "national_id"
+                },
                 normalized=normalized,
                 action=action,
                 changes=changes,
@@ -281,7 +284,10 @@ def validate_file(meta: RequestMeta, name: str, uploaded) -> StudentImportBatch:
 
 def commit(meta: RequestMeta, batch: StudentImportBatch) -> StudentImportBatch:
     """Apply create/update rows; error rows are skipped. One transaction."""
-    if batch.status not in (StudentImportBatch.Status.VALIDATED, StudentImportBatch.Status.HAS_ERRORS):
+    if batch.status not in (
+        StudentImportBatch.Status.VALIDATED,
+        StudentImportBatch.Status.HAS_ERRORS,
+    ):
         raise ValueError("This batch was already committed or rejected.")
     created = updated = 0
     with transaction.atomic():
@@ -322,7 +328,9 @@ def commit(meta: RequestMeta, batch: StudentImportBatch) -> StudentImportBatch:
         batch.committed_at = timezone.now()
         batch.committed_by = meta.actor
         batch.summary = {**batch.summary, "created": created, "updated": updated}
-        batch.save(update_fields=["status", "committed_at", "committed_by", "summary", "updated_at"])
+        batch.save(
+            update_fields=["status", "committed_at", "committed_by", "summary", "updated_at"]
+        )
         record(meta, "students.import_commit", batch, new=batch.summary)
     return batch
 

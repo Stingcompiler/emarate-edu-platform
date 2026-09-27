@@ -112,9 +112,10 @@ class StudentImportRow(models.Model):
 
     class Meta:
         ordering = ["row_no"]
-        constraints = [
-            models.UniqueConstraint(fields=["batch", "row_no"], name="uniq_import_row")
-        ]
+        constraints = [models.UniqueConstraint(fields=["batch", "row_no"], name="uniq_import_row")]
+
+    def __str__(self) -> str:
+        return f"{self.batch_id}:{self.row_no}"
 
 
 class UniversityNumberSequence(models.Model):
@@ -131,3 +132,6 @@ class UniversityNumberSequence(models.Model):
                 fields=["college", "year", "prefix"], name="uniq_university_number_sequence"
             )
         ]
+
+    def __str__(self) -> str:
+        return f"{self.year}-{self.prefix}"

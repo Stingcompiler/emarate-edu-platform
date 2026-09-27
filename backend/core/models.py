@@ -36,13 +36,13 @@ class BilingualNameModel(models.Model):
     class Meta:
         abstract = True
 
+    def __str__(self) -> str:
+        return self.name_ar
+
     @property
     def name(self) -> str:
         if (get_language() or "ar").startswith("en") and self.name_en:
             return self.name_en
-        return self.name_ar
-
-    def __str__(self) -> str:
         return self.name_ar
 
 

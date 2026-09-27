@@ -136,6 +136,7 @@ class OfferingInstructor(TimestampedModel):
     role = models.CharField(max_length=10, choices=Kind.choices)
 
     class Meta:
+        ordering = ["id"]
         constraints = [
             models.UniqueConstraint(fields=["offering", "user"], name="uniq_offering_instructor")
         ]
@@ -160,6 +161,7 @@ class DepartmentMembership(TimestampedModel):
     )
 
     class Meta:
+        ordering = ["id"]
         constraints = [
             models.UniqueConstraint(fields=["department", "user"], name="uniq_department_member")
         ]
@@ -186,9 +188,8 @@ class Enrollment(TimestampedModel):
     source = models.CharField(max_length=10, choices=Source.choices, default=Source.MANUAL)
 
     class Meta:
+        ordering = ["id"]
         constraints = [
-            models.UniqueConstraint(
-                fields=["offering", "student_record"], name="uniq_enrollment"
-            )
+            models.UniqueConstraint(fields=["offering", "student_record"], name="uniq_enrollment")
         ]
         indexes = [models.Index(fields=["student_record", "status"])]

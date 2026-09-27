@@ -44,7 +44,8 @@ def test_endpoints_require_authentication_by_default():
     response = _PrivateView.as_view()(request)
     response.render()
 
-    assert response.status_code == 403
+    # 401 (not 403): the cookie JWT authenticator names a WWW-Authenticate scheme.
+    assert response.status_code == 401
     assert response["Content-Type"] == "application/problem+json"
     assert response.data["code"] == "not_authenticated"
 

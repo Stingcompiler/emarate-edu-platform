@@ -71,16 +71,19 @@ def remove_member(meta: RequestMeta, membership: DepartmentMembership) -> None:
 # ─── Instructors on an offering ───────────────────────────────────────────
 
 
-def add_instructor(meta: RequestMeta, offering: CourseOffering, user, role: str) -> OfferingInstructor:
+def add_instructor(
+    meta: RequestMeta, offering: CourseOffering, user, role: str
+) -> OfferingInstructor:
     department_id = offering.course.department_id
     _require(meta, "courses.manage", department_id)
     if _KIND_ROLE[role] not in rbac.roles_of(user):
         raise ValidationError({"user": [f"This person does not have the {role} role."]})
     # Department roles assign their own members; academic affairs / admin assign anyone.
     college_wide = rbac.scope_for(meta.actor, "courses.manage").everything
-    if not college_wide and not DepartmentMembership.objects.filter(
-        department_id=department_id, user=user
-    ).exists():
+    if (
+        not college_wide
+        and not DepartmentMembership.objects.filter(department_id=department_id, user=user).exists()
+    ):
         raise ValidationError({"user": ["Add this person to the department first."]})
     try:
         with transaction.atomic():
