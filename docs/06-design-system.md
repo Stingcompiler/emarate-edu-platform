@@ -8,6 +8,7 @@
 
 1. **الأبيض أساس، الأزرق تفاعل، الكحلي بنية، الأحمر تأكيد نادر.**
 2. **الوضوح قبل الزخرفة:** أسطح مسطحة، ظلال خفيفة، لا تدرجات.
+2b. **الهاتف أولًا للطالب والأستاذ، بملمس iOS** (تبويبات سفلية، Sheets، عناوين كبيرة)؛ سطح المكتب يتوسع منه. الوضع الداكن مواطن من الدرجة الأولى.
 3. **RTL أولًا، LTR مكافئ:** خصائص منطقية فقط (`inline-start/end`).
 4. **الحالة مرئية دائمًا:** كل كيان له شارة حالة بلون دلالي ثابت عبر النظام.
 5. **الوصولية شرط:** WCAG AA للتباين، تنقل بلوحة المفاتيح، `aria` للمكوّنات المركّبة.
@@ -219,6 +220,9 @@ Tailwind 4: `@theme { --color-primary: var(--primary); ... }` فتُستخدم `
 | DataExportButton | CSV/PDF | loading | – |
 | StatusTransitionMenu | يعرض `allowed_transitions` من الـ API | – | يطلب ملاحظة عند الرفض/الإرجاع |
 
+### 7.1b مكوّنات الهاتف (ملمس iOS — المواصفة الكاملة في `09-mobile-experience.md` §5)
+TabBar (عائم، ينكمش عند التمرير، شارات)، NavigationBar (عنوان كبير → مضمَّن)، Sheet (Detents نصف/كامل، مقبض)، ActionSheet، SegmentedControl، GroupedList/ListRow، SwipeActions، PullToRefresh، CapsuleToast، CardCourse، CountdownPill، OfflineBanner، DownloadButton، InstallPrompt، SearchBar. القاعدة: على الشاشات < `lg` تُستبدل Dialog بـ Sheet، وDropdownMenu بـ ActionSheet، وTable بـ GroupedList، وToast بـ CapsuleToast تلقائيًا عبر نفس الـ API.
+
 ### 7.2 تشريح المكوّنات المركّبة
 - **Table:** `Toolbar (FilterBar + Actions)` → `Table` → `Footer (Pagination + selection summary)`. الأعمدة تُعرَّف بمصفوفة `{key, header, cell, sortable, width, hideOnMobile}`؛ الصفوف الطويلة على الموبايل تُعرض بطاقة بـ 3 حقول أولية + "المزيد".
 - **Form:** `FormLayout` (عمود/عمودان) من `FormField`s؛ التحقق على `blur` ثم عند الإرسال؛ الأخطاء من الخادم تُربط بحقولها (`errors.field`) والباقي في `Alert` أعلى النموذج؛ زر الإرسال يعطَّل أثناء الإرسال فقط.
@@ -253,7 +257,8 @@ Tailwind 4: `@theme { --color-primary: var(--primary); ... }` فتُستخدم `
 | الهيكل | المكوّنات | ملاحظات |
 |---|---|---|
 | **الموقع العام** | Header (شعار أفقي، قائمة، لغة، زر "قدّم الآن" accent) → المحتوى → Footer (اتصال، روابط، سياسات، اجتماعي، شعار معكوس على navy) | عرض 1200px؛ أقسام بتناوب أبيض/n50 |
-| **البوابة** | TopBar (navy) + Sidebar (يمين، 264px، مطوي 72px) + المحتوى (`PageHeader` + جسم) | على `md` وأقل: Drawer + BottomNav للطالب/الأستاذ |
+| **البوابة — سطح المكتب (≥ lg)** | TopBar (navy) + Sidebar (يمين، 264px، مطوي 72px) + المحتوى (`PageHeader` + جسم) | الإدارة والأساتذة على الحاسوب |
+| **البوابة — الهاتف (< lg)** | **هاتف-أولًا للطالب والأستاذ:** NavigationBar بعنوان كبير + محتوى + TabBar عائم (5 تبويبات)؛ الأدوار الإدارية: Drawer + TabBar بثلاثة تبويبات (الرئيسية/الإشعارات/أنا) | الوضع الداكن مدعوم من المرحلة الأولى؛ التفاصيل في 09 |
 | **المصادقة** | بطاقة مركزية 440px على n50 بشعار كامل | تسجيل الدخول، التسجيل (Wizard)، استعادة، تفعيل |
 | **الزائر (متابعة الطلب)** | داخل الموقع العام بجلسة OTP؛ بطاقة واسعة 800px | لا شريط جانبي |
 | **الاختبار** | شاشة مركّزة: عداد ثابت أعلى، سؤال، تنقل أسئلة جانبي، بلا Sidebar | منع الخروج العرضي بتأكيد |
