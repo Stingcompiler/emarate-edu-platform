@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="ar">
+<head>
+<meta charset="utf-8">
+<title>سطح المكتب — استيراد سجل الطلاب</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'IBM Plex Sans Arabic',system-ui,sans-serif;background:#F4F5F7;color:#1F2B47}
+a{color:#2D64A7;text-decoration:none}
+.scr{width:1280px;height:800px;position:relative;overflow:hidden;background:#F4F5F7;direction:rtl;text-align:right;box-sizing:border-box;display:flex}
+.side{width:240px;flex-shrink:0;background:#1F2B47;color:#fff;padding:20px 16px;box-sizing:border-box;display:flex;flex-direction:column}
+.logo{display:flex;align-items:center;gap:10px;font-size:14px;font-weight:700;padding:4px 6px 22px}
+.logo i{width:32px;height:32px;border-radius:9px;background:#fff;display:block}
+.nv{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;font-size:14px;color:rgba(255,255,255,.75);margin-bottom:2px}
+.nv svg{width:18px;height:18px}
+.nv.on{background:rgba(255,255,255,.12);color:#fff;font-weight:600}
+.me{margin-top:auto;display:flex;align-items:center;gap:10px;padding:10px 6px;border-top:1px solid rgba(255,255,255,.12)}
+.me .av{width:34px;height:34px;border-radius:17px;background:#2D64A7;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700}
+.me .t{font-size:13px;font-weight:600}.me .s{font-size:11px;color:rgba(255,255,255,.6)}
+.main{flex:1;min-width:0;display:flex;flex-direction:column}
+.bar{height:60px;display:flex;align-items:center;gap:14px;padding:0 28px;background:#fff;border-bottom:1px solid #E7E9EE}
+.bar h1{font-size:18px;font-weight:700;margin:0}
+.crumb{font-size:13px;color:#8F95A3}.crumb a{color:#2D64A7}
+.bar .act{margin-right:auto;display:flex;gap:8px}
+.btn{font-size:13px;font-weight:700;padding:9px 16px;border-radius:10px;white-space:nowrap}
+.b-pri{background:#2D64A7;color:#fff}.b-sec{background:#F0F1F4;color:#1F2B47}
+.wrap{flex:1;overflow:auto;padding:22px 28px;box-sizing:border-box}
+.steps{display:flex;align-items:center;margin-bottom:18px}
+.st{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:#8F95A3}
+.st i{width:26px;height:26px;border-radius:13px;background:#E7E9EE;color:#576075;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700}
+.st.d{color:#14603A}.st.d i{background:#1E7F4F;color:#fff}
+.st.c{color:#1F2B47}.st.c i{background:#2D64A7;color:#fff}
+.ln{width:60px;height:2px;background:#E7E9EE;margin:0 12px}
+.cols{display:grid;grid-template-columns:1fr 320px;gap:20px}
+.grp{background:#fff;border-radius:16px;border:1px solid #E7E9EE;overflow:hidden;margin-bottom:20px}
+.hd{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid #EEF0F3}
+.hd h2{font-size:14px;font-weight:700;margin:0;flex:1}
+.hd .f{display:flex;gap:6px}
+.hd .f span{font-size:11px;font-weight:600;padding:5px 10px;border-radius:999px;background:#F0F1F4;color:#576075}
+.hd .f .on{background:#1F2B47;color:#fff}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{font-size:11px;font-weight:600;color:#8F95A3;text-align:right;padding:9px 14px;background:#F8F9FB;border-bottom:1px solid #EEF0F3}
+td{padding:9px 14px;border-top:1px solid #EEF0F3;vertical-align:middle}
+tr.new td{background:#F2FAF5}tr.upd td{background:#F2F6FB}tr.bad td{background:#FFF7F6}
+.num{direction:ltr;text-align:right;font-variant-numeric:tabular-nums}
+.chip{font-size:11px;font-weight:600;padding:3px 8px;border-radius:999px;white-space:nowrap}
+.c-ok{background:#E6F4EC;color:#14603A}.c-bad{background:#FBE9E7;color:#922B20}.c-info{background:#E5ECF4;color:#1F4674}.c-neu{background:#EEF0F3;color:#576075}
+.err{font-size:11px;color:#922B20;margin-top:2px}
+.chg{font-size:11px;color:#1F4674}
+.sum{padding:14px 16px}
+.sum .r{display:flex;justify-content:space-between;font-size:13px;padding:7px 0;border-top:1px solid #EEF0F3}
+.sum .r:first-child{border-top:0;padding-top:0}
+.sum b{font-weight:700;direction:ltr}.sum .k{color:#576075}
+.file{display:flex;align-items:center;gap:12px;padding:12px 16px}
+.file .ft{width:40px;height:40px;border-radius:10px;background:#E6F4EC;color:#14603A;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;direction:ltr}
+.file .t{font-size:13px;font-weight:600}.file .s{font-size:12px;color:#8F95A3}
+.opt{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;font-size:13px;font-weight:600;border-top:1px solid #EEF0F3}
+.sw{width:40px;height:24px;border-radius:12px;background:#C7CAD1;position:relative;flex-shrink:0}
+.sw i{position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:9px;background:#fff}
+.sw.on{background:#1E7F4F}.sw.on i{left:19px}
+.note{font-size:12px;color:#576075;line-height:1.7;padding:12px 16px;background:#F8F9FB;border-top:1px solid #EEF0F3}
+.prev{padding:6px 16px 12px}
+.prev .r{display:flex;justify-content:space-between;font-size:12px;padding:6px 0;border-top:1px solid #EEF0F3}
+.prev .r:first-child{border-top:0}
+</style>
+</helmet>
+<div class="scr" style="width: 1280px; height: 800px">
+<aside class="side">
+<div class="logo"><i></i>منصة الكلية</div>
+<a class="nv" href="DesktopHeadRegistrar.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8v9a2 2 0 0 1-2 2h-4v-7h-6v7H5a2 2 0 0 1-2-2z"/></svg>القبول</a>
+<a class="nv" href="HeadRegistrarApplications.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>كل الطلبات</a>
+<a class="nv" href="HeadRegistrarStudent.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>سجل الطلاب</a>
+<a class="nv on" href="DesktopStudentsImport.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21V9M8 13l4-4 4 4"/><path d="M20 16.6A5 5 0 0 0 18 7h-1.3A8 8 0 1 0 4 15.2"/></svg>استيراد سجل الطلاب</a>
+<a class="nv" href="DesktopFormBuilder.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>قوالب التقديم</a>
+<a class="nv" href="HeadRegistrarCycles.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>دورات القبول</a>
+<div class="me"><span class="av">ن ف</span><span><div class="t">أ. نجلاء الفكي</div><div class="s">مسؤول المسجلين</div></span></div>
+</aside>
+<div class="main">
+<div class="bar"><span class="crumb"><a href="HeadRegistrarStudent.dc.html">سجل الطلاب</a> / </span><h1>استيراد سجل الطلاب — خريف 2026</h1><div class="act"><a class="btn b-sec" href="DesktopHeadRegistrar.dc.html">إلغاء</a><a class="btn b-pri" href="DesktopHeadRegistrar.dc.html">اعتماد: 1,380 إنشاء · 24 تحديث</a></div></div>
+<div class="wrap">
+<div class="steps"><span class="st d"><i>✓</i>رفع الملف</span><span class="ln"></span><span class="st d"><i>✓</i>الأعمدة المكتشفة</span><span class="ln"></span><span class="st c"><i>3</i>المعاينة</span><span class="ln"></span><span class="st"><i>4</i>الاعتماد</span></div>
+<div class="cols">
+<div>
+<div class="grp">
+<div class="hd"><h2>المعاينة · 1,412 صفًا</h2><div class="f"><span class="on">الكل</span><span>إنشاء 1,380</span><span>تحديث 24</span><span>أخطاء 8</span></div></div>
+<table>
+<thead><tr><th>#</th><th>الرقم الجامعي</th><th>الاسم</th><th>البرنامج</th><th>المستوى</th><th>البريد</th><th>الإجراء</th></tr></thead>
+<tbody>
+<tr class="new"><td>1</td><td class="num">26-IT-0001</td><td>آدم عبد الله الطيب</td><td>تقنية المعلومات</td><td>1</td><td class="num">adam.t@gmail.com</td><td><span class="chip c-ok">إنشاء</span></td></tr>
+<tr class="new"><td>2</td><td class="num">26-IT-0002</td><td>إسراء محمد حسن</td><td>تقنية المعلومات</td><td>1</td><td class="num">israa.mh@gmail.com</td><td><span class="chip c-ok">إنشاء</span></td></tr>
+<tr class="upd"><td>3</td><td class="num">25-IT-0074</td><td>سارة محمد الأمين</td><td>تقنية المعلومات</td><td>2<div class="chg">كان: 1</div></td><td class="num">sara.m.amin@gmail.com</td><td><span class="chip c-info">تحديث المستوى</span></td></tr>
+<tr class="bad"><td>4</td><td class="num">26-IT-0O04</td><td>بلال عوض الكريم<div class="err">الرقم الجامعي لا يطابق النمط YY-DEPT-NNNN (حرف O بدل صفر)</div></td><td>تقنية المعلومات</td><td>1</td><td class="num">bilal.a@gmail.com</td><td><span class="chip c-bad">خطأ</span></td></tr>
+<tr class="new"><td>5</td><td class="num">26-CS-0001</td><td>تسنيم عثمان</td><td>علوم الحاسوب</td><td>1</td><td class="num">tasneem.o@gmail.com</td><td><span class="chip c-ok">إنشاء</span></td></tr>
+<tr class="bad"><td>6</td><td class="num">26-CS-0002</td><td>جعفر إدريس<div class="err">البريد مكرر مع الصف 812 (26-BA-0040) — تحقق يدويًا</div></td><td>علوم الحاسوب</td><td>1</td><td class="num">jaafar@gmail.com</td><td><span class="chip c-bad">خطأ</span></td></tr>
+<tr class="new"><td>7</td><td class="num">26-CS-0003</td><td>حنان الصادق</td><td>الذكاء الاصطناعي</td><td>1</td><td class="num">hanan.s@gmail.com</td><td><span class="chip c-ok">إنشاء</span></td></tr>
+<tr class="upd"><td>8</td><td class="num">24-CS-0019</td><td>سارة عبد الله حسن</td><td>علوم الحاسوب</td><td>3</td><td class="num">sara.ah@outlook.com<div class="chg">كان: sara.a@gmail.com</div></td><td><span class="chip c-info">تحديث البريد</span></td></tr>
+<tr class="new"><td>9</td><td class="num">26-CE-0001</td><td>مها الصادق حسن</td><td>الهندسة المدنية</td><td>1</td><td class="num">maha.sh@gmail.com</td><td><span class="chip c-ok">إنشاء</span></td></tr>
+<tr class="bad"><td>10</td><td class="num">26-BA-0007</td><td>—<div class="err">الاسم فارغ</div></td><td>إدارة الأعمال</td><td>1</td><td class="num">—</td><td><span class="chip c-bad">خطأ</span></td></tr>
+<tr><td colspan="7" style="text-align: center; color: #2D64A7; font-weight: 600">عرض 1,402 صفًا آخر</td></tr>
+</tbody></table>
+</div>
+</div>
+<div>
+<div class="grp"><div class="file"><span class="ft">CSV</span><span><div class="t">students_fall_2026.csv</div><div class="s">1,412 صفًا · 8 أعمدة · UTF-8 · رُفع اليوم 11:52</div></span></div></div>
+<div class="grp"><div class="hd"><h2>ملخص</h2></div><div class="sum">
+<div class="r"><span class="k">إنشاء سجل جديد</span><b style="color: #14603A">1,380</b></div>
+<div class="r"><span class="k">تحديث سجل موجود</span><b style="color: #1F4674">24</b></div>
+<div class="r"><span class="k">أخطاء — لن تُستورد</span><b style="color: #922B20">8</b></div>
+<div class="r"><span class="k">أرقام مكررة داخل الملف</span><b>0</b></div>
+<div class="r"><span class="k">الأقسام</span><b>4</b></div>
+</div>
+<div class="opt">تسجيل المستوى الأول في مقرراته تلقائيًا<span class="sw on"><i></i></span></div>
+<div class="opt">إرسال رابط تفعيل للسجلات الجديدة<span class="sw"><i></i></span></div>
+<div class="note">التفعيل معطّل هنا لأن الطالب يفعّل حسابه بنفسه من «تسجيل طالب» بالرقم الجامعي + OTP على بريده. الصفوف الخاطئة تُصدَّر لتصحيحها وإعادة رفعها.</div></div>
+<div class="grp"><div class="hd"><h2>الدفعات السابقة</h2></div><div class="prev">
+<div class="r"><span>students_spring_2026.csv</span><span style="color: #8F95A3">1,388 · 3 مارس</span></div>
+<div class="r"><span>students_fall_2025.csv</span><span style="color: #8F95A3">1,301 · 2 سبتمبر 2025</span></div>
+<div class="r"><span><a href="DesktopStudentsImport.dc.html">تنزيل القالب الفارغ</a></span><span style="color: #8F95A3">CSV · 8 أعمدة</span></div>
+</div></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":800}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

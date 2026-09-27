@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="ar">
+<head>
+<meta charset="utf-8">
+<title>سطح المكتب — أساتذة القسم (إضافة/إزالة عضو)</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'IBM Plex Sans Arabic',system-ui,sans-serif;background:#F4F5F7;color:#1F2B47}
+a{color:#2D64A7;text-decoration:none}
+.scr{width:1280px;height:800px;position:relative;overflow:hidden;background:#F4F5F7;direction:rtl;text-align:right;box-sizing:border-box;display:flex}
+.side{width:240px;flex-shrink:0;background:#1F2B47;color:#fff;padding:20px 16px;box-sizing:border-box;display:flex;flex-direction:column}
+.logo{display:flex;align-items:center;gap:10px;font-size:14px;font-weight:700;padding:4px 6px 22px}
+.logo i{width:32px;height:32px;border-radius:9px;background:#fff;display:block}
+.nv{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;font-size:14px;color:rgba(255,255,255,.75);margin-bottom:2px}
+.nv svg{width:18px;height:18px}
+.nv.on{background:rgba(255,255,255,.12);color:#fff;font-weight:600}
+.me{margin-top:auto;display:flex;align-items:center;gap:10px;padding:10px 6px;border-top:1px solid rgba(255,255,255,.12)}
+.me .av{width:34px;height:34px;border-radius:17px;background:#2D64A7;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700}
+.me .t{font-size:13px;font-weight:600}.me .s{font-size:11px;color:rgba(255,255,255,.6)}
+.main{flex:1;min-width:0;display:flex;flex-direction:column}
+.bar{height:60px;display:flex;align-items:center;gap:14px;padding:0 28px;background:#fff;border-bottom:1px solid #E7E9EE}
+.bar h1{font-size:18px;font-weight:700;margin:0}
+.bar .act{margin-right:auto;display:flex;gap:8px}
+.btn{font-size:13px;font-weight:700;padding:9px 16px;border-radius:10px;white-space:nowrap}
+.b-pri{background:#2D64A7;color:#fff}.b-sec{background:#F0F1F4;color:#1F2B47}.b-bad{background:#FBE9E7;color:#922B20}
+.wrap{flex:1;overflow:auto;padding:22px 28px;box-sizing:border-box}
+.cols{display:grid;grid-template-columns:1fr 380px;gap:20px}
+.grp{background:#fff;border-radius:16px;border:1px solid #E7E9EE;overflow:hidden;margin-bottom:20px}
+.hd{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid #EEF0F3}
+.hd h2{font-size:14px;font-weight:700;margin:0;flex:1}
+.hd .f{display:flex;gap:6px}
+.hd .f span{font-size:11px;font-weight:600;padding:5px 10px;border-radius:999px;background:#F0F1F4;color:#576075}
+.hd .f .on{background:#1F2B47;color:#fff}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{font-size:11px;font-weight:600;color:#8F95A3;text-align:right;padding:9px 16px;background:#F8F9FB;border-bottom:1px solid #EEF0F3}
+td{padding:10px 16px;border-top:1px solid #EEF0F3;vertical-align:middle}
+tr.sel td{background:#F2F6FB}
+.av{display:inline-flex;width:30px;height:30px;border-radius:15px;background:#E5ECF4;color:#1F4674;font-size:10px;font-weight:700;align-items:center;justify-content:center;margin-left:8px;vertical-align:middle}
+.tags span{display:inline-block;font-size:11px;font-weight:600;background:#EEF0F3;color:#576075;padding:2px 7px;border-radius:999px;margin-left:4px;direction:ltr}
+.chip{font-size:11px;font-weight:600;padding:3px 8px;border-radius:999px;white-space:nowrap}
+.c-ok{background:#E6F4EC;color:#14603A}.c-warn{background:#FBF3E3;color:#8A5A14}.c-neu{background:#EEF0F3;color:#576075}.c-info{background:#E5ECF4;color:#1F4674}
+.num{direction:ltr;text-align:right}
+.mini{font-size:11px;font-weight:700;padding:5px 10px;border-radius:8px;background:#F0F1F4;color:#1F2B47}
+.pr{padding:16px}
+.who{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.who .big{width:52px;height:52px;border-radius:26px;background:#2D64A7;color:#fff;font-size:15px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.who .n{font-size:16px;font-weight:700}.who .s{font-size:12px;color:#576075;margin-top:2px}
+.kp{display:grid;grid-template-columns:repeat(3, 1fr);gap:8px;margin-bottom:14px}
+.kp div{background:#F8F9FB;border-radius:10px;padding:8px;text-align:center}
+.kp b{display:block;font-size:18px;font-weight:700;direction:ltr}.kp span{font-size:10px;color:#8F95A3}
+.lbl{font-size:11px;font-weight:700;color:#8F95A3;margin:12px 0 6px}
+.cr{display:flex;align-items:center;gap:8px;padding:8px 0;border-top:1px solid #EEF0F3;font-size:13px}
+.cr .tile{width:32px;height:32px;border-radius:9px;display:flex;flex-direction:column;align-items:center;justify-content:center;direction:ltr;font-weight:700;line-height:1;background:#E5ECF4;color:#2D64A7;flex-shrink:0}
+.cr .tile b{font-size:7px;opacity:.7}.cr .tile span{font-size:10px;margin-top:1px}
+.cr .n{flex:1}.cr .n small{display:block;font-size:11px;color:#8F95A3}
+.cr .x{color:#C7CAD1}
+.add{border:1.5px dashed #C7CAD1;border-radius:10px;padding:9px;text-align:center;font-size:12px;font-weight:600;color:#8F95A3;margin-top:6px}
+.acts{display:flex;gap:8px;margin-top:14px}
+.acts a{flex:1;text-align:center}
+.note{font-size:11px;color:#8F95A3;line-height:1.6;margin-top:10px}
+.sheet{padding:14px 16px}
+.sheet h3{font-size:14px;font-weight:700;margin:0 0 4px}
+.sheet p{font-size:12px;color:#576075;margin:0 0 10px;line-height:1.6}
+.seg{display:flex;background:#F0F1F4;border-radius:10px;padding:3px;margin-bottom:10px}
+.seg span{flex:1;text-align:center;font-size:12px;font-weight:600;padding:7px 0;border-radius:8px;color:#576075}
+.seg .on{background:#fff;color:#1F2B47;box-shadow:0 1px 3px rgba(31,43,71,.12)}
+.in{height:40px;border:1px solid #E7E9EE;border-radius:10px;background:#F8F9FB;display:flex;align-items:center;padding:0 12px;font-size:13px;color:#8F95A3;margin-bottom:8px}
+.in.v{color:#1F2B47;font-weight:600;background:#fff;border-color:#2D64A7}
+</style>
+</helmet>
+<div class="scr" style="width: 1280px; height: 800px">
+<aside class="side">
+<div class="logo"><i></i>منصة الكلية</div>
+<a class="nv" href="DesktopDeptDashboard.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8v9a2 2 0 0 1-2 2h-4v-7h-6v7H5a2 2 0 0 1-2-2z"/></svg>لوحة القسم</a>
+<a class="nv" href="DesktopDeptDashboard.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>المواد والتعيينات</a>
+<a class="nv on" href="DesktopDeptProfessors.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>الأساتذة والمعيدون</a>
+<a class="nv" href="DesktopDeptDashboard.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>الطلاب</a>
+<a class="nv" href="DesktopResultsImport.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21V9M8 13l4-4 4 4"/><path d="M20 16.6A5 5 0 0 0 18 7h-1.3A8 8 0 1 0 4 15.2"/></svg>رفع النتائج</a>
+<a class="nv" href="DesktopDeptReports.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l4-4 4 4 5-6"/></svg>التقارير</a>
+<a class="nv" href="DesktopDeptOperations.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>سجل العمليات</a>
+<div class="me"><span class="av">م أ</span><span><div class="t">د. مصطفى الأمين</div><div class="s">مدير قسم تقنية المعلومات</div></span></div>
+</aside>
+<div class="main">
+<div class="bar"><h1>الأساتذة والمعيدون — تقنية المعلومات · 14</h1><div class="act"><a class="btn b-sec" href="DesktopDeptReports.dc.html">تقرير الأداء</a><a class="btn b-pri" href="DesktopDeptProfessors.dc.html">+ إضافة عضو</a></div></div>
+<div class="wrap">
+<div class="cols">
+<div>
+<div class="grp">
+<div class="hd"><h2>أعضاء القسم</h2><div class="f"><span class="on">الكل 14</span><span>أساتذة 10</span><span>معيدون 4</span><span>بلا مواد 1</span></div></div>
+<table>
+<thead><tr><th>العضو</th><th>الدور</th><th>المواد المسندة</th><th>المستويات</th><th>نظري/عملي</th><th>الحالة</th><th></th></tr></thead>
+<tbody>
+<tr><td><span class="av">ه ع</span>د. هالة عبد الرحمن</td><td>أستاذ · مشرف القسم</td><td class="tags"><span>IT101</span><span>IT303</span></td><td class="num">1، 3</td><td>نظري</td><td><span class="chip c-ok">منتظم</span></td><td><a class="mini" href="AcademicAffairsTeacher.dc.html">الملف</a></td></tr>
+<tr><td><span class="av">أ م</span>أ. أحمد محمود</td><td>أستاذ</td><td class="tags"><span>IT201</span></td><td class="num">2</td><td>نظري + عملي</td><td><span class="chip c-ok">منتظم</span></td><td><a class="mini" href="AcademicAffairsTeacher.dc.html">الملف</a></td></tr>
+<tr class="sel"><td><span class="av">ك ح</span>أ. خالد حسن عبد الله</td><td>محاضر</td><td class="tags"><span>IT205</span><span>IT207</span></td><td class="num">2</td><td>نظري</td><td><span class="chip c-warn">تصحيح متأخر</span></td><td><a class="mini" href="AcademicAffairsTeacher.dc.html">الملف</a></td></tr>
+<tr><td><span class="av">س ع</span>د. سلمى عبد الله</td><td>أستاذ</td><td class="tags"><span>IT203</span><span>IT403</span></td><td class="num">2، 4</td><td>نظري + عملي</td><td><span class="chip c-ok">منتظم</span></td><td><a class="mini" href="AcademicAffairsTeacher.dc.html">الملف</a></td></tr>
+<tr><td><span class="av">ن س</span>أ. نهى سليمان</td><td>معيدة</td><td class="tags"><span>IT201</span></td><td class="num">2</td><td>عملي</td><td><span class="chip c-ok">تصحح (مفوّضة)</span></td><td><a class="mini" href="AcademicAffairsTeacher.dc.html">الملف</a></td></tr>
+<tr><td><span class="av">م ح</span>أ. محمد حامد</td><td>معيد</td><td class="tags"><span>IT203</span></td><td class="num">2</td><td>عملي</td><td><span class="chip c-neu">لا يصحح</span></td><td><a class="mini" href="AcademicAffairsTeacher.dc.html">الملف</a></td></tr>
+<tr><td><span class="av">ر أ</span>أ. رنا أحمد</td><td>معيدة</td><td class="tags"><span>IT101</span></td><td class="num">1</td><td>عملي</td><td><span class="chip c-ok">تصحح (مفوّضة)</span></td><td><a class="mini" href="AcademicAffairsTeacher.dc.html">الملف</a></td></tr>
+<tr><td><span class="av">ي ب</span>د. ياسر بشير</td><td>أستاذ</td><td class="tags" style="color: #8A5A14; font-weight: 600">— بلا مواد</td><td class="num">—</td><td>—</td><td><span class="chip c-warn">بلا تعيين</span></td><td><a class="mini" href="DesktopDeptDashboard.dc.html" style="background: #2D64A7; color: #fff">تعيين</a></td></tr>
+<tr><td><span class="av">ع ك</span>أ. عمر كمال</td><td>محاضر</td><td class="tags"><span>IT305</span></td><td class="num">3</td><td>نظري</td><td><span class="chip c-info">دعوة معلّقة</span></td><td><a class="mini" href="DesktopDeptProfessors.dc.html">إعادة الدعوة</a></td></tr>
+<tr><td colspan="7" style="text-align: center; color: #2D64A7; font-weight: 600">عرض 5 أعضاء آخرين</td></tr>
+</tbody></table>
+</div>
+</div>
+<div>
+<div class="grp"><div class="pr">
+<div class="who"><span class="big">ك ح</span><span><div class="n">أ. خالد حسن عبد الله</div><div class="s">محاضر · انضم للقسم سبتمبر 2024 · k.hassan@ecst.edu.sd</div></span></div>
+<div class="kp"><div><b>2</b><span>مواد</span></div><div><b>94</b><span>طالبًا</span></div><div><b>6.4</b><span>يوم تصحيح</span></div></div>
+<div class="lbl">مواده هذا الفصل</div>
+<div class="cr"><span class="tile" style="background: #EEE9F4; color: #6A4C93"><b>IT</b><span>205</span></span><span class="n">شبكات الحاسوب<small>58 طالبًا · نظري · المستوى 2</small></span><span class="x">×</span></div>
+<div class="cr"><span class="tile" style="background: #EEE9F4; color: #6A4C93"><b>IT</b><span>207</span></span><span class="n">تفاعل الإنسان والحاسوب<small>36 طالبًا · نظري · المستوى 2</small></span><span class="x">×</span></div>
+<a class="add" href="DesktopDeptDashboard.dc.html">+ إسناد مادة (من جدول المواد)</a>
+<div class="acts"><a class="btn b-sec" href="AdminNotify.dc.html">إشعار</a><a class="btn b-bad" href="DesktopDeptProfessors.dc.html">إزالة من القسم</a></div>
+<div class="note">الإزالة تفكّ ارتباطه بالقسم ومواده فقط ولا تحذف حسابه ولا تغيّر دوره أو كلمة مروره — ذلك من صلاحية الشؤون العلمية ومدير النظام. الإزالة للمدير فقط؛ المشرف يرى الزر معطّلًا.</div>
+</div></div>
+<div class="grp"><div class="sheet"><h3>إضافة عضو إلى القسم</h3><p>حساب موجود في الكلية، أو دعوة ببريد تُنشئ الحساب عبر الشؤون العلمية.</p>
+<div class="seg"><span class="on">حساب موجود</span><span>دعوة ببريد</span></div>
+<div class="in v">د. ياسر بشير — أستاذ · بلا قسم</div>
+<div class="in">الدور في القسم: أستاذ ▾</div>
+<a class="btn b-pri" href="DesktopDeptProfessors.dc.html" style="display: block; text-align: center">إضافة إلى تقنية المعلومات</a>
+</div></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":800}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

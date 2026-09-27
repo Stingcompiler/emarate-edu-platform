@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="ar">
+<head>
+<meta charset="utf-8">
+<title>سجل الطلاب — ملف طالب</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'IBM Plex Sans Arabic',system-ui,sans-serif;background:#F4F5F7;color:#1F2B47}
+a{color:#2D64A7;text-decoration:none}
+.scr{width:390px;height:844px;position:relative;overflow:hidden;background:#F4F5F7;direction:rtl;text-align:right;box-sizing:border-box}
+.body{position:absolute;top:0;left:0;right:0;bottom:0;overflow-y:auto;padding:54px 16px 110px;box-sizing:border-box}
+.back{display:flex;align-items:center;gap:2px;font-size:15px;color:#2D64A7;font-weight:600}
+.back svg{width:22px;height:22px}
+.id{margin-top:14px;background:#1F2B47;color:#fff;border-radius:18px;padding:16px;display:flex;gap:14px;align-items:center}
+.id .av{width:56px;height:56px;border-radius:28px;background:#2D64A7;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;flex-shrink:0}
+.id .n{font-size:17px;font-weight:700}.id .num{font-size:14px;direction:ltr;text-align:right;letter-spacing:1px;opacity:.9;margin-top:2px}
+.id .m{font-size:11px;color:rgba(255,255,255,.7);margin-top:4px}
+.chip{font-size:11px;font-weight:600;padding:4px 9px;border-radius:999px;white-space:nowrap}
+.c-ok{background:#E6F4EC;color:#14603A}.c-warn{background:#FBF3E3;color:#8A5A14}.c-neu{background:#EEF0F3;color:#576075}.c-bad{background:#FBE9E7;color:#922B20}
+.seg{display:flex;background:#E7E9EE;border-radius:12px;padding:3px;margin:14px 0 4px}
+.seg a{flex:1;text-align:center;font-size:12px;font-weight:600;padding:8px 0;border-radius:9px;color:#576075}
+.seg .on{background:#fff;color:#1F2B47;box-shadow:0 1px 3px rgba(31,43,71,.12)}
+.lbl{font-size:12px;font-weight:600;color:#8F95A3;margin:16px 4px 6px;display:flex;justify-content:space-between}
+.lbl a{font-weight:600}
+.grp{background:#fff;border-radius:16px;border:1px solid #E7E9EE;overflow:hidden}
+.li{display:flex;align-items:center;gap:12px;padding:11px 14px;min-height:46px}
+.li+.li{border-top:1px solid #EEF0F3}
+.k{font-size:13px;color:#576075;width:96px;flex-shrink:0}.v{font-size:14px;font-weight:600;flex:1}
+.en{display:flex;align-items:center;gap:12px;padding:11px 14px}
+.en+.en{border-top:1px solid #EEF0F3}
+.en .t{font-size:14px;font-weight:600;flex:1}.en .m{font-size:12px;color:#8F95A3;margin-top:2px}
+.tl{padding:6px 14px}
+.ev{display:flex;gap:10px;padding:8px 0;font-size:13px}
+.ev i{width:8px;height:8px;border-radius:4px;background:#C7CAD1;margin-top:6px;flex-shrink:0}
+.ev .m{font-size:11px;color:#8F95A3}
+.fix{position:absolute;left:16px;right:16px;bottom:24px;display:flex;gap:8px}
+.btn{display:flex;align-items:center;justify-content:center;height:48px;border-radius:13px;font-size:14px;font-weight:600;flex:1}
+.b-pri{background:#2D64A7;color:#fff}.b-sec{background:#fff;color:#1F2B47;border:1.5px solid #E7E9EE}
+</style>
+</helmet>
+<div class="scr" style="width: 390px; height: 844px">
+<div class="body">
+<a class="back" href="HeadRegistrarHome.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg><span>سجل الطلاب</span></a>
+<div class="id"><span class="av">س م</span><div style="flex: 1"><div class="n">سارة محمد الأمين</div><div class="num">25-IT-0074</div><div class="m">بكالوريوس تقنية المعلومات · المستوى الثاني · مستورَدة 2025</div></div><span class="chip c-ok">منتظمة</span></div>
+<div class="seg"><a class="on" href="HeadRegistrarStudent.dc.html">البيانات</a><a href="HeadRegistrarStudent.dc.html">التسجيل</a><a href="HeadRegistrarStudent.dc.html">الحالات</a><a href="HeadRegistrarStudent.dc.html">السجل</a></div>
+<div class="lbl"><span>بيانات الاتصال</span><a href="HeadRegistrarStudent.dc.html">تعديل</a></div>
+<div class="grp">
+<div class="li"><span class="k">البريد</span><span class="v" style="direction: ltr; text-align: right">sara.m.amin@gmail.com</span><span class="chip c-ok">مُتحقق</span></div>
+<div class="li"><span class="k">الهاتف</span><span class="v" style="direction: ltr; text-align: right">+249 91 234 5678</span></div>
+<div class="li"><span class="k">الرقم الوطني</span><span class="v" style="direction: ltr; text-align: right">•••• •••• 4471</span><a href="HeadRegistrarStudent.dc.html" style="font-size: 12px; font-weight: 600">إظهار</a></div>
+<div class="li"><span class="k">تاريخ الميلاد</span><span class="v">2 يونيو 2007</span></div>
+<div class="li"><span class="k">الحساب</span><span class="v">مفعّل · آخر دخول اليوم 08:10</span></div>
+</div>
+<div class="lbl"><span>التسجيل — خريف 2026</span><a href="HeadRegistrarStudent.dc.html">إدارة</a></div>
+<div class="grp">
+<div class="en"><span class="t">مسجلة في 6 مواد · 18 ساعة<div class="m">تسجيل جماعي بالمستوى · 1 سبتمبر · بواسطة أ. نجلاء الفكي</div></span><span class="chip c-ok">فعّال</span></div>
+<div class="en"><span class="t">ربيع 2026 · 6 مواد · المعدل 3.42<div class="m">النتائج منشورة</div></span><span class="chip c-neu">مكتمل</span></div>
+</div>
+<div class="lbl"><span>الحالات والإقرارات</span></div>
+<div class="grp">
+<div class="en"><span class="t">لا حالات مفتوحة<div class="m">أقرّت لائحة السلوك 2026 · 12 سبتمبر</div></span><span class="chip c-ok">سليم</span></div>
+</div>
+<div class="lbl"><span>آخر التغييرات</span><a href="HeadRegistrarStudent.dc.html">الكل</a></div>
+<div class="grp"><div class="tl">
+<div class="ev"><i></i><span>تحديث الهاتف <span class="m">· الطالبة · 20 سبتمبر</span></span></div>
+<div class="ev"><i></i><span>تسجيل 6 مواد (جماعي) <span class="m">· نجلاء الفكي · 1 سبتمبر</span></span></div>
+<div class="ev"><i></i><span>ترقية إلى المستوى الثاني <span class="m">· النظام · 25 أغسطس</span></span></div>
+</div></div>
+</div>
+<div class="fix"><a class="btn b-sec" href="AdminNotify.dc.html">إشعار للطالبة</a><a class="btn b-pri" href="HeadRegistrarStudent.dc.html">تعديل البيانات</a></div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

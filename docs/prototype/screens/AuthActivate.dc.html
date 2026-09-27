@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ar">
+<head>
+<meta charset="utf-8">
+<title>المصادقة — تفعيل حساب مقبول</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'IBM Plex Sans Arabic',system-ui,sans-serif;background:#fff;color:#1F2B47}
+a{color:#2D64A7;text-decoration:none}
+.scr{width:390px;height:844px;position:relative;overflow:hidden;background:#fff;direction:rtl;text-align:right;box-sizing:border-box}
+.body{position:absolute;top:0;left:0;right:0;bottom:0;overflow-y:auto;padding:60px 20px 110px;box-sizing:border-box}
+.wel{font-size:12px;font-weight:600;color:#B02544}
+h1{font-size:26px;font-weight:700;margin:6px 0 6px;line-height:1.3}
+.s{font-size:14px;color:#576075;line-height:1.7}
+.id{margin-top:20px;background:#1F2B47;color:#fff;border-radius:18px;padding:16px 18px;position:relative;overflow:hidden}
+.id:after{content:"";position:absolute;left:-40px;bottom:-60px;width:160px;height:160px;border-radius:80px;background:rgba(255,255,255,.06)}
+.id small{font-size:11px;color:rgba(255,255,255,.65)}
+.id .n{font-size:18px;font-weight:700;margin-top:2px}
+.id .num{font-size:24px;font-weight:700;letter-spacing:1px;direction:ltr;text-align:right;margin-top:8px}
+.id .m{font-size:12px;color:rgba(255,255,255,.75);margin-top:4px}
+.lbl{font-size:12px;font-weight:600;color:#8F95A3;margin:24px 4px 6px;display:block}
+.in{height:52px;border:1.5px solid #E7E9EE;border-radius:14px;display:flex;align-items:center;padding:0 14px;font-size:16px;background:#F8F9FB;margin-bottom:10px;justify-content:space-between}
+.in.on{border-color:#2D64A7;background:#fff;box-shadow:0 0 0 3px rgba(45,100,167,.15)}
+.in span{direction:ltr;letter-spacing:3px}
+.in a{font-size:12px;font-weight:600}
+.rules{display:flex;flex-wrap:wrap;gap:6px}
+.rules span{font-size:11px;font-weight:600;padding:4px 9px;border-radius:999px;background:#EEF0F3;color:#8F95A3}
+.rules .ok{background:#E6F4EC;color:#14603A}
+.fix{position:absolute;left:20px;right:20px;bottom:24px}
+.btn{display:flex;align-items:center;justify-content:center;height:52px;border-radius:14px;font-size:16px;font-weight:600;background:#2D64A7;color:#fff}
+.alt{text-align:center;font-size:12px;margin-top:12px;color:#8F95A3;line-height:1.6}
+</style>
+</helmet>
+<div class="scr" style="width: 390px; height: 844px">
+<div class="body">
+<div class="wel">مرحبًا بك في الكلية</div>
+<h1>فعّل حسابك، خالد</h1>
+<p class="s">قبِل مسجل القسم طلبك وأنشأ سجلّك. اختر كلمة مرور لتدخل البوابة — بريدك وهاتفك مُتحققان من الطلب فلا حاجة لإعادتهما.</p>
+<div class="id"><small>الرقم الجامعي</small><div class="n">خالد يوسف عبد الرحيم</div><div class="num">26-CS-0117</div><div class="m">بكالوريوس علوم الحاسوب · المستوى الأول · خريف 2026/2027</div></div>
+<span class="lbl">كلمة المرور</span>
+<div class="in on"><span>••••••••••</span><a href="AuthActivate.dc.html">إظهار</a></div>
+<div class="in"><span style="color: #C7CAD1">تأكيد كلمة المرور</span></div>
+<div class="rules"><span class="ok">8 أحرف فأكثر ✓</span><span class="ok">حرف ورقم ✓</span><span>ليست رقمك الجامعي</span></div>
+</div>
+<div class="fix"><a class="btn" href="StudentToday.dc.html">تفعيل والدخول</a><div class="alt">الرابط صالح 72 ساعة · بالتفعيل توافق على <a href="StudentRegulations.dc.html">لوائح الكلية</a></div></div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="ar">
+<head>
+<meta charset="utf-8">
+<title>مشترك — البحث النطاقي</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'IBM Plex Sans Arabic',system-ui,sans-serif;background:#F4F5F7;color:#1F2B47}
+a{color:#2D64A7;text-decoration:none}
+.scr{width:390px;height:844px;position:relative;overflow:hidden;background:#F4F5F7;direction:rtl;text-align:right;box-sizing:border-box}
+.body{position:absolute;top:0;left:0;right:0;bottom:0;overflow-y:auto;padding:52px 16px 40px;box-sizing:border-box}
+.srch{display:flex;align-items:center;gap:8px}
+.srch .in{flex:1;height:44px;border-radius:13px;background:#fff;border:1.5px solid #2D64A7;box-shadow:0 0 0 3px rgba(45,100,167,.12);display:flex;align-items:center;gap:8px;padding:0 12px;font-size:15px}
+.srch .in svg{width:18px;height:18px;color:#8F95A3}
+.srch .in i{width:2px;height:20px;background:#2D64A7}
+.srch a{font-size:14px;font-weight:600}
+.sc{display:flex;gap:6px;margin:12px 0 4px;overflow-x:auto}
+.sc span{flex:none;font-size:12px;font-weight:600;padding:6px 11px;border-radius:999px;background:#fff;border:1px solid #E7E9EE;color:#576075}
+.sc .on{background:#1F2B47;border-color:#1F2B47;color:#fff}
+.sec{font-size:12px;font-weight:700;color:#8F95A3;margin:16px 4px 8px;display:flex;justify-content:space-between}
+.sec a{font-weight:600}
+.grp{background:#fff;border-radius:16px;border:1px solid #E7E9EE;overflow:hidden}
+.li{display:flex;align-items:center;gap:12px;padding:11px 14px;min-height:56px;color:#1F2B47}
+.li+.li{border-top:1px solid #EEF0F3}
+.av{width:38px;height:38px;border-radius:19px;background:#E5ECF4;color:#1F4674;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.tile{width:38px;height:38px;border-radius:11px;display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;direction:ltr;font-weight:700;line-height:1;background:#E5ECF4;color:#2D64A7}
+.tile b{font-size:8px;opacity:.7}.tile span{font-size:12px;margin-top:1px}
+.t{font-size:14px;font-weight:600}.t mark{background:#FFF1B8;color:inherit;border-radius:3px;padding:0 1px}
+.m{font-size:12px;color:#8F95A3;margin-top:2px}
+.grow{flex:1;min-width:0}
+.chip{font-size:11px;font-weight:600;padding:3px 8px;border-radius:999px;white-space:nowrap}
+.c-ok{background:#E6F4EC;color:#14603A}.c-warn{background:#FBF3E3;color:#8A5A14}
+.note{font-size:12px;color:#8F95A3;line-height:1.7;margin:16px 4px 0}
+</style>
+</helmet>
+<div class="scr" style="width: 390px; height: 844px">
+<div class="body">
+<div class="srch"><div class="in"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.3-4.3"/></svg><span>سارة</span><i></i></div><a href="AdminHome.dc.html">إلغاء</a></div>
+<div class="sc"><span class="on">الكل 9</span><span>طلاب 3</span><span>طلبات تقديم 2</span><span>مواد 1</span><span>أساتذة 1</span><span>صفحات 2</span></div>
+<div class="sec">طلاب<a href="SharedSearch.dc.html">الكل · 3</a></div>
+<div class="grp">
+<a class="li" href="HeadRegistrarStudent.dc.html"><span class="av">س م</span><span class="grow"><div class="t"><mark>سارة</mark> محمد الأمين</div><div class="m">25-IT-0074 · تقنية المعلومات · المستوى الثاني</div></span><span class="chip c-ok">منتظمة</span></a>
+<a class="li" href="HeadRegistrarStudent.dc.html"><span class="av">س ع</span><span class="grow"><div class="t"><mark>سارة</mark> عبد الله حسن</div><div class="m">24-CS-0019 · علوم الحاسوب · المستوى الثالث</div></span><span class="chip c-ok">منتظمة</span></a>
+</div>
+<div class="sec">طلبات تقديم<a href="HeadRegistrarApplications.dc.html">الكل · 2</a></div>
+<div class="grp">
+<a class="li" href="AdminApplication.dc.html"><span class="av" style="background: #FBF3E3; color: #8A5A14">ط</span><span class="grow"><div class="t"><mark>سارة</mark> عثمان الفاضل</div><div class="m">APP-2026-000123 · تقنية المعلومات · محمد النور</div></span><span class="chip c-warn">ناقص مستندات</span></a>
+</div>
+<div class="sec">مواد</div>
+<div class="grp"><a class="li" href="TeacherCourse.dc.html"><span class="tile"><b>IT</b><span>201</span></span><span class="grow"><div class="t">هياكل البيانات</div><div class="m">مطابقة في المعيدة: نهى <mark>سا</mark>… لا — الأستاذة: د. <mark>سارة</mark> عبد الرحمن</div></span></a></div>
+<div class="sec">صفحات</div>
+<div class="grp">
+<a class="li" href="AdminApprovals.dc.html"><span class="grow"><div class="t">طلبات التسجيل</div><div class="m">/students · تبويب الطلبات</div></span></a>
+<a class="li" href="AdminNotify.dc.html"><span class="grow"><div class="t">إرسال إشعار</div><div class="m">/notifications/new</div></span></a>
+</div>
+<div class="note">النتائج محدودة بنطاق دورك (قسمك وأدواره). البحث في الأرقام الجامعية والبريد يتطلب مطابقة تامة.</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

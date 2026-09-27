@@ -721,6 +721,249 @@
       "w": 1280,
       "x": 6800,
       "y": 11870
+    },
+    "AuthForgot.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 40,
+      "title": "المصادقة — نسيت كلمة المرور",
+      "w": 390,
+      "x": 0,
+      "y": 13013
+    },
+    "AuthActivate.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 40,
+      "title": "المصادقة — تفعيل حساب مقبول",
+      "w": 390,
+      "x": 470,
+      "y": 13013
+    },
+    "AuthPending.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 40,
+      "title": "المصادقة — الحساب بانتظار الاعتماد",
+      "w": 390,
+      "x": 940,
+      "y": 13013
+    },
+    "SharedSearch.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 40,
+      "title": "مشترك — البحث النطاقي",
+      "w": 390,
+      "x": 1410,
+      "y": 13013
+    },
+    "SharedNotFound.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 40,
+      "title": "مشترك — 404 / 403 (حالة فارغة موحّدة)",
+      "w": 390,
+      "x": 1880,
+      "y": 13013
+    },
+    "VisitorAbout.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 40,
+      "title": "الزائر — عن الكلية",
+      "w": 390,
+      "x": 0,
+      "y": 14200
+    },
+    "VisitorDepartments.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 40,
+      "title": "الزائر — الأقسام",
+      "w": 390,
+      "x": 470,
+      "y": 14200
+    },
+    "VisitorDepartment.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 40,
+      "title": "الزائر — صفحة قسم",
+      "w": 390,
+      "x": 940,
+      "y": 14200
+    },
+    "VisitorAdmissions.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 40,
+      "title": "الزائر — صفحة القبول",
+      "w": 390,
+      "x": 1410,
+      "y": 14200
+    },
+    "VisitorNewsArticle.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 40,
+      "title": "الزائر — صفحة خبر",
+      "w": 390,
+      "x": 1880,
+      "y": 14200
+    },
+    "VisitorEvent.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 40,
+      "title": "الزائر — صفحة فعالية",
+      "w": 390,
+      "x": 2350,
+      "y": 14200
+    },
+    "VisitorApplySuccess.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 40,
+      "title": "الزائر — تم إرسال الطلب",
+      "w": 390,
+      "x": 2820,
+      "y": 14200
+    },
+    "RegistrarHome.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 40,
+      "title": "مسجل القسم — الرئيسية",
+      "w": 390,
+      "x": 0,
+      "y": 15387
+    },
+    "HeadRegistrarCycles.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 40,
+      "title": "مسؤول المسجلين — دورات القبول والبرامج المفتوحة",
+      "w": 390,
+      "x": 470,
+      "y": 15387
+    },
+    "HeadRegistrarStudent.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 40,
+      "title": "سجل الطلاب — ملف طالب",
+      "w": 390,
+      "x": 940,
+      "y": 15387
+    },
+    "StudentAffairsCases.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 40,
+      "title": "شؤون الطلاب — الحالات",
+      "w": 390,
+      "x": 1410,
+      "y": 15387
+    },
+    "StudentAffairsCaseNew.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 40,
+      "title": "شؤون الطلاب — فتح حالة",
+      "w": 390,
+      "x": 1880,
+      "y": 15387
+    },
+    "EventsManagerHome.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 40,
+      "title": "مدير الفعاليات — الرئيسية",
+      "w": 390,
+      "x": 2350,
+      "y": 15387
+    },
+    "SystemAdminSettings.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 40,
+      "title": "مدير النظام — إعدادات النظام والتكاملات",
+      "w": 390,
+      "x": 2820,
+      "y": 15387
+    },
+    "SystemAdminUser.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 40,
+      "title": "مدير النظام — ملف مستخدم",
+      "w": 390,
+      "x": 3290,
+      "y": 15387
+    },
+    "ResultsOfficerSearch.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 40,
+      "title": "مسؤول النتائج — بحث نتيجة وطلب تعديل",
+      "w": 390,
+      "x": 3760,
+      "y": 15387
+    },
+    "DesktopStudentsImport.dc.html": {
+      "h": 800,
+      "is_interactive": true,
+      "radius": 12,
+      "title": "سطح المكتب — استيراد سجل الطلاب",
+      "w": 1280,
+      "x": 0,
+      "y": 16574
+    },
+    "DesktopDeptReports.dc.html": {
+      "h": 800,
+      "is_interactive": true,
+      "radius": 12,
+      "title": "سطح المكتب — تقارير القسم",
+      "w": 1280,
+      "x": 1360,
+      "y": 16574
+    },
+    "DesktopDeptProfessors.dc.html": {
+      "h": 800,
+      "is_interactive": true,
+      "radius": 12,
+      "title": "سطح المكتب — أساتذة القسم (إضافة/إزالة عضو)",
+      "w": 1280,
+      "x": 2720,
+      "y": 16574
+    },
+    "DesktopDeptOperations.dc.html": {
+      "h": 800,
+      "is_interactive": true,
+      "radius": 12,
+      "title": "سطح المكتب — سجل العمليات (تدقيق القسم)",
+      "w": 1280,
+      "x": 4080,
+      "y": 16574
+    },
+    "DesktopApplicationDetail.dc.html": {
+      "h": 800,
+      "is_interactive": true,
+      "radius": 12,
+      "title": "سطح المكتب — تفاصيل طلب تقديم",
+      "w": 1280,
+      "x": 5440,
+      "y": 16574
+    },
+    "DesktopSystemStructure.dc.html": {
+      "h": 800,
+      "is_interactive": true,
+      "radius": 12,
+      "title": "سطح المكتب — الهيكل الأكاديمي (كلية · أقسام · برامج · فصول)",
+      "w": 1280,
+      "x": 6800,
+      "y": 16574
     }
   },
   "createdOnFiles": {
@@ -826,6 +1069,38 @@
       "w": 240,
       "x": 0,
       "y": 11610
+    },
+    "row11": {
+      "kind": "title1",
+      "maxW": 2270,
+      "text": "المصادقة والمشترك — نسيت كلمة المرور · تفعيل مقبول · بانتظار الاعتماد · البحث النطاقي · 404/403",
+      "w": 240,
+      "x": 0,
+      "y": 12753
+    },
+    "row12": {
+      "kind": "title1",
+      "maxW": 3210,
+      "text": "الموقع العام (ب) — عن الكلية · الأقسام · قسم · القبول · خبر · فعالية · نجاح التقديم",
+      "w": 240,
+      "x": 0,
+      "y": 13940
+    },
+    "row13": {
+      "kind": "title1",
+      "maxW": 4150,
+      "text": "الإدارة (ج) — مسجل القسم · دورات القبول · ملف طالب · الحالات · فتح حالة · الفعاليات · إعدادات النظام · ملف مستخدم · بحث نتيجة",
+      "w": 240,
+      "x": 0,
+      "y": 15127
+    },
+    "row14": {
+      "kind": "title1",
+      "maxW": 8080,
+      "text": "سطح المكتب (ب) — استيراد سجل الطلاب · تقارير القسم · أساتذة القسم (إضافة/إزالة) · سجل العمليات · تفاصيل طلب تقديم · الهيكل الأكاديمي",
+      "w": 240,
+      "x": 0,
+      "y": 16314
     }
   },
   "order": [
@@ -908,7 +1183,34 @@
     "DesktopFormBuilder.dc.html",
     "DesktopSiteCMS.dc.html",
     "DesktopExamBuilder.dc.html",
-    "DesktopHeadRegistrar.dc.html"
+    "DesktopHeadRegistrar.dc.html",
+    "AuthForgot.dc.html",
+    "AuthActivate.dc.html",
+    "AuthPending.dc.html",
+    "SharedSearch.dc.html",
+    "SharedNotFound.dc.html",
+    "VisitorAbout.dc.html",
+    "VisitorDepartments.dc.html",
+    "VisitorDepartment.dc.html",
+    "VisitorAdmissions.dc.html",
+    "VisitorNewsArticle.dc.html",
+    "VisitorEvent.dc.html",
+    "VisitorApplySuccess.dc.html",
+    "RegistrarHome.dc.html",
+    "HeadRegistrarCycles.dc.html",
+    "HeadRegistrarStudent.dc.html",
+    "StudentAffairsCases.dc.html",
+    "StudentAffairsCaseNew.dc.html",
+    "EventsManagerHome.dc.html",
+    "SystemAdminSettings.dc.html",
+    "SystemAdminUser.dc.html",
+    "ResultsOfficerSearch.dc.html",
+    "DesktopStudentsImport.dc.html",
+    "DesktopDeptReports.dc.html",
+    "DesktopDeptProfessors.dc.html",
+    "DesktopDeptOperations.dc.html",
+    "DesktopApplicationDetail.dc.html",
+    "DesktopSystemStructure.dc.html"
   ],
   "pages": [],
   "title": "ECST Portal Prototype"

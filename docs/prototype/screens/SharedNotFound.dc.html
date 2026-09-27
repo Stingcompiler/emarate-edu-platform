@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="ar">
+<head>
+<meta charset="utf-8">
+<title>مشترك — 404 / 403 (حالة فارغة موحّدة)</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'IBM Plex Sans Arabic',system-ui,sans-serif;background:#F4F5F7;color:#1F2B47}
+a{color:#2D64A7;text-decoration:none}
+.scr{width:390px;height:844px;position:relative;overflow:hidden;background:#F4F5F7;direction:rtl;text-align:right;box-sizing:border-box}
+.body{position:absolute;top:0;left:0;right:0;bottom:0;overflow-y:auto;padding:52px 20px 40px;box-sizing:border-box}
+.seg{display:flex;background:#E7E9EE;border-radius:12px;padding:3px;margin-bottom:26px}
+.seg a{flex:1;text-align:center;font-size:13px;font-weight:600;padding:8px 0;border-radius:9px;color:#576075}
+.seg .on{background:#fff;color:#1F2B47;box-shadow:0 1px 3px rgba(31,43,71,.12)}
+.card{background:#fff;border:1px solid #E7E9EE;border-radius:20px;padding:30px 22px;text-align:center}
+.code{font-size:64px;font-weight:700;color:#E7E9EE;line-height:1;direction:ltr;letter-spacing:2px}
+.ic{width:64px;height:64px;border-radius:20px;background:#E5ECF4;color:#2D64A7;display:flex;align-items:center;justify-content:center;margin:-22px auto 16px;position:relative}
+.ic svg{width:30px;height:30px}
+h1{font-size:22px;font-weight:700;margin:0;line-height:1.35}
+.s{font-size:14px;color:#576075;line-height:1.7;margin:8px 0 0}
+.acts{display:flex;flex-direction:column;gap:8px;margin-top:22px}
+.btn{display:flex;align-items:center;justify-content:center;height:48px;border-radius:13px;font-size:15px;font-weight:600}
+.b-pri{background:#2D64A7;color:#fff}.b-sec{background:#F0F1F4;color:#1F2B47}
+.alt{margin-top:26px}
+.alt .t{font-size:12px;font-weight:700;color:#8F95A3;margin:0 4px 8px}
+.grp{background:#fff;border-radius:16px;border:1px solid #E7E9EE;overflow:hidden}
+.li{display:flex;align-items:center;gap:12px;padding:12px 14px;color:#1F2B47;font-size:14px;font-weight:600}
+.li+.li{border-top:1px solid #EEF0F3}
+.li .m{font-size:12px;color:#8F95A3;font-weight:500;margin-top:2px}
+.ref{font-size:11px;color:#C7CAD1;text-align:center;margin-top:18px;direction:ltr}
+</style>
+</helmet>
+<div class="scr" style="width: 390px; height: 844px">
+<div class="body">
+<div class="seg"><a class="on" href="SharedNotFound.dc.html">404 غير موجود</a><a href="SharedNotFound.dc.html">403 غير مصرّح</a><a href="StudentOffline.dc.html">بلا اتصال</a></div>
+<div class="card"><div class="code">404</div><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.3-4.3M8 11h6"/></svg></div><h1>الصفحة غير موجودة</h1><p class="s">ربما نُقل الرابط أو حُذف العنصر، أو أن الرابط الذي وصلك ناقص.</p><div class="acts"><a class="btn b-pri" href="StudentToday.dc.html">إلى الرئيسية</a><a class="btn b-sec" href="SharedSearch.dc.html">بحث</a></div></div>
+<div class="alt"><div class="t">النسخة 403 (نفس الهيكل)</div><div class="grp"><div class="li"><span style="flex: 1">ليست لديك صلاحية لعرض هذه الصفحة<div class="m">"هذه الصفحة لدور مدير القسم. إن كنت تحتاجها، اطلب من أمين الشؤون العلمية." — بلا كشف عن وجود العنصر.</div></span></div></div></div>
+<div class="ref">ref: 4f2a-9c · portal 2.0.3</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>
