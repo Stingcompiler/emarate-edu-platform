@@ -24,10 +24,11 @@ repos:
     rev: v0.16.9
     hooks:
       - id: ruff-check
-        args: [--fix]
-        files: ^backend/
+        args: [--fix, --config, backend/pyproject.toml]
+        files: ^(backend|scripts)/.*\.py$
       - id: ruff-format
-        files: ^backend/
+        args: [--config, backend/pyproject.toml]
+        files: ^(backend|scripts)/.*\.py$
 
   - repo: local
     hooks:
