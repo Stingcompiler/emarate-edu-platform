@@ -219,7 +219,8 @@ HRNotice (teacher, sent_by, subject, body, acknowledged_at) → يولّد Notif
 - Backend جديد: إعدادات مقسمة (base/dev/test/prod)، Redis، Celery، Anymail، Storage خاص/عام، Throttling، CSP، Logging، drf-spectacular.
 - **قبول:** `scripts/dev.sh` → API صحي على SQLite بلا أي خدمة خارجية، اختبار واحد يمر على SQLite وPostgres في CI، توليد Client من OpenAPI.
 
-### Phase 1 — النواة
+### Phase 1 — النواة ✅
+> **مُنجز.** ملاحظات التنفيذ: الأدوار صف `RoleAssignment(role, department)` وجدول قدرات واحد في `accounts/rbac.py` بدل Django Groups (نطاق القسم لا يُعبَّر عنه بصلاحيات Group)؛ الدخول بكوكيز JWT (HttpOnly) + CSRF؛ مصفوفة الصلاحيات تغطي كل Endpoint × 14 دورًا × داخل/خارج نطاق القسم وتفشل إن أُضيف Endpoint بلا صف؛ `seed_demo` للتطوير فقط. «المسجل» في معيار القبول هو **مسؤول المسجلين** (الاستيراد صلاحيته ومدير النظام فقط، docs/03 §7).
 - `organization`, `academic`, `students`, `accounts` (تسجيل OTP + اعتماد)، `rbac`, `audit`.
 - استيراد الطلاب (Validate → Preview → Commit).
 - مصفوفة اختبار الصلاحيات (كل Endpoint × 10 أدوار).

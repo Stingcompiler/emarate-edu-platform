@@ -21,12 +21,16 @@ live in `docs/` (01–09); `docs/03-roles-and-permissions.md` wins any conflict.
 - The department manager dashboard keeps the old sections and workflows; only
   additions are allowed (docs/02 D20).
 - **No Zustand.** Server state lives in TanStack Query; UI state is a small Context.
+- **Authorization lives in `accounts/rbac.py`** (capabilities + department scope).
+  Every new `/api/v1` endpoint needs a row in `core/tests/test_permission_matrix.py`;
+  the suite fails otherwise. Writes go through a service that records an audit entry.
 
 ## Commands
 
 | Task | Command |
 |---|---|
 | Run everything | `pnpm dev` |
+| Demo data (dev only, idempotent) | `cd backend && DEMO_PASSWORD='…' uv run python manage.py seed_demo` — accounts `<role>@demo.ecst.test` |
 | Backend tests (SQLite / Postgres) | `cd backend && uv run pytest` · `DATABASE_URL=postgres:///ecst uv run pytest` |
 | Lint and format the backend | `cd backend && uv run ruff check . && uv run ruff format .` |
 | Regenerate the API client | `pnpm api:generate` |

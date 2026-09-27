@@ -1,79 +1,87 @@
-# Handoff — Phase 1 (core backend) — 2026-09-27
+# Handoff — Phase 1 done → Phase 2 (learning) — 2026-09-28
 
 ## Where things stand
-- **Branch:** `feat/phase-1-core`, created from `main` after PRs #1 (docs + 147-board prototype) and #2 (Phase 0 + responsive shell) were merged.
-- **PR:** not opened yet. Open it against `main` when the phase is done, then merge it yourself (see CLAUDE.md).
-- **Phase 1 scope:** docs/02-build-plan.md §8 Phase 1. Specs: docs/05-system-design.md §6 (models), §7 (API), §8.1–8.2 (registration and login flows); docs/03-roles-and-permissions.md §6–7 (appointments and the permission matrix).
+- **Phase 1 (core backend) is complete** on branch `feat/phase-1-core`. PR against `main` is opened in this step and merged once CI is green (CLAUDE.md: merge yourself, never wait).
+  - If you find the PR still open, check CI (`gh pr checks`), fix any failure, merge with `gh pr merge --merge`, then start Phase 2 from a fresh branch off `main`.
+- **Verified locally:**
+  - 130 tests pass on SQLite; 129 pass plus 1 SQLite-only skip on Postgres;
+  - ruff is clean;
+  - `makemigrations --check` is clean;
+  - the OpenAPI schema has 0 warnings (now a CI gate);
+  - `pnpm api:generate`, typecheck and build pass;
+  - `seed_demo` runs on the dev DB, and a live login as the department manager sees only the IT courses.
 
-### Done (not committed yet — commit this handoff together with it)
-- Dependencies added: djangorestframework-simplejwt, django-filter, openpyxl, phonenumbers (`backend/pyproject.toml`, `uv.lock`).
-- **Models and migrations** (fresh dev DB migrates; `makemigrations --check` is clean):
-  - `organization`: College, Department, Program, SystemSettings (singleton).
-  - `academic`: AcademicYear, Term, Course, CourseOffering, OfferingInstructor, DepartmentMembership, Enrollment.
-  - `students`: StudentRecord, StudentImportBatch/Row, UniversityNumberSequence.
-  - `audit`: AuditLog (append-only).
-  - `accounts`: User switched to email login (username removed, migration 0002), plus RoleAssignment, OneTimeCode, RegistrationRequest, ActivationToken.
-- **RBAC** in `backend/accounts/rbac.py`: Role enum (14 roles), `CAPABILITIES` (docs/03 §7), `GRANTS` (§6), `CREATABLE_ACCOUNTS`, and `Scope` / `scope_for` / `can`.
-- **Core:** `core/permissions.py` (`capability()` DRF class), `core/viewsets.py` (ScopedModelViewSet: capability + department scope + audit + ProtectedError→409), `core/errors.py` (Conflict 409, Locked 429), `core/text.py` (Arabic name normalisation), `core/models.py` (Bilingual + Singleton mixins).
-- **Services:**
-  - `accounts/services.py`: registration start/verify/complete/decide, login with lockout, password reset, staff accounts plus activation tokens, grant/revoke role.
-  - `accounts/otp.py`, `accounts/emails.py`.
-  - `academic/services.py`: membership, instructors, enroll, drop, bulk_enroll.
-  - `students/importer.py`: read xlsx/csv → validate → commit/reject.
-  - `audit/services.py`.
-- **Serializers and views:**
-  - accounts: auth cookies, /me, public registration, password, activate, users, role-assignments, registration-requests.
-  - organization.
-  - academic: years, terms, courses, offerings + instructors, department members, enrollments + bulk/drop, me/courses.
-  - students: records, imports + rows/commit/reject.
-- **Authentication:** `accounts/authentication.py` (CookieJWTAuthentication + CSRF). Settings: SIMPLE_JWT, cookie names, lockout, throttles `login`/`otp`/`otp_ip`.
+## What Phase 1 delivered (for orientation)
+- **API:**
+  - `/api/public/`: health, csrf, registration start/verify/complete, password forgot/reset, activate.
+  - `/api/v1/` (`config/urls_v1.py`, SimpleRouter, no trailing slash): auth login/refresh/logout, me, me/courses, colleges, departments, programs, system-settings, academic-years, terms, courses, offerings (+instructors), departments/<id>/members, enrollments (+bulk, drop), students, student-imports (+rows, commit, reject), users, role-assignments, registration-requests (+decide), audit-logs.
+- **Authorization:**
+  - `accounts/rbac.py` is the single table; `core/permissions.capability()` and `core/viewsets.ScopedModelViewSet` apply it.
+  - Out-of-scope objects return 404; in scope but without the capability returns 403.
+- **Tests:**
+  - `backend/conftest.py`: fixtures for a college, IT/BA departments, programs, current term, courses, offerings, `users` (one per role, scoped roles on IT), `make_user`, `make_student`, `api(user)`, `last_code()`.
+  - `core/tests/test_permission_matrix.py`: READS table plus COVERED_ELSEWHERE. A new endpoint fails the suite until it gets a row.
+  - `core/tests/test_acceptance_phase1.py`: the full journey.
+- **Demo data:** `DEMO_PASSWORD=… uv run python manage.py seed_demo` (DEBUG only, idempotent).
+  - Creates 4 departments, 11 programs, 23 courses, 40 students, and accounts `<handle>@demo.ecst.test`.
+  - Handles: admin, head.registrar, registrar, results, academic, student.affairs, dept.manager, dept.supervisor, teacher, ta, hr, site, events, student.
 
-## In progress
-- Nothing is wired into URLs yet. `accounts/views.py` imports an unused `update_session_auth_hash`; remove it.
-
-## Next steps (ordered)
-1. **URLs:** add `config/urls_v1.py`, mounted at `api/v1/` in `config/urls.py`. Public endpoints go under `api/public/`: `csrf`, `registration/start|verify|complete`, `password/forgot|reset`, `activate`. Routers:
-   - auth/login|refresh|logout, me, me/courses;
-   - colleges, departments, programs, system-settings;
-   - academic-years, terms, courses, offerings;
-   - departments/<id>/members;
-   - enrollments, students, student-imports, users, role-assignments, registration-requests, audit-logs.
-2. **Audit log read endpoint** (`audit/views.py`): system admin sees everything; department manager/supervisor see their department (capability `audit.view`).
-3. **Admin registrations** for the organization, academic, students and audit apps (audit is read-only).
-4. **Tests** (pytest, both DBs):
-   - rbac unit tests;
-   - registration flow (uniform response, OTP attempts, approval on/off, email-matches-official → active, reject deletes the pending account);
-   - login (identifier = email or university number, lockout, pending message);
-   - cookies, refresh rotation and CSRF;
-   - importer (xlsx + csv, Arabic headers, blank keeps value, duplicates, commit idempotency);
-   - enrollment bulk idempotency;
-   - **permission matrix**: every endpoint × role × in/out of department scope (docs/05 §11). The test must fail if an endpoint has no row.
-5. **Seed:** `manage.py seed_demo` with fictional Sudanese-style data. ECST, 4 departments, 11 programs (match `docs/prototype` names), 2026/2027 terms, courses, offerings, one user per role, ~40 student records. The dev password comes from env `DEMO_PASSWORD`, and the command only runs when DEBUG is on.
-6. **Acceptance script/test:** registrar uploads file → student registers with OTP → department manager approves → student's `me/courses` lists current-term courses.
-7. `pnpm api:generate`, typecheck and build; README/CLAUDE.md commands; open the PR; merge once CI is green; update this handoff for Phase 2.
+## Next steps (Phase 2 — learning, docs/02 §8 and docs/05 §6 `learning`)
+1. Read docs/02 §8 Phase 2, docs/05 §6 (`learning` models) and §7, and docs/03 §7 rows for lectures, assignments and grading. Then look at the prototype boards for teacher and student courses:
+   ```bash
+   python3 scripts/boards.py list Teacher
+   python3 scripts/boards.py list Course
+   ```
+2. **New app `learning`:**
+   - Models: lectures (video/file/link) per offering, assignments v2 with versioned submissions, grading, and basic rule-based grading.
+   - Everything is scoped via the offering → course → department, plus instructor membership (teacher/TA; `ta_can_grade`).
+3. **Storage:**
+   - Bunny (private storage + Stream TUS) in production.
+   - In dev, a local adapter with the same interface: signed URLs that expire in 10 minutes, and direct upload to a local endpoint, so there is no external service and no Docker.
+   - Keep `core.W001` meaningful.
+4. **Acceptance (tests):**
+   - A teacher gets a direct-upload ticket for a 500 MB video; the bytes never pass through Django in prod mode (test the ticket and signature, not the transfer).
+   - A file link expires after 10 minutes.
+   - **A student cannot write their own grade.** Add a permission-matrix row for every new endpoint.
+5. Extend `seed_demo` with lectures and assignments. Then run `pnpm api:generate`, open the PR, merge when green, and update this handoff.
+6. **UI:** Phase 10 applies the brand to every portal page, but any page built earlier must follow the `responsive-page` skill: match the phone and desktop boards, and verify at 390, 768 and 1280.
 
 ## Decisions made (don't revisit)
-- **Roles stored as a `role` CharField on RoleAssignment, not Django Groups.** Department scope can't be expressed with Group permissions, and one code table (`rbac.CAPABILITIES`) is testable against docs/03. Mention this in the PR as a deliberate deviation from docs/03 §10.
-- **Registration:** with approval ON, an email equal to the official email in the college file activates immediately; any other email → `pending_approval` (docs/02 §4.3). Rejecting deletes the never-activated account so the student can retry.
-- **The registration start response is identical for matching and non-matching details.** Only a match gets an email.
-- **Staff accounts are created without a password;** an activation link is emailed (7 days, single use).
-- **Supervisor = manager without delete/removal:** `courses.delete` and `membership.remove` exclude supervisors. Instructor removal counts as a delete.
-- **Structure endpoints are college-wide reference data** (no department filter). Write access is system admin only.
-- **The import never touches `status` or `user`,** and a blank cell keeps the existing value.
+- **Roles are rows (`role`, `department`), not Django Groups.** Mention this deviation from docs/03 §10 in PRs that touch roles.
+- **Registration:**
+  - With approval ON, an email equal to the official one in the file activates immediately; any other email goes to `pending_approval`.
+  - Rejecting deletes the pending account.
+  - The start response is identical whether or not the details match.
+- **Staff accounts:** no password is set; a 7-day, single-use activation link is emailed.
+- **Supervisor = manager without delete/removal.** Instructor removal counts as a delete.
+- **Structure** (college, departments, programs, years, terms) is college-wide reference data: readable by staff roles, written only by the system admin.
+- **Import:**
+  - Only the head registrar and the system admin can import.
+  - The import never touches `status` or `user`; a blank cell keeps the existing value.
+- **Pagination:** every paginated model has a default ordering, and a pytest filterwarning turns unordered pagination into an error.
 
 ## Gotchas found
-- **Constraint order:** building constraint lists from a Python set gives a non-deterministic migration order. Use `sorted()` (see `_SCOPED` in accounts/models.py).
-- **Adding the non-null `full_name_ar`** needed a one-off default. Migration 0002 uses `preserve_default=False`.
-- **Django 6.1:** use `MAILERS` (EMAIL_BACKEND is deprecated). The built-in CSP needs a per-view `csp_override` for Swagger.
-- **TypeScript is pinned to 5.9** (openapi-typescript). `astro dev` needs `--ignore-lock`. Test phone sizes in the browser pane, not headless Chrome.
-- **Audit log actors are PROTECT.** Never make a user you may delete the actor of an entry.
+- **DRF parsers:** `get_parsers()` runs before `self.action` is set. Use `parser_classes`; the import upload was broken by this.
+- **GROUP BY ordering:** `annotate(Count)` drops the model's default ordering. Restate `order_by` (see OfferingViewSet).
+- **Emails in tests:** they are sent via `transaction.on_commit`. Wrap calls in `django_capture_on_commit_callbacks(execute=True)` and read the code with `conftest.last_code()`.
+- **Test settings:** InMemoryStorage for uploads, all throttle scopes at 10000/min, and a long SECRET_KEY (short keys trigger a JWT warning).
+- **Enum names:** drf-spectacular's `ENUM_NAME_OVERRIDES` covers RoleEnum and TeachingKindEnum. Add new shared choice sets there, or the schema gate fails.
+- **Audit IP:** `RequestMeta.from_request` trusts `X-Forwarded-For`. Restrict it to the proxy in Phase 11 (Render sets it).
+- **Earlier gotchas:**
+  - build constraint lists with sorted sets;
+  - Django 6.1 uses `MAILERS`;
+  - TypeScript is pinned to 5.9;
+  - `astro dev` needs `--ignore-lock`;
+  - test phone sizes in the browser pane;
+  - audit actors are PROTECT.
 
 ## Verify
 ```bash
 cd backend && uv run python manage.py makemigrations --check --dry-run && uv run python manage.py check
 cd backend && uv run pytest && DATABASE_URL=postgres:///ecst uv run pytest
 cd backend && uv run ruff check . ../scripts && uv run ruff format --check . ../scripts
-pnpm api:generate && pnpm typecheck && pnpm build
+cd backend && uv run python manage.py spectacular --fail-on-warn --validate --file /dev/null
+pnpm api:generate && pnpm typecheck && pnpm build && pnpm format:check
 ```
 
 ## Owner's standing rules
@@ -82,5 +90,6 @@ pnpm api:generate && pnpm typecheck && pnpm build
   - no Docker; SQLite in dev, Postgres in prod, tests on both;
   - one PR per phase, **merge to main yourself without asking; never wait**;
   - department manager dashboard: additions only;
-  - no Zustand.
+  - no Zustand;
+  - every endpoint gets a permission-matrix row.
 - Hand off via this file (skill `session-handoff`) at every phase or major step, or when context is long.
