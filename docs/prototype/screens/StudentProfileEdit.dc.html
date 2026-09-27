@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="ar">
+<head>
+<meta charset="utf-8">
+<title>الطالب — ملفي (تعديل البريد والهاتف والصورة)</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'IBM Plex Sans Arabic',system-ui,sans-serif;background:#F4F5F7;color:#1F2B47}
+a{color:#2D64A7;text-decoration:none}
+.scr{width:390px;height:844px;position:relative;overflow:hidden;background:#F4F5F7;direction:rtl;text-align:right;box-sizing:border-box}
+.body{position:absolute;top:0;left:0;right:0;bottom:0;overflow-y:auto;padding:54px 16px 110px;box-sizing:border-box}
+.back{display:flex;align-items:center;gap:2px;font-size:15px;color:#2D64A7;font-weight:600}
+.back svg{width:22px;height:22px}
+.ph{display:flex;flex-direction:column;align-items:center;margin-top:14px}
+.ph .av{width:88px;height:88px;border-radius:44px;background:#2D64A7;color:#fff;font-size:26px;font-weight:700;display:flex;align-items:center;justify-content:center;position:relative}
+.ph .av i{position:absolute;bottom:0;left:0;width:30px;height:30px;border-radius:15px;background:#fff;border:2px solid #F4F5F7;display:flex;align-items:center;justify-content:center;color:#1F2B47}
+.ph .av i svg{width:15px;height:15px}
+.ph a{font-size:13px;font-weight:600;margin-top:8px}
+.ph .n{font-size:18px;font-weight:700;margin-top:6px}
+.lbl{font-size:12px;font-weight:600;color:#8F95A3;margin:18px 4px 6px;display:flex;justify-content:space-between}
+.grp{background:#fff;border-radius:16px;border:1px solid #E7E9EE;overflow:hidden}
+.li{display:flex;align-items:center;gap:12px;padding:11px 14px;min-height:50px}
+.li+.li{border-top:1px solid #EEF0F3}
+.k{font-size:13px;color:#576075;width:92px;flex-shrink:0}.v{font-size:14px;font-weight:600;flex:1}
+.lock{color:#C7CAD1}.lock svg{width:15px;height:15px}
+.f{padding:10px 14px}.f+.f{border-top:1px solid #EEF0F3}
+.f label{display:block;font-size:11px;font-weight:600;color:#8F95A3}
+.f .in{display:flex;align-items:center;gap:8px;margin-top:2px}
+.f .in span{font-size:15px;direction:ltr;flex:1;text-align:right}
+.f.on{background:#F2F6FB;box-shadow:inset 3px 0 0 #2D64A7}
+.chip{font-size:11px;font-weight:600;padding:3px 8px;border-radius:999px;white-space:nowrap}
+.c-ok{background:#E6F4EC;color:#14603A}.c-warn{background:#FBF3E3;color:#8A5A14}
+.otp{margin-top:8px;display:flex;gap:6px;direction:ltr}
+.otp b{width:36px;height:42px;border-radius:10px;border:1.5px solid #E7E9EE;background:#fff;display:flex;align-items:center;justify-content:center;font-size:18px}
+.otp b.on{border-color:#2D64A7}
+.hint{font-size:12px;color:#576075;line-height:1.6;margin-top:6px}
+.note{margin-top:12px;font-size:12px;color:#8F95A3;line-height:1.7;padding:0 4px}
+.fix{position:absolute;left:16px;right:16px;bottom:24px}
+.btn{display:flex;align-items:center;justify-content:center;height:50px;border-radius:14px;font-size:15px;font-weight:600;background:#2D64A7;color:#fff}
+</style>
+</helmet>
+<div class="scr" style="width: 390px; height: 844px">
+<div class="body">
+<a class="back" href="StudentMe.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg><span>أنا</span></a>
+<div class="ph"><span class="av">أ م<i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></i></span><a href="StudentProfileEdit.dc.html">تغيير الصورة</a><div class="n">أحمد محمد عثمان</div></div>
+<div class="lbl"><span>البيانات الأكاديمية</span><span>للقراءة فقط</span></div>
+<div class="grp">
+<div class="li"><span class="k">الرقم الجامعي</span><span class="v" style="direction: ltr; text-align: right">24-IT-0031</span><span class="lock"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span></div>
+<div class="li"><span class="k">البرنامج</span><span class="v">بكالوريوس تقنية المعلومات</span><span class="lock"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span></div>
+<div class="li"><span class="k">المستوى</span><span class="v">الثالث · منتظم</span><span class="lock"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span></div>
+</div>
+<div class="lbl"><span>الاتصال</span><span>قابل للتعديل</span></div>
+<div class="grp">
+<div class="f"><label>البريد الإلكتروني</label><div class="in"><span>a.m.osman@gmail.com</span><span class="chip c-ok">مُتحقق</span></div></div>
+<div class="f on"><label>الهاتف — تغيير قيد التحقق</label><div class="in"><span>+249 91 777 3021</span><span class="chip c-warn">بانتظار الرمز</span></div><div class="otp"><b>7</b><b>3</b><b class="on">|</b><b></b><b></b><b></b></div><div class="hint">أرسلنا رمزًا إلى بريدك (لا إلى الرقم الجديد) للتأكد أنك صاحب الحساب. الرقم القديم يبقى فعّالًا حتى التأكيد.</div></div>
+</div>
+<div class="note">تغيير الاسم أو الرقم الجامعي أو البرنامج يتم عبر مسجل القسم بمستند رسمي. تغيير البريد يتطلب رمزًا على البريد القديم والجديد معًا.</div>
+</div>
+<div class="fix"><a class="btn" href="StudentMe.dc.html">تأكيد وحفظ</a></div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

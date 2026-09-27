@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="ar">
+<head>
+<meta charset="utf-8">
+<title>مدير النظام — ملف مستخدم</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'IBM Plex Sans Arabic',system-ui,sans-serif;background:#F4F5F7;color:#1F2B47}
+a{color:#2D64A7;text-decoration:none}
+.scr{width:390px;height:844px;position:relative;overflow:hidden;background:#F4F5F7;direction:rtl;text-align:right;box-sizing:border-box}
+.body{position:absolute;top:0;left:0;right:0;bottom:0;overflow-y:auto;padding:54px 16px 110px;box-sizing:border-box}
+.back{display:flex;align-items:center;gap:2px;font-size:15px;color:#2D64A7;font-weight:600}
+.back svg{width:22px;height:22px}
+.who{display:flex;align-items:center;gap:12px;margin-top:14px}
+.av{width:56px;height:56px;border-radius:28px;background:#E5ECF4;color:#1F4674;font-weight:700;font-size:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.nm{font-size:18px;font-weight:700}.s{font-size:13px;color:#576075;margin-top:2px}
+.chip{font-size:11px;font-weight:600;padding:4px 9px;border-radius:999px;white-space:nowrap}
+.c-ok{background:#E6F4EC;color:#14603A}.c-neu{background:#EEF0F3;color:#576075}
+.lbl{font-size:12px;font-weight:600;color:#8F95A3;margin:18px 4px 6px;display:flex;justify-content:space-between}
+.lbl a{font-weight:600}
+.grp{background:#fff;border-radius:16px;border:1px solid #E7E9EE;overflow:hidden}
+.li{display:flex;align-items:center;gap:12px;padding:11px 14px;min-height:48px}
+.li+.li{border-top:1px solid #EEF0F3}
+.k{font-size:13px;color:#576075;width:96px;flex-shrink:0}.v{font-size:14px;font-weight:600;flex:1}
+.role{display:flex;align-items:center;gap:10px;padding:11px 14px}
+.role+.role{border-top:1px solid #EEF0F3}
+.role .n{flex:1;font-size:14px;font-weight:600}.role .n small{display:block;font-size:12px;color:#576075;font-weight:500;margin-top:2px}
+.role .x{color:#C7CAD1;font-size:18px}
+.addr{padding:11px 14px;border-top:1px solid #EEF0F3;font-size:13px;font-weight:600;color:#2D64A7}
+.dev{display:flex;align-items:center;gap:12px;padding:11px 14px}
+.dev+.dev{border-top:1px solid #EEF0F3}
+.dev svg{width:20px;height:20px;color:#8F95A3;flex-shrink:0}
+.dev .n{flex:1;font-size:13px;font-weight:600}.dev .n small{display:block;font-size:12px;color:#8F95A3;font-weight:500}
+.dev a{font-size:12px;font-weight:600;color:#922B20}
+.danger{display:flex;gap:8px;margin-top:18px}
+.danger a{flex:1;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;background:#fff;border:1.5px solid #E7E9EE;color:#1F2B47}
+.danger a.bad{color:#922B20;border-color:#F3C9C4}
+.fix{position:absolute;left:16px;right:16px;bottom:24px}
+.btn{display:flex;align-items:center;justify-content:center;height:50px;border-radius:14px;font-size:15px;font-weight:600;background:#2D64A7;color:#fff}
+</style>
+</helmet>
+<div class="scr" style="width: 390px; height: 844px">
+<div class="body">
+<a class="back" href="SystemAdminUsers.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg><span>المستخدمون</span></a>
+<div class="who"><span class="av">م ن</span><div style="flex: 1"><div class="nm">أ. محمد النور</div><div class="s">m.alnour@ecst.edu.sd · أُنشئ 12 أغسطس 2026</div></div><span class="chip c-ok">نشط</span></div>
+<div class="lbl"><span>الحساب</span><a href="SystemAdminUser.dc.html">تعديل</a></div>
+<div class="grp">
+<div class="li"><span class="k">الهاتف</span><span class="v" style="direction: ltr; text-align: right">+249 12 345 6789</span></div>
+<div class="li"><span class="k">آخر دخول</span><span class="v">اليوم 08:30 · iPhone · الخرطوم</span></div>
+<div class="li"><span class="k">كلمة المرور</span><span class="v">غُيّرت قبل 46 يومًا</span><a href="SystemAdminUser.dc.html" style="font-size: 12px; font-weight: 600">إعادة تعيين</a></div>
+<div class="li"><span class="k">التحقق بخطوتين</span><span class="v">بريد (OTP) عند جهاز جديد</span></div>
+</div>
+<div class="lbl"><span>الأدوار والنطاقات</span></div>
+<div class="grp">
+<div class="role"><span class="n">مسجل<small>النطاق: تقنية المعلومات · علوم الحاسوب</small></span><span class="chip c-ok">أساسي</span><span class="x">×</span></div>
+<div class="role"><span class="n">أستاذ<small>معيّن على: مقدمة في نظم المعلومات (IS101)</small></span><span class="chip c-neu">إضافي</span><span class="x">×</span></div>
+<a class="addr" href="SystemAdminUser.dc.html">+ إضافة دور أو نطاق</a>
+</div>
+<div class="lbl"><span>الجلسات والأجهزة · 3</span><a href="SystemAdminUser.dc.html" style="color: #922B20">إنهاء الكل</a></div>
+<div class="grp">
+<div class="dev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/></svg><span class="n">iPhone · Safari (PWA)<small>الخرطوم · نشط الآن · Push مفعّل</small></span><a href="SystemAdminUser.dc.html">إنهاء</a></div>
+<div class="dev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg><span class="n">Windows · Chrome<small>الخرطوم · قبل ساعتين</small></span><a href="SystemAdminUser.dc.html">إنهاء</a></div>
+<div class="dev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/></svg><span class="n">Android · Chrome<small>أم درمان · قبل 5 أيام</small></span><a href="SystemAdminUser.dc.html">إنهاء</a></div>
+</div>
+<div class="lbl"><span>آخر نشاط</span><a href="SystemAdminHome.dc.html">التدقيق</a></div>
+<div class="grp">
+<div class="li"><span class="v" style="font-weight: 500; font-size: 13px">غيّر حالة APP-2026-000123 إلى "ناقص مستندات" <span style="color: #8F95A3">· اليوم 09:40</span></span></div>
+<div class="li"><span class="v" style="font-weight: 500; font-size: 13px">ردّ على استفسار حسن إسماعيل <span style="color: #8F95A3">· أمس</span></span></div>
+</div>
+<div class="danger"><a href="SystemAdminUser.dc.html">انتحال للدعم (مسجَّل)</a><a class="bad" href="SystemAdminUser.dc.html">تعطيل الحساب</a></div>
+</div>
+<div class="fix"><a class="btn" href="SystemAdminUsers.dc.html">حفظ</a></div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

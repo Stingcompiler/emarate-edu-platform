@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="ar">
+<head>
+<meta charset="utf-8">
+<title>سطح المكتب — منشئ الاختبار</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'IBM Plex Sans Arabic',system-ui,sans-serif;background:#F4F5F7;color:#1F2B47}
+a{color:#2D64A7;text-decoration:none}
+.scr{width:1280px;height:800px;position:relative;overflow:hidden;background:#F4F5F7;direction:rtl;text-align:right;box-sizing:border-box;display:flex;flex-direction:column}
+.bar{height:60px;display:flex;align-items:center;gap:14px;padding:0 24px;background:#fff;border-bottom:1px solid #E7E9EE;flex-shrink:0}
+.crumb{font-size:13px;color:#8F95A3}.crumb a{color:#2D64A7}
+.bar h1{font-size:17px;font-weight:700;margin:0}
+.chip{font-size:11px;font-weight:600;padding:4px 9px;border-radius:999px;white-space:nowrap}
+.c-neu{background:#EEF0F3;color:#576075}.c-ok{background:#E6F4EC;color:#14603A}.c-warn{background:#FBF3E3;color:#8A5A14}
+.bar .act{margin-right:auto;display:flex;gap:8px;align-items:center}
+.btn{font-size:13px;font-weight:700;padding:9px 16px;border-radius:10px;white-space:nowrap}
+.b-pri{background:#2D64A7;color:#fff}.b-sec{background:#F0F1F4;color:#1F2B47}
+.cols{flex:1;display:grid;grid-template-columns:260px 1fr 320px;min-height:0}
+.list,.props{background:#fff;overflow:auto;padding:16px;box-sizing:border-box}
+.list{border-left:1px solid #E7E9EE}.props{border-right:1px solid #E7E9EE}
+.pt{font-size:12px;font-weight:700;color:#8F95A3;margin:0 0 8px;display:flex;justify-content:space-between}
+.pt a{font-weight:600}
+.qi{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:9px;margin-bottom:2px;color:#1F2B47}
+.qi.on{background:#E5ECF4}
+.qi .n{width:24px;height:24px;border-radius:7px;background:#F0F1F4;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;direction:ltr}
+.qi.on .n{background:#2D64A7;color:#fff}
+.qi .t{flex:1;font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.qi .m{font-size:12px;color:#8F95A3;direction:ltr;line-height:1.6}
+.qi .w{color:#B7791F}
+.sum{margin-top:14px;padding:10px 12px;background:#F8F9FB;border-radius:10px;font-size:12px;color:#576075;line-height:1.8}
+.sum b{color:#1F2B47}
+.edit{overflow:auto;padding:22px 28px;box-sizing:border-box}
+.card{max-width:700px;margin:0 auto;background:#fff;border:1px solid #E7E9EE;border-radius:18px;padding:22px 24px;box-sizing:border-box}
+.hd{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.hd .n{width:34px;height:34px;border-radius:10px;background:#2D64A7;color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;direction:ltr}
+.hd .ty{font-size:13px;font-weight:600;border:1px solid #E7E9EE;border-radius:8px;padding:6px 10px;background:#F8F9FB}
+.hd .pts{margin-right:auto;font-size:13px;font-weight:600;border:1px solid #E7E9EE;border-radius:8px;padding:6px 10px;direction:ltr}
+.stem{font-size:15px;font-weight:600;line-height:1.7;border:1px solid #E7E9EE;border-radius:12px;padding:12px 14px;min-height:60px}
+.code{margin-top:10px;background:#1F2B47;color:#E7E9EE;border-radius:10px;padding:12px 14px;font-family:ui-monospace,Menlo,monospace;font-size:12px;direction:ltr;text-align:left;line-height:1.6}
+.opt{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid #E7E9EE;border-radius:12px;margin-top:8px}
+.opt i{width:22px;height:22px;border-radius:11px;border:2px solid #C7CAD1;box-sizing:border-box;flex-shrink:0}
+.opt.ok{border-color:#1E7F4F;background:#F2FAF5}.opt.ok i{border-color:#1E7F4F;background:#1E7F4F;box-shadow:inset 0 0 0 4px #fff}
+.opt .t{flex:1;font-size:14px}
+.opt .x{color:#C7CAD1;font-size:16px}
+.opt .k{font-size:11px;font-weight:700;color:#14603A}
+.addo{margin-top:8px;font-size:13px;font-weight:600;color:#2D64A7}
+.fb{margin-top:16px}
+.fb label{display:block;font-size:11px;font-weight:600;color:#8F95A3;margin-bottom:4px}
+.fb .v{font-size:13px;color:#576075;border:1px solid #E7E9EE;border-radius:10px;padding:9px 12px;line-height:1.6}
+.pr{padding:8px 0;border-top:1px solid #EEF0F3}
+.pr:first-of-type{border-top:0}
+.pr label{display:block;font-size:11px;font-weight:600;color:#8F95A3;margin-bottom:4px}
+.pr .v{font-size:13px;font-weight:600;border:1px solid #E7E9EE;border-radius:8px;padding:7px 10px;background:#F8F9FB}
+.pr .row{display:flex;align-items:center;justify-content:space-between;font-size:13px;font-weight:600;padding:6px 0}
+.sw{width:40px;height:24px;border-radius:12px;background:#C7CAD1;position:relative;flex-shrink:0}
+.sw i{position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:9px;background:#fff}
+.sw.on{background:#1E7F4F}.sw.on i{left:19px}
+.warn{margin-top:10px;background:#FBF3E3;color:#8A5A14;border-radius:10px;padding:10px 12px;font-size:12px;line-height:1.6}
+</style>
+</helmet>
+<div class="scr" style="width: 1280px; height: 800px">
+<div class="bar"><span class="crumb"><a href="TeacherCourse.dc.html">هياكل البيانات</a> / <a href="TeacherExamNew.dc.html">الاختبارات</a> / </span><h1>اختبار منتصف الفصل — هياكل البيانات</h1><span class="chip c-neu">مسودة · 18 سؤالًا · 40 درجة</span><div class="act"><a class="btn b-sec" href="StudentExam.dc.html">معاينة كطالب</a><a class="btn b-sec" href="TeacherExamNew.dc.html">الإعدادات</a><a class="btn b-pri" href="TeacherCourse.dc.html">جدولة ونشر</a></div></div>
+<div class="cols">
+<aside class="list">
+<p class="pt">الأسئلة · 18<a href="DesktopExamBuilder.dc.html">+ سؤال</a></p>
+<a class="qi" href="DesktopExamBuilder.dc.html"><span class="n">1</span><span class="t">ما تعقيد البحث في مصفوفة مرتبة…</span><span class="m">2</span></a>
+<a class="qi" href="DesktopExamBuilder.dc.html"><span class="n">2</span><span class="t">أي هيكل يناسب LIFO؟</span><span class="m">2</span></a>
+<a class="qi" href="DesktopExamBuilder.dc.html"><span class="n">3</span><span class="t">القائمة المرتبطة المزدوجة تحتاج…</span><span class="m">2</span></a>
+<a class="qi on" href="DesktopExamBuilder.dc.html"><span class="n">4</span><span class="t">ما ناتج تنفيذ الكود التالي؟</span><span class="m">3</span></a>
+<a class="qi" href="DesktopExamBuilder.dc.html"><span class="n">5</span><span class="t">صواب/خطأ: الطابور الدائري…</span><span class="m">1</span></a>
+<a class="qi" href="DesktopExamBuilder.dc.html"><span class="n">6</span><span class="t">اكتب دالة تعكس قائمة مرتبطة</span><span class="m">5</span></a>
+<a class="qi" href="DesktopExamBuilder.dc.html"><span class="n">7</span><span class="t">أي العمليات O(1) في الجدول…</span><span class="m">2</span></a>
+<a class="qi" href="DesktopExamBuilder.dc.html"><span class="n">8</span><span class="t">اختر كل ما ينطبق على الشجرة…</span><span class="m">3</span></a>
+<a class="qi" href="DesktopExamBuilder.dc.html"><span class="n">9</span><span class="t">(بلا إجابة صحيحة محددة)</span><span class="m w">!</span></a>
+<a class="qi" href="DesktopExamBuilder.dc.html"><span class="n">10</span><span class="t">ما الفرق بين المكدس والطابور؟</span><span class="m">4</span></a>
+<a class="qi" href="DesktopExamBuilder.dc.html" style="justify-content: center; color: #2D64A7; font-size: 12px; font-weight: 600">8 أسئلة أخرى</a>
+<div class="sum"><b>الأنواع:</b> 11 اختيار من متعدد · 3 صواب/خطأ · 2 اختيار متعدد · 2 مقالي<br><b>المدة:</b> 60 دقيقة · <b>الترتيب:</b> عشوائي · <b>سؤال 9</b> ناقص إجابة</div>
+</aside>
+<div class="edit">
+<div class="card">
+<div class="hd"><span class="n">4</span><span class="ty">اختيار من متعدد ▾</span><span class="pts">3 درجات</span></div>
+<div class="stem">ما ناتج تنفيذ الكود التالي على مكدس فارغ؟</div>
+<div class="code">s = Stack()<br>for x in [3, 1, 4]:<br>&nbsp;&nbsp;&nbsp;&nbsp;s.push(x)<br>s.pop()<br>s.push(5)<br>print(s.peek(), s.size())</div>
+<div class="opt"><i></i><span class="t">4 3</span><span class="x">×</span></div>
+<div class="opt ok"><i></i><span class="t">5 3</span><span class="k">الإجابة الصحيحة</span><span class="x">×</span></div>
+<div class="opt"><i></i><span class="t">5 4</span><span class="x">×</span></div>
+<div class="opt"><i></i><span class="t">1 2</span><span class="x">×</span></div>
+<div class="addo">+ خيار</div>
+<div class="fb"><label>تغذية راجعة تظهر بعد النشر (اختياري)</label><div class="v">بعد pop تُزال 4، ثم push(5) يجعل القمة 5 والحجم 3.</div></div>
+</div>
+</div>
+<aside class="props">
+<p class="pt">خصائص السؤال 4</p>
+<div class="pr"><label>الدرجة</label><div class="v" style="direction: ltr; text-align: right">3</div></div>
+<div class="pr"><label>الصعوبة</label><div class="v">متوسط</div></div>
+<div class="pr"><label>الوسم (لتحليل النتائج)</label><div class="v">المكدس · التتبع</div></div>
+<div class="pr"><div class="row">خلط ترتيب الخيارات<span class="sw on"><i></i></span></div><div class="row">تصحيح تلقائي<span class="sw on"><i></i></span></div><div class="row">درجة جزئية<span class="sw"><i></i></span></div></div>
+<p class="pt" style="margin-top: 20px">إعدادات الاختبار</p>
+<div class="pr"><label>المدة · المحاولات</label><div class="v">60 دقيقة · محاولة واحدة</div></div>
+<div class="pr"><label>النافذة الزمنية</label><div class="v">الأحد 5 أكتوبر · 10:00 – 12:00</div></div>
+<div class="pr"><div class="row">ترتيب عشوائي للأسئلة<span class="sw on"><i></i></span></div><div class="row">سؤال واحد في الشاشة<span class="sw on"><i></i></span></div><div class="row">حفظ تلقائي كل 10 ثوانٍ<span class="sw on"><i></i></span></div><div class="row">إظهار النتيجة فور الإنهاء<span class="sw"><i></i></span></div><div class="row">يتطلب إقرار لائحة الامتحانات<span class="sw on"><i></i></span></div></div>
+<div class="warn">لا يمكن النشر: السؤال 9 بلا إجابة صحيحة محددة.</div>
+</aside>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":800}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

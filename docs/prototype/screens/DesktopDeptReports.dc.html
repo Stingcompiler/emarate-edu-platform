@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="ar">
+<head>
+<meta charset="utf-8">
+<title>سطح المكتب — تقارير القسم</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'IBM Plex Sans Arabic',system-ui,sans-serif;background:#F4F5F7;color:#1F2B47}
+a{color:#2D64A7;text-decoration:none}
+.scr{width:1280px;height:800px;position:relative;overflow:hidden;background:#F4F5F7;direction:rtl;text-align:right;box-sizing:border-box;display:flex}
+.side{width:240px;flex-shrink:0;background:#1F2B47;color:#fff;padding:20px 16px;box-sizing:border-box;display:flex;flex-direction:column}
+.logo{display:flex;align-items:center;gap:10px;font-size:14px;font-weight:700;padding:4px 6px 22px}
+.logo i{width:32px;height:32px;border-radius:9px;background:#fff;display:block}
+.nv{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;font-size:14px;color:rgba(255,255,255,.75);margin-bottom:2px}
+.nv svg{width:18px;height:18px}
+.nv.on{background:rgba(255,255,255,.12);color:#fff;font-weight:600}
+.me{margin-top:auto;display:flex;align-items:center;gap:10px;padding:10px 6px;border-top:1px solid rgba(255,255,255,.12)}
+.me .av{width:34px;height:34px;border-radius:17px;background:#2D64A7;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700}
+.me .t{font-size:13px;font-weight:600}.me .s{font-size:12px;color:rgba(255,255,255,.6);line-height:1.6}
+.main{flex:1;min-width:0;display:flex;flex-direction:column}
+.bar{height:60px;display:flex;align-items:center;gap:14px;padding:0 28px;background:#fff;border-bottom:1px solid #E7E9EE}
+.bar h1{font-size:18px;font-weight:700;margin:0}
+.bar .act{margin-right:auto;display:flex;gap:8px}
+.btn{font-size:13px;font-weight:700;padding:9px 16px;border-radius:10px;white-space:nowrap}
+.b-pri{background:#2D64A7;color:#fff}.b-sec{background:#F0F1F4;color:#1F2B47}
+.wrap{flex:1;overflow:auto;padding:22px 28px;box-sizing:border-box}
+.tabs{display:flex;gap:6px;margin-bottom:14px}
+.tabs a{font-size:13px;font-weight:600;padding:8px 14px;border-radius:999px;background:#fff;border:1px solid #E7E9EE;color:#576075}
+.tabs .on{background:#1F2B47;border-color:#1F2B47;color:#fff}
+.flt{display:flex;gap:8px;margin-bottom:18px;align-items:center}
+.flt span{font-size:12px;font-weight:600;border:1px solid #E7E9EE;background:#fff;border-radius:9px;padding:7px 12px;color:#1F2B47;display:flex;gap:6px;align-items:center}
+.flt span small{color:#8F95A3;font-weight:500}
+.flt svg{width:14px;height:14px;color:#8F95A3}
+.kp{display:grid;grid-template-columns:repeat(5, 1fr);gap:12px;margin-bottom:20px}
+.kp div{background:#fff;border:1px solid #E7E9EE;border-radius:14px;padding:12px 14px}
+.kp b{display:block;font-size:24px;font-weight:700;line-height:1.1;direction:ltr;text-align:right}
+.kp span{font-size:12px;color:#8F95A3}
+.kp small{display:block;font-size:12px;margin-top:4px;color:#14603A}.kp small.w{color:#8A5A14}
+.cols{display:grid;grid-template-columns:1fr 360px;gap:20px}
+.grp{background:#fff;border-radius:16px;border:1px solid #E7E9EE;overflow:hidden;margin-bottom:20px}
+.hd{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid #EEF0F3}
+.hd h2{font-size:14px;font-weight:700;margin:0;flex:1}.hd a{font-size:12px;font-weight:600}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{font-size:11px;font-weight:600;color:#8F95A3;text-align:right;padding:9px 14px;background:#F8F9FB;border-bottom:1px solid #EEF0F3}
+td{padding:9px 14px;border-top:1px solid #EEF0F3;vertical-align:middle}
+.num{direction:ltr;text-align:right;font-variant-numeric:tabular-nums}
+.tile{display:inline-flex;width:34px;height:34px;border-radius:9px;flex-direction:column;align-items:center;justify-content:center;direction:ltr;font-weight:700;line-height:1;vertical-align:middle;margin-left:8px;background:#E5ECF4;color:#2D64A7}
+.tile b{font-size:8px;opacity:.7}.tile span{font-size:11px;margin-top:1px}
+.bar2{display:inline-block;width:80px;height:6px;border-radius:3px;background:#EEF0F3;overflow:hidden;direction:ltr;vertical-align:middle;margin-left:6px}
+.bar2 i{display:block;height:100%;background:#2D64A7}
+.chart{padding:16px;display:flex;align-items:flex-end;gap:8px;height:150px;box-sizing:border-box;direction:ltr}
+.chart div{flex:1;background:#E5ECF4;border-radius:5px 5px 0 0;position:relative}
+.chart div.hi{background:#2D64A7}
+.chart div span{position:absolute;bottom:-18px;left:0;right:0;text-align:center;font-size:10px;color:#8F95A3}
+.chart div b{position:absolute;top:-16px;left:0;right:0;text-align:center;font-size:10px;font-weight:700;color:#1F2B47}
+.lg{padding:4px 16px 14px;font-size:12px;color:#8F95A3}
+.trend{padding:12px 16px}
+.tr{display:flex;align-items:center;gap:10px;padding:7px 0;font-size:13px}
+.tr+.tr{border-top:1px solid #EEF0F3}
+.tr .n{flex:1}.tr .v{font-weight:700;direction:ltr}
+.tr .d{font-size:12px;font-weight:600;padding:2px 7px;border-radius:999px}
+.up{background:#E6F4EC;color:#14603A}.dn{background:#FBE9E7;color:#922B20}
+</style>
+</helmet>
+<div class="scr" style="width: 1280px; height: 800px">
+<aside class="side">
+<div class="logo"><i></i>منصة الكلية</div>
+<a class="nv" href="DesktopDeptDashboard.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8v9a2 2 0 0 1-2 2h-4v-7h-6v7H5a2 2 0 0 1-2-2z"/></svg>لوحة القسم</a>
+<a class="nv" href="DesktopDeptDashboard.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>المواد والتعيينات</a>
+<a class="nv" href="DesktopDeptProfessors.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>الأساتذة والمعيدون</a>
+<a class="nv" href="DesktopDeptStudents.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>الطلاب</a>
+<a class="nv" href="DesktopDeptExams.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>الاختبارات</a>
+<a class="nv" href="DesktopDeptLive.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="2"/><path d="M16.2 7.8a6 6 0 0 1 0 8.4M7.8 16.2a6 6 0 0 1 0-8.4"/></svg>البث</a>
+<a class="nv" href="DesktopResultsImport.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21V9M8 13l4-4 4 4"/><path d="M20 16.6A5 5 0 0 0 18 7h-1.3A8 8 0 1 0 4 15.2"/></svg>رفع النتائج</a>
+<a class="nv on" href="DesktopDeptReports.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l4-4 4 4 5-6"/></svg>التقارير</a>
+<a class="nv" href="DesktopDeptOperations.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>سجل العمليات</a>
+<div class="me"><span class="av">م أ</span><span><div class="t">د. مصطفى الأمين</div><div class="s">مدير قسم تقنية المعلومات</div></span></div>
+</aside>
+<div class="main">
+<div class="bar"><h1>تقارير القسم — تقنية المعلومات</h1><div class="act"><a class="btn b-sec" href="DesktopDeptReports.dc.html">تصدير CSV</a><a class="btn b-pri" href="DesktopDeptReports.dc.html">تصدير PDF</a></div></div>
+<div class="wrap">
+<div class="tabs"><a class="on" href="DesktopDeptReports.dc.html">المواد</a><a href="DesktopDeptReports.dc.html">المحاضرات</a><a href="DesktopDeptReports.dc.html">الأساتذة</a><a href="DesktopDeptReports.dc.html">الطلاب</a></div>
+<div class="flt"><span><small>الفصل</small>خريف 2026<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></span><span><small>المستوى</small>الكل<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></span><span><small>المادة</small>الكل<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></span><span><small>الفترة</small>آخر 30 يومًا<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></span></div>
+<div class="kp"><div><b>18</b><span>مادة مفتوحة</span><small class="w">3 بلا أستاذ</small></div><div><b>71</b><span>محاضرة مرفوعة</span><small>+24 في 30 يومًا</small></div><div><b>412</b><span>طالبًا</span><small>96% مسجلون في مواد</small></div><div><b>2.1</b><span>يوم متوسط التصحيح</span><small>الحد 3</small></div><div><b>84%</b><span>نسبة التسليم</span><small class="w">−3% عن ربيع 2026</small></div></div>
+<div class="cols">
+<div>
+<div class="grp"><div class="hd"><h2>المواد — خريف 2026</h2><a href="DesktopDeptReports.dc.html">ترتيب: الأقل رفعًا</a></div>
+<table>
+<thead><tr><th>المادة</th><th>المستوى</th><th>الأستاذ</th><th>الطلاب</th><th>المحاضرات</th><th>التسليم</th><th>غير مصحح</th><th>آخر رفع</th></tr></thead>
+<tbody>
+<tr><td><span class="tile" style="background: #FBE9E7; color: #922B20"><b>IT</b><span>301</span></span>نظم المعلومات الإدارية</td><td>3</td><td style="color: #922B20; font-weight: 600">بلا أستاذ</td><td class="num">44</td><td class="num"><span class="bar2"><i style="width: 0%"></i></span>0/8</td><td class="num">—</td><td class="num">—</td><td style="color: #8F95A3">—</td></tr>
+<tr><td><span class="tile" style="background: #EEE9F4; color: #6A4C93"><b>IT</b><span>207</span></span>تفاعل الإنسان والحاسوب</td><td>2</td><td>أ. خالد حسن</td><td class="num">36</td><td class="num"><span class="bar2"><i style="width: 25%"></i></span>2/8</td><td class="num">71%</td><td class="num">9</td><td>قبل 12 يومًا</td></tr>
+<tr><td><span class="tile" style="background: #EEE9F4; color: #6A4C93"><b>IT</b><span>205</span></span>شبكات الحاسوب</td><td>2</td><td>أ. خالد حسن</td><td class="num">58</td><td class="num"><span class="bar2"><i style="width: 50%"></i></span>4/8</td><td class="num">79%</td><td class="num" style="color: #922B20; font-weight: 700">22</td><td>قبل 6 أيام</td></tr>
+<tr><td><span class="tile"><b>IT</b><span>201</span></span>هياكل البيانات</td><td>2</td><td>أ. أحمد محمود</td><td class="num">58</td><td class="num"><span class="bar2"><i style="width: 50%"></i></span>4/8</td><td class="num">91%</td><td class="num">3</td><td>أمس</td></tr>
+<tr><td><span class="tile" style="background: #E6F4EC; color: #14603A"><b>IT</b><span>101</span></span>مقدمة في البرمجة</td><td>1</td><td>د. هالة عبد الرحمن</td><td class="num">96</td><td class="num"><span class="bar2"><i style="width: 50%"></i></span>4/8</td><td class="num">88%</td><td class="num">6</td><td>اليوم</td></tr>
+<tr><td><span class="tile" style="background: #FBF3E3; color: #8A5A14"><b>IT</b><span>203</span></span>قواعد البيانات</td><td>2</td><td>د. سلمى عبد الله</td><td class="num">61</td><td class="num"><span class="bar2"><i style="width: 62%"></i></span>5/8</td><td class="num">93%</td><td class="num">0</td><td>اليوم</td></tr>
+<tr><td colspan="8" style="text-align: center; color: #2D64A7; font-weight: 600">عرض 12 مادة أخرى</td></tr>
+</tbody></table></div>
+</div>
+<div>
+<div class="grp"><div class="hd"><h2>الرفع الأسبوعي — آخر 8 أسابيع</h2></div>
+<div class="chart"><div style="height: 40%"><b>6</b><span>1</span></div><div style="height: 55%"><b>8</b><span>2</span></div><div style="height: 35%"><b>5</b><span>3</span></div><div style="height: 70%"><b>10</b><span>4</span></div><div style="height: 60%"><b>9</b><span>5</span></div><div style="height: 85%"><b>12</b><span>6</span></div><div style="height: 50%"><b>7</b><span>7</span></div><div class="hi" style="height: 100%"><b>14</b><span>8</span></div></div>
+<div class="lg">محاضرات مرفوعة لكل أسبوع · الأسبوع 8 = الحالي</div></div>
+<div class="grp"><div class="hd"><h2>مقارنة بربيع 2026</h2></div><div class="trend">
+<div class="tr"><span class="n">متوسط زمن التصحيح</span><span class="v">2.1 ي</span><span class="d up">−0.6</span></div>
+<div class="tr"><span class="n">نسبة التسليم</span><span class="v">84%</span><span class="d dn">−3%</span></div>
+<div class="tr"><span class="n">محاضرات لكل مادة</span><span class="v">3.9</span><span class="d up">+0.4</span></div>
+<div class="tr"><span class="n">جلسات بث منفذة</span><span class="v">31</span><span class="d up">+9</span></div>
+<div class="tr"><span class="n">مواد بلا أستاذ</span><span class="v">3</span><span class="d dn">+2</span></div>
+</div></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":800}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

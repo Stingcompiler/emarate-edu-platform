@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="ar">
+<head>
+<meta charset="utf-8">
+<title>سطح المكتب — الموارد البشرية: تقرير أداء الفصل (تصدير)</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'IBM Plex Sans Arabic',system-ui,sans-serif;background:#F4F5F7;color:#1F2B47}
+a{color:#2D64A7;text-decoration:none}
+.scr{width:1280px;height:800px;position:relative;overflow:hidden;background:#F4F5F7;direction:rtl;text-align:right;box-sizing:border-box;display:flex}
+.side{width:240px;flex-shrink:0;background:#1F2B47;color:#fff;padding:20px 16px;box-sizing:border-box;display:flex;flex-direction:column}
+.logo{display:flex;align-items:center;gap:10px;font-size:14px;font-weight:700;padding:4px 6px 22px}
+.logo i{width:32px;height:32px;border-radius:9px;background:#fff;display:block}
+.nv{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;font-size:14px;color:rgba(255,255,255,.75);margin-bottom:2px}
+.nv.on{background:rgba(255,255,255,.12);color:#fff;font-weight:600}
+.nv .n{margin-right:auto;font-size:11px;font-weight:700;background:#B02544;padding:2px 7px;border-radius:999px;color:#fff}
+.nv i{width:18px;height:18px;border-radius:5px;border:1.75px solid currentColor;box-sizing:border-box;opacity:.85;flex-shrink:0}
+.me{margin-top:auto;display:flex;align-items:center;gap:10px;padding:10px 6px;border-top:1px solid rgba(255,255,255,.12)}
+.me .av{width:34px;height:34px;border-radius:17px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700}
+.me .t{font-size:13px;font-weight:600}.me .s{font-size:12px;color:rgba(255,255,255,.6)}
+.main{flex:1;min-width:0;display:flex;flex-direction:column}
+.bar{height:60px;display:flex;align-items:center;gap:14px;padding:0 28px;background:#fff;border-bottom:1px solid #E7E9EE;flex-shrink:0}
+.bar h1{font-size:18px;font-weight:700;margin:0}
+.crumb{font-size:13px;color:#8F95A3}.crumb a{color:#2D64A7}
+.term{font-size:12px;font-weight:600;background:#EEF0F3;color:#576075;padding:5px 10px;border-radius:999px}
+.bar .act{margin-right:auto;display:flex;gap:8px}
+.btn{font-size:13px;font-weight:700;padding:9px 14px;border-radius:10px;white-space:nowrap;display:inline-block}
+.b-pri{background:#2D64A7;color:#fff}.b-sec{background:#F0F1F4;color:#1F2B47}.b-bad{background:#FBE9E7;color:#922B20}
+.wrap{flex:1;overflow:auto;padding:22px 28px;box-sizing:border-box}
+.kp{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}
+.kp.k5{grid-template-columns:repeat(5,1fr)}
+.kp div{background:#fff;border:1px solid #E7E9EE;border-radius:14px;padding:12px 14px}
+.kp b{display:block;font-size:24px;font-weight:700;line-height:1.1;direction:ltr;text-align:right}
+.kp span{font-size:12px;color:#8F95A3}
+.kp small{display:block;font-size:12px;margin-top:4px;color:#14603A}.kp small.w{color:#8A5A14}.kp small.b{color:#922B20}
+.flt{display:flex;gap:8px;margin-bottom:14px;align-items:center;flex-wrap:wrap}
+.flt span{font-size:12px;font-weight:600;border:1px solid #E7E9EE;background:#fff;border-radius:9px;padding:7px 12px;color:#1F2B47}
+.flt span small{color:#8F95A3;font-weight:500;margin-left:6px}
+.flt .on{background:#1F2B47;border-color:#1F2B47;color:#fff}
+.flt .srch{flex:1;max-width:280px;color:#8F95A3;font-weight:500}
+.cols{display:grid;grid-template-columns:1fr 340px;gap:20px;align-items:start}
+.grp{background:#fff;border-radius:16px;border:1px solid #E7E9EE;overflow:hidden;margin-bottom:20px}
+.hd{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid #EEF0F3}
+.hd h2{font-size:14px;font-weight:700;margin:0;flex:1}.hd span,.hd a{font-size:12px}.hd span{color:#8F95A3}.hd a{font-weight:600}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{font-size:11px;font-weight:600;color:#8F95A3;text-align:right;padding:9px 14px;background:#F8F9FB;border-bottom:1px solid #EEF0F3;white-space:nowrap}
+td{padding:9px 14px;border-top:1px solid #EEF0F3;vertical-align:middle}
+tr.sel td{background:#F2F6FB}
+.num{direction:ltr;text-align:right;font-variant-numeric:tabular-nums}
+.mono{font-family:ui-monospace,Menlo,monospace;font-size:12px;direction:ltr;text-align:right}
+.tile{display:inline-flex;width:32px;height:32px;border-radius:9px;flex-direction:column;align-items:center;justify-content:center;direction:ltr;font-weight:700;line-height:1;vertical-align:middle;margin-left:8px;background:#E5ECF4;color:#2D64A7}
+.tile b{font-size:7px;opacity:.7}.tile span{font-size:10px;margin-top:1px}
+.av{display:inline-flex;width:26px;height:26px;border-radius:13px;background:#E5ECF4;color:#1F4674;font-size:9px;font-weight:700;align-items:center;justify-content:center;margin-left:8px;vertical-align:middle}
+.chip{font-size:11px;font-weight:600;padding:3px 8px;border-radius:999px;white-space:nowrap}
+.c-ok{background:#E6F4EC;color:#14603A}.c-warn{background:#FBF3E3;color:#8A5A14}.c-bad{background:#FBE9E7;color:#922B20}.c-info{background:#E5ECF4;color:#1F4674}.c-neu{background:#EEF0F3;color:#576075}.c-live{background:#FBE9E7;color:#922B20}
+.mini{font-size:11px;font-weight:700;padding:5px 9px;border-radius:7px;background:#F0F1F4;color:#1F2B47;white-space:nowrap}
+.mini.pri{background:#2D64A7;color:#fff}.mini.bad{background:#FBE9E7;color:#922B20}
+.pr{padding:14px 16px}
+.pr .k{display:block;font-size:11px;font-weight:600;color:#8F95A3;margin:10px 0 4px}
+.pr .k:first-child{margin-top:0}
+.pr .v{font-size:13px;font-weight:600;border:1px solid #E7E9EE;border-radius:8px;padding:7px 10px;background:#F8F9FB}
+.row2{display:flex;align-items:center;justify-content:space-between;font-size:13px;font-weight:600;padding:8px 0;border-top:1px solid #EEF0F3;margin-top:6px}
+.sw{width:40px;height:24px;border-radius:12px;background:#C7CAD1;position:relative;flex-shrink:0;display:inline-block}
+.sw::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:9px;background:#fff}
+.sw.on{background:#1E7F4F}.sw.on::after{left:19px}
+.note{font-size:12px;color:#576075;line-height:1.7;padding:10px 16px;border-top:1px solid #EEF0F3;background:#F8F9FB}
+.bars{padding:12px 16px}
+.br{display:flex;align-items:center;gap:10px;padding:6px 0;font-size:13px}
+.br+.br{border-top:1px solid #EEF0F3}
+.br .n{width:150px;flex-shrink:0}.br .b{flex:1;height:10px;border-radius:5px;background:#EEF0F3;overflow:hidden;direction:ltr;display:flex}
+.br .b i{display:block;height:100%}
+.br .v{width:60px;text-align:right;direction:ltr;font-weight:700;flex-shrink:0}
+.lg{display:flex;gap:14px;font-size:11px;color:#576075;padding:0 16px 12px;flex-wrap:wrap}
+.lg i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-left:5px;vertical-align:middle}
+.chart{padding:18px 16px 26px;display:flex;align-items:flex-end;gap:6px;height:150px;box-sizing:border-box;direction:ltr}
+.chart div{flex:1;border-radius:4px 4px 0 0;position:relative;background:#E5ECF4}
+.chart div.hi{background:#2D64A7}
+.chart div span{position:absolute;bottom:-18px;left:0;right:0;text-align:center;font-size:10px;color:#8F95A3}
+.chart div b{position:absolute;top:-16px;left:0;right:0;text-align:center;font-size:10px;font-weight:700;color:#1F2B47}
+.diff{border:1px solid #E7E9EE;border-radius:10px;overflow:hidden;font-size:12px;margin-top:10px}
+.diff .r{display:grid;grid-template-columns:100px 1fr 1fr;border-top:1px solid #EEF0F3}
+.diff .r:first-child{border-top:0;background:#F8F9FB;font-weight:700;color:#8F95A3;font-size:11px}
+.diff .r span{padding:7px 10px}.diff .r span+span{border-right:1px solid #EEF0F3}
+.old{background:#FFF7F6;color:#922B20}.new{background:#F2FAF5;color:#14603A}
+</style>
+</helmet>
+<div class="scr" style="width: 1280px; height: 800px">
+<aside class="side">
+<div class="logo"><i></i>منصة الكلية</div>
+<a class="nv" href="HRHome.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;flex-shrink:0"><path d="M3 11l9-8 9 8v9a2 2 0 0 1-2 2h-4v-7h-6v7H5a2 2 0 0 1-2-2z"/></svg>الرئيسية</a><a class="nv" href="DesktopHRTeachers.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;flex-shrink:0"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>الأساتذة والمؤشرات</a><a class="nv" href="HRNoticeNew.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;flex-shrink:0"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4z"/></svg>التنبيهات المرسلة</a><a class="nv on" href="DesktopHRReports.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;flex-shrink:0"><path d="M3 3v18h18"/><path d="M7 14l4-4 4 4 5-6"/></svg>التقارير</a>
+<div class="me"><span class="av" style="background: #1E7F4F">س ب</span><span><div class="t">أ. سلوى بابكر</div><div class="s">الموارد البشرية</div></span></div>
+</aside>
+<div class="main">
+<div class="bar"><h1>تقرير أداء هيئة التدريس</h1><span class="term">خريف 2026 مقابل ربيع 2026</span><div class="act"><a class="btn b-sec" href="DesktopHRReports.dc.html">CSV</a><a class="btn b-pri" href="DesktopHRReports.dc.html">PDF موقّع للإدارة</a></div></div>
+<div class="wrap">
+<div class="flt"><span>القالب<small>ملخص الفصل</small></span><span>القسم<small>الكل</small></span><span>الدور<small>أساتذة + معيدون</small></span><span>المقارنة<small>الفصل السابق</small></span><span class="on">معاينة PDF</span></div>
+<div class="cols"><div>
+<div class="grp" style="padding:26px 30px"><div style="display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid #1F2B47;padding-bottom:12px;margin-bottom:16px"><div><div style="font-size:18px;font-weight:700">تقرير أداء هيئة التدريس — خريف 2026</div><div style="font-size:12px;color:#576075;margin-top:4px">كلية الإمارات للعلوم والتقنية · الموارد البشرية · أُعدّ 27 سبتمبر 2026 · حتى الأسبوع 4</div></div><div style="width:44px;height:44px;border-radius:11px;background:#1F2B47"></div></div>
+<div class="kp" style="margin-bottom:14px"><div><b>46</b><span>عضوًا</span></div><div><b>2.3 ي</b><span>زمن التصحيح</span><small>−0.5 ي</small></div><div><b>84%</b><span>انتظام الرفع</span><small class="w">−2%</small></div><div><b>5</b><span>تحت الحد</span><small class="b">+1</small></div></div>
+<table>
+<thead><tr><th>القسم</th><th>أعضاء</th><th>زمن التصحيح</th><th>انتظام الرفع</th><th>جلسات بث</th><th>الرد</th><th>تحت الحد</th></tr></thead>
+<tbody>
+<tr><td>تقنية المعلومات</td><td class="num">14</td><td class="num">2.1</td><td class="num">88%</td><td class="num">31/36</td><td class="num">86%</td><td class="num">2</td></tr>
+<tr><td>علوم الحاسوب</td><td class="num">11</td><td class="num">1.6</td><td class="num">94%</td><td class="num">24/26</td><td class="num">91%</td><td class="num">0</td></tr>
+<tr><td>الهندسة</td><td class="num">12</td><td class="num">2.9</td><td class="num">79%</td><td class="num">18/30</td><td class="num">77%</td><td class="num">2</td></tr>
+<tr><td>إدارة الأعمال</td><td class="num">9</td><td class="num">2.4</td><td class="num">71%</td><td class="num">15/20</td><td class="num">68%</td><td class="num">1</td></tr>
+</tbody></table>
+<div style="font-size:12px;color:#576075;line-height:1.8;margin-top:14px"><b style="color:#1F2B47">ملاحظات:</b> تحسّن زمن التصحيح في ثلاثة أقسام. انخفاض انتظام الرفع في إدارة الأعمال مرتبط بمادتين بلا أستاذ حتى 20 سبتمبر. أُرسلت 3 تنبيهات فردية؛ أُقرّ بـ 2.</div>
+<div style="display:flex;justify-content:space-between;font-size:11px;color:#8F95A3;margin-top:18px;padding-top:10px;border-top:1px solid #EEF0F3"><span>سري — للإدارة العليا والشؤون العلمية</span><span>صفحة 1 من 3</span></div>
+</div>
+</div><div>
+<div class="grp"><div class="hd"><h2>محتوى التقرير</h2></div><div class="pr">
+<div class="row2" style="border-top:0;margin-top:0">ملخص الكلية<span class="sw on"></span></div>
+<div class="row2">جدول الأقسام<span class="sw on"></span></div>
+<div class="row2">قائمة «تحت الحد» بالأسماء<span class="sw on"></span></div>
+<div class="row2">سجل التنبيهات وحالة الإقرار<span class="sw on"></span></div>
+<div class="row2">رسوم الاتجاه (3 فصول)<span class="sw"></span></div>
+<span class="k" style="margin-top:14px">الملاحظات (تظهر في الصفحة الأولى)</span><div class="v" style="font-weight:500;line-height:1.7;font-size:12px">تحسّن زمن التصحيح في ثلاثة أقسام…</div>
+<span class="k">الجهات المستلمة</span><div class="v" style="font-weight:500">إدارة الكلية · أمين الشؤون العلمية</div>
+</div><div class="note">يُحفظ كل تقرير مُصدَّر بنسخته في سجل التقارير ولا يُعدّل بعد التوقيع.</div></div>
+<div class="grp"><div class="hd"><h2>تقارير سابقة</h2></div><table><tbody>
+<tr><td>ربيع 2026 — نهاية الفصل</td><td style="color:#8F95A3">15 يونيو</td><td><a class="mini" href="DesktopHRReports.dc.html">PDF</a></td></tr>
+<tr><td>خريف 2025 — نهاية الفصل</td><td style="color:#8F95A3">20 يناير</td><td><a class="mini" href="DesktopHRReports.dc.html">PDF</a></td></tr>
+</tbody></table></div>
+</div></div>
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":800}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

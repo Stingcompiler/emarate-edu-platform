@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="ar">
+<head>
+<meta charset="utf-8">
+<title>سطح المكتب — استيراد ملف النتائج</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'IBM Plex Sans Arabic',system-ui,sans-serif;background:#F4F5F7;color:#1F2B47}
+a{color:#2D64A7;text-decoration:none}
+.scr{width:1280px;height:800px;position:relative;overflow:hidden;background:#F4F5F7;direction:rtl;text-align:right;box-sizing:border-box;display:flex}
+.side{width:240px;flex-shrink:0;background:#1F2B47;color:#fff;padding:20px 16px;box-sizing:border-box;display:flex;flex-direction:column}
+.logo{display:flex;align-items:center;gap:10px;font-size:14px;font-weight:700;padding:4px 6px 22px}
+.logo i{width:32px;height:32px;border-radius:9px;background:#fff;display:block}
+.nv{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;font-size:14px;color:rgba(255,255,255,.75);margin-bottom:2px}
+.nv svg{width:18px;height:18px}
+.nv.on{background:rgba(255,255,255,.12);color:#fff;font-weight:600}
+.me{margin-top:auto;display:flex;align-items:center;gap:10px;padding:10px 6px;border-top:1px solid rgba(255,255,255,.12)}
+.me .av{width:34px;height:34px;border-radius:17px;background:#B02544;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700}
+.me .t{font-size:13px;font-weight:600}.me .s{font-size:12px;color:rgba(255,255,255,.6);line-height:1.6}
+.main{flex:1;min-width:0;display:flex;flex-direction:column}
+.bar{height:60px;display:flex;align-items:center;gap:14px;padding:0 28px;background:#fff;border-bottom:1px solid #E7E9EE}
+.bar h1{font-size:18px;font-weight:700;margin:0}
+.crumb{font-size:13px;color:#8F95A3}.crumb a{color:#2D64A7}
+.bar .act{margin-right:auto;display:flex;gap:8px}
+.btn{font-size:13px;font-weight:700;padding:9px 16px;border-radius:10px;white-space:nowrap;display:inline-flex;align-items:center;gap:6px}
+.b-pri{background:#2D64A7;color:#fff}.b-sec{background:#F0F1F4;color:#1F2B47}.b-dis{background:#EEF0F3;color:#8F95A3}
+.wrap{flex:1;overflow:auto;padding:22px 28px;box-sizing:border-box}
+.steps{display:flex;align-items:center;gap:0;margin-bottom:18px}
+.st{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:#8F95A3}
+.st i{width:26px;height:26px;border-radius:13px;background:#E7E9EE;color:#576075;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700}
+.st.d{color:#14603A}.st.d i{background:#1E7F4F;color:#fff}
+.st.c{color:#1F2B47}.st.c i{background:#2D64A7;color:#fff}
+.ln{width:60px;height:2px;background:#E7E9EE;margin:0 12px}
+.cols{display:grid;grid-template-columns:1fr 320px;gap:20px}
+.grp{background:#fff;border-radius:16px;border:1px solid #E7E9EE;overflow:hidden;margin-bottom:20px}
+.hd{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid #EEF0F3}
+.hd h2{font-size:14px;font-weight:700;margin:0;flex:1}
+.hd .f{font-size:12px;color:#576075}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{font-size:11px;font-weight:600;color:#8F95A3;text-align:right;padding:9px 14px;background:#F8F9FB;border-bottom:1px solid #EEF0F3}
+td{padding:9px 14px;border-top:1px solid #EEF0F3;vertical-align:middle}
+tr.bad td{background:#FFF7F6}
+.num{direction:ltr;text-align:right;font-variant-numeric:tabular-nums}
+.chip{font-size:11px;font-weight:600;padding:3px 8px;border-radius:999px;white-space:nowrap}
+.c-ok{background:#E6F4EC;color:#14603A}.c-bad{background:#FBE9E7;color:#922B20}.c-warn{background:#FBF3E3;color:#8A5A14}
+.err{font-size:11px;color:#922B20;margin-top:2px}
+.sum{padding:14px 16px}
+.sum .r{display:flex;justify-content:space-between;font-size:13px;padding:7px 0;border-top:1px solid #EEF0F3}
+.sum .r:first-child{border-top:0;padding-top:0}
+.sum b{font-weight:700;direction:ltr}
+.sum .k{color:#576075}
+.map{padding:6px 0}
+.map .r{display:flex;align-items:center;gap:10px;padding:8px 16px;font-size:13px}
+.map .r+.r{border-top:1px solid #EEF0F3}
+.map .a{width:110px;color:#576075;font-size:12px}
+.map .b{flex:1;font-weight:600;background:#F8F9FB;border:1px solid #E7E9EE;border-radius:8px;padding:6px 10px;display:flex;justify-content:space-between}
+.map .b svg{width:14px;height:14px;color:#8F95A3}
+.note{font-size:12px;color:#576075;line-height:1.7;padding:12px 16px;background:#F8F9FB;border-top:1px solid #EEF0F3}
+.file{display:flex;align-items:center;gap:12px;padding:12px 16px}
+.file .ft{width:40px;height:40px;border-radius:10px;background:#E6F4EC;color:#14603A;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;direction:ltr}
+.file .t{font-size:13px;font-weight:600}.file .s{font-size:12px;color:#8F95A3}
+</style>
+</helmet>
+<div class="scr" style="width: 1280px; height: 800px">
+<aside class="side">
+<div class="logo"><i></i>منصة الكلية</div>
+<a class="nv" href="ResultsOfficerHome.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8v9a2 2 0 0 1-2 2h-4v-7h-6v7H5a2 2 0 0 1-2-2z"/></svg>الرئيسية</a>
+<a class="nv on" href="DesktopResultsImport.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21V9M8 13l4-4 4 4"/><path d="M20 16.6A5 5 0 0 0 18 7h-1.3A8 8 0 1 0 4 15.2"/></svg>رفع النتائج</a>
+<a class="nv" href="ResultsOfficerHome.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>الدفعات</a>
+<a class="nv" href="ResultsOfficerCorrections.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>طلبات التعديل</a>
+<a class="nv" href="ResultsOfficerSettings.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>إعدادات العرض</a>
+<a class="nv" href="DesktopResultsLog.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>السجل</a>
+<div class="me"><span class="av">و ع</span><span><div class="t">أ. وليد عبد الماجد</div><div class="s">مسؤول النتائج</div></span></div>
+</aside>
+<div class="main">
+<div class="bar"><span class="crumb"><a href="ResultsOfficerHome.dc.html">الدفعات</a> / </span><h1>استيراد نتائج — IT301 نظم المعلومات الإدارية</h1><div class="act"><a class="btn b-sec" href="ResultsOfficerHome.dc.html">إلغاء</a><a class="btn b-dis" href="DesktopResultsImport.dc.html">اعتماد الدفعة — أصلح الأخطاء أولًا</a></div></div>
+<div class="wrap">
+<div class="steps"><span class="st d"><i>✓</i>اختيار الملف</span><span class="ln"></span><span class="st d"><i>✓</i>مطابقة الأعمدة</span><span class="ln"></span><span class="st c"><i>3</i>التحقق والمعاينة</span><span class="ln"></span><span class="st"><i>4</i>الاعتماد والنشر</span></div>
+<div class="cols">
+<div>
+<div class="grp">
+<div class="hd"><h2>معاينة الصفوف · 44</h2><span class="f">تصفية: <a href="DesktopResultsImport.dc.html">الأخطاء فقط (2)</a> · الكل</span></div>
+<table>
+<thead><tr><th>#</th><th>الرقم الجامعي</th><th>الاسم في السجل</th><th>أعمال</th><th>نهائي</th><th>المجموع</th><th>التقدير</th><th>الحالة</th></tr></thead>
+<tbody>
+<tr><td>1</td><td class="num">24-IT-0031</td><td>أحمد محمد عثمان</td><td class="num">34</td><td class="num">52</td><td class="num">86</td><td>A</td><td><span class="chip c-ok">مطابق</span></td></tr>
+<tr><td>2</td><td class="num">24-IT-0033</td><td>آلاء حسن الطيب</td><td class="num">31</td><td class="num">47</td><td class="num">78</td><td>B+</td><td><span class="chip c-ok">مطابق</span></td></tr>
+<tr class="bad"><td>3</td><td class="num">24-IT-0O38</td><td>—<div class="err">رقم غير موجود · الأقرب: 24-IT-0038 (بلال عوض)</div></td><td class="num">28</td><td class="num">40</td><td class="num">68</td><td>C+</td><td><span class="chip c-bad">غير مطابق</span></td></tr>
+<tr><td>4</td><td class="num">24-IT-0040</td><td>دعاء الصادق</td><td class="num">36</td><td class="num">55</td><td class="num">91</td><td>A</td><td><span class="chip c-ok">مطابق</span></td></tr>
+<tr><td>5</td><td class="num">24-IT-0042</td><td>عمر صالح عبد الله</td><td class="num">18</td><td class="num">22</td><td class="num">40</td><td>F</td><td><span class="chip c-ok">مطابق</span></td></tr>
+<tr class="bad"><td>6</td><td class="num">24-IT-0045</td><td>محمد إبراهيم<div class="err">المجموع 112 يتجاوز 100 — تحقق من عمود "نهائي"</div></td><td class="num">40</td><td class="num">72</td><td class="num">112</td><td>—</td><td><span class="chip c-bad">قيمة خاطئة</span></td></tr>
+<tr><td>7</td><td class="num">24-IT-0047</td><td>مريم بابكر</td><td class="num">33</td><td class="num">49</td><td class="num">82</td><td>A-</td><td><span class="chip c-ok">مطابق</span></td></tr>
+<tr><td>8</td><td class="num">24-IT-0049</td><td>يوسف عادل</td><td class="num">29</td><td class="num">38</td><td class="num">67</td><td>C+</td><td><span class="chip c-ok">مطابق</span></td></tr>
+<tr><td>9</td><td class="num">24-IT-0050</td><td>هند عبد الرحيم</td><td class="num">35</td><td class="num">50</td><td class="num">85</td><td>A</td><td><span class="chip c-ok">مطابق</span></td></tr>
+<tr><td>10</td><td class="num">24-IT-0052</td><td>خالد يوسف</td><td class="num">30</td><td class="num">44</td><td class="num">74</td><td>B</td><td><span class="chip c-ok">مطابق</span></td></tr>
+<tr><td colspan="8" style="text-align: center; color: #2D64A7; font-weight: 600">عرض 34 صفًا آخر</td></tr>
+</tbody></table>
+</div>
+</div>
+<div>
+<div class="grp"><div class="file"><span class="ft">XLSX</span><span><div class="t">IT301_Spring2026_final.xlsx</div><div class="s">44 صفًا · 6 أعمدة · رفعه د. هالة عبد الرحمن (مشرف القسم) أمس</div></span></div></div>
+<div class="grp"><div class="hd"><h2>ملخص التحقق</h2></div><div class="sum">
+<div class="r"><span class="k">صفوف مطابقة</span><b style="color: #14603A">42</b></div>
+<div class="r"><span class="k">رقم جامعي غير موجود</span><b style="color: #922B20">1</b></div>
+<div class="r"><span class="k">قيمة خارج النطاق</span><b style="color: #922B20">1</b></div>
+<div class="r"><span class="k">طلاب مسجلون بلا صف في الملف</span><b style="color: #8A5A14">2</b></div>
+<div class="r"><span class="k">مقياس التقدير</span><b>الافتراضي</b></div>
+</div><div class="note">لا تُنشر أي درجة قبل حل كل الأخطاء. الطالبان بلا صف سيظهران "لم تُرصد" حتى الرفع التالي.</div></div>
+<div class="grp"><div class="hd"><h2>مطابقة الأعمدة</h2><a href="DesktopResultsImport.dc.html" style="font-size: 12px; font-weight: 600">تعديل</a></div><div class="map">
+<div class="r"><span class="a">الرقم الجامعي</span><span class="b">Student ID<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></span></div>
+<div class="r"><span class="a">أعمال الفصل</span><span class="b">Coursework<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></span></div>
+<div class="r"><span class="a">الاختبار النهائي</span><span class="b">Final<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></span></div>
+<div class="r"><span class="a">المجموع</span><span class="b">يُحسب تلقائيًا<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></span></div>
+</div></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":800}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

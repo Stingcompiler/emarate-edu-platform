@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="ar">
+<head>
+<meta charset="utf-8">
+<title>مدير الفعاليات — فعالية جديدة</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'IBM Plex Sans Arabic',system-ui,sans-serif;background:#F4F5F7;color:#1F2B47}
+a{color:#2D64A7;text-decoration:none}
+.scr{width:390px;height:844px;position:relative;overflow:hidden;background:#F4F5F7;direction:rtl;text-align:right;box-sizing:border-box}
+.body{position:absolute;top:0;left:0;right:0;bottom:0;overflow-y:auto;padding:54px 16px 110px;box-sizing:border-box}
+.back{display:flex;align-items:center;gap:2px;font-size:15px;color:#2D64A7;font-weight:600}
+.back svg{width:22px;height:22px}
+.h1{font-size:24px;font-weight:700;margin:10px 0 2px}
+.s{font-size:13px;color:#576075}
+.lbl{font-size:12px;font-weight:600;color:#8F95A3;margin:18px 4px 6px;display:block}
+.grp{background:#fff;border-radius:16px;border:1px solid #E7E9EE;overflow:hidden}
+.card{display:flex;gap:14px;padding:14px;background:linear-gradient(135deg,#B02544,#6E1A2E);color:#fff}
+.dt{width:58px;flex-shrink:0;background:#fff;color:#1F2B47;border-radius:12px;text-align:center;padding:8px 0;line-height:1.1}
+.dt b{display:block;font-size:24px;font-weight:700}.dt span{font-size:11px;color:#576075}
+.card .tt{font-size:17px;font-weight:700;line-height:1.35}
+.card .m{font-size:12px;opacity:.85;margin-top:4px}
+.f{padding:10px 14px}.f+.f{border-top:1px solid #EEF0F3}
+.f label{display:block;font-size:11px;font-weight:600;color:#8F95A3}
+.f input,.f textarea{width:100%;border:0;background:transparent;font-size:15px;font-family:inherit;color:#1F2B47;outline:none;padding:2px 0 0;box-sizing:border-box;line-height:1.6}
+.two{display:flex}.two .f{flex:1}.two .f+.f{border-top:0;border-right:1px solid #EEF0F3}
+.li{display:flex;align-items:center;gap:12px;padding:11px 14px;min-height:50px}
+.li+.li{border-top:1px solid #EEF0F3}
+.t{font-size:15px;font-weight:600;flex:1}.v{font-size:13px;color:#8F95A3}
+.sw{width:46px;height:28px;border-radius:14px;background:#C7CAD1;position:relative;flex-shrink:0}
+.sw i{position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:11px;background:#fff}
+.sw.on{background:#1E7F4F}.sw.on i{left:21px}
+.chips{display:flex;gap:6px;flex-wrap:wrap;padding:10px 14px}
+.chip{border:1.5px solid #E7E9EE;border-radius:999px;padding:6px 12px;font-size:12px;font-weight:600;color:#576075;background:#fff}
+.chip.on{border-color:#1F2B47;background:#1F2B47;color:#fff}
+.fix{position:absolute;left:16px;right:16px;bottom:24px;display:flex;gap:8px}
+.btn{display:flex;align-items:center;justify-content:center;height:50px;border-radius:14px;font-size:15px;font-weight:600;flex:1}
+.b-pri{background:#2D64A7;color:#fff}.b-sec{background:#fff;color:#1F2B47;border:1.5px solid #E7E9EE}
+</style>
+</helmet>
+<div class="scr" style="width: 390px; height: 844px">
+<div class="body">
+<a class="back" href="SiteManagerHome.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg><span>الفعاليات</span></a>
+<h1 class="h1">فعالية جديدة</h1>
+<div class="s">بشير الطاهر · مدير الفعاليات · تُنشر على الموقع وتقويم الطلاب</div>
+<span class="lbl">المعاينة</span>
+<div class="grp"><div class="card"><div class="dt"><b>8</b><span>أكتوبر</span></div><div><div class="tt">يوم التعريف بالكلية</div><div class="m">الخميس · 9:00 – 14:00 · القاعة الكبرى، المبنى الرئيسي</div><div class="m">مفتوح للجمهور · تسجيل مسبق</div></div></div></div>
+<span class="lbl">التفاصيل</span>
+<div class="grp">
+<div class="f"><label for="t">العنوان</label><input id="t" type="text" value="يوم التعريف بالكلية"></div>
+<div class="two"><div class="f"><label>التاريخ</label><input type="text" value="الخميس 8 أكتوبر 2026"></div><div class="f"><label>الوقت</label><input type="text" value="9:00 – 14:00"></div></div>
+<div class="f"><label for="l">المكان</label><input id="l" type="text" value="القاعة الكبرى، المبنى الرئيسي"></div>
+<div class="f"><label for="d">الوصف</label><textarea id="d" rows="3">جولة في الأقسام والمعامل، لقاءات مع الأساتذة، وجلسة أسئلة عن القبول والمنح. للطلاب المرشحين وأولياء الأمور.</textarea></div>
+</div>
+<span class="lbl">الجمهور</span>
+<div class="grp"><div class="chips"><span class="chip on">عام على الموقع</span><span class="chip on">الطلاب</span><span class="chip">الأساتذة</span><span class="chip">الزوار المسجلون</span></div></div>
+<span class="lbl">التسجيل والتذكير</span>
+<div class="grp">
+<div class="li"><span class="t">تسجيل مسبق</span><span class="v">نموذج قصير · حد 300</span><span class="sw on" role="switch" aria-checked="true" aria-label="تسجيل"><i></i></span></div>
+<div class="li"><span class="t">تذكير Push قبل يوم</span><span class="sw on" role="switch" aria-checked="true" aria-label="تذكير"><i></i></span></div>
+<div class="li"><span class="t">إضافة إلى تقويم الطلاب</span><span class="sw on" role="switch" aria-checked="true" aria-label="تقويم"><i></i></span></div>
+</div>
+</div>
+<div class="fix"><a class="btn b-sec" href="SiteManagerHome.dc.html">حفظ مسودة</a><a class="btn b-pri" href="SiteManagerHome.dc.html">إرسال للمراجعة</a></div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

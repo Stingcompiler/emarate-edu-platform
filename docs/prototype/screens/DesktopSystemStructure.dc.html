@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="ar">
+<head>
+<meta charset="utf-8">
+<title>سطح المكتب — الهيكل الأكاديمي (كلية · أقسام · برامج · فصول)</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'IBM Plex Sans Arabic',system-ui,sans-serif;background:#F4F5F7;color:#1F2B47}
+a{color:#2D64A7;text-decoration:none}
+.scr{width:1280px;height:800px;position:relative;overflow:hidden;background:#F4F5F7;direction:rtl;text-align:right;box-sizing:border-box;display:flex}
+.side{width:240px;flex-shrink:0;background:#1F2B47;color:#fff;padding:20px 16px;box-sizing:border-box;display:flex;flex-direction:column}
+.logo{display:flex;align-items:center;gap:10px;font-size:14px;font-weight:700;padding:4px 6px 22px}
+.logo i{width:32px;height:32px;border-radius:9px;background:#fff;display:block}
+.nv{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;font-size:14px;color:rgba(255,255,255,.75);margin-bottom:2px}
+.nv svg{width:18px;height:18px}
+.nv.on{background:rgba(255,255,255,.12);color:#fff;font-weight:600}
+.me{margin-top:auto;display:flex;align-items:center;gap:10px;padding:10px 6px;border-top:1px solid rgba(255,255,255,.12)}
+.me .av{width:34px;height:34px;border-radius:17px;background:#B02544;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700}
+.me .t{font-size:13px;font-weight:600}.me .s{font-size:12px;color:rgba(255,255,255,.6);line-height:1.6}
+.main{flex:1;min-width:0;display:flex;flex-direction:column}
+.bar{height:60px;display:flex;align-items:center;gap:14px;padding:0 28px;background:#fff;border-bottom:1px solid #E7E9EE}
+.bar h1{font-size:18px;font-weight:700;margin:0}
+.bar .act{margin-right:auto;display:flex;gap:8px}
+.btn{font-size:13px;font-weight:700;padding:9px 16px;border-radius:10px;white-space:nowrap}
+.b-pri{background:#2D64A7;color:#fff}.b-sec{background:#F0F1F4;color:#1F2B47}
+.wrap{flex:1;overflow:auto;padding:22px 28px;box-sizing:border-box}
+.cols{display:grid;grid-template-columns:300px 1fr 340px;gap:20px}
+.grp{background:#fff;border-radius:16px;border:1px solid #E7E9EE;overflow:hidden;margin-bottom:20px}
+.hd{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid #EEF0F3}
+.hd h2{font-size:14px;font-weight:700;margin:0;flex:1}.hd a{font-size:12px;font-weight:600}
+.tree{padding:8px}
+.tn{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:9px;font-size:13px;font-weight:600;color:#1F2B47;margin-bottom:2px}
+.tn.on{background:#E5ECF4;color:#1F4674}
+.tn .c{margin-right:auto;font-size:11px;color:#8F95A3;font-weight:500}
+.tn svg{width:14px;height:14px;color:#8F95A3}
+.l1{margin-right:0}.l2{margin-right:18px}.l3{margin-right:36px;font-weight:500}
+.dot{width:8px;height:8px;border-radius:4px;flex-shrink:0}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{font-size:11px;font-weight:600;color:#8F95A3;text-align:right;padding:9px 16px;background:#F8F9FB;border-bottom:1px solid #EEF0F3}
+td{padding:10px 16px;border-top:1px solid #EEF0F3;vertical-align:middle}
+.tile{display:inline-flex;width:34px;height:34px;border-radius:9px;flex-direction:column;align-items:center;justify-content:center;direction:ltr;font-weight:700;line-height:1;vertical-align:middle;margin-left:8px}
+.tile b{font-size:8px;opacity:.7}.tile span{font-size:11px;margin-top:1px}
+.chip{font-size:11px;font-weight:600;padding:3px 8px;border-radius:999px;white-space:nowrap}
+.c-ok{background:#E6F4EC;color:#14603A}.c-neu{background:#EEF0F3;color:#576075}.c-info{background:#E5ECF4;color:#1F4674}.c-warn{background:#FBF3E3;color:#8A5A14}
+.num{direction:ltr;text-align:right}
+.mini{font-size:11px;font-weight:700;padding:5px 10px;border-radius:8px;background:#F0F1F4;color:#1F2B47}
+.terms{padding:6px 16px}
+.tr{display:flex;align-items:center;gap:12px;padding:10px 0;border-top:1px solid #EEF0F3;font-size:13px}
+.tr:first-child{border-top:0}
+.tr .n{flex:1;font-weight:600}.tr .n small{display:block;font-size:12px;color:#8F95A3;font-weight:500}
+.tr .cur{font-size:11px;font-weight:700;color:#fff;background:#1E7F4F;padding:3px 8px;border-radius:999px}
+.tr a{font-size:11px;font-weight:600}
+.pr{padding:14px 16px}
+.pr .k{display:block;font-size:11px;font-weight:600;color:#8F95A3;margin:10px 0 4px}
+.pr .k:first-child{margin-top:0}
+.pr .v{font-size:13px;font-weight:600;border:1px solid #E7E9EE;border-radius:8px;padding:7px 10px;background:#F8F9FB}
+.pr .row{display:flex;align-items:center;justify-content:space-between;font-size:13px;font-weight:600;padding:8px 0;border-top:1px solid #EEF0F3;margin-top:6px}
+.sw{width:40px;height:24px;border-radius:12px;background:#C7CAD1;position:relative;flex-shrink:0}
+.sw i{position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:9px;background:#fff}
+.sw.on{background:#1E7F4F}.sw.on i{left:19px}
+.note{font-size:12px;color:#8F95A3;line-height:1.6;margin-top:10px}
+</style>
+</helmet>
+<div class="scr" style="width: 1280px; height: 800px">
+<aside class="side">
+<div class="logo"><i></i>منصة الكلية</div>
+<a class="nv" href="SystemAdminHome.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8v9a2 2 0 0 1-2 2h-4v-7h-6v7H5a2 2 0 0 1-2-2z"/></svg>صحة النظام</a>
+<a class="nv" href="SystemAdminUsers.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>المستخدمون</a>
+<a class="nv" href="DesktopRolesMatrix.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>الأدوار والصلاحيات</a>
+<a class="nv on" href="DesktopSystemStructure.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>الهيكل الأكاديمي</a>
+<a class="nv" href="SystemAdminSettings.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/></svg>الإعدادات والتكاملات</a>
+<a class="nv" href="DesktopSystemAudit.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>التدقيق الكامل</a>
+<div class="me"><span class="av">م أ</span><span><div class="t">م. محمد الأمين</div><div class="s">مدير النظام</div></span></div>
+</aside>
+<div class="main">
+<div class="bar"><h1>الهيكل الأكاديمي</h1><div class="act"><a class="btn b-sec" href="DesktopSystemStructure.dc.html">+ عام أكاديمي</a><a class="btn b-sec" href="DesktopSystemStructure.dc.html">+ قسم</a><a class="btn b-pri" href="DesktopSystemStructure.dc.html">+ برنامج</a></div></div>
+<div class="wrap">
+<div class="cols">
+<div>
+<div class="grp"><div class="hd"><h2>الشجرة</h2></div><div class="tree">
+<div class="tn l1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>كلية الإمارات للعلوم والتقنية<span class="c">4 أقسام</span></div>
+<div class="tn l2 on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg><i class="dot" style="background: #2D64A7"></i>تقنية المعلومات<span class="c">3 برامج</span></div>
+<div class="tn l3">بكالوريوس تقنية المعلومات<span class="c">132 س</span></div>
+<div class="tn l3">بكالوريوس نظم المعلومات<span class="c">128 س</span></div>
+<div class="tn l3">دبلوم تقنية المعلومات<span class="c">66 س</span></div>
+<div class="tn l2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg><i class="dot" style="background: #6A4C93"></i>علوم الحاسوب<span class="c">2</span></div>
+<div class="tn l2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg><i class="dot" style="background: #B7791F"></i>الهندسة<span class="c">3</span></div>
+<div class="tn l2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg><i class="dot" style="background: #1E7F4F"></i>إدارة الأعمال<span class="c">3</span></div>
+</div></div>
+<div class="grp"><div class="hd"><h2>الأعوام والفصول</h2><a href="DesktopSystemStructure.dc.html">إدارة</a></div><div class="terms">
+<div class="tr"><span class="n">خريف 2026/2027<small>1 سبتمبر 2026 – 20 يناير 2027</small></span><span class="cur">الحالي</span></div>
+<div class="tr"><span class="n">ربيع 2026/2027<small>1 فبراير – 15 يونيو 2027</small></span><a href="DesktopSystemStructure.dc.html">تعيين كحالي</a></div>
+<div class="tr"><span class="n">ربيع 2025/2026<small>مغلق · النتائج منشورة</small></span><span class="chip c-neu">مؤرشف</span></div>
+</div></div>
+</div>
+<div>
+<div class="grp"><div class="hd"><h2>قسم تقنية المعلومات — البرامج · 3</h2><a href="DesktopSystemStructure.dc.html">تعديل القسم</a></div>
+<table>
+<thead><tr><th>البرنامج</th><th>الدرجة</th><th>المدة</th><th>الساعات</th><th>المستويات</th><th>مقياس التقدير</th><th>الحالة</th><th></th></tr></thead>
+<tbody>
+<tr><td><span class="tile" style="background: #E5ECF4; color: #2D64A7"><b>BSc</b><span>IT</span></span>بكالوريوس تقنية المعلومات</td><td>بكالوريوس</td><td>4 سنوات</td><td class="num">132</td><td class="num">8</td><td>الافتراضي</td><td><span class="chip c-ok">نشط · يقبل</span></td><td><a class="mini" href="DesktopSystemStructure.dc.html">تعديل</a></td></tr>
+<tr><td><span class="tile" style="background: #E5ECF4; color: #2D64A7"><b>BSc</b><span>IS</span></span>بكالوريوس نظم المعلومات</td><td>بكالوريوس</td><td>4 سنوات</td><td class="num">128</td><td class="num">8</td><td>الافتراضي</td><td><span class="chip c-ok">نشط · يقبل</span></td><td><a class="mini" href="DesktopSystemStructure.dc.html">تعديل</a></td></tr>
+<tr><td><span class="tile" style="background: #EEF0F3; color: #576075"><b>Dip</b><span>IT</span></span>دبلوم تقنية المعلومات</td><td>دبلوم</td><td>سنتان</td><td class="num">66</td><td class="num">4</td><td>الافتراضي</td><td><span class="chip c-info">نشط · مغلق للقبول</span></td><td><a class="mini" href="DesktopSystemStructure.dc.html">تعديل</a></td></tr>
+</tbody></table></div>
+<div class="grp"><div class="hd"><h2>كتالوج مواد القسم · 42</h2><a href="DesktopSystemStructure.dc.html">استيراد CSV</a></div>
+<table>
+<thead><tr><th>الرمز</th><th>المادة</th><th>المستوى</th><th>الساعات</th><th>البرامج</th><th>التقديمات (خريف 2026)</th></tr></thead>
+<tbody>
+<tr><td class="num">IT101</td><td>مقدمة في البرمجة</td><td class="num">1</td><td class="num">3</td><td>IT · IS · Dip</td><td><span class="chip c-ok">مفتوحة · 96 طالبًا</span></td></tr>
+<tr><td class="num">IT201</td><td>هياكل البيانات</td><td class="num">2</td><td class="num">3</td><td>IT · IS</td><td><span class="chip c-ok">مفتوحة · 58</span></td></tr>
+<tr><td class="num">IT301</td><td>نظم المعلومات الإدارية</td><td class="num">3</td><td class="num">3</td><td>IS</td><td><span class="chip c-warn">مفتوحة · بلا أستاذ</span></td></tr>
+<tr><td class="num">IT401</td><td>مشروع التخرج 1</td><td class="num">4</td><td class="num">4</td><td>IT · IS</td><td><span class="chip c-neu">غير مفتوحة</span></td></tr>
+<tr><td colspan="6" style="text-align: center; color: #2D64A7; font-weight: 600">عرض 38 مادة أخرى</td></tr>
+</tbody></table></div>
+</div>
+<div>
+<div class="grp"><div class="hd"><h2>قسم تقنية المعلومات</h2></div><div class="pr">
+<span class="k">الاسم</span><div class="v">تقنية المعلومات</div>
+<span class="k">الرمز · الرابط العام</span><div class="v" style="direction: ltr; text-align: right">IT · /departments/it</div>
+<span class="k">مدير القسم</span><div class="v">د. مصطفى الأمين</div>
+<span class="k">مشرف القسم</span><div class="v">د. هالة عبد الرحمن</div>
+<span class="k">المسجلون المرتبطون</span><div class="v">محمد النور · رشا خالد</div>
+<div class="row">يظهر على الموقع العام<span class="sw on"><i></i></span></div>
+<div class="row">نشط<span class="sw on"><i></i></span></div>
+<div class="note">تعيين المدير/المشرف من الشؤون العلمية؛ ربط المسجلين من مسؤول المسجلين. القسم لا يُحذف وفيه مواد أو طلاب — يُعطَّل فقط.</div>
+</div></div>
+<div class="grp"><div class="hd"><h2>مقاييس التقدير</h2><a href="DesktopSystemStructure.dc.html">+ مقياس</a></div><div class="terms">
+<div class="tr"><span class="n">الافتراضي<small>A ≥ 85 · B+ ≥ 75 · B ≥ 70 · C+ ≥ 65 · C ≥ 60 · F</small></span><span class="chip c-ok">9 برامج</span></div>
+<div class="tr"><span class="n">الهندسة<small>A ≥ 90 · B+ ≥ 80 · B ≥ 70 · C ≥ 60 · F</small></span><span class="chip c-neu">3 برامج</span></div>
+</div></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":800}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

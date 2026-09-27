@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="ar">
+<head>
+<meta charset="utf-8">
+<title>الأستاذ — دفتر الدرجات</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'IBM Plex Sans Arabic',system-ui,sans-serif;background:#F4F5F7;color:#1F2B47}
+a{color:#2D64A7;text-decoration:none}
+.scr{width:390px;height:844px;position:relative;overflow:hidden;background:#F4F5F7;direction:rtl;text-align:right;box-sizing:border-box}
+.body{position:absolute;top:0;left:0;right:0;bottom:0;overflow-y:auto;padding:54px 16px 40px;box-sizing:border-box}
+.back{display:flex;align-items:center;gap:2px;font-size:15px;color:#2D64A7;font-weight:600}
+.back svg{width:22px;height:22px}
+.h1{font-size:24px;font-weight:700;margin:10px 0 2px}
+.s{font-size:13px;color:#576075}
+.dist{margin-top:12px;background:#fff;border:1px solid #E7E9EE;border-radius:16px;padding:12px 14px}
+.dist .hd{display:flex;justify-content:space-between;font-size:13px;font-weight:700}
+.bars{display:flex;gap:4px;align-items:flex-end;height:60px;margin-top:8px;direction:ltr}
+.bars div{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;height:100%;justify-content:flex-end}
+.bars i{width:100%;border-radius:4px 4px 0 0;background:#C4D3E6}
+.bars i.h{background:#2D64A7}
+.bars span{font-size:9px;color:#8F95A3}
+.tbl{margin-top:12px;background:#fff;border:1px solid #E7E9EE;border-radius:16px;overflow:hidden}
+.hr,.row{display:grid;grid-template-columns:1fr 44px 44px 44px 52px;align-items:center;padding:9px 12px;font-size:13px}
+.hr{background:#F9FAFB;border-bottom:1px solid #EEF0F3;font-size:10px;font-weight:700;color:#8F95A3}
+.row+.row{border-top:1px solid #F0F1F4}
+.row .n{font-weight:600;font-size:14px}
+.c{text-align:center;direction:ltr;color:#576075}
+.tot{text-align:center;direction:ltr;font-weight:700}
+.miss{color:#C0392B}
+.exp{display:flex;gap:8px;margin-top:12px}
+.exp a{flex:1;text-align:center;font-size:13px;font-weight:600;padding:11px;border-radius:12px;background:#E5ECF4;color:#1F4674}
+</style>
+</helmet>
+<div class="scr" style="width: 390px; height: 844px">
+<div class="body">
+<a class="back" href="TeacherStudents.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg><span>الطلاب</span></a>
+<h1 class="h1">دفتر الدرجات</h1>
+<div class="s">قواعد البيانات · أعمال الفصل من 50 · 58 طالبًا · يُصدَّر إلى ملف النتائج الجاهز</div>
+<div class="dist"><div class="hd"><span>توزيع المجموع الحالي</span><span>متوسط 35.5 · وسيط 37</span></div><div class="bars" aria-label="التوزيع"><div><i style="height: 15%"></i><span>&lt;10</span></div><div><i style="height: 25%"></i><span>10s</span></div><div><i style="height: 55%"></i><span>20s</span></div><div><i class="h" style="height: 100%"></i><span>30s</span></div><div><i style="height: 70%"></i><span>40s</span></div><div><i style="height: 20%"></i><span>50</span></div></div></div>
+<div class="tbl">
+<div class="hr"><span>الطالب</span><span class="c">و1 /20</span><span class="c">ق1 /20</span><span class="c">و2 /20</span><span class="c">المجموع</span></div>
+<div class="row"><span class="n">أحمد محمد عثمان</span><span class="c">18</span><span class="c">16</span><span class="c" style="color: #8A5A14">16*</span><span class="tot">42.5</span></div>
+<div class="row"><span class="n">فاطمة عبد الله</span><span class="c">19</span><span class="c">18</span><span class="c">18</span><span class="tot">46</span></div>
+<div class="row"><span class="n">محمد خالد</span><span class="c">14</span><span class="c miss">—</span><span class="c">15</span><span class="tot">30.5</span></div>
+<div class="row"><span class="n">يوسف عادل</span><span class="c miss">—</span><span class="c">9</span><span class="c miss">—</span><span class="tot" style="color: #C0392B">16</span></div>
+<div class="row"><span class="n">سلمى أحمد</span><span class="c">17</span><span class="c">15</span><span class="c" style="color: #8A5A14">13</span><span class="tot">37</span></div>
+<div class="row"><span class="n">هدى محمد</span><span class="c">16</span><span class="c">17</span><span class="c miss">—</span><span class="tot">34</span></div>
+<div class="row"><span class="n">عمر صالح</span><span class="c miss">—</span><span class="c miss">—</span><span class="c miss">—</span><span class="tot" style="color: #C0392B">0</span></div>
+<div class="row" style="justify-content: center"><a href="TeacherGradebook.dc.html" style="grid-column: 1 / -1; text-align: center; font-size: 14px; font-weight: 600">51 آخرون · اسحب أفقيًا لمزيد من الأعمدة</a></div>
+</div>
+<div class="s" style="margin-top: 10px">* اقتراح آلي بانتظار الاعتماد · — لم يُسلَّم · الخصم يظهر باللون الكهرماني</div>
+<div class="exp"><a href="TeacherGradebook.dc.html">تصدير CSV</a><a href="TeacherGradebook.dc.html">تصدير بصيغة ملف النتائج</a></div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="ar">
+<head>
+<meta charset="utf-8">
+<title>إرسال إشعار</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'IBM Plex Sans Arabic',system-ui,sans-serif;background:#F4F5F7;color:#1F2B47}
+a{color:#2D64A7;text-decoration:none}
+.scr{width:390px;height:844px;position:relative;overflow:hidden;background:#F4F5F7;direction:rtl;text-align:right;box-sizing:border-box}
+.body{position:absolute;top:0;left:0;right:0;bottom:0;overflow-y:auto;padding:54px 16px 110px;box-sizing:border-box}
+.back{display:flex;align-items:center;gap:2px;font-size:15px;color:#2D64A7;font-weight:600}
+.back svg{width:22px;height:22px}
+.h1{font-size:26px;font-weight:700;margin:10px 0 2px}
+.s{font-size:13px;color:#576075}
+.lbl{font-size:12px;font-weight:600;color:#8F95A3;margin:18px 4px 6px;display:block}
+.grp{background:#fff;border-radius:16px;border:1px solid #E7E9EE;overflow:hidden}
+.li{display:flex;align-items:center;gap:12px;padding:12px 14px;min-height:50px}
+.li+.li{border-top:1px solid #EEF0F3}
+.r{width:22px;height:22px;border-radius:11px;border:2px solid #C7CAD1;flex-shrink:0;box-sizing:border-box}
+.r.on{border:7px solid #2D64A7}
+.t{font-size:15px;font-weight:600;flex:1}.cnt{font-size:13px;color:#8F95A3;direction:ltr}
+.field{padding:10px 14px}
+.field+.field{border-top:1px solid #EEF0F3}
+.field label{display:block;font-size:11px;font-weight:600;color:#8F95A3}
+.field input,.field textarea{width:100%;border:0;background:transparent;font-size:15px;font-family:inherit;color:#1F2B47;outline:none;padding:2px 0 0;box-sizing:border-box;line-height:1.6}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{border:1.5px solid #E7E9EE;border-radius:999px;padding:7px 13px;font-size:13px;font-weight:600;color:#576075;background:#fff}
+.chip.on{border-color:#1F2B47;background:#1F2B47;color:#fff}
+.prev{background:#1F2B47;color:#fff;border-radius:14px;padding:12px 14px;display:flex;gap:10px;align-items:flex-start}
+.prev .ic{width:34px;height:34px;border-radius:9px;background:#2D64A7;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:11px;font-weight:700}
+.prev b{display:block;font-size:14px}.prev span{font-size:12px;opacity:.8;line-height:1.5}
+.fix{position:absolute;left:16px;right:16px;bottom:24px}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;height:50px;border-radius:14px;font-size:16px;font-weight:600;width:100%;background:#2D64A7;color:#fff}
+</style>
+</helmet>
+<div class="scr" style="width: 390px; height: 844px">
+<div class="body">
+<a class="back" href="AdminHome.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg><span>الرئيسية</span></a>
+<h1 class="h1">إشعار جديد</h1>
+<div class="s">الجمهور مقيّد بنطاقك: قسم تقنية المعلومات</div>
+<span class="lbl">إلى</span>
+<div class="grp">
+<div class="li"><span class="r"></span><span class="t">كل طلاب القسم</span><span class="cnt">412</span></div>
+<div class="li"><span class="r on"></span><span class="t">المستوى الثاني — تقنية المعلومات</span><span class="cnt">142</span></div>
+<div class="li"><span class="r"></span><span class="t">طلاب مادة محددة</span><span class="cnt">اختر…</span></div>
+<div class="li"><span class="r"></span><span class="t">أساتذة ومعيدو القسم</span><span class="cnt">14</span></div>
+</div>
+<span class="lbl">الرسالة</span>
+<div class="grp">
+<div class="field"><label for="t">العنوان</label><input id="t" type="text" value="لقاء مدير القسم مع طلاب المستوى الثاني"></div>
+<div class="field"><label for="b">النص</label><textarea id="b" rows="3">يسرّني لقاؤكم الأربعاء 11:00 ص عبر غرفة المستوى الثاني (Teams) لمناقشة خطة الفصل والتدريب الميداني. الحضور مهم.</textarea></div>
+<div class="field"><label for="u">رابط إجراء</label><input id="u" type="text" value="جلسة البث — الأربعاء 11:00 ص"></div>
+</div>
+<span class="lbl">القنوات والفئة</span>
+<div class="chips"><span class="chip on">داخل التطبيق</span><span class="chip on">Push</span><span class="chip">بريد</span><span class="chip on">أكاديمي</span><span class="chip">عاجل</span></div>
+<span class="lbl">معاينة على الهاتف</span>
+<div class="prev"><span class="ic">ق.ت</span><span><b>لقاء مدير القسم مع طلاب المستوى الثاني</b><span>يسرّني لقاؤكم الأربعاء 11:00 ص عبر غرفة المستوى الثاني…</span></span></div>
+</div>
+<div class="fix"><a class="btn" href="AdminHome.dc.html"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4z"/></svg>إرسال إلى 142 طالبًا الآن</a></div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

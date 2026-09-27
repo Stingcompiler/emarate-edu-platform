@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="ar">
+<head>
+<meta charset="utf-8">
+<title>سطح المكتب — /dev/styleguide: الرموز والمكونات (بعد قرارات الخط)</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'IBM Plex Sans Arabic',system-ui,sans-serif;background:#F4F5F7;color:#1F2B47}
+a{color:#2D64A7;text-decoration:none}
+.scr{width:1280px;height:800px;position:relative;overflow:hidden;background:#F4F5F7;direction:rtl;text-align:right;box-sizing:border-box;padding:24px 28px}
+.hd{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:16px}
+.hd h1{font-size:20px;font-weight:700;margin:0}.hd span{font-size:12px;color:#576075;direction:ltr}
+.cols{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+.card{background:#fff;border:1px solid #E7E9EE;border-radius:16px;padding:14px 16px}
+.card h2{font-size:13px;font-weight:700;margin:0 0 10px;color:#8F95A3}
+.sw{display:grid;grid-template-columns:repeat(4, 1fr);gap:6px}
+.sw div{height:52px;border-radius:10px;padding:6px 8px;box-sizing:border-box;font-size:10px;font-weight:600;direction:ltr;text-align:left;display:flex;flex-direction:column;justify-content:flex-end}
+.sw div small{font-weight:500;opacity:.8}
+.ty .r{display:flex;align-items:baseline;gap:10px;padding:5px 0;border-top:1px solid #EEF0F3}
+.ty .r:first-child{border-top:0}
+.ty .k{width:78px;font-size:10px;color:#8F95A3;direction:ltr;flex-shrink:0}
+.ty .x{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kufi{font-family:'Noto Kufi Arabic','IBM Plex Sans Arabic',sans-serif}
+.rule{margin-top:10px;background:#F2F6FB;border-radius:10px;padding:8px 10px;font-size:11px;color:#1F4674;line-height:1.7}
+.rule b{display:block;color:#1F2B47;font-size:12px}
+.rule .bad{color:#922B20;text-decoration:line-through}
+.cm{display:flex;flex-direction:column;gap:8px}
+.btns{display:flex;gap:6px;flex-wrap:wrap}
+.btn{height:36px;padding:0 14px;border-radius:10px;font-size:13px;font-weight:600;display:inline-flex;align-items:center}
+.b-pri{background:#2D64A7;color:#fff}.b-sec{background:#F0F1F4;color:#1F2B47}.b-out{background:#fff;border:1.5px solid #E7E9EE;color:#1F2B47}.b-dan{background:#FBE9E7;color:#922B20}.b-acc{background:#B02544;color:#fff}.b-dis{background:#EEF0F3;color:#8F95A3}
+.chips{display:flex;gap:5px;flex-wrap:wrap}
+.chip{font-size:11px;font-weight:600;padding:4px 9px;border-radius:999px}
+.c-ok{background:#E6F4EC;color:#14603A}.c-warn{background:#FBF3E3;color:#8A5A14}.c-bad{background:#FBE9E7;color:#922B20}.c-info{background:#E5ECF4;color:#1F4674}.c-neu{background:#EEF0F3;color:#576075}
+.in{height:44px;border:1.5px solid #E7E9EE;border-radius:12px;background:#F8F9FB;display:flex;align-items:center;padding:0 12px;font-size:14px;color:#8F95A3}
+.in.on{border-color:#2D64A7;background:#fff;box-shadow:0 0 0 3px rgba(45,100,167,.15);color:#1F2B47}
+.in.err{border-color:#C0392B;background:#fff;color:#1F2B47}
+.err{font-size:12px;color:#922B20;margin-top:-4px}
+.li{display:flex;align-items:center;gap:10px;padding:9px 12px;border:1px solid #E7E9EE;border-radius:12px;background:#fff}
+.tile{width:38px;height:38px;border-radius:11px;background:#E5ECF4;color:#2D64A7;display:flex;flex-direction:column;align-items:center;justify-content:center;direction:ltr;font-weight:700;line-height:1;flex-shrink:0}
+.tile b{font-size:8px;opacity:.7}.tile span{font-size:12px;margin-top:1px}
+.li .t{font-size:14px;font-weight:600;flex:1}.li .s{font-size:12px;color:#576075;margin-top:2px;line-height:1.6}
+.swi{width:40px;height:24px;border-radius:12px;background:#1E7F4F;position:relative;flex-shrink:0}
+.swi i{position:absolute;top:3px;left:19px;width:18px;height:18px;border-radius:9px;background:#fff}
+.dark{background:#111318;color:#E7E9EE;border-radius:12px;padding:10px 12px}
+.dark .li{background:#1B1F2A;border-color:#2A2F3D}.dark .li .t{color:#E7E9EE}.dark .li .s{color:#9AA1B2}.dark .tile{background:#1F3A5F;color:#8FB4E6}
+.dark .chip.c-ok{background:#123D2A;color:#7BD8A4}
+.sp{display:flex;gap:4px;align-items:flex-end;direction:ltr}
+.sp i{background:#2D64A7;border-radius:2px;display:block}
+.sp span{font-size:9px;color:#8F95A3;direction:ltr}
+.rad{display:flex;gap:8px;direction:ltr}
+.rad div{width:44px;height:36px;border:1.5px solid #2D64A7;background:#E5ECF4;font-size:9px;color:#1F4674;display:flex;align-items:flex-end;justify-content:center;padding-bottom:3px;box-sizing:border-box}
+.ico{display:flex;gap:10px;align-items:center;color:#576075}
+.ico svg{width:20px;height:20px}
+.mono{font-family:ui-monospace,Menlo,monospace;font-size:11px;direction:ltr;color:#576075}
+</style>
+</helmet>
+<div class="scr" style="width: 1280px; height: 800px">
+<div class="hd"><h1>/dev/styleguide — الرموز والمكونات كما ستُبنى</h1><span>tokens.css · v1.1 · 2026-09-27 · Plex + Noto Kufi (public headings only)</span></div>
+<div class="cols">
+<div class="cm">
+<div class="card"><h2>الألوان</h2><div class="sw">
+<div style="background: #2D64A7; color: #fff">primary<small>#2D64A7</small></div><div style="background: #1F2B47; color: #fff">navy<small>#1F2B47</small></div><div style="background: #B02544; color: #fff">accent<small>#B02544</small></div><div style="background: #111318; color: #fff">ink<small>#111318</small></div>
+<div style="background: #1E7F4F; color: #fff">success<small>#1E7F4F</small></div><div style="background: #B7791F; color: #fff">warning<small>#B7791F</small></div><div style="background: #C0392B; color: #fff">danger<small>#C0392B</small></div><div style="background: #576075; color: #fff">muted<small>#576075</small></div>
+<div style="background: #E5ECF4; color: #1F4674">primary-soft</div><div style="background: #E6F4EC; color: #14603A">success-soft</div><div style="background: #FBF3E3; color: #8A5A14">warning-soft</div><div style="background: #FBE9E7; color: #922B20">danger-soft</div>
+<div style="background: #F4F5F7; color: #576075; border: 1px solid #E7E9EE">bg<small>#F4F5F7</small></div><div style="background: #fff; color: #576075; border: 1px solid #E7E9EE">surface<small>#FFFFFF</small></div><div style="background: #E7E9EE; color: #576075">border<small>#E7E9EE</small></div><div style="background: #EEF0F3; color: #576075">divider<small>#EEF0F3</small></div>
+</div></div>
+<div class="card"><h2>الوضع الداكن — نفس المكونات</h2><div class="dark"><div class="li"><span class="tile"><b>IT</b><span>201</span></span><span class="t">هياكل البيانات<div class="s">أ. أحمد محمود · 58 طالبًا</div></span><span class="chip c-ok">منشورة</span></div></div></div>
+<div class="card"><h2>المسافات · الأقطار · الأيقونات</h2><div class="sp"><i style="width: 4px; height: 4px"></i><i style="width: 8px; height: 8px"></i><i style="width: 12px; height: 12px"></i><i style="width: 16px; height: 16px"></i><i style="width: 24px; height: 24px"></i><i style="width: 32px; height: 32px"></i><span>4 · 8 · 12 · 16 · 24 · 32</span></div><div class="rad" style="margin-top: 10px"><div style="border-radius: 8px">8</div><div style="border-radius: 12px">12</div><div style="border-radius: 16px">16</div><div style="border-radius: 24px">24</div><div style="border-radius: 999px">999</div></div><div class="ico" style="margin-top: 10px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8v9a2 2 0 0 1-2 2h-4v-7h-6v7H5a2 2 0 0 1-2-2z"/></svg><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg><span class="mono">lucide · 20px · stroke 1.75</span></div></div>
+</div>
+<div class="cm">
+<div class="card ty"><h2>الخطوط — Plex في البوابة · Kufi للعناوين الكبيرة في الموقع العام</h2>
+<div class="r"><span class="k">display 36/1.25</span><span class="x kufi" style="font-size: 30px; font-weight: 700">تعليم تقني يبدأ من هنا</span></div>
+<div class="r"><span class="k">h1 30/1.3</span><span class="x" style="font-size: 26px; font-weight: 700">السبت 27 سبتمبر</span></div>
+<div class="r"><span class="k">h2 24/1.35</span><span class="x" style="font-size: 20px; font-weight: 700">مستحق اليوم</span></div>
+<div class="r"><span class="k">h3 20/1.4</span><span class="x" style="font-size: 17px; font-weight: 600">واجب 2 — تنفيذ قائمة مرتبطة</span></div>
+<div class="r"><span class="k">body 16/1.7</span><span class="x" style="font-size: 15px">أرسلنا رمزًا من 6 أرقام إلى بريدك الجامعي.</span></div>
+<div class="r"><span class="k">small 14/1.6</span><span class="x" style="font-size: 13px; color: #576075">هياكل البيانات · أ. أحمد محمود · 58 طالبًا</span></div>
+<div class="r"><span class="k">secondary 12/1.6</span><span class="x" style="font-size: 12px; color: #576075; line-height: 1.6">الحد الأدنى للنص الثانوي — قبل 12 دقيقة · ملف .py + تقرير</span></div>
+<div class="r"><span class="k">caption 11/600</span><span class="x"><span class="chip c-warn">اليوم</span> <span class="chip c-info">مؤهل</span> — رقاقات فقط</span></div>
+<div class="r"><span class="k">mono tabular</span><span class="x mono" style="font-size: 13px; color: #1F2B47">24-IT-0031 · APP-2026-000123 · 3.42</span></div>
+<div class="rule"><b>القاعدة الجديدة</b>النص الثانوي ≥ 12px بسطر 1.6 · <span class="bad">11px للنص الثانوي</span> · 11px مسموح للرقاقات فقط بوزن 600 · Noto Kufi لعناوين ≥ 24px في الموقع العام فقط، ولا يدخل البوابة.</div>
+</div>
+</div>
+<div class="cm">
+<div class="card"><h2>الأزرار</h2><div class="btns"><span class="btn b-pri">أساسي</span><span class="btn b-sec">ثانوي</span><span class="btn b-out">مفرّغ</span><span class="btn b-acc">إجراء بارز</span><span class="btn b-dan">حذف</span><span class="btn b-dis">معطّل</span></div></div>
+<div class="card"><h2>الحالات (Chips)</h2><div class="chips"><span class="chip c-ok">منشورة · مقبول · مُقرّ</span><span class="chip c-info">قيد المراجعة · مؤهل</span><span class="chip c-warn">ناقص · متأخر · تنبيه</span><span class="chip c-bad">مرفوض · غش · تحت الحد</span><span class="chip c-neu">مسودة · مؤرشف</span></div></div>
+<div class="card cm"><h2>الحقول</h2><div class="in on">26-IT-0142 <span style="width: 2px; height: 20px; background: #2D64A7; margin-right: 2px"></span></div><div class="in">name@example.com</div><div class="in err">26-IT-0O42</div><div class="err">الرقم الجامعي لا يطابق النمط YY-DEPT-NNNN</div></div>
+<div class="card cm"><h2>صف القائمة · مفتاح</h2><div class="li"><span class="tile"><b>IT</b><span>201</span></span><span class="t">هياكل البيانات<div class="s">أ. أحمد محمود · 4/8 محاضرات · 58 طالبًا</div></span><span class="chip c-ok">منتظم</span></div><div class="li"><span class="t">إشعار الطلاب عند النشر<div class="s">Push + داخل التطبيق</div></span><span class="swi"><i></i></span></div></div>
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":800}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="ar">
+<head>
+<meta charset="utf-8">
+<title>الطالب — الإعلانات</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'IBM Plex Sans Arabic',system-ui,sans-serif;background:#F4F5F7;color:#1F2B47}
+a{color:#2D64A7;text-decoration:none}
+.scr{width:390px;height:844px;position:relative;overflow:hidden;background:#F4F5F7;direction:rtl;text-align:right;box-sizing:border-box}
+.body{position:absolute;top:0;left:0;right:0;bottom:0;overflow-y:auto;padding:54px 16px 40px;box-sizing:border-box}
+.back{display:flex;align-items:center;gap:2px;font-size:15px;color:#2D64A7;font-weight:600}
+.back svg{width:22px;height:22px}
+.h1{font-size:28px;font-weight:700;margin:10px 0 0;line-height:1.2}
+.filters{display:flex;gap:6px;margin:14px 0 12px;overflow-x:auto}
+.filters a{flex:none;font-size:13px;font-weight:600;padding:8px 14px;border-radius:999px;background:#fff;border:1px solid #E7E9EE;color:#576075}
+.filters .on{background:#1F2B47;border-color:#1F2B47;color:#fff}
+.pin{background:#1F2B47;color:#fff;border-radius:18px;padding:16px;margin-bottom:12px}
+.pin .k{font-size:11px;font-weight:700;color:#FFD6DE}
+.pin h3{font-size:17px;font-weight:700;margin:6px 0 4px;line-height:1.4}
+.pin p{margin:0;font-size:13px;color:rgba(255,255,255,.78);line-height:1.6}
+.pin .m{font-size:12px;color:rgba(255,255,255,.6);margin-top:8px;line-height:1.6}
+.a{background:#fff;border:1px solid #E7E9EE;border-radius:16px;padding:14px;margin-bottom:10px;color:#1F2B47;display:block}
+.a .who{display:flex;align-items:center;gap:8px;font-size:12px;color:#576075}
+.a .sc{font-size:10px;font-weight:700;padding:2px 8px;border-radius:999px}
+.a h3{font-size:15px;font-weight:700;margin:8px 0 4px;line-height:1.4}
+.a p{margin:0;font-size:13px;color:#3B4459;line-height:1.7}
+.a .m{font-size:12px;color:#8F95A3;margin-top:8px;line-height:1.6}
+</style>
+</helmet>
+<div class="scr" style="width: 390px; height: 844px">
+<div class="body">
+<a class="back" href="StudentToday.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg><span>اليوم</span></a>
+<h1 class="h1">الإعلانات</h1>
+<div class="filters"><a class="on" href="StudentAnnouncements.dc.html">الكل</a><a href="StudentAnnouncements.dc.html">موادي</a><a href="StudentAnnouncements.dc.html">القسم</a><a href="StudentAnnouncements.dc.html">الكلية</a><a href="StudentAnnouncements.dc.html">الفعاليات</a></div>
+<div class="pin"><span class="k">مثبّت · الكلية</span><h3>مواعيد الاختبارات النهائية لخريف 2026</h3><p>تبدأ الاختبارات النهائية 14 ديسمبر. الجدول التفصيلي يُنشر في 1 ديسمبر، والإقرار بلائحة الامتحانات مطلوب قبله.</p><div class="m">شؤون الطلاب · قبل يومين · ينتهي 14 ديسمبر</div></div>
+<a class="a" href="StudentCourse.dc.html"><div class="who"><span class="sc" style="background: #E5ECF4; color: #1F4674">IT201</span>د. سارة الطيب · قواعد البيانات</div><h3>تمديد موعد الواجب 2 إلى الثلاثاء</h3><p>نظرًا لانقطاع الكهرباء أمس، مُدِّد التسليم 48 ساعة. لا حاجة لطلب تمديد فردي.</p><div class="m">قبل ساعتين</div></a>
+<a class="a" href="StudentLive.dc.html"><div class="who"><span class="sc" style="background: #EEF0F3; color: #3B4459">القسم</span>د. مصطفى الأمين · مدير القسم</div><h3>لقاء طلاب المستوى الثاني — الأربعاء 11:00 ص</h3><p>لقاء عبر Teams لمناقشة خطة الفصل والتدريب الميداني. الحضور مهم والرابط في «البث».</p><div class="m">السبت</div></a>
+<a class="a" href="StudentCourse.dc.html"><div class="who"><span class="sc" style="background: #EEE9F4; color: #6A4C93">IT205</span>أ. خالد حسن · شبكات الحاسوب</div><h3>تغيير موعد المعمل إلى الثلاثاء</h3><p>معمل 4 يُنقل من الاثنين إلى الثلاثاء 1:00 م بسبب صيانة المعمل.</p><div class="m">أمس</div></a>
+<a class="a" href="StudentAnnouncements.dc.html"><div class="who"><span class="sc" style="background: #F5E4E8; color: #7B192F">فعالية</span>مدير الفعاليات</div><h3>ورشة «مقدمة في الأمن السيبراني» — 5 أكتوبر</h3><p>ورشة عملية لطلاب تقنية المعلومات بالتعاون مع شركة محلية. التسجيل مفتوح حتى 3 أكتوبر، 40 مقعدًا.</p><div class="m">الخميس · سجّل من الرابط</div></a>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

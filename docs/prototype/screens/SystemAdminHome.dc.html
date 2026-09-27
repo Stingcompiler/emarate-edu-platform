@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="ar">
+<head>
+<meta charset="utf-8">
+<title>مدير النظام — الرئيسية</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'IBM Plex Sans Arabic',system-ui,sans-serif;background:#F4F5F7;color:#1F2B47}
+a{color:#2D64A7;text-decoration:none}
+.scr{width:390px;height:844px;position:relative;overflow:hidden;background:#F4F5F7;direction:rtl;text-align:right;box-sizing:border-box}
+.top{background:#1F2B47;color:#fff;padding:54px 16px 18px}
+.top h1{font-size:20px;font-weight:700;margin:0}
+.top .s{font-size:12px;color:rgba(255,255,255,.7);margin-top:2px}
+.hl{display:flex;gap:8px;margin-top:14px}
+.hl div{flex:1;background:rgba(255,255,255,.1);border-radius:12px;padding:8px 10px;font-size:11px;color:rgba(255,255,255,.7)}
+.hl b{display:flex;align-items:center;gap:6px;font-size:13px;color:#fff;margin-bottom:2px}
+.hl i{width:8px;height:8px;border-radius:4px;background:#3FBF7F}
+.hl i.w{background:#F0B429}
+.body{position:absolute;top:172px;left:0;right:0;bottom:0;overflow-y:auto;padding:14px 16px 120px;box-sizing:border-box}
+.sec{display:flex;align-items:baseline;justify-content:space-between;margin:16px 2px 8px}
+.sec h2{font-size:15px;font-weight:700;margin:0}.sec a{font-size:13px;font-weight:600}
+.grp{background:#fff;border-radius:16px;border:1px solid #E7E9EE;overflow:hidden}
+.li{display:flex;align-items:center;gap:12px;padding:12px 14px;min-height:56px;color:#1F2B47}
+.li+.li{border-top:1px solid #EEF0F3}
+.t{font-size:15px;font-weight:600;line-height:1.35}.s{font-size:13px;color:#576075;margin-top:2px}
+.grow{flex:1;min-width:0}
+.v{font-size:13px;color:#8F95A3}
+.sw{width:46px;height:28px;border-radius:14px;background:#C7CAD1;position:relative;flex-shrink:0}
+.sw i{position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:11px;background:#fff}
+.sw.on{background:#1E7F4F}.sw.on i{left:21px}
+.role{display:flex;align-items:center;gap:10px;padding:9px 14px}
+.role+.role{border-top:1px solid #EEF0F3}
+.role .n{flex:1;font-size:13px}
+.role .c{font-size:13px;font-weight:700;direction:ltr;width:44px;text-align:right}
+.role .b{width:100px;height:6px;border-radius:3px;background:#EEF0F3;overflow:hidden;direction:ltr}
+.role .b i{display:block;height:100%;background:#2D64A7}
+.chev{color:#C7CAD1}.chev svg{width:18px;height:18px}
+.log{padding:10px 14px;font-size:12px;color:#576075;line-height:1.6}
+.log+.log{border-top:1px solid #EEF0F3}
+.log b{color:#1F2B47;font-weight:600}
+.log time{display:block;font-size:11px;color:#8F95A3}
+.tabs{position:absolute;left:12px;right:12px;bottom:14px;height:64px;border-radius:24px;background:rgba(255,255,255,.94);box-shadow:0 4px 16px rgba(31,43,71,.12);border:1px solid #EEF0F3;display:flex;align-items:center;justify-content:space-around;padding:0 6px}
+.tab{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;font-weight:500;color:#8F95A3;width:80px}
+.tab svg{width:24px;height:24px}.tab.on{color:#2D64A7;font-weight:600}
+</style>
+</helmet>
+<div class="scr" style="width: 390px; height: 844px">
+<div class="top"><h1>إدارة النظام</h1><div class="s">م. محمد الأمين · مدير النظام · الإصدار 2.0.3</div><div class="hl"><div><b><i></i>الخدمة</b>سليمة · 99.98%</div><div><b><i></i>النسخ الاحتياطي</b>اليوم 03:00</div><div><b><i class="w"></i>البريد</b>تأخير 4 دقائق</div></div></div>
+<div class="body">
+<div class="sec"><h2>إعدادات النظام</h2></div>
+<div class="grp">
+<div class="li"><span class="grow"><div class="t">تسجيل الطلاب يتطلب موافقة مدير القسم</div><div class="s">مفعّل: يمرّ كل تسجيل على مدير القسم · معطّل: يسجل الطالب مباشرة</div></span><span class="sw on" role="switch" aria-checked="true" aria-label="موافقة"><i></i></span></div>
+<a class="li" href="SystemAdminHome.dc.html"><span class="grow"><div class="t">الفصل الحالي</div><div class="s">خريف 2026/2027 · 1 سبتمبر – 20 يناير</div></span><span class="chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></span></a>
+<a class="li" href="DesktopSystemStructure.dc.html"><span class="grow"><div class="t">الأقسام والبرامج</div><div class="s">4 أقسام · 11 برنامجًا</div></span><span class="chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></span></a>
+<a class="li" href="SystemAdminSettings.dc.html"><span class="grow"><div class="t">البريد والإشعارات</div><div class="s">مزود البريد · مفاتيح Push · القوالب</div></span><span class="chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></span></a>
+</div>
+<div class="sec"><h2>المستخدمون · 1,532</h2><a href="SystemAdminUsers.dc.html">إدارة</a></div>
+<div class="grp">
+<div class="role"><span class="n">طلاب</span><span class="b"><i style="width: 92%"></i></span><span class="c">1,412</span></div>
+<div class="role"><span class="n">أساتذة ومعيدون</span><span class="b"><i style="width: 3%"></i></span><span class="c">46</span></div>
+<div class="role"><span class="n">مديرو ومشرفو الأقسام</span><span class="b"><i style="width: 1%"></i></span><span class="c">7</span></div>
+<div class="role"><span class="n">مسجلون وقبول</span><span class="b"><i style="width: 1%"></i></span><span class="c">6</span></div>
+<div class="role"><span class="n">أدوار إدارية أخرى</span><span class="b"><i style="width: 1%"></i></span><span class="c">8</span></div>
+<a class="role" href="SystemAdminUsers.dc.html" style="color: #2D64A7; justify-content: center; font-size: 14px; font-weight: 600">كل المستخدمين</a>
+</div>
+<div class="sec"><h2>سجل التدقيق</h2><a href="DesktopSystemAudit.dc.html">الكل</a></div>
+<div class="grp">
+<div class="log"><time>اليوم 11:20</time><b>د. مصطفى الأمين</b> عيّن <b>أ. نهى سليمان</b> معيدة في هياكل البيانات</div>
+<div class="log"><time>اليوم 10:42</time><b>أ. ريم الشيخ</b> نشرت الموقع (3 تغييرات)</div>
+<div class="log"><time>أمس 16:05</time><b>أ. وليد عبد الماجد</b> رفع دفعة نتائج B-2026-121 (44 صفًا)</div>
+<div class="log"><time>أمس 09:12</time><b>م. محمد الأمين</b> غيّر إعداد "تسجيل الطلاب يتطلب موافقة" إلى مفعّل</div>
+</div>
+</div>
+<nav class="tabs" aria-label="التنقل الرئيسي"><a class="tab on" href="SystemAdminHome.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8v9a2 2 0 0 1-2 2h-4v-7h-6v7H5a2 2 0 0 1-2-2z"/></svg><span>الرئيسية</span></a><a class="tab" href="AdminNotifications.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg><span>الإشعارات</span></a><a class="tab" href="SystemAdminHome.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>أنا</span></a></nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

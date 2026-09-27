@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="ar">
+<head>
+<meta charset="utf-8">
+<title>سطح مكتب الطالب — اليوم</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'IBM Plex Sans Arabic',system-ui,sans-serif;background:#F4F5F7;color:#1F2B47}
+a{color:#2D64A7;text-decoration:none}
+.scr{width:1280px;height:800px;position:relative;overflow:hidden;background:#F4F5F7;direction:rtl;text-align:right;box-sizing:border-box;display:flex;flex-direction:column}
+.top{height:56px;background:#1F2B47;color:#fff;display:flex;align-items:center;gap:16px;padding:0 24px;flex-shrink:0}
+.top .logo{display:flex;align-items:center;gap:10px;font-size:14px;font-weight:700}
+.top .logo i{width:30px;height:30px;border-radius:8px;background:#fff;display:block}
+.top .term{font-size:12px;color:rgba(255,255,255,.7)}
+.top .srch{margin-right:auto;width:300px;height:36px;border-radius:10px;background:rgba(255,255,255,.12);display:flex;align-items:center;gap:8px;padding:0 12px;font-size:13px;color:rgba(255,255,255,.7)}
+.top .srch svg{width:16px;height:16px}
+.top .ic{width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;position:relative}
+.top .ic svg{width:18px;height:18px}
+.top .ic b{position:absolute;top:-4px;left:-4px;width:16px;height:16px;border-radius:8px;background:#B02544;font-size:10px;display:flex;align-items:center;justify-content:center}
+.top .me{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600}
+.top .me i{width:32px;height:32px;border-radius:16px;background:#2D64A7;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700}
+.row{flex:1;display:flex;min-height:0}
+.side{width:264px;flex-shrink:0;background:#fff;border-left:1px solid #E7E9EE;padding:16px 12px;box-sizing:border-box}
+.nv{display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:12px;font-size:14px;font-weight:500;color:#576075;margin-bottom:2px}
+.nv svg{width:22px;height:22px}
+.nv.on{background:#E5ECF4;color:#1F4674;font-weight:600}
+.nv .n{margin-right:auto;font-size:11px;font-weight:700;background:#B02544;color:#fff;padding:2px 7px;border-radius:999px}
+.side .sub{margin-top:16px;padding-top:12px;border-top:1px solid #EEF0F3}
+.side .sub .nv{font-size:13px;padding:8px 14px}
+.main{flex:1;overflow:auto;padding:24px 32px;box-sizing:border-box}
+.wrap{max-width:900px}
+.h{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:18px}
+.h h1{font-size:28px;font-weight:700;margin:0}
+.h .d{font-size:14px;color:#576075}
+.now{display:flex;align-items:center;gap:16px;background:#1F2B47;color:#fff;border-radius:18px;padding:16px 20px;margin-bottom:22px}
+.now .live{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:700;color:#FF6B84}
+.now .live i{width:8px;height:8px;border-radius:4px;background:#FF6B84}
+.now .t{font-size:18px;font-weight:700;margin-top:2px}.now .m{font-size:12px;color:rgba(255,255,255,.75);margin-top:2px}
+.now a.btn{margin-right:auto;background:#fff;color:#1F2B47;font-size:14px;font-weight:700;padding:10px 18px;border-radius:12px}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.sec{display:flex;align-items:baseline;justify-content:space-between;margin:0 2px 8px}
+.sec h2{font-size:15px;font-weight:700;margin:0}.sec a{font-size:13px;font-weight:600}
+.grp{background:#fff;border-radius:16px;border:1px solid #E7E9EE;overflow:hidden;margin-bottom:20px}
+.li{display:flex;align-items:center;gap:12px;padding:12px 16px;min-height:60px;color:#1F2B47}
+.li+.li{border-top:1px solid #EEF0F3}
+.time{width:48px;flex-shrink:0;text-align:center;direction:ltr}
+.time b{display:block;font-size:14px;font-weight:700}.time small{font-size:10px;color:#8F95A3}
+.tile{width:42px;height:42px;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;direction:ltr;font-weight:700;line-height:1}
+.tile b{font-size:9px;opacity:.7}.tile span{font-size:13px;margin-top:2px}
+.t{font-size:15px;font-weight:600;line-height:1.35}.s{font-size:12px;color:#576075;margin-top:2px}
+.grow{flex:1;min-width:0}
+.chip{font-size:11px;font-weight:600;padding:4px 9px;border-radius:999px;white-space:nowrap}
+.c-warn{background:#FBF3E3;color:#8A5A14}.c-info{background:#E5ECF4;color:#1F4674}.c-bad{background:#FBE9E7;color:#922B20}.c-ok{background:#E6F4EC;color:#14603A}
+.ack{display:flex;align-items:center;gap:12px;background:#FBF3E3;border-radius:14px;padding:12px 16px;margin-bottom:20px;font-size:13px;color:#8A5A14}
+.ack b{display:block;font-size:14px;color:#1F2B47}
+.ack a{margin-right:auto;font-size:12px;font-weight:700;background:#1F2B47;color:#fff;padding:8px 14px;border-radius:10px}
+.wk{padding:12px 16px}
+.wk .r{display:flex;justify-content:space-between;font-size:12px;color:#576075;margin-bottom:6px}
+.wk .bar{display:flex;gap:3px;height:10px;direction:ltr}
+.wk .bar i{flex:1;border-radius:3px;background:#EEF0F3}
+.wk .bar i.f{background:#2D64A7}.wk .bar i.d{background:#C0392B}
+</style>
+</helmet>
+<div class="scr" style="width: 1280px; height: 800px">
+<div class="top"><span class="logo"><i></i>بوابة الطالب</span><span class="term">خريف 2026/2027 · الأسبوع 4</span><div class="srch"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.3-4.3"/></svg>بحث في موادي ومحاضراتي</div><a class="ic" href="StudentNotifications.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg><b>3</b></a><span class="me"><i>أ م</i>أحمد محمد عثمان</span></div>
+<div class="row">
+<aside class="side">
+<a class="nv on" href="DesktopStudentToday.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>اليوم</a>
+<a class="nv" href="DesktopStudentCourse.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>موادي</a>
+<a class="nv" href="StudentTasks.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>المهام<span class="n">4</span></a>
+<a class="nv" href="StudentNotifications.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>الإشعارات</a>
+<a class="nv" href="StudentMe.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>أنا</a>
+<div class="sub">
+<a class="nv" href="DesktopStudentResults.dc.html">النتائج</a>
+<a class="nv" href="StudentLive.dc.html">البث</a>
+<a class="nv" href="StudentRegulations.dc.html">اللوائح</a>
+<a class="nv" href="StudentDownloads.dc.html">التنزيلات</a>
+<a class="nv" href="StudentSettings.dc.html">الإعدادات</a>
+</div>
+</aside>
+<div class="main"><div class="wrap">
+<div class="h"><h1>السبت 27 سبتمبر</h1><span class="d">4 مهام مستحقة · بث بعد 20 دقيقة</span></div>
+<div class="now"><span><span class="live"><i></i>يبدأ 10:00 · بعد 20 دقيقة</span><div class="t">بث مباشر — هياكل البيانات: الأشجار الثنائية</div><div class="m">أ. أحمد محمود · Zoom · 58 طالبًا</div></span><a class="btn" href="StudentLive.dc.html">انضمام</a></div>
+<div class="ack"><span><b>لائحة الامتحانات 2026 تنتظر إقرارك</b>الإقرار شرط لبدء اختبار منتصف الفصل يوم الأحد</span><a href="StudentRegulations.dc.html">اقرأ وأقرّ</a></div>
+<div class="cols">
+<div>
+<div class="sec"><h2>مستحق اليوم</h2><a href="StudentTasks.dc.html">كل المهام</a></div>
+<div class="grp">
+<a class="li" href="StudentAssignment.dc.html"><span class="time"><b>23:59</b><small>اليوم</small></span><span class="tile" style="background: #E5ECF4; color: #2D64A7"><b>IT</b><span>201</span></span><span class="grow"><div class="t">واجب 2 — تنفيذ قائمة مرتبطة</div><div class="s">هياكل البيانات · لم يُسلَّم</div></span><span class="chip c-warn">اليوم</span></a>
+<a class="li" href="StudentAssignment.dc.html"><span class="time"><b>23:59</b><small>اليوم</small></span><span class="tile" style="background: #FBF3E3; color: #8A5A14"><b>IT</b><span>203</span></span><span class="grow"><div class="t">تقرير معمل 3 — الاستعلامات</div><div class="s">قواعد البيانات · مسودة محفوظة</div></span><span class="chip c-warn">اليوم</span></a>
+</div>
+<div class="sec"><h2>غدًا وهذا الأسبوع</h2></div>
+<div class="grp">
+<a class="li" href="DesktopStudentExam.dc.html"><span class="time"><b>10:00</b><small>الأحد</small></span><span class="tile" style="background: #E5ECF4; color: #2D64A7"><b>IT</b><span>201</span></span><span class="grow"><div class="t">اختبار منتصف الفصل</div><div class="s">60 دقيقة · محاولة واحدة · يتطلب إقرار اللائحة</div></span><span class="chip c-info">اختبار</span></a>
+<a class="li" href="StudentAssignment.dc.html"><span class="time"><b>23:59</b><small>الثلاثاء</small></span><span class="tile" style="background: #EEE9F4; color: #6A4C93"><b>IT</b><span>205</span></span><span class="grow"><div class="t">واجب 1 — نموذج OSI</div><div class="s">شبكات الحاسوب</div></span></a>
+</div>
+</div>
+<div>
+<div class="sec"><h2>جديد في موادي</h2><a href="DesktopStudentCourse.dc.html">موادي</a></div>
+<div class="grp">
+<a class="li" href="StudentLecture.dc.html"><span class="tile" style="background: #E6F4EC; color: #14603A"><b>IT</b><span>101</span></span><span class="grow"><div class="t">المحاضرة 5 — الدوال والمعاملات</div><div class="s">مقدمة في البرمجة · فيديو 42 د + ملف · اليوم 08:30</div></span><span class="chip c-ok">جديد</span></a>
+<a class="li" href="StudentExamResult.dc.html"><span class="tile" style="background: #FBF3E3; color: #8A5A14"><b>IT</b><span>203</span></span><span class="grow"><div class="t">نتيجة اختبار قصير 1 — 18 / 20</div><div class="s">قواعد البيانات · أمس</div></span></a>
+<a class="li" href="StudentAnnouncements.dc.html"><span class="tile" style="background: #EEE9F4; color: #6A4C93"><b>IT</b><span>205</span></span><span class="grow"><div class="t">تغيير قاعة محاضرة الأحد إلى معمل 2</div><div class="s">إعلان من مدير القسم · أمس</div></span></a>
+</div>
+<div class="sec"><h2>هذا الأسبوع</h2></div>
+<div class="grp"><div class="wk"><div class="r"><span>حجم العمل: 6 مهام · أُنجز 2 · متأخر 0</span><span>الأسبوع 4</span></div><div class="bar"><i class="f"></i><i class="f"></i><i></i><i></i><i></i><i></i></div></div></div>
+</div>
+</div>
+</div></div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":800}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

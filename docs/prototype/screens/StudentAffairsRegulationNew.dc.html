@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="ar">
+<head>
+<meta charset="utf-8">
+<title>شؤون الطلاب — نشر لائحة</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'IBM Plex Sans Arabic',system-ui,sans-serif;background:#F4F5F7;color:#1F2B47}
+a{color:#2D64A7;text-decoration:none}
+.scr{width:390px;height:844px;position:relative;overflow:hidden;background:#F4F5F7;direction:rtl;text-align:right;box-sizing:border-box}
+.body{position:absolute;top:0;left:0;right:0;bottom:0;overflow-y:auto;padding:54px 16px 110px;box-sizing:border-box}
+.back{display:flex;align-items:center;gap:2px;font-size:15px;color:#2D64A7;font-weight:600}
+.back svg{width:22px;height:22px}
+.h1{font-size:24px;font-weight:700;margin:10px 0 2px}
+.s{font-size:13px;color:#576075}
+.lbl{font-size:12px;font-weight:600;color:#8F95A3;margin:18px 4px 6px;display:block}
+.grp{background:#fff;border-radius:16px;border:1px solid #E7E9EE;overflow:hidden}
+.f{padding:10px 14px}.f+.f{border-top:1px solid #EEF0F3}
+.f label{display:block;font-size:11px;font-weight:600;color:#8F95A3}
+.f input,.f textarea{width:100%;border:0;background:transparent;font-size:15px;font-family:inherit;color:#1F2B47;outline:none;padding:2px 0 0;box-sizing:border-box;line-height:1.6}
+.two{display:flex}.two .f{flex:1}.two .f+.f{border-top:0;border-right:1px solid #EEF0F3}
+.li{display:flex;align-items:center;gap:12px;padding:11px 14px;min-height:50px}
+.li+.li{border-top:1px solid #EEF0F3}
+.t{font-size:15px;font-weight:600;flex:1}.v{font-size:13px;color:#8F95A3}
+.sw{width:46px;height:28px;border-radius:14px;background:#C7CAD1;position:relative;flex-shrink:0}
+.sw i{position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:11px;background:#fff}
+.sw.on{background:#1E7F4F}.sw.on i{left:21px}
+.ft{width:40px;height:40px;border-radius:11px;background:#FBE9E7;color:#922B20;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;direction:ltr;flex-shrink:0}
+.chips{display:flex;gap:6px;flex-wrap:wrap;padding:10px 14px}
+.chip{border:1.5px solid #E7E9EE;border-radius:999px;padding:6px 12px;font-size:12px;font-weight:600;color:#576075;background:#fff}
+.chip.on{border-color:#1F2B47;background:#1F2B47;color:#fff}
+.fix{position:absolute;left:16px;right:16px;bottom:24px;display:flex;gap:8px}
+.btn{display:flex;align-items:center;justify-content:center;height:50px;border-radius:14px;font-size:15px;font-weight:600;flex:1}
+.b-pri{background:#2D64A7;color:#fff}.b-sec{background:#fff;color:#1F2B47;border:1.5px solid #E7E9EE}
+</style>
+</helmet>
+<div class="scr" style="width: 390px; height: 844px">
+<div class="body">
+<a class="back" href="StudentAffairsHome.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg><span>شؤون الطلاب</span></a>
+<h1 class="h1">نشر لائحة</h1>
+<div class="s">النشر يُنشئ إصدارًا جديدًا ويُشعر الجمهور؛ الإصدار السابق يُؤرشف ولا يُحذف</div>
+<span class="lbl">اللائحة</span>
+<div class="grp">
+<div class="f"><label for="t">العنوان</label><input id="t" type="text" value="لائحة الامتحانات 2026"></div>
+<div class="two"><div class="f"><label>الفئة</label><input type="text" value="الامتحانات"></div><div class="f"><label>الإصدار</label><input type="text" value="2026 (يحل محل 2025)"></div></div>
+<div class="f"><label for="d">ملخص للطالب</label><textarea id="d" rows="2">قواعد الحضور والنزاهة والأعطال والنتائج للاختبارات الإلكترونية — سارية من 1 أكتوبر 2026.</textarea></div>
+<div class="li"><span class="ft">PDF</span><span class="t">لائحة-الامتحانات-2026.pdf<div class="s">6 صفحات · 420 KB</div></span><a href="StudentAffairsRegulationNew.dc.html" class="v" style="color: #2D64A7; font-weight: 600">استبدال</a></div>
+</div>
+<span class="lbl">الجمهور</span>
+<div class="grp"><div class="chips"><span class="chip on">كل الطلاب (1,412)</span><span class="chip">قسم</span><span class="chip">برنامج</span><span class="chip">مستوى</span><span class="chip">عام على الموقع</span></div></div>
+<span class="lbl">الإقرار والسريان</span>
+<div class="grp">
+<div class="li"><span class="t">يتطلب إقرار الاطلاع</span><span class="sw on" role="switch" aria-checked="true" aria-label="إقرار"><i></i></span></div>
+<div class="li"><span class="t">الإقرار شرط لبدء الاختبارات</span><span class="sw on" role="switch" aria-checked="true" aria-label="شرط"><i></i></span></div>
+<div class="li"><span class="t">تاريخ السريان</span><span class="v">1 أكتوبر 2026</span></div>
+<div class="li"><span class="t">تذكير من لم يقرّ بعد 7 أيام</span><span class="sw on" role="switch" aria-checked="true" aria-label="تذكير"><i></i></span></div>
+</div>
+<span class="lbl">القنوات</span>
+<div class="grp"><div class="chips"><span class="chip on">داخل التطبيق</span><span class="chip on">Push</span><span class="chip on">بريد</span></div></div>
+</div>
+<div class="fix"><a class="btn b-sec" href="StudentAffairsHome.dc.html">حفظ مسودة</a><a class="btn b-pri" href="StudentAffairsHome.dc.html">نشر الإصدار 2026</a></div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

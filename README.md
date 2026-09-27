@@ -13,6 +13,8 @@
 | [docs/05-system-design.md](docs/05-system-design.md) | تصميم النظام: المكوّنات، البيئات (SQLite/Postgres)، نموذج البيانات الموحّد، الـ API، التدفقات الرئيسية، الأمن |
 | [docs/06-design-system.md](docs/06-design-system.md) | نظام التصميم: نظام الألوان الكامل (فاتح/داكن/حالات/رسوم)، الخطوط، الشبكة، المكوّنات وحالاتها، الأنماط |
 | [docs/07-pages-spec.md](docs/07-pages-spec.md) | خريطة الصفحات ومواصفة كل صفحة في الموقع العام والبوابة لكل دور |
+| [docs/08-ux-research.md](docs/08-ux-research.md) | بحث المراجع: Canvas/Classroom/Moodle/Pulse، قدرات PWA على iPhone 2026، أفضل ممارسات التنزيل دون اتصال (بالمصادر) |
+| [docs/09-mobile-experience.md](docs/09-mobile-experience.md) | تجربة الهاتف بملمس iOS: التنقل بالتبويبات، شاشات الطالب والأستاذ، مكوّنات الهاتف، الإيماءات، دون اتصال والتنزيل، الأداء |
 | [docs/brand/brand-identity.md](docs/brand/brand-identity.md) | الهوية البصرية المشتقة من الشعار: الألوان، الخطوط، Tokens، نسخ الشعار |
 
 ## البنية

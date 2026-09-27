@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="ar">
+<head>
+<meta charset="utf-8">
+<title>الطالب — المادة</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'IBM Plex Sans Arabic',system-ui,sans-serif;background:#F4F5F7;color:#1F2B47}
+a{color:#2D64A7;text-decoration:none}
+.scr{width:390px;height:844px;position:relative;overflow:hidden;background:#F4F5F7;direction:rtl;text-align:right;box-sizing:border-box}
+.hdr{background:#E5ECF4;padding:52px 16px 14px}
+.back{display:flex;align-items:center;gap:2px;font-size:15px;color:#2D64A7;font-weight:600}
+.back svg{width:22px;height:22px}
+.tile{width:56px;height:56px;border-radius:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;direction:ltr;font-weight:700;line-height:1;background:#2D64A7;color:#fff}
+.tile b{font-size:11px;opacity:.75}.tile span{font-size:18px;margin-top:2px}
+.body{position:absolute;top:214px;left:0;right:0;bottom:0;overflow-y:auto;padding:14px 16px 120px;box-sizing:border-box}
+.seg{display:flex;gap:6px;margin-top:14px;overflow-x:auto}
+.seg button{flex:none;font-size:13px;font-weight:600;padding:8px 14px;border-radius:999px;color:#1F4674;border:0;background:rgba(255,255,255,.7);font-family:inherit;cursor:pointer}
+.seg .on{background:#2D64A7;color:#fff}
+.grp{background:#fff;border-radius:16px;border:1px solid #E7E9EE;overflow:hidden}
+.li{display:flex;align-items:center;gap:12px;padding:12px 14px;min-height:60px;color:#1F2B47}
+.li+.li{border-top:1px solid #EEF0F3}
+.no{width:34px;flex-shrink:0;font-size:22px;font-weight:700;color:#C7CAD1;direction:ltr;text-align:center;line-height:1}
+.no.cur{color:#2D64A7}.no.done{color:#1E7F4F}
+.t{font-size:16px;font-weight:600;line-height:1.35}
+.s{font-size:13px;color:#576075;margin-top:2px}
+.grow{flex:1;min-width:0}
+.chip{font-size:11px;font-weight:600;padding:4px 9px;border-radius:999px;white-space:nowrap}
+.c-warn{background:#FBF3E3;color:#8A5A14}.c-info{background:#E5ECF4;color:#1F4674}.c-ok{background:#E6F4EC;color:#14603A}.c-neu{background:#EEF0F3;color:#576075}
+.dl{color:#1E7F4F}.cl{color:#C7CAD1}
+.sec{display:flex;align-items:baseline;justify-content:space-between;margin:18px 2px 8px}
+.sec h2{font-size:15px;font-weight:700;margin:0}
+.ann{padding:14px}
+.ann+.ann{border-top:1px solid #EEF0F3}
+.ann .who{display:flex;align-items:center;gap:8px;font-size:13px;color:#576075;margin-bottom:6px}
+.av{width:26px;height:26px;border-radius:13px;background:#2D64A7;color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.ann p{margin:0;font-size:15px;line-height:1.7}
+.ring{width:84px;height:84px;border-radius:42px;flex-shrink:0}
+.tabs{position:absolute;left:12px;right:12px;bottom:14px;height:64px;border-radius:24px;background:rgba(255,255,255,.94);box-shadow:0 4px 16px rgba(31,43,71,.12);border:1px solid #EEF0F3;display:flex;align-items:center;justify-content:space-around;padding:0 6px}
+.tab{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;font-weight:500;color:#8F95A3;width:64px;position:relative}
+.tab svg{width:24px;height:24px}.tab.on{color:#2D64A7;font-weight:600}
+.tab .n{position:absolute;top:-4px;right:12px;background:#B02544;color:#fff;font-size:10px;font-weight:700;min-width:16px;height:16px;border-radius:8px;display:flex;align-items:center;justify-content:center;padding:0 4px}
+</style>
+</helmet>
+<div class="scr" style="width: 390px; height: 844px">
+<div class="hdr">
+<div style="display: flex; justify-content: space-between; align-items: center">
+<a class="back" href="StudentCourses.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg><span>موادي</span></a>
+<a href="StudentDownloads.dc.html" style="font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 6px"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 13v8M8 17l4 4 4-4"/><path d="M20 16.6A5 5 0 0 0 18 7h-1.3A8 8 0 1 0 4 15.2"/></svg>تنزيل المادة</a>
+</div>
+<div style="display: flex; align-items: center; gap: 14px; margin-top: 14px">
+<div class="tile"><b>IT</b><span>201</span></div>
+<div><div style="font-size: 22px; font-weight: 700; line-height: 1.25">قواعد البيانات</div><div style="font-size: 13px; color: #576075; margin-top: 3px">د. سارة الطيب · معيد: أ. محمد النور · شعبة A · 3 ساعات</div></div>
+</div>
+<div class="seg">
+<button class="{{c0}}" onClick="{{s0}}">المحاضرات 8</button>
+<button class="{{c1}}" onClick="{{s1}}">الأعمال 3</button>
+<button class="{{c2}}" onClick="{{s2}}">الإعلانات 2</button>
+<button class="{{c3}}" onClick="{{s3}}">درجاتي</button>
+</div>
+</div>
+<div class="body">
+<sc-if value="{{is0}}" hint-placeholder-val="{{ true }}">
+<div class="grp">
+<a class="li" href="StudentLecture.dc.html"><span class="no cur">06</span><span class="grow"><div class="t">التطبيع: النماذج القياسية</div><div class="s">بث مباشر الآن · التسجيل يُضاف بعد الجلسة</div></span><span class="chip" style="background: #FBE9E7; color: #922B20">جارٍ</span></a>
+<a class="li" href="StudentLecture.dc.html"><span class="no done">05</span><span class="grow"><div class="t">التطبيع (Normalization)</div><div class="s">فيديو 42 د · شرائح · مثال SQL · منزّل</div></span><span class="dl"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span></a>
+<a class="li" href="StudentLecture.dc.html"><span class="no done">04</span><span class="grow"><div class="t">مخطط الكيانات والعلاقات ERD</div><div class="s">شرائح · تمرين معمل · منزّل</div></span><span class="dl"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span></a>
+<a class="li" href="StudentLecture.dc.html"><span class="no">03</span><span class="grow"><div class="t">النموذج العلائقي</div><div class="s">فيديو 38 د · شرائح</div></span><span class="cl"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 13v8M8 17l4 4 4-4"/><path d="M20 16.6A5 5 0 0 0 18 7h-1.3A8 8 0 1 0 4 15.2"/></svg></span></a>
+<a class="li" href="StudentLecture.dc.html"><span class="no">02</span><span class="grow"><div class="t">أنظمة إدارة قواعد البيانات</div><div class="s">فيديو 35 د</div></span><span class="cl"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 13v8M8 17l4 4 4-4"/><path d="M20 16.6A5 5 0 0 0 18 7h-1.3A8 8 0 1 0 4 15.2"/></svg></span></a>
+<a class="li" href="StudentLecture.dc.html"><span class="no">01</span><span class="grow"><div class="t">مقدمة وتوصيف المقرر</div><div class="s">شرائح · الخطة الدراسية</div></span><span class="cl"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 13v8M8 17l4 4 4-4"/><path d="M20 16.6A5 5 0 0 0 18 7h-1.3A8 8 0 1 0 4 15.2"/></svg></span></a>
+</div>
+<div class="s" style="text-align: center; margin-top: 10px">7 و 8 لم تُنشر بعد · ✓ منزّل للقراءة دون اتصال</div>
+</sc-if>
+<sc-if value="{{is1}}" hint-placeholder-val="{{ false }}">
+<div class="sec"><h2>مستحق</h2></div>
+<div class="grp">
+<a class="li" href="StudentAssignment.dc.html"><span class="no cur" style="font-size: 13px; line-height: 1.2"><b style="display:block">6</b><small style="font-size:9px;font-weight:600">ساعات</small></span><span class="grow"><div class="t">واجب 2 — تصميم مخطط ERD</div><div class="s">اليوم 11:59 م · 20 درجة · ملف + رابط GitHub</div></span><span class="chip c-warn">لم يُسلَّم</span></a>
+<a class="li" href="StudentExamStart.dc.html"><span class="no" style="font-size: 13px; line-height: 1.2; color: #1F4674"><b style="display:block">6</b><small style="font-size:9px;font-weight:600">أيام</small></span><span class="grow"><div class="t">اختبار قصير 1 — النموذج العلائقي</div><div class="s">حتى 3 أكتوبر · 20 دقيقة · محاولة واحدة</div></span><span class="chip c-info">مفتوح</span></a>
+</div>
+<div class="sec"><h2>مكتمل</h2></div>
+<div class="grp">
+<a class="li" href="StudentAssignment.dc.html"><span class="no done" style="font-size: 16px">18</span><span class="grow"><div class="t">واجب 1 — استعلامات SQL أساسية</div><div class="s">سُلِّم 12 سبتمبر · ملاحظة الأستاذ متاحة</div></span><span class="chip c-ok">18/20</span></a>
+</div>
+</sc-if>
+<sc-if value="{{is2}}" hint-placeholder-val="{{ false }}">
+<div class="grp">
+<div class="ann"><div class="who"><span class="av">س</span>د. سارة الطيب · قبل ساعتين</div><p><b>تمديد موعد الواجب 2 إلى الثلاثاء.</b> نظرًا لانقطاع الكهرباء أمس، مُدِّد موعد التسليم 48 ساعة. لا حاجة لطلب تمديد فردي.</p></div>
+<div class="ann"><div class="who"><span class="av">س</span>د. سارة الطيب · الخميس</div><p>أضفت مقالًا مبسطًا عن النماذج القياسية في موارد المحاضرة 5 — مفيد قبل الاختبار القصير.</p></div>
+</div>
+</sc-if>
+<sc-if value="{{is3}}" hint-placeholder-val="{{ false }}">
+<div class="grp" style="padding: 16px; display: flex; align-items: center; gap: 16px">
+<svg class="ring" viewBox="0 0 84 84" aria-label="68%"><circle cx="42" cy="42" r="35" fill="none" stroke="#E5ECF4" stroke-width="9"/><circle cx="42" cy="42" r="35" fill="none" stroke="#2D64A7" stroke-width="9" stroke-linecap="round" stroke-dasharray="150 220" transform="rotate(-90 42 42)"/><text x="42" y="47" text-anchor="middle" font-size="18" font-weight="700" fill="#1F2B47" font-family="IBM Plex Sans Arabic, sans-serif">68%</text></svg>
+<div><div class="t">34 من 50 — أعمال الفصل</div><div class="s">النهائي 50 درجة يُضاف بعد الاختبار النهائي</div></div>
+</div>
+<div class="grp" style="margin-top: 12px">
+<div class="li"><span class="grow"><div class="t">واجب 1 — استعلامات SQL</div><div class="s">مصحح · 20 سبتمبر</div></span><span style="font-size: 17px; font-weight: 700; direction: ltr">18 / 20</span></div>
+<div class="li"><span class="grow"><div class="t">اختبار قصير 1</div><div class="s">تصحيح تلقائي</div></span><span style="font-size: 17px; font-weight: 700; direction: ltr">16 / 20</span></div>
+<div class="li"><span class="grow"><div class="t">واجب 2 — ERD</div><div class="s">لم يُسلَّم بعد</div></span><span style="font-size: 17px; font-weight: 700; color: #C7CAD1; direction: ltr">— / 20</span></div>
+</div>
+</sc-if>
+</div>
+<nav class="tabs" aria-label="التنقل الرئيسي">
+<a class="tab" href="StudentToday.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="3"/><path d="M16 2v4M8 2v4M3 10h18M9 16l2 2 4-4"/></svg><span>اليوم</span></a>
+<a class="tab on" href="StudentCourses.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4h6a4 4 0 0 1 4 4v12a3 3 0 0 0-3-3H2zM22 4h-6a4 4 0 0 0-4 4v12a3 3 0 0 1 3-3h7z"/></svg><span>موادي</span></a>
+<a class="tab" href="StudentTasks.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M10 6h11M10 12h11M10 18h11M3 6l1.5 1.5L7 5M3 12l1.5 1.5L7 11M3 18l1.5 1.5L7 17"/></svg><span>المهام</span></a>
+<a class="tab" href="StudentNotifications.dc.html"><span class="n">3</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg><span>الإشعارات</span></a>
+<a class="tab" href="StudentMe.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>أنا</span></a>
+</nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+constructor(props) { super(props); this.state = { seg: 0 }; }
+renderVals() {
+const g = this.state.seg;
+const set = (n) => () => this.setState({ seg: n });
+return {
+is0: g === 0, is1: g === 1, is2: g === 2, is3: g === 3,
+c0: g === 0 ? 'on' : '', c1: g === 1 ? 'on' : '', c2: g === 2 ? 'on' : '', c3: g === 3 ? 'on' : '',
+s0: set(0), s1: set(1), s2: set(2), s3: set(3)
+};
+}
+}
+</script>
+</body>
+</html>

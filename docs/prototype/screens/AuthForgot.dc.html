@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="ar">
+<head>
+<meta charset="utf-8">
+<title>المصادقة — نسيت كلمة المرور</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'IBM Plex Sans Arabic',system-ui,sans-serif;background:#fff;color:#1F2B47}
+a{color:#2D64A7;text-decoration:none}
+.scr{width:390px;height:844px;position:relative;overflow:hidden;background:#fff;direction:rtl;text-align:right;box-sizing:border-box}
+.body{position:absolute;top:0;left:0;right:0;bottom:0;overflow-y:auto;padding:52px 20px 110px;box-sizing:border-box}
+.back{display:flex;align-items:center;gap:2px;font-size:15px;color:#2D64A7;font-weight:600}
+.back svg{width:22px;height:22px}
+h1{font-size:26px;font-weight:700;margin:34px 0 6px;line-height:1.3}
+.s{font-size:14px;color:#576075;line-height:1.7}
+.lbl{font-size:12px;font-weight:600;color:#8F95A3;margin:26px 4px 6px;display:block}
+.in{height:52px;border:1.5px solid #E7E9EE;border-radius:14px;display:flex;align-items:center;padding:0 14px;font-size:16px;background:#F8F9FB}
+.in.on{border-color:#2D64A7;background:#fff;box-shadow:0 0 0 3px rgba(45,100,167,.15)}
+.in span{direction:ltr;unicode-bidi:embed;flex:1;text-align:right}
+.in i{width:2px;height:22px;background:#2D64A7}
+.steps{display:flex;gap:10px;margin-top:30px}
+.st{flex:1;border:1px solid #E7E9EE;border-radius:12px;padding:10px;text-align:center;font-size:12px;color:#8F95A3;line-height:1.5}
+.st b{display:block;width:24px;height:24px;border-radius:12px;background:#EEF0F3;color:#576075;margin:0 auto 6px;font-size:12px;line-height:24px}
+.st.on{border-color:#2D64A7;color:#1F2B47}.st.on b{background:#2D64A7;color:#fff}
+.note{margin-top:22px;font-size:12px;color:#8F95A3;line-height:1.7}
+.fix{position:absolute;left:20px;right:20px;bottom:24px}
+.btn{display:flex;align-items:center;justify-content:center;height:52px;border-radius:14px;font-size:16px;font-weight:600;background:#2D64A7;color:#fff}
+.alt{text-align:center;font-size:13px;margin-top:12px;color:#576075}
+</style>
+</helmet>
+<div class="scr" style="width: 390px; height: 844px">
+<div class="body">
+<a class="back" href="Login.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg><span>تسجيل الدخول</span></a>
+<h1>نسيت كلمة المرور؟</h1>
+<p class="s">أدخل بريدك الجامعي أو رقمك الجامعي. سنرسل رمز تحقق إلى البريد المسجل لدينا — الرسالة واحدة سواء وُجد الحساب أم لا.</p>
+<span class="lbl">البريد أو الرقم الجامعي</span>
+<div class="in on"><span>26-IT-01</span><i></i></div>
+<div class="steps"><div class="st on"><b>1</b>البريد أو الرقم</div><div class="st"><b>2</b>رمز التحقق</div><div class="st"><b>3</b>كلمة مرور جديدة</div></div>
+<div class="note">لا تصلك الرسالة؟ تحقق من الرسائل غير المرغوبة، أو راجع مسجل قسمك لتحديث بريدك. يُقفل الطلب مؤقتًا بعد 5 محاولات.</div>
+</div>
+<div class="fix"><a class="btn" href="AuthReset.dc.html">إرسال رمز التحقق</a><div class="alt">تذكرتها؟ <a href="Login.dc.html">ارجع لتسجيل الدخول</a></div></div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

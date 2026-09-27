@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="ar">
+<head>
+<meta charset="utf-8">
+<title>الزائر — تواصل معنا</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'IBM Plex Sans Arabic',system-ui,sans-serif;background:#fff;color:#1F2B47}
+a{color:#2D64A7;text-decoration:none}
+.scr{width:390px;height:844px;position:relative;overflow:hidden;background:#fff;direction:rtl;text-align:right;box-sizing:border-box}
+.body{position:absolute;top:0;left:0;right:0;bottom:0;overflow-y:auto;padding:0 16px 110px;box-sizing:border-box}
+.nav{display:flex;align-items:center;justify-content:space-between;padding:52px 0 12px}
+.back{display:flex;align-items:center;gap:2px;font-size:15px;color:#2D64A7;font-weight:600}
+.back svg{width:22px;height:22px}
+h1{font-size:28px;font-weight:700;margin:8px 0 4px}
+.s{font-size:14px;color:#576075;line-height:1.6}
+.lbl{font-size:12px;font-weight:600;color:#8F95A3;margin:20px 4px 6px;display:block}
+.grp{background:#fff;border-radius:16px;border:1px solid #E7E9EE;overflow:hidden}
+.f{padding:10px 14px}.f+.f{border-top:1px solid #EEF0F3}
+.f label{display:block;font-size:11px;font-weight:600;color:#8F95A3}
+.f input,.f textarea{width:100%;border:0;background:transparent;font-size:15px;font-family:inherit;color:#1F2B47;outline:none;padding:2px 0 0;box-sizing:border-box;line-height:1.6}
+.f input::placeholder,.f textarea::placeholder{color:#C7CAD1}
+.chips{display:flex;gap:6px;flex-wrap:wrap;padding:10px 14px}
+.chip{border:1.5px solid #E7E9EE;border-radius:999px;padding:6px 12px;font-size:12px;font-weight:600;color:#576075;background:#fff}
+.chip.on{border-color:#1F2B47;background:#1F2B47;color:#fff}
+.hint{display:flex;gap:10px;align-items:flex-start;background:#E5ECF4;border-radius:12px;padding:10px 12px;font-size:12px;color:#1F4674;line-height:1.6;margin-top:10px}
+.hint svg{width:18px;height:18px;flex-shrink:0;margin-top:1px}
+.alt{margin-top:22px;border-top:1px solid #EEF0F3;padding-top:14px}
+.alt .r{display:flex;align-items:center;gap:12px;padding:8px 0;font-size:14px;color:#1F2B47}
+.alt .r svg{width:20px;height:20px;color:#8F95A3}
+.alt .r span{direction:ltr;text-align:right}
+.fix{position:absolute;left:16px;right:16px;bottom:24px}
+.btn{display:flex;align-items:center;justify-content:center;height:50px;border-radius:14px;font-size:15px;font-weight:600;background:#2D64A7;color:#fff}
+
+.hero h1,h1,.big,.feat .t,.cover+.art h1,.art h1{font-family:'Noto Kufi Arabic','IBM Plex Sans Arabic',sans-serif;letter-spacing:0}
+</style>
+</helmet>
+<div class="scr" style="width: 390px; height: 844px">
+<div class="body">
+<div class="nav"><a class="back" href="VisitorHome.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg><span>الرئيسية</span></a></div>
+<h1>تواصل معنا</h1>
+<div class="s">يصل استفسارك إلى مسجل القسم المختص ويردّ خلال يوم عمل. تتابع الرد عبر بريدك أو هاتفك — لا حاجة لحساب.</div>
+<span class="lbl">الموضوع</span>
+<div class="grp"><div class="chips"><span class="chip on">القبول والتقديم</span><span class="chip">برنامج معين</span><span class="chip">الرسوم والمنح</span><span class="chip">معادلة شهادة</span><span class="chip">أخرى</span></div></div>
+<span class="lbl">بياناتك</span>
+<div class="grp">
+<div class="f"><label for="n">الاسم الكامل</label><input id="n" type="text" placeholder="كما في الشهادة"></div>
+<div class="f"><label for="e">البريد الإلكتروني</label><input id="e" type="email" placeholder="name@example.com" dir="ltr" style="text-align: right"></div>
+<div class="f"><label for="p">الهاتف (واتساب إن أمكن)</label><input id="p" type="tel" placeholder="+249 9x xxx xxxx" dir="ltr" style="text-align: right"></div>
+<div class="f"><label for="d">القسم</label><input id="d" type="text" value="تقنية المعلومات"></div>
+</div>
+<span class="lbl">رسالتك</span>
+<div class="grp"><div class="f"><label for="m">الاستفسار</label><textarea id="m" rows="4" placeholder="اكتب سؤالك بوضوح — مثلًا: هل تُقبل شهادة الثانوية السعودية؟"></textarea></div></div>
+<div class="hint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg><span>سنرسل رمز تحقق إلى بريدك قبل الإرسال؛ وبه تتابع الرد لاحقًا من صفحة "تابع طلبك".</span></div>
+<div class="alt">
+<div class="r"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.6a2 2 0 0 1-.5 2.1L8.1 9.7a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.8.3 1.7.5 2.6.7a2 2 0 0 1 1.7 2z"/></svg><span>+249 183 000 000</span></div>
+<div class="r"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v16H4z"/><path d="M22 6l-10 7L2 6"/></svg><span>admissions@ecst.edu.sd</span></div>
+<div class="r"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg><span style="direction: rtl">الخرطوم · شارع الجامعة · الأحد–الخميس 8:00–15:00</span></div>
+</div>
+</div>
+<div class="fix"><a class="btn" href="VisitorTrack.dc.html">إرسال والتحقق من البريد</a></div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

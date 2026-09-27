@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="ar">
+<head>
+<meta charset="utf-8">
+<title>الأستاذ — طلاب المادة</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'IBM Plex Sans Arabic',system-ui,sans-serif;background:#F4F5F7;color:#1F2B47}
+a{color:#2D64A7;text-decoration:none}
+.scr{width:390px;height:844px;position:relative;overflow:hidden;background:#F4F5F7;direction:rtl;text-align:right;box-sizing:border-box}
+.body{position:absolute;top:0;left:0;right:0;bottom:0;overflow-y:auto;padding:54px 16px 110px;box-sizing:border-box}
+.back{display:flex;align-items:center;gap:2px;font-size:15px;color:#2D64A7;font-weight:600}
+.back svg{width:22px;height:22px}
+.h1{font-size:24px;font-weight:700;margin:10px 0 2px}
+.s{font-size:13px;color:#576075}
+.search{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid #E7E9EE;border-radius:12px;padding:10px 12px;margin-top:12px;color:#8F95A3;font-size:14px}
+.search svg{width:18px;height:18px}
+.filters{display:flex;gap:6px;margin:10px 0 12px;overflow-x:auto}
+.filters a{flex:none;font-size:12px;font-weight:600;padding:7px 12px;border-radius:999px;background:#fff;border:1px solid #E7E9EE;color:#576075}
+.filters .on{background:#1F2B47;border-color:#1F2B47;color:#fff}
+.grp{background:#fff;border-radius:16px;border:1px solid #E7E9EE;overflow:hidden}
+.li{display:flex;align-items:center;gap:12px;padding:11px 14px;min-height:60px;color:#1F2B47}
+.li+.li{border-top:1px solid #EEF0F3}
+.av{width:40px;height:40px;border-radius:20px;background:#E5ECF4;color:#1F4674;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}
+.t{font-size:15px;font-weight:600}.grow{flex:1;min-width:0}
+.mini{display:flex;gap:3px;margin-top:5px;direction:rtl}
+.mini i{width:14px;height:5px;border-radius:2px;background:#E7E9EE}
+.mini i.a{background:#1E7F4F}.mini i.l{background:#B7791F}.mini i.x{background:#C0392B}
+.pct{font-size:15px;font-weight:700;direction:ltr;width:44px;text-align:center}
+.fix{position:absolute;left:16px;right:16px;bottom:24px;display:flex;gap:8px}
+.btn{display:flex;align-items:center;justify-content:center;gap:6px;height:46px;border-radius:13px;font-size:14px;font-weight:600;flex:1}
+.b-tint{background:#E5ECF4;color:#1F4674}.b-acc{background:#F5E4E8;color:#7B192F}
+</style>
+</helmet>
+<div class="scr" style="width: 390px; height: 844px">
+<div class="body">
+<a class="back" href="TeacherCourse.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg><span>قواعد البيانات</span></a>
+<h1 class="h1">الطلاب · 58</h1>
+<div class="s">شعبة A · متوسط أعمال الفصل 71% · الشرائط: واجب 1، اختبار 1، واجب 2</div>
+<div class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>بحث بالاسم أو الرقم الجامعي</div>
+<div class="filters"><a class="on" href="TeacherStudents.dc.html">الكل 58</a><a href="TeacherStudents.dc.html">لم يسلّموا الواجب 2 · 17</a><a href="TeacherStudents.dc.html">تحت 50% · 6</a><a href="TeacherStudents.dc.html">بلا أي نشاط · 3</a></div>
+<div class="grp">
+<a class="li" href="TeacherGradeSubmission.dc.html"><span class="av">أ م</span><span class="grow"><div class="t">أحمد محمد عثمان</div><div class="mini"><i class="a"></i><i class="a"></i><i class="l"></i></div></span><span class="pct" style="color: #14603A">85%</span></a>
+<a class="li" href="TeacherStudents.dc.html"><span class="av">ف ع</span><span class="grow"><div class="t">فاطمة عبد الله الحسن</div><div class="mini"><i class="a"></i><i class="a"></i><i class="a"></i></div></span><span class="pct" style="color: #14603A">92%</span></a>
+<a class="li" href="TeacherStudents.dc.html"><span class="av">م خ</span><span class="grow"><div class="t">محمد خالد إبراهيم</div><div class="mini"><i class="a"></i><i class="x"></i><i class="l"></i></div></span><span class="pct">61%</span></a>
+<a class="li" href="TeacherStudents.dc.html"><span class="av" style="background: #FBE9E7; color: #922B20">ي ع</span><span class="grow"><div class="t">يوسف عادل محمد</div><div class="mini"><i class="x"></i><i class="l"></i><i class="x"></i></div></span><span class="pct" style="color: #922B20">32%</span></a>
+<a class="li" href="TeacherStudents.dc.html"><span class="av">س أ</span><span class="grow"><div class="t">سلمى أحمد الطيب</div><div class="mini"><i class="a"></i><i class="a"></i><i class="l"></i></div></span><span class="pct">74%</span></a>
+<a class="li" href="TeacherStudents.dc.html"><span class="av">ه م</span><span class="grow"><div class="t">هدى محمد النور</div><div class="mini"><i class="a"></i><i class="a"></i><i class="x"></i></div></span><span class="pct">68%</span></a>
+<a class="li" href="TeacherStudents.dc.html"><span class="av" style="background: #FBE9E7; color: #922B20">ع ص</span><span class="grow"><div class="t">عمر صالح عبد الله</div><div class="mini"><i class="x"></i><i class="x"></i><i class="x"></i></div></span><span class="pct" style="color: #922B20">0%</span></a>
+<a class="li" href="TeacherStudents.dc.html" style="color: #2D64A7; justify-content: center; font-size: 14px; font-weight: 600">51 آخرون</a>
+</div>
+</div>
+<div class="fix"><a class="btn b-tint" href="TeacherGradebook.dc.html">دفتر الدرجات</a><a class="btn b-acc" href="TeacherAnnouncement.dc.html">تنبيه المتأخرين (17)</a></div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

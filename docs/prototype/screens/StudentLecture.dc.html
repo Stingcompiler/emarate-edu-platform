@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="ar">
+<head>
+<meta charset="utf-8">
+<title>الطالب — المحاضرة</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'IBM Plex Sans Arabic',system-ui,sans-serif;background:#F4F5F7;color:#1F2B47}
+a{color:#2D64A7;text-decoration:none}
+.scr{width:390px;height:844px;position:relative;overflow:hidden;background:#F4F5F7;direction:rtl;text-align:right;box-sizing:border-box}
+.body{position:absolute;top:0;left:0;right:0;bottom:0;overflow-y:auto;padding:54px 16px 40px;box-sizing:border-box}
+.back{display:flex;align-items:center;gap:2px;font-size:15px;color:#2D64A7;font-weight:600}
+.back svg{width:22px;height:22px}
+.player{border-radius:18px;background:#0C111C;aspect-ratio:16/9;position:relative;overflow:hidden;margin-top:14px}
+.player .grid{position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0 39px,rgba(255,255,255,.04) 39px 40px)}
+.play{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:60px;height:60px;border-radius:30px;background:#fff;display:flex;align-items:center;justify-content:center;color:#1F2B47}
+.bar{position:absolute;left:14px;right:14px;bottom:12px;height:4px;border-radius:2px;background:rgba(255,255,255,.25)}
+.bar i{display:block;width:38%;height:100%;border-radius:2px;background:#fff}
+.pt{position:absolute;bottom:22px;left:14px;color:#fff;font-size:11px;direction:ltr;opacity:.9}
+.off{position:absolute;top:12px;right:12px;font-size:11px;font-weight:600;color:#14603A;background:#E6F4EC;padding:4px 9px;border-radius:999px}
+.eyebrow{font-size:12px;font-weight:600;color:#2D64A7;margin-top:16px}
+.h1{font-size:22px;font-weight:700;margin:4px 0 6px;line-height:1.35}
+.s{font-size:13px;color:#576075}
+.sec{display:flex;align-items:baseline;justify-content:space-between;margin:18px 2px 8px}
+.sec h2{font-size:15px;font-weight:700;margin:0}
+.grp{background:#fff;border-radius:16px;border:1px solid #E7E9EE;overflow:hidden}
+.li{display:flex;align-items:center;gap:12px;padding:12px 14px;min-height:60px;color:#1F2B47}
+.li+.li{border-top:1px solid #EEF0F3}
+.ft{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:11px;font-weight:700;direction:ltr}
+.t{font-size:15px;font-weight:600;line-height:1.35}
+.grow{flex:1;min-width:0}
+.dlb{width:36px;height:36px;border-radius:18px;display:flex;align-items:center;justify-content:center;border:0;background:#F0F1F4;color:#2D64A7;cursor:pointer;flex-shrink:0}
+.dlb svg{width:18px;height:18px}
+.dlb.ok{background:#E6F4EC;color:#1E7F4F}
+.ring{width:36px;height:36px;border-radius:18px;border:3px solid #E5ECF4;border-top-color:#2D64A7;border-left-color:#2D64A7;box-sizing:border-box;flex-shrink:0}
+.nav{display:flex;gap:10px;margin-top:18px}
+.nav a{flex:1;background:#fff;border:1px solid #E7E9EE;border-radius:14px;padding:10px 12px;color:#1F2B47}
+.nav .k{font-size:11px;font-weight:600;color:#8F95A3}
+.nav .v{font-size:14px;font-weight:600;margin-top:2px}
+</style>
+</helmet>
+<div class="scr" style="width: 390px; height: 844px">
+<div class="body">
+<div style="display: flex; justify-content: space-between; align-items: center">
+<a class="back" href="StudentCourse.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg><span>قواعد البيانات</span></a>
+<span class="s">5 من 8</span>
+</div>
+<div class="player"><div class="grid"></div><a class="play" href="StudentLecture.dc.html" aria-label="تشغيل"><svg viewBox="0 0 24 24" width="26" height="26" fill="currentColor"><path d="M6 4l14 8-14 8z"/></svg></a><span class="off">متاح دون اتصال</span><span class="pt">16:04 / 42:10</span><div class="bar"><i></i></div></div>
+<div class="eyebrow">المحاضرة 05 · نظري · 42 دقيقة</div>
+<h1 class="h1">التطبيع (Normalization) والنماذج القياسية</h1>
+<p class="s" style="line-height: 1.8; margin: 0">النماذج القياسية الأول والثاني والثالث، أثر التكرار على سلامة البيانات، وأمثلة عملية على جدول الطلاب والمقررات.</p>
+<div class="sec"><h2>الموارد</h2><a href="StudentDownloads.dc.html">تنزيل الكل</a></div>
+<div class="grp">
+<div class="li"><span class="ft" style="background: #FBE9E7; color: #922B20">PDF</span><span class="grow"><div class="t">شرائح المحاضرة 5</div><div class="s">2.4 MB · 38 شريحة</div></span><button class="dlb ok" aria-label="منزّل"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></button></div>
+<div class="li"><span class="ft" style="background: #E5ECF4; color: #1F4674">MP4</span><span class="grow"><div class="t">تسجيل المحاضرة (480p)</div><div class="s">210 MB · جارٍ التنزيل 64%</div></span><span class="ring" aria-label="جارٍ التنزيل"></span></div>
+<div class="li"><span class="ft" style="background: #EEF0F3; color: #3B4459">SQL</span><span class="grow"><div class="t">مثال عملي normalization.sql</div><div class="s">12 KB</div></span><button class="dlb" aria-label="تنزيل"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 13v8M8 17l4 4 4-4"/><path d="M20 16.6A5 5 0 0 0 18 7h-1.3A8 8 0 1 0 4 15.2"/></svg></button></div>
+<a class="li" href="StudentLecture.dc.html"><span class="ft" style="background: #EEF0F3; color: #3B4459">URL</span><span class="grow"><div class="t">مقال مبسّط عن النماذج القياسية</div><div class="s">رابط خارجي · يتطلب اتصالًا</div></span></a>
+</div>
+<div class="sec"><h2>مرتبط بهذه المحاضرة</h2></div>
+<div class="grp"><a class="li" href="StudentAssignment.dc.html"><span class="ft" style="background: #FBF3E3; color: #8A5A14; font-size: 13px">6س</span><span class="grow"><div class="t">واجب 2 — تصميم مخطط ERD</div><div class="s">ينتهي اليوم 11:59 م</div></span></a></div>
+<div class="nav">
+<a href="StudentLecture.dc.html"><div class="k">السابقة · 04</div><div class="v">مخطط الكيانات ERD</div></a>
+<a href="StudentLecture.dc.html"><div class="k">التالية · 06</div><div class="v">النماذج القياسية — بث اليوم</div></a>
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

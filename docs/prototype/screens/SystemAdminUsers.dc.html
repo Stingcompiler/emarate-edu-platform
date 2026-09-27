@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="ar">
+<head>
+<meta charset="utf-8">
+<title>مدير النظام — المستخدمون</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'IBM Plex Sans Arabic',system-ui,sans-serif;background:#F4F5F7;color:#1F2B47}
+a{color:#2D64A7;text-decoration:none}
+.scr{width:390px;height:844px;position:relative;overflow:hidden;background:#F4F5F7;direction:rtl;text-align:right;box-sizing:border-box}
+.body{position:absolute;top:0;left:0;right:0;bottom:0;overflow-y:auto;padding:54px 16px 110px;box-sizing:border-box}
+.back{display:flex;align-items:center;gap:2px;font-size:15px;color:#2D64A7;font-weight:600}
+.back svg{width:22px;height:22px}
+.h1{font-size:24px;font-weight:700;margin:10px 0 2px}
+.s{font-size:13px;color:#576075}
+.srch{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid #E7E9EE;border-radius:12px;padding:0 12px;height:42px;margin-top:12px;color:#8F95A3;font-size:14px}
+.srch svg{width:18px;height:18px}
+.filters{display:flex;gap:6px;margin:10px 0 12px;overflow-x:auto}
+.filters a{flex:none;font-size:12px;font-weight:600;padding:7px 12px;border-radius:999px;background:#fff;border:1px solid #E7E9EE;color:#576075}
+.filters .on{background:#1F2B47;border-color:#1F2B47;color:#fff}
+.grp{background:#fff;border-radius:16px;border:1px solid #E7E9EE;overflow:hidden}
+.li{display:flex;align-items:center;gap:12px;padding:11px 14px;min-height:62px;color:#1F2B47}
+.li+.li{border-top:1px solid #EEF0F3}
+.av{width:40px;height:40px;border-radius:20px;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.t{font-size:15px;font-weight:600}.grow{flex:1;min-width:0}
+.m{font-size:12px;color:#576075;margin-top:2px}
+.chip{font-size:11px;font-weight:600;padding:4px 9px;border-radius:999px;white-space:nowrap}
+.c-ok{background:#E6F4EC;color:#14603A}.c-neu{background:#EEF0F3;color:#576075}.c-bad{background:#FBE9E7;color:#922B20}.c-warn{background:#FBF3E3;color:#8A5A14}
+.chev{color:#C7CAD1}.chev svg{width:18px;height:18px}
+.fab{position:absolute;left:16px;bottom:24px;height:50px;padding:0 18px;border-radius:25px;background:#2D64A7;color:#fff;display:flex;align-items:center;gap:8px;font-size:15px;font-weight:600;box-shadow:0 6px 18px rgba(45,100,167,.35)}
+.fab svg{width:20px;height:20px}
+</style>
+</helmet>
+<div class="scr" style="width: 390px; height: 844px">
+<div class="body">
+<a class="back" href="SystemAdminHome.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg><span>إدارة النظام</span></a>
+<h1 class="h1">المستخدمون · 1,532</h1>
+<div class="s">الأدوار الإدارية تُنشأ هنا · الطلاب من القبول · الأساتذة من الشؤون العلمية</div>
+<div class="srch"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.3-4.3"/></svg><span>بحث بالاسم أو البريد أو الرقم الجامعي</span></div>
+<div class="filters"><a class="on" href="SystemAdminUsers.dc.html">إداريون 21</a><a href="SystemAdminUsers.dc.html">أساتذة 46</a><a href="SystemAdminUsers.dc.html">طلاب 1,412</a><a href="SystemAdminUsers.dc.html">معطّل 9</a><a href="SystemAdminUsers.dc.html">بلا دخول 30 يومًا</a></div>
+<div class="grp">
+<a class="li" href="SystemAdminUsers.dc.html"><span class="av" style="background: #1F2B47; color: #fff">ن ف</span><span class="grow"><div class="t">أ. نجلاء الفكي</div><div class="m">مسؤول المسجلين · دخول اليوم 08:30</div></span><span class="chip c-ok">نشط</span><span class="chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></span></a>
+<a class="li" href="SystemAdminUser.dc.html"><span class="av" style="background: #E5ECF4; color: #1F4674">م ن</span><span class="grow"><div class="t">أ. محمد النور</div><div class="m">مسجل · تقنية المعلومات + علوم الحاسوب · اليوم</div></span><span class="chip c-ok">نشط</span><span class="chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></span></a>
+<a class="li" href="SystemAdminUsers.dc.html"><span class="av" style="background: #E5ECF4; color: #1F4674">ه ع</span><span class="grow"><div class="t">أ. هند عبد الله</div><div class="m">مسجل · إدارة الأعمال · أمس</div></span><span class="chip c-ok">نشط</span><span class="chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></span></a>
+<a class="li" href="SystemAdminUsers.dc.html"><span class="av" style="background: #F5E4E8; color: #7B192F">و ع</span><span class="grow"><div class="t">أ. وليد عبد الماجد</div><div class="m">مسؤول النتائج · اليوم</div></span><span class="chip c-ok">نشط</span><span class="chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></span></a>
+<a class="li" href="SystemAdminUsers.dc.html"><span class="av" style="background: #EEE9F4; color: #6A4C93">ع ح</span><span class="grow"><div class="t">د. عبد الله الحاج</div><div class="m">أمين الشؤون العلمية · اليوم</div></span><span class="chip c-ok">نشط</span><span class="chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></span></a>
+<a class="li" href="SystemAdminUsers.dc.html"><span class="av" style="background: #EEE9F4; color: #6A4C93">إ ط</span><span class="grow"><div class="t">أ. إيمان الطيب</div><div class="m">أمين شؤون الطلاب · اليوم</div></span><span class="chip c-ok">نشط</span><span class="chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></span></a>
+<a class="li" href="SystemAdminUsers.dc.html"><span class="av" style="background: #E6F4EC; color: #14603A">س ب</span><span class="grow"><div class="t">أ. سلوى بابكر</div><div class="m">الموارد البشرية · قبل 3 أيام</div></span><span class="chip c-ok">نشط</span><span class="chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></span></a>
+<a class="li" href="SystemAdminUsers.dc.html"><span class="av" style="background: #FBF3E3; color: #8A5A14">ر ش</span><span class="grow"><div class="t">أ. ريم الشيخ</div><div class="m">مدير الموقع · اليوم</div></span><span class="chip c-ok">نشط</span><span class="chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></span></a>
+<a class="li" href="SystemAdminUsers.dc.html"><span class="av" style="background: #FBF3E3; color: #8A5A14">ب ط</span><span class="grow"><div class="t">بشير الطاهر</div><div class="m">مدير الفعاليات · لم يفعّل الحساب</div></span><span class="chip c-warn">دعوة معلّقة</span><span class="chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></span></a>
+<a class="li" href="SystemAdminUsers.dc.html"><span class="av" style="background: #EEF0F3; color: #8F95A3">أ ك</span><span class="grow"><div class="t">أ. أحمد كمال</div><div class="m">مسجل سابق · عُطّل 1 سبتمبر</div></span><span class="chip c-bad">معطّل</span><span class="chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></span></a>
+</div>
+</div>
+<a class="fab" href="SystemAdminUsers.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>مستخدم إداري</a>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

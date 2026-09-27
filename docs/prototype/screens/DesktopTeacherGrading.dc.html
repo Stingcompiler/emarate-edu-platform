@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="ar">
+<head>
+<meta charset="utf-8">
+<title>سطح مكتب الأستاذ — تصحيح متسلسل (تسليم + لوحة درجات)</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'IBM Plex Sans Arabic',system-ui,sans-serif;background:#F4F5F7;color:#1F2B47}
+a{color:#2D64A7;text-decoration:none}
+.scr{width:1280px;height:800px;position:relative;overflow:hidden;background:#F4F5F7;direction:rtl;text-align:right;box-sizing:border-box;display:flex;flex-direction:column}
+.top{height:60px;background:#fff;border-bottom:1px solid #E7E9EE;display:flex;align-items:center;gap:14px;padding:0 24px;flex-shrink:0}
+.crumb{font-size:13px;color:#8F95A3}.crumb a{color:#2D64A7}
+.top h1{font-size:16px;font-weight:700;margin:0}
+.top .pos{font-size:12px;color:#576075;background:#F0F1F4;padding:5px 10px;border-radius:999px}
+.top .act{margin-right:auto;display:flex;gap:8px}
+.btn{font-size:13px;font-weight:700;padding:9px 16px;border-radius:10px;white-space:nowrap}
+.b-pri{background:#2D64A7;color:#fff}.b-sec{background:#F0F1F4;color:#1F2B47}
+.body{flex:1;display:grid;grid-template-columns:260px 1fr 340px;min-height:0}
+.q{background:#fff;border-left:1px solid #E7E9EE;overflow:auto}
+.q .f{display:flex;gap:4px;padding:12px}
+.q .f span{flex:1;text-align:center;font-size:11px;font-weight:600;padding:6px 0;border-radius:8px;background:#F0F1F4;color:#576075}
+.q .f .on{background:#1F2B47;color:#fff}
+.st{display:flex;align-items:center;gap:10px;padding:10px 14px;border-top:1px solid #EEF0F3;color:#1F2B47}
+.st.on{background:#F2F6FB;border-right:3px solid #2D64A7}
+.st .av{width:30px;height:30px;border-radius:15px;background:#E5ECF4;color:#1F4674;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.st .n{flex:1;font-size:13px;font-weight:600}.st .n small{display:block;font-size:12px;color:#8F95A3;font-weight:500}
+.st .g{font-size:12px;font-weight:700;direction:ltr;color:#14603A}
+.st .g.no{color:#C7CAD1}
+.sub{overflow:auto;padding:22px 26px;box-sizing:border-box}
+.sw{max-width:720px}
+.who{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.who .av{width:44px;height:44px;border-radius:22px;background:#2D64A7;color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.who .n{font-size:17px;font-weight:700}.who .m{font-size:12px;color:#576075;margin-top:2px}
+.chip{font-size:11px;font-weight:600;padding:4px 9px;border-radius:999px;white-space:nowrap}
+.c-bad{background:#FBE9E7;color:#922B20}.c-neu{background:#EEF0F3;color:#576075}.c-ok{background:#E6F4EC;color:#14603A}
+.ver{display:flex;gap:6px;margin-bottom:12px}
+.ver span{font-size:11px;font-weight:600;padding:5px 10px;border-radius:999px;background:#F0F1F4;color:#576075}
+.ver .on{background:#1F2B47;color:#fff}
+.files{display:flex;gap:8px;margin-bottom:14px}
+.fl{flex:1;display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #E7E9EE;border-radius:12px;padding:10px 12px}
+.fl .ft{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;direction:ltr;flex-shrink:0}
+.fl .t{font-size:13px;font-weight:600}.fl .s{font-size:12px;color:#8F95A3;line-height:1.6}
+.code{background:#1F2B47;color:#E7E9EE;border-radius:14px;padding:14px 16px;font-family:ui-monospace,Menlo,monospace;font-size:12px;direction:ltr;text-align:left;line-height:1.7;height:250px;overflow:hidden;position:relative}
+.code .ln{color:#6B7A99;display:inline-block;width:26px}
+.code .hl{background:rgba(255,107,132,.18);display:block;margin:0 -16px;padding:0 16px}
+.code .cm{position:absolute;left:16px;right:16px;bottom:12px;background:#fff;color:#1F2B47;border-radius:10px;padding:8px 12px;font-family:'IBM Plex Sans Arabic',sans-serif;font-size:12px;direction:rtl;text-align:right;line-height:1.6}
+.code .cm b{color:#922B20}
+.txt{margin-top:12px;background:#fff;border:1px solid #E7E9EE;border-radius:14px;padding:12px 14px;font-size:13px;line-height:1.8;color:#3B4257}
+.txt b{display:block;font-size:12px;color:#8F95A3;margin-bottom:4px}
+.pane{background:#fff;border-right:1px solid #E7E9EE;overflow:auto;padding:18px;box-sizing:border-box}
+.pane h3{font-size:14px;font-weight:700;margin:0 0 10px;display:flex;justify-content:space-between;align-items:baseline}
+.pane h3 span{font-size:11px;color:#8F95A3;font-weight:500}
+.ai{background:#F2F6FB;border:1px solid #D5E0EE;border-radius:12px;padding:10px 12px;font-size:12px;line-height:1.6;color:#1F4674;margin-bottom:12px}
+.ai b{display:flex;justify-content:space-between;font-size:13px;color:#1F2B47;margin-bottom:4px}
+.ai a{font-weight:700;font-size:11px}
+.cr{padding:9px 0;border-top:1px solid #EEF0F3}
+.cr .r{display:flex;justify-content:space-between;font-size:13px;font-weight:600}
+.cr .r span:last-child{direction:ltr;font-variant-numeric:tabular-nums}
+.cr .lv{display:flex;gap:4px;margin-top:6px}
+.cr .lv span{flex:1;text-align:center;font-size:10px;padding:5px 2px;border-radius:6px;border:1px solid #E7E9EE;color:#576075}
+.cr .lv .on{background:#2D64A7;border-color:#2D64A7;color:#fff}
+.tot{display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding:12px;background:#1F2B47;color:#fff;border-radius:12px}
+.tot b{font-size:22px;font-weight:700;direction:ltr}.tot small{font-size:12px;opacity:.7;display:block}
+.fb{margin-top:12px;border:1px solid #E7E9EE;border-radius:12px;padding:10px 12px;font-size:12px;line-height:1.7;color:#3B4257;min-height:70px}
+.fb b{display:block;font-size:11px;color:#8F95A3;margin-bottom:3px}
+.acts{display:flex;gap:8px;margin-top:12px}
+.acts a{flex:1;text-align:center}
+.kb{font-size:10px;color:#8F95A3;margin-top:8px;text-align:center}
+.kb code{background:#F0F1F4;padding:1px 5px;border-radius:4px;font-family:ui-monospace,Menlo,monospace}
+</style>
+</helmet>
+<div class="scr" style="width: 1280px; height: 800px">
+<div class="top"><span class="crumb"><a href="DesktopTeacherToday.dc.html">اليوم</a> / <a href="DesktopTeacherCourse.dc.html">هياكل البيانات</a> / </span><h1>تصحيح — واجب 2: تنفيذ قائمة مرتبطة</h1><span class="pos">3 من 14 · غير مصحح</span><div class="act"><a class="btn b-sec" href="DesktopTeacherGrading.dc.html">تصدير CSV</a><a class="btn b-sec" href="AdminNotify.dc.html">إشعار من لم يسلّم (7)</a></div></div>
+<div class="body">
+<aside class="q">
+<div class="f"><span class="on">غير مصحح 14</span><span>مصحح 37</span><span>لم يسلّم 7</span></div>
+<a class="st" href="DesktopTeacherGrading.dc.html"><span class="av">ه ص</span><span class="n">هبة صلاح الدين<small>قبل 12 د · في الوقت</small></span><span class="g no">—</span></a>
+<a class="st" href="DesktopTeacherGrading.dc.html"><span class="av">ع ص</span><span class="n">عمر صالح عبد الله<small>متأخر يومًا</small></span><span class="g no">—</span></a>
+<a class="st on" href="DesktopTeacherGrading.dc.html"><span class="av">أ م</span><span class="n">أحمد محمد عثمان<small>قبل 4 أيام · إصداران</small></span><span class="g no">—</span></a>
+<a class="st" href="DesktopTeacherGrading.dc.html"><span class="av">ر إ</span><span class="n">رقية إبراهيم<small>قبل 3 أيام</small></span><span class="g no">—</span></a>
+<a class="st" href="DesktopTeacherGrading.dc.html"><span class="av">ي ع</span><span class="n">يوسف عادل<small>قبل 3 أيام</small></span><span class="g no">—</span></a>
+<a class="st" href="DesktopTeacherGrading.dc.html"><span class="av">م ب</span><span class="n">مريم بابكر<small>قبل يومين · مصحح</small></span><span class="g">19/20</span></a>
+<a class="st" href="DesktopTeacherGrading.dc.html"><span class="av">خ ي</span><span class="n">خالد يوسف<small>قبل يومين · مصحح</small></span><span class="g">15/20</span></a>
+<a class="st" href="DesktopTeacherGrading.dc.html"><span class="av">د ص</span><span class="n">دعاء الصادق<small>أمس · مصحح</small></span><span class="g">20/20</span></a>
+</aside>
+<div class="sub"><div class="sw">
+<div class="who"><span class="av">أ م</span><span style="flex: 1"><div class="n">أحمد محمد عثمان · 24-IT-0031</div><div class="m">سُلِّم 23 سبتمبر 22:14 · في الوقت · الإصدار 2 (أعاد التسليم بعد ساعة)</div></span><span class="chip c-neu">غير مصحح</span></div>
+<div class="ver"><span class="on">الإصدار 2 · 22:14</span><span>الإصدار 1 · 21:03</span><span>الفرق</span></div>
+<div class="files">
+<div class="fl"><span class="ft" style="background: #E5ECF4; color: #1F4674">PY</span><span><div class="t">linked_list.py</div><div class="s">6 KB · 142 سطرًا</div></span></div>
+<div class="fl"><span class="ft" style="background: #FBE9E7; color: #922B20">PDF</span><span><div class="t">تقرير التنفيذ.pdf</div><div class="s">3 صفحات</div></span></div>
+<div class="fl"><span class="ft" style="background: #EEF0F3; color: #576075">🔗</span><span><div class="t">GitHub — repo</div><div class="s">رابط مسمّى</div></span></div>
+</div>
+<div class="code"><span class="ln">38</span>def insert_at(self, index, value):<br><span class="ln">39</span>&nbsp;&nbsp;&nbsp;&nbsp;if index == 0:<br><span class="ln">40</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return self.push_front(value)<br><span class="ln">41</span>&nbsp;&nbsp;&nbsp;&nbsp;cur = self.head<br><span class="hl"><span class="ln">42</span>&nbsp;&nbsp;&nbsp;&nbsp;for _ in range(index):</span><br><span class="ln">43</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;cur = cur.next<br><span class="ln">44</span>&nbsp;&nbsp;&nbsp;&nbsp;node = Node(value, cur.next)<br><span class="ln">45</span>&nbsp;&nbsp;&nbsp;&nbsp;cur.next = node<br><span class="ln">46</span>&nbsp;&nbsp;&nbsp;&nbsp;self._size += 1<div class="cm"><b>تعليق على السطر 42:</b> الحلقة تصل إلى index بدل index−1، فالإدراج يحدث بعد الموضع المطلوب بواحد. راجع حالة index == size أيضًا.</div></div>
+<div class="txt"><b>نص التسليم</b>نفذتُ القائمة المرتبطة الأحادية مع عمليات الإدراج والحذف والبحث، وأضفتُ اختبارات وحدة لكل عملية. واجهتُ صعوبة في حالة الإدراج عند النهاية وحللتها بحارس (sentinel).</div>
+</div></div>
+<aside class="pane">
+<h3>التصحيح<span>Rubric · 20 درجة</span></h3>
+<div class="ai"><b>اقتراح آلي: 15 / 20<a href="DesktopTeacherGrading.dc.html">اعتماد الكل</a></b>الاختبارات: 9/10 ناجحة (فشل insert_at في الموضع الأخير). الأسلوب جيد، التوثيق كامل. التقرير يغطي المطلوب.</div>
+<div class="cr"><div class="r"><span>الصحة (الاختبارات)</span><span>7 / 8</span></div><div class="lv"><span>0–2</span><span>3–5</span><span>6</span><span class="on">7</span><span>8</span></div></div>
+<div class="cr"><div class="r"><span>التعقيد والكفاءة</span><span>3 / 4</span></div><div class="lv"><span>0–1</span><span>2</span><span class="on">3</span><span>4</span></div></div>
+<div class="cr"><div class="r"><span>الأسلوب والتوثيق</span><span>4 / 4</span></div><div class="lv"><span>0–1</span><span>2</span><span>3</span><span class="on">4</span></div></div>
+<div class="cr"><div class="r"><span>التقرير</span><span>3 / 4</span></div><div class="lv"><span>0–1</span><span>2</span><span class="on">3</span><span>4</span></div></div>
+<div class="tot"><span><small>المجموع</small>في الوقت · بلا خصم</span><b>17 / 20</b></div>
+<div class="fb"><b>ملاحظات للطالب</b>عمل جيد ومنظم. خطأ واحد في insert_at (السطر 42) يجعل الإدراج يتجاوز الموضع بواحد — أصلحه في المشروع القادم. التقرير واضح لكنه لم يذكر تعقيد البحث.</div>
+<div class="acts"><a class="btn b-sec" href="DesktopTeacherGrading.dc.html">حفظ</a><a class="btn b-pri" href="DesktopTeacherGrading.dc.html">حفظ والتالي →</a></div>
+<div class="kb"><code>J</code> التالي · <code>K</code> السابق · <code>⌘↵</code> حفظ والتالي</div>
+</aside>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":800}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="ar">
+<head>
+<meta charset="utf-8">
+<title>الطالب — البث المباشر</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'IBM Plex Sans Arabic',system-ui,sans-serif;background:#F4F5F7;color:#1F2B47}
+a{color:#2D64A7;text-decoration:none}
+.scr{width:390px;height:844px;position:relative;overflow:hidden;background:#F4F5F7;direction:rtl;text-align:right;box-sizing:border-box}
+.body{position:absolute;top:0;left:0;right:0;bottom:0;overflow-y:auto;padding:54px 16px 120px;box-sizing:border-box}
+.back{display:flex;align-items:center;gap:2px;font-size:15px;color:#2D64A7;font-weight:600}
+.back svg{width:22px;height:22px}
+.h1{font-size:30px;font-weight:700;margin:10px 0 0;line-height:1.2}
+.s{font-size:13px;color:#576075;margin-top:2px}
+.now{background:#B02544;color:#fff;border-radius:20px;padding:16px 18px;margin-top:16px}
+.now .l{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;background:rgba(255,255,255,.18);padding:4px 10px;border-radius:999px}
+.now .l i{width:7px;height:7px;border-radius:4px;background:#fff}
+.now h3{font-size:19px;font-weight:700;margin:10px 0 2px;line-height:1.35}
+.now p{margin:0;font-size:13px;opacity:.85}
+.now .btn{margin-top:12px;background:#fff;color:#7B192F}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;height:44px;border-radius:13px;font-size:15px;font-weight:600;width:100%}
+.sec{display:flex;align-items:baseline;justify-content:space-between;margin:20px 2px 8px}
+.sec h2{font-size:15px;font-weight:700;margin:0}
+.grp{background:#fff;border-radius:16px;border:1px solid #E7E9EE;overflow:hidden}
+.li{display:flex;align-items:center;gap:12px;padding:12px 14px;min-height:64px}
+.li+.li{border-top:1px solid #EEF0F3}
+.time{width:46px;flex-shrink:0;text-align:center;direction:ltr;line-height:1.2}
+.time b{display:block;font-size:14px;font-weight:700}
+.time small{display:block;font-size:10px;font-weight:600;color:#8F95A3}
+.t{font-size:15px;font-weight:600;line-height:1.35}
+.grow{flex:1;min-width:0}
+.pv{font-size:10px;font-weight:700;padding:3px 7px;border-radius:6px;direction:ltr;display:inline-block;margin-inline-end:6px}
+.p-teams{background:#E5ECF4;color:#1F4674}.p-meet{background:#E6F4EC;color:#14603A}.p-zoom{background:#E5ECF4;color:#1F4674}
+.rem{font-size:13px;font-weight:600;color:#2D64A7;flex-shrink:0}
+</style>
+</helmet>
+<div class="scr" style="width: 390px; height: 844px">
+<div class="body">
+<a class="back" href="StudentToday.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg><span>اليوم</span></a>
+<h1 class="h1">البث المباشر</h1>
+<div class="s">الروابط تُفتح في تطبيق المزوّد ولا تظهر إلا للمسجلين</div>
+<div class="now">
+<span class="l"><i></i>جارٍ الآن · 42 مشاركًا</span>
+<h3>قواعد البيانات — المحاضرة 6: التطبيع</h3>
+<p>د. سارة الطيب · Microsoft Teams · بدأ 10:00 ص</p>
+<a class="btn" href="StudentLive.dc.html"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M6 4l14 8-14 8z"/></svg>انضمام</a>
+</div>
+<div class="sec"><h2>اليوم</h2></div>
+<div class="grp">
+<div class="li"><span class="time"><b>1:00</b><small>م</small></span><span class="grow"><div class="t">شبكات الحاسوب — معمل 4</div><div class="s"><span class="pv p-meet">Meet</span>أ. خالد حسن · 90 دقيقة</div></span><a class="rem" href="StudentLive.dc.html">تذكير ✓</a></div>
+</div>
+<div class="sec"><h2>هذا الأسبوع</h2></div>
+<div class="grp">
+<div class="li"><span class="time"><b>4:00</b><small>الاثنين</small></span><span class="grow"><div class="t">هياكل البيانات — مراجعة قبل الاختبار</div><div class="s"><span class="pv p-zoom">Zoom</span>د. عمر البشير</div></span><a class="rem" href="StudentLive.dc.html">تذكير</a></div>
+<div class="li"><span class="time"><b>11:00</b><small>الأربعاء</small></span><span class="grow"><div class="t">لقاء مدير القسم — المستوى الثاني</div><div class="s"><span class="pv p-teams">Teams</span>قسم تقنية المعلومات</div></span><a class="rem" href="StudentLive.dc.html">تذكير</a></div>
+<div class="li"><span class="time"><b>9:00</b><small>الخميس</small></span><span class="grow"><div class="t">لغة إنجليزية — محادثة</div><div class="s"><span class="pv p-meet">Meet</span>أ. منى إبراهيم</div></span><a class="rem" href="StudentLive.dc.html">تذكير</a></div>
+</div>
+<div class="sec"><h2>تسجيلات سابقة</h2><a href="StudentCourse.dc.html" style="font-size: 13px; font-weight: 600">الكل</a></div>
+<div class="grp">
+<a class="li" href="StudentLecture.dc.html" style="color: #1F2B47"><span class="time"><b>42</b><small>دقيقة</small></span><span class="grow"><div class="t">قواعد البيانات — المحاضرة 5</div><div class="s">أُضيف كمورد · متاح دون اتصال</div></span></a>
+</div>
+</div>
+<nav aria-label="التنقل الرئيسي" style="position:absolute;left:12px;right:12px;bottom:14px;height:64px;border-radius:24px;background:rgba(255,255,255,.94);box-shadow:0 4px 16px rgba(31,43,71,.12);border:1px solid #EEF0F3;display:flex;align-items:center;justify-content:space-around;padding:0 6px">
+<a href="StudentToday.dc.html" style="display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;font-weight:600;color:#2D64A7;width:64px"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="3"/><path d="M16 2v4M8 2v4M3 10h18M9 16l2 2 4-4"/></svg><span>اليوم</span></a>
+<a href="StudentCourses.dc.html" style="display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;font-weight:500;color:#8F95A3;width:64px"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4h6a4 4 0 0 1 4 4v12a3 3 0 0 0-3-3H2zM22 4h-6a4 4 0 0 0-4 4v12a3 3 0 0 1 3-3h7z"/></svg><span>موادي</span></a>
+<a href="StudentTasks.dc.html" style="display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;font-weight:500;color:#8F95A3;width:64px"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M10 6h11M10 12h11M10 18h11M3 6l1.5 1.5L7 5M3 12l1.5 1.5L7 11M3 18l1.5 1.5L7 17"/></svg><span>المهام</span></a>
+<a href="StudentNotifications.dc.html" style="display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;font-weight:500;color:#8F95A3;width:64px"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg><span>الإشعارات</span></a>
+<a href="StudentMe.dc.html" style="display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;font-weight:500;color:#8F95A3;width:64px"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>أنا</span></a>
+</nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

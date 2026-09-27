@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="ar">
+<head>
+<meta charset="utf-8">
+<title>مسؤول النتائج — طلبات التعديل</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'IBM Plex Sans Arabic',system-ui,sans-serif;background:#F4F5F7;color:#1F2B47}
+a{color:#2D64A7;text-decoration:none}
+.scr{width:390px;height:844px;position:relative;overflow:hidden;background:#F4F5F7;direction:rtl;text-align:right;box-sizing:border-box}
+.body{position:absolute;top:0;left:0;right:0;bottom:0;overflow-y:auto;padding:54px 16px 120px;box-sizing:border-box}
+.back{display:flex;align-items:center;gap:2px;font-size:15px;color:#2D64A7;font-weight:600}
+.back svg{width:22px;height:22px}
+.h1{font-size:24px;font-weight:700;margin:10px 0 2px}
+.s{font-size:13px;color:#576075;line-height:1.6}
+.seg{display:flex;background:#E7E9EE;border-radius:12px;padding:3px;margin:12px 0 4px}
+.seg a{flex:1;text-align:center;font-size:12px;font-weight:600;padding:8px 0;border-radius:9px;color:#576075}
+.seg .on{background:#fff;color:#1F2B47;box-shadow:0 1px 3px rgba(31,43,71,.12)}
+.sec{font-size:12px;font-weight:700;color:#8F95A3;margin:16px 4px 8px}
+.grp{background:#fff;border-radius:16px;border:1px solid #E7E9EE;overflow:hidden}
+.li{display:flex;align-items:center;gap:12px;padding:12px 14px;color:#1F2B47}
+.li+.li{border-top:1px solid #EEF0F3}
+.tile{width:40px;height:40px;border-radius:11px;display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;direction:ltr;font-weight:700;line-height:1}
+.tile b{font-size:8px;opacity:.7}.tile span{font-size:12px;margin-top:1px}
+.t{font-size:14px;font-weight:600;line-height:1.35}.m{font-size:12px;color:#576075;margin-top:2px;line-height:1.6}
+.grow{flex:1;min-width:0}
+.df{direction:ltr;text-align:right;white-space:nowrap;font-size:13px;font-weight:700}
+.df s{color:#922B20;font-weight:500}.df b{color:#14603A}
+.chip{font-size:11px;font-weight:600;padding:3px 8px;border-radius:999px;white-space:nowrap;margin-top:4px;display:inline-block}
+.c-info{background:#E5ECF4;color:#1F4674}.c-ok{background:#E6F4EC;color:#14603A}.c-bad{background:#FBE9E7;color:#922B20}.c-neu{background:#EEF0F3;color:#576075}
+.tabs{position:absolute;left:12px;right:12px;bottom:14px;height:64px;border-radius:24px;background:rgba(255,255,255,.94);box-shadow:0 4px 16px rgba(31,43,71,.12);border:1px solid #EEF0F3;display:flex;align-items:center;justify-content:space-around;padding:0 6px}
+.tab{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;font-weight:500;color:#8F95A3;width:80px}
+.tab svg{width:24px;height:24px}.tab.on{color:#2D64A7;font-weight:600}
+</style>
+</helmet>
+<div class="scr" style="width: 390px; height: 844px">
+<div class="body">
+<a class="back" href="ResultsOfficerHome.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg><span>النتائج</span></a>
+<h1 class="h1">طلبات التعديل</h1>
+<div class="s">تُنفَّذ فقط بعد موافقة أمين الشؤون العلمية · تظهر القيمتان في سجل النتيجة</div>
+<div class="seg"><a class="on" href="ResultsOfficerCorrections.dc.html">معلّقة 3</a><a href="ResultsOfficerCorrections.dc.html">مقبولة 11</a><a href="ResultsOfficerCorrections.dc.html">مرفوضة 2</a></div>
+<div class="sec">بانتظار الموافقة</div>
+<div class="grp">
+<a class="li" href="AdminCorrection.dc.html"><span class="tile" style="background: #E6F4EC; color: #14603A"><b>IT</b><span>102</span></span><span class="grow"><div class="t">أحمد محمد عثمان · 24-IT-0031</div><div class="m">برمجة 2 · خطأ رصد النهائي · مرفق صورة الورقة · قبل ساعة</div><span class="chip c-info">بانتظار د. عبد الله الحاج</span></span><span class="df"><s>78</s> → <b>87</b></span></a>
+<a class="li" href="AdminCorrection.dc.html"><span class="tile" style="background: #E5ECF4; color: #1F4674"><b>MTH</b><span>102</span></span><span class="grow"><div class="t">دعاء الصادق · 24-IT-0040</div><div class="m">تفاضل 2 · احتساب أعمال الفصل · أمس</div><span class="chip c-info">بانتظار الموافقة</span></span><span class="df"><s>74</s> → <b>79</b></span></a>
+<a class="li" href="AdminCorrection.dc.html"><span class="tile" style="background: #FBE9E7; color: #922B20"><b>STA</b><span>101</span></span><span class="grow"><div class="t">بلال عوض الكريم · 24-IT-0038</div><div class="m">إحصاء · رقم جامعي أُدخل خطأ في الملف · قبل يومين</div><span class="chip c-info">بانتظار الموافقة</span></span><span class="df"><s>—</s> → <b>68</b></span></a>
+</div>
+<div class="sec">آخر القرارات</div>
+<div class="grp">
+<div class="li"><span class="tile" style="background: #E6F4EC; color: #14603A"><b>IT</b><span>104</span></span><span class="grow"><div class="t">هند عبد الرحيم · 24-IT-0050</div><div class="m">تنظيم الحاسوب · قُبل ونُشر · أُشعرت الطالبة · 20 سبتمبر</div><span class="chip c-ok">مقبول</span></span><span class="df"><s>81</s> → <b>85</b></span></div>
+<div class="li"><span class="tile" style="background: #E5ECF4; color: #1F4674"><b>ENG</b><span>102</span></span><span class="grow"><div class="t">يوسف عادل · 24-IT-0049</div><div class="m">لغة إنجليزية 2 · "لا دليل على خطأ الرصد" · 18 سبتمبر</div><span class="chip c-bad">مرفوض</span></span><span class="df"><s>67</s> → <b>72</b></span></div>
+<a class="li" href="ResultsOfficerCorrections.dc.html" style="justify-content: center; color: #2D64A7; font-size: 14px; font-weight: 600">الكل · 16</a>
+</div>
+</div>
+<nav class="tabs" aria-label="التنقل الرئيسي"><a class="tab on" href="ResultsOfficerHome.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8v9a2 2 0 0 1-2 2h-4v-7h-6v7H5a2 2 0 0 1-2-2z"/></svg><span>الرئيسية</span></a><a class="tab" href="AdminNotifications.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg><span>الإشعارات</span></a><a class="tab" href="ResultsOfficerHome.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>أنا</span></a></nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

@@ -8,6 +8,7 @@
 
 1. **الأبيض أساس، الأزرق تفاعل، الكحلي بنية، الأحمر تأكيد نادر.**
 2. **الوضوح قبل الزخرفة:** أسطح مسطحة، ظلال خفيفة، لا تدرجات.
+2b. **الهاتف أولًا للطالب والأستاذ، بملمس iOS** (تبويبات سفلية، Sheets، عناوين كبيرة)؛ سطح المكتب يتوسع منه. الوضع الداكن مواطن من الدرجة الأولى.
 3. **RTL أولًا، LTR مكافئ:** خصائص منطقية فقط (`inline-start/end`).
 4. **الحالة مرئية دائمًا:** كل كيان له شارة حالة بلون دلالي ثابت عبر النظام.
 5. **الوصولية شرط:** WCAG AA للتباين، تنقل بلوحة المفاتيح، `aria` للمكوّنات المركّبة.
@@ -106,10 +107,16 @@
 | body | 1rem / 1.7 | 400 | النص |
 | body-strong | 1rem / 1.7 | 600 | تأكيد |
 | small | 0.875rem / 1.6 | 400 | جداول، مساعدة |
-| caption | 0.75rem / 1.5 | 500 | شارات، تسميات |
+| caption | 0.75rem / 1.5 | 500 | شارات، تسميات، رقاقات (Chips) فقط — **ليس** للنص الثانوي |
 | mono | 0.875rem | 500 | الأرقام الجامعية، الرموز، الأرقام المرجعية (`tabular-nums`) |
 
 الخط: **IBM Plex Sans Arabic** (400/500/600/700) مستضاف ذاتيًا؛ بديل `system-ui`. الأرقام غربية (0-9) افتراضيًا. العربية: `line-height ≥ 1.6`، لا `letter-spacing`، لا أحرف كبيرة قسرية للاتيني داخل العربية.
+
+**قرارات الخط (بعد مقارنة Plex / Almarai / Cairo / Noto Kufi على الشاشة نفسها — لوحة «مقارنة الخطوط» في النموذج):**
+1. **البوابة كلها بـ Plex** — محايد، أرقام جدولية، لاتيني من العائلة نفسها.
+2. **الحد الأدنى للنص الثانوي (.s / meta / وصف تحت العنوان) = 12px (0.75rem)** لا 11px؛ عند 11px تضيق أسنان Plex على الهاتف. 11px مسموح فقط داخل الرقاقات والشارات (caption) وبوزن 600.
+3. **النص الثانوي بـ `line-height 1.6`** حتى داخل صفوف القوائم.
+4. **الموقع العام (Astro) فقط:** خط عرض `--font-display: "Noto Kufi Arabic"` (600/700) لعناوين Hero و H1/H2 الكبيرة (≥ 1.5rem) لإعطاء الهوية طابعًا أقوى؛ كل ما دونها Plex. لا يُستخدم Kufi في البوابة إطلاقًا ولا في النصوص الجارية.
 
 ---
 
@@ -161,6 +168,7 @@
   --radius-sm:6px; --radius-md:10px; --radius-lg:16px; --radius-full:9999px;
   --shadow-sm:0 1px 2px rgb(31 43 71/.06); --shadow-md:0 4px 12px rgb(31 43 71/.08); --shadow-lg:0 12px 32px rgb(31 43 71/.12);
   --font-sans:"IBM Plex Sans Arabic",system-ui,sans-serif; --font-mono:"IBM Plex Mono",ui-monospace,monospace;
+  --font-display:"Noto Kufi Arabic",var(--font-sans); /* الموقع العام فقط — عناوين ≥ 1.5rem */
   --dur-fast:150ms; --dur-base:200ms; --ease:cubic-bezier(.2,.8,.2,1);
 }
 :root[data-theme="dark"] { /* §2.6 */ }
@@ -219,6 +227,9 @@ Tailwind 4: `@theme { --color-primary: var(--primary); ... }` فتُستخدم `
 | DataExportButton | CSV/PDF | loading | – |
 | StatusTransitionMenu | يعرض `allowed_transitions` من الـ API | – | يطلب ملاحظة عند الرفض/الإرجاع |
 
+### 7.1b مكوّنات الهاتف (ملمس iOS — المواصفة الكاملة في `09-mobile-experience.md` §5)
+TabBar (عائم، ينكمش عند التمرير، شارات)، NavigationBar (عنوان كبير → مضمَّن)، Sheet (Detents نصف/كامل، مقبض)، ActionSheet، SegmentedControl، GroupedList/ListRow، SwipeActions، PullToRefresh، CapsuleToast، CardCourse، CountdownPill، OfflineBanner، DownloadButton، InstallPrompt، SearchBar. القاعدة: على الشاشات < `lg` تُستبدل Dialog بـ Sheet، وDropdownMenu بـ ActionSheet، وTable بـ GroupedList، وToast بـ CapsuleToast تلقائيًا عبر نفس الـ API.
+
 ### 7.2 تشريح المكوّنات المركّبة
 - **Table:** `Toolbar (FilterBar + Actions)` → `Table` → `Footer (Pagination + selection summary)`. الأعمدة تُعرَّف بمصفوفة `{key, header, cell, sortable, width, hideOnMobile}`؛ الصفوف الطويلة على الموبايل تُعرض بطاقة بـ 3 حقول أولية + "المزيد".
 - **Form:** `FormLayout` (عمود/عمودان) من `FormField`s؛ التحقق على `blur` ثم عند الإرسال؛ الأخطاء من الخادم تُربط بحقولها (`errors.field`) والباقي في `Alert` أعلى النموذج؛ زر الإرسال يعطَّل أثناء الإرسال فقط.
@@ -253,7 +264,8 @@ Tailwind 4: `@theme { --color-primary: var(--primary); ... }` فتُستخدم `
 | الهيكل | المكوّنات | ملاحظات |
 |---|---|---|
 | **الموقع العام** | Header (شعار أفقي، قائمة، لغة، زر "قدّم الآن" accent) → المحتوى → Footer (اتصال، روابط، سياسات، اجتماعي، شعار معكوس على navy) | عرض 1200px؛ أقسام بتناوب أبيض/n50 |
-| **البوابة** | TopBar (navy) + Sidebar (يمين، 264px، مطوي 72px) + المحتوى (`PageHeader` + جسم) | على `md` وأقل: Drawer + BottomNav للطالب/الأستاذ |
+| **البوابة — سطح المكتب (≥ lg)** | TopBar (navy) + Sidebar (يمين، 264px، مطوي 72px) + المحتوى (`PageHeader` + جسم) | الإدارة والأساتذة على الحاسوب |
+| **البوابة — الهاتف (< lg)** | **هاتف-أولًا للطالب والأستاذ:** NavigationBar بعنوان كبير + محتوى + TabBar عائم (5 تبويبات)؛ الأدوار الإدارية: Drawer + TabBar بثلاثة تبويبات (الرئيسية/الإشعارات/أنا) | الوضع الداكن مدعوم من المرحلة الأولى؛ التفاصيل في 09 |
 | **المصادقة** | بطاقة مركزية 440px على n50 بشعار كامل | تسجيل الدخول، التسجيل (Wizard)، استعادة، تفعيل |
 | **الزائر (متابعة الطلب)** | داخل الموقع العام بجلسة OTP؛ بطاقة واسعة 800px | لا شريط جانبي |
 | **الاختبار** | شاشة مركّزة: عداد ثابت أعلى، سؤال، تنقل أسئلة جانبي، بلا Sidebar | منع الخروج العرضي بتأكيد |

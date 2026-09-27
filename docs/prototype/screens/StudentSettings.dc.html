@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="ar">
+<head>
+<meta charset="utf-8">
+<title>الطالب — الإعدادات</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'IBM Plex Sans Arabic',system-ui,sans-serif;background:#F4F5F7;color:#1F2B47}
+a{color:#2D64A7;text-decoration:none}
+.scr{width:390px;height:844px;position:relative;overflow:hidden;background:#F4F5F7;direction:rtl;text-align:right;box-sizing:border-box}
+.body{position:absolute;top:0;left:0;right:0;bottom:0;overflow-y:auto;padding:54px 16px 40px;box-sizing:border-box}
+.back{display:flex;align-items:center;gap:2px;font-size:15px;color:#2D64A7;font-weight:600}
+.back svg{width:22px;height:22px}
+.h1{font-size:28px;font-weight:700;margin:10px 0 0;line-height:1.2}
+.sec{font-size:13px;font-weight:700;color:#8F95A3;margin:20px 4px 8px}
+.grp{background:#fff;border-radius:16px;border:1px solid #E7E9EE;overflow:hidden}
+.li{display:flex;align-items:center;gap:12px;padding:12px 14px;min-height:52px}
+.li+.li{border-top:1px solid #EEF0F3}
+.t{font-size:15px;font-weight:500;flex:1}.s{font-size:12px;color:#8F95A3;margin-top:2px}
+.v{font-size:14px;color:#8F95A3}
+.sw{width:46px;height:28px;border-radius:14px;background:#1E7F4F;position:relative;flex-shrink:0}
+.sw i{position:absolute;top:3px;left:21px;width:22px;height:22px;border-radius:11px;background:#fff}
+.sw.off{background:#C7CAD1}.sw.off i{left:3px}
+.mx{display:grid;grid-template-columns:1fr 56px 56px 56px;align-items:center;padding:8px 14px;font-size:13px}
+.mx+.mx{border-top:1px solid #EEF0F3}
+.mx.h{color:#8F95A3;font-size:11px;font-weight:700;padding-top:10px}
+.mx .c{text-align:center}
+.dot{display:inline-block;width:22px;height:22px;border-radius:11px;border:2px solid #C7CAD1;box-sizing:border-box}
+.dot.on{background:#2D64A7;border-color:#2D64A7}
+.seg{display:flex;background:#F0F1F4;border-radius:9px;padding:2px;gap:2px}
+.seg span{padding:6px 12px;border-radius:7px;font-size:13px;font-weight:600;color:#576075}
+.seg .on{background:#fff;color:#1F2B47;box-shadow:0 1px 2px rgba(31,43,71,.08)}
+.chev{color:#C7CAD1}.chev svg{width:18px;height:18px}
+</style>
+</helmet>
+<div class="scr" style="width: 390px; height: 844px">
+<div class="body">
+<a class="back" href="StudentMe.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg><span>أنا</span></a>
+<h1 class="h1">الإعدادات</h1>
+<div class="sec">الإشعارات — لكل فئة قناتها</div>
+<div class="grp">
+<div class="mx h"><span>الفئة</span><span class="c">داخل التطبيق</span><span class="c">Push</span><span class="c">بريد</span></div>
+<div class="mx"><span>المحاضرات والواجبات</span><span class="c"><i class="dot on"></i></span><span class="c"><i class="dot on"></i></span><span class="c"><i class="dot"></i></span></div>
+<div class="mx"><span>الاختبارات ومواعيدها</span><span class="c"><i class="dot on"></i></span><span class="c"><i class="dot on"></i></span><span class="c"><i class="dot on"></i></span></div>
+<div class="mx"><span>النتائج</span><span class="c"><i class="dot on"></i></span><span class="c"><i class="dot on"></i></span><span class="c"><i class="dot on"></i></span></div>
+<div class="mx"><span>البث المباشر</span><span class="c"><i class="dot on"></i></span><span class="c"><i class="dot on"></i></span><span class="c"><i class="dot"></i></span></div>
+<div class="mx"><span>إعلانات الكلية والقسم</span><span class="c"><i class="dot on"></i></span><span class="c"><i class="dot"></i></span><span class="c"><i class="dot"></i></span></div>
+<div class="mx"><span>اللوائح وشؤون الطلاب</span><span class="c"><i class="dot on"></i></span><span class="c"><i class="dot on"></i></span><span class="c"><i class="dot on"></i></span></div>
+</div>
+<div class="sec">المظهر واللغة</div>
+<div class="grp">
+<div class="li"><span class="t">المظهر</span><span class="seg"><span class="on">فاتح</span><span>داكن</span><span>النظام</span></span></div>
+<div class="li"><span class="t">اللغة</span><span class="seg"><span class="on">العربية</span><span>English</span></span></div>
+<div class="li"><span class="t">وضع البيانات المنخفضة<div class="s">بلا تحميل تلقائي للصور والفيديو</div></span><span class="sw off" role="switch" aria-checked="false" aria-label="بيانات منخفضة"><i></i></span></div>
+</div>
+<div class="sec">الأمان</div>
+<div class="grp">
+<a class="li" href="StudentSettings.dc.html" style="color: #1F2B47"><span class="t">تغيير كلمة المرور</span><span class="chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></span></a>
+<div class="li"><span class="t">الدخول ببصمة الجهاز (Passkey)<div class="s">متاح بعد التثبيت</div></span><span class="sw off" role="switch" aria-checked="false" aria-label="Passkey"><i></i></span></div>
+<a class="li" href="StudentSettings.dc.html" style="color: #1F2B47"><span class="t">الأجهزة المتصلة<div class="s">iPhone 13 (هذا الجهاز) · Chrome على Windows</div></span><span class="v">2</span><span class="chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></span></a>
+<a class="li" href="Login.dc.html" style="color: #C0392B"><span class="t" style="color: #C0392B">الخروج من كل الأجهزة</span></a>
+</div>
+<div class="sec">الحساب</div>
+<div class="grp">
+<a class="li" href="StudentSettings.dc.html" style="color: #1F2B47"><span class="t">البريد الإلكتروني</span><span class="v" style="direction: ltr">ahmed.m***@gmail.com</span><span class="chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></span></a>
+<a class="li" href="StudentSettings.dc.html" style="color: #1F2B47"><span class="t">الهاتف</span><span class="v" style="direction: ltr">+249 91 *** 0042</span><span class="chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></span></a>
+<div class="li"><span class="t">الاسم والرقم والبرنامج<div class="s">من سجل الكلية — لا يُعدَّل من هنا</div></span></div>
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

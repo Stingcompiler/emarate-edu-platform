@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="ar">
+<head>
+<meta charset="utf-8">
+<title>الزائر — 404 الموقع العام</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'IBM Plex Sans Arabic',system-ui,sans-serif;background:#fff;color:#1F2B47}
+a{color:#2D64A7;text-decoration:none}
+.scr{width:390px;height:844px;position:relative;overflow:hidden;background:#fff;direction:rtl;text-align:right;box-sizing:border-box}
+.body{position:absolute;top:0;left:0;right:0;bottom:0;overflow-y:auto;padding:0 16px 40px;box-sizing:border-box}
+.nav{display:flex;align-items:center;justify-content:space-between;padding:52px 0 12px}
+.logo{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:700;color:#1F2B47}
+.logo i{width:30px;height:30px;border-radius:8px;background:#1F2B47;display:block}
+.hero{margin-top:34px;text-align:center}
+.code{font-size:88px;font-weight:700;line-height:1;color:#E5ECF4;direction:ltr;font-family:'Noto Kufi Arabic','IBM Plex Sans Arabic',sans-serif}
+h1{font-size:26px;font-weight:700;margin:-18px 0 8px;font-family:'Noto Kufi Arabic','IBM Plex Sans Arabic',sans-serif;position:relative}
+.s{font-size:15px;color:#576075;line-height:1.7;margin:0 auto;max-width:300px}
+.srch{display:flex;align-items:center;gap:8px;border:1.5px solid #E7E9EE;border-radius:14px;padding:0 14px;height:50px;margin-top:22px;font-size:14px;color:#8F95A3}
+.srch svg{width:18px;height:18px}
+.lbl{font-size:12px;font-weight:700;color:#8F95A3;margin:24px 2px 8px}
+.go{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.go a{border:1px solid #E7E9EE;border-radius:14px;padding:12px;color:#1F2B47;font-size:14px;font-weight:600}
+.go a small{display:block;font-size:12px;color:#8F95A3;font-weight:500;margin-top:2px}
+.go a.pri{background:#2D64A7;border-color:#2D64A7;color:#fff}.go a.pri small{color:rgba(255,255,255,.8)}
+.foot{margin-top:24px;font-size:12px;color:#8F95A3;text-align:center;line-height:1.7}
+</style>
+</helmet>
+<div class="scr" style="width: 390px; height: 844px">
+<div class="body">
+<div class="nav"><a class="logo" href="VisitorHome.dc.html"><i></i>كلية الإمارات للعلوم والتقنية</a></div>
+<div class="hero"><div class="code">404</div><h1>لم نجد هذه الصفحة</h1><p class="s">ربما نُقلت عند تحديث الموقع، أو أن الرابط الذي وصلك ناقص. جرّب البحث أو اختر وجهة.</p></div>
+<div class="srch"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.3-4.3"/></svg>ابحث عن برنامج أو خبر</div>
+<div class="lbl">الوجهات الأكثر طلبًا</div>
+<div class="go">
+<a class="pri" href="VisitorAdmissions.dc.html">القبول<small>يُغلق 15 أكتوبر</small></a>
+<a href="VisitorPrograms.dc.html">البرامج<small>11 برنامجًا</small></a>
+<a href="VisitorTrack.dc.html">تابع طلبك<small>بالبريد أو الهاتف</small></a>
+<a href="Login.dc.html">دخول البوابة<small>للطلاب والموظفين</small></a>
+</div>
+<div class="foot">إن وصلت هنا من رابط داخل موقعنا، <a href="VisitorContact.dc.html">أخبرنا</a> لنصلحه.<br>الروابط القديمة تُحوَّل تلقائيًا من قائمة التحويلات.</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

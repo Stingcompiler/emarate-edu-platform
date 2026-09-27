@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="ar">
+<head>
+<meta charset="utf-8">
+<title>سطح المكتب — تقارير القبول والتسجيل</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'IBM Plex Sans Arabic',system-ui,sans-serif;background:#F4F5F7;color:#1F2B47}
+a{color:#2D64A7;text-decoration:none}
+.scr{width:1280px;height:800px;position:relative;overflow:hidden;background:#F4F5F7;direction:rtl;text-align:right;box-sizing:border-box;display:flex}
+.side{width:240px;flex-shrink:0;background:#1F2B47;color:#fff;padding:20px 16px;box-sizing:border-box;display:flex;flex-direction:column}
+.logo{display:flex;align-items:center;gap:10px;font-size:14px;font-weight:700;padding:4px 6px 22px}
+.logo i{width:32px;height:32px;border-radius:9px;background:#fff;display:block}
+.nv{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;font-size:14px;color:rgba(255,255,255,.75);margin-bottom:2px}
+.nv.on{background:rgba(255,255,255,.12);color:#fff;font-weight:600}
+.nv .n{margin-right:auto;font-size:11px;font-weight:700;background:#B02544;padding:2px 7px;border-radius:999px;color:#fff}
+.nv i{width:18px;height:18px;border-radius:5px;border:1.75px solid currentColor;box-sizing:border-box;opacity:.85;flex-shrink:0}
+.me{margin-top:auto;display:flex;align-items:center;gap:10px;padding:10px 6px;border-top:1px solid rgba(255,255,255,.12)}
+.me .av{width:34px;height:34px;border-radius:17px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700}
+.me .t{font-size:13px;font-weight:600}.me .s{font-size:12px;color:rgba(255,255,255,.6)}
+.main{flex:1;min-width:0;display:flex;flex-direction:column}
+.bar{height:60px;display:flex;align-items:center;gap:14px;padding:0 28px;background:#fff;border-bottom:1px solid #E7E9EE;flex-shrink:0}
+.bar h1{font-size:18px;font-weight:700;margin:0}
+.crumb{font-size:13px;color:#8F95A3}.crumb a{color:#2D64A7}
+.term{font-size:12px;font-weight:600;background:#EEF0F3;color:#576075;padding:5px 10px;border-radius:999px}
+.bar .act{margin-right:auto;display:flex;gap:8px}
+.btn{font-size:13px;font-weight:700;padding:9px 14px;border-radius:10px;white-space:nowrap;display:inline-block}
+.b-pri{background:#2D64A7;color:#fff}.b-sec{background:#F0F1F4;color:#1F2B47}.b-bad{background:#FBE9E7;color:#922B20}
+.wrap{flex:1;overflow:auto;padding:22px 28px;box-sizing:border-box}
+.kp{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}
+.kp.k5{grid-template-columns:repeat(5,1fr)}
+.kp div{background:#fff;border:1px solid #E7E9EE;border-radius:14px;padding:12px 14px}
+.kp b{display:block;font-size:24px;font-weight:700;line-height:1.1;direction:ltr;text-align:right}
+.kp span{font-size:12px;color:#8F95A3}
+.kp small{display:block;font-size:12px;margin-top:4px;color:#14603A}.kp small.w{color:#8A5A14}.kp small.b{color:#922B20}
+.flt{display:flex;gap:8px;margin-bottom:14px;align-items:center;flex-wrap:wrap}
+.flt span{font-size:12px;font-weight:600;border:1px solid #E7E9EE;background:#fff;border-radius:9px;padding:7px 12px;color:#1F2B47}
+.flt span small{color:#8F95A3;font-weight:500;margin-left:6px}
+.flt .on{background:#1F2B47;border-color:#1F2B47;color:#fff}
+.flt .srch{flex:1;max-width:280px;color:#8F95A3;font-weight:500}
+.cols{display:grid;grid-template-columns:1fr 340px;gap:20px;align-items:start}
+.grp{background:#fff;border-radius:16px;border:1px solid #E7E9EE;overflow:hidden;margin-bottom:20px}
+.hd{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid #EEF0F3}
+.hd h2{font-size:14px;font-weight:700;margin:0;flex:1}.hd span,.hd a{font-size:12px}.hd span{color:#8F95A3}.hd a{font-weight:600}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{font-size:11px;font-weight:600;color:#8F95A3;text-align:right;padding:9px 14px;background:#F8F9FB;border-bottom:1px solid #EEF0F3;white-space:nowrap}
+td{padding:9px 14px;border-top:1px solid #EEF0F3;vertical-align:middle}
+tr.sel td{background:#F2F6FB}
+.num{direction:ltr;text-align:right;font-variant-numeric:tabular-nums}
+.mono{font-family:ui-monospace,Menlo,monospace;font-size:12px;direction:ltr;text-align:right}
+.tile{display:inline-flex;width:32px;height:32px;border-radius:9px;flex-direction:column;align-items:center;justify-content:center;direction:ltr;font-weight:700;line-height:1;vertical-align:middle;margin-left:8px;background:#E5ECF4;color:#2D64A7}
+.tile b{font-size:7px;opacity:.7}.tile span{font-size:10px;margin-top:1px}
+.av{display:inline-flex;width:26px;height:26px;border-radius:13px;background:#E5ECF4;color:#1F4674;font-size:9px;font-weight:700;align-items:center;justify-content:center;margin-left:8px;vertical-align:middle}
+.chip{font-size:11px;font-weight:600;padding:3px 8px;border-radius:999px;white-space:nowrap}
+.c-ok{background:#E6F4EC;color:#14603A}.c-warn{background:#FBF3E3;color:#8A5A14}.c-bad{background:#FBE9E7;color:#922B20}.c-info{background:#E5ECF4;color:#1F4674}.c-neu{background:#EEF0F3;color:#576075}.c-live{background:#FBE9E7;color:#922B20}
+.mini{font-size:11px;font-weight:700;padding:5px 9px;border-radius:7px;background:#F0F1F4;color:#1F2B47;white-space:nowrap}
+.mini.pri{background:#2D64A7;color:#fff}.mini.bad{background:#FBE9E7;color:#922B20}
+.pr{padding:14px 16px}
+.pr .k{display:block;font-size:11px;font-weight:600;color:#8F95A3;margin:10px 0 4px}
+.pr .k:first-child{margin-top:0}
+.pr .v{font-size:13px;font-weight:600;border:1px solid #E7E9EE;border-radius:8px;padding:7px 10px;background:#F8F9FB}
+.row2{display:flex;align-items:center;justify-content:space-between;font-size:13px;font-weight:600;padding:8px 0;border-top:1px solid #EEF0F3;margin-top:6px}
+.sw{width:40px;height:24px;border-radius:12px;background:#C7CAD1;position:relative;flex-shrink:0;display:inline-block}
+.sw::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:9px;background:#fff}
+.sw.on{background:#1E7F4F}.sw.on::after{left:19px}
+.note{font-size:12px;color:#576075;line-height:1.7;padding:10px 16px;border-top:1px solid #EEF0F3;background:#F8F9FB}
+.bars{padding:12px 16px}
+.br{display:flex;align-items:center;gap:10px;padding:6px 0;font-size:13px}
+.br+.br{border-top:1px solid #EEF0F3}
+.br .n{width:150px;flex-shrink:0}.br .b{flex:1;height:10px;border-radius:5px;background:#EEF0F3;overflow:hidden;direction:ltr;display:flex}
+.br .b i{display:block;height:100%}
+.br .v{width:60px;text-align:right;direction:ltr;font-weight:700;flex-shrink:0}
+.lg{display:flex;gap:14px;font-size:11px;color:#576075;padding:0 16px 12px;flex-wrap:wrap}
+.lg i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-left:5px;vertical-align:middle}
+.chart{padding:18px 16px 26px;display:flex;align-items:flex-end;gap:6px;height:150px;box-sizing:border-box;direction:ltr}
+.chart div{flex:1;border-radius:4px 4px 0 0;position:relative;background:#E5ECF4}
+.chart div.hi{background:#2D64A7}
+.chart div span{position:absolute;bottom:-18px;left:0;right:0;text-align:center;font-size:10px;color:#8F95A3}
+.chart div b{position:absolute;top:-16px;left:0;right:0;text-align:center;font-size:10px;font-weight:700;color:#1F2B47}
+.diff{border:1px solid #E7E9EE;border-radius:10px;overflow:hidden;font-size:12px;margin-top:10px}
+.diff .r{display:grid;grid-template-columns:100px 1fr 1fr;border-top:1px solid #EEF0F3}
+.diff .r:first-child{border-top:0;background:#F8F9FB;font-weight:700;color:#8F95A3;font-size:11px}
+.diff .r span{padding:7px 10px}.diff .r span+span{border-right:1px solid #EEF0F3}
+.old{background:#FFF7F6;color:#922B20}.new{background:#F2FAF5;color:#14603A}
+</style>
+</helmet>
+<div class="scr" style="width: 1280px; height: 800px">
+<aside class="side">
+<div class="logo"><i></i>منصة الكلية</div>
+<a class="nv" href="DesktopHeadRegistrar.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;flex-shrink:0"><path d="M3 11l9-8 9 8v9a2 2 0 0 1-2 2h-4v-7h-6v7H5a2 2 0 0 1-2-2z"/></svg>القبول</a><a class="nv" href="HeadRegistrarApplications.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;flex-shrink:0"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>كل الطلبات</a><a class="nv" href="HeadRegistrarStudent.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;flex-shrink:0"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>سجل الطلاب</a><a class="nv" href="DesktopEnrollment.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;flex-shrink:0"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>التسجيل في المواد</a><a class="nv" href="DesktopFormBuilder.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;flex-shrink:0"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>قوالب التقديم</a><a class="nv" href="HeadRegistrarCycles.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;flex-shrink:0"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>دورات القبول</a><a class="nv on" href="DesktopAdmissionsReports.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;flex-shrink:0"><path d="M3 3v18h18"/><path d="M7 14l4-4 4 4 5-6"/></svg>التقارير</a>
+<div class="me"><span class="av" style="background: #2D64A7">ن ف</span><span><div class="t">أ. نجلاء الفكي</div><div class="s">مسؤول المسجلين</div></span></div>
+</aside>
+<div class="main">
+<div class="bar"><h1>تقارير القبول</h1><span class="term">خريف 2026 · حتى اليوم</span><div class="act"><a class="btn b-sec" href="DesktopAdmissionsReports.dc.html">CSV</a><a class="btn b-pri" href="DesktopAdmissionsReports.dc.html">تقرير PDF للإدارة</a></div></div>
+<div class="wrap">
+<div class="flt"><span class="on">القبول</span><span>التسجيل</span><span>المسجلون</span><span>الفترة<small>الدورة الحالية</small></span><span>القسم<small>الكل</small></span><span>مقارنة<small>خريف 2025</small></span></div>
+<div class="kp k5"><div><b>609</b><span>طلبًا</span><small>+18% عن خريف 2025</small></div><div><b>146</b><span>مقبولًا</span><small>24% من الطلبات</small></div><div><b>108</b><span>حُوِّلوا إلى طلاب</span><small class="w">38 لم يُحوَّلوا</small></div><div><b>1.9 ي</b><span>متوسط أول رد</span><small>الهدف 3 أيام</small></div><div><b>23</b><span>غير موزع</span><small class="b">الهندسة بلا مسجل</small></div></div>
+<div class="cols"><div>
+<div class="grp"><div class="hd"><h2>الطلبات حسب البرنامج والحالة</h2><span>من الأعلى طلبًا</span></div><div class="bars">
+<div class="br"><span class="n">تقنية المعلومات</span><span class="b"><i style="width:30%;background:#96B1D3"></i><i style="width:20%;background:#2D64A7"></i><i style="width:10%;background:#B7791F"></i><i style="width:28%;background:#1E7F4F"></i><i style="width:7%;background:#C0392B"></i></span><span class="v">218</span></div>
+<div class="br"><span class="n">علوم الحاسوب</span><span class="b"><i style="width:22%;background:#96B1D3"></i><i style="width:14%;background:#2D64A7"></i><i style="width:8%;background:#B7791F"></i><i style="width:16%;background:#1E7F4F"></i><i style="width:5%;background:#C0392B"></i></span><span class="v">146</span></div>
+<div class="br"><span class="n">إدارة الأعمال</span><span class="b"><i style="width:18%;background:#96B1D3"></i><i style="width:10%;background:#2D64A7"></i><i style="width:6%;background:#B7791F"></i><i style="width:8%;background:#1E7F4F"></i><i style="width:3%;background:#C0392B"></i></span><span class="v">98</span></div>
+<div class="br"><span class="n">الذكاء الاصطناعي</span><span class="b"><i style="width:9%;background:#96B1D3"></i><i style="width:7%;background:#2D64A7"></i><i style="width:3%;background:#B7791F"></i><i style="width:6%;background:#1E7F4F"></i><i style="width:2%;background:#C0392B"></i></span><span class="v">61</span></div>
+<div class="br"><span class="n">الهندسة (3 برامج)</span><span class="b"><i style="width:20%;background:#96B1D3"></i><i style="width:2%;background:#2D64A7"></i><i style="width:2%;background:#B7791F"></i><i style="width:0%"></i></span><span class="v">86</span></div>
+</div><div class="lg"><span><i style="background:#96B1D3"></i>مُقدَّم</span><span><i style="background:#2D64A7"></i>مراجعة</span><span><i style="background:#B7791F"></i>ناقص</span><span><i style="background:#1E7F4F"></i>مقبول</span><span><i style="background:#C0392B"></i>مرفوض</span></div></div>
+<div class="grp"><div class="hd"><h2>أداء المسجلين</h2></div><table>
+<thead><tr><th>المسجل</th><th>الأقسام</th><th>طلبات</th><th>أول رد</th><th>استفسارات متأخرة</th><th>قرارات</th></tr></thead>
+<tbody>
+<tr><td><span class="av">م ن</span>محمد النور</td><td>IT · CS</td><td class="num">92</td><td class="num">1.4 ي</td><td class="num" style="color:#922B20;font-weight:700">2</td><td class="num">58</td></tr>
+<tr><td><span class="av">ر خ</span>رشا خالد</td><td>IT</td><td class="num">78</td><td class="num">1.1 ي</td><td class="num">0</td><td class="num">51</td></tr>
+<tr><td><span class="av">ه ع</span>هند عبد الله</td><td>BA</td><td class="num">66</td><td class="num">2.6 ي</td><td class="num">0</td><td class="num">33</td></tr>
+<tr><td><span class="av">ع م</span>علي محجوب</td><td>CS</td><td class="num">53</td><td class="num">2.2 ي</td><td class="num">0</td><td class="num">29</td></tr>
+</tbody></table></div>
+</div><div>
+<div class="grp"><div class="hd"><h2>الطلبات اليومية</h2><span>آخر 10 أيام</span></div><div class="chart"><div style="height:30%"><b>21</b><span>18</span></div><div style="height:42%"><b>29</b><span>19</span></div><div style="height:55%"><b>38</b><span>20</span></div><div style="height:48%"><b>33</b><span>21</span></div><div style="height:62%"><b>43</b><span>22</span></div><div style="height:58%"><b>40</b><span>23</span></div><div style="height:70%"><b>49</b><span>24</span></div><div style="height:88%"><b>61</b><span>25</span></div><div style="height:78%"><b>54</b><span>26</span></div><div class="hi" style="height:100%"><b>69</b><span>27</span></div></div></div>
+<div class="grp"><div class="hd"><h2>مصادر المتقدمين</h2></div><div class="bars">
+<div class="br"><span class="n" style="width:110px">صفحة البرنامج</span><span class="b"><i style="width:46%;background:#2D64A7"></i></span><span class="v" style="width:40px">46%</span></div>
+<div class="br"><span class="n" style="width:110px">بحث Google</span><span class="b"><i style="width:28%;background:#2D64A7"></i></span><span class="v" style="width:40px">28%</span></div>
+<div class="br"><span class="n" style="width:110px">يوم التعريف</span><span class="b"><i style="width:14%;background:#2D64A7"></i></span><span class="v" style="width:40px">14%</span></div>
+<div class="br"><span class="n" style="width:110px">أخرى</span><span class="b"><i style="width:12%;background:#C7CAD1"></i></span><span class="v" style="width:40px">12%</span></div>
+</div></div>
+</div></div>
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":800}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

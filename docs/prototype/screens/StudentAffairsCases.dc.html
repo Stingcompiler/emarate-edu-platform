@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="ar">
+<head>
+<meta charset="utf-8">
+<title>شؤون الطلاب — الحالات</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'IBM Plex Sans Arabic',system-ui,sans-serif;background:#F4F5F7;color:#1F2B47}
+a{color:#2D64A7;text-decoration:none}
+.scr{width:390px;height:844px;position:relative;overflow:hidden;background:#F4F5F7;direction:rtl;text-align:right;box-sizing:border-box}
+.body{position:absolute;top:0;left:0;right:0;bottom:0;overflow-y:auto;padding:54px 16px 120px;box-sizing:border-box}
+.back{display:flex;align-items:center;gap:2px;font-size:15px;color:#2D64A7;font-weight:600}
+.back svg{width:22px;height:22px}
+.h1{font-size:24px;font-weight:700;margin:10px 0 2px}
+.s{font-size:13px;color:#576075}
+.seg{display:flex;background:#E7E9EE;border-radius:12px;padding:3px;margin:12px 0 4px}
+.seg a{flex:1;text-align:center;font-size:12px;font-weight:600;padding:8px 0;border-radius:9px;color:#576075}
+.seg .on{background:#fff;color:#1F2B47;box-shadow:0 1px 3px rgba(31,43,71,.12)}
+.filters{display:flex;gap:6px;margin:10px 0 4px;overflow-x:auto}
+.filters a{flex:none;font-size:12px;font-weight:600;padding:6px 11px;border-radius:999px;background:#fff;border:1px solid #E7E9EE;color:#576075}
+.filters .on{background:#1F2B47;border-color:#1F2B47;color:#fff}
+.sec{font-size:12px;font-weight:700;color:#8F95A3;margin:16px 4px 8px}
+.grp{background:#fff;border-radius:16px;border:1px solid #E7E9EE;overflow:hidden}
+.li{display:flex;align-items:center;gap:12px;padding:12px 14px;min-height:64px;color:#1F2B47}
+.li+.li{border-top:1px solid #EEF0F3}
+.ty{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}
+.t{font-size:15px;font-weight:600;line-height:1.35}.m{font-size:12px;color:#576075;margin-top:2px}
+.grow{flex:1;min-width:0}
+.chip{font-size:11px;font-weight:600;padding:4px 9px;border-radius:999px;white-space:nowrap}
+.c-bad{background:#FBE9E7;color:#922B20}.c-warn{background:#FBF3E3;color:#8A5A14}.c-info{background:#E5ECF4;color:#1F4674}.c-neu{background:#EEF0F3;color:#576075}.c-ok{background:#E6F4EC;color:#14603A}
+.age{font-size:12px;color:#8F95A3;direction:ltr}
+.fab{position:absolute;left:16px;bottom:92px;height:50px;padding:0 18px;border-radius:25px;background:#2D64A7;color:#fff;display:flex;align-items:center;gap:8px;font-size:15px;font-weight:600;box-shadow:0 6px 18px rgba(45,100,167,.35)}
+.fab svg{width:20px;height:20px}
+.tabs{position:absolute;left:12px;right:12px;bottom:14px;height:64px;border-radius:24px;background:rgba(255,255,255,.94);box-shadow:0 4px 16px rgba(31,43,71,.12);border:1px solid #EEF0F3;display:flex;align-items:center;justify-content:space-around;padding:0 6px}
+.tab{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;font-weight:500;color:#8F95A3;width:80px}
+.tab svg{width:24px;height:24px}.tab.on{color:#2D64A7;font-weight:600}
+</style>
+</helmet>
+<div class="scr" style="width: 390px; height: 844px">
+<div class="body">
+<a class="back" href="StudentAffairsHome.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg><span>شؤون الطلاب</span></a>
+<h1 class="h1">الحالات</h1>
+<div class="s"><a href="DesktopStudentAffairsCases.dc.html">الجدول الكامل من الحاسوب</a> · 14 مفتوحة · 6 تجاوزت 14 يومًا · سرية — لا يراها إلا هذا الدور والطالب المعني بعد النشر</div>
+<div class="seg"><a class="on" href="StudentAffairsCases.dc.html">مفتوحة 14</a><a href="StudentAffairsCases.dc.html">بلاغات جديدة 2</a><a href="StudentAffairsCases.dc.html">مقفلة 41</a></div>
+<div class="filters"><a class="on" href="StudentAffairsCases.dc.html">الكل</a><a href="StudentAffairsCases.dc.html">غش 3</a><a href="StudentAffairsCases.dc.html">أكاديمية 6</a><a href="StudentAffairsCases.dc.html">سلوكية 3</a><a href="StudentAffairsCases.dc.html">اجتماعية 2</a><a href="StudentAffairsCases.dc.html">متأخرة 6</a></div>
+<div class="sec">بلاغات جديدة من الأساتذة</div>
+<div class="grp">
+<a class="li" href="AdminCase.dc.html"><span class="ty" style="background: #FBE9E7; color: #922B20">غش</span><span class="grow"><div class="t">يوسف عادل محمد · 26-IT-0088</div><div class="m">MR-0009 · هياكل البيانات · أ. أحمد محمود · اليوم</div></span><span class="chip c-bad">جديد</span></a>
+<a class="li" href="AdminCase.dc.html"><span class="ty" style="background: #FBE9E7; color: #922B20">غش</span><span class="grow"><div class="t">طالبان — محاولتان متطابقتان</div><div class="m">MR-0010 · شبكات الحاسوب · أ. خالد حسن · أمس</div></span><span class="chip c-bad">جديد</span></a>
+</div>
+<div class="sec">قيد المعالجة</div>
+<div class="grp">
+<a class="li" href="AdminCase.dc.html"><span class="ty" style="background: #FBE9E7; color: #922B20">غش</span><span class="grow"><div class="t">هاني عبد الرحمن · 25-CS-0031</div><div class="m">C-2026-018 · قيد التحقيق · جلسة استماع الثلاثاء</div></span><span class="age">6 أيام</span></a>
+<a class="li" href="StudentAffairsStudent.dc.html"><span class="ty" style="background: #FBF3E3; color: #8A5A14">أك</span><span class="grow"><div class="t">عمر صالح عبد الله · 26-IT-0093</div><div class="m">C-2026-014 · إنذار أكاديمي ثانٍ · بانتظار رد الطالب</div></span><span class="age" style="color: #922B20">19 يومًا</span></a>
+<a class="li" href="AdminCase.dc.html"><span class="ty" style="background: #FBF3E3; color: #8A5A14">أك</span><span class="grow"><div class="t">آية الفاتح · 24-BA-0057</div><div class="m">C-2026-012 · انقطاع عن الدراسة · تواصل مع ولي الأمر</div></span><span class="age" style="color: #922B20">23 يومًا</span></a>
+<a class="li" href="AdminCase.dc.html"><span class="ty" style="background: #E5ECF4; color: #1F4674">سل</span><span class="grow"><div class="t">مجموعة طلاب — المستوى الثالث هندسة</div><div class="m">C-2026-016 · إتلاف معمل · 4 طلاب · القرار قيد الصياغة</div></span><span class="age">9 أيام</span></a>
+<a class="li" href="AdminCase.dc.html"><span class="ty" style="background: #EEF0F3; color: #576075">اج</span><span class="grow"><div class="t">حالة اجتماعية — طلب تأجيل رسوم</div><div class="m">C-2026-017 · سرية · محوّلة من مسجل القسم</div></span><span class="age">4 أيام</span></a>
+<a class="li" href="StudentAffairsCases.dc.html" style="color: #2D64A7; justify-content: center; font-size: 14px; font-weight: 600; min-height: 44px">عرض 7 أخرى</a>
+</div>
+</div>
+<a class="fab" href="StudentAffairsCaseNew.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>حالة</a>
+<nav class="tabs" aria-label="التنقل الرئيسي"><a class="tab on" href="StudentAffairsHome.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8v9a2 2 0 0 1-2 2h-4v-7h-6v7H5a2 2 0 0 1-2-2z"/></svg><span>الرئيسية</span></a><a class="tab" href="AdminNotifications.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg><span>الإشعارات</span></a><a class="tab" href="StudentAffairsHome.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>أنا</span></a></nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

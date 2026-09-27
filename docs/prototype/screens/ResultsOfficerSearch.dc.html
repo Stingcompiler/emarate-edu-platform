@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="ar">
+<head>
+<meta charset="utf-8">
+<title>مسؤول النتائج — بحث نتيجة وطلب تعديل</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'IBM Plex Sans Arabic',system-ui,sans-serif;background:#F4F5F7;color:#1F2B47}
+a{color:#2D64A7;text-decoration:none}
+.scr{width:390px;height:844px;position:relative;overflow:hidden;background:#F4F5F7;direction:rtl;text-align:right;box-sizing:border-box}
+.body{position:absolute;top:0;left:0;right:0;bottom:0;overflow-y:auto;padding:54px 16px 40px;box-sizing:border-box}
+.back{display:flex;align-items:center;gap:2px;font-size:15px;color:#2D64A7;font-weight:600}
+.back svg{width:22px;height:22px}
+.h1{font-size:24px;font-weight:700;margin:10px 0 2px}
+.s{font-size:13px;color:#576075}
+.srch{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid #E7E9EE;border-radius:12px;padding:0 12px;height:44px;margin-top:12px;font-size:14px}
+.srch svg{width:18px;height:18px;color:#8F95A3}
+.srch span{direction:ltr;flex:1;text-align:right}
+.grp{background:#fff;border-radius:16px;border:1px solid #E7E9EE;overflow:hidden;margin-top:12px}
+.hd{display:flex;align-items:center;gap:12px;padding:12px 14px;border-bottom:1px solid #EEF0F3}
+.av{width:38px;height:38px;border-radius:19px;background:#E5ECF4;color:#1F4674;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.hd .t{font-size:15px;font-weight:700}.hd .m{font-size:12px;color:#576075;margin-top:2px}
+.li{display:flex;align-items:center;gap:10px;padding:10px 14px;min-height:50px;color:#1F2B47}
+.li+.li{border-top:1px solid #EEF0F3}
+.tile{width:38px;height:38px;border-radius:11px;display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;direction:ltr;font-weight:700;line-height:1;background:#E5ECF4;color:#2D64A7}
+.tile b{font-size:8px;opacity:.7}.tile span{font-size:12px;margin-top:1px}
+.t{font-size:14px;font-weight:600;flex:1}.t small{display:block;font-size:12px;color:#8F95A3;font-weight:500}
+.gr{width:48px;text-align:center;direction:ltr}
+.gr b{display:block;font-size:16px;font-weight:700}.gr small{font-size:10px;color:#8F95A3}
+.li.sel{background:#F2F6FB}
+.sheet{position:absolute;left:0;right:0;bottom:0;background:#fff;border-radius:22px 22px 0 0;box-shadow:0 -8px 30px rgba(31,43,71,.18);padding:10px 16px 24px}
+.hdl{width:40px;height:5px;border-radius:3px;background:#D5D8DF;margin:0 auto 12px}
+.sheet h2{font-size:17px;font-weight:700;margin:0 0 2px}
+.sheet .s{margin-bottom:12px}
+.diff{display:flex;gap:8px}
+.diff div{flex:1;border:1.5px solid #E7E9EE;border-radius:12px;padding:10px 12px}
+.diff small{font-size:12px;color:#8F95A3;display:block}
+.diff b{font-size:22px;font-weight:700;direction:ltr;display:block}
+.diff .new{border-color:#2D64A7;background:#F2F6FB}
+.f{margin-top:10px;border:1px solid #E7E9EE;border-radius:12px;padding:10px 12px}
+.f label{display:block;font-size:11px;font-weight:600;color:#8F95A3}
+.f textarea{width:100%;border:0;background:transparent;font-size:14px;font-family:inherit;color:#1F2B47;outline:none;padding:2px 0 0;box-sizing:border-box;line-height:1.6}
+.note{font-size:12px;color:#576075;line-height:1.6;margin-top:10px}
+.btn{display:flex;align-items:center;justify-content:center;height:50px;border-radius:14px;font-size:15px;font-weight:600;background:#2D64A7;color:#fff;margin-top:12px}
+</style>
+</helmet>
+<div class="scr" style="width: 390px; height: 844px">
+<div class="body">
+<a class="back" href="ResultsOfficerHome.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg><span>النتائج</span></a>
+<h1 class="h1">بحث في النتائج</h1>
+<div class="s">التعديل لا يُنفَّذ مباشرة — يُرسل طلبًا لأمين الشؤون العلمية</div>
+<div class="srch"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.3-4.3"/></svg><span>24-IT-0031</span></div>
+<div class="grp">
+<div class="hd"><span class="av">أ م</span><span><div class="t">أحمد محمد عثمان</div><div class="m">24-IT-0031 · تقنية المعلومات · المستوى الثالث · ربيع 2026</div></span></div>
+<div class="li"><span class="tile"><b>IT</b><span>301</span></span><span class="t">نظم المعلومات الإدارية<small>B-2026-121 · بانتظار الاعتماد</small></span><span class="gr"><b>86</b><small>A</small></span></div>
+<div class="li sel"><span class="tile" style="background: #E6F4EC; color: #14603A"><b>IT</b><span>102</span></span><span class="t">برمجة 2<small>B-2026-117 · منشورة 20 سبتمبر</small></span><span class="gr"><b>78</b><small>B+</small></span></div>
+<div class="li"><span class="tile" style="background: #E6F4EC; color: #14603A"><b>IT</b><span>104</span></span><span class="t">تنظيم الحاسوب<small>B-2026-118 · منشورة</small></span><span class="gr"><b>91</b><small>A</small></span></div>
+<div class="li"><span class="tile" style="background: #E5ECF4; color: #1F4674"><b>MTH</b><span>102</span></span><span class="t">تفاضل وتكامل 2<small>B-2026-119 · معتمدة</small></span><span class="gr"><b>74</b><small>B</small></span></div>
+</div>
+</div>
+<div class="sheet"><div class="hdl"></div><h2>طلب تعديل — برمجة 2</h2><div class="s">أحمد محمد عثمان · 24-IT-0031 · الدفعة B-2026-117</div>
+<div class="diff"><div><small>الحالية</small><b>78</b><small>B+</small></div><div class="new"><small>الجديدة</small><b>87</b><small>A</small></div></div>
+<div class="f"><label for="r">السبب (إلزامي)</label><textarea id="r" rows="2">خطأ في رصد درجة الاختبار النهائي: الورقة المصححة 55 وسُجلت 46. مرفق صورة الورقة.</textarea></div>
+<div class="note">يصل الطلب إلى د. عبد الله الحاج للموافقة؛ بعدها تُنشر القيمة الجديدة ويُشعر الطالب. يظهر التعديل في سجل النتيجة بالقيمتين.</div>
+<a class="btn" href="AdminCorrection.dc.html">إرسال طلب التعديل</a></div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

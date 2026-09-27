@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="ar">
+<head>
+<meta charset="utf-8">
+<title>سطح مكتب الأستاذ — سجل الدرجات</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'IBM Plex Sans Arabic',system-ui,sans-serif;background:#F4F5F7;color:#1F2B47}
+a{color:#2D64A7;text-decoration:none}
+.scr{width:1280px;height:800px;position:relative;overflow:hidden;background:#F4F5F7;direction:rtl;text-align:right;box-sizing:border-box;display:flex;flex-direction:column}
+.top{height:56px;background:#1F2B47;color:#fff;display:flex;align-items:center;gap:16px;padding:0 24px;flex-shrink:0}
+.top .logo{display:flex;align-items:center;gap:10px;font-size:14px;font-weight:700}
+.top .logo i{width:30px;height:30px;border-radius:8px;background:#fff;display:block}
+.top .me{margin-right:auto;display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600}
+.top .me i{width:32px;height:32px;border-radius:16px;background:#2D64A7;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700}
+.row{flex:1;display:flex;min-height:0}
+.side{width:72px;flex-shrink:0;background:#fff;border-left:1px solid #E7E9EE;padding:16px 10px;box-sizing:border-box;display:flex;flex-direction:column;gap:4px;align-items:center}
+.side a{width:52px;height:52px;border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:10px;color:#8F95A3;font-weight:500}
+.side a svg{width:22px;height:22px}
+.side a.on{background:#E5ECF4;color:#1F4674;font-weight:600}
+.main{flex:1;overflow:auto;padding:22px 28px;box-sizing:border-box}
+.h{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.h .tile{width:44px;height:44px;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;direction:ltr;font-weight:700;line-height:1;background:#E5ECF4;color:#2D64A7}
+.h .tile b{font-size:9px;opacity:.7}.h .tile span{font-size:13px;margin-top:2px}
+.h h1{font-size:20px;font-weight:700;margin:0}.h .m{font-size:12px;color:#576075;margin-top:2px}
+.h .act{margin-right:auto;display:flex;gap:8px}
+.btn{font-size:13px;font-weight:700;padding:9px 14px;border-radius:10px;white-space:nowrap}
+.b-pri{background:#2D64A7;color:#fff}.b-sec{background:#F0F1F4;color:#1F2B47}
+.tabs{display:flex;gap:2px;border-bottom:1px solid #E7E9EE;margin-bottom:16px}
+.tabs span{font-size:13px;font-weight:600;padding:8px 12px;color:#8F95A3;border-bottom:2px solid transparent}
+.tabs .on{color:#1F2B47;border-color:#2D64A7}
+.flt{display:flex;gap:8px;margin-bottom:12px;align-items:center}
+.flt span{font-size:12px;font-weight:600;border:1px solid #E7E9EE;background:#fff;border-radius:9px;padding:7px 12px;color:#1F2B47}
+.flt span small{color:#8F95A3;font-weight:500;margin-left:6px}
+.flt .srch{flex:1;max-width:280px;color:#8F95A3;font-weight:500}
+.grp{background:#fff;border-radius:16px;border:1px solid #E7E9EE;overflow:hidden}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{font-size:11px;font-weight:600;color:#8F95A3;text-align:center;padding:8px 10px;background:#F8F9FB;border-bottom:1px solid #EEF0F3;white-space:nowrap}
+th:first-child,td:first-child{text-align:right;padding-right:16px;position:sticky;right:0;background:#fff}
+th:first-child{background:#F8F9FB}
+th small{display:block;font-weight:500;color:#C7CAD1}
+td{padding:9px 10px;border-top:1px solid #EEF0F3;text-align:center;direction:ltr;font-variant-numeric:tabular-nums}
+td:first-child{direction:rtl}
+.av{display:inline-flex;width:26px;height:26px;border-radius:13px;background:#E5ECF4;color:#1F4674;font-size:9px;font-weight:700;align-items:center;justify-content:center;margin-left:8px;vertical-align:middle}
+.id{font-size:11px;color:#8F95A3;direction:ltr;display:inline-block;margin-right:6px}
+.miss{color:#C7CAD1}
+.late{color:#8A5A14;background:#FBF3E3;border-radius:6px;padding:2px 6px}
+.pend{color:#1F4674;background:#E5ECF4;border-radius:6px;padding:2px 6px}
+.low{color:#922B20;font-weight:700}
+.tot{font-weight:700}
+tfoot td{background:#F8F9FB;font-weight:700;color:#576075}
+.foot{display:flex;justify-content:space-between;padding:10px 16px;font-size:12px;color:#8F95A3;border-top:1px solid #EEF0F3}
+</style>
+</helmet>
+<div class="scr" style="width: 1280px; height: 800px">
+<div class="top"><span class="logo"><i></i>بوابة الأستاذ</span><span class="me"><i>أ م</i>أ. أحمد محمود</span></div>
+<div class="row">
+<aside class="side">
+<a href="DesktopTeacherToday.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>اليوم</a>
+<a class="on" href="DesktopTeacherCourse.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>موادي</a>
+<a href="DesktopTeacherGrading.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>التصحيح</a>
+<a href="TeacherNotifications.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>الإشعارات</a>
+<a href="TeacherProfile.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>أنا</a>
+</aside>
+<div class="main">
+<div class="h"><span class="tile"><b>IT</b><span>201</span></span><span><h1>هياكل البيانات — سجل الدرجات</h1><div class="m">خريف 2026 · 58 طالبًا · أعمال الفصل 40 (واجبات 20 + اختبارات 20) · النهائي يُرصد من مسؤول النتائج</div></span><div class="act"><a class="btn b-sec" href="DesktopTeacherGradebook.dc.html">تصدير CSV</a><a class="btn b-sec" href="DesktopTeacherGradebook.dc.html">إعدادات الأوزان</a><a class="btn b-pri" href="DesktopTeacherGrading.dc.html">التصحيح (31)</a></div></div>
+<div class="tabs"><span>المحاضرات</span><span>الواجبات</span><span>الاختبارات</span><span>الطلاب</span><span class="on">الدرجات</span><span>البث</span><span>الإعلانات</span><span>الإعدادات</span></div>
+<div class="flt"><span class="srch">بحث باسم الطالب أو رقمه</span><span>الترتيب<small>الأقل مجموعًا</small></span><span>إظهار<small>الكل 58</small></span><span>تحت 50%<small>4</small></span></div>
+<div class="grp"><table>
+<thead><tr><th>الطالب</th><th>واجب 1<small>/10</small></th><th>واجب 2<small>/10</small></th><th>قصير 1<small>/5</small></th><th>قصير 2<small>/5</small></th><th>منتصف<small>/10</small></th><th>أعمال<small>/40</small></th><th>%</th><th>التسليم</th><th>الحضور (بث)</th></tr></thead>
+<tbody>
+<tr><td><span class="av">ع ص</span>عمر صالح عبد الله <span class="id">26-IT-0093</span></td><td>4</td><td class="late">6</td><td>2</td><td class="miss">—</td><td class="miss">—</td><td class="tot low">12</td><td class="low">30%</td><td>2/4</td><td>1/4</td></tr>
+<tr><td><span class="av">ي ع</span>يوسف عادل محمد <span class="id">26-IT-0088</span></td><td>7</td><td class="pend">مُعلّق</td><td>3</td><td>3</td><td class="miss">—</td><td class="tot">13</td><td>43%</td><td>4/4</td><td>3/4</td></tr>
+<tr><td><span class="av">أ م</span>أحمد محمد عثمان <span class="id">24-IT-0031</span></td><td>9</td><td class="pend">17/20*</td><td>4</td><td>4</td><td class="miss">—</td><td class="tot">17</td><td>57%</td><td>4/4</td><td>4/4</td></tr>
+<tr><td><span class="av">ه ص</span>هبة صلاح الدين <span class="id">26-IT-0142</span></td><td>8</td><td class="pend">مُعلّق</td><td>5</td><td>4</td><td class="miss">—</td><td class="tot">17</td><td>57%</td><td>4/4</td><td>4/4</td></tr>
+<tr><td><span class="av">خ ي</span>خالد يوسف عبد الرحيم <span class="id">26-CS-0117</span></td><td>7</td><td>7.5</td><td>4</td><td>3</td><td class="miss">—</td><td class="tot">21.5</td><td>72%</td><td>4/4</td><td>3/4</td></tr>
+<tr><td><span class="av">ر إ</span>رقية إبراهيم علي <span class="id">26-CE-0002</span></td><td>9</td><td class="pend">مُعلّق</td><td>5</td><td>5</td><td class="miss">—</td><td class="tot">19</td><td>63%</td><td>4/4</td><td>4/4</td></tr>
+<tr><td><span class="av">م ب</span>مريم بابكر <span class="id">26-IT-0151</span></td><td>10</td><td>9.5</td><td>5</td><td>5</td><td class="miss">—</td><td class="tot">29.5</td><td>98%</td><td>4/4</td><td>4/4</td></tr>
+<tr><td><span class="av">د ص</span>دعاء الصادق <span class="id">24-IT-0040</span></td><td>10</td><td>10</td><td>5</td><td>4</td><td class="miss">—</td><td class="tot">29</td><td>97%</td><td>4/4</td><td>4/4</td></tr>
+<tr><td colspan="10" style="text-align: center; color: #2D64A7; font-weight: 600; direction: rtl">عرض 50 طالبًا آخر</td></tr>
+</tbody>
+<tfoot><tr><td>المتوسط · 58 طالبًا</td><td>7.8</td><td>8.1</td><td>3.9</td><td>3.7</td><td>—</td><td>20.4</td><td>68%</td><td>88%</td><td>71%</td></tr></tfoot>
+</table><div class="foot"><span>* درجة محفوظة لم تُنشر بعد · «مُعلّق» = سُلِّم ولم يُصحح · «—» = لم يُسلَّم أو لم يُعقد</span><span>آخر تحديث قبل دقيقتين</span></div></div>
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":800}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>
