@@ -964,6 +964,42 @@
       "w": 1280,
       "x": 6800,
       "y": 16574
+    },
+    "DesktopStudentToday.dc.html": {
+      "h": 800,
+      "is_interactive": true,
+      "radius": 12,
+      "title": "سطح مكتب الطالب — اليوم",
+      "w": 1280,
+      "x": 0,
+      "y": 17761
+    },
+    "DesktopStudentCourse.dc.html": {
+      "h": 800,
+      "is_interactive": true,
+      "radius": 12,
+      "title": "سطح مكتب الطالب — المادة (محاضرة مفتوحة)",
+      "w": 1280,
+      "x": 1360,
+      "y": 17761
+    },
+    "DesktopStudentExam.dc.html": {
+      "h": 800,
+      "is_interactive": true,
+      "radius": 12,
+      "title": "سطح مكتب الطالب — تأدية الاختبار (وضع مركّز)",
+      "w": 1280,
+      "x": 2720,
+      "y": 17761
+    },
+    "DesktopStudentResults.dc.html": {
+      "h": 800,
+      "is_interactive": true,
+      "radius": 12,
+      "title": "سطح مكتب الطالب — النتائج والسجل الأكاديمي",
+      "w": 1280,
+      "x": 4080,
+      "y": 17761
     }
   },
   "createdOnFiles": {
@@ -1101,6 +1137,14 @@
       "w": 240,
       "x": 0,
       "y": 16314
+    },
+    "row15": {
+      "kind": "title1",
+      "maxW": 5360,
+      "text": "سطح مكتب الطالب — نفس شاشات الهاتف متمددة: التبويبات الخمسة تصبح قائمة جانبية 264px · المادة بعمودين (قائمة + عارض) · الاختبار في وضع مركّز بلا قائمة · النتائج جدول كامل",
+      "w": 240,
+      "x": 0,
+      "y": 17501
     }
   },
   "order": [
@@ -1210,7 +1254,11 @@
     "DesktopDeptProfessors.dc.html",
     "DesktopDeptOperations.dc.html",
     "DesktopApplicationDetail.dc.html",
-    "DesktopSystemStructure.dc.html"
+    "DesktopSystemStructure.dc.html",
+    "DesktopStudentToday.dc.html",
+    "DesktopStudentCourse.dc.html",
+    "DesktopStudentExam.dc.html",
+    "DesktopStudentResults.dc.html"
   ],
   "pages": [],
   "title": "ECST Portal Prototype"

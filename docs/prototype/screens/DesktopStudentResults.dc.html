@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="ar">
+<head>
+<meta charset="utf-8">
+<title>سطح مكتب الطالب — النتائج والسجل الأكاديمي</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'IBM Plex Sans Arabic',system-ui,sans-serif;background:#F4F5F7;color:#1F2B47}
+a{color:#2D64A7;text-decoration:none}
+.scr{width:1280px;height:800px;position:relative;overflow:hidden;background:#F4F5F7;direction:rtl;text-align:right;box-sizing:border-box;display:flex;flex-direction:column}
+.top{height:56px;background:#1F2B47;color:#fff;display:flex;align-items:center;gap:16px;padding:0 24px;flex-shrink:0}
+.top .logo{display:flex;align-items:center;gap:10px;font-size:14px;font-weight:700}
+.top .logo i{width:30px;height:30px;border-radius:8px;background:#fff;display:block}
+.top .me{margin-right:auto;display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600}
+.top .me i{width:32px;height:32px;border-radius:16px;background:#2D64A7;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700}
+.row{flex:1;display:flex;min-height:0}
+.side{width:264px;flex-shrink:0;background:#fff;border-left:1px solid #E7E9EE;padding:16px 12px;box-sizing:border-box}
+.nv{display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:12px;font-size:14px;font-weight:500;color:#576075;margin-bottom:2px}
+.nv svg{width:22px;height:22px}
+.nv.on{background:#E5ECF4;color:#1F4674;font-weight:600}
+.side .sub{margin-top:16px;padding-top:12px;border-top:1px solid #EEF0F3}
+.side .sub .nv{font-size:13px;padding:8px 14px}
+.main{flex:1;overflow:auto;padding:24px 32px;box-sizing:border-box}
+.wrap{max-width:900px}
+.h{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:6px}
+.h h1{font-size:28px;font-weight:700;margin:0}
+.h a{font-size:13px;font-weight:600;background:#fff;border:1.5px solid #E7E9EE;color:#1F2B47;padding:8px 14px;border-radius:10px}
+.s{font-size:13px;color:#576075;margin-bottom:16px}
+.seg{display:inline-flex;background:#E7E9EE;border-radius:12px;padding:3px;margin-bottom:18px}
+.seg span{font-size:13px;font-weight:600;padding:8px 16px;border-radius:9px;color:#576075}
+.seg .on{background:#fff;color:#1F2B47;box-shadow:0 1px 3px rgba(31,43,71,.12)}
+.cols{display:grid;grid-template-columns:1fr 280px;gap:20px;align-items:start}
+.grp{background:#fff;border-radius:16px;border:1px solid #E7E9EE;overflow:hidden;margin-bottom:20px}
+.hd{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid #EEF0F3}
+.hd h2{font-size:14px;font-weight:700;margin:0;flex:1}.hd span{font-size:12px;color:#8F95A3}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{font-size:11px;font-weight:600;color:#8F95A3;text-align:right;padding:9px 16px;background:#F8F9FB;border-bottom:1px solid #EEF0F3}
+td{padding:11px 16px;border-top:1px solid #EEF0F3;vertical-align:middle}
+.tile{display:inline-flex;width:36px;height:36px;border-radius:10px;flex-direction:column;align-items:center;justify-content:center;direction:ltr;font-weight:700;line-height:1;vertical-align:middle;margin-left:10px}
+.tile b{font-size:8px;opacity:.7}.tile span{font-size:12px;margin-top:1px}
+.num{direction:ltr;text-align:right;font-variant-numeric:tabular-nums}
+.gr{font-size:15px;font-weight:700}
+.chip{font-size:11px;font-weight:600;padding:3px 8px;border-radius:999px;white-space:nowrap}
+.c-ok{background:#E6F4EC;color:#14603A}.c-neu{background:#EEF0F3;color:#576075}.c-info{background:#E5ECF4;color:#1F4674}
+tfoot td{font-weight:700;background:#F8F9FB}
+.gpa{background:#1F2B47;color:#fff;border-radius:16px;padding:18px;text-align:center}
+.gpa small{font-size:11px;color:rgba(255,255,255,.65)}
+.gpa b{display:block;font-size:44px;font-weight:700;line-height:1.1;direction:ltr;margin:4px 0}
+.gpa .m{font-size:12px;color:rgba(255,255,255,.75)}
+.gpa .r{display:flex;gap:8px;margin-top:14px}
+.gpa .r div{flex:1;background:rgba(255,255,255,.1);border-radius:10px;padding:8px 4px}
+.gpa .r b{font-size:16px;margin:0}.gpa .r span{font-size:10px;color:rgba(255,255,255,.7)}
+.tr{padding:12px 16px}
+.tr .rr{display:flex;align-items:center;gap:10px;padding:7px 0;font-size:13px}
+.tr .rr+.rr{border-top:1px solid #EEF0F3}
+.tr .n{flex:1}.tr .v{font-weight:700;direction:ltr}
+.tr .bar{width:70px;height:6px;border-radius:3px;background:#EEF0F3;overflow:hidden;direction:ltr}
+.tr .bar i{display:block;height:100%;background:#2D64A7}
+.note{font-size:11px;color:#8F95A3;line-height:1.7;padding:10px 16px;border-top:1px solid #EEF0F3}
+</style>
+</helmet>
+<div class="scr" style="width: 1280px; height: 800px">
+<div class="top"><span class="logo"><i></i>بوابة الطالب</span><span class="me"><i>أ م</i>أحمد محمد عثمان</span></div>
+<div class="row">
+<aside class="side">
+<a class="nv" href="DesktopStudentToday.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>اليوم</a>
+<a class="nv" href="DesktopStudentCourse.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>موادي</a>
+<a class="nv" href="StudentTasks.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>المهام</a>
+<a class="nv" href="StudentNotifications.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>الإشعارات</a>
+<a class="nv" href="StudentMe.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>أنا</a>
+<div class="sub">
+<a class="nv on" href="DesktopStudentResults.dc.html">النتائج</a>
+<a class="nv" href="StudentLive.dc.html">البث</a>
+<a class="nv" href="StudentRegulations.dc.html">اللوائح</a>
+<a class="nv" href="StudentDownloads.dc.html">التنزيلات</a>
+<a class="nv" href="StudentSettings.dc.html">الإعدادات</a>
+</div>
+</aside>
+<div class="main"><div class="wrap">
+<div class="h"><h1>نتائجي</h1><a href="StudentTranscript.dc.html">تنزيل كشف الدرجات PDF</a></div>
+<div class="s">24-IT-0031 · بكالوريوس تقنية المعلومات · المستوى الثالث · الفصول الظاهرة يحددها مسؤول النتائج</div>
+<div class="seg"><span class="on">ربيع 2026</span><span>خريف 2025</span><span>السجل الأكاديمي</span></div>
+<div class="cols">
+<div>
+<div class="grp"><div class="hd"><h2>ربيع 2025/2026 — 6 مواد · 18 ساعة</h2><span>نُشرت 20 سبتمبر 2026</span></div>
+<table>
+<thead><tr><th>المادة</th><th>الساعات</th><th>أعمال</th><th>نهائي</th><th>المجموع</th><th>التقدير</th><th>النقاط</th><th>الحالة</th></tr></thead>
+<tbody>
+<tr><td><span class="tile" style="background: #E6F4EC; color: #14603A"><b>IT</b><span>102</span></span>برمجة 2</td><td class="num">3</td><td class="num">31</td><td class="num">47</td><td class="num">78</td><td class="gr">B+</td><td class="num">3.5</td><td><span class="chip c-info">طلب تعديل قيد النظر</span></td></tr>
+<tr><td><span class="tile" style="background: #E6F4EC; color: #14603A"><b>IT</b><span>104</span></span>تنظيم الحاسوب</td><td class="num">3</td><td class="num">36</td><td class="num">55</td><td class="num">91</td><td class="gr">A</td><td class="num">4.0</td><td><span class="chip c-ok">منشورة</span></td></tr>
+<tr><td><span class="tile" style="background: #E5ECF4; color: #1F4674"><b>MTH</b><span>102</span></span>تفاضل وتكامل 2</td><td class="num">3</td><td class="num">30</td><td class="num">44</td><td class="num">74</td><td class="gr">B</td><td class="num">3.0</td><td><span class="chip c-ok">منشورة</span></td></tr>
+<tr><td><span class="tile" style="background: #E5ECF4; color: #1F4674"><b>STA</b><span>101</span></span>إحصاء</td><td class="num">3</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="gr" style="color: #8F95A3">—</td><td class="num">—</td><td><span class="chip c-neu">لم تُرصد بعد</span></td></tr>
+<tr><td><span class="tile" style="background: #EEE9F4; color: #6A4C93"><b>ENG</b><span>102</span></span>لغة إنجليزية 2</td><td class="num">3</td><td class="num">34</td><td class="num">50</td><td class="num">84</td><td class="gr">A-</td><td class="num">3.7</td><td><span class="chip c-ok">منشورة</span></td></tr>
+<tr><td><span class="tile" style="background: #FBF3E3; color: #8A5A14"><b>IT</b><span>106</span></span>مبادئ الشبكات</td><td class="num">3</td><td class="num">29</td><td class="num">41</td><td class="num">70</td><td class="gr">B</td><td class="num">3.0</td><td><span class="chip c-ok">منشورة</span></td></tr>
+</tbody>
+<tfoot><tr><td>المعدل الفصلي (5 مواد مرصودة)</td><td class="num">15</td><td></td><td></td><td class="num">79.4</td><td class="gr">B+</td><td class="num">3.44</td><td></td></tr></tfoot>
+</table>
+<div class="note">التنويه: النتائج المنشورة رسمية بعد اعتماد أمين الشؤون العلمية. أي اعتراض يُقدَّم عبر مسجل القسم خلال 14 يومًا من النشر.</div></div>
+</div>
+<div>
+<div class="gpa"><small>المعدل التراكمي</small><b>3.42</b><div class="m">54 ساعة مكتسبة من 132 · جيد جدًا</div><div class="r"><div><b>3.44</b><span>ربيع 2026</span></div><div><b>3.51</b><span>خريف 2025</span></div><div><b>3.30</b><span>ربيع 2025</span></div></div></div>
+<div class="grp" style="margin-top: 20px"><div class="hd"><h2>التقدم في الخطة</h2></div><div class="tr">
+<div class="rr"><span class="n">المستوى 1</span><span class="bar"><i style="width: 100%"></i></span><span class="v">36/36</span></div>
+<div class="rr"><span class="n">المستوى 2</span><span class="bar"><i style="width: 50%"></i></span><span class="v">18/36</span></div>
+<div class="rr"><span class="n">المستوى 3</span><span class="bar"><i style="width: 0%"></i></span><span class="v">0/36</span></div>
+<div class="rr"><span class="n">المستوى 4</span><span class="bar"><i style="width: 0%"></i></span><span class="v">0/24</span></div>
+</div></div>
+</div>
+</div>
+</div></div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":800}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>
