@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="ar">
+<head>
+<meta charset="utf-8">
+<title>الأستاذ — جلسة بث</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'IBM Plex Sans Arabic',system-ui,sans-serif;background:#F7F8FA;color:#1F2B47}
+a{color:#2D64A7;text-decoration:none}a:hover{color:#26558D}
+.scr{width:390px;height:844px;position:relative;overflow:hidden;background:#F7F8FA;direction:rtl;text-align:right;box-sizing:border-box}
+.body{position:absolute;top:0;left:0;right:0;bottom:0;overflow-y:auto;padding:54px 16px 40px;box-sizing:border-box}
+.back{display:flex;align-items:center;gap:2px;font-size:16px;color:#2D64A7;font-weight:500}
+.back svg{width:22px;height:22px}
+.h1{font-size:24px;font-weight:700;margin:10px 0 0;line-height:1.25}
+.card{background:#fff;border-radius:14px;box-shadow:0 1px 2px rgba(31,43,71,.06);overflow:hidden}
+.sec{font-size:13px;font-weight:600;color:#576075;margin:18px 4px 8px}
+.lbl{font-size:13px;font-weight:600;color:#3B4459;margin:14px 0 6px;display:block}
+.inp{width:100%;box-sizing:border-box;height:48px;border:1px solid #C0C3CB;border-radius:10px;padding:0 14px;font-size:15px;font-family:inherit;background:#fff;color:#1F2B47}
+.seg{display:flex;background:#EEF0F3;border-radius:10px;padding:3px;gap:2px}
+.seg button{flex:1;text-align:center;font-size:14px;font-weight:600;padding:9px 0;border-radius:8px;color:#576075;border:0;background:transparent;font-family:inherit;cursor:pointer}
+.seg .on{background:#fff;color:#1F2B47;box-shadow:0 1px 2px rgba(31,43,71,.08)}
+.row{display:flex;align-items:center;gap:12px;padding:12px 14px;min-height:52px;box-sizing:border-box}
+.row+.row{border-top:1px solid #EEF0F3}
+.t{font-size:15px;font-weight:600}
+.s{font-size:13px;color:#576075;margin-top:2px}
+.grow{flex-grow:1;min-width:0}
+.sw{width:46px;height:28px;border-radius:14px;background:#1E7F4F;position:relative;flex-shrink:0}
+.sw i{position:absolute;top:3px;left:21px;width:22px;height:22px;border-radius:11px;background:#fff}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;height:50px;border-radius:12px;font-size:16px;font-weight:600;border:0;font-family:inherit;box-sizing:border-box;width:100%}
+.b-pri{background:#2D64A7;color:#fff}
+</style>
+</helmet>
+<div class="scr" style="width: 390px; height: 844px">
+<div class="body">
+<a class="back" href="TeacherCourse.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg><span>قواعد البيانات</span></a>
+<h1 class="h1">جلسة بث جديدة</h1>
+<div class="s">الرابط من مزوّد خارجي — لا يُظهره النظام إلا للمسجلين في المادة</div>
+<label class="lbl" for="ti">العنوان</label>
+<input id="ti" class="inp" type="text" value="المحاضرة 7 — لغة SQL المتقدمة">
+<span class="lbl">النطاق</span>
+<div class="seg"><button class="on">هذه المادة (58)</button><button>المستوى الثاني (142)</button></div>
+<span class="lbl">المزوّد</span>
+<div class="seg"><button class="on">Teams</button><button>Google Meet</button><button>Zoom</button><button>آخر</button></div>
+<label class="lbl" for="u">رابط الانضمام</label>
+<input id="u" class="inp" type="url" placeholder="https://teams.microsoft.com/l/meetup-join/..." style="direction: ltr; text-align: left">
+<div style="display: flex; gap: 10px">
+<div style="flex: 1"><label class="lbl" for="d">التاريخ</label><input id="d" class="inp" type="text" value="الاثنين 28 سبتمبر"></div>
+<div style="flex: 1"><label class="lbl" for="tm">الوقت</label><input id="tm" class="inp" type="text" value="10:00 ص – 11:30 ص"></div>
+</div>
+<div class="sec">الخيارات</div>
+<div class="card">
+<div class="row"><span class="grow"><div class="t">تذكير الطلاب قبل 30 دقيقة</div><div class="s">إشعار داخل التطبيق + Push</div></span><span class="sw" role="switch" aria-checked="true" aria-label="تذكير"><i></i></span></div>
+<div class="row"><span class="grow"><div class="t">تكرار أسبوعيًا</div><div class="s">حتى نهاية الفصل · 8 جلسات</div></span><span class="sw" role="switch" aria-checked="true" aria-label="تكرار"><i></i></span></div>
+<div class="row"><span class="grow"><div class="t">تسجيل الحضور يدويًا بعد الجلسة</div><div class="s">قائمة الطلاب مع تحديد الحاضرين</div></span><span class="sw" role="switch" aria-checked="true" aria-label="حضور"><i></i></span></div>
+</div>
+<div style="height: 18px"></div>
+<a class="btn b-pri" href="TeacherCourse.dc.html">حفظ الجلسة</a>
+<div class="s" style="text-align: center; margin-top: 12px; line-height: 1.6">بعد انتهاء الجلسة يمكنك إرفاق رابط التسجيل كمورد في المحاضرة.</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

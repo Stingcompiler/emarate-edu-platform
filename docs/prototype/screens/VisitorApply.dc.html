@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="ar">
+<head>
+<meta charset="utf-8">
+<title>الموقع العام — التقديم</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'IBM Plex Sans Arabic',system-ui,sans-serif;background:#fff;color:#1F2B47}
+a{color:#2D64A7;text-decoration:none}a:hover{color:#26558D}
+.scr{width:390px;height:844px;position:relative;overflow:hidden;background:#fff;direction:rtl;text-align:right;box-sizing:border-box}
+.body{position:absolute;top:0;left:0;right:0;bottom:0;overflow-y:auto;padding:54px 20px 110px;box-sizing:border-box}
+.back{display:flex;align-items:center;gap:2px;font-size:16px;color:#2D64A7;font-weight:500}
+.back svg{width:22px;height:22px}
+.step{display:flex;align-items:center;gap:6px;margin:16px 0 6px}
+.st{flex:1;height:4px;border-radius:2px;background:#DCDFE5}
+.st.done{background:#1E7F4F}.st.cur{background:#2D64A7}
+.h1{font-size:22px;font-weight:700;margin:10px 0 4px}
+.s{font-size:13px;color:#576075;line-height:1.6}
+.lbl{font-size:13px;font-weight:600;color:#3B4459;margin:14px 0 6px;display:block}
+.inp{width:100%;box-sizing:border-box;height:50px;border:1px solid #C0C3CB;border-radius:12px;padding:0 14px;font-size:16px;font-family:inherit;background:#fff;color:#1F2B47}
+.sel{display:flex;align-items:center;justify-content:space-between}
+.two{display:flex;gap:10px}
+.two div{flex:1}
+.drop{border:1.5px dashed #96B1D3;border-radius:12px;padding:14px;text-align:center;color:#2D64A7;font-size:14px;background:#F2F5F9}
+.ok{display:flex;align-items:center;gap:10px;border:1px solid #C9E8D5;background:#E6F4EC;border-radius:12px;padding:10px 12px;font-size:13px;color:#14603A;margin-top:8px}
+.fix{position:absolute;left:20px;right:20px;bottom:24px;display:flex;gap:8px}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;height:50px;border-radius:12px;font-size:16px;font-weight:600;border:0;font-family:inherit;box-sizing:border-box;flex:1}
+.b-pri{background:#2D64A7;color:#fff}.b-sec{background:#EEF0F3;color:#1F2B47;flex:0 0 110px}
+</style>
+</helmet>
+<div class="scr" style="width: 390px; height: 844px">
+<div class="body">
+<div style="display: flex; justify-content: space-between; align-items: center">
+<a class="back" href="VisitorProgram.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg><span>البرنامج</span></a>
+<span class="s">تُحفظ المسودة تلقائيًا</span>
+</div>
+<div class="step" aria-label="الخطوة 3 من 5"><span class="st done"></span><span class="st done"></span><span class="st cur"></span><span class="st"></span><span class="st"></span></div>
+<div class="s">الخطوة 3 من 5 · البيانات الأكاديمية</div>
+<h1 class="h1">مؤهلك السابق</h1>
+<div class="s">هذه الحقول من قالب «بكالوريوس تقنية المعلومات» الذي يحدده مسؤول المسجلين.</div>
+<span class="lbl">نوع الشهادة</span>
+<div class="inp sel"><span>الشهادة السودانية — علمي</span><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#8F95A3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></div>
+<div class="two">
+<div><label class="lbl" for="y">سنة التخرج</label><input id="y" class="inp" type="text" inputmode="numeric" value="2026"></div>
+<div><label class="lbl" for="p">النسبة %</label><input id="p" class="inp" type="text" inputmode="decimal" value="82.4"></div>
+</div>
+<label class="lbl" for="sc">المدرسة</label>
+<input id="sc" class="inp" type="text" value="مدرسة الخرطوم الثانوية بنات">
+<label class="lbl" for="st">الولاية</label>
+<div class="inp sel"><span>الخرطوم</span><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#8F95A3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></div>
+<span class="lbl">الشهادة الثانوية (PDF أو صورة، حتى 10 MB)</span>
+<div class="drop">اضغط لالتقاط صورة أو اختيار ملف</div>
+<div class="ok"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>الشهادة-الثانوية.pdf · 1.8 MB · رُفع</div>
+<div class="s" style="margin-top: 16px">الخطوات: 1 التحقق (بريد/هاتف + رمز) ✓ · 2 البرنامج ✓ · <b style="color: #1F2B47">3 الأكاديمي</b> · 4 المستندات · 5 المراجعة والإرسال</div>
+</div>
+<div class="fix">
+<a class="btn b-sec" href="VisitorApply.dc.html">السابق</a>
+<a class="btn b-pri" href="VisitorTrack.dc.html">التالي: المستندات</a>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="ar">
+<head>
+<meta charset="utf-8">
+<title>الأستاذ — طابور التصحيح</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'IBM Plex Sans Arabic',system-ui,sans-serif;background:#F7F8FA;color:#1F2B47}
+a{color:#2D64A7;text-decoration:none}a:hover{color:#26558D}
+.scr{width:390px;height:844px;position:relative;overflow:hidden;background:#F7F8FA;direction:rtl;text-align:right;box-sizing:border-box}
+.body{position:absolute;top:0;left:0;right:0;bottom:0;overflow-y:auto;padding:58px 16px 120px;box-sizing:border-box}
+.h1{font-size:28px;font-weight:700;margin:0;line-height:1.25}
+.sub{font-size:14px;color:#576075;margin-top:4px}
+.seg{display:flex;background:#EEF0F3;border-radius:10px;padding:3px;gap:2px;margin:14px 0}
+.seg a{flex:1;text-align:center;font-size:14px;font-weight:600;padding:8px 0;border-radius:8px;color:#576075}
+.seg .on{background:#fff;color:#1F2B47;box-shadow:0 1px 2px rgba(31,43,71,.08)}
+.card{background:#fff;border-radius:14px;box-shadow:0 1px 2px rgba(31,43,71,.06);overflow:hidden}
+.sec{font-size:13px;font-weight:600;color:#576075;margin:18px 4px 8px;display:flex;justify-content:space-between}
+.row{display:flex;align-items:center;gap:12px;padding:12px 14px;min-height:56px;box-sizing:border-box;color:#1F2B47}
+.row+.row{border-top:1px solid #EEF0F3}
+.av{width:36px;height:36px;border-radius:18px;background:#E5ECF4;color:#1F4674;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0}
+.t{font-size:15px;font-weight:600;line-height:1.35}
+.s{font-size:13px;color:#576075;margin-top:2px}
+.grow{flex-grow:1;min-width:0}
+.badge{font-size:11px;font-weight:600;padding:3px 8px;border-radius:999px;white-space:nowrap}
+.b-warn{background:#FBF3E3;color:#8A5A14}.b-bad{background:#FBE9E7;color:#922B20}.b-info{background:#E5ECF4;color:#1F4674}.b-neu{background:#EEF0F3;color:#3B4459}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;height:48px;border-radius:12px;font-size:15px;font-weight:600;border:0;font-family:inherit;box-sizing:border-box;width:100%}
+.b-pri{background:#2D64A7;color:#fff}
+.tabs{position:absolute;left:12px;right:12px;bottom:14px;height:64px;border-radius:24px;background:rgba(255,255,255,.94);box-shadow:0 4px 16px rgba(31,43,71,.12);border:1px solid #EEF0F3;display:flex;align-items:center;justify-content:space-around;padding:0 6px}
+.tab{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;font-weight:500;color:#8F95A3;width:64px;position:relative}
+.tab svg{width:24px;height:24px}
+.tab.on{color:#2D64A7;font-weight:600}
+.tab .n{position:absolute;top:-4px;right:12px;background:#B02544;color:#fff;font-size:10px;font-weight:700;min-width:16px;height:16px;border-radius:8px;display:flex;align-items:center;justify-content:center;padding:0 4px}
+</style>
+</helmet>
+<div class="scr" style="width: 390px; height: 844px">
+<div class="body">
+<h1 class="h1">التصحيح</h1>
+<div class="sub">14 تسليمًا بانتظارك · متوسط زمن تصحيحك 1.8 يوم</div>
+<div class="seg"><a class="on" href="TeacherGrading.dc.html">بانتظار (14)</a><a href="TeacherGrading.dc.html">اقتراحات آلية (6)</a><a href="TeacherGrading.dc.html">مصحح</a></div>
+<a class="btn b-pri" href="TeacherGradeSubmission.dc.html">ابدأ التصحيح المتسلسل</a>
+<div class="sec"><span>قواعد البيانات — واجب 2 ERD</span><span>9</span></div>
+<div class="card">
+<a class="row" href="TeacherGradeSubmission.dc.html"><span class="av">أ م</span><span class="grow"><div class="t">أحمد محمد عثمان</div><div class="s">سُلِّم 5:42 م · PDF + GitHub · اقتراح آلي 16/20</div></span><span class="badge b-info">مقترح</span></a>
+<a class="row" href="TeacherGradeSubmission.dc.html"><span class="av">ف ع</span><span class="grow"><div class="t">فاطمة عبد الله</div><div class="s">سُلِّم 4:10 م · PDF</div></span><span class="badge b-warn">جديد</span></a>
+<a class="row" href="TeacherGradeSubmission.dc.html"><span class="av">م خ</span><span class="grow"><div class="t">محمد خالد</div><div class="s">إعادة تسليم (الإصدار 2) · 3:55 م</div></span><span class="badge b-warn">جديد</span></a>
+<a class="row" href="TeacherGradeSubmission.dc.html"><span class="av">س أ</span><span class="grow"><div class="t">سلمى أحمد</div><div class="s">سُلِّم أمس · متأخر يومًا · خصم 10%</div></span><span class="badge b-bad">متأخر</span></a>
+<a class="row" href="TeacherGrading.dc.html"><span class="grow" style="text-align: center; color: #2D64A7; font-size: 14px; font-weight: 600">عرض 5 أخرى</span></a>
+</div>
+<div class="sec"><span>نظم المعلومات — تقرير حالة</span><span>5</span></div>
+<div class="card">
+<a class="row" href="TeacherGradeSubmission.dc.html"><span class="av">ه م</span><span class="grow"><div class="t">هبة مصطفى</div><div class="s">سُلِّم اليوم · DOCX</div></span><span class="badge b-warn">جديد</span></a>
+<a class="row" href="TeacherGradeSubmission.dc.html"><span class="av">ع ص</span><span class="grow"><div class="t">عمر صالح</div><div class="s">سُلِّم اليوم · PDF</div></span><span class="badge b-warn">جديد</span></a>
+<a class="row" href="TeacherGrading.dc.html"><span class="grow" style="text-align: center; color: #2D64A7; font-size: 14px; font-weight: 600">عرض 3 أخرى</span></a>
+</div>
+<div class="sec"><span>لم يسلّموا — واجب 2 ERD</span><span>17</span></div>
+<div class="card"><div class="row"><span class="grow"><div class="s" style="margin: 0">ينتهي الموعد الليلة 11:59 م</div></span><a href="TeacherAnnouncement.dc.html" style="font-size: 13px; font-weight: 600">إرسال تذكير للـ 17</a></div></div>
+</div>
+<nav class="tabs" aria-label="التنقل الرئيسي">
+<a class="tab" href="TeacherToday.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="3"/><path d="M16 2v4M8 2v4M3 10h18M9 16l2 2 4-4"/></svg><span>اليوم</span></a>
+<a class="tab" href="TeacherCourses.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4h6a4 4 0 0 1 4 4v12a3 3 0 0 0-3-3H2zM22 4h-6a4 4 0 0 0-4 4v12a3 3 0 0 1 3-3h7z"/></svg><span>موادي</span></a>
+<a class="tab on" href="TeacherGrading.dc.html"><span class="n">14</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2M9 14l2 2 4-4"/></svg><span>التصحيح</span></a>
+<a class="tab" href="TeacherToday.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg><span>الإشعارات</span></a>
+<a class="tab" href="TeacherToday.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>أنا</span></a>
+</nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

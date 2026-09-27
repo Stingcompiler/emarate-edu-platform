@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="ar">
+<head>
+<meta charset="utf-8">
+<title>الطالب — موادي</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'IBM Plex Sans Arabic',system-ui,sans-serif;background:#F7F8FA;color:#1F2B47}
+a{color:#2D64A7;text-decoration:none}a:hover{color:#26558D}
+.scr{width:390px;height:844px;position:relative;overflow:hidden;background:#F7F8FA;direction:rtl;text-align:right;box-sizing:border-box}
+.body{position:absolute;top:0;left:0;right:0;bottom:0;overflow-y:auto;padding:58px 16px 120px;box-sizing:border-box}
+.h1{font-size:28px;font-weight:700;margin:0;line-height:1.25}
+.sub{font-size:14px;color:#576075;margin-top:4px}
+.seg{display:flex;background:#EEF0F3;border-radius:10px;padding:3px;gap:2px;margin:16px 0}
+.seg a{flex:1;text-align:center;font-size:14px;font-weight:600;padding:8px 0;border-radius:8px;color:#576075}
+.seg .on{background:#fff;color:#1F2B47;box-shadow:0 1px 2px rgba(31,43,71,.08)}
+.grid{display:grid;grid-template-columns:repeat(2, minmax(0, 1fr));gap:12px}
+.cc{background:#fff;border-radius:14px;box-shadow:0 1px 2px rgba(31,43,71,.06);overflow:hidden;color:#1F2B47;display:flex;flex-direction:column;min-height:150px}
+.strip{height:8px}
+.cb{padding:12px 12px 12px;display:flex;flex-direction:column;gap:4px;flex-grow:1}
+.code{font-size:11px;font-weight:700;letter-spacing:.3px;color:#576075}
+.nm{font-size:15px;font-weight:600;line-height:1.35}
+.tc{font-size:12px;color:#576075}
+.bar{height:5px;border-radius:3px;background:#EEF0F3;margin-top:auto;overflow:hidden}
+.bar span{display:block;height:100%;border-radius:3px}
+.foot{display:flex;justify-content:space-between;align-items:center;font-size:11px;color:#576075;margin-top:6px}
+.badge{font-size:10px;font-weight:600;padding:2px 7px;border-radius:999px;background:#F5E4E8;color:#7B192F}
+.tabs{position:absolute;left:12px;right:12px;bottom:14px;height:64px;border-radius:24px;background:rgba(255,255,255,.94);box-shadow:0 4px 16px rgba(31,43,71,.12);border:1px solid #EEF0F3;display:flex;align-items:center;justify-content:space-around;padding:0 6px}
+.tab{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;font-weight:500;color:#8F95A3;width:64px;position:relative}
+.tab svg{width:24px;height:24px}
+.tab.on{color:#2D64A7;font-weight:600}
+.tab .n{position:absolute;top:-4px;right:12px;background:#B02544;color:#fff;font-size:10px;font-weight:700;min-width:16px;height:16px;border-radius:8px;display:flex;align-items:center;justify-content:center;padding:0 4px}
+</style>
+</helmet>
+<div class="scr" style="width: 390px; height: 844px">
+<div class="body">
+<div style="display: flex; justify-content: space-between; align-items: flex-start">
+<div><h1 class="h1">موادي</h1><div class="sub">5 مواد · 15 ساعة معتمدة</div></div>
+<a href="StudentDownloads.dc.html" aria-label="التنزيلات" style="width: 40px; height: 40px; border-radius: 12px; background: #fff; box-shadow: 0 1px 2px rgba(31,43,71,.08); display: flex; align-items: center; justify-content: center; color: #2D64A7"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 13v8M8 17l4 4 4-4"/><path d="M20 16.6A5 5 0 0 0 18 7h-1.3A8 8 0 1 0 4 15.2"/></svg></a>
+</div>
+<div class="seg"><a class="on" href="StudentCourses.dc.html">خريف 2026</a><a href="StudentResults.dc.html">الفصول السابقة</a></div>
+<div class="grid">
+<a class="cc" href="StudentCourse.dc.html"><span class="strip" style="background: #2D64A7"></span><span class="cb"><span class="code">IT201</span><span class="nm">قواعد البيانات</span><span class="tc">د. سارة الطيب</span><span class="bar"><span style="width: 62%; background: #2D64A7"></span></span><span class="foot"><span>5 من 8 محاضرات</span><span class="badge">واجب</span></span></span></a>
+<a class="cc" href="StudentCourse.dc.html"><span class="strip" style="background: #0F8B8D"></span><span class="cb"><span class="code">IT203</span><span class="nm">هياكل البيانات</span><span class="tc">د. عمر البشير</span><span class="bar"><span style="width: 75%; background: #0F8B8D"></span></span><span class="foot"><span>6 من 8 محاضرات</span><span class="badge">اختبار</span></span></span></a>
+<a class="cc" href="StudentCourse.dc.html"><span class="strip" style="background: #6A4C93"></span><span class="cb"><span class="code">IT205</span><span class="nm">شبكات الحاسوب</span><span class="tc">أ. خالد حسن</span><span class="bar"><span style="width: 50%; background: #6A4C93"></span></span><span class="foot"><span>4 من 8 محاضرات</span></span></span></a>
+<a class="cc" href="StudentCourse.dc.html"><span class="strip" style="background: #D98E04"></span><span class="cb"><span class="code">MTH202</span><span class="nm">رياضيات متقطعة</span><span class="tc">د. هالة عبد الرحمن</span><span class="bar"><span style="width: 88%; background: #D98E04"></span></span><span class="foot"><span>7 من 8 محاضرات</span></span></span></a>
+<a class="cc" href="StudentCourse.dc.html"><span class="strip" style="background: #1E7F4F"></span><span class="cb"><span class="code">ENG201</span><span class="nm">لغة إنجليزية تقنية</span><span class="tc">أ. منى إبراهيم</span><span class="bar"><span style="width: 38%; background: #1E7F4F"></span></span><span class="foot"><span>3 من 8 محاضرات</span></span></span></a>
+<span class="cc" style="border: 1px dashed #C0C3CB; box-shadow: none; background: transparent; align-items: center; justify-content: center; color: #8F95A3; font-size: 13px; text-align: center; padding: 12px">اضغط مطوّلًا على أي مادة: تنزيل، إخفاء، إشعارات</span>
+</div>
+</div>
+<nav class="tabs" aria-label="التنقل الرئيسي">
+<a class="tab" href="StudentToday.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="3"/><path d="M16 2v4M8 2v4M3 10h18M9 16l2 2 4-4"/></svg><span>اليوم</span></a>
+<a class="tab on" href="StudentCourses.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4h6a4 4 0 0 1 4 4v12a3 3 0 0 0-3-3H2zM22 4h-6a4 4 0 0 0-4 4v12a3 3 0 0 1 3-3h7z"/></svg><span>موادي</span></a>
+<a class="tab" href="StudentTasks.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M10 6h11M10 12h11M10 18h11M3 6l1.5 1.5L7 5M3 12l1.5 1.5L7 11M3 18l1.5 1.5L7 17"/></svg><span>المهام</span></a>
+<a class="tab" href="StudentNotifications.dc.html"><span class="n">3</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg><span>الإشعارات</span></a>
+<a class="tab" href="StudentMe.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>أنا</span></a>
+</nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

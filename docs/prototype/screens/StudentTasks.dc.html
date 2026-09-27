@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="ar">
+<head>
+<meta charset="utf-8">
+<title>الطالب — المهام</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'IBM Plex Sans Arabic',system-ui,sans-serif;background:#F7F8FA;color:#1F2B47}
+a{color:#2D64A7;text-decoration:none}a:hover{color:#26558D}
+.scr{width:390px;height:844px;position:relative;overflow:hidden;background:#F7F8FA;direction:rtl;text-align:right;box-sizing:border-box}
+.body{position:absolute;top:0;left:0;right:0;bottom:0;overflow-y:auto;padding:58px 16px 120px;box-sizing:border-box}
+.h1{font-size:28px;font-weight:700;margin:0;line-height:1.25}
+.sub{font-size:14px;color:#576075;margin-top:4px}
+.seg{display:flex;background:#EEF0F3;border-radius:10px;padding:3px;gap:2px;margin:14px 0}
+.seg a{flex:1;text-align:center;font-size:14px;font-weight:600;padding:8px 0;border-radius:8px;color:#576075}
+.seg .on{background:#fff;color:#1F2B47;box-shadow:0 1px 2px rgba(31,43,71,.08)}
+.card{background:#fff;border-radius:14px;box-shadow:0 1px 2px rgba(31,43,71,.06);overflow:hidden}
+.sec{font-size:13px;font-weight:600;color:#576075;margin:18px 4px 8px;display:flex;justify-content:space-between}
+.row{display:flex;align-items:center;gap:12px;padding:12px 14px;min-height:56px;box-sizing:border-box;color:#1F2B47}
+.row+.row{border-top:1px solid #EEF0F3}
+.dot{width:10px;height:10px;border-radius:5px;flex-shrink:0}
+.t{font-size:16px;font-weight:600;line-height:1.35}
+.s{font-size:13px;color:#576075;margin-top:2px}
+.grow{flex-grow:1;min-width:0}
+.badge{font-size:11px;font-weight:600;padding:3px 8px;border-radius:999px;white-space:nowrap}
+.b-info{background:#E5ECF4;color:#1F4674}.b-warn{background:#FBF3E3;color:#8A5A14}.b-ok{background:#E6F4EC;color:#14603A}.b-bad{background:#FBE9E7;color:#922B20}.b-neu{background:#EEF0F3;color:#3B4459}
+.bars{display:flex;align-items:flex-end;gap:6px;height:56px;direction:rtl}
+.bars div{flex:1;border-radius:4px 4px 0 0;background:#C4D3E6}
+.bars .hi{background:#2D64A7}
+.days{display:flex;gap:6px;font-size:11px;color:#576075;margin-top:6px}
+.days span{flex:1;text-align:center}
+.tabs{position:absolute;left:12px;right:12px;bottom:14px;height:64px;border-radius:24px;background:rgba(255,255,255,.94);box-shadow:0 4px 16px rgba(31,43,71,.12);border:1px solid #EEF0F3;display:flex;align-items:center;justify-content:space-around;padding:0 6px}
+.tab{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;font-weight:500;color:#8F95A3;width:64px;position:relative}
+.tab svg{width:24px;height:24px}
+.tab.on{color:#2D64A7;font-weight:600}
+.tab .n{position:absolute;top:-4px;right:12px;background:#B02544;color:#fff;font-size:10px;font-weight:700;min-width:16px;height:16px;border-radius:8px;display:flex;align-items:center;justify-content:center;padding:0 4px}
+</style>
+</helmet>
+<div class="scr" style="width: 390px; height: 844px">
+<div class="body">
+<h1 class="h1">المهام</h1>
+<div class="sub">8 مهام قادمة عبر 5 مواد</div>
+<div class="seg"><a class="on" href="StudentTasks.dc.html">الكل</a><a href="StudentTasks.dc.html">واجبات</a><a href="StudentTasks.dc.html">اختبارات</a></div>
+<div class="card" style="padding: 14px 16px">
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px"><span class="t" style="font-size: 14px">حجم العمل هذا الأسبوع</span><span class="s" style="margin: 0">الذروة: الثلاثاء</span></div>
+<div class="bars" aria-label="عدد المهام لكل يوم"><div style="height: 40%"></div><div style="height: 70%"></div><div class="hi" style="height: 100%"></div><div style="height: 30%"></div><div style="height: 55%"></div><div style="height: 10%"></div><div style="height: 10%"></div></div>
+<div class="days"><span>أحد</span><span>إثنين</span><span>ثلاثاء</span><span>أربعاء</span><span>خميس</span><span>جمعة</span><span>سبت</span></div>
+</div>
+<div class="sec"><span>متأخر</span><span style="color: #C0392B">1</span></div>
+<div class="card">
+<a class="row" href="StudentAssignment.dc.html"><span class="dot" style="background: #6A4C93"></span><span class="grow"><div class="t">تقرير معمل 3 — تكوين الموجّه</div><div class="s">شبكات الحاسوب · تأخر يومين · خصم 10%</div></span><span class="badge b-bad">متأخر</span></a>
+</div>
+<div class="sec"><span>اليوم</span><span>2</span></div>
+<div class="card">
+<a class="row" href="StudentAssignment.dc.html"><span class="dot" style="background: #2D64A7"></span><span class="grow"><div class="t">واجب 2 — تصميم مخطط ERD</div><div class="s">قواعد البيانات · 11:59 م</div></span><span class="badge b-warn">6 ساعات</span></a>
+<a class="row" href="StudentTasks.dc.html"><span class="dot" style="background: #D98E04"></span><span class="grow"><div class="t">قراءة: الفصل 4 — نظرية الأعداد</div><div class="s">رياضيات متقطعة · بلا تسليم</div></span><span class="badge b-neu">اسحب لإتمام</span></a>
+</div>
+<div class="sec"><span>هذا الأسبوع</span><span>3</span></div>
+<div class="card">
+<a class="row" href="StudentExamStart.dc.html"><span class="dot" style="background: #0F8B8D"></span><span class="grow"><div class="t">اختبار منتصف الفصل</div><div class="s">هياكل البيانات · غدًا 10:00 ص · 45 دقيقة</div></span><span class="badge b-info">اختبار</span></a>
+<a class="row" href="StudentAssignment.dc.html"><span class="dot" style="background: #1E7F4F"></span><span class="grow"><div class="t">عرض تقديمي — مقال تقني</div><div class="s">لغة إنجليزية · الثلاثاء</div></span><span class="badge b-neu">واجب</span></a>
+<a class="row" href="StudentExamStart.dc.html"><span class="dot" style="background: #2D64A7"></span><span class="grow"><div class="t">اختبار قصير 1 — النموذج العلائقي</div><div class="s">قواعد البيانات · حتى الجمعة</div></span><span class="badge b-info">مفتوح</span></a>
+</div>
+<div class="sec"><span>مكتمل</span><span>2</span></div>
+<div class="card" style="opacity: .75">
+<a class="row" href="StudentAssignment.dc.html"><span class="dot" style="background: #2D64A7"></span><span class="grow"><div class="t" style="text-decoration: line-through; color: #576075">واجب 1 — استعلامات SQL</div><div class="s">18/20</div></span><span class="badge b-ok">مصحح</span></a>
+<a class="row" href="StudentTasks.dc.html"><span class="dot" style="background: #0F8B8D"></span><span class="grow"><div class="t" style="text-decoration: line-through; color: #576075">تمرين 2 — القوائم المرتبطة</div><div class="s">سُلِّم</div></span><span class="badge b-neu">بانتظار التصحيح</span></a>
+</div>
+</div>
+<nav class="tabs" aria-label="التنقل الرئيسي">
+<a class="tab" href="StudentToday.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="3"/><path d="M16 2v4M8 2v4M3 10h18M9 16l2 2 4-4"/></svg><span>اليوم</span></a>
+<a class="tab" href="StudentCourses.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4h6a4 4 0 0 1 4 4v12a3 3 0 0 0-3-3H2zM22 4h-6a4 4 0 0 0-4 4v12a3 3 0 0 1 3-3h7z"/></svg><span>موادي</span></a>
+<a class="tab on" href="StudentTasks.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M10 6h11M10 12h11M10 18h11M3 6l1.5 1.5L7 5M3 12l1.5 1.5L7 11M3 18l1.5 1.5L7 17"/></svg><span>المهام</span></a>
+<a class="tab" href="StudentNotifications.dc.html"><span class="n">3</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg><span>الإشعارات</span></a>
+<a class="tab" href="StudentMe.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>أنا</span></a>
+</nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

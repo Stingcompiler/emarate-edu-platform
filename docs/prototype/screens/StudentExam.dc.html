@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="ar">
+<head>
+<meta charset="utf-8">
+<title>الطالب — أثناء الاختبار</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'IBM Plex Sans Arabic',system-ui,sans-serif;background:#FFFFFF;color:#1F2B47}
+a{color:#2D64A7;text-decoration:none}a:hover{color:#26558D}
+.scr{width:390px;height:844px;position:relative;overflow:hidden;background:#fff;direction:rtl;text-align:right;box-sizing:border-box}
+.top{position:absolute;top:0;left:0;right:0;height:104px;padding:50px 16px 0;box-sizing:border-box;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #EEF0F3;background:#fff}
+.timer{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:6px 12px;font-size:15px;font-weight:700;background:#FBF3E3;color:#8A5A14;direction:ltr;font-variant-numeric:tabular-nums}
+.body{position:absolute;top:104px;left:0;right:0;bottom:96px;overflow-y:auto;padding:18px 16px;box-sizing:border-box}
+.opt{display:flex;align-items:center;gap:12px;width:100%;box-sizing:border-box;padding:14px;border:1.5px solid #DCDFE5;border-radius:14px;background:#fff;font-size:16px;font-family:inherit;text-align:right;color:#1F2B47;cursor:pointer;min-height:56px}
+.opt+.opt{margin-top:10px}
+.opt .r{width:22px;height:22px;border-radius:11px;border:2px solid #C0C3CB;flex-shrink:0;box-sizing:border-box}
+.opt.on{border-color:#2D64A7;background:#F2F5F9}
+.opt.on .r{border:7px solid #2D64A7}
+.bot{position:absolute;left:0;right:0;bottom:0;height:96px;padding:10px 16px 28px;box-sizing:border-box;border-top:1px solid #EEF0F3;background:#fff;display:flex;gap:10px;align-items:center}
+.btn{display:flex;align-items:center;justify-content:center;gap:6px;height:48px;border-radius:12px;font-size:15px;font-weight:600;border:0;font-family:inherit;box-sizing:border-box;cursor:pointer}
+.b-pri{background:#2D64A7;color:#fff;flex:1}.b-sec{background:#EEF0F3;color:#1F2B47;flex:1}.b-flag{background:#fff;border:1.5px solid #DCDFE5;color:#576075;width:48px;padding:0}
+.dim{position:absolute;left:0;top:0;width:390px;height:844px;background:rgba(17,19,24,.45)}
+.sheet{position:absolute;left:0;right:0;bottom:0;background:#fff;border-radius:20px 20px 0 0;box-shadow:0 -8px 32px rgba(31,43,71,.18);padding:10px 16px 28px;box-sizing:border-box}
+.handle{width:36px;height:5px;border-radius:3px;background:#C0C3CB;margin:0 auto 12px}
+.grid{display:grid;grid-template-columns:repeat(5, minmax(0, 1fr));gap:8px;direction:ltr}
+.q{height:48px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:15px;border:1.5px solid #DCDFE5;background:#fff;color:#1F2B47;font-family:inherit;cursor:pointer}
+.q.a{background:#E6F4EC;border-color:#C9E8D5;color:#14603A}
+.q.m{background:#FBF3E3;border-color:#F1DDB0;color:#8A5A14}
+.q.c{border-color:#2D64A7;box-shadow:0 0 0 3px #C4D3E6}
+.leg{display:flex;gap:14px;font-size:12px;color:#576075;margin:12px 0 14px}
+.leg span{display:flex;align-items:center;gap:5px}
+.leg i{width:12px;height:12px;border-radius:3px;display:inline-block}
+.x{position:absolute;left:14px;top:14px;width:32px;height:32px;border-radius:16px;background:#EEF0F3;border:0;display:flex;align-items:center;justify-content:center;color:#3B4459;cursor:pointer}
+.x svg{width:18px;height:18px}
+</style>
+</helmet>
+<div class="scr" style="width: 390px; height: 844px">
+<div class="top">
+<span class="timer" aria-live="polite"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>38:12</span>
+<span style="font-size: 14px; font-weight: 600">السؤال 4 من 20</span>
+<button class="btn" style="height: 36px; padding: 0 12px; background: #EEF0F3; color: #1F2B47; font-size: 13px" onClick="{{openNav}}">الأسئلة</button>
+</div>
+<div class="body">
+<div style="display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: #576075; margin-bottom: 12px"><span>هياكل البيانات · اختبار منتصف الفصل</span><span style="color: #1E7F4F; display: flex; align-items: center; gap: 4px"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>محفوظ 10:42</span></div>
+<div style="font-size: 12px; font-weight: 700; color: #2D64A7; margin-bottom: 6px">سؤال اختيار من متعدد · 2 درجة</div>
+<p style="font-size: 18px; font-weight: 600; line-height: 1.7; margin: 0 0 18px">ما هو التعقيد الزمني لإدراج عنصر في بداية قائمة مرتبطة أحادية (Singly Linked List) عند وجود مؤشر للرأس؟</p>
+<button class="opt {{o1}}" onClick="{{p1}}"><span class="r"></span><span style="direction: ltr">O(1)</span></button>
+<button class="opt {{o2}}" onClick="{{p2}}"><span class="r"></span><span style="direction: ltr">O(log n)</span></button>
+<button class="opt {{o3}}" onClick="{{p3}}"><span class="r"></span><span style="direction: ltr">O(n)</span></button>
+<button class="opt {{o4}}" onClick="{{p4}}"><span class="r"></span><span style="direction: ltr">O(n log n)</span></button>
+<div style="font-size: 12px; color: #8F95A3; margin-top: 16px; line-height: 1.6">يُحفظ اختيارك فورًا على الجهاز ويُرسل للخادم كل 10 ثوانٍ. عند انقطاع الإنترنت يظهر هنا: «يعمل دون اتصال — سيُرسل عند العودة».</div>
+</div>
+<div class="bot">
+<button class="btn b-flag" aria-label="تمييز السؤال للمراجعة"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22V4a2 2 0 0 1 2-2h11l-2 5 2 5H6"/></svg></button>
+<button class="btn b-sec">السابق</button>
+<button class="btn b-pri">التالي</button>
+</div>
+<sc-if value="{{nav}}" hint-placeholder-val="{{ false }}">
+<div class="dim"></div>
+<div class="sheet">
+<div class="handle"></div>
+<button class="x" onClick="{{closeNav}}" aria-label="إغلاق"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+<div style="font-size: 18px; font-weight: 700">الأسئلة</div>
+<div class="leg"><span><i style="background: #E6F4EC; border: 1px solid #C9E8D5"></i>مُجاب 9</span><span><i style="background: #FBF3E3; border: 1px solid #F1DDB0"></i>مميّز 2</span><span><i style="background: #fff; border: 1px solid #DCDFE5"></i>متبقٍ 9</span></div>
+<div class="grid">
+<button class="q a">1</button><button class="q a">2</button><button class="q a">3</button><button class="q c">4</button><button class="q">5</button>
+<button class="q a">6</button><button class="q m">7</button><button class="q a">8</button><button class="q">9</button><button class="q">10</button>
+<button class="q a">11</button><button class="q a">12</button><button class="q">13</button><button class="q m">14</button><button class="q">15</button>
+<button class="q a">16</button><button class="q">17</button><button class="q">18</button><button class="q a">19</button><button class="q">20</button>
+</div>
+<div style="height: 16px"></div>
+<a class="btn" style="background: #B02544; color: #fff; width: 100%" href="StudentExamResult.dc.html">إرسال الاختبار (9 أسئلة بلا إجابة)</a>
+</div>
+</sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+constructor(props) { super(props); this.state = { pick: 0, nav: false }; }
+renderVals() {
+const p = this.state.pick;
+const pick = (n) => () => this.setState({ pick: n });
+return {
+o1: p === 1 ? 'on' : '', o2: p === 2 ? 'on' : '', o3: p === 3 ? 'on' : '', o4: p === 4 ? 'on' : '',
+p1: pick(1), p2: pick(2), p3: pick(3), p4: pick(4),
+nav: this.state.nav, openNav: () => this.setState({ nav: true }), closeNav: () => this.setState({ nav: false })
+};
+}
+}
+</script>
+</body>
+</html>

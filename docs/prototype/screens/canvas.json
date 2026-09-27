@@ -1,0 +1,65 @@
+{
+  "v": 3,
+  "attachments": {},
+  "createdOnFiles": {"at": "2026-09-27T17:11:48.976Z", "v": 1},
+  "title": "ECST Portal Prototype",
+  "launch": {"view": "canvas"},
+  "pages": [],
+  "boards": {
+    "Main.dc.html": {"x": 0, "y": 0, "w": 390, "h": 844, "title": "القائمة — اختر الدور", "is_interactive": true, "radius": 40},
+    "Login.dc.html": {"x": 470, "y": 0, "w": 390, "h": 844, "title": "تسجيل الدخول", "is_interactive": true, "radius": 40},
+    "Register.dc.html": {"x": 940, "y": 0, "w": 390, "h": 844, "title": "تسجيل طالب — OTP", "is_interactive": true, "radius": 40},
+    "VisitorProgram.dc.html": {"x": 1410, "y": 0, "w": 390, "h": 844, "title": "الموقع العام — برنامج", "is_interactive": true, "radius": 40},
+    "VisitorApply.dc.html": {"x": 1880, "y": 0, "w": 390, "h": 844, "title": "التقديم — خطوة 3", "is_interactive": true, "radius": 40},
+    "VisitorTrack.dc.html": {"x": 2350, "y": 0, "w": 390, "h": 844, "title": "متابعة طلبي (OTP)", "is_interactive": true, "radius": 40},
+
+    "StudentToday.dc.html": {"x": 0, "y": 1187, "w": 390, "h": 844, "title": "الطالب — اليوم", "is_interactive": true, "radius": 40},
+    "StudentCourses.dc.html": {"x": 470, "y": 1187, "w": 390, "h": 844, "title": "الطالب — موادي", "is_interactive": true, "radius": 40},
+    "StudentCourse.dc.html": {"x": 940, "y": 1187, "w": 390, "h": 844, "title": "الطالب — المادة (مقاطع تفاعلية)", "is_interactive": true, "radius": 40},
+    "StudentLecture.dc.html": {"x": 1410, "y": 1187, "w": 390, "h": 844, "title": "الطالب — المحاضرة والتنزيل", "is_interactive": true, "radius": 40},
+    "StudentAssignment.dc.html": {"x": 1880, "y": 1187, "w": 390, "h": 844, "title": "الطالب — الواجب (Sheet التسليم)", "is_interactive": true, "radius": 40},
+    "StudentTasks.dc.html": {"x": 2350, "y": 1187, "w": 390, "h": 844, "title": "الطالب — المهام", "is_interactive": true, "radius": 40},
+
+    "StudentExamStart.dc.html": {"x": 0, "y": 2374, "w": 390, "h": 844, "title": "الاختبار — قبل البدء", "is_interactive": true, "radius": 40},
+    "StudentExam.dc.html": {"x": 470, "y": 2374, "w": 390, "h": 844, "title": "الاختبار — أثناء (تفاعلي)", "is_interactive": true, "radius": 40},
+    "StudentExamResult.dc.html": {"x": 940, "y": 2374, "w": 390, "h": 844, "title": "الاختبار — النتيجة", "is_interactive": true, "radius": 40},
+    "StudentResults.dc.html": {"x": 1410, "y": 2374, "w": 390, "h": 844, "title": "الطالب — النتائج", "is_interactive": true, "radius": 40},
+    "StudentLive.dc.html": {"x": 1880, "y": 2374, "w": 390, "h": 844, "title": "الطالب — البث", "is_interactive": true, "radius": 40},
+    "StudentNotifications.dc.html": {"x": 2350, "y": 2374, "w": 390, "h": 844, "title": "الطالب — الإشعارات", "is_interactive": true, "radius": 40},
+    "StudentMe.dc.html": {"x": 2820, "y": 2374, "w": 390, "h": 844, "title": "الطالب — أنا", "is_interactive": true, "radius": 40},
+    "StudentDownloads.dc.html": {"x": 3290, "y": 2374, "w": 390, "h": 844, "title": "الطالب — التنزيلات", "is_interactive": true, "radius": 40},
+
+    "TeacherToday.dc.html": {"x": 0, "y": 3561, "w": 390, "h": 844, "title": "الأستاذ — اليوم", "is_interactive": true, "radius": 40},
+    "TeacherCourses.dc.html": {"x": 470, "y": 3561, "w": 390, "h": 844, "title": "الأستاذ — موادي", "is_interactive": true, "radius": 40},
+    "TeacherCourse.dc.html": {"x": 940, "y": 3561, "w": 390, "h": 844, "title": "الأستاذ — المادة", "is_interactive": true, "radius": 40},
+    "TeacherGrading.dc.html": {"x": 1410, "y": 3561, "w": 390, "h": 844, "title": "الأستاذ — طابور التصحيح", "is_interactive": true, "radius": 40},
+    "TeacherGradeSubmission.dc.html": {"x": 1880, "y": 3561, "w": 390, "h": 844, "title": "الأستاذ — تصحيح تسليم", "is_interactive": true, "radius": 40},
+    "TeacherAnnouncement.dc.html": {"x": 2350, "y": 3561, "w": 390, "h": 844, "title": "الأستاذ — إعلان سريع", "is_interactive": true, "radius": 40},
+    "TeacherLiveNew.dc.html": {"x": 2820, "y": 3561, "w": 390, "h": 844, "title": "الأستاذ — جلسة بث", "is_interactive": true, "radius": 40},
+    "TeacherExamMonitor.dc.html": {"x": 3290, "y": 3561, "w": 390, "h": 844, "title": "الأستاذ — مراقبة اختبار", "is_interactive": true, "radius": 40},
+
+    "AdminHome.dc.html": {"x": 0, "y": 4748, "w": 390, "h": 844, "title": "مدير القسم — الرئيسية", "is_interactive": true, "radius": 40},
+    "AdminApprovals.dc.html": {"x": 470, "y": 4748, "w": 390, "h": 844, "title": "مدير القسم — اعتماد التسجيل", "is_interactive": true, "radius": 40},
+    "AdminApplication.dc.html": {"x": 940, "y": 4748, "w": 390, "h": 844, "title": "مسجل القسم — طلب تقديم", "is_interactive": true, "radius": 40},
+    "AdminInquiry.dc.html": {"x": 1410, "y": 4748, "w": 390, "h": 844, "title": "مدير الموقع — استفسار", "is_interactive": true, "radius": 40},
+    "AdminCorrection.dc.html": {"x": 1880, "y": 4748, "w": 390, "h": 844, "title": "الشؤون العلمية — تعديل نتيجة", "is_interactive": true, "radius": 40},
+    "AdminNotify.dc.html": {"x": 2350, "y": 4748, "w": 390, "h": 844, "title": "إرسال إشعار", "is_interactive": true, "radius": 40},
+    "AdminCase.dc.html": {"x": 2820, "y": 4748, "w": 390, "h": 844, "title": "شؤون الطلاب — بلاغ غش", "is_interactive": true, "radius": 40}
+  },
+  "order": [
+    "Main.dc.html", "Login.dc.html", "Register.dc.html", "VisitorProgram.dc.html", "VisitorApply.dc.html", "VisitorTrack.dc.html",
+    "StudentToday.dc.html", "StudentCourses.dc.html", "StudentCourse.dc.html", "StudentLecture.dc.html", "StudentAssignment.dc.html", "StudentTasks.dc.html",
+    "StudentExamStart.dc.html", "StudentExam.dc.html", "StudentExamResult.dc.html", "StudentResults.dc.html", "StudentLive.dc.html", "StudentNotifications.dc.html", "StudentMe.dc.html", "StudentDownloads.dc.html",
+    "TeacherToday.dc.html", "TeacherCourses.dc.html", "TeacherCourse.dc.html", "TeacherGrading.dc.html", "TeacherGradeSubmission.dc.html", "TeacherAnnouncement.dc.html", "TeacherLiveNew.dc.html", "TeacherExamMonitor.dc.html",
+    "AdminHome.dc.html", "AdminApprovals.dc.html", "AdminApplication.dc.html", "AdminInquiry.dc.html", "AdminCorrection.dc.html", "AdminNotify.dc.html", "AdminCase.dc.html"
+  ],
+  "notes": {
+    "row0": {"x": 0, "y": -300, "text": "الدخول والزائر — ابدأ من «القائمة» واضغط تشغيل", "kind": "title1", "maxW": 2740},
+    "row1": {"x": 0, "y": 927, "text": "الطالب — التعلّم اليومي (اليوم · موادي · المادة · المحاضرة · الواجب · المهام)", "kind": "title1", "maxW": 2740},
+    "row2": {"x": 0, "y": 2114, "text": "الطالب — الاختبارات والنتائج والبث والإشعارات وأنا والتنزيلات", "kind": "title1", "maxW": 3680},
+    "row3": {"x": 0, "y": 3301, "text": "الأستاذ — اليوم · موادي · المادة · التصحيح · الإعلان · البث · مراقبة الاختبار", "kind": "title1", "maxW": 3680},
+    "row4": {"x": 0, "y": 4488, "text": "الإدارة على الهاتف — المهام السريعة لكل دور", "kind": "title1", "maxW": 3210},
+    "hint": {"x": 2820, "y": 0, "w": 380, "text": "كيف تراجع: افتح الرابط على هاتفك، اضغط «تشغيل» على شاشة «القائمة»، وانتقل بالروابط. الشاشات ذات الأزرار الفعلية: المادة (المقاطع)، الواجب (Sheet التسليم)، الاختبار (الاختيارات وشبكة الأسئلة). سجّل ملاحظاتك بالتعليقات أو في docs/prototype/feedback.md.", "fill": "blue"}
+  },
+  "designSystems": []
+}

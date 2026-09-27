@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="ar">
+<head>
+<meta charset="utf-8">
+<title>الطالب — النتائج</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'IBM Plex Sans Arabic',system-ui,sans-serif;background:#F7F8FA;color:#1F2B47}
+a{color:#2D64A7;text-decoration:none}a:hover{color:#26558D}
+.scr{width:390px;height:844px;position:relative;overflow:hidden;background:#F7F8FA;direction:rtl;text-align:right;box-sizing:border-box}
+.body{position:absolute;top:0;left:0;right:0;bottom:0;overflow-y:auto;padding:54px 16px 120px;box-sizing:border-box}
+.back{display:flex;align-items:center;gap:2px;font-size:16px;color:#2D64A7;font-weight:500}
+.back svg{width:22px;height:22px}
+.h1{font-size:28px;font-weight:700;margin:10px 0 0;line-height:1.25}
+.seg{display:flex;background:#EEF0F3;border-radius:10px;padding:3px;gap:2px;margin:14px 0}
+.seg a{flex:1;text-align:center;font-size:14px;font-weight:600;padding:8px 0;border-radius:8px;color:#576075}
+.seg .on{background:#fff;color:#1F2B47;box-shadow:0 1px 2px rgba(31,43,71,.08)}
+.card{background:#fff;border-radius:14px;box-shadow:0 1px 2px rgba(31,43,71,.06);overflow:hidden}
+.row{display:flex;align-items:center;gap:12px;padding:12px 14px;min-height:56px;box-sizing:border-box}
+.row+.row{border-top:1px solid #EEF0F3}
+.dot{width:10px;height:10px;border-radius:5px;flex-shrink:0}
+.t{font-size:15px;font-weight:600;line-height:1.35}
+.s{font-size:13px;color:#576075;margin-top:2px}
+.grow{flex-grow:1;min-width:0}
+.g{font-size:18px;font-weight:700;width:40px;text-align:center}
+.badge{font-size:11px;font-weight:600;padding:3px 8px;border-radius:999px;white-space:nowrap}
+.b-ok{background:#E6F4EC;color:#14603A}.b-bad{background:#FBE9E7;color:#922B20}.b-neu{background:#EEF0F3;color:#3B4459}
+.sec{font-size:13px;font-weight:600;color:#576075;margin:18px 4px 8px}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;height:48px;border-radius:12px;font-size:15px;font-weight:600;border:0;font-family:inherit;box-sizing:border-box;width:100%}
+.b-sec{background:#E5ECF4;color:#1F4674}
+.tabs{position:absolute;left:12px;right:12px;bottom:14px;height:64px;border-radius:24px;background:rgba(255,255,255,.94);box-shadow:0 4px 16px rgba(31,43,71,.12);border:1px solid #EEF0F3;display:flex;align-items:center;justify-content:space-around;padding:0 6px}
+.tab{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;font-weight:500;color:#8F95A3;width:64px;position:relative}
+.tab svg{width:24px;height:24px}
+.tab.on{color:#2D64A7;font-weight:600}
+.tab .n{position:absolute;top:-4px;right:12px;background:#B02544;color:#fff;font-size:10px;font-weight:700;min-width:16px;height:16px;border-radius:8px;display:flex;align-items:center;justify-content:center;padding:0 4px}
+</style>
+</helmet>
+<div class="scr" style="width: 390px; height: 844px">
+<div class="body">
+<a class="back" href="StudentMe.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg><span>أنا</span></a>
+<h1 class="h1">النتائج</h1>
+<div class="seg"><a class="on" href="StudentResults.dc.html">ربيع 2026</a><a href="StudentResults.dc.html">السجل الأكاديمي</a></div>
+<div class="card" style="display: flex; text-align: center">
+<div style="flex: 1; padding: 14px 8px"><div style="font-size: 24px; font-weight: 700; color: #2D64A7">3.42</div><div style="font-size: 12px; color: #576075">المعدل الفصلي</div></div>
+<div style="flex: 1; padding: 14px 8px; border-right: 1px solid #EEF0F3"><div style="font-size: 24px; font-weight: 700">3.31</div><div style="font-size: 12px; color: #576075">التراكمي</div></div>
+<div style="flex: 1; padding: 14px 8px; border-right: 1px solid #EEF0F3"><div style="font-size: 24px; font-weight: 700">15</div><div style="font-size: 12px; color: #576075">ساعة مجتازة</div></div>
+</div>
+<div class="sec">المقررات · نُشرت 20 سبتمبر</div>
+<div class="card">
+<div class="row"><span class="dot" style="background: #2D64A7"></span><span class="grow"><div class="t">IT102 — برمجة 2</div><div class="s">3 ساعات</div></span><span class="g">A</span><span class="badge b-ok">ناجح · 91</span></div>
+<div class="row"><span class="dot" style="background: #0F8B8D"></span><span class="grow"><div class="t">IT104 — تنظيم الحاسوب</div><div class="s">3 ساعات</div></span><span class="g">B+</span><span class="badge b-ok">ناجح · 84</span></div>
+<div class="row"><span class="dot" style="background: #6A4C93"></span><span class="grow"><div class="t">MTH102 — تفاضل وتكامل 2</div><div class="s">3 ساعات</div></span><span class="g">B</span><span class="badge b-ok">ناجح · 78</span></div>
+<div class="row"><span class="dot" style="background: #D98E04"></span><span class="grow"><div class="t">STA101 — إحصاء</div><div class="s">3 ساعات</div></span><span class="g">C+</span><span class="badge b-ok">ناجح · 67</span></div>
+<div class="row"><span class="dot" style="background: #1E7F4F"></span><span class="grow"><div class="t">ENG102 — لغة إنجليزية 2</div><div class="s">3 ساعات</div></span><span class="g">A-</span><span class="badge b-ok">ناجح · 88</span></div>
+</div>
+<div style="font-size: 12px; color: #8F95A3; line-height: 1.6; margin: 12px 4px">هذه النتيجة معتمدة من مسؤول النتائج. أي تعديل لاحق يصلك بإشعار ويظهر في السجل.</div>
+<a class="btn b-sec" href="StudentResults.dc.html"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>تنزيل كشف الدرجات PDF</a>
+</div>
+<nav class="tabs" aria-label="التنقل الرئيسي">
+<a class="tab" href="StudentToday.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="3"/><path d="M16 2v4M8 2v4M3 10h18M9 16l2 2 4-4"/></svg><span>اليوم</span></a>
+<a class="tab" href="StudentCourses.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4h6a4 4 0 0 1 4 4v12a3 3 0 0 0-3-3H2zM22 4h-6a4 4 0 0 0-4 4v12a3 3 0 0 1 3-3h7z"/></svg><span>موادي</span></a>
+<a class="tab" href="StudentTasks.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M10 6h11M10 12h11M10 18h11M3 6l1.5 1.5L7 5M3 12l1.5 1.5L7 11M3 18l1.5 1.5L7 17"/></svg><span>المهام</span></a>
+<a class="tab" href="StudentNotifications.dc.html"><span class="n">3</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg><span>الإشعارات</span></a>
+<a class="tab on" href="StudentMe.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>أنا</span></a>
+</nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>
