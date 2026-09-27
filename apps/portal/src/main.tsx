@@ -16,7 +16,18 @@ import { Cases } from "./routes/affairs/Cases";
 import { RegulationDetail } from "./routes/affairs/RegulationDetail";
 import { RegulationNew } from "./routes/affairs/RegulationNew";
 import { Regulations } from "./routes/affairs/Regulations";
+import { AnnouncementNew } from "./routes/announcements/AnnouncementNew";
+import { Announcements } from "./routes/announcements/Announcements";
 import { ExamDetail } from "./routes/exams/ExamDetail";
+import { Inquiries } from "./routes/inquiries/Inquiries";
+import { LiveList } from "./routes/live/LiveList";
+import { LiveNew } from "./routes/live/LiveNew";
+import { EventEditor, Events } from "./routes/site/Events";
+import { NewsEditor } from "./routes/site/NewsEditor";
+import { PageEditor } from "./routes/site/PageEditor";
+import { Redirects } from "./routes/site/Redirects";
+import { SiteHome } from "./routes/site/SiteHome";
+import { SiteMedia } from "./routes/site/SiteMedia";
 import { ExamEditor } from "./routes/exams/ExamEditor";
 import { ExamMonitor } from "./routes/exams/ExamMonitor";
 import { ExamResult } from "./routes/exams/ExamResult";
@@ -74,6 +85,19 @@ const router = createBrowserRouter([
   // Focused exam shell: no sidebar or tabs at any size (docs/06 §9).
   { path: "/exam-attempts/:id", element: signedIn(<TakeExam />) },
   { path: "/exam-attempts/:id/result", element: signedIn(<ExamResult />) },
+  { path: "/live", element: signedIn(<LiveList />) },
+  { path: "/live/new", element: signedIn(<LiveNew />) },
+  { path: "/announcements", element: signedIn(<Announcements />) },
+  { path: "/announcements/new", element: signedIn(<AnnouncementNew />) },
+  { path: "/inquiries", element: signedIn(<Inquiries />) },
+  { path: "/inquiries/:id", element: signedIn(<Inquiries />) },
+  { path: "/site", element: signedIn(<SiteHome />) },
+  { path: "/site/pages/:id", element: signedIn(<PageEditor />) },
+  { path: "/site/news/:id", element: signedIn(<NewsEditor />) },
+  { path: "/site/media", element: signedIn(<SiteMedia />) },
+  { path: "/site/redirects", element: signedIn(<Redirects />) },
+  { path: "/events", element: signedIn(<Events />) },
+  { path: "/events/:id", element: signedIn(<EventEditor />) },
   { path: "/cases", element: signedIn(<Cases />) },
   { path: "/cases/new", element: signedIn(<CaseNew />) },
   { path: "/cases/:id", element: signedIn(<CaseDetail />) },

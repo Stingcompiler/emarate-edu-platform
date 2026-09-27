@@ -307,6 +307,7 @@ class Command(BaseCommand):
 
         self._phase4(users, autumn)
         self._exam(users, autumn)
+        self._phase6(users, autumn)
         return {
             "departments": Department.objects.count(),
             "programs": Program.objects.count(),
@@ -542,6 +543,114 @@ class Command(BaseCommand):
                     for i, (t, c) in enumerate(choices, start=1)
                 ]
             )
+
+    def _phase6(self, users, term) -> None:
+        """A live session, announcements, a public page, an event and two inquiries."""
+        from datetime import timedelta
+
+        from django.utils import timezone
+
+        from contacts.models import Contact
+        from content.models import Announcement, Event, Page
+        from inquiries.models import Inquiry, InquiryStatusHistory
+        from live.models import LiveSession
+
+        now = timezone.now()
+        offering = CourseOffering.objects.filter(term=term, course__code="IT101").first()
+        if offering and not LiveSession.objects.exists():
+            session = LiveSession(
+                scope="offering",
+                offering=offering,
+                title="مراجعة المحاضرة الثانية",
+                provider="teams",
+                starts_at=now + timedelta(minutes=5),
+                ends_at=now + timedelta(hours=1),
+                host=users[Role.TEACHER],
+            )
+            session.join_url = "https://teams.microsoft.com/l/meetup-join/demo"
+            session.save()
+        site = users[Role.SITE_MANAGER]
+        if not Announcement.objects.exists():
+            Announcement.objects.create(
+                scope="college",
+                audience="public",
+                title="فتح باب القبول لخريف 2026",
+                body=(
+                    "<p>يبدأ استقبال طلبات الالتحاق بـ 11 برنامجًا في 4 أقسام"
+                    " — التقديم إلكتروني بالكامل.</p>"
+                ),
+                status="published",
+                publish_at=now,
+                is_pinned=True,
+                created_by=site,
+            )
+            if offering:
+                Announcement.objects.create(
+                    scope="offering",
+                    scope_id=offering.pk,
+                    audience="students",
+                    title="تمديد موعد الواجب الأول",
+                    body="<p>مُدِّد التسليم 48 ساعة. لا حاجة لطلب تمديد فردي.</p>",
+                    status="published",
+                    publish_at=now,
+                    created_by=users[Role.TEACHER],
+                )
+        Page.objects.get_or_create(
+            slug="about",
+            defaults={
+                "title_ar": "عن الكلية",
+                "status": "published",
+                "author": site,
+                "blocks": [
+                    {"type": "heading", "text": "رسالتنا"},
+                    {"type": "paragraph", "text": "تعليم تقني تطبيقي يخدم سوق العمل."},
+                ],
+            },
+        )
+        Event.objects.get_or_create(
+            slug="open-day",
+            defaults={
+                "title": "يوم التعريف بالكلية",
+                "description": "<p>جولة في الأقسام والمعامل.</p>",
+                "starts_at": now + timedelta(days=10),
+                "ends_at": now + timedelta(days=10, hours=5),
+                "location": "القاعة الكبرى",
+                "status": "published",
+                "created_by": users[Role.EVENTS_MANAGER],
+            },
+        )
+        if not Inquiry.objects.exists():
+            for n, (name, kind, dept, subject, message) in enumerate(
+                [
+                    (
+                        "فاطمة محمد الأمين",
+                        "admission",
+                        Department.objects.get(code="IT"),
+                        "معادلة شهادة",
+                        "هل يمكن قبول شهادة الثانوية السعودية؟ وما المعادلة المطلوبة؟",
+                    ),
+                    (
+                        "عبد الرحمن الطاهر",
+                        "general",
+                        None,
+                        "مواعيد الدوام",
+                        "ما مواعيد عمل الكلية في رمضان؟",
+                    ),
+                ],
+                start=1,
+            ):
+                contact = Contact.objects.create(
+                    name=name, email=f"visitor{n}@example.test", phone_e164=f"+24991234567{n}"
+                )
+                inquiry = Inquiry.objects.create(
+                    reference_no=f"INQ-26-DEMO0{n}",
+                    contact=contact,
+                    type=kind,
+                    department=dept,
+                    subject=subject,
+                    message=message,
+                )
+                InquiryStatusHistory.objects.create(inquiry=inquiry, to_status="new")
 
     def _user(self, email, name, password, role, department) -> User:
         user = User.objects.filter(email=email).first()
