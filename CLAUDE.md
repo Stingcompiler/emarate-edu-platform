@@ -5,6 +5,11 @@ live in `docs/` (01–09); `docs/03-roles-and-permissions.md` wins any conflict.
 
 ## Rules
 
+- **Start every session by reading `.claude/handoff/CURRENT.md`** and continue from its
+  Next steps. Keep it updated (skill `session-handoff`) at the end of each phase or major
+  step, and whenever the conversation grows long, so another session can take over
+  without losing anything.
+
 - **Responsive, always.** Every page is built for phone *and* large screens and
   must match both prototype boards (390×844 and 1280×800). Follow the
   `responsive-page` skill for every UI change and verify at both sizes before
@@ -12,7 +17,7 @@ live in `docs/` (01–09); `docs/03-roles-and-permissions.md` wins any conflict.
 - **No Docker.** Development runs on SQLite with zero services (`pnpm dev`);
   production is PostgreSQL + Redis. Code must work on both databases (docs/05 §4);
   tests run on both in CI.
-- **One branch and one PR per phase or change**, targeting `main`.
+- **One branch and one PR per phase or change**, targeting `main`. When local checks pass (tests on SQLite and Postgres, typecheck, build) and CI is green, **merge it to `main` yourself** (`gh pr merge --merge`), without asking the owner, and continue to the next phase. Never force-push or rebase.
 - The department manager dashboard keeps the old sections and workflows; only
   additions are allowed (docs/02 D20).
 - **No Zustand.** Server state lives in TanStack Query; UI state is a small Context.

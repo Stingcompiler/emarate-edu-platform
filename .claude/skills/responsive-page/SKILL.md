@@ -14,8 +14,6 @@ checked at both sizes.
 
 ```bash
 python3 scripts/boards.py list "<keyword from the page title>"
-#   while the prototype is still on its branch, add:
-#   --ref origin/docs/mobile-experience-and-prototype
 ```
 
 - Phone boards are 390×844; desktop boards are 1280×800 (files `Desktop*.dc.html`).
