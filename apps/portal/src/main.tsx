@@ -16,6 +16,13 @@ import { Cases } from "./routes/affairs/Cases";
 import { RegulationDetail } from "./routes/affairs/RegulationDetail";
 import { RegulationNew } from "./routes/affairs/RegulationNew";
 import { Regulations } from "./routes/affairs/Regulations";
+import { ExamDetail } from "./routes/exams/ExamDetail";
+import { ExamEditor } from "./routes/exams/ExamEditor";
+import { ExamMonitor } from "./routes/exams/ExamMonitor";
+import { ExamResult } from "./routes/exams/ExamResult";
+import { Exams } from "./routes/exams/Exams";
+import { ExamStats } from "./routes/exams/ExamStats";
+import { TakeExam } from "./routes/exams/TakeExam";
 import { Corrections } from "./routes/results/Corrections";
 import { ResultImportDetail } from "./routes/results/ImportDetail";
 import { ResultImports } from "./routes/results/Imports";
@@ -58,6 +65,15 @@ const router = createBrowserRouter([
   { path: "/regulations", element: signedIn(<Regulations />) },
   { path: "/regulations/new", element: signedIn(<RegulationNew />) },
   { path: "/regulations/:id", element: signedIn(<RegulationDetail />) },
+  { path: "/exams", element: signedIn(<Exams />) },
+  { path: "/exams/new", element: signedIn(<ExamEditor />) },
+  { path: "/exams/:id", element: signedIn(<ExamDetail />) },
+  { path: "/exams/:id/edit", element: signedIn(<ExamEditor />) },
+  { path: "/exams/:id/monitor", element: signedIn(<ExamMonitor />) },
+  { path: "/exams/:id/stats", element: signedIn(<ExamStats />) },
+  // Focused exam shell: no sidebar or tabs at any size (docs/06 §9).
+  { path: "/exam-attempts/:id", element: signedIn(<TakeExam />) },
+  { path: "/exam-attempts/:id/result", element: signedIn(<ExamResult />) },
   { path: "/cases", element: signedIn(<Cases />) },
   { path: "/cases/new", element: signedIn(<CaseNew />) },
   { path: "/cases/:id", element: signedIn(<CaseDetail />) },

@@ -9,6 +9,8 @@ const BUILT = [
   "/result-corrections",
   "/regulations",
   "/cases",
+  "/exams",
+  "/exam-attempts",
 ];
 
 export function isBuiltPath(path: string): boolean {

@@ -52,7 +52,7 @@ export default function () {
     headers: csrfHeaders(jar),
     tags: { name: "start" },
   });
-  if (!check(start, { "started": (r) => r.status === 201 })) return;
+  if (!check(start, { started: (r) => r.status === 201 })) return;
   const attempt = start.json();
 
   for (const question of attempt.questions) {
@@ -64,11 +64,11 @@ export default function () {
       { headers: csrfHeaders(jar), tags: { name: "answer" } },
     );
     saveAnswer.add(res.timings.duration);
-    check(res, { "saved": (r) => r.status === 204 });
+    check(res, { saved: (r) => r.status === 204 });
   }
   const submit = http.post(`${BASE}/api/v1/exam-attempts/${attempt.public_id}/submit`, null, {
     headers: csrfHeaders(jar),
     tags: { name: "submit" },
   });
-  check(submit, { "submitted": (r) => r.status === 200 });
+  check(submit, { submitted: (r) => r.status === 200 });
 }
