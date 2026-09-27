@@ -13,6 +13,7 @@ from audit.services import RequestMeta, record, snapshot
 from core.errors import Conflict, Invalid
 from files.models import Purpose, StoredFile, VideoAsset
 from files.validation import extension_of
+from notifications import events
 from students.models import StudentRecord
 
 from . import access
@@ -77,6 +78,7 @@ def update_lecture(meta: RequestMeta, lecture: Lecture, **data) -> Lecture:
 
 def set_lecture_published(meta: RequestMeta, lecture: Lecture, published: bool) -> Lecture:
     require(meta.actor, lecture.offering, "edit")
+    first_time = lecture.published_at is None
     with transaction.atomic():
         lecture.is_published = published
         if published and lecture.published_at is None:
@@ -88,6 +90,8 @@ def set_lecture_published(meta: RequestMeta, lecture: Lecture, published: bool) 
             lecture,
             department_id=_dept(lecture.offering),
         )
+        if published and first_time:
+            events.lecture_published(lecture)
     return lecture
 
 
@@ -222,6 +226,8 @@ def set_assignment_status(meta: RequestMeta, assignment: Assignment, status: str
         old = assignment.status
         assignment.status = status
         assignment.save(update_fields=["status", "updated_at"])
+        if status == Assignment.Status.PUBLISHED and old == Assignment.Status.DRAFT:
+            events.assignment_published(assignment)
         record(
             meta,
             f"assignment.{status}",
@@ -439,6 +445,7 @@ def grade(
                 "graded_at": timezone.now(),
             },
         )
+        events.grade_released(submission)
         record(
             meta,
             "submission.grade",
@@ -466,6 +473,7 @@ def approve_grade(meta: RequestMeta, submission: Submission) -> SubmissionGrade:
         result.graded_by = meta.actor
         result.graded_at = timezone.now()
         result.save(update_fields=["status", "graded_by", "graded_at", "updated_at"])
+        events.grade_released(submission)
         record(
             meta,
             "submission.grade_approve",

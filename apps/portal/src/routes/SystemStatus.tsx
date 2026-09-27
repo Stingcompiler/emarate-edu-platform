@@ -15,7 +15,7 @@ import { api } from "../lib/api";
  * desktop = TopBar + right sidebar + two columns.
  */
 const NAV: NavItem[] = [
-  { label: "حالة النظام", to: "/", icon: Activity },
+  { label: "حالة النظام", to: "/system", icon: Activity },
   { label: "توثيق الـ API", to: "/api/docs/", icon: BookOpenText, external: true },
   { label: "الموقع العام", to: "http://localhost:4321/", icon: Globe, external: true },
 ];

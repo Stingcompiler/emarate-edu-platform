@@ -1,51 +1,54 @@
-# Handoff — Phase 2 done → Phase 3 (notifications + PWA) — 2026-09-28
+# Handoff — Phase 3 done → Phase 4 (results + student affairs) — 2026-09-28
 
 ## Where things stand
-- **Phase 1** merged to `main` (PR #3).
-- **Phase 2 (learning)** is complete on branch `feat/phase-2-learning`. Its PR against `main` is opened in this step; merge it as soon as CI is green.
-  - If you find it still open, check CI once, fix failures, `gh pr merge --merge`, then branch Phase 3 off `main`.
-  - GitHub auto-merge is disabled for this repo, so merge manually.
+- **Phases 1–2 are merged** to `main` (PRs #3 and #4).
+- **Phase 3 (notifications + PWA)** is complete on `feat/phase-3-notifications`. Its PR is opened in this step; merge it once CI is green.
+  - GitHub auto-merge is disabled for this repo, so merge manually with `gh pr merge --merge`.
 - **Verified locally:**
-  - 164 tests pass on SQLite; 163 pass plus 1 skip on Postgres;
-  - migrations reverse cleanly on both databases;
-  - the OpenAPI schema has 0 warnings;
-  - ruff is clean; `pnpm api:generate`, typecheck, build and format:check pass;
-  - `seed_demo` now also creates lectures and assignments.
+  - 190 tests pass on SQLite; 189 pass plus 1 skip on Postgres;
+  - migrations reverse on both databases;
+  - the schema has 0 warnings;
+  - ruff, typecheck, build and prettier pass.
+  - Portal pages were checked in the browser pane at 390, 768 and 1280, plus dark mode.
+  - The Service Worker was verified in real headless Chrome over CDP: it registers, activates and caches the shell. The pane itself can't fetch SW scripts, which is a pane limitation.
 
-## What Phase 2 delivered
-- **`files` app:**
-  - `StoredFile` (private, purpose `lecture` or `submission`, tied to an offering) and `VideoAsset` (local or Bunny).
-  - `MEDIA_BACKEND` is `local` in dev: signed links from `django.core.signing`, 10 minutes, served at `/api/public/files/<token>`.
-  - In prod it is `bunny`: `files/bunny.py` provides BunnyStorage, token CDN links, Stream TUS tickets, embed tokens and the webhook `/api/public/webhooks/bunny-stream?secret=`.
-  - Upload checks live in `files/validation.py` (extension allow-list + content signature + size + zip-bomb check).
-  - Who may upload or read is decided by the owning app through `files/access.py` (`register(purpose, Policy)` and `register_video`); `learning` registers in `AppConfig.ready`.
-- **`learning` app:** Lecture + LectureResource (file, video or link), Assignment (+AssignmentLinkField), Submission + SubmissionVersion, SubmissionGrade.
-  - Access: `learning/access.py` `for_offering(user, offering)` → flags `view_all`, `view_published`, `edit`, `delete`, `delete_own`, `grade`, `submit`.
-  - List filters: `staff_offerings_q` / `student_offerings_q`.
-  - Grading: rule-based grading suggests a grade and the teacher approves it. A TA cannot approve AI-suggested grades. Students see approved grades only.
-  - Late policies: none, allow, or penalty (`final_score`).
+## What Phase 3 delivered
+- **Backend `notifications` app:**
+  - `audience.py`: validate, authorize per docs/03 §8, resolve, and `options()` for the compose form (groups: college, department, cohort, course, staff).
+  - `services.py`: `send`, `notify`, `notify_audience`, idempotent `fan_out` that honours preferences, and HR notices.
+  - `push.py`: VAPID keys; dev creates `backend/.vapid-dev.json`, and `manage.py vapid_keys` prints production keys.
+  - `tasks.py`: fan_out, send_push, deliver_outbox with backoff, remind_due_assignments (beat).
+  - `events.py`: the automatic notifications.
+  - Other apps call `notifications.events.*` inside their transactions.
 - **Endpoints:**
-  - `/api/v1/files`, `files/<id>/url`, `videos/upload-ticket`, `videos/<id>/upload` (local), `videos/<id>/playback`.
-  - `lectures` (+publish, unpublish, resources), `assignments` (+publish, close, submit, my-submission, submissions), `submissions` (+grade, grade/approve).
-- **Errors:** `core.errors.Invalid(detail, code)` gives a 400 with a specific problem `code`; a plain ValidationError renders `invalid`.
+  - `/api/v1/notifications` (+read, read-all, unread-count), `notifications/sent` (+preview, audiences), `notifications/preferences`.
+  - `push/config`, `push/subscriptions`, `push/subscriptions/remove`.
+  - `hr-notices` (+acknowledge).
+  - New fields: `CourseOffering.ta_can_notify` and `Assignment.reminder_sent_at`.
+- **Portal (`apps/portal`):**
+  - Routes: `/login`, `/register`, `/forgot-password`, `/notifications`, `/notifications/new`, `/settings`, `/install`, `/system`, 404.
+  - `PortalShell` holds the role nav, unread badges, bell and sign-out. The phone NavigationBar is a light large title that collapses to a glass bar (docs/09).
+  - `lib/auth.tsx` provides `useMe`, `RequireAuth` and sign-out. `lib/push.ts`, `lib/theme.ts` and `components/ui.tsx` hold the primitives.
+  - `packages/api` refreshes the session once on a 401 and replays the request.
+  - `public/sw.js` is hand-written. Dev registers `/sw.js?dev=1`, which handles push only (no caching).
+- **Dev servers:** `.claude/launch.json` defines api, portal and boards. The preview tool in this app looked in another folder, so start them from the shell. Vite listens on `localhost`, not 127.0.0.1.
 
-## Next steps (Phase 3 — notifications + PWA, docs/02 §8, docs/05 §6 `notifications`, §8.6)
-1. Read docs/02 §8 Phase 3, docs/05 §6 `notifications` and §8.6, docs/03 §8 (who notifies whom), and the prototype boards:
+## Next steps (Phase 4 — results + student affairs, docs/02 §8)
+1. Read docs/02 §8 Phase 4, docs/05 §6 `results` and `student_affairs`, §8.4, and docs/03 rows for results, corrections and student affairs. Boards:
    ```bash
-   python3 scripts/boards.py list Notif
-   python3 scripts/boards.py list Install
+   python3 scripts/boards.py list Results
+   python3 scripts/boards.py list StudentAffairs
+   python3 scripts/boards.py list DesktopResults
    ```
-2. **Backend app `notifications`:**
-   - Models: Notification, NotificationRecipient, PushSubscription, NotificationPreference, HRNotice, Outbox.
-   - Fan-out task computes the audience within the sender's allowed scope.
-   - Web Push via `pywebpush` (VAPID keys from env; dev keys generated locally). Delete a subscription on 404/410.
-   - Email goes through the Outbox with retries.
-   - Automatic notifications for earlier phases: a new lecture or assignment published, a grade approved, a registration pending or decided, an assignment on a course.
-3. **Portal (first real UI work):**
-   - A Service Worker (Vite PWA without heavy deps, or a hand-written SW), an install screen, a notification centre, and preferences.
-   - Every page follows the `responsive-page` skill and must match the phone and desktop boards at 390, 768 and 1280.
-4. **Acceptance:** a teacher sends a notification to their course, and it reaches subscribed browsers. Test the fan-out, scope limits (a teacher can't target other courses) and push payloads with the push call mocked.
-5. Add permission-matrix rows for every new endpoint, extend the seed, run `pnpm api:generate`, open the PR, merge when green, and update this handoff.
+2. **Backend `results`:**
+   - Import a finished results file (results officer college-wide; department manager/supervisor for their department): validate, preview, commit.
+   - GradingScale, publish per term (TermResultRelease) and display settings.
+   - ResultCorrection approved by academic affairs.
+   - Student view, and a PDF transcript. WeasyPrint is heavy; decide or defer and note it.
+   - Notify on publish or correction via `notifications.events`.
+3. **Backend `student_affairs`:** regulations with acknowledgement, student cases with events, and misconduct reports (exam linkage completes in Phase 5). Regulatory notifications.
+4. **Portal pages:** follow the responsive-page skill. Match both boards where they exist; say "derived" in the PR where one is missing.
+5. Add a permission-matrix row for every endpoint, extend the seed, test on both databases, open the PR, merge when green, and update this handoff.
 
 ## Decisions made (don't revisit)
 - **Roles are rows (`role`, `department`), not Django Groups.** Mention this deviation from docs/03 §10 in PRs that touch roles.
@@ -61,9 +64,20 @@
   - The import never touches `status` or `user`; a blank cell keeps the existing value.
 - **Files are never public.** Everything goes through `files.services.signed_url` after the owning app's policy. Lecture files and videos reach students only through a *published* lecture.
 - **Assignments:** an assignment with submissions can't be deleted (409; close it instead). A graded (approved) submission can't be resubmitted.
+- **Notifications:**
+  - A fan-out never includes the sender.
+  - The `account` category always reaches the inbox.
+  - Categories that email by default: results and account.
+  - A TA may notify only if `ta_can_notify` is set.
+  - Action URLs must be portal paths or https (serializer, SW and UI all check).
+- **Portal:**
+  - Links point only to pages that exist (`lib/links.ts`, `lib/nav.ts`); notification links to future pages still mark items read.
+  - Active chips use `bg-text text-bg`, which contrasts in both themes.
 - **Pagination:** every paginated model has a default ordering, and a pytest filterwarning turns unordered pagination into an error.
 
 ## Gotchas found
+- **Response timing:** responses are serialized before `transaction.on_commit` fan-outs run. Read counts from the DB in tests, not from the create response.
+- **Localized names:** the API's `name` field follows Accept-Language (English browsers get English), so server-built labels use `name_ar` explicitly.
 - **Empty Q():** `Q() | x` drops the empty Q, which silently lost college-wide viewers. Use `Q(pk__isnull=False)` or `Q(<fk>__isnull=False)` for "everything" (see `learning.access.staff_offerings_q`, `rbac.Scope.q`).
 - **drf-spectacular:** views with user-dependent `get_queryset` need a `swagger_fake_view` guard.
 - **DRF parsers:** `get_parsers()` runs before `self.action` is set. Use `parser_classes`; the import upload was broken by this.

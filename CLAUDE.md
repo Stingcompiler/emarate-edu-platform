@@ -31,6 +31,7 @@ live in `docs/` (01–09); `docs/03-roles-and-permissions.md` wins any conflict.
 |---|---|
 | Run everything | `pnpm dev` |
 | Demo data (dev only, idempotent) | `cd backend && DEMO_PASSWORD='…' uv run python manage.py seed_demo` — accounts `<role>@demo.ecst.test` |
+| Web Push keys for production | `cd backend && uv run python manage.py vapid_keys` (dev creates `backend/.vapid-dev.json` itself) |
 | Backend tests (SQLite / Postgres) | `cd backend && uv run pytest` · `DATABASE_URL=postgres:///ecst uv run pytest` |
 | Lint and format the backend | `cd backend && uv run ruff check . && uv run ruff format .` |
 | Regenerate the API client | `pnpm api:generate` |

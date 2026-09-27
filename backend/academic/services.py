@@ -10,6 +10,7 @@ from accounts import rbac
 from accounts.rbac import Role
 from audit.services import RequestMeta, record
 from core.errors import Conflict
+from notifications import events
 from organization.models import Department, Program
 from students.models import StudentRecord
 
@@ -88,6 +89,7 @@ def add_instructor(
     try:
         with transaction.atomic():
             instructor = OfferingInstructor.objects.create(offering=offering, user=user, role=role)
+            events.instructor_assigned(instructor)
             record(
                 meta,
                 "offering.instructor_add",

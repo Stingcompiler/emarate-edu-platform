@@ -126,6 +126,7 @@ class Assignment(PublicIdModel, TimestampedModel):
     )
     rubric = models.JSONField(default=dict, blank=True)
     status = models.CharField(max_length=10, choices=Status.choices, default=Status.DRAFT)
+    reminder_sent_at = models.DateTimeField(null=True, blank=True, editable=False)
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="+"
     )

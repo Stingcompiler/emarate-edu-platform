@@ -1,0 +1,228 @@
+import type { Schemas } from "@ecst/api";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { BellRing, LogOut } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router";
+
+import { PortalShell } from "../components/PortalShell";
+import { Button, Card, SectionLabel } from "../components/ui";
+import { api } from "../lib/api";
+import { hasRole, useMe, useSignOut } from "../lib/auth";
+import { disablePush, enablePush, pushState, type PushState } from "../lib/push";
+import { applyTheme, storedTheme, type Theme } from "../lib/theme";
+
+type Preference = Schemas["Preference"];
+
+const LABELS: Record<Preference["category"], string> = {
+  course: "المواد: المحاضرات والواجبات والتصحيح",
+  college: "إعلانات الكلية والقسم",
+  results: "النتائج",
+  account: "الحساب والتسجيل",
+  hr: "الموارد البشرية",
+};
+const CHANNELS = [
+  { key: "inapp", label: "داخل التطبيق" },
+  { key: "push", label: "Push" },
+  { key: "email", label: "بريد" },
+] as const;
+
+/** Board: StudentSettings / StaffSettings (phone). Desktop: no board — same sections, wider (docs/06 §9). */
+export function Settings() {
+  const me = useMe();
+  const client = useQueryClient();
+  const navigate = useNavigate();
+  const signOut = useSignOut();
+  const staff = hasRole(me.data, "teacher", "ta");
+
+  const prefs = useQuery({
+    queryKey: ["notifications", "preferences"],
+    queryFn: async () => (await api.GET("/api/v1/notifications/preferences")).data ?? [],
+  });
+  const save = useMutation({
+    mutationFn: async (rows: Preference[]) => {
+      const { data } = await api.PUT("/api/v1/notifications/preferences", { body: rows });
+      return data ?? rows;
+    },
+    onMutate: (rows) => client.setQueryData(["notifications", "preferences"], rows),
+    onSuccess: (rows) => client.setQueryData(["notifications", "preferences"], rows),
+  });
+
+  const rows = (prefs.data ?? []).filter((p) => p.category !== "hr" || staff);
+
+  function toggle(category: Preference["category"], channel: "inapp" | "push" | "email") {
+    const next = (prefs.data ?? []).map((p) =>
+      p.category === category ? { ...p, [channel]: !p[channel] } : p,
+    );
+    save.mutate(next);
+  }
+
+  return (
+    <PortalShell title="الإعدادات">
+      <div className="max-w-3xl">
+        <PushCard />
+
+        <SectionLabel>الإشعارات — لكل فئة قنواتها</SectionLabel>
+        <Card className="overflow-hidden">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-border-soft text-xs text-text-muted">
+                <th scope="col" className="px-4 py-2.5 text-start font-medium">
+                  الفئة
+                </th>
+                {CHANNELS.map((c) => (
+                  <th
+                    key={c.key}
+                    scope="col"
+                    className="w-16 px-1 py-2.5 text-center font-medium sm:w-24"
+                  >
+                    {c.label}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border-soft">
+              {rows.map((row) => (
+                <tr key={row.category}>
+                  <th scope="row" className="px-4 py-3 text-start font-medium text-text">
+                    {LABELS[row.category]}
+                  </th>
+                  {CHANNELS.map((c) => (
+                    <td key={c.key} className="px-1 text-center">
+                      <Dot
+                        on={row[c.key]}
+                        label={`${LABELS[row.category]} — ${c.label}`}
+                        onClick={() => toggle(row.category, c.key)}
+                      />
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </Card>
+
+        <SectionLabel>المظهر</SectionLabel>
+        <Card className="flex min-h-14 items-center justify-between gap-3 px-4 py-2">
+          <span className="text-sm font-medium text-text">المظهر</span>
+          <ThemeSwitch />
+        </Card>
+
+        <SectionLabel>الحساب</SectionLabel>
+        <Card className="px-4 py-3">
+          <p className="text-sm font-semibold text-text">{me.data?.full_name_ar}</p>
+          <p className="mt-0.5 text-sm text-text-muted" dir="ltr">
+            {me.data?.email}
+          </p>
+        </Card>
+        <Button
+          variant="secondary"
+          className="mt-4 w-full text-danger-strong lg:hidden"
+          onClick={async () => {
+            await signOut();
+            navigate("/login", { replace: true });
+          }}
+        >
+          <LogOut size={18} aria-hidden className="rtl:-scale-x-100" />
+          تسجيل الخروج
+        </Button>
+      </div>
+    </PortalShell>
+  );
+}
+
+function Dot({ on, label, onClick }: { on: boolean; label: string; onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={on}
+      aria-label={label}
+      onClick={onClick}
+      className="inline-grid size-11 place-items-center"
+    >
+      <span
+        className={`size-5 rounded-full border-2 ${on ? "border-primary bg-primary" : "border-n300 bg-transparent"}`}
+      />
+    </button>
+  );
+}
+
+function ThemeSwitch() {
+  const [theme, setTheme] = useState<Theme>(storedTheme);
+  const options: { key: Theme; label: string }[] = [
+    { key: "light", label: "فاتح" },
+    { key: "dark", label: "داكن" },
+    { key: "system", label: "النظام" },
+  ];
+  return (
+    <div role="radiogroup" aria-label="المظهر" className="flex rounded-lg bg-surface-alt p-0.5">
+      {options.map((o) => (
+        <button
+          key={o.key}
+          type="button"
+          role="radio"
+          aria-checked={theme === o.key}
+          onClick={() => {
+            applyTheme(o.key);
+            setTheme(o.key);
+          }}
+          className={`min-h-9 rounded-md px-3 text-sm ${theme === o.key ? "bg-surface font-semibold text-text shadow-xs" : "text-text-muted"}`}
+        >
+          {o.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+const PUSH_TEXT: Record<PushState, string> = {
+  on: "تصلك الإشعارات على هذا الجهاز حتى والتطبيق مغلق.",
+  off: "فعّلها لتصلك الإشعارات فور إرسالها.",
+  denied: "رفضت الإذن سابقًا. فعّله من إعدادات المتصفح لهذا الموقع.",
+  "needs-install": "على iPhone تعمل الإشعارات بعد تثبيت التطبيق على الشاشة الرئيسية.",
+  unsupported: "هذا المتصفح لا يدعم الإشعارات الفورية.",
+};
+
+function PushCard() {
+  const [state, setState] = useState<PushState | null>(null);
+  const [busy, setBusy] = useState(false);
+  useEffect(() => {
+    void pushState().then(setState);
+  }, []);
+  if (state === null) return null;
+
+  async function flip() {
+    setBusy(true);
+    try {
+      setState(state === "on" ? await disablePush() : await enablePush());
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <Card className="flex flex-wrap items-center gap-3 p-4">
+      <span className="grid size-10 place-items-center rounded-full bg-primary-soft text-primary-700">
+        <BellRing size={20} aria-hidden />
+      </span>
+      <div className="min-w-0 flex-1">
+        <p className="text-sm font-semibold text-text">الإشعارات على هذا الجهاز</p>
+        <p className="text-sm leading-relaxed text-text-muted">{PUSH_TEXT[state]}</p>
+      </div>
+      {state === "needs-install" ? (
+        <Link to="/install">
+          <Button variant="secondary">طريقة التثبيت</Button>
+        </Link>
+      ) : state === "on" || state === "off" ? (
+        <Button variant={state === "on" ? "secondary" : "primary"} onClick={flip} disabled={busy}>
+          {state === "on" ? "إيقاف" : "تفعيل"}
+        </Button>
+      ) : null}
+      {busy && (
+        <span className="sr-only" role="status">
+          لحظة…
+        </span>
+      )}
+    </Card>
+  );
+}

@@ -104,6 +104,9 @@ class CourseOffering(PublicIdModel, TimestampedModel):
     section = models.CharField(max_length=10, default="A")
     capacity = models.PositiveIntegerField(null=True, blank=True)
     ta_can_grade = models.BooleanField(default=False)
+    ta_can_notify = models.BooleanField(
+        default=False, help_text="TAs may send notifications to this course's students."
+    )
     status = models.CharField(max_length=10, choices=Status.choices, default=Status.ACTIVE)
 
     class Meta:

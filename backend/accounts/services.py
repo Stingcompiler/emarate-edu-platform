@@ -21,6 +21,7 @@ from rest_framework.exceptions import PermissionDenied, ValidationError
 from audit.services import SYSTEM, RequestMeta, record
 from core.errors import Conflict, Invalid, Locked
 from core.text import names_match
+from notifications import events
 from organization.models import SystemSettings
 from students.models import StudentRecord
 
@@ -132,6 +133,7 @@ def complete_registration(request: RegistrationRequest, password: str) -> User:
         )
         if needs_approval:
             transaction.on_commit(lambda: emails.registration_pending(user.email))
+            events.registration_pending(request)
     return user
 
 
@@ -154,6 +156,7 @@ def decide_registration(
             user.is_active = True
             user.save(update_fields=["is_active"])
             RoleAssignment.objects.get_or_create(user=user, role=Role.STUDENT, department=None)
+            events.registration_approved(user)
         else:
             request.status = RegistrationRequest.Status.REJECTED
             # The pending account never became usable: remove it so the student

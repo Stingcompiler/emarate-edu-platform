@@ -51,6 +51,10 @@ if MEDIA_BACKEND == "bunny":
     BUNNY_WEBHOOK_SECRET = env("BUNNY_WEBHOOK_SECRET", required=True)
     STORAGES = {**STORAGES, "default": {"BACKEND": "files.bunny.BunnyStorage"}}  # noqa: F405
 
+VAPID_PUBLIC_KEY = env("VAPID_PUBLIC_KEY", required=True)
+VAPID_PRIVATE_KEY = env("VAPID_PRIVATE_KEY", required=True)
+VAPID_SUBJECT = env("VAPID_SUBJECT", "mailto:it@ecst.edu.sd")
+
 # ─── HTTPS hardening ──────────────────────────────────────────────────────
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 SECURE_SSL_REDIRECT = env_bool("DJANGO_SECURE_SSL_REDIRECT", True)

@@ -116,6 +116,7 @@ class OfferingSerializer(serializers.ModelSerializer):
             "section",
             "capacity",
             "ta_can_grade",
+            "ta_can_notify",
             "status",
             "instructors",
             "enrolled_count",
