@@ -1,0 +1,323 @@
+"""Fictional demo data for local development (never production).
+
+    DEMO_PASSWORD='...' uv run python manage.py seed_demo
+
+Idempotent: running it again only adds what is missing. Names are invented;
+the structure mirrors docs/prototype (4 departments, 11 programs).
+"""
+
+from __future__ import annotations
+
+import os
+from datetime import date
+
+from django.conf import settings
+from django.core.management.base import BaseCommand, CommandError
+from django.db import transaction
+
+from academic import services as academic_services
+from academic.models import AcademicYear, Course, CourseOffering, DepartmentMembership, Term
+from accounts.models import RoleAssignment, User
+from accounts.rbac import DEPARTMENT_SCOPED_ROLES, Role
+from audit.services import RequestMeta
+from organization.models import College, Department, Program, SystemSettings
+from students.models import StudentRecord
+
+DOMAIN = "demo.ecst.test"
+
+DEPARTMENTS = [
+    # code, Arabic, English, programs: (code, Arabic, English, degree, levels, terms)
+    (
+        "IT",
+        "تقنية المعلومات",
+        "Information Technology",
+        [
+            ("BIT", "بكالوريوس تقنية المعلومات", "BSc Information Technology", "bachelor", 4, 8),
+            ("BIS", "بكالوريوس نظم المعلومات", "BSc Information Systems", "bachelor", 4, 8),
+            ("DIT", "دبلوم تقنية المعلومات", "Diploma in Information Technology", "diploma", 2, 4),
+        ],
+    ),
+    (
+        "CS",
+        "علوم الحاسوب",
+        "Computer Science",
+        [
+            ("BCS", "بكالوريوس علوم الحاسوب", "BSc Computer Science", "bachelor", 4, 8),
+            ("BAI", "بكالوريوس الذكاء الاصطناعي", "BSc Artificial Intelligence", "bachelor", 4, 8),
+        ],
+    ),
+    (
+        "ENG",
+        "الهندسة",
+        "Engineering",
+        [
+            ("BCE", "بكالوريوس الهندسة المدنية", "BSc Civil Engineering", "bachelor", 5, 10),
+            (
+                "BEE",
+                "بكالوريوس الهندسة الكهربائية",
+                "BSc Electrical Engineering",
+                "bachelor",
+                5,
+                10,
+            ),
+            (
+                "BME",
+                "بكالوريوس الهندسة الميكانيكية",
+                "BSc Mechanical Engineering",
+                "bachelor",
+                5,
+                10,
+            ),
+        ],
+    ),
+    (
+        "BA",
+        "إدارة الأعمال",
+        "Business Administration",
+        [
+            ("BBA", "بكالوريوس إدارة الأعمال", "BSc Business Administration", "bachelor", 4, 8),
+            ("DACC", "دبلوم المحاسبة", "Diploma in Accounting", "diploma", 2, 4),
+            ("DBA", "دبلوم إدارة الأعمال", "Diploma in Business Administration", "diploma", 2, 4),
+        ],
+    ),
+]
+
+# (department, program or None = shared, code, Arabic, English, level, term order)
+COURSES = [
+    ("IT", None, "IT100", "مهارات الحاسوب", "Computer Skills", 1, 1),
+    ("IT", None, "MATH101", "الرياضيات المتقطعة", "Discrete Mathematics", 1, 1),
+    ("IT", None, "ENG101", "اللغة الإنجليزية 1", "English I", 1, 1),
+    ("IT", "BIT", "IT101", "مقدمة في البرمجة", "Introduction to Programming", 1, 1),
+    ("IT", "BIT", "IT102", "أساسيات تقنية المعلومات", "IT Fundamentals", 1, 1),
+    ("IT", "BIT", "IT103", "البرمجة الكائنية", "Object-Oriented Programming", 1, 2),
+    ("IT", "BIT", "IT201", "هياكل البيانات", "Data Structures", 2, 1),
+    ("IT", "BIT", "IT202", "قواعد البيانات", "Databases", 2, 1),
+    ("IT", "BIT", "IT203", "شبكات الحاسوب", "Computer Networks", 2, 1),
+    ("IT", "BIS", "IS101", "مقدمة في نظم المعلومات", "Introduction to Information Systems", 1, 1),
+    ("IT", "BIS", "IS201", "تحليل النظم", "Systems Analysis", 2, 1),
+    ("IT", "DIT", "DIT101", "صيانة الحاسوب", "Computer Maintenance", 1, 1),
+    ("CS", None, "CS100", "التفكير الحسابي", "Computational Thinking", 1, 1),
+    ("CS", "BCS", "CS101", "الخوارزميات 1", "Algorithms I", 1, 1),
+    ("CS", "BAI", "AI101", "مقدمة في الذكاء الاصطناعي", "Introduction to AI", 1, 1),
+    ("ENG", None, "EN100", "الرسم الهندسي", "Engineering Drawing", 1, 1),
+    ("ENG", None, "EN101", "الفيزياء الهندسية", "Engineering Physics", 1, 1),
+    ("ENG", "BCE", "CE101", "مقاومة المواد", "Strength of Materials", 1, 1),
+    ("ENG", "BEE", "EE101", "الدوائر الكهربائية", "Electric Circuits", 1, 1),
+    ("ENG", "BME", "ME101", "الميكانيكا الهندسية", "Engineering Mechanics", 1, 1),
+    ("BA", None, "BA100", "مبادئ الإدارة", "Principles of Management", 1, 1),
+    ("BA", None, "BA101", "مبادئ المحاسبة", "Principles of Accounting", 1, 1),
+    ("BA", "BBA", "BA201", "السلوك التنظيمي", "Organizational Behaviour", 2, 1),
+]
+
+# One account per role; department roles belong to IT (the prototype's department).
+STAFF = [
+    (Role.SYSTEM_ADMIN, "admin", "م. عثمان الطيب"),
+    (Role.HEAD_REGISTRAR, "head.registrar", "أ. سعاد إبراهيم"),
+    (Role.REGISTRAR, "registrar", "أ. نزار عوض"),
+    (Role.RESULTS_OFFICER, "results", "أ. منى الفاضل"),
+    (Role.ACADEMIC_AFFAIRS, "academic", "د. عبد الله الحسن"),
+    (Role.STUDENT_AFFAIRS, "student.affairs", "أ. إخلاص بابكر"),
+    (Role.DEPARTMENT_MANAGER, "dept.manager", "د. مصطفى الأمين"),
+    (Role.DEPARTMENT_SUPERVISOR, "dept.supervisor", "د. هالة عبد الرحمن"),
+    (Role.TEACHER, "teacher", "د. سلمى الخضر"),
+    (Role.TA, "ta", "م. ياسر عبد الباقي"),
+    (Role.HR, "hr", "أ. رشا المكي"),
+    (Role.SITE_MANAGER, "site", "أ. طارق حمدان"),
+    (Role.EVENTS_MANAGER, "events", "أ. آمنة الصادق"),
+]
+
+FIRST = ["أحمد", "محمد", "سارة", "مريم", "عمر", "فاطمة", "خالد", "آمنة", "يوسف", "هبة"]
+FATHER = ["عبد الله", "الطيب", "حسن", "إبراهيم", "عثمان", "بشير", "الأمين", "صالح"]
+FAMILY = ["علي", "النور", "أحمد", "الفكي", "موسى"]
+FIRST_EN = [
+    "Ahmed",
+    "Mohamed",
+    "Sara",
+    "Mariam",
+    "Omar",
+    "Fatima",
+    "Khalid",
+    "Amna",
+    "Yousif",
+    "Heba",
+]
+FATHER_EN = ["Abdalla", "Altayeb", "Hassan", "Ibrahim", "Osman", "Bashir", "Alamin", "Salih"]
+FAMILY_EN = ["Ali", "Alnoor", "Ahmed", "Alfaki", "Musa"]
+FEMALE = {"سارة", "مريم", "فاطمة", "آمنة", "هبة"}
+
+# (program, level, how many)
+COHORTS = [
+    ("BIT", 1, 12),
+    ("BIT", 2, 8),
+    ("BIS", 1, 5),
+    ("DIT", 1, 3),
+    ("BCS", 1, 4),
+    ("BAI", 1, 2),
+    ("BCE", 1, 2),
+    ("BEE", 1, 1),
+    ("BBA", 1, 2),
+    ("BBA", 2, 1),
+]
+
+
+class Command(BaseCommand):
+    help = "Load fictional demo data (DEBUG only; password from DEMO_PASSWORD)."
+
+    def handle(self, *args, **options):
+        if not settings.DEBUG:
+            raise CommandError("seed_demo only runs with DEBUG on (development).")
+        password = os.environ.get("DEMO_PASSWORD", "")
+        if len(password) < 8:
+            raise CommandError("Set DEMO_PASSWORD (8+ characters) for the demo accounts.")
+        with transaction.atomic():
+            counts = self._seed(password)
+        for name, value in counts.items():
+            self.stdout.write(f"{name}: {value}")
+        self.stdout.write(self.style.SUCCESS(f"Demo data ready. Sign in as admin@{DOMAIN}."))
+
+    def _seed(self, password: str) -> dict[str, int]:
+        SystemSettings.load()
+        college, _ = College.objects.get_or_create(
+            code="ECST",
+            defaults={
+                "name_ar": "كلية الإمارات للعلوم والتقنية",
+                "name_en": "Emirates College of Science and Technology",
+            },
+        )
+        departments: dict[str, Department] = {}
+        programs: dict[str, Program] = {}
+        for code, name_ar, name_en, program_rows in DEPARTMENTS:
+            department, _ = Department.objects.get_or_create(
+                college=college, code=code, defaults={"name_ar": name_ar, "name_en": name_en}
+            )
+            departments[code] = department
+            for p_code, p_ar, p_en, degree, levels, terms in program_rows:
+                programs[p_code], _ = Program.objects.get_or_create(
+                    code=p_code,
+                    defaults={
+                        "department": department,
+                        "name_ar": p_ar,
+                        "name_en": p_en,
+                        "degree": degree,
+                        "levels_count": levels,
+                        "duration_terms": terms,
+                    },
+                )
+
+        year, _ = AcademicYear.objects.get_or_create(
+            name="2026/2027",
+            defaults={"starts_on": date(2026, 9, 1), "ends_on": date(2027, 7, 31)},
+        )
+        if not AcademicYear.objects.filter(is_current=True).exists():
+            AcademicYear.objects.filter(pk=year.pk).update(is_current=True)
+        autumn, _ = Term.objects.get_or_create(
+            academic_year=year,
+            order=1,
+            defaults={
+                "name_ar": "خريف 2026",
+                "name_en": "Autumn 2026",
+                "starts_on": date(2026, 9, 1),
+                "ends_on": date(2027, 1, 31),
+                "status": Term.Status.ACTIVE,
+            },
+        )
+        Term.objects.get_or_create(
+            academic_year=year,
+            order=2,
+            defaults={
+                "name_ar": "ربيع 2027",
+                "name_en": "Spring 2027",
+                "starts_on": date(2027, 2, 15),
+                "ends_on": date(2027, 7, 15),
+            },
+        )
+        if not Term.objects.filter(is_current=True).exists():
+            Term.objects.filter(pk=autumn.pk).update(is_current=True)
+
+        users: dict[Role, User] = {}
+        for role, handle, name in STAFF:
+            users[role] = self._user(f"{handle}@{DOMAIN}", name, password, role, departments["IT"])
+        admin = users[Role.SYSTEM_ADMIN]
+        meta = RequestMeta(actor=admin, user_agent="seed_demo")
+
+        for role in (Role.TEACHER, Role.TA):
+            DepartmentMembership.objects.get_or_create(
+                department=departments["IT"],
+                user=users[role],
+                defaults={"kind": role.value, "added_by": admin},
+            )
+
+        for dept, program, code, name_ar, name_en, level, term_order in COURSES:
+            course, _ = Course.objects.get_or_create(
+                department=departments[dept],
+                code=code,
+                defaults={
+                    "program": programs[program] if program else None,
+                    "name_ar": name_ar,
+                    "name_en": name_en,
+                    "default_level": level,
+                    "default_term_order": term_order,
+                },
+            )
+            if term_order == autumn.order:
+                offering, _ = CourseOffering.objects.get_or_create(course=course, term=autumn)
+                if dept == "IT" and program in (None, "BIT"):
+                    offering.instructors.get_or_create(
+                        user=users[Role.TEACHER], defaults={"role": "teacher"}
+                    )
+                    if code in ("IT101", "IT201"):
+                        offering.instructors.get_or_create(
+                            user=users[Role.TA], defaults={"role": "ta"}
+                        )
+
+        n = 0
+        for program_code, level, count in COHORTS:
+            program = programs[program_code]
+            for _ in range(count):
+                n += 1
+                first = FIRST[n % len(FIRST)]
+                number = f"26-{program.department.code}-{n:04d}"
+                StudentRecord.objects.get_or_create(
+                    university_number=number,
+                    defaults={
+                        "program": program,
+                        "level": level,
+                        "full_name_ar": f"{first} {FATHER[n % len(FATHER)]} "
+                        f"{FAMILY[n % len(FAMILY)]}",
+                        "full_name_en": f"{FIRST_EN[n % len(FIRST)]} "
+                        f"{FATHER_EN[n % len(FATHER)]} {FAMILY_EN[n % len(FAMILY)]}",
+                        "gender": "female" if first in FEMALE else "male",
+                        # Half the file carries an official email (instant activation).
+                        "email": f"s{n:04d}@students.{DOMAIN}" if n % 2 else "",
+                    },
+                )
+        for program_code, level in {(p, lv) for p, lv, _ in COHORTS}:
+            academic_services.bulk_enroll(meta, autumn, programs[program_code], level)
+
+        # A ready-made student account on the first IT record.
+        record = StudentRecord.objects.get(university_number="26-IT-0001")
+        if record.user_id is None:
+            record.user = self._user(
+                f"student@{DOMAIN}", record.full_name_ar, password, Role.STUDENT, None
+            )
+            record.save(update_fields=["user", "updated_at"])
+
+        return {
+            "departments": Department.objects.count(),
+            "programs": Program.objects.count(),
+            "courses": Course.objects.count(),
+            "offerings": CourseOffering.objects.filter(term=autumn).count(),
+            "students": StudentRecord.objects.count(),
+            "users": User.objects.count(),
+        }
+
+    def _user(self, email, name, password, role, department) -> User:
+        user = User.objects.filter(email=email).first()
+        if user is None:
+            user = User.objects.create_user(email=email, password=password, full_name_ar=name)
+        RoleAssignment.objects.get_or_create(
+            user=user,
+            role=role,
+            department=department if role in DEPARTMENT_SCOPED_ROLES else None,
+        )
+        return user

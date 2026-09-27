@@ -49,6 +49,8 @@ jobs:
           uv run ruff format --check . ../scripts
       - name: Migrations are complete
         run: uv run python manage.py makemigrations --check --dry-run
+      - name: OpenAPI schema has no warnings
+        run: uv run python manage.py spectacular --fail-on-warn --validate --file /dev/null
       - name: Tests
         run: uv run pytest -W error::DeprecationWarning
 

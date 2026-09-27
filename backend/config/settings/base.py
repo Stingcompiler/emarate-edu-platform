@@ -5,6 +5,7 @@ override only what differs. See docs/05-system-design.md §4 for the rules that
 keep SQLite (development) and PostgreSQL (production) interchangeable.
 """
 
+from datetime import timedelta
 from pathlib import Path
 
 from django.utils.csp import CSP
@@ -27,8 +28,14 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "rest_framework",
+    "rest_framework_simplejwt.token_blacklist",
+    "django_filters",
     "drf_spectacular",
     "core",
+    "audit",
+    "organization",
+    "academic",
+    "students",
     "accounts",
 ]
 
@@ -112,8 +119,14 @@ CACHES = {"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"
 REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "DEFAULT_AUTHENTICATION_CLASSES": [
-        # Phase 1 replaces this with HttpOnly JWT cookies (docs/05 §7).
+        # HttpOnly JWT cookies for the portal (docs/05 §7); sessions for the admin.
+        "accounts.authentication.CookieJWTAuthentication",
         "rest_framework.authentication.SessionAuthentication",
+    ],
+    "DEFAULT_FILTER_BACKENDS": [
+        "django_filters.rest_framework.DjangoFilterBackend",
+        "rest_framework.filters.SearchFilter",
+        "rest_framework.filters.OrderingFilter",
     ],
     # Secure by default: every endpoint must opt out explicitly to be public.
     "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.IsAuthenticated"],
@@ -125,7 +138,13 @@ REST_FRAMEWORK = {
         "rest_framework.throttling.AnonRateThrottle",
         "rest_framework.throttling.UserRateThrottle",
     ],
-    "DEFAULT_THROTTLE_RATES": {"anon": "30/minute", "user": "60/minute"},
+    "DEFAULT_THROTTLE_RATES": {
+        "anon": "30/minute",
+        "user": "60/minute",
+        "login": "10/minute",  # per IP (docs/05 §7)
+        "otp": "5/hour",  # per email target
+        "otp_ip": "20/hour",  # per IP, across targets
+    },
     "EXCEPTION_HANDLER": "core.exceptions.problem_exception_handler",
     "TEST_REQUEST_DEFAULT_FORMAT": "json",
 }
@@ -137,8 +156,32 @@ SPECTACULAR_SETTINGS = {
     "SERVE_INCLUDE_SCHEMA": False,
     "COMPONENT_SPLIT_REQUEST": True,
     "SCHEMA_PATH_PREFIX": r"/api/(v1|public|visitor)",
-    "ENUM_NAME_OVERRIDES": {"CheckResultEnum": ["ok", "error"]},
+    "ENUM_NAME_OVERRIDES": {
+        "CheckResultEnum": ["ok", "error"],
+        "RoleEnum": "accounts.rbac.Role",
+        "TeachingKindEnum": "academic.models.DepartmentMembership.Kind",
+    },
 }
+
+# ─── Authentication (docs/05 §7, §8.2) ────────────────────────────────────
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=15),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
+    "ROTATE_REFRESH_TOKENS": True,
+    "BLACKLIST_AFTER_ROTATION": True,
+    "UPDATE_LAST_LOGIN": True,
+    "AUTH_HEADER_TYPES": ("Bearer",),
+    "USER_ID_FIELD": "id",
+}
+AUTH_COOKIE_ACCESS = "access"
+AUTH_COOKIE_REFRESH = "refresh"
+AUTH_COOKIE_SECURE = False  # True in production (HTTPS)
+AUTH_COOKIE_SAMESITE = "Lax"
+# Lock an identifier for 15 minutes after 10 failed logins (docs/05 §8.2).
+LOGIN_MAX_FAILURES = 10
+LOGIN_LOCKOUT_SECONDS = 15 * 60
+# Links in emails (activation) point at the portal.
+PORTAL_BASE_URL = env("PORTAL_BASE_URL", "http://localhost:5173")
 
 # ─── Background tasks ─────────────────────────────────────────────────────
 CELERY_BROKER_URL = env("CELERY_BROKER_URL", "memory://")

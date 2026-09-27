@@ -54,6 +54,7 @@ pnpm dev
 
 | الأمر | ماذا يفعل |
 |---|---|
+| `cd backend && DEMO_PASSWORD='…' uv run python manage.py seed_demo` | بيانات تجريبية وهمية (التطوير فقط): 4 أقسام، 11 برنامجًا، 40 طالبًا، حساب لكل دور `@demo.ecst.test` |
 | `cd backend && uv run pytest` | الاختبارات على SQLite |
 | `cd backend && DATABASE_URL=postgres:///ecst uv run pytest` | الاختبارات نفسها على PostgreSQL محلي |
 | `cd backend && uv run ruff check . && uv run ruff format .` | الفحص والتنسيق (ruff بدل black + isort) |
