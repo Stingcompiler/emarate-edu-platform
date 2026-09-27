@@ -139,12 +139,36 @@ READS: dict[str, tuple[str, frozenset, frozenset]] = {
     "submission-detail": ("/api/v1/submissions/{submission}", LEARNING, OUTSIDERS),
     "file-url": ("/api/v1/files/{file}/url", LEARNING, OUTSIDERS),
     "video-playback": ("/api/v1/videos/{video}/playback", LEARNING, OUTSIDERS),
+    # Personal: every user reads their own inbox, preferences and sent list.
+    "notification-list": ("/api/v1/notifications", EVERYONE, frozenset()),
+    "notification-unread-count": ("/api/v1/notifications/unread-count", EVERYONE, frozenset()),
+    "notification-preferences": ("/api/v1/notifications/preferences", EVERYONE, frozenset()),
+    "notification-sent-list": ("/api/v1/notifications/sent", EVERYONE, frozenset()),
+    "notification-sent-audiences": (
+        "/api/v1/notifications/sent/audiences",
+        EVERYONE,
+        frozenset(),
+    ),
+    "push-config": ("/api/v1/push/config", EVERYONE, frozenset()),
+    "hr-notice-list": ("/api/v1/hr-notices", EVERYONE, frozenset()),
+    "hr-notice-detail": (
+        "/api/v1/hr-notices/{hr_notice}",
+        frozenset({R.SYSTEM_ADMIN, R.HR, R.TEACHER}),
+        EVERYONE - {R.SYSTEM_ADMIN, R.HR, R.TEACHER},
+    ),
 }
 
 # url name → "module::test" that pins down its (write) rules.
 _L = "learning.tests.test_learning::"
 _F = "files.tests.test_files::"
+_N = "notifications.tests.test_notifications::"
 COVERED_ELSEWHERE = {
+    "notification-read": _N + "test_inbox_read_and_counts",
+    "notification-read-all": _N + "test_inbox_read_and_counts",
+    "notification-sent-preview": _N + "test_audience_options_and_preview",
+    "push-subscribe": _N + "test_teacher_notifies_their_course_and_push_arrives",
+    "push-unsubscribe": _N + "test_push_unsubscribe_and_config",
+    "hr-notice-acknowledge": _N + "test_hr_notice",
     "lecture-publish": _L + "test_students_see_published_lectures_only",
     "lecture-unpublish": _L + "test_resource_removal_and_unpublish",
     "lecture-add-resource": _L + "test_lecture_file_link_is_signed_and_scoped",
@@ -289,7 +313,11 @@ def _learning_world(users, offering, student):
     submission = Submission.objects.create(
         assignment=assignment, student_record=student, first_submitted_at=timezone.now()
     )
+    from notifications.models import HRNotice
+
+    notice = HRNotice.objects.create(teacher=teacher, sent_by=users[R.HR], subject="s", body="b")
     return {
+        "hr_notice": notice.public_id,
         "lecture": lecture.public_id,
         "assignment": assignment.public_id,
         "submission": submission.public_id,

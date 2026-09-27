@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     "accounts",
     "files",
     "learning",
+    "notifications",
 ]
 
 MIDDLEWARE = [
@@ -127,6 +128,20 @@ BUNNY_STREAM_API_KEY = ""
 BUNNY_STREAM_TOKEN_KEY = ""
 BUNNY_WEBHOOK_SECRET = ""
 
+# ─── Web Push (VAPID) ─────────────────────────────────────────────────────
+# Development creates a local key pair in backend/.vapid-dev.json on first use.
+VAPID_PUBLIC_KEY = ""
+VAPID_PRIVATE_KEY = ""
+VAPID_SUBJECT = "mailto:it@ecst.edu.sd"
+
+CELERY_BEAT_SCHEDULE = {
+    "remind-due-assignments": {
+        "task": "notifications.tasks.remind_due_assignments",
+        "schedule": 30 * 60,
+    },
+    "deliver-outbox": {"task": "notifications.tasks.deliver_outbox", "schedule": 5 * 60},
+}
+
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # ─── Cache (LocMem in development; Redis in production) ───────────────────
@@ -178,6 +193,8 @@ SPECTACULAR_SETTINGS = {
         "RoleEnum": "accounts.rbac.Role",
         "TeachingKindEnum": "academic.models.DepartmentMembership.Kind",
         "ResourceKindEnum": "learning.models.LectureResource.Kind",
+        "NotificationCategoryEnum": "notifications.models.Category",
+        "SendCategoryEnum": ["course", "college", "results"],
     },
 }
 
