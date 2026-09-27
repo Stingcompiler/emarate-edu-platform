@@ -8,11 +8,12 @@ from core import views as core_views
 
 # /api/public/*  — anonymous, cacheable (landing site, health)
 # /api/v1/*      — authenticated portal API
-# /api/visitor/* — visitor session after OTP (Phase 7)
+# /api/visitor/* — visitor session after OTP
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/public/", include("core.urls_public")),
     path("api/v1/", include("config.urls_v1")),
+    path("api/visitor/", include("admissions.urls_visitor")),
 ]
 
 if settings.SERVE_API_DOCS:

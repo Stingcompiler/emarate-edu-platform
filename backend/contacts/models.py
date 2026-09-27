@@ -29,6 +29,19 @@ class Contact(PublicIdModel, TimestampedModel):
         return self.name
 
 
+class VisitorSession(TimestampedModel):
+    contact = models.ForeignKey(Contact, on_delete=models.CASCADE, related_name="sessions")
+    token_hash = models.CharField(max_length=64, unique=True)
+    expires_at = models.DateTimeField()
+    ip = models.GenericIPAddressField(null=True, blank=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self) -> str:
+        return f"visitor:{self.contact_id}"
+
+
 def match_or_create(*, name: str, email: str | None, phone_e164: str | None) -> Contact:
     """Same email or phone → same contact; the name is never a lookup key."""
     email = (email or "").strip().lower() or None

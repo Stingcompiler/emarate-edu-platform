@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     "contacts",
     "inquiries",
     "content",
+    "admissions",
 ]
 
 MIDDLEWARE = [
@@ -157,6 +158,7 @@ CELERY_BEAT_SCHEDULE = {
     "close-expired-attempts": {"task": "exams.tasks.close_expired_attempts", "schedule": 60},
     "remind-exams-starting": {"task": "exams.tasks.remind_exams_starting", "schedule": 5 * 60},
     "remind-live-sessions": {"task": "live.tasks.remind_live_sessions", "schedule": 5 * 60},
+    "expire-applications": {"task": "admissions.tasks.expire_applications", "schedule": 24 * 3600},
 }
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
@@ -230,6 +232,10 @@ SPECTACULAR_SETTINGS = {
         "ContentStatusEnum": "content.models.Status",
         "EventStatusEnum": "content.models.Event.EventStatus",
         "LiveStatusEnum": "live.models.LiveSession.Status",
+        "ApplicationStatusEnum": "admissions.models.Application.Status",
+        "TemplateStatusEnum": "admissions.models.ApplicationFormTemplate.Status",
+        "DocumentStatusEnum": "admissions.models.ApplicationDocument.Status",
+        "ReplyChannelEnum": ["email", "internal"],
     },
 }
 

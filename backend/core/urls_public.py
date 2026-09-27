@@ -1,6 +1,7 @@
 from django.urls import path
 
 from accounts import views as accounts
+from admissions import views as admissions
 from content import views as content
 from files import views as files
 from inquiries import views as inquiries
@@ -25,6 +26,15 @@ urlpatterns = [
     path("files/<str:token>", files.FileDownloadView.as_view(), name="file-download"),
     path("inquiries", inquiries.PublicInquiryView.as_view(), name="public-inquiry"),
     path("site", content.PublicSiteSettingsView.as_view(), name="public-site"),
+    path("intakes", admissions.PublicIntakesView.as_view(), name="public-intakes"),
+    path("intakes/<int:pk>", admissions.PublicIntakeView.as_view(), name="public-intake"),
+    path("visitor/otp", admissions.VisitorOTPView.as_view(), name="visitor-otp"),
+    path("visitor/verify", admissions.VisitorVerifyView.as_view(), name="visitor-verify"),
+    path(
+        "applications/<str:reference_no>",
+        admissions.PublicApplicationStatusView.as_view(),
+        name="public-application-status",
+    ),
     path("pages/<str:slug>", content.PublicPageView.as_view(), name="public-page"),
     path("news", content.PublicNewsList.as_view(), name="public-news"),
     path("news/<str:slug>", content.PublicNewsDetail.as_view(), name="public-news-detail"),

@@ -5,6 +5,7 @@ from rest_framework.routers import SimpleRouter
 
 from academic import views as academic
 from accounts import views as accounts
+from admissions import views as admissions
 from audit import views as audit
 from content import views as content
 from exams import views as exams
@@ -51,6 +52,10 @@ router.register("exam-attempts", exams.AttemptViewSet, basename="exam-attempt")
 router.register("live-sessions", live.LiveSessionViewSet, basename="live-session")
 router.register("inquiries", inquiries.InquiryViewSet, basename="inquiry")
 router.register("announcements", content.AnnouncementViewSet, basename="announcement")
+router.register("admission-cycles", admissions.CycleViewSet, basename="admission-cycle")
+router.register("intakes", admissions.IntakeViewSet, basename="intake")
+router.register("form-templates", admissions.TemplateViewSet, basename="form-template")
+router.register("applications", admissions.ApplicationViewSet, basename="application")
 router.register("content/pages", content.PageViewSet, basename="page")
 router.register("content/news", content.NewsViewSet, basename="news")
 router.register("content/events", content.EventViewSet, basename="event")

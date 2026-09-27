@@ -115,6 +115,10 @@ def complete_registration(request: RegistrationRequest, password: str) -> User:
             ) from None
         locked.user = user
         locked.save(update_fields=["user", "updated_at"])
+        if not needs_approval:
+            from admissions.services import mark_activated
+
+            mark_activated(locked)
         if needs_approval:
             request.status = RegistrationRequest.Status.PENDING_APPROVAL
         else:
@@ -157,6 +161,9 @@ def decide_registration(
             user.save(update_fields=["is_active"])
             RoleAssignment.objects.get_or_create(user=user, role=Role.STUDENT, department=None)
             events.registration_approved(user)
+            from admissions.services import mark_activated
+
+            mark_activated(student)
         else:
             request.status = RegistrationRequest.Status.REJECTED
             # The pending account never became usable: remove it so the student
