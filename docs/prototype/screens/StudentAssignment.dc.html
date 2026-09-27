@@ -10,30 +10,38 @@
 <helmet>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-body{margin:0;font-family:'IBM Plex Sans Arabic',system-ui,sans-serif;background:#F7F8FA;color:#1F2B47}
-a{color:#2D64A7;text-decoration:none}a:hover{color:#26558D}
-.scr{width:390px;height:844px;position:relative;overflow:hidden;background:#F7F8FA;direction:rtl;text-align:right;box-sizing:border-box}
+body{margin:0;font-family:'IBM Plex Sans Arabic',system-ui,sans-serif;background:#F4F5F7;color:#1F2B47}
+a{color:#2D64A7;text-decoration:none}
+.scr{width:390px;height:844px;position:relative;overflow:hidden;background:#F4F5F7;direction:rtl;text-align:right;box-sizing:border-box}
 .body{position:absolute;top:0;left:0;right:0;bottom:0;overflow-y:auto;padding:54px 16px 130px;box-sizing:border-box}
-.back{display:flex;align-items:center;gap:2px;font-size:16px;color:#2D64A7;font-weight:500}
+.back{display:flex;align-items:center;gap:2px;font-size:15px;color:#2D64A7;font-weight:600}
 .back svg{width:22px;height:22px}
-.card{background:#fff;border-radius:14px;box-shadow:0 1px 2px rgba(31,43,71,.06);overflow:hidden}
-.row{display:flex;align-items:center;gap:12px;padding:12px 14px;min-height:52px;box-sizing:border-box;color:#1F2B47}
-.row+.row{border-top:1px solid #EEF0F3}
-.t{font-size:16px;font-weight:600;line-height:1.35}
-.s{font-size:13px;color:#576075;margin-top:2px}
-.grow{flex-grow:1;min-width:0}
-.sec{font-size:13px;font-weight:600;color:#576075;margin:18px 4px 8px}
-.badge{font-size:11px;font-weight:600;padding:3px 8px;border-radius:999px;white-space:nowrap}
-.b-warn{background:#FBF3E3;color:#8A5A14}.b-ok{background:#E6F4EC;color:#14603A}
-.btn{display:flex;align-items:center;justify-content:center;gap:8px;height:50px;border-radius:12px;font-size:16px;font-weight:600;border:0;cursor:pointer;font-family:inherit;box-sizing:border-box;width:100%}
-.b-pri{background:#2D64A7;color:#fff}
+.due{display:flex;align-items:center;gap:14px;background:#fff;border:1px solid #E7E9EE;border-radius:18px;padding:14px 16px;margin-top:14px}
+.due .big{font-size:34px;font-weight:700;line-height:1;direction:ltr;color:#8A5A14}
+.due .big small{font-size:13px;font-weight:600;color:#8F95A3;margin-left:4px}
+.eyebrow{font-size:12px;font-weight:600;color:#2D64A7;margin-top:16px}
+.h1{font-size:22px;font-weight:700;margin:4px 0 4px;line-height:1.35}
+.s{font-size:13px;color:#576075}
+.sec{display:flex;align-items:baseline;justify-content:space-between;margin:18px 2px 8px}
+.sec h2{font-size:15px;font-weight:700;margin:0}
+.grp{background:#fff;border-radius:16px;border:1px solid #E7E9EE;overflow:hidden}
+.li{display:flex;align-items:center;gap:12px;padding:12px 14px;min-height:54px;color:#1F2B47}
+.li+.li{border-top:1px solid #EEF0F3}
+.ck{width:22px;height:22px;border-radius:11px;border:2px solid #C7CAD1;flex-shrink:0;box-sizing:border-box;display:flex;align-items:center;justify-content:center;color:#fff}
+.ck.on{background:#1E7F4F;border-color:#1E7F4F}
+.ck svg{width:13px;height:13px}
+.t{font-size:15px;font-weight:600;line-height:1.35}
+.grow{flex:1;min-width:0}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;height:50px;border-radius:14px;font-size:16px;font-weight:600;border:0;cursor:pointer;font-family:inherit;box-sizing:border-box;width:100%}
+.b-pri{background:#2D64A7;color:#fff}.b-tint{background:#E5ECF4;color:#1F4674}
 .fix{position:absolute;left:16px;right:16px;bottom:24px}
-.dim{position:absolute;left:0;top:0;width:390px;height:844px;background:rgba(17,19,24,.45)}
-.sheet{position:absolute;left:0;right:0;bottom:0;background:#fff;border-radius:20px 20px 0 0;box-shadow:0 -8px 32px rgba(31,43,71,.18);padding:10px 16px 26px;box-sizing:border-box}
-.handle{width:36px;height:5px;border-radius:3px;background:#C0C3CB;margin:0 auto 12px}
-.inp{width:100%;box-sizing:border-box;border:1px solid #C0C3CB;border-radius:10px;padding:12px 14px;font-size:15px;font-family:inherit;background:#fff;color:#1F2B47}
-.lbl{font-size:13px;font-weight:600;color:#3B4459;margin:12px 0 6px;display:block}
-.drop{border:1.5px dashed #96B1D3;border-radius:12px;padding:16px;text-align:center;color:#2D64A7;font-size:14px;background:#F2F5F9}
+.dim{position:absolute;left:0;top:0;width:390px;height:844px;background:rgba(12,17,28,.5)}
+.sheet{position:absolute;left:0;right:0;bottom:0;background:#fff;border-radius:22px 22px 0 0;padding:10px 16px 26px;box-sizing:border-box}
+.handle{width:36px;height:5px;border-radius:3px;background:#C7CAD1;margin:0 auto 12px}
+.field{background:#F4F5F7;border-radius:12px;padding:10px 14px;margin-top:8px}
+.field label{display:block;font-size:11px;font-weight:600;color:#8F95A3}
+.field input,.field textarea{width:100%;border:0;background:transparent;font-size:15px;font-family:inherit;color:#1F2B47;padding:2px 0 0;box-sizing:border-box;outline:none}
+.drop{border:1.5px dashed #96B1D3;border-radius:12px;padding:14px;text-align:center;color:#2D64A7;font-size:14px;background:#F2F5F9;margin-top:8px}
 .x{position:absolute;left:14px;top:14px;width:32px;height:32px;border-radius:16px;background:#EEF0F3;border:0;display:flex;align-items:center;justify-content:center;color:#3B4459;cursor:pointer}
 .x svg{width:18px;height:18px}
 </style>
@@ -41,48 +49,43 @@ a{color:#2D64A7;text-decoration:none}a:hover{color:#26558D}
 <div class="scr" style="width: 390px; height: 844px">
 <div class="body">
 <a class="back" href="StudentCourse.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg><span>قواعد البيانات</span></a>
-<div style="display: flex; align-items: center; gap: 8px; margin-top: 12px"><span class="badge b-warn">ينتهي بعد 6 ساعات</span><span class="badge" style="background: #EEF0F3; color: #3B4459">20 درجة</span></div>
-<h1 style="font-size: 22px; font-weight: 700; margin: 8px 0 4px; line-height: 1.35">واجب 2 — تصميم مخطط ERD لنظام مكتبة</h1>
-<div class="s">د. سارة الطيب · الموعد: اليوم 11:59 م · يُسمح بإعادة التسليم حتى الموعد</div>
-<div class="sec">المطلوب</div>
-<div class="card" style="padding: 14px 16px; font-size: 15px; line-height: 1.8; color: #3B4459">صمّم مخطط كيانات وعلاقات لنظام إدارة مكتبة يشمل: الأعضاء، الكتب، النسخ، الاستعارة، والغرامات. حدّد المفاتيح الأساسية والأجنبية وأنواع العلاقات، ثم حوّله إلى جداول بالنموذج القياسي الثالث.</div>
-<div class="sec">المرفقات</div>
-<div class="card"><a class="row" href="StudentAssignment.dc.html"><span class="grow"><div class="t">قالب التسليم.docx</div><div class="s">48 KB</div></span><span style="color: #2D64A7"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 13v8M8 17l4 4 4-4"/><path d="M20 16.6A5 5 0 0 0 18 7h-1.3A8 8 0 1 0 4 15.2"/></svg></span></a></div>
-<div class="sec">صيغة التسليم</div>
-<div class="card">
-<div class="row"><span class="grow"><div class="t">ملف PDF أو صورة</div><div class="s">حتى 20 MB · ملفان كحد أقصى</div></span></div>
-<div class="row"><span class="grow"><div class="t">رابط GitHub Repository</div><div class="s">اختياري · حقل مسمى يحدده الأستاذ</div></span></div>
-<div class="row"><span class="grow"><div class="t">ملاحظة نصية</div><div class="s">اختياري</div></span></div>
+<div class="due">
+<div class="big">6<small>س</small> 12<small>د</small></div>
+<div class="grow"><div class="t">متبقٍ على التسليم</div><div class="s">اليوم 11:59 م · يُسمح بإعادة التسليم حتى الموعد · 20 درجة</div></div>
 </div>
-<div class="sec">تسليمي</div>
+<div class="eyebrow">واجب 2 · د. سارة الطيب</div>
+<h1 class="h1">تصميم مخطط ERD لنظام مكتبة</h1>
+<p class="s" style="line-height: 1.8; margin: 0">صمّم مخطط كيانات وعلاقات لنظام إدارة مكتبة يشمل الأعضاء والكتب والنسخ والاستعارة والغرامات. حدّد المفاتيح وأنواع العلاقات ثم حوّله إلى جداول بالنموذج القياسي الثالث.</p>
+<div class="sec"><h2>ما يجب تسليمه</h2></div>
+<div class="grp">
+<div class="li"><span class="ck {{k1}}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span><span class="grow"><div class="t">ملف PDF أو صورة للمخطط</div><div class="s">حتى 20 MB · ملفان كحد أقصى</div></span></div>
+<div class="li"><span class="ck {{k1}}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span><span class="grow"><div class="t">رابط GitHub Repository</div><div class="s">حقل مسمى يحدده الأستاذ · اختياري</div></span></div>
+<div class="li"><span class="ck"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span><span class="grow"><div class="t">ملاحظة نصية</div><div class="s">اختياري</div></span></div>
+</div>
+<div class="sec"><h2>المرفقات من الأستاذ</h2></div>
+<div class="grp"><a class="li" href="StudentAssignment.dc.html"><span style="width: 44px; height: 44px; border-radius: 12px; background: #E5ECF4; color: #1F4674; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; direction: ltr; flex-shrink: 0">DOCX</span><span class="grow"><div class="t">قالب التسليم</div><div class="s">48 KB</div></span><span style="color: #2D64A7"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 13v8M8 17l4 4 4-4"/><path d="M20 16.6A5 5 0 0 0 18 7h-1.3A8 8 0 1 0 4 15.2"/></svg></span></a></div>
+<div class="sec"><h2>تسليمي</h2></div>
 <sc-if value="{{notSent}}" hint-placeholder-val="{{ true }}">
-<div class="card" style="padding: 20px; text-align: center; color: #8F95A3; font-size: 14px">لم تسلّم بعد</div>
+<div class="grp" style="padding: 18px; text-align: center; color: #8F95A3; font-size: 14px">لم تسلّم بعد — يظهر هنا كل إصدار تسلّمه</div>
 </sc-if>
 <sc-if value="{{sent}}" hint-placeholder-val="{{ false }}">
-<div class="card" style="border: 1px solid #C9E8D5"><div class="row"><span style="width: 36px; height: 36px; border-radius: 18px; background: #E6F4EC; color: #1E7F4F; display: flex; align-items: center; justify-content: center; flex-shrink: 0"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span><span class="grow"><div class="t">الإصدار 1 — تم التسليم</div><div class="s">اليوم 5:42 م · ERD-library.pdf · github.com/ahmed/library-erd</div></span><span class="badge b-ok">في الوقت</span></div></div>
+<div class="grp" style="border-color: #C9E8D5"><div class="li"><span class="ck on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span><span class="grow"><div class="t">الإصدار 1 — تم التسليم في الوقت</div><div class="s">اليوم 5:42 م · ERD-library.pdf · github.com/ahmed/library-erd</div></span></div></div>
 </sc-if>
 </div>
 <div class="fix">
-<sc-if value="{{notSent}}" hint-placeholder-val="{{ true }}">
-<button class="btn b-pri" onClick="{{open}}">تسليم الواجب</button>
-</sc-if>
-<sc-if value="{{sent}}" hint-placeholder-val="{{ false }}">
-<button class="btn" style="background: #E5ECF4; color: #1F4674" onClick="{{open}}">إعادة التسليم (إصدار جديد)</button>
-</sc-if>
+<sc-if value="{{notSent}}" hint-placeholder-val="{{ true }}"><button class="btn b-pri" onClick="{{open}}">تسليم الواجب</button></sc-if>
+<sc-if value="{{sent}}" hint-placeholder-val="{{ false }}"><button class="btn b-tint" onClick="{{open}}">إعادة التسليم — إصدار جديد</button></sc-if>
 </div>
 <sc-if value="{{isOpen}}" hint-placeholder-val="{{ false }}">
 <div class="dim"></div>
 <div class="sheet">
 <div class="handle"></div>
 <button class="x" onClick="{{close}}" aria-label="إغلاق"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
-<div style="font-size: 18px; font-weight: 700; margin-bottom: 2px">تسليم الواجب 2</div>
-<div class="s">يمكنك إعادة التسليم حتى 11:59 م — يُحفظ كل إصدار</div>
-<span class="lbl">الملفات</span>
-<div class="drop">اضغط لاختيار ملف أو صورة<br><span style="font-size: 12px; color: #576075">PDF, JPG, PNG · حتى 20 MB</span></div>
-<span class="lbl">GitHub Repository</span>
-<input class="inp" type="url" placeholder="https://github.com/..." style="direction: ltr; text-align: left">
-<span class="lbl">ملاحظة للأستاذ (اختياري)</span>
-<textarea class="inp" rows="2" placeholder="اكتب ملاحظتك..."></textarea>
+<div style="font-size: 18px; font-weight: 700">تسليم الواجب 2</div>
+<div class="s">يُحفظ كل إصدار · متبقٍ 6 ساعات</div>
+<div class="drop">اضغط لاختيار ملف أو التقاط صورة<br><span style="font-size: 12px; color: #576075">PDF, JPG, PNG · حتى 20 MB</span></div>
+<div class="field"><label for="gh">GitHub Repository</label><input id="gh" type="url" placeholder="https://github.com/…" style="direction: ltr; text-align: left"></div>
+<div class="field"><label for="nt">ملاحظة للأستاذ (اختياري)</label><textarea id="nt" rows="2" placeholder="اكتب ملاحظتك…"></textarea></div>
 <div style="height: 14px"></div>
 <button class="btn b-pri" onClick="{{send}}">إرسال التسليم</button>
 </div>
@@ -94,7 +97,7 @@ class Component extends DCLogic {
 constructor(props) { super(props); this.state = { open: false, sent: false }; }
 renderVals() {
 return {
-isOpen: this.state.open, sent: this.state.sent, notSent: !this.state.sent,
+isOpen: this.state.open, sent: this.state.sent, notSent: !this.state.sent, k1: this.state.sent ? 'on' : '',
 open: () => this.setState({ open: true }),
 close: () => this.setState({ open: false }),
 send: () => this.setState({ open: false, sent: true })

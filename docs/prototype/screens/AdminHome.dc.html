@@ -10,68 +10,64 @@
 <helmet>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-body{margin:0;font-family:'IBM Plex Sans Arabic',system-ui,sans-serif;background:#F7F8FA;color:#1F2B47}
-a{color:#2D64A7;text-decoration:none}a:hover{color:#26558D}
-.scr{width:390px;height:844px;position:relative;overflow:hidden;background:#F7F8FA;direction:rtl;text-align:right;box-sizing:border-box}
-.top{background:#1F2B47;color:#fff;padding:54px 16px 14px;display:flex;align-items:center;justify-content:space-between}
-.body{position:absolute;top:110px;left:0;right:0;bottom:0;overflow-y:auto;padding:14px 16px 120px;box-sizing:border-box}
-.card{background:#fff;border-radius:14px;box-shadow:0 1px 2px rgba(31,43,71,.06);overflow:hidden}
-.sec{font-size:13px;font-weight:600;color:#576075;margin:16px 4px 8px}
-.row{display:flex;align-items:center;gap:12px;padding:12px 14px;min-height:56px;box-sizing:border-box;color:#1F2B47}
-.row+.row{border-top:1px solid #EEF0F3}
-.ic{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.ic svg{width:20px;height:20px}
-.t{font-size:15px;font-weight:600;line-height:1.35}
-.s{font-size:13px;color:#576075;margin-top:2px}
-.grow{flex-grow:1;min-width:0}
-.badge{font-size:11px;font-weight:600;padding:3px 8px;border-radius:999px;white-space:nowrap}
-.b-warn{background:#FBF3E3;color:#8A5A14}.b-info{background:#E5ECF4;color:#1F4674}.b-acc{background:#F5E4E8;color:#7B192F}
-.kpi{display:grid;grid-template-columns:repeat(2, minmax(0, 1fr));gap:10px}
-.k{background:#fff;border-radius:14px;box-shadow:0 1px 2px rgba(31,43,71,.06);padding:12px 14px;color:#1F2B47}
-.k b{display:block;font-size:22px;font-weight:700}
-.k span{font-size:12px;color:#576075}
+body{margin:0;font-family:'IBM Plex Sans Arabic',system-ui,sans-serif;background:#F4F5F7;color:#1F2B47}
+a{color:#2D64A7;text-decoration:none}
+.scr{width:390px;height:844px;position:relative;overflow:hidden;background:#F4F5F7;direction:rtl;text-align:right;box-sizing:border-box}
+.top{background:#1F2B47;color:#fff;padding:54px 16px 18px}
+.top .r{display:flex;align-items:center;justify-content:space-between}
+.top h1{font-size:20px;font-weight:700;margin:0}
+.top .s{font-size:12px;color:rgba(255,255,255,.7);margin-top:2px}
+.pulse{display:flex;gap:8px;margin-top:16px}
+.pulse div{flex:1;background:rgba(255,255,255,.1);border-radius:12px;padding:10px 8px;text-align:center}
+.pulse b{display:block;font-size:20px;font-weight:700;line-height:1.1}
+.pulse span{font-size:11px;color:rgba(255,255,255,.7)}
+.body{position:absolute;top:172px;left:0;right:0;bottom:0;overflow-y:auto;padding:14px 16px 120px;box-sizing:border-box}
+.sec{display:flex;align-items:baseline;justify-content:space-between;margin:16px 2px 8px}
+.sec h2{font-size:15px;font-weight:700;margin:0}.sec a{font-size:13px;font-weight:600}
+.grp{background:#fff;border-radius:16px;border:1px solid #E7E9EE;overflow:hidden}
+.li{display:flex;align-items:center;gap:12px;padding:12px 14px;min-height:58px;color:#1F2B47}
+.li+.li{border-top:1px solid #EEF0F3}
+.cnt{width:36px;height:36px;border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex-shrink:0;direction:ltr}
+.t{font-size:15px;font-weight:600;line-height:1.35}.s{font-size:13px;color:#576075;margin-top:2px}
+.grow{flex:1;min-width:0}
+.chev{color:#C7CAD1}.chev svg{width:18px;height:18px}
+.desk{font-size:11px;font-weight:600;color:#8F95A3;background:#F0F1F4;padding:3px 8px;border-radius:999px;white-space:nowrap}
 .tabs{position:absolute;left:12px;right:12px;bottom:14px;height:64px;border-radius:24px;background:rgba(255,255,255,.94);box-shadow:0 4px 16px rgba(31,43,71,.12);border:1px solid #EEF0F3;display:flex;align-items:center;justify-content:space-around;padding:0 6px}
 .tab{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;font-weight:500;color:#8F95A3;width:80px;position:relative}
-.tab svg{width:24px;height:24px}
-.tab.on{color:#2D64A7;font-weight:600}
+.tab svg{width:24px;height:24px}.tab.on{color:#2D64A7;font-weight:600}
 .tab .n{position:absolute;top:-4px;right:20px;background:#B02544;color:#fff;font-size:10px;font-weight:700;min-width:16px;height:16px;border-radius:8px;display:flex;align-items:center;justify-content:center;padding:0 4px}
 </style>
 </helmet>
 <div class="scr" style="width: 390px; height: 844px">
 <div class="top">
-<span style="display: flex; align-items: center; gap: 10px"><a href="AdminHome.dc.html" aria-label="القائمة" style="color: #fff; display: flex"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg></a><span><div style="font-size: 16px; font-weight: 700">قسم تقنية المعلومات</div><div style="font-size: 12px; opacity: .8">د. مصطفى الأمين · مدير القسم</div></span></span>
-<a href="AdminNotify.dc.html" aria-label="الإشعارات" style="color: #fff; display: flex; position: relative"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg><span style="position: absolute; top: -4px; right: -4px; width: 9px; height: 9px; border-radius: 5px; background: #B02544"></span></a>
+<div class="r"><span style="display: flex; align-items: center; gap: 12px"><a href="AdminHome.dc.html" aria-label="القائمة" style="color: #fff; display: flex"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg></a><span><h1>قسم تقنية المعلومات</h1><div class="s">د. مصطفى الأمين · مدير القسم · خريف 2026</div></span></span><a href="AdminNotify.dc.html" aria-label="الإشعارات" style="color: #fff; display: flex; position: relative"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg><span style="position: absolute; top: -3px; right: -3px; width: 9px; height: 9px; border-radius: 5px; background: #FF6B84"></span></a></div>
+<div class="pulse"><div><b>412</b><span>طالبًا</span></div><div><b>18</b><span>مادة</span></div><div><b>14</b><span>أستاذًا</span></div><div><b style="color: #FFD6DE">3</b><span>بلا أستاذ</span></div></div>
 </div>
 <div class="body">
-<div class="kpi">
-<a class="k" href="AdminApprovals.dc.html"><b style="color: #B7791F">12</b><span>طلبات تسجيل معلقة</span></a>
-<a class="k" href="AdminHome.dc.html"><b>3</b><span>مواد بلا أستاذ</span></a>
-<a class="k" href="AdminHome.dc.html"><b>27</b><span>تسليمات غير مصححة بالقسم</span></a>
-<a class="k" href="AdminHome.dc.html"><b>18</b><span>مادة · 412 طالبًا</span></a>
+<div class="sec"><h2>صندوق القرارات</h2><span style="font-size: 12px; color: #8F95A3">4 عناصر</span></div>
+<div class="grp">
+<a class="li" href="AdminApprovals.dc.html"><span class="cnt" style="background: #FBF3E3; color: #8A5A14">12</span><span class="grow"><div class="t">طلبات تسجيل بانتظار الاعتماد</div><div class="s">أقدمها منذ 3 أيام · اعتماد بضغطة</div></span><span class="chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></span></a>
+<a class="li" href="AdminCorrection.dc.html"><span class="cnt" style="background: #E5ECF4; color: #1F4674">1</span><span class="grow"><div class="t">دفعة نتائج IT301 جاهزة للاعتماد</div><div class="s">44 صفًا · 0 أخطاء · رفعها مشرف القسم</div></span><span class="chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></span></a>
+<a class="li" href="AdminHome.dc.html"><span class="cnt" style="background: #FBE9E7; color: #922B20">3</span><span class="grow"><div class="t">مواد بلا أستاذ معيّن</div><div class="s">IT207 · IT302 · IT405 — عيّن من قائمة أساتذة القسم</div></span><span class="chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></span></a>
+<a class="li" href="AdminHome.dc.html"><span class="cnt" style="background: #EEF0F3; color: #576075">27</span><span class="grow"><div class="t">تسليمات غير مصححة في القسم</div><div class="s">أبطأ أستاذ: 4.2 يوم · تنبيه ممكن</div></span><span class="chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></span></a>
 </div>
-<div class="sec">يحتاج قرارك الآن</div>
-<div class="card">
-<a class="row" href="AdminApprovals.dc.html"><span class="ic" style="background: #FBF3E3; color: #B7791F"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span><span class="grow"><div class="t">12 طالبًا سجّلوا وينتظرون الاعتماد</div><div class="s">أقدمها منذ 3 أيام</div></span><span class="badge b-warn">اعتماد</span></a>
-<a class="row" href="AdminCorrection.dc.html"><span class="ic" style="background: #E5ECF4; color: #2D64A7"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10L12 5 2 10l10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg></span><span class="grow"><div class="t">دفعة نتائج IT301 جاهزة للاعتماد</div><div class="s">44 صفًا · 0 أخطاء · رفعها مشرف القسم</div></span><span class="badge b-info">مراجعة</span></a>
-<a class="row" href="AdminNotify.dc.html"><span class="ic" style="background: #EEF0F3; color: #3B4459"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-5v12L3 13z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg></span><span class="grow"><div class="t">إرسال إشعار للقسم</div><div class="s">طلاب / أساتذة / مستوى / مادة</div></span><span class="badge b-acc">إرسال</span></a>
+<div class="sec"><h2>اللوحة — كما هي على الحاسوب</h2></div>
+<div class="grp">
+<a class="li" href="AdminHome.dc.html"><span class="grow t">المواد</span><span class="s" style="margin: 0">18</span><span class="chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></span></a>
+<a class="li" href="AdminHome.dc.html"><span class="grow t">المحاضرات</span><span class="s" style="margin: 0">آخر رفع اليوم</span><span class="chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></span></a>
+<a class="li" href="AdminHome.dc.html"><span class="grow t">الأساتذة</span><span class="s" style="margin: 0">14</span><span class="chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></span></a>
+<a class="li" href="AdminApprovals.dc.html"><span class="grow t">طلاب القسم</span><span class="s" style="margin: 0">412</span><span class="chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></span></a>
+<a class="li" href="AdminHome.dc.html"><span class="grow t">التقارير</span><span class="desk">من الحاسوب</span></a>
+<a class="li" href="AdminHome.dc.html"><span class="grow t">النتائج — رفع ملف</span><span class="desk">من الحاسوب</span></a>
+<a class="li" href="AdminHome.dc.html"><span class="grow t">سجل العمليات</span><span class="s" style="margin: 0">اليوم 23</span><span class="chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></span></a>
+<a class="li" href="TeacherCourses.dc.html"><span class="grow t">موادي</span><span class="s" style="margin: 0">2</span><span class="chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></span></a>
 </div>
-<div class="sec">أقسام اللوحة (كما هي على الحاسوب)</div>
-<div class="card">
-<a class="row" href="AdminHome.dc.html"><span class="grow t">المواد</span><span class="s" style="margin: 0">18</span></a>
-<a class="row" href="AdminHome.dc.html"><span class="grow t">المحاضرات</span><span class="s" style="margin: 0">آخر رفع اليوم</span></a>
-<a class="row" href="AdminHome.dc.html"><span class="grow t">الأساتذة</span><span class="s" style="margin: 0">14</span></a>
-<a class="row" href="AdminApprovals.dc.html"><span class="grow t">طلاب القسم</span><span class="s" style="margin: 0">412</span></a>
-<a class="row" href="AdminHome.dc.html"><span class="grow t">التقارير</span><span class="s" style="margin: 0; color: #8F95A3">من الحاسوب</span></a>
-<a class="row" href="AdminHome.dc.html"><span class="grow t">النتائج (رفع ملف)</span><span class="s" style="margin: 0; color: #8F95A3">من الحاسوب</span></a>
-<a class="row" href="AdminHome.dc.html"><span class="grow t">سجل العمليات</span><span class="s" style="margin: 0">اليوم 23</span></a>
-<a class="row" href="TeacherCourses.dc.html"><span class="grow t">موادي</span><span class="s" style="margin: 0">2</span></a>
-</div>
-<div class="sec">أدوار أخرى في النموذج الأولي</div>
-<div class="card">
-<a class="row" href="AdminApplication.dc.html"><span class="grow t">مسجل القسم — مراجعة طلب تقديم</span></a>
-<a class="row" href="AdminInquiry.dc.html"><span class="grow t">مدير الموقع — الرد على استفسار</span></a>
-<a class="row" href="AdminCorrection.dc.html"><span class="grow t">أمين الشؤون العلمية — طلب تعديل نتيجة</span></a>
-<a class="row" href="AdminCase.dc.html"><span class="grow t">شؤون الطلاب — بلاغ غش</span></a>
+<div class="sec"><h2>أدوار أخرى في النموذج</h2></div>
+<div class="grp">
+<a class="li" href="AdminApplication.dc.html"><span class="grow t">مسجل القسم — مراجعة طلب تقديم</span><span class="chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></span></a>
+<a class="li" href="AdminInquiry.dc.html"><span class="grow t">مدير الموقع — الرد على استفسار</span><span class="chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></span></a>
+<a class="li" href="AdminCorrection.dc.html"><span class="grow t">الشؤون العلمية — طلب تعديل نتيجة</span><span class="chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></span></a>
+<a class="li" href="AdminCase.dc.html"><span class="grow t">شؤون الطلاب — بلاغ غش</span><span class="chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></span></a>
 </div>
 </div>
 <nav class="tabs" aria-label="التنقل الرئيسي">

@@ -10,64 +10,58 @@
 <helmet>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-body{margin:0;font-family:'IBM Plex Sans Arabic',system-ui,sans-serif;background:#F7F8FA;color:#1F2B47}
-a{color:#2D64A7;text-decoration:none}a:hover{color:#26558D}
-.scr{width:390px;height:844px;position:relative;overflow:hidden;background:#F7F8FA;direction:rtl;text-align:right;box-sizing:border-box}
+body{margin:0;font-family:'IBM Plex Sans Arabic',system-ui,sans-serif;background:#F4F5F7;color:#1F2B47}
+a{color:#2D64A7;text-decoration:none}
+.scr{width:390px;height:844px;position:relative;overflow:hidden;background:#F4F5F7;direction:rtl;text-align:right;box-sizing:border-box}
 .body{position:absolute;top:0;left:0;right:0;bottom:0;overflow-y:auto;padding:58px 16px 120px;box-sizing:border-box}
-.h1{font-size:28px;font-weight:700;margin:0;line-height:1.25}
-.seg{display:flex;background:#EEF0F3;border-radius:10px;padding:3px;gap:2px;margin:14px 0}
-.seg a{flex:1;text-align:center;font-size:14px;font-weight:600;padding:8px 0;border-radius:8px;color:#576075}
-.seg .on{background:#fff;color:#1F2B47;box-shadow:0 1px 2px rgba(31,43,71,.08)}
-.card{background:#fff;border-radius:14px;box-shadow:0 1px 2px rgba(31,43,71,.06);overflow:hidden}
-.sec{font-size:13px;font-weight:600;color:#576075;margin:18px 4px 8px}
-.row{display:flex;align-items:flex-start;gap:12px;padding:12px 14px;box-sizing:border-box;color:#1F2B47;position:relative}
-.row+.row{border-top:1px solid #EEF0F3}
-.ic{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.ic svg{width:20px;height:20px}
-.t{font-size:15px;font-weight:600;line-height:1.45}
-.s{font-size:13px;color:#576075;margin-top:3px;line-height:1.5}
-.grow{flex-grow:1;min-width:0}
+.h1{font-size:30px;font-weight:700;margin:0;line-height:1.2}
+.filters{display:flex;gap:6px;margin:14px 0 6px;overflow-x:auto}
+.filters a{flex:none;font-size:13px;font-weight:600;padding:8px 14px;border-radius:999px;background:#fff;border:1px solid #E7E9EE;color:#576075}
+.filters .on{background:#1F2B47;border-color:#1F2B47;color:#fff}
+.sec{font-size:13px;font-weight:700;color:#8F95A3;margin:18px 4px 8px}
+.grp{background:#fff;border-radius:16px;border:1px solid #E7E9EE;overflow:hidden}
+.li{display:flex;align-items:flex-start;gap:12px;padding:13px 14px;color:#1F2B47;position:relative}
+.li+.li{border-top:1px solid #EEF0F3}
+.av{width:40px;height:40px;border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;color:#fff}
+.tile{width:40px;height:40px;border-radius:11px;display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;direction:ltr;font-weight:700;line-height:1}
+.tile b{font-size:9px;opacity:.7}.tile span{font-size:13px;margin-top:1px}
+.t{font-size:15px;font-weight:500;line-height:1.5}
+.un .t{font-weight:700}
+.s{font-size:13px;color:#576075;margin-top:2px;line-height:1.5}
+.grow{flex:1;min-width:0}
 .tm{font-size:11px;color:#8F95A3;white-space:nowrap;margin-top:3px}
-.un{width:8px;height:8px;border-radius:4px;background:#2D64A7;position:absolute;left:10px;top:18px}
-.tabs{position:absolute;left:12px;right:12px;bottom:14px;height:64px;border-radius:24px;background:rgba(255,255,255,.94);box-shadow:0 4px 16px rgba(31,43,71,.12);border:1px solid #EEF0F3;display:flex;align-items:center;justify-content:space-around;padding:0 6px}
-.tab{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;font-weight:500;color:#8F95A3;width:64px;position:relative}
-.tab svg{width:24px;height:24px}
-.tab.on{color:#2D64A7;font-weight:600}
-.tab .n{position:absolute;top:-4px;right:12px;background:#B02544;color:#fff;font-size:10px;font-weight:700;min-width:16px;height:16px;border-radius:8px;display:flex;align-items:center;justify-content:center;padding:0 4px}
+.dot{width:8px;height:8px;border-radius:4px;background:#2D64A7;position:absolute;left:10px;top:20px}
+.act{display:inline-block;margin-top:6px;font-size:12px;font-weight:700;color:#2D64A7;background:#E5ECF4;padding:4px 10px;border-radius:999px}
 </style>
 </helmet>
 <div class="scr" style="width: 390px; height: 844px">
 <div class="body">
-<div style="display: flex; justify-content: space-between; align-items: center">
-<h1 class="h1">الإشعارات</h1>
-<a href="StudentNotifications.dc.html" style="font-size: 13px; font-weight: 600">تحديد الكل مقروءًا</a>
-</div>
-<div class="seg"><a class="on" href="StudentNotifications.dc.html">الكل</a><a href="StudentNotifications.dc.html">غير مقروء (3)</a></div>
+<div style="display: flex; justify-content: space-between; align-items: center"><h1 class="h1">الإشعارات</h1><a href="StudentNotifications.dc.html" style="font-size: 13px; font-weight: 600">تحديد الكل مقروءًا</a></div>
+<div class="filters"><a class="on" href="StudentNotifications.dc.html">الكل</a><a href="StudentNotifications.dc.html">غير مقروء 3</a><a href="StudentNotifications.dc.html">المواد</a><a href="StudentNotifications.dc.html">الكلية</a><a href="StudentNotifications.dc.html">النتائج</a></div>
 <div class="sec">اليوم</div>
-<div class="card">
-<a class="row" href="StudentLive.dc.html"><span class="un" aria-label="غير مقروء"></span><span class="ic" style="background: #F5E4E8; color: #B02544"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="14" height="12" rx="2"/><path d="M22 8l-6 4 6 4z"/></svg></span><span class="grow"><div class="t">بدأ البث: قواعد البيانات — المحاضرة 6</div><div class="s">انضم الآن عبر Teams</div></span><span class="tm">قبل 12 د</span></a>
-<a class="row" href="StudentCourse.dc.html"><span class="un" aria-label="غير مقروء"></span><span class="ic" style="background: #EEF0F3; color: #3B4459"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-5v12L3 13z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg></span><span class="grow"><div class="t">إعلان: تأجيل تسليم الواجب 2 إلى الثلاثاء</div><div class="s">د. سارة الطيب · قواعد البيانات</div></span><span class="tm">قبل ساعتين</span></a>
-<a class="row" href="StudentMe.dc.html"><span class="un" aria-label="غير مقروء"></span><span class="ic" style="background: #FBE9E7; color: #C0392B"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/></svg></span><span class="grow"><div class="t">لائحة الامتحانات 2026 — مطلوب إقرارك</div><div class="s">شؤون الطلاب · قبل بداية الاختبارات</div></span><span class="tm">9:00 ص</span></a>
+<div class="grp">
+<a class="li un" href="StudentLive.dc.html"><span class="dot"></span><span class="av" style="background: #B02544">بث</span><span class="grow"><div class="t">بدأ البث: قواعد البيانات — المحاضرة 6</div><div class="s">د. سارة الطيب عبر Teams · 42 زميلًا انضموا</div><span class="act">انضمام</span></span><span class="tm">قبل 12 د</span></a>
+<a class="li un" href="StudentCourse.dc.html"><span class="dot"></span><span class="av" style="background: #2D64A7">س</span><span class="grow"><div class="t">تمديد موعد الواجب 2 إلى الثلاثاء</div><div class="s">د. سارة الطيب: «نظرًا لانقطاع الكهرباء أمس، مُدِّد التسليم 48 ساعة»</div></span><span class="tm">قبل ساعتين</span></a>
+<a class="li un" href="StudentMe.dc.html"><span class="dot"></span><span class="av" style="background: #1F2B47">شط</span><span class="grow"><div class="t">لائحة الامتحانات 2026 — مطلوب إقرارك</div><div class="s">شؤون الطلاب · قبل بداية الاختبارات</div><span class="act">أقرّ الآن</span></span><span class="tm">9:00 ص</span></a>
 </div>
 <div class="sec">أمس</div>
-<div class="card">
-<a class="row" href="StudentLecture.dc.html"><span class="ic" style="background: #E5ECF4; color: #2D64A7"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4h6a4 4 0 0 1 4 4v12a3 3 0 0 0-3-3H2zM22 4h-6a4 4 0 0 0-4 4v12a3 3 0 0 1 3-3h7z"/></svg></span><span class="grow"><div class="t">محاضرة جديدة: التطبيع (فيديو + شرائح)</div><div class="s">قواعد البيانات</div></span><span class="tm">أمس</span></a>
-<a class="row" href="StudentAssignment.dc.html"><span class="ic" style="background: #E6F4EC; color: #1E7F4F"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span><span class="grow"><div class="t">تم تصحيح واجب 1 — استعلامات SQL: 18/20</div><div class="s">ملاحظة الأستاذ: «ممتاز، انتبه لأسماء الأعمدة»</div></span><span class="tm">أمس</span></a>
-<a class="row" href="StudentExamStart.dc.html"><span class="ic" style="background: #FBF3E3; color: #B7791F"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span><span class="grow"><div class="t">تذكير: اختبار منتصف الفصل غدًا 10:00 ص</div><div class="s">هياكل البيانات · 45 دقيقة</div></span><span class="tm">أمس</span></a>
+<div class="grp">
+<a class="li" href="StudentLecture.dc.html"><span class="tile" style="background: #E5ECF4; color: #2D64A7"><b>IT</b><span>201</span></span><span class="grow"><div class="t">محاضرة جديدة: التطبيع (فيديو + شرائح)</div><div class="s">قواعد البيانات</div></span><span class="tm">أمس</span></a>
+<a class="li" href="StudentAssignment.dc.html"><span class="tile" style="background: #E6F4EC; color: #1E7F4F"><b>18</b><span>/20</span></span><span class="grow"><div class="t">تم تصحيح واجب 1 — استعلامات SQL</div><div class="s">«ممتاز، انتبه لأسماء الأعمدة»</div></span><span class="tm">أمس</span></a>
+<a class="li" href="StudentExamStart.dc.html"><span class="tile" style="background: #E3F1F1; color: #0F8B8D"><b>IT</b><span>203</span></span><span class="grow"><div class="t">تذكير: اختبار منتصف الفصل غدًا 10:00 ص</div><div class="s">هياكل البيانات · 45 دقيقة</div></span><span class="tm">أمس</span></a>
 </div>
 <div class="sec">هذا الأسبوع</div>
-<div class="card">
-<a class="row" href="StudentResults.dc.html"><span class="ic" style="background: #E6F4EC; color: #1E7F4F"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span><span class="grow"><div class="t">نُشرت نتائج ربيع 2026</div><div class="s">مسؤول النتائج</div></span><span class="tm">الأحد</span></a>
-<a class="row" href="StudentLive.dc.html"><span class="ic" style="background: #EEF0F3; color: #3B4459"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-5v12L3 13z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg></span><span class="grow"><div class="t">لقاء مدير القسم مع طلاب المستوى الثاني</div><div class="s">قسم تقنية المعلومات · الأربعاء 11:00 ص</div></span><span class="tm">السبت</span></a>
+<div class="grp">
+<a class="li" href="StudentResults.dc.html"><span class="av" style="background: #1E7F4F">ن</span><span class="grow"><div class="t">نُشرت نتائج ربيع 2026</div><div class="s">مسؤول النتائج · معدلك الفصلي 3.42</div></span><span class="tm">الأحد</span></a>
+<a class="li" href="StudentLive.dc.html"><span class="av" style="background: #576075">ق</span><span class="grow"><div class="t">لقاء مدير القسم مع طلاب المستوى الثاني</div><div class="s">الأربعاء 11:00 ص عبر Teams</div></span><span class="tm">السبت</span></a>
 </div>
-<div class="s" style="text-align: center; margin-top: 14px">اسحب الصف يسارًا لتحديده مقروءًا · التفضيلات في أنا ← الإعدادات</div>
 </div>
-<nav class="tabs" aria-label="التنقل الرئيسي">
-<a class="tab" href="StudentToday.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="3"/><path d="M16 2v4M8 2v4M3 10h18M9 16l2 2 4-4"/></svg><span>اليوم</span></a>
-<a class="tab" href="StudentCourses.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4h6a4 4 0 0 1 4 4v12a3 3 0 0 0-3-3H2zM22 4h-6a4 4 0 0 0-4 4v12a3 3 0 0 1 3-3h7z"/></svg><span>موادي</span></a>
-<a class="tab" href="StudentTasks.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M10 6h11M10 12h11M10 18h11M3 6l1.5 1.5L7 5M3 12l1.5 1.5L7 11M3 18l1.5 1.5L7 17"/></svg><span>المهام</span></a>
-<a class="tab on" href="StudentNotifications.dc.html"><span class="n">3</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg><span>الإشعارات</span></a>
-<a class="tab" href="StudentMe.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>أنا</span></a>
+<nav aria-label="التنقل الرئيسي" style="position:absolute;left:12px;right:12px;bottom:14px;height:64px;border-radius:24px;background:rgba(255,255,255,.94);box-shadow:0 4px 16px rgba(31,43,71,.12);border:1px solid #EEF0F3;display:flex;align-items:center;justify-content:space-around;padding:0 6px">
+<a href="StudentToday.dc.html" style="display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;font-weight:500;color:#8F95A3;width:64px"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="3"/><path d="M16 2v4M8 2v4M3 10h18M9 16l2 2 4-4"/></svg><span>اليوم</span></a>
+<a href="StudentCourses.dc.html" style="display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;font-weight:500;color:#8F95A3;width:64px"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4h6a4 4 0 0 1 4 4v12a3 3 0 0 0-3-3H2zM22 4h-6a4 4 0 0 0-4 4v12a3 3 0 0 1 3-3h7z"/></svg><span>موادي</span></a>
+<a href="StudentTasks.dc.html" style="display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;font-weight:500;color:#8F95A3;width:64px"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M10 6h11M10 12h11M10 18h11M3 6l1.5 1.5L7 5M3 12l1.5 1.5L7 11M3 18l1.5 1.5L7 17"/></svg><span>المهام</span></a>
+<a href="StudentNotifications.dc.html" style="display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;font-weight:600;color:#2D64A7;width:64px;position:relative"><span style="position:absolute;top:-4px;right:12px;background:#B02544;color:#fff;font-size:10px;font-weight:700;min-width:16px;height:16px;border-radius:8px;display:flex;align-items:center;justify-content:center;padding:0 4px">3</span><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg><span>الإشعارات</span></a>
+<a href="StudentMe.dc.html" style="display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;font-weight:500;color:#8F95A3;width:64px"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>أنا</span></a>
 </nav>
 </div>
 </x-dc>

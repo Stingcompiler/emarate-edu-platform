@@ -10,40 +10,38 @@
 <helmet>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-body{margin:0;font-family:'IBM Plex Sans Arabic',system-ui,sans-serif;background:#F7F8FA;color:#1F2B47}
-a{color:#2D64A7;text-decoration:none}a:hover{color:#26558D}
-.scr{width:390px;height:844px;position:relative;overflow:hidden;background:#F7F8FA;direction:rtl;text-align:right;box-sizing:border-box}
-.body{position:absolute;top:0;left:0;right:0;bottom:0;overflow-y:auto;padding:90px 20px 40px;box-sizing:border-box}
-.h1{font-size:24px;font-weight:700;margin:0;line-height:1.25}
-.sub{font-size:14px;color:#576075;margin-top:6px}
-.inp{width:100%;box-sizing:border-box;height:50px;border:1px solid #C0C3CB;border-radius:12px;padding:0 14px;font-size:16px;font-family:inherit;background:#fff;color:#1F2B47}
-.lbl{font-size:13px;font-weight:600;color:#3B4459;margin:14px 0 6px;display:block}
-.btn{display:flex;align-items:center;justify-content:center;gap:8px;height:50px;border-radius:12px;font-size:16px;font-weight:600;border:0;cursor:pointer;font-family:inherit;box-sizing:border-box}
-.b-pri{background:#2D64A7;color:#fff}.b-sec{background:#E5ECF4;color:#1F4674}
+body{margin:0;font-family:'IBM Plex Sans Arabic',system-ui,sans-serif;background:#fff;color:#1F2B47}
+a{color:#2D64A7;text-decoration:none}
+.scr{width:390px;height:844px;position:relative;overflow:hidden;background:#fff;direction:rtl;text-align:right;box-sizing:border-box}
+.body{position:absolute;top:0;left:0;right:0;bottom:0;overflow-y:auto;padding:100px 24px 40px;box-sizing:border-box}
+.h1{font-size:26px;font-weight:700;margin:18px 0 4px;line-height:1.3}
+.s{font-size:14px;color:#576075}
+.grp{border:1px solid #E7E9EE;border-radius:16px;overflow:hidden;margin-top:24px}
+.f{padding:11px 14px}
+.f+.f{border-top:1px solid #EEF0F3}
+.f label{display:block;font-size:11px;font-weight:600;color:#8F95A3}
+.f input{width:100%;border:0;background:transparent;font-size:17px;font-family:inherit;color:#1F2B47;outline:none;padding:3px 0 0;box-sizing:border-box}
+.row{display:flex;justify-content:space-between;align-items:center;margin:14px 2px 22px;font-size:14px}
+.btn{display:flex;align-items:center;justify-content:center;height:52px;border-radius:14px;font-size:16px;font-weight:600;width:100%}
+.b-pri{background:#2D64A7;color:#fff}
+.alt{margin-top:28px;border-top:1px solid #EEF0F3;padding-top:14px;text-align:center;font-size:12px;color:#8F95A3}
+.roles{display:flex;gap:8px;margin-top:10px}
+.roles a{flex:1;text-align:center;font-size:13px;font-weight:600;padding:11px 0;border-radius:12px;background:#F0F1F4;color:#1F2B47}
 </style>
 </helmet>
 <div class="scr" style="width: 390px; height: 844px">
 <div class="body">
-<div style="display: flex; flex-direction: column; align-items: center; gap: 10px; margin-bottom: 26px">
-<svg viewBox="0 0 64 64" width="72" height="72" aria-hidden="true"><circle cx="32" cy="32" r="29" fill="none" stroke="#2D64A7" stroke-width="3"/><ellipse cx="32" cy="32" rx="22" ry="8" fill="none" stroke="#2D64A7" stroke-width="3" transform="rotate(30 32 32)"/><ellipse cx="32" cy="32" rx="22" ry="8" fill="none" stroke="#2D64A7" stroke-width="3" transform="rotate(-30 32 32)"/><ellipse cx="32" cy="32" rx="22" ry="8" fill="none" stroke="#2D64A7" stroke-width="3" transform="rotate(90 32 32)"/><circle cx="18" cy="24" r="4" fill="#B02544"/><circle cx="46" cy="24" r="4" fill="#B02544"/><circle cx="18" cy="40" r="4" fill="#B02544"/><circle cx="46" cy="40" r="4" fill="#B02544"/><path d="M27 20c3-4 7-6 10-5-2 2-2 5-1 7l-4 1c-2-1-4-1-5-3z" fill="#111318"/></svg>
-<h1 class="h1" style="text-align: center">بوابة كلية الإمارات</h1>
-<div class="sub" style="text-align: center">للعلوم والتكنولوجيا</div>
+<svg viewBox="0 0 64 64" width="64" height="64" aria-hidden="true"><circle cx="32" cy="32" r="29" fill="none" stroke="#2D64A7" stroke-width="3"/><ellipse cx="32" cy="32" rx="22" ry="8" fill="none" stroke="#2D64A7" stroke-width="3" transform="rotate(30 32 32)"/><ellipse cx="32" cy="32" rx="22" ry="8" fill="none" stroke="#2D64A7" stroke-width="3" transform="rotate(-30 32 32)"/><ellipse cx="32" cy="32" rx="22" ry="8" fill="none" stroke="#2D64A7" stroke-width="3" transform="rotate(90 32 32)"/><circle cx="18" cy="24" r="4" fill="#B02544"/><circle cx="46" cy="24" r="4" fill="#B02544"/><circle cx="18" cy="40" r="4" fill="#B02544"/><circle cx="46" cy="40" r="4" fill="#B02544"/><path d="M27 20c3-4 7-6 10-5-2 2-2 5-1 7l-4 1c-2-1-4-1-5-3z" fill="#111318"/></svg>
+<h1 class="h1">مرحبًا بك في بوابة الكلية</h1>
+<div class="s">ادخل برقمك الجامعي أو بريدك</div>
+<div class="grp">
+<div class="f"><label for="u">الرقم الجامعي أو البريد</label><input id="u" type="text" placeholder="26-IT-0042" style="direction: ltr; text-align: left"></div>
+<div class="f"><label for="p">كلمة المرور</label><input id="p" type="password" placeholder="••••••••" style="direction: ltr; text-align: left"></div>
 </div>
-<label class="lbl" for="u">البريد الإلكتروني أو الرقم الجامعي</label>
-<input class="inp" id="u" type="text" placeholder="26-IT-0042">
-<label class="lbl" for="p">كلمة المرور</label>
-<input class="inp" id="p" type="password" placeholder="••••••••">
-<div style="display: flex; justify-content: space-between; align-items: center; margin: 12px 0 22px; font-size: 14px">
-<a href="Register.dc.html">تسجيل طالب جديد</a>
-<a href="Login.dc.html" style="color: #576075">نسيت كلمة المرور؟</a>
-</div>
+<div class="row"><a href="Register.dc.html" style="font-weight: 600">طالب جديد؟ أنشئ حسابك</a><a href="Login.dc.html" style="color: #8F95A3">نسيت كلمة المرور</a></div>
 <a class="btn b-pri" href="StudentToday.dc.html">تسجيل الدخول</a>
-<div style="margin: 26px 0 10px; font-size: 12px; color: #8F95A3; text-align: center">— في النموذج الأولي: ادخل بدور آخر —</div>
-<div style="display: flex; gap: 8px">
-<a class="btn b-sec" style="flex: 1; height: 44px; font-size: 14px" href="TeacherToday.dc.html">أستاذ</a>
-<a class="btn b-sec" style="flex: 1; height: 44px; font-size: 14px" href="AdminHome.dc.html">إدارة</a>
-<a class="btn b-sec" style="flex: 1; height: 44px; font-size: 14px" href="Main.dc.html">القائمة</a>
-</div>
+<div class="alt">في النموذج الأولي فقط — ادخل بدور آخر</div>
+<div class="roles"><a href="TeacherToday.dc.html">أستاذ</a><a href="AdminHome.dc.html">إدارة</a><a href="Main.dc.html">القائمة</a></div>
 </div>
 </div>
 </x-dc>

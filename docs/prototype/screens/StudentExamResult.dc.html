@@ -10,41 +10,48 @@
 <helmet>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-body{margin:0;font-family:'IBM Plex Sans Arabic',system-ui,sans-serif;background:#F7F8FA;color:#1F2B47}
-a{color:#2D64A7;text-decoration:none}a:hover{color:#26558D}
-.scr{width:390px;height:844px;position:relative;overflow:hidden;background:#F7F8FA;direction:rtl;text-align:right;box-sizing:border-box}
+body{margin:0;font-family:'IBM Plex Sans Arabic',system-ui,sans-serif;background:#F4F5F7;color:#1F2B47}
+a{color:#2D64A7;text-decoration:none}
+.scr{width:390px;height:844px;position:relative;overflow:hidden;background:#F4F5F7;direction:rtl;text-align:right;box-sizing:border-box}
 .body{position:absolute;top:0;left:0;right:0;bottom:0;overflow-y:auto;padding:54px 16px 40px;box-sizing:border-box}
-.card{background:#fff;border-radius:14px;box-shadow:0 1px 2px rgba(31,43,71,.06);overflow:hidden}
-.row{display:flex;align-items:flex-start;gap:12px;padding:12px 14px;box-sizing:border-box}
-.row+.row{border-top:1px solid #EEF0F3}
-.sec{font-size:13px;font-weight:600;color:#576075;margin:18px 4px 8px}
-.btn{display:flex;align-items:center;justify-content:center;gap:8px;height:48px;border-radius:12px;font-size:15px;font-weight:600;border:0;font-family:inherit;box-sizing:border-box;width:100%}
-.b-pri{background:#2D64A7;color:#fff}
-.m{width:22px;height:22px;border-radius:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}
-.m svg{width:14px;height:14px}
+.hero{background:#fff;border:1px solid #E7E9EE;border-radius:20px;padding:22px 16px 18px;text-align:center;margin-top:8px}
+.score{font-size:64px;font-weight:700;line-height:1;direction:ltr;color:#1F2B47}
+.score small{font-size:18px;color:#8F95A3;font-weight:600}
+.pass{display:inline-block;margin-top:10px;font-size:13px;font-weight:700;padding:6px 14px;border-radius:999px;background:#E6F4EC;color:#14603A}
+.meta{font-size:13px;color:#576075;margin-top:10px}
+.stats{display:flex;gap:8px;margin-top:12px}
+.st{flex:1;background:#fff;border:1px solid #E7E9EE;border-radius:14px;padding:12px 8px;text-align:center}
+.st b{display:block;font-size:22px;font-weight:700;line-height:1.1}
+.st span{font-size:12px;color:#576075}
+.sec{font-size:13px;font-weight:700;color:#8F95A3;margin:20px 4px 8px}
+.grp{background:#fff;border-radius:16px;border:1px solid #E7E9EE;overflow:hidden}
+.li{display:flex;align-items:flex-start;gap:12px;padding:12px 14px}
+.li+.li{border-top:1px solid #EEF0F3}
+.n{width:28px;height:28px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;direction:ltr}
+.t{font-size:15px;font-weight:600;line-height:1.5}
+.s{font-size:13px;color:#576075;margin-top:2px}
+.ex{font-size:12px;color:#1F4674;background:#F2F5F9;border-radius:8px;padding:6px 10px;margin-top:6px;line-height:1.6}
+.btn{display:flex;align-items:center;justify-content:center;height:48px;border-radius:13px;font-size:15px;font-weight:600;width:100%;background:#2D64A7;color:#fff;margin-top:14px}
 </style>
 </helmet>
 <div class="scr" style="width: 390px; height: 844px">
 <div class="body">
 <div style="text-align: center; font-size: 13px; color: #576075">هياكل البيانات · اختبار منتصف الفصل</div>
-<div class="card" style="margin-top: 14px; padding: 24px 16px; display: flex; flex-direction: column; align-items: center; gap: 10px">
-<svg viewBox="0 0 120 120" width="150" height="150" aria-label="34 من 40"><circle cx="60" cy="60" r="50" fill="none" stroke="#E5ECF4" stroke-width="12"/><circle cx="60" cy="60" r="50" fill="none" stroke="#1E7F4F" stroke-width="12" stroke-linecap="round" stroke-dasharray="267 314" transform="rotate(-90 60 60)"/><text x="60" y="56" text-anchor="middle" font-size="30" font-weight="700" fill="#1F2B47" font-family="IBM Plex Sans Arabic, sans-serif">34</text><text x="60" y="78" text-anchor="middle" font-size="13" fill="#576075" font-family="IBM Plex Sans Arabic, sans-serif">من 40</text></svg>
-<span style="font-size: 13px; font-weight: 700; padding: 5px 14px; border-radius: 999px; background: #E6F4EC; color: #14603A">ناجح · 85%</span>
-<div style="font-size: 13px; color: #576075">أُرسل 10:58 ص · استغرقت 41 دقيقة · محاولة 1 من 1</div>
+<div class="hero">
+<div class="score">34<small> / 40</small></div>
+<div class="pass">ناجح · 85%</div>
+<div class="meta">أُرسل 10:58 ص · استغرقت 41 دقيقة · محاولة 1 من 1</div>
 </div>
-<div class="card" style="margin-top: 12px; display: flex; text-align: center">
-<div style="flex: 1; padding: 12px"><div style="font-size: 20px; font-weight: 700; color: #1E7F4F">17</div><div style="font-size: 12px; color: #576075">صحيح</div></div>
-<div style="flex: 1; padding: 12px; border-right: 1px solid #EEF0F3"><div style="font-size: 20px; font-weight: 700; color: #C0392B">3</div><div style="font-size: 12px; color: #576075">خطأ</div></div>
-<div style="flex: 1; padding: 12px; border-right: 1px solid #EEF0F3"><div style="font-size: 20px; font-weight: 700; color: #8F95A3">0</div><div style="font-size: 12px; color: #576075">بلا إجابة</div></div>
+<div class="stats"><div class="st"><b style="color: #1E7F4F">17</b><span>صحيح</span></div><div class="st"><b style="color: #C0392B">3</b><span>خطأ</span></div><div class="st"><b style="color: #8F95A3">0</b><span>بلا إجابة</span></div><div class="st"><b>2.05</b><span>دقيقة/سؤال</span></div></div>
+<div class="sec">مراجعة الإجابات — سمح الأستاذ بالعرض</div>
+<div class="grp">
+<div class="li"><span class="n" style="background: #E6F4EC; color: #14603A">1</span><span style="flex: 1"><div class="t">الإدراج في بداية قائمة مرتبطة أحادية</div><div class="s" style="direction: ltr; text-align: right">O(1) ✓</div></span></div>
+<div class="li"><span class="n" style="background: #FBE9E7; color: #922B20">7</span><span style="flex: 1"><div class="t">البحث الثنائي يتطلب مصفوفة…</div><div class="s">إجابتك: غير مرتبة · الصحيح: مرتبة</div><div class="ex">شرح الأستاذ: البحث الثنائي يعتمد على الترتيب لتنصيف نطاق البحث في كل خطوة.</div></span></div>
+<div class="li"><span class="n" style="background: #E6F4EC; color: #14603A">8</span><span style="flex: 1"><div class="t">المكدس يتبع مبدأ LIFO</div><div class="s">صحيح ✓</div></span></div>
+<div class="li"><span class="n" style="background: #FBE9E7; color: #922B20">14</span><span style="flex: 1"><div class="t">تعقيد البحث في شجرة ثنائية متوازنة</div><div class="s" style="direction: ltr; text-align: right">إجابتك: O(n) · الصحيح: O(log n)</div></span></div>
 </div>
-<div class="sec">مراجعة الإجابات (سمح الأستاذ بالعرض)</div>
-<div class="card">
-<div class="row"><span class="m" style="background: #E6F4EC; color: #1E7F4F"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span><span style="flex-grow: 1"><div style="font-size: 15px; font-weight: 600; line-height: 1.5">1. الإدراج في بداية قائمة مرتبطة أحادية</div><div style="font-size: 13px; color: #576075; direction: ltr; text-align: right">O(1)</div></span></div>
-<div class="row"><span class="m" style="background: #FBE9E7; color: #C0392B"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg></span><span style="flex-grow: 1"><div style="font-size: 15px; font-weight: 600; line-height: 1.5">7. البحث الثنائي يتطلب مصفوفة</div><div style="font-size: 13px; color: #576075">إجابتك: غير مرتبة · الصحيح: مرتبة</div><div style="font-size: 12px; color: #2D64A7; margin-top: 4px">شرح الأستاذ: البحث الثنائي يعتمد على الترتيب لتنصيف نطاق البحث.</div></span></div>
-<div class="row"><span class="m" style="background: #E6F4EC; color: #1E7F4F"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span><span style="flex-grow: 1"><div style="font-size: 15px; font-weight: 600; line-height: 1.5">8. المكدس يتبع مبدأ LIFO</div><div style="font-size: 13px; color: #576075">صحيح</div></span></div>
-</div>
-<a href="StudentExamResult.dc.html" style="display: block; text-align: center; font-size: 14px; margin: 12px 0 18px">عرض كل الأسئلة (20)</a>
-<a class="btn b-pri" href="StudentCourse.dc.html">العودة إلى المادة</a>
+<a href="StudentExamResult.dc.html" style="display: block; text-align: center; font-size: 14px; font-weight: 600; margin-top: 12px">عرض الأسئلة الـ20 كلها</a>
+<a class="btn" href="StudentCourse.dc.html">العودة إلى المادة</a>
 </div>
 </div>
 </x-dc>
