@@ -1198,6 +1198,132 @@
       "w": 1280,
       "x": 6800,
       "y": 23696
+    },
+    "VisitorApplyProgram.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 40,
+      "title": "التقديم — الخطوة 2: اختيار البرنامج",
+      "w": 390,
+      "x": 0,
+      "y": 24883
+    },
+    "VisitorApplyDocs.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 40,
+      "title": "التقديم — الخطوة 4: المستندات",
+      "w": 390,
+      "x": 470,
+      "y": 24883
+    },
+    "VisitorAnnouncement.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 40,
+      "title": "الزائر — صفحة إعلان",
+      "w": 390,
+      "x": 940,
+      "y": 24883
+    },
+    "VisitorPolicy.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 40,
+      "title": "الزائر — سياسة الخصوصية والشروط",
+      "w": 390,
+      "x": 1410,
+      "y": 24883
+    },
+    "VisitorNotFound.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 40,
+      "title": "الزائر — 404 الموقع العام",
+      "w": 390,
+      "x": 1880,
+      "y": 24883
+    },
+    "StudentProfileEdit.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 40,
+      "title": "الطالب — ملفي (تعديل البريد والهاتف والصورة)",
+      "w": 390,
+      "x": 2350,
+      "y": 24883
+    },
+    "DesktopDeptExams.dc.html": {
+      "h": 800,
+      "is_interactive": true,
+      "radius": 12,
+      "title": "سطح المكتب — اختبارات القسم (قراءة · مراقبة · حذف للمدير)",
+      "w": 1280,
+      "x": 0,
+      "y": 26070
+    },
+    "DesktopDeptLive.dc.html": {
+      "h": 800,
+      "is_interactive": true,
+      "radius": 12,
+      "title": "سطح المكتب — بث القسم وجلسات المستوى",
+      "w": 1280,
+      "x": 1360,
+      "y": 26070
+    },
+    "DesktopAdmissionsReports.dc.html": {
+      "h": 800,
+      "is_interactive": true,
+      "radius": 12,
+      "title": "سطح المكتب — تقارير القبول والتسجيل",
+      "w": 1280,
+      "x": 2720,
+      "y": 26070
+    },
+    "DesktopStudentAffairsReports.dc.html": {
+      "h": 800,
+      "is_interactive": true,
+      "radius": 12,
+      "title": "سطح المكتب — تقارير شؤون الطلاب (بلا أسماء)",
+      "w": 1280,
+      "x": 4080,
+      "y": 26070
+    },
+    "DesktopHRReports.dc.html": {
+      "h": 800,
+      "is_interactive": true,
+      "radius": 12,
+      "title": "سطح المكتب — الموارد البشرية: تقرير أداء الفصل (تصدير)",
+      "w": 1280,
+      "x": 5440,
+      "y": 26070
+    },
+    "DesktopResultsLog.dc.html": {
+      "h": 800,
+      "is_interactive": true,
+      "radius": 12,
+      "title": "سطح المكتب — سجل النتائج (تدقيق الدفعات والتعديلات)",
+      "w": 1280,
+      "x": 6800,
+      "y": 26070
+    },
+    "DesktopSystemAudit.dc.html": {
+      "h": 800,
+      "is_interactive": true,
+      "radius": 12,
+      "title": "سطح المكتب — مدير النظام: التدقيق الكامل للكلية",
+      "w": 1280,
+      "x": 8160,
+      "y": 26070
+    },
+    "DesktopSiteRedirects.dc.html": {
+      "h": 800,
+      "is_interactive": true,
+      "radius": 12,
+      "title": "سطح المكتب — مدير الموقع: التحويلات وروابط 404",
+      "w": 1280,
+      "x": 9520,
+      "y": 26070
     }
   },
   "createdOnFiles": {
@@ -1383,6 +1509,22 @@
       "w": 240,
       "x": 0,
       "y": 23436
+    },
+    "row21": {
+      "kind": "title1",
+      "maxW": 2740,
+      "text": "الصفحات الثانوية (هاتف) — التقديم: اختيار البرنامج (2/5) والمستندات (4/5) · صفحة إعلان · الخصوصية والشروط · 404 الموقع العام · ملفي (تعديل الاتصال)",
+      "w": 240,
+      "x": 0,
+      "y": 24623
+    },
+    "row22": {
+      "kind": "title1",
+      "maxW": 10800,
+      "text": "الصفحات الثانوية (سطح المكتب) — اختبارات القسم · بث القسم وجلسات المستوى · تقارير القبول · تقارير شؤون الطلاب · تقرير HR · سجل النتائج · التدقيق الكامل · التحويلات",
+      "w": 240,
+      "x": 0,
+      "y": 25810
     }
   },
   "order": [
@@ -1518,7 +1660,21 @@
     "DesktopEnrollment.dc.html",
     "DesktopRolesMatrix.dc.html",
     "DesktopSiteMedia.dc.html",
-    "DesktopStyleguide.dc.html"
+    "DesktopStyleguide.dc.html",
+    "VisitorApplyProgram.dc.html",
+    "VisitorApplyDocs.dc.html",
+    "VisitorAnnouncement.dc.html",
+    "VisitorPolicy.dc.html",
+    "VisitorNotFound.dc.html",
+    "StudentProfileEdit.dc.html",
+    "DesktopDeptExams.dc.html",
+    "DesktopDeptLive.dc.html",
+    "DesktopAdmissionsReports.dc.html",
+    "DesktopStudentAffairsReports.dc.html",
+    "DesktopHRReports.dc.html",
+    "DesktopResultsLog.dc.html",
+    "DesktopSystemAudit.dc.html",
+    "DesktopSiteRedirects.dc.html"
   ],
   "pages": [],
   "title": "ECST Portal Prototype"
