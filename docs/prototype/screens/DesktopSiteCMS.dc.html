@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="ar">
+<head>
+<meta charset="utf-8">
+<title>سطح المكتب — تحرير صفحة الموقع</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'IBM Plex Sans Arabic',system-ui,sans-serif;background:#F4F5F7;color:#1F2B47}
+a{color:#2D64A7;text-decoration:none}
+.scr{width:1280px;height:800px;position:relative;overflow:hidden;background:#F4F5F7;direction:rtl;text-align:right;box-sizing:border-box;display:flex;flex-direction:column}
+.bar{height:60px;display:flex;align-items:center;gap:14px;padding:0 24px;background:#fff;border-bottom:1px solid #E7E9EE;flex-shrink:0}
+.crumb{font-size:13px;color:#8F95A3}.crumb a{color:#2D64A7}
+.bar h1{font-size:17px;font-weight:700;margin:0}
+.chip{font-size:11px;font-weight:600;padding:4px 9px;border-radius:999px;white-space:nowrap}
+.c-neu{background:#EEF0F3;color:#576075}.c-ok{background:#E6F4EC;color:#14603A}.c-warn{background:#FBF3E3;color:#8A5A14}
+.bar .act{margin-right:auto;display:flex;gap:8px;align-items:center}
+.bar .sv{font-size:12px;color:#8F95A3}
+.btn{font-size:13px;font-weight:700;padding:9px 16px;border-radius:10px;white-space:nowrap}
+.b-pri{background:#2D64A7;color:#fff}.b-sec{background:#F0F1F4;color:#1F2B47}
+.cols{flex:1;display:grid;grid-template-columns:230px 1fr 320px;min-height:0}
+.tree,.props{background:#fff;overflow:auto;padding:16px;box-sizing:border-box}
+.tree{border-left:1px solid #E7E9EE}.props{border-right:1px solid #E7E9EE}
+.pt{font-size:12px;font-weight:700;color:#8F95A3;margin:0 0 8px}
+.pg{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:9px;font-size:13px;font-weight:600;color:#1F2B47;margin-bottom:2px}
+.pg.on{background:#E5ECF4;color:#1F4674}
+.pg .u{margin-right:auto;font-size:11px;color:#8F95A3;direction:ltr;font-weight:500}
+.pg i{width:7px;height:7px;border-radius:4px;background:#1E7F4F;flex-shrink:0}
+.pg i.d{background:#B7791F}
+.sub{margin-right:18px}
+.edit{overflow:auto;padding:22px 28px;box-sizing:border-box}
+.doc{max-width:720px;margin:0 auto;background:#fff;border:1px solid #E7E9EE;border-radius:18px;overflow:hidden}
+.tb{display:flex;gap:4px;padding:8px 12px;border-bottom:1px solid #EEF0F3;background:#F8F9FB}
+.tb span{font-size:12px;font-weight:700;padding:5px 9px;border-radius:7px;color:#576075;background:#fff;border:1px solid #E7E9EE}
+.tb .sep{border:0;background:transparent;padding:0 3px;color:#C7CAD1}
+.blk{padding:16px 24px;border-bottom:1px solid #EEF0F3;position:relative}
+.blk .tag{position:absolute;top:8px;left:12px;font-size:10px;font-weight:700;color:#8F95A3;background:#EEF0F3;padding:2px 7px;border-radius:999px}
+.blk.sel{box-shadow:inset 0 0 0 2px #2D64A7}.blk.sel .tag{background:#E5ECF4;color:#1F4674}
+.hero{background:linear-gradient(135deg,#1F2B47,#2D64A7);color:#fff;padding:26px 24px}
+.hero .e{font-size:11px;font-weight:600;opacity:.75}
+.hero h2{font-size:26px;font-weight:700;margin:6px 0 6px;line-height:1.3}
+.hero p{font-size:13px;opacity:.85;margin:0;max-width:440px;line-height:1.7}
+.blk h3{font-size:18px;font-weight:700;margin:0 0 6px}
+.blk p{font-size:13px;color:#576075;line-height:1.8;margin:0}
+.st{display:grid;grid-template-columns:repeat(3, 1fr);gap:10px}
+.st div{border:1px solid #E7E9EE;border-radius:12px;padding:12px;text-align:center}
+.st b{display:block;font-size:22px;font-weight:700;direction:ltr}.st span{font-size:11px;color:#8F95A3}
+.ppl{display:grid;grid-template-columns:repeat(4, 1fr);gap:10px}
+.ppl div{text-align:center}
+.ppl i{display:block;width:56px;height:56px;border-radius:28px;background:#E5ECF4;margin:0 auto 6px}
+.ppl b{display:block;font-size:12px;font-weight:600}.ppl span{font-size:11px;color:#8F95A3}
+.add{padding:12px;text-align:center;font-size:13px;font-weight:600;color:#8F95A3;border:1.5px dashed #C7CAD1;border-radius:10px;margin:14px 24px}
+.pr{padding:8px 0;border-top:1px solid #EEF0F3}
+.pr:first-of-type{border-top:0}
+.pr label{display:block;font-size:11px;font-weight:600;color:#8F95A3;margin-bottom:4px}
+.pr .v{font-size:13px;font-weight:600;border:1px solid #E7E9EE;border-radius:8px;padding:7px 10px;background:#F8F9FB}
+.pr .cnt{font-size:11px;color:#14603A;direction:ltr;text-align:left;margin-top:3px}
+.seo{background:#F8F9FB;border-radius:10px;padding:10px 12px;margin-top:6px}
+.seo .u{font-size:11px;color:#1E7F4F;direction:ltr;text-align:right}
+.seo .h{font-size:14px;color:#1A0DAB;font-weight:600;margin-top:2px}
+.seo .d{font-size:11px;color:#4D5156;margin-top:2px;line-height:1.5}
+.hist{font-size:12px;color:#576075;line-height:1.7;padding:6px 0}
+.hist b{color:#1F2B47;font-weight:600}
+</style>
+</helmet>
+<div class="scr" style="width: 1280px; height: 800px">
+<div class="bar"><span class="crumb"><a href="SiteManagerHome.dc.html">موقع الكلية</a> / <a href="SiteManagerHome.dc.html">الصفحات</a> / </span><h1>عن الكلية</h1><span class="chip c-warn">مسودة · تغييرات غير منشورة</span><div class="act"><span class="sv">حُفظ تلقائيًا قبل 12 ثانية</span><a class="btn b-sec" href="VisitorHome.dc.html">معاينة</a><a class="btn b-pri" href="SiteManagerHome.dc.html">نشر الصفحة</a></div></div>
+<div class="cols">
+<aside class="tree">
+<p class="pt">صفحات الموقع</p>
+<a class="pg" href="DesktopSiteCMS.dc.html"><i></i>الرئيسية<span class="u">/</span></a>
+<a class="pg on" href="DesktopSiteCMS.dc.html"><i class="d"></i>عن الكلية<span class="u">/about</span></a>
+<a class="pg sub" href="DesktopSiteCMS.dc.html"><i></i>كلمة العميد<span class="u">/about/dean</span></a>
+<a class="pg sub" href="DesktopSiteCMS.dc.html"><i></i>الاعتماد<span class="u">/about/accreditation</span></a>
+<a class="pg" href="DesktopSiteCMS.dc.html"><i></i>البرامج<span class="u">/programs</span></a>
+<a class="pg" href="DesktopSiteCMS.dc.html"><i></i>القبول<span class="u">/admissions</span></a>
+<a class="pg" href="DesktopSiteCMS.dc.html"><i></i>الأخبار<span class="u">/news</span></a>
+<a class="pg" href="DesktopSiteCMS.dc.html"><i></i>الفعاليات<span class="u">/events</span></a>
+<a class="pg" href="DesktopSiteCMS.dc.html"><i></i>تواصل معنا<span class="u">/contact</span></a>
+<p class="pt" style="margin-top: 18px">من قاعدة البيانات (لا تُحرَّر هنا)</p>
+<div class="pg" style="color: #8F95A3">صفحات البرامج · 11</div>
+<div class="pg" style="color: #8F95A3">الأقسام · 4</div>
+<div class="pg" style="color: #8F95A3">هيئة التدريس · 46</div>
+<a class="btn b-sec" href="DesktopSiteCMS.dc.html" style="display: block; text-align: center; margin-top: 14px">+ صفحة جديدة</a>
+</aside>
+<div class="edit">
+<div class="doc">
+<div class="tb"><span>B</span><span>I</span><span>H2</span><span>H3</span><span class="sep">|</span><span>قائمة</span><span>رابط</span><span>صورة</span><span class="sep">|</span><span>+ كتلة</span></div>
+<div class="blk" style="padding: 0"><span class="tag" style="top: 8px; background: rgba(255,255,255,.2); color: #fff">غلاف</span><div class="hero"><div class="e">عن الكلية</div><h2>ثلاثة عقود من التعليم التقني في السودان</h2><p>تأسست كلية الإمارات للعلوم والتقنية عام 1996 لتقدّم برامج تطبيقية في الحاسوب والهندسة والأعمال، وتخرّج منها أكثر من 4,000 طالب.</p></div></div>
+<div class="blk sel"><span class="tag">نص</span><h3>رسالتنا</h3><p>إعداد خريجين قادرين على المنافسة في سوق العمل عبر برامج تطبيقية معتمدة، وهيئة تدريس متفرغة، وشراكات مع القطاع الخاص. نلتزم بالجودة الأكاديمية والإتاحة للجميع.</p></div>
+<div class="blk"><span class="tag">أرقام</span><div class="st"><div><b>1996</b><span>سنة التأسيس</span></div><div><b>4,000+</b><span>خريج</span></div><div><b>11</b><span>برنامجًا معتمدًا</span></div></div></div>
+<div class="blk"><span class="tag">أشخاص · من القاعدة</span><h3>القيادة الأكاديمية</h3><div class="ppl"><div><i></i><b>د. عبد الله الحاج</b><span>أمين الشؤون العلمية</span></div><div><i></i><b>د. مصطفى الأمين</b><span>تقنية المعلومات</span></div><div><i></i><b>د. طارق محجوب</b><span>علوم الحاسوب</span></div><div><i></i><b>د. بابكر عثمان</b><span>الهندسة</span></div></div></div>
+<div class="add">+ إضافة كتلة: نص · صورة · أرقام · أشخاص · أسئلة شائعة · دعوة للتقديم</div>
+</div>
+</div>
+<aside class="props">
+<p class="pt">الكتلة المحددة · نص</p>
+<div class="pr"><label>العنوان</label><div class="v">رسالتنا</div></div>
+<div class="pr"><label>المحاذاة / العرض</label><div class="v">يمين · عرض المحتوى</div></div>
+<p class="pt" style="margin-top: 20px">SEO للصفحة</p>
+<div class="pr"><label>عنوان الصفحة (title)</label><div class="v">عن الكلية | كلية الإمارات للعلوم والتقنية</div><div class="cnt">52 / 60</div></div>
+<div class="pr"><label>الوصف التعريفي (description)</label><div class="v" style="font-weight: 500">تعرّف على كلية الإمارات للعلوم والتقنية: تأسست 1996 في الخرطوم، 11 برنامجًا معتمدًا في الحاسوب والهندسة والأعمال، وأكثر من 4,000 خريج.</div><div class="cnt">148 / 160</div></div>
+<div class="pr"><label>الرابط</label><div class="v" style="direction: ltr; text-align: right">/about</div></div>
+<div class="pr"><label>معاينة نتيجة البحث</label><div class="seo"><div class="u">ecst.edu.sd › about</div><div class="h">عن الكلية | كلية الإمارات للعلوم والتقنية</div><div class="d">تعرّف على كلية الإمارات للعلوم والتقنية: تأسست 1996 في الخرطوم، 11 برنامجًا معتمدًا …</div></div></div>
+<p class="pt" style="margin-top: 20px">السجل</p>
+<div class="hist"><b>ريم الشيخ</b> عدّلت "رسالتنا" · قبل 12 ثانية<br><b>ريم الشيخ</b> غيّرت الغلاف · أمس<br><b>نُشر</b> الإصدار 6 · 3 سبتمبر</div>
+</aside>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":800}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

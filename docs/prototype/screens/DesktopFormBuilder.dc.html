@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="ar">
+<head>
+<meta charset="utf-8">
+<title>سطح المكتب — منشئ قوالب التقديم</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'IBM Plex Sans Arabic',system-ui,sans-serif;background:#F4F5F7;color:#1F2B47}
+a{color:#2D64A7;text-decoration:none}
+.scr{width:1280px;height:800px;position:relative;overflow:hidden;background:#F4F5F7;direction:rtl;text-align:right;box-sizing:border-box;display:flex;flex-direction:column}
+.bar{height:60px;display:flex;align-items:center;gap:14px;padding:0 24px;background:#fff;border-bottom:1px solid #E7E9EE;flex-shrink:0}
+.crumb{font-size:13px;color:#8F95A3}.crumb a{color:#2D64A7}
+.bar h1{font-size:17px;font-weight:700;margin:0}
+.chip{font-size:11px;font-weight:600;padding:4px 9px;border-radius:999px;white-space:nowrap}
+.c-neu{background:#EEF0F3;color:#576075}.c-ok{background:#E6F4EC;color:#14603A}
+.bar .act{margin-right:auto;display:flex;gap:8px}
+.btn{font-size:13px;font-weight:700;padding:9px 16px;border-radius:10px;white-space:nowrap}
+.b-pri{background:#2D64A7;color:#fff}.b-sec{background:#F0F1F4;color:#1F2B47}
+.cols{flex:1;display:grid;grid-template-columns:250px 1fr 300px;min-height:0}
+.pal,.props{background:#fff;overflow:auto;padding:18px 16px;box-sizing:border-box}
+.pal{border-left:1px solid #E7E9EE}.props{border-right:1px solid #E7E9EE}
+.pt{font-size:12px;font-weight:700;color:#8F95A3;margin:0 0 8px}
+.fld{display:flex;align-items:center;gap:10px;padding:9px 10px;border:1px solid #E7E9EE;border-radius:10px;font-size:13px;font-weight:600;margin-bottom:6px;background:#fff;cursor:grab}
+.fld svg{width:16px;height:16px;color:#8F95A3}
+.fld .h{margin-right:auto;color:#C7CAD1}
+.canvas{overflow:auto;padding:22px 28px;box-sizing:border-box}
+.form{max-width:640px;margin:0 auto;background:#fff;border:1px solid #E7E9EE;border-radius:18px;padding:22px 24px;box-sizing:border-box}
+.form h2{font-size:18px;font-weight:700;margin:0 0 2px}
+.form .s{font-size:13px;color:#576075;margin-bottom:16px}
+.stp{display:flex;gap:6px;margin-bottom:18px}
+.stp span{font-size:12px;font-weight:600;padding:6px 12px;border-radius:999px;background:#F0F1F4;color:#576075}
+.stp .on{background:#1F2B47;color:#fff}
+.q{border:1px solid #E7E9EE;border-radius:12px;padding:12px 14px;margin-bottom:10px;position:relative}
+.q.sel{border-color:#2D64A7;box-shadow:0 0 0 3px rgba(45,100,167,.15)}
+.q.lock{background:#F8F9FB}
+.q label{display:block;font-size:13px;font-weight:600;margin-bottom:6px}
+.q label small{font-weight:500;color:#8F95A3;font-size:11px;margin-right:6px}
+.q .in{height:36px;border:1px solid #E7E9EE;border-radius:8px;background:#fff;display:flex;align-items:center;padding:0 10px;font-size:13px;color:#C7CAD1}
+.q .two{display:flex;gap:8px}.q .two .in{flex:1}
+.q .opts{display:flex;flex-wrap:wrap;gap:6px}
+.q .opts span{font-size:12px;border:1px solid #E7E9EE;border-radius:999px;padding:5px 10px;color:#576075}
+.q .up{height:56px;border:1.5px dashed #C7CAD1;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:12px;color:#8F95A3}
+.q .tag{position:absolute;top:10px;left:12px;font-size:10px;font-weight:700;color:#8F95A3;background:#EEF0F3;padding:2px 7px;border-radius:999px}
+.q.sel .tag{background:#E5ECF4;color:#1F4674}
+.add{border:1.5px dashed #C7CAD1;border-radius:12px;padding:12px;text-align:center;font-size:13px;color:#8F95A3;font-weight:600}
+.pr{padding:8px 0;border-top:1px solid #EEF0F3}
+.pr:first-of-type{border-top:0}
+.pr label{display:block;font-size:11px;font-weight:600;color:#8F95A3;margin-bottom:4px}
+.pr .v{font-size:13px;font-weight:600;border:1px solid #E7E9EE;border-radius:8px;padding:7px 10px;background:#F8F9FB}
+.pr .row{display:flex;align-items:center;justify-content:space-between;font-size:13px;font-weight:600;padding:6px 0}
+.sw{width:40px;height:24px;border-radius:12px;background:#C7CAD1;position:relative;flex-shrink:0}
+.sw i{position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:9px;background:#fff}
+.sw.on{background:#1E7F4F}.sw.on i{left:19px}
+.opt{display:flex;align-items:center;gap:8px;font-size:13px;padding:5px 0}
+.opt i{width:14px;height:14px;border-radius:7px;border:1.5px solid #C7CAD1}
+.opt .x{margin-right:auto;color:#C7CAD1}
+.use{margin-top:14px;padding:10px 12px;background:#F8F9FB;border-radius:10px;font-size:12px;color:#576075;line-height:1.7}
+</style>
+</helmet>
+<div class="scr" style="width: 1280px; height: 800px">
+<div class="bar"><span class="crumb"><a href="HeadRegistrarHome.dc.html">القبول</a> / <a href="HeadRegistrarHome.dc.html">قوالب التقديم</a> / </span><h1>قالب الهندسة — خريف 2026</h1><span class="chip c-neu">مسودة · الإصدار 3</span><div class="act"><a class="btn b-sec" href="VisitorApply.dc.html">معاينة كزائر</a><a class="btn b-pri" href="HeadRegistrarHome.dc.html">نشر للبرامج المرتبطة (3)</a></div></div>
+<div class="cols">
+<aside class="pal">
+<p class="pt">حقول أساسية (مقفلة في كل القوالب)</p>
+<div class="fld" style="opacity: .6"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>الاسم الكامل</div>
+<div class="fld" style="opacity: .6"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>البريد (مع تحقق)</div>
+<div class="fld" style="opacity: .6"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>الهاتف · البرنامج</div>
+<p class="pt" style="margin-top: 18px">أضف حقلًا</p>
+<div class="fld"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h10M4 17h7"/></svg>نص قصير<span class="h">⋮⋮</span></div>
+<div class="fld"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 10h16M4 14h16M4 18h10"/></svg>نص طويل<span class="h">⋮⋮</span></div>
+<div class="fld"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 20l4-16M17 20l4-16M2 9h20M2 15h20"/></svg>رقم / نسبة<span class="h">⋮⋮</span></div>
+<div class="fld"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>تاريخ<span class="h">⋮⋮</span></div>
+<div class="fld"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-6"/></svg>اختيار واحد<span class="h">⋮⋮</span></div>
+<div class="fld"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M8 12l3 3 5-6"/></svg>اختيار متعدد<span class="h">⋮⋮</span></div>
+<div class="fld"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>رفع مستند<span class="h">⋮⋮</span></div>
+<div class="fld"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12h16M12 4v16"/></svg>عنوان قسم / فاصل<span class="h">⋮⋮</span></div>
+<div class="use">القالب الافتراضي للكلية يُطبَّق على أي برنامج بلا قالب خاص. هذا القالب مرتبط بـ: الهندسة المدنية · الكهربائية · الميكانيكية.</div>
+</aside>
+<div class="canvas">
+<div class="form">
+<h2>نموذج التقديم — الهندسة</h2><div class="s">ما يراه الزائر · اسحب لإعادة الترتيب · انقر للتحرير</div>
+<div class="stp"><span>1 البيانات الشخصية</span><span class="on">2 المؤهل</span><span>3 المستندات</span><span>4 المراجعة</span></div>
+<div class="q lock"><span class="tag">أساسي</span><label>نوع الشهادة الثانوية <small>مطلوب</small></label><div class="opts"><span>السودانية</span><span>العربية</span><span>IGCSE</span><span>أخرى</span></div></div>
+<div class="q lock"><span class="tag">أساسي</span><label>النسبة المئوية <small>مطلوب · 0–100</small></label><div class="two"><div class="in">مثال: 82.4</div><div class="in">سنة الشهادة</div></div></div>
+<div class="q sel"><span class="tag">خاص بالقالب</span><label>درجة الرياضيات في الثانوية <small>مطلوب · 0–100</small></label><div class="in">تُستخدم لشرط القبول في الهندسة (≥ 70)</div></div>
+<div class="q"><span class="tag">خاص بالقالب</span><label>درجة الفيزياء في الثانوية <small>مطلوب · 0–100</small></label><div class="in"></div></div>
+<div class="q"><span class="tag">خاص بالقالب</span><label>التخصص الهندسي المفضل الثاني <small>اختياري</small></label><div class="opts"><span>المدنية</span><span>الكهربائية</span><span>الميكانيكية</span><span>لا يوجد</span></div></div>
+<div class="q"><span class="tag">خاص بالقالب</span><label>شهادة معادلة (لغير السودانية) <small>شرطي</small></label><div class="up">يظهر فقط إذا كانت الشهادة ≠ السودانية · PDF/JPG حتى 5 MB</div></div>
+<div class="add">+ أفلت حقلًا هنا أو اختر من القائمة</div>
+</div>
+</div>
+<aside class="props">
+<p class="pt">خصائص الحقل المحدد</p>
+<div class="pr"><label>التسمية</label><div class="v">درجة الرياضيات في الثانوية</div></div>
+<div class="pr"><label>النوع</label><div class="v">رقم / نسبة</div></div>
+<div class="pr"><label>نص المساعدة</label><div class="v" style="font-weight: 500; color: #576075">تُستخدم لشرط القبول في الهندسة (≥ 70)</div></div>
+<div class="pr"><label>النطاق</label><div class="v" style="display: flex; justify-content: space-between; direction: ltr">0 <span>—</span> 100</div></div>
+<div class="pr"><div class="row">مطلوب<span class="sw on"><i></i></span></div><div class="row">يظهر في قائمة الطلبات للمسجل<span class="sw on"><i></i></span></div><div class="row">قابل للتصفية<span class="sw on"><i></i></span></div></div>
+<div class="pr"><label>قاعدة تأهّل تلقائية</label><div class="v" style="font-weight: 500">القيمة ≥ 70 → "مؤهل" · وإلا → "غير مستوفٍ" (قابل للتجاوز من المسجل)</div></div>
+<div class="pr"><label>الظهور الشرطي</label><div class="v" style="font-weight: 500; color: #8F95A3">دائمًا</div></div>
+<div class="pr"><label>الخطوة</label><div class="v">2 · المؤهل</div></div>
+<div class="pr" style="display: flex; gap: 8px; padding-top: 14px"><a class="btn b-sec" href="DesktopFormBuilder.dc.html" style="flex: 1; text-align: center">تكرار</a><a class="btn" href="DesktopFormBuilder.dc.html" style="flex: 1; text-align: center; background: #FBE9E7; color: #922B20">حذف</a></div>
+</aside>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":800}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="ar">
+<head>
+<meta charset="utf-8">
+<title>الأستاذ — اختبار جديد (الإعدادات)</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'IBM Plex Sans Arabic',system-ui,sans-serif;background:#F4F5F7;color:#1F2B47}
+a{color:#2D64A7;text-decoration:none}
+.scr{width:390px;height:844px;position:relative;overflow:hidden;background:#F4F5F7;direction:rtl;text-align:right;box-sizing:border-box}
+.body{position:absolute;top:0;left:0;right:0;bottom:0;overflow-y:auto;padding:54px 16px 110px;box-sizing:border-box}
+.back{display:flex;align-items:center;gap:2px;font-size:15px;color:#2D64A7;font-weight:600}
+.back svg{width:22px;height:22px}
+.steps{display:flex;gap:4px;margin:16px 0 6px}
+.steps i{flex:1;height:5px;border-radius:3px;background:#E7E9EE}
+.steps i.c{background:#2D64A7}
+.stl{font-size:12px;color:#8F95A3;font-weight:600}
+.h1{font-size:24px;font-weight:700;margin:8px 0 2px}
+.s{font-size:13px;color:#576075}
+.lbl{font-size:12px;font-weight:600;color:#8F95A3;margin:18px 4px 6px;display:block}
+.grp{background:#fff;border-radius:16px;border:1px solid #E7E9EE;overflow:hidden}
+.f{padding:10px 14px}.f+.f{border-top:1px solid #EEF0F3}
+.f label{display:block;font-size:11px;font-weight:600;color:#8F95A3}
+.f input{width:100%;border:0;background:transparent;font-size:15px;font-family:inherit;color:#1F2B47;outline:none;padding:2px 0 0;box-sizing:border-box}
+.two{display:flex}.two .f{flex:1}.two .f+.f{border-top:0;border-right:1px solid #EEF0F3}
+.li{display:flex;align-items:center;gap:12px;padding:11px 14px;min-height:50px}
+.li+.li{border-top:1px solid #EEF0F3}
+.t{font-size:15px;font-weight:600;flex:1}.v{font-size:14px;color:#8F95A3}
+.sw{width:46px;height:28px;border-radius:14px;background:#C7CAD1;position:relative;flex-shrink:0}
+.sw i{position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:11px;background:#fff}
+.sw.on{background:#1E7F4F}.sw.on i{left:21px}
+.seg{display:flex;gap:6px}
+.seg span{flex:1;text-align:center;font-size:12px;font-weight:600;padding:8px 0;border-radius:9px;background:#F0F1F4;color:#576075}
+.seg .on{background:#1F2B47;color:#fff}
+.hint{background:#E5ECF4;border-radius:14px;padding:12px 14px;font-size:13px;color:#1F4674;line-height:1.6;margin-top:14px}
+.fix{position:absolute;left:16px;right:16px;bottom:24px;display:flex;gap:8px}
+.btn{display:flex;align-items:center;justify-content:center;height:50px;border-radius:14px;font-size:15px;font-weight:600;flex:1}
+.b-pri{background:#2D64A7;color:#fff}.b-sec{background:#F0F1F4;color:#1F2B47;flex:0 0 120px}
+</style>
+</helmet>
+<div class="scr" style="width: 390px; height: 844px">
+<div class="body">
+<a class="back" href="TeacherCourse.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg><span>قواعد البيانات</span></a>
+<div class="steps"><i class="c"></i><i></i><i></i><i></i></div>
+<div class="stl">الخطوة 1 من 4 · الإعدادات</div>
+<h1 class="h1">اختبار جديد</h1>
+<div class="s">الوقت من ساعة الخادم · النافذة والمدة منفصلتان</div>
+<span class="lbl">الأساسيات</span>
+<div class="grp">
+<div class="f"><label for="t">اسم الاختبار</label><input id="t" type="text" value="اختبار قصير 2 — التطبيع"></div>
+<div class="two"><div class="f"><label for="q">عدد الأسئلة</label><input id="q" type="text" inputmode="numeric" value="15"></div><div class="f"><label for="m">الدرجة الكلية</label><input id="m" type="text" inputmode="numeric" value="30"></div></div>
+<div class="two"><div class="f"><label for="p">درجة النجاح</label><input id="p" type="text" inputmode="numeric" value="15"></div><div class="f"><label for="a">المحاولات</label><input id="a" type="text" inputmode="numeric" value="1"></div></div>
+</div>
+<span class="lbl">النافذة والمدة</span>
+<div class="grp">
+<div class="two"><div class="f"><label>يفتح</label><input type="text" value="الخميس 2 أكتوبر 9:00 ص"></div><div class="f"><label>يُغلق</label><input type="text" value="الخميس 2 أكتوبر 12:00 م"></div></div>
+<div class="f"><label for="d">مدة المحاولة (دقيقة)</label><input id="d" type="text" inputmode="numeric" value="25"></div>
+<div class="li"><span class="t">مهلة سماح بعد انتهاء الوقت</span><span class="v">30 ثانية</span></div>
+</div>
+<span class="lbl">السلوك</span>
+<div class="grp">
+<div class="li"><span class="t">الرجوع للسؤال السابق</span><span class="sw on" role="switch" aria-checked="true" aria-label="رجوع"><i></i></span></div>
+<div class="li"><span class="t">ترتيب الأسئلة عشوائي</span><span class="sw on" role="switch" aria-checked="true" aria-label="عشوائي"><i></i></span></div>
+<div class="li"><span class="t">ترتيب الاختيارات عشوائي</span><span class="sw on" role="switch" aria-checked="true" aria-label="اختيارات"><i></i></span></div>
+<div class="li" style="flex-direction: column; align-items: stretch; gap: 8px"><span class="t">ظهور النتيجة للطالب</span><div class="seg"><span class="on">فور الإرسال</span><span>بعد الإغلاق</span><span>يدويًا</span></div></div>
+<div class="li"><span class="t">السماح للمعيد بالتصحيح اليدوي</span><span class="sw on" role="switch" aria-checked="true" aria-label="معيد"><i></i></span></div>
+</div>
+<div class="hint">في الخطوة التالية تضيف الأسئلة بأنواعها (اختيار واحد/متعدد، صح/خطأ، إجابة قصيرة، إكمال) — من الحاسوب أسهل لكنها ممكنة هنا.</div>
+</div>
+<div class="fix"><a class="btn b-sec" href="TeacherCourse.dc.html">حفظ مسودة</a><a class="btn b-pri" href="TeacherExamQuestions.dc.html">التالي: الأسئلة</a></div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

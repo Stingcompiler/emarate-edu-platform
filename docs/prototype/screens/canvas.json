@@ -1,65 +1,915 @@
 {
   "v": 3,
   "attachments": {},
-  "createdOnFiles": {"at": "2026-09-27T17:11:48.976Z", "v": 1},
-  "title": "ECST Portal Prototype",
-  "launch": {"view": "canvas"},
-  "pages": [],
   "boards": {
-    "Main.dc.html": {"x": 0, "y": 0, "w": 390, "h": 844, "title": "القائمة — اختر الدور", "is_interactive": true, "radius": 40},
-    "Login.dc.html": {"x": 470, "y": 0, "w": 390, "h": 844, "title": "تسجيل الدخول", "is_interactive": true, "radius": 40},
-    "Register.dc.html": {"x": 940, "y": 0, "w": 390, "h": 844, "title": "تسجيل طالب — OTP", "is_interactive": true, "radius": 40},
-    "VisitorProgram.dc.html": {"x": 1410, "y": 0, "w": 390, "h": 844, "title": "الموقع العام — برنامج", "is_interactive": true, "radius": 40},
-    "VisitorApply.dc.html": {"x": 1880, "y": 0, "w": 390, "h": 844, "title": "التقديم — خطوة 3", "is_interactive": true, "radius": 40},
-    "VisitorTrack.dc.html": {"x": 2350, "y": 0, "w": 390, "h": 844, "title": "متابعة طلبي (OTP)", "is_interactive": true, "radius": 40},
-
-    "StudentToday.dc.html": {"x": 0, "y": 1187, "w": 390, "h": 844, "title": "الطالب — اليوم", "is_interactive": true, "radius": 40},
-    "StudentCourses.dc.html": {"x": 470, "y": 1187, "w": 390, "h": 844, "title": "الطالب — موادي", "is_interactive": true, "radius": 40},
-    "StudentCourse.dc.html": {"x": 940, "y": 1187, "w": 390, "h": 844, "title": "الطالب — المادة (مقاطع تفاعلية)", "is_interactive": true, "radius": 40},
-    "StudentLecture.dc.html": {"x": 1410, "y": 1187, "w": 390, "h": 844, "title": "الطالب — المحاضرة والتنزيل", "is_interactive": true, "radius": 40},
-    "StudentAssignment.dc.html": {"x": 1880, "y": 1187, "w": 390, "h": 844, "title": "الطالب — الواجب (Sheet التسليم)", "is_interactive": true, "radius": 40},
-    "StudentTasks.dc.html": {"x": 2350, "y": 1187, "w": 390, "h": 844, "title": "الطالب — المهام", "is_interactive": true, "radius": 40},
-
-    "StudentExamStart.dc.html": {"x": 0, "y": 2374, "w": 390, "h": 844, "title": "الاختبار — قبل البدء", "is_interactive": true, "radius": 40},
-    "StudentExam.dc.html": {"x": 470, "y": 2374, "w": 390, "h": 844, "title": "الاختبار — أثناء (تفاعلي)", "is_interactive": true, "radius": 40},
-    "StudentExamResult.dc.html": {"x": 940, "y": 2374, "w": 390, "h": 844, "title": "الاختبار — النتيجة", "is_interactive": true, "radius": 40},
-    "StudentResults.dc.html": {"x": 1410, "y": 2374, "w": 390, "h": 844, "title": "الطالب — النتائج", "is_interactive": true, "radius": 40},
-    "StudentLive.dc.html": {"x": 1880, "y": 2374, "w": 390, "h": 844, "title": "الطالب — البث", "is_interactive": true, "radius": 40},
-    "StudentNotifications.dc.html": {"x": 2350, "y": 2374, "w": 390, "h": 844, "title": "الطالب — الإشعارات", "is_interactive": true, "radius": 40},
-    "StudentMe.dc.html": {"x": 2820, "y": 2374, "w": 390, "h": 844, "title": "الطالب — أنا", "is_interactive": true, "radius": 40},
-    "StudentDownloads.dc.html": {"x": 3290, "y": 2374, "w": 390, "h": 844, "title": "الطالب — التنزيلات", "is_interactive": true, "radius": 40},
-
-    "TeacherToday.dc.html": {"x": 0, "y": 3561, "w": 390, "h": 844, "title": "الأستاذ — اليوم", "is_interactive": true, "radius": 40},
-    "TeacherCourses.dc.html": {"x": 470, "y": 3561, "w": 390, "h": 844, "title": "الأستاذ — موادي", "is_interactive": true, "radius": 40},
-    "TeacherCourse.dc.html": {"x": 940, "y": 3561, "w": 390, "h": 844, "title": "الأستاذ — المادة", "is_interactive": true, "radius": 40},
-    "TeacherGrading.dc.html": {"x": 1410, "y": 3561, "w": 390, "h": 844, "title": "الأستاذ — طابور التصحيح", "is_interactive": true, "radius": 40},
-    "TeacherGradeSubmission.dc.html": {"x": 1880, "y": 3561, "w": 390, "h": 844, "title": "الأستاذ — تصحيح تسليم", "is_interactive": true, "radius": 40},
-    "TeacherAnnouncement.dc.html": {"x": 2350, "y": 3561, "w": 390, "h": 844, "title": "الأستاذ — إعلان سريع", "is_interactive": true, "radius": 40},
-    "TeacherLiveNew.dc.html": {"x": 2820, "y": 3561, "w": 390, "h": 844, "title": "الأستاذ — جلسة بث", "is_interactive": true, "radius": 40},
-    "TeacherExamMonitor.dc.html": {"x": 3290, "y": 3561, "w": 390, "h": 844, "title": "الأستاذ — مراقبة اختبار", "is_interactive": true, "radius": 40},
-
-    "AdminHome.dc.html": {"x": 0, "y": 4748, "w": 390, "h": 844, "title": "مدير القسم — الرئيسية", "is_interactive": true, "radius": 40},
-    "AdminApprovals.dc.html": {"x": 470, "y": 4748, "w": 390, "h": 844, "title": "مدير القسم — اعتماد التسجيل", "is_interactive": true, "radius": 40},
-    "AdminApplication.dc.html": {"x": 940, "y": 4748, "w": 390, "h": 844, "title": "مسجل القسم — طلب تقديم", "is_interactive": true, "radius": 40},
-    "AdminInquiry.dc.html": {"x": 1410, "y": 4748, "w": 390, "h": 844, "title": "مدير الموقع — استفسار", "is_interactive": true, "radius": 40},
-    "AdminCorrection.dc.html": {"x": 1880, "y": 4748, "w": 390, "h": 844, "title": "الشؤون العلمية — تعديل نتيجة", "is_interactive": true, "radius": 40},
-    "AdminNotify.dc.html": {"x": 2350, "y": 4748, "w": 390, "h": 844, "title": "إرسال إشعار", "is_interactive": true, "radius": 40},
-    "AdminCase.dc.html": {"x": 2820, "y": 4748, "w": 390, "h": 844, "title": "شؤون الطلاب — بلاغ غش", "is_interactive": true, "radius": 40}
+    "AdminApplication.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 40,
+      "title": "مسجل القسم — طلب تقديم",
+      "w": 390,
+      "x": 940,
+      "y": 4748
+    },
+    "AdminApprovals.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 40,
+      "title": "مدير القسم — اعتماد التسجيل",
+      "w": 390,
+      "x": 470,
+      "y": 4748
+    },
+    "AdminCase.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 40,
+      "title": "شؤون الطلاب — بلاغ غش",
+      "w": 390,
+      "x": 2820,
+      "y": 4748
+    },
+    "AdminCorrection.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 40,
+      "title": "الشؤون العلمية — تعديل نتيجة",
+      "w": 390,
+      "x": 1880,
+      "y": 4748
+    },
+    "AdminHome.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 40,
+      "title": "مدير القسم — الرئيسية",
+      "w": 390,
+      "x": 0,
+      "y": 4748
+    },
+    "AdminInquiry.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 40,
+      "title": "مدير الموقع — استفسار",
+      "w": 390,
+      "x": 1410,
+      "y": 4748
+    },
+    "AdminNotify.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 40,
+      "title": "إرسال إشعار",
+      "w": 390,
+      "x": 2350,
+      "y": 4748
+    },
+    "Login.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 40,
+      "title": "تسجيل الدخول",
+      "w": 390,
+      "x": 470,
+      "y": 0
+    },
+    "Main.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 40,
+      "title": "القائمة — اختر الدور",
+      "w": 390,
+      "x": 0,
+      "y": 0
+    },
+    "Register.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 40,
+      "title": "تسجيل طالب — OTP",
+      "w": 390,
+      "x": 940,
+      "y": 0
+    },
+    "StudentAssignment.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 40,
+      "title": "الطالب — الواجب (Sheet التسليم)",
+      "w": 390,
+      "x": 1880,
+      "y": 1187
+    },
+    "StudentCourse.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 40,
+      "title": "الطالب — المادة (مقاطع تفاعلية)",
+      "w": 390,
+      "x": 940,
+      "y": 1187
+    },
+    "StudentCourses.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 40,
+      "title": "الطالب — موادي",
+      "w": 390,
+      "x": 470,
+      "y": 1187
+    },
+    "StudentDownloads.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 40,
+      "title": "الطالب — التنزيلات",
+      "w": 390,
+      "x": 3290,
+      "y": 2374
+    },
+    "StudentExam.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 40,
+      "title": "الاختبار — أثناء (تفاعلي)",
+      "w": 390,
+      "x": 470,
+      "y": 2374
+    },
+    "StudentExamResult.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 40,
+      "title": "الاختبار — النتيجة",
+      "w": 390,
+      "x": 940,
+      "y": 2374
+    },
+    "StudentExamStart.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 40,
+      "title": "الاختبار — قبل البدء",
+      "w": 390,
+      "x": 0,
+      "y": 2374
+    },
+    "StudentLecture.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 40,
+      "title": "الطالب — المحاضرة والتنزيل",
+      "w": 390,
+      "x": 1410,
+      "y": 1187
+    },
+    "StudentLive.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 40,
+      "title": "الطالب — البث",
+      "w": 390,
+      "x": 1880,
+      "y": 2374
+    },
+    "StudentMe.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 40,
+      "title": "الطالب — أنا",
+      "w": 390,
+      "x": 2820,
+      "y": 2374
+    },
+    "StudentNotifications.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 40,
+      "title": "الطالب — الإشعارات",
+      "w": 390,
+      "x": 2350,
+      "y": 2374
+    },
+    "StudentResults.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 40,
+      "title": "الطالب — النتائج",
+      "w": 390,
+      "x": 1410,
+      "y": 2374
+    },
+    "StudentTasks.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 40,
+      "title": "الطالب — المهام",
+      "w": 390,
+      "x": 2350,
+      "y": 1187
+    },
+    "StudentToday.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 40,
+      "title": "الطالب — اليوم",
+      "w": 390,
+      "x": 0,
+      "y": 1187
+    },
+    "TeacherAnnouncement.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 40,
+      "title": "الأستاذ — إعلان سريع",
+      "w": 390,
+      "x": 2350,
+      "y": 3561
+    },
+    "TeacherCourse.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 40,
+      "title": "الأستاذ — المادة",
+      "w": 390,
+      "x": 940,
+      "y": 3561
+    },
+    "TeacherCourses.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 40,
+      "title": "الأستاذ — موادي",
+      "w": 390,
+      "x": 470,
+      "y": 3561
+    },
+    "TeacherExamMonitor.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 40,
+      "title": "الأستاذ — مراقبة اختبار",
+      "w": 390,
+      "x": 3290,
+      "y": 3561
+    },
+    "TeacherGradeSubmission.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 40,
+      "title": "الأستاذ — تصحيح تسليم",
+      "w": 390,
+      "x": 1880,
+      "y": 3561
+    },
+    "TeacherGrading.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 40,
+      "title": "الأستاذ — طابور التصحيح",
+      "w": 390,
+      "x": 1410,
+      "y": 3561
+    },
+    "TeacherLiveNew.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 40,
+      "title": "الأستاذ — جلسة بث",
+      "w": 390,
+      "x": 2820,
+      "y": 3561
+    },
+    "TeacherToday.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 40,
+      "title": "الأستاذ — اليوم",
+      "w": 390,
+      "x": 0,
+      "y": 3561
+    },
+    "VisitorApply.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 40,
+      "title": "التقديم — خطوة 3",
+      "w": 390,
+      "x": 1880,
+      "y": 0
+    },
+    "VisitorProgram.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 40,
+      "title": "الموقع العام — برنامج",
+      "w": 390,
+      "x": 1410,
+      "y": 0
+    },
+    "VisitorTrack.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 40,
+      "title": "متابعة طلبي (OTP)",
+      "w": 390,
+      "x": 2350,
+      "y": 0
+    },
+    "StudentRegulations.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 40,
+      "title": "الطالب — اللوائح والإقرار",
+      "w": 390,
+      "x": 0,
+      "y": 5935
+    },
+    "StudentStatus.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 40,
+      "title": "الطالب — حالتي الأكاديمية",
+      "w": 390,
+      "x": 470,
+      "y": 5935
+    },
+    "StudentSettings.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 40,
+      "title": "الطالب — الإعدادات",
+      "w": 390,
+      "x": 940,
+      "y": 5935
+    },
+    "StudentTranscript.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 40,
+      "title": "الطالب — السجل الأكاديمي",
+      "w": 390,
+      "x": 1410,
+      "y": 5935
+    },
+    "StudentAnnouncements.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 40,
+      "title": "الطالب — الإعلانات",
+      "w": 390,
+      "x": 1880,
+      "y": 5935
+    },
+    "StudentInstall.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 40,
+      "title": "الطالب — تثبيت التطبيق",
+      "w": 390,
+      "x": 2350,
+      "y": 5935
+    },
+    "StudentOffline.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 40,
+      "title": "الطالب — دون اتصال",
+      "w": 390,
+      "x": 2820,
+      "y": 5935
+    },
+    "TeacherNotifications.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 40,
+      "title": "الأستاذ — الإشعارات",
+      "w": 390,
+      "x": 0,
+      "y": 7122
+    },
+    "TeacherProfile.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 40,
+      "title": "الأستاذ — أنا",
+      "w": 390,
+      "x": 470,
+      "y": 7122
+    },
+    "TeacherLectureNew.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 40,
+      "title": "الأستاذ — محاضرة جديدة",
+      "w": 390,
+      "x": 940,
+      "y": 7122
+    },
+    "TeacherAssignmentNew.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 40,
+      "title": "الأستاذ — واجب جديد",
+      "w": 390,
+      "x": 1410,
+      "y": 7122
+    },
+    "TeacherExamNew.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 40,
+      "title": "الأستاذ — اختبار جديد (الإعدادات)",
+      "w": 390,
+      "x": 1880,
+      "y": 7122
+    },
+    "TeacherExamQuestions.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 40,
+      "title": "الأستاذ — أسئلة الاختبار",
+      "w": 390,
+      "x": 2350,
+      "y": 7122
+    },
+    "TeacherStudents.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 40,
+      "title": "الأستاذ — طلاب المادة",
+      "w": 390,
+      "x": 2820,
+      "y": 7122
+    },
+    "TeacherGradebook.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 40,
+      "title": "الأستاذ — دفتر الدرجات",
+      "w": 390,
+      "x": 3290,
+      "y": 7122
+    },
+    "TeacherExamResults.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 40,
+      "title": "الأستاذ — نتائج الاختبار وإحصاءاته",
+      "w": 390,
+      "x": 3760,
+      "y": 7122
+    },
+    "HeadRegistrarHome.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 40,
+      "title": "مسؤول المسجلين — لوحة القبول",
+      "w": 390,
+      "x": 0,
+      "y": 8309
+    },
+    "HeadRegistrarApplications.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 40,
+      "title": "مسؤول المسجلين — الطلبات والتوزيع",
+      "w": 390,
+      "x": 470,
+      "y": 8309
+    },
+    "RegistrarRegisterStudent.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 40,
+      "title": "مسؤول المسجلين — تحويل مقبول إلى طالب",
+      "w": 390,
+      "x": 940,
+      "y": 8309
+    },
+    "ResultsOfficerHome.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 40,
+      "title": "مسؤول النتائج — الدفعات",
+      "w": 390,
+      "x": 1410,
+      "y": 8309
+    },
+    "AcademicAffairsHome.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 40,
+      "title": "أمين الشؤون العلمية — الرئيسية",
+      "w": 390,
+      "x": 1880,
+      "y": 8309
+    },
+    "AcademicAffairsTeacher.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 40,
+      "title": "الشؤون العلمية / HR — ملف أستاذ وأداؤه",
+      "w": 390,
+      "x": 2350,
+      "y": 8309
+    },
+    "StudentAffairsHome.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 40,
+      "title": "أمين شؤون الطلاب — الرئيسية",
+      "w": 390,
+      "x": 2820,
+      "y": 8309
+    },
+    "StudentAffairsRegulationNew.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 40,
+      "title": "شؤون الطلاب — نشر لائحة",
+      "w": 390,
+      "x": 3290,
+      "y": 8309
+    },
+    "HRHome.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 40,
+      "title": "الموارد البشرية — أداء الأساتذة",
+      "w": 390,
+      "x": 0,
+      "y": 9496
+    },
+    "HRNoticeNew.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 40,
+      "title": "الموارد البشرية — تنبيه موجّه",
+      "w": 390,
+      "x": 470,
+      "y": 9496
+    },
+    "SiteManagerHome.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 40,
+      "title": "مدير الموقع — محتوى الموقع",
+      "w": 390,
+      "x": 940,
+      "y": 9496
+    },
+    "SiteManagerAnnouncementNew.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 40,
+      "title": "مدير الموقع — إعلان جديد",
+      "w": 390,
+      "x": 1410,
+      "y": 9496
+    },
+    "EventsManagerEventNew.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 40,
+      "title": "مدير الفعاليات — فعالية جديدة",
+      "w": 390,
+      "x": 1880,
+      "y": 9496
+    },
+    "SystemAdminHome.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 40,
+      "title": "مدير النظام — الرئيسية",
+      "w": 390,
+      "x": 2350,
+      "y": 9496
+    },
+    "SystemAdminUsers.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 40,
+      "title": "مدير النظام — المستخدمون",
+      "w": 390,
+      "x": 2820,
+      "y": 9496
+    },
+    "AdminInquiries.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 40,
+      "title": "مسجل — صندوق الاستفسارات",
+      "w": 390,
+      "x": 3290,
+      "y": 9496
+    },
+    "AdminNotifications.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 40,
+      "title": "الإداريون — الإشعارات",
+      "w": 390,
+      "x": 3760,
+      "y": 9496
+    },
+    "VisitorHome.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 40,
+      "title": "الزائر — الصفحة الرئيسية للموقع",
+      "w": 390,
+      "x": 0,
+      "y": 10683
+    },
+    "VisitorPrograms.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 40,
+      "title": "الزائر — البرامج",
+      "w": 390,
+      "x": 470,
+      "y": 10683
+    },
+    "VisitorNews.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 40,
+      "title": "الزائر — الأخبار والفعاليات",
+      "w": 390,
+      "x": 940,
+      "y": 10683
+    },
+    "VisitorContact.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 40,
+      "title": "الزائر — تواصل معنا",
+      "w": 390,
+      "x": 1410,
+      "y": 10683
+    },
+    "VisitorApplyVerify.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 40,
+      "title": "الزائر — التحقق من البريد (OTP)",
+      "w": 390,
+      "x": 1880,
+      "y": 10683
+    },
+    "VisitorApplyReview.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 40,
+      "title": "الزائر — مراجعة الطلب قبل الإرسال",
+      "w": 390,
+      "x": 2350,
+      "y": 10683
+    },
+    "DesktopDeptDashboard.dc.html": {
+      "h": 800,
+      "is_interactive": true,
+      "radius": 12,
+      "title": "سطح المكتب — لوحة مدير القسم",
+      "w": 1280,
+      "x": 0,
+      "y": 11870
+    },
+    "DesktopResultsImport.dc.html": {
+      "h": 800,
+      "is_interactive": true,
+      "radius": 12,
+      "title": "سطح المكتب — استيراد ملف النتائج",
+      "w": 1280,
+      "x": 1360,
+      "y": 11870
+    },
+    "DesktopFormBuilder.dc.html": {
+      "h": 800,
+      "is_interactive": true,
+      "radius": 12,
+      "title": "سطح المكتب — منشئ قوالب التقديم",
+      "w": 1280,
+      "x": 2720,
+      "y": 11870
+    },
+    "DesktopSiteCMS.dc.html": {
+      "h": 800,
+      "is_interactive": true,
+      "radius": 12,
+      "title": "سطح المكتب — تحرير صفحة الموقع",
+      "w": 1280,
+      "x": 4080,
+      "y": 11870
+    },
+    "DesktopExamBuilder.dc.html": {
+      "h": 800,
+      "is_interactive": true,
+      "radius": 12,
+      "title": "سطح المكتب — منشئ الاختبار",
+      "w": 1280,
+      "x": 5440,
+      "y": 11870
+    },
+    "DesktopHeadRegistrar.dc.html": {
+      "h": 800,
+      "is_interactive": true,
+      "radius": 12,
+      "title": "سطح المكتب — لوحة مسؤول المسجلين",
+      "w": 1280,
+      "x": 6800,
+      "y": 11870
+    }
+  },
+  "createdOnFiles": {
+    "at": "2026-09-27T17:11:48.976Z",
+    "v": 1
+  },
+  "designSystems": [],
+  "launch": {
+    "view": "canvas"
+  },
+  "notes": {
+    "hint": {
+      "fill": "blue",
+      "text": "كيف تراجع: افتح الرابط على هاتفك، اضغط «تشغيل» على شاشة «القائمة»، وانتقل بالروابط. الشاشات ذات الأزرار الفعلية: المادة (المقاطع)، الواجب (Sheet التسليم)، الاختبار (الاختيارات وشبكة الأسئلة). سجّل ملاحظاتك بالتعليقات أو في docs/prototype/feedback.md.",
+      "w": 380,
+      "x": 2820,
+      "y": 0
+    },
+    "row0": {
+      "kind": "title1",
+      "maxW": 2740,
+      "text": "الدخول والزائر — ابدأ من «القائمة» واضغط تشغيل",
+      "w": 240,
+      "x": 0,
+      "y": -300
+    },
+    "row1": {
+      "kind": "title1",
+      "maxW": 2740,
+      "text": "الطالب — التعلّم اليومي (اليوم · موادي · المادة · المحاضرة · الواجب · المهام)",
+      "w": 240,
+      "x": 0,
+      "y": 927
+    },
+    "row2": {
+      "kind": "title1",
+      "maxW": 3680,
+      "text": "الطالب — الاختبارات والنتائج والبث والإشعارات وأنا والتنزيلات",
+      "w": 240,
+      "x": 0,
+      "y": 2114
+    },
+    "row3": {
+      "kind": "title1",
+      "maxW": 3680,
+      "text": "الأستاذ — اليوم · موادي · المادة · التصحيح · الإعلان · البث · مراقبة الاختبار",
+      "w": 240,
+      "x": 0,
+      "y": 3301
+    },
+    "row4": {
+      "kind": "title1",
+      "maxW": 3210,
+      "text": "الإدارة على الهاتف — المهام السريعة لكل دور",
+      "w": 240,
+      "x": 0,
+      "y": 4488
+    },
+    "row5": {
+      "kind": "title1",
+      "maxW": 3210,
+      "text": "الطالب — اللوائح · الحالة · الإعدادات · السجل الأكاديمي · الإعلانات · التثبيت · بلا اتصال",
+      "w": 240,
+      "x": 0,
+      "y": 5675
+    },
+    "row6": {
+      "kind": "title1",
+      "maxW": 4150,
+      "text": "الأستاذ — الإشعارات · أنا · محاضرة جديدة · واجب جديد · اختبار جديد · الأسئلة · الطلاب · سجل الدرجات · نتائج الاختبار",
+      "w": 240,
+      "x": 0,
+      "y": 6862
+    },
+    "row7": {
+      "kind": "title1",
+      "maxW": 3680,
+      "text": "الإدارة (أ) — مسؤول المسجلين · تحويل مقبول · مسؤول النتائج · الشؤون العلمية · شؤون الطلاب",
+      "w": 240,
+      "x": 0,
+      "y": 8049
+    },
+    "row8": {
+      "kind": "title1",
+      "maxW": 4150,
+      "text": "الإدارة (ب) — الموارد البشرية · مدير الموقع · الفعاليات · مدير النظام · صندوق الاستفسارات · إشعارات الإداريين",
+      "w": 240,
+      "x": 0,
+      "y": 9236
+    },
+    "row9": {
+      "kind": "title1",
+      "maxW": 2740,
+      "text": "الموقع العام — الرئيسية · البرامج · الأخبار · تواصل · تحقق OTP · مراجعة الطلب",
+      "w": 240,
+      "x": 0,
+      "y": 10423
+    },
+    "row10": {
+      "kind": "title1",
+      "maxW": 8080,
+      "text": "سطح المكتب (1280×800) — لوحة مدير القسم (كما هي) · استيراد النتائج · منشئ القوالب · محرر الموقع · منشئ الاختبار · لوحة مسؤول المسجلين",
+      "w": 240,
+      "x": 0,
+      "y": 11610
+    }
   },
   "order": [
-    "Main.dc.html", "Login.dc.html", "Register.dc.html", "VisitorProgram.dc.html", "VisitorApply.dc.html", "VisitorTrack.dc.html",
-    "StudentToday.dc.html", "StudentCourses.dc.html", "StudentCourse.dc.html", "StudentLecture.dc.html", "StudentAssignment.dc.html", "StudentTasks.dc.html",
-    "StudentExamStart.dc.html", "StudentExam.dc.html", "StudentExamResult.dc.html", "StudentResults.dc.html", "StudentLive.dc.html", "StudentNotifications.dc.html", "StudentMe.dc.html", "StudentDownloads.dc.html",
-    "TeacherToday.dc.html", "TeacherCourses.dc.html", "TeacherCourse.dc.html", "TeacherGrading.dc.html", "TeacherGradeSubmission.dc.html", "TeacherAnnouncement.dc.html", "TeacherLiveNew.dc.html", "TeacherExamMonitor.dc.html",
-    "AdminHome.dc.html", "AdminApprovals.dc.html", "AdminApplication.dc.html", "AdminInquiry.dc.html", "AdminCorrection.dc.html", "AdminNotify.dc.html", "AdminCase.dc.html"
+    "Main.dc.html",
+    "Login.dc.html",
+    "Register.dc.html",
+    "VisitorProgram.dc.html",
+    "VisitorApply.dc.html",
+    "VisitorTrack.dc.html",
+    "StudentToday.dc.html",
+    "StudentCourses.dc.html",
+    "StudentCourse.dc.html",
+    "StudentLecture.dc.html",
+    "StudentAssignment.dc.html",
+    "StudentTasks.dc.html",
+    "StudentExamStart.dc.html",
+    "StudentExam.dc.html",
+    "StudentExamResult.dc.html",
+    "StudentResults.dc.html",
+    "StudentLive.dc.html",
+    "StudentNotifications.dc.html",
+    "StudentMe.dc.html",
+    "StudentDownloads.dc.html",
+    "TeacherToday.dc.html",
+    "TeacherCourses.dc.html",
+    "TeacherCourse.dc.html",
+    "TeacherGrading.dc.html",
+    "TeacherGradeSubmission.dc.html",
+    "TeacherAnnouncement.dc.html",
+    "TeacherLiveNew.dc.html",
+    "TeacherExamMonitor.dc.html",
+    "AdminHome.dc.html",
+    "AdminApprovals.dc.html",
+    "AdminApplication.dc.html",
+    "AdminInquiry.dc.html",
+    "AdminCorrection.dc.html",
+    "AdminNotify.dc.html",
+    "AdminCase.dc.html",
+    "StudentRegulations.dc.html",
+    "StudentStatus.dc.html",
+    "StudentSettings.dc.html",
+    "StudentTranscript.dc.html",
+    "StudentAnnouncements.dc.html",
+    "StudentInstall.dc.html",
+    "StudentOffline.dc.html",
+    "TeacherNotifications.dc.html",
+    "TeacherProfile.dc.html",
+    "TeacherLectureNew.dc.html",
+    "TeacherAssignmentNew.dc.html",
+    "TeacherExamNew.dc.html",
+    "TeacherExamQuestions.dc.html",
+    "TeacherStudents.dc.html",
+    "TeacherGradebook.dc.html",
+    "TeacherExamResults.dc.html",
+    "HeadRegistrarHome.dc.html",
+    "HeadRegistrarApplications.dc.html",
+    "RegistrarRegisterStudent.dc.html",
+    "ResultsOfficerHome.dc.html",
+    "AcademicAffairsHome.dc.html",
+    "AcademicAffairsTeacher.dc.html",
+    "StudentAffairsHome.dc.html",
+    "StudentAffairsRegulationNew.dc.html",
+    "HRHome.dc.html",
+    "HRNoticeNew.dc.html",
+    "SiteManagerHome.dc.html",
+    "SiteManagerAnnouncementNew.dc.html",
+    "EventsManagerEventNew.dc.html",
+    "SystemAdminHome.dc.html",
+    "SystemAdminUsers.dc.html",
+    "AdminInquiries.dc.html",
+    "AdminNotifications.dc.html",
+    "VisitorHome.dc.html",
+    "VisitorPrograms.dc.html",
+    "VisitorNews.dc.html",
+    "VisitorContact.dc.html",
+    "VisitorApplyVerify.dc.html",
+    "VisitorApplyReview.dc.html",
+    "DesktopDeptDashboard.dc.html",
+    "DesktopResultsImport.dc.html",
+    "DesktopFormBuilder.dc.html",
+    "DesktopSiteCMS.dc.html",
+    "DesktopExamBuilder.dc.html",
+    "DesktopHeadRegistrar.dc.html"
   ],
-  "notes": {
-    "row0": {"x": 0, "y": -300, "text": "الدخول والزائر — ابدأ من «القائمة» واضغط تشغيل", "kind": "title1", "maxW": 2740},
-    "row1": {"x": 0, "y": 927, "text": "الطالب — التعلّم اليومي (اليوم · موادي · المادة · المحاضرة · الواجب · المهام)", "kind": "title1", "maxW": 2740},
-    "row2": {"x": 0, "y": 2114, "text": "الطالب — الاختبارات والنتائج والبث والإشعارات وأنا والتنزيلات", "kind": "title1", "maxW": 3680},
-    "row3": {"x": 0, "y": 3301, "text": "الأستاذ — اليوم · موادي · المادة · التصحيح · الإعلان · البث · مراقبة الاختبار", "kind": "title1", "maxW": 3680},
-    "row4": {"x": 0, "y": 4488, "text": "الإدارة على الهاتف — المهام السريعة لكل دور", "kind": "title1", "maxW": 3210},
-    "hint": {"x": 2820, "y": 0, "w": 380, "text": "كيف تراجع: افتح الرابط على هاتفك، اضغط «تشغيل» على شاشة «القائمة»، وانتقل بالروابط. الشاشات ذات الأزرار الفعلية: المادة (المقاطع)، الواجب (Sheet التسليم)، الاختبار (الاختيارات وشبكة الأسئلة). سجّل ملاحظاتك بالتعليقات أو في docs/prototype/feedback.md.", "fill": "blue"}
-  },
-  "designSystems": []
+  "pages": [],
+  "title": "ECST Portal Prototype"
 }

@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="ar">
+<head>
+<meta charset="utf-8">
+<title>سطح المكتب — لوحة مسؤول المسجلين</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'IBM Plex Sans Arabic',system-ui,sans-serif;background:#F4F5F7;color:#1F2B47}
+a{color:#2D64A7;text-decoration:none}
+.scr{width:1280px;height:800px;position:relative;overflow:hidden;background:#F4F5F7;direction:rtl;text-align:right;box-sizing:border-box;display:flex}
+.side{width:240px;flex-shrink:0;background:#1F2B47;color:#fff;padding:20px 16px;box-sizing:border-box;display:flex;flex-direction:column}
+.logo{display:flex;align-items:center;gap:10px;font-size:14px;font-weight:700;padding:4px 6px 22px}
+.logo i{width:32px;height:32px;border-radius:9px;background:#fff;display:block}
+.nv{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;font-size:14px;color:rgba(255,255,255,.75);margin-bottom:2px}
+.nv svg{width:18px;height:18px}
+.nv.on{background:rgba(255,255,255,.12);color:#fff;font-weight:600}
+.nv .n{margin-right:auto;font-size:11px;font-weight:700;background:#B02544;padding:2px 7px;border-radius:999px}
+.me{margin-top:auto;display:flex;align-items:center;gap:10px;padding:10px 6px;border-top:1px solid rgba(255,255,255,.12)}
+.me .av{width:34px;height:34px;border-radius:17px;background:#2D64A7;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700}
+.me .t{font-size:13px;font-weight:600}.me .s{font-size:11px;color:rgba(255,255,255,.6)}
+.main{flex:1;min-width:0;display:flex;flex-direction:column}
+.bar{height:60px;display:flex;align-items:center;gap:14px;padding:0 28px;background:#fff;border-bottom:1px solid #E7E9EE}
+.bar h1{font-size:18px;font-weight:700;margin:0}
+.bar .term{font-size:12px;font-weight:600;background:#EEF0F3;color:#576075;padding:5px 10px;border-radius:999px}
+.bar .act{margin-right:auto;display:flex;gap:8px}
+.btn{font-size:13px;font-weight:700;padding:9px 14px;border-radius:10px;white-space:nowrap}
+.b-pri{background:#2D64A7;color:#fff}.b-sec{background:#F0F1F4;color:#1F2B47}
+.wrap{flex:1;overflow:auto;padding:22px 28px;box-sizing:border-box}
+.fun{background:#fff;border:1px solid #E7E9EE;border-radius:16px;padding:16px 20px;margin-bottom:20px}
+.fun .r{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:10px}
+.fun h2{font-size:15px;font-weight:700;margin:0}.fun .r span{font-size:12px;color:#8F95A3}
+.fun .b{display:flex;height:18px;border-radius:9px;overflow:hidden;direction:ltr}
+.fun .b i{display:block;height:100%}
+.leg{display:flex;justify-content:space-between;margin-top:8px}
+.leg span{font-size:11px;color:#576075}.leg b{display:block;font-size:16px;color:#1F2B47;line-height:1.2}
+.cols{display:grid;grid-template-columns:1fr 340px;gap:20px}
+.grp{background:#fff;border-radius:16px;border:1px solid #E7E9EE;overflow:hidden;margin-bottom:20px}
+.hd{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid #EEF0F3}
+.hd h2{font-size:14px;font-weight:700;margin:0;flex:1}
+.hd .f{display:flex;gap:6px}
+.hd .f span{font-size:11px;font-weight:600;padding:5px 10px;border-radius:999px;background:#F0F1F4;color:#576075}
+.hd .f .on{background:#1F2B47;color:#fff}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{font-size:11px;font-weight:600;color:#8F95A3;text-align:right;padding:9px 16px;background:#F8F9FB;border-bottom:1px solid #EEF0F3}
+td{padding:10px 16px;border-top:1px solid #EEF0F3;vertical-align:middle}
+.ck{display:inline-block;width:18px;height:18px;border-radius:6px;border:2px solid #C7CAD1;box-sizing:border-box;vertical-align:middle}
+.ck.on{background:#2D64A7;border-color:#2D64A7}
+.ref{font-size:11px;color:#8F95A3;direction:ltr;text-align:right}
+.av{display:inline-flex;width:24px;height:24px;border-radius:12px;background:#E5ECF4;color:#1F4674;font-size:9px;font-weight:700;align-items:center;justify-content:center;margin-left:6px;vertical-align:middle}
+.empty{color:#B7791F;font-weight:600}
+.chip{font-size:11px;font-weight:600;padding:3px 8px;border-radius:999px;white-space:nowrap}
+.c-ok{background:#E6F4EC;color:#14603A}.c-warn{background:#FBF3E3;color:#8A5A14}.c-bad{background:#FBE9E7;color:#922B20}.c-info{background:#E5ECF4;color:#1F4674}.c-neu{background:#EEF0F3;color:#576075}
+.sel{display:flex;align-items:center;gap:10px;padding:10px 16px;background:#E5ECF4;font-size:13px;color:#1F4674;border-top:1px solid #D5E0EE}
+.sel b{font-weight:700}.sel .a{margin-right:auto;display:flex;gap:6px}
+.sel .a span{font-size:12px;font-weight:700;background:#fff;padding:6px 10px;border-radius:8px}
+.rg{display:flex;align-items:center;gap:10px;padding:10px 16px}
+.rg+.rg{border-top:1px solid #EEF0F3}
+.rg .av2{width:32px;height:32px;border-radius:16px;background:#E5ECF4;color:#1F4674;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.rg .t{font-size:13px;font-weight:600}.rg .s{font-size:11px;color:#8F95A3}
+.rg .grow{flex:1}
+.rg .ld{width:70px;height:6px;border-radius:3px;background:#EEF0F3;overflow:hidden;direction:ltr}
+.rg .ld i{display:block;height:100%;background:#2D64A7}
+.rg .n{font-size:12px;font-weight:700;direction:ltr;width:28px;text-align:right}
+.li{display:flex;align-items:center;gap:12px;padding:11px 16px;color:#1F2B47}
+.li+.li{border-top:1px solid #EEF0F3}
+.li .t{font-size:13px;font-weight:600}.li .s{font-size:11px;color:#8F95A3;margin-top:2px}
+.li .grow{flex:1}
+</style>
+</helmet>
+<div class="scr" style="width: 1280px; height: 800px">
+<aside class="side">
+<div class="logo"><i></i>منصة الكلية</div>
+<a class="nv on" href="DesktopHeadRegistrar.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8v9a2 2 0 0 1-2 2h-4v-7h-6v7H5a2 2 0 0 1-2-2z"/></svg>القبول<span class="n">23</span></a>
+<a class="nv" href="HeadRegistrarApplications.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>كل الطلبات</a>
+<a class="nv" href="DesktopHeadRegistrar.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>المسجلون والأقسام</a>
+<a class="nv" href="DesktopFormBuilder.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>قوالب التقديم</a>
+<a class="nv" href="DesktopHeadRegistrar.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>البرامج والدورات</a>
+<a class="nv" href="DesktopHeadRegistrar.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21V9M8 13l4-4 4 4"/><path d="M20 16.6A5 5 0 0 0 18 7h-1.3A8 8 0 1 0 4 15.2"/></svg>استيراد سجل الطلاب</a>
+<a class="nv" href="DesktopHeadRegistrar.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l4-4 4 4 5-6"/></svg>التقارير</a>
+<div class="me"><span class="av">ن ف</span><span><div class="t">أ. نجلاء الفكي</div><div class="s">مسؤول المسجلين</div></span></div>
+</aside>
+<div class="main">
+<div class="bar"><h1>القبول</h1><span class="term">خريف 2026 · يُغلق 15 أكتوبر</span><div class="act"><a class="btn b-sec" href="DesktopHeadRegistrar.dc.html">تصدير CSV</a><a class="btn b-pri" href="DesktopHeadRegistrar.dc.html">+ دورة قبول</a></div></div>
+<div class="wrap">
+<div class="fun"><div class="r"><h2>مسار الطلبات · 609</h2><span>آخر تحديث قبل دقيقة</span></div><div class="b"><i style="width: 28%; background: #96B1D3"></i><i style="width: 22%; background: #2D64A7"></i><i style="width: 12%; background: #B7791F"></i><i style="width: 24%; background: #1E7F4F"></i><i style="width: 9%; background: #C0392B"></i><i style="width: 5%; background: #E4E5E8"></i></div><div class="leg"><span><b>171</b>مُقدَّم</span><span><b>134</b>قيد المراجعة</span><span><b>72</b>ناقص مستندات</span><span><b>146</b>مقبول</span><span><b>55</b>مرفوض</span><span><b>31</b>قائمة انتظار</span></div></div>
+<div class="cols">
+<div>
+<div class="grp">
+<div class="hd"><h2>طلبات غير موزعة · 23</h2><div class="f"><span class="on">غير موزعة</span><span>مؤهلة للقرار 41</span><span>ناقصة 72</span><span>الكل</span></div></div>
+<table>
+<thead><tr><th style="width: 36px"><span class="ck on"></span></th><th>الطلب</th><th>المتقدم</th><th>البرنامج</th><th>النسبة</th><th>المسجل</th><th>الحالة</th><th>منذ</th></tr></thead>
+<tbody>
+<tr><td><span class="ck on"></span></td><td class="ref">APP-2026-000301</td><td>مها الصادق حسن</td><td>الهندسة المدنية</td><td>88.1%</td><td class="empty">غير موزع</td><td><span class="chip c-warn">مُقدَّم</span></td><td>5 أيام</td></tr>
+<tr><td><span class="ck on"></span></td><td class="ref">APP-2026-000304</td><td>عثمان البشير عوض</td><td>الهندسة الكهربائية</td><td>79.4%</td><td class="empty">غير موزع</td><td><span class="chip c-warn">مُقدَّم</span></td><td>5 أيام</td></tr>
+<tr><td><span class="ck on"></span></td><td class="ref">APP-2026-000311</td><td>رقية إبراهيم علي</td><td>الهندسة المدنية</td><td>91.0%</td><td class="empty">غير موزع</td><td><span class="chip c-warn">مُقدَّم</span></td><td>4 أيام</td></tr>
+<tr><td><span class="ck"></span></td><td class="ref">APP-2026-000318</td><td>أمجد محمد الحسن</td><td>الهندسة الميكانيكية</td><td>74.8%</td><td class="empty">غير موزع</td><td><span class="chip c-warn">مُقدَّم</span></td><td>3 أيام</td></tr>
+<tr><td><span class="ck"></span></td><td class="ref">APP-2026-000322</td><td>نادية عبد الله</td><td>إدارة الأعمال</td><td>83.9%</td><td class="empty">غير موزع</td><td><span class="chip c-warn">مُقدَّم</span></td><td>3 أيام</td></tr>
+<tr><td><span class="ck"></span></td><td class="ref">APP-2026-000123</td><td>سارة عثمان الفاضل</td><td>تقنية المعلومات</td><td>82.4%</td><td><span class="av">م ن</span>محمد النور</td><td><span class="chip c-warn">ناقص مستندات</span></td><td>7 أيام</td></tr>
+<tr><td><span class="ck"></span></td><td class="ref">APP-2026-000098</td><td>خالد يوسف عبد الرحيم</td><td>علوم الحاسوب</td><td>85.2%</td><td><span class="av">ه ع</span>هند عبد الله</td><td><span class="chip c-info">مؤهل — قرار</span></td><td>9 أيام</td></tr>
+</tbody></table>
+<div class="sel"><span>محدد <b>3 طلبات</b> — الهندسة</span><div class="a"><span>توزيع إلى مسجل ▾</span><span>تغيير الحالة ▾</span><span>تصدير</span></div></div>
+</div>
+</div>
+<div>
+<div class="grp"><div class="hd"><h2>المسجلون · الحمل الحالي</h2></div>
+<div class="rg"><span class="av2">م ن</span><span class="grow"><div class="t">محمد النور</div><div class="s">تقنية المعلومات · علوم الحاسوب</div></span><span class="ld"><i style="width: 84%"></i></span><span class="n">92</span></div>
+<div class="rg"><span class="av2">ه ع</span><span class="grow"><div class="t">هند عبد الله</div><div class="s">إدارة الأعمال</div></span><span class="ld"><i style="width: 60%"></i></span><span class="n">66</span></div>
+<div class="rg"><span class="av2">ع م</span><span class="grow"><div class="t">علي محجوب</div><div class="s">علوم الحاسوب</div></span><span class="ld"><i style="width: 48%"></i></span><span class="n">53</span></div>
+<div class="rg"><span class="av2">ر خ</span><span class="grow"><div class="t">رشا خالد</div><div class="s">تقنية المعلومات</div></span><span class="ld"><i style="width: 71%"></i></span><span class="n">78</span></div>
+<div class="rg"><span class="av2">ط ب</span><span class="grow"><div class="t">طارق بشير</div><div class="s" style="color: #B7791F">بلا قسم — عيّن الهندسة؟</div></span><span class="ld"><i style="width: 0%"></i></span><span class="n">0</span></div>
+</div>
+<div class="grp"><div class="hd"><h2>يحتاج إجراءك</h2></div>
+<a class="li" href="HeadRegistrarApplications.dc.html"><span class="grow"><div class="t">41 طلبًا مؤهلًا بانتظار قرارك</div><div class="s">القرار غير مفوّض للمسجلين هذه الدورة</div></span><span class="chip c-info">قرار</span></a>
+<a class="li" href="RegistrarRegisterStudent.dc.html"><span class="grow"><div class="t">38 مقبولًا لم يُحوَّلوا إلى طلاب</div><div class="s">تحويل جماعي متاح</div></span><span class="chip c-ok">تحويل</span></a>
+<a class="li" href="DesktopFormBuilder.dc.html"><span class="grow"><div class="t">قالب الهندسة — مسودة غير منشورة</div><div class="s">3 برامج تستخدم القالب الافتراضي مؤقتًا</div></span><span class="chip c-neu">قالب</span></a>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":800}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

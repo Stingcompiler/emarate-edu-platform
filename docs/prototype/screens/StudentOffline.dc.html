@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="ar">
+<head>
+<meta charset="utf-8">
+<title>الطالب — دون اتصال</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'IBM Plex Sans Arabic',system-ui,sans-serif;background:#F4F5F7;color:#1F2B47}
+a{color:#2D64A7;text-decoration:none}
+.scr{width:390px;height:844px;position:relative;overflow:hidden;background:#F4F5F7;direction:rtl;text-align:right;box-sizing:border-box}
+.ban{position:absolute;top:0;left:0;right:0;height:78px;background:#1F2B47;color:#fff;padding:50px 16px 0;box-sizing:border-box;display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;z-index:2}
+.ban svg{width:18px;height:18px}
+.ban span{flex:1}
+.ban small{font-weight:500;opacity:.7}
+.body{position:absolute;top:78px;left:0;right:0;bottom:0;overflow-y:auto;padding:16px 16px 120px;box-sizing:border-box}
+.h1{font-size:28px;font-weight:700;margin:0;line-height:1.2}
+.s{font-size:13px;color:#576075;margin-top:4px}
+.sec{display:flex;align-items:baseline;justify-content:space-between;margin:20px 2px 8px}
+.sec h2{font-size:15px;font-weight:700;margin:0}.sec span{font-size:12px;color:#8F95A3}
+.grp{background:#fff;border-radius:16px;border:1px solid #E7E9EE;overflow:hidden}
+.li{display:flex;align-items:center;gap:12px;padding:12px 14px;min-height:60px;color:#1F2B47}
+.li+.li{border-top:1px solid #EEF0F3}
+.li.dis{opacity:.45}
+.tile{width:40px;height:40px;border-radius:11px;display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;direction:ltr;font-weight:700;line-height:1}
+.tile b{font-size:9px;opacity:.7}.tile span{font-size:13px;margin-top:1px}
+.t{font-size:15px;font-weight:600;line-height:1.35}
+.grow{flex:1;min-width:0}
+.ok{color:#1E7F4F;display:flex;align-items:center;gap:4px;font-size:12px;font-weight:600}
+.q{background:#FBF3E3;border-radius:14px;padding:12px 14px;font-size:13px;color:#8A5A14;line-height:1.6;margin-top:12px}
+.tabs{position:absolute;left:12px;right:12px;bottom:14px;height:64px;border-radius:24px;background:rgba(255,255,255,.94);box-shadow:0 4px 16px rgba(31,43,71,.12);border:1px solid #EEF0F3;display:flex;align-items:center;justify-content:space-around;padding:0 6px}
+.tab{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;font-weight:500;color:#8F95A3;width:64px}
+.tab svg{width:24px;height:24px}.tab.on{color:#2D64A7;font-weight:600}
+</style>
+</helmet>
+<div class="scr" style="width: 390px; height: 844px">
+<div class="ban"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 1l22 22M16.7 11.4A10 10 0 0 0 5 12.6M12 20h.01M8.5 16.4a5 5 0 0 1 7 0M2 8.8a15 15 0 0 1 20 0"/></svg><span>لا اتصال بالإنترنت — تعرض المحتوى المحفوظ <small>· آخر تحديث 9:48 ص</small></span></div>
+<div class="body">
+<h1 class="h1">اليوم</h1>
+<div class="s">الأحد 27 سبتمبر · سيُحدَّث تلقائيًا عند عودة الاتصال</div>
+<div class="q"><b>في الانتظار:</b> إقرار لائحة الامتحانات (1) · تعليم إشعارين مقروءين — تُرسل عند عودة الاتصال.</div>
+<div class="sec"><h2>متاح دون اتصال</h2><span>3 مواد · 1.2 GB</span></div>
+<div class="grp">
+<a class="li" href="StudentCourse.dc.html"><span class="tile" style="background: #E5ECF4; color: #2D64A7"><b>IT</b><span>201</span></span><span class="grow"><div class="t">قواعد البيانات</div><div class="s">4 محاضرات بالفيديو والشرائح</div></span><span class="ok"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>منزّل</span></a>
+<a class="li" href="StudentCourse.dc.html"><span class="tile" style="background: #E3F1F1; color: #0F8B8D"><b>IT</b><span>203</span></span><span class="grow"><div class="t">هياكل البيانات</div><div class="s">5 محاضرات · ملخص المراجعة</div></span><span class="ok"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>منزّل</span></a>
+<a class="li" href="StudentCourse.dc.html"><span class="tile" style="background: #EEE9F4; color: #6A4C93"><b>IT</b><span>205</span></span><span class="grow"><div class="t">شبكات الحاسوب</div><div class="s">محاضرتان</div></span><span class="ok"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>منزّل</span></a>
+</div>
+<div class="sec"><h2>يحتاج اتصالًا</h2></div>
+<div class="grp">
+<div class="li dis"><span class="tile" style="background: #FBE9E7; color: #922B20"><b>بث</b><span>الآن</span></span><span class="grow"><div class="t">بث قواعد البيانات — المحاضرة 6</div><div class="s">الانضمام يتطلب إنترنت</div></span></div>
+<div class="li dis"><span class="tile" style="background: #FBF3E3; color: #8A5A14"><b>6</b><span>س</span></span><span class="grow"><div class="t">تسليم واجب 2 — ERD</div><div class="s">جهّز الملف الآن وسلّمه عند عودة الاتصال</div></span></div>
+<div class="li dis"><span class="tile" style="background: #E3F1F1; color: #0F8B8D"><b>IT</b><span>203</span></span><span class="grow"><div class="t">اختبار منتصف الفصل — غدًا</div><div class="s">البدء يتطلب اتصالًا؛ أثناء الاختبار يستمر الحفظ دون اتصال</div></span></div>
+</div>
+</div>
+<nav class="tabs" aria-label="التنقل الرئيسي">
+<a class="tab on" href="StudentToday.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="3"/><path d="M16 2v4M8 2v4M3 10h18M9 16l2 2 4-4"/></svg><span>اليوم</span></a>
+<a class="tab" href="StudentCourses.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4h6a4 4 0 0 1 4 4v12a3 3 0 0 0-3-3H2zM22 4h-6a4 4 0 0 0-4 4v12a3 3 0 0 1 3-3h7z"/></svg><span>موادي</span></a>
+<a class="tab" href="StudentTasks.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M10 6h11M10 12h11M10 18h11M3 6l1.5 1.5L7 5M3 12l1.5 1.5L7 11M3 18l1.5 1.5L7 17"/></svg><span>المهام</span></a>
+<a class="tab" href="StudentNotifications.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg><span>الإشعارات</span></a>
+<a class="tab" href="StudentMe.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>أنا</span></a>
+</nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>
