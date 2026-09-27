@@ -43,6 +43,10 @@ INSTALLED_APPS = [
     "results",
     "student_affairs",
     "exams",
+    "live",
+    "contacts",
+    "inquiries",
+    "content",
 ]
 
 MIDDLEWARE = [
@@ -131,6 +135,13 @@ BUNNY_STREAM_API_KEY = ""
 BUNNY_STREAM_TOKEN_KEY = ""
 BUNNY_WEBHOOK_SECRET = ""
 
+# Deploy hook of the static public site (Phase 9); empty = no rebuilds.
+SITE_REBUILD_HOOK_URL = ""
+
+# Encrypts secrets stored in the database (live links). Set it in production so
+# rotating SECRET_KEY does not make stored values unreadable.
+FIELD_ENCRYPTION_KEY = ""
+
 # ─── Web Push (VAPID) ─────────────────────────────────────────────────────
 # Development creates a local key pair in backend/.vapid-dev.json on first use.
 VAPID_PUBLIC_KEY = ""
@@ -145,6 +156,7 @@ CELERY_BEAT_SCHEDULE = {
     "deliver-outbox": {"task": "notifications.tasks.deliver_outbox", "schedule": 5 * 60},
     "close-expired-attempts": {"task": "exams.tasks.close_expired_attempts", "schedule": 60},
     "remind-exams-starting": {"task": "exams.tasks.remind_exams_starting", "schedule": 5 * 60},
+    "remind-live-sessions": {"task": "live.tasks.remind_live_sessions", "schedule": 5 * 60},
 }
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
@@ -181,6 +193,7 @@ REST_FRAMEWORK = {
         "login": "10/minute",  # per IP (docs/05 §7)
         "otp": "5/hour",  # per email target
         "otp_ip": "20/hour",  # per IP, across targets
+        "contact": "5/hour",  # public contact form per IP (docs/05 §7)
     },
     "EXCEPTION_HANDLER": "core.exceptions.problem_exception_handler",
     "TEST_REQUEST_DEFAULT_FORMAT": "json",
@@ -212,6 +225,11 @@ SPECTACULAR_SETTINGS = {
         "StudentRecordStatusEnum": "students.models.StudentRecord.Status",
         "ExamStatusEnum": "exams.models.Exam.Status",
         "AttemptStatusEnum": "exams.models.ExamAttempt.Status",
+        "InquiryStatusEnum": "inquiries.models.Inquiry.Status",
+        "InquiryTypeEnum": "inquiries.models.Inquiry.Type",
+        "ContentStatusEnum": "content.models.Status",
+        "EventStatusEnum": "content.models.Event.EventStatus",
+        "LiveStatusEnum": "live.models.LiveSession.Status",
     },
 }
 

@@ -206,6 +206,47 @@ READS: dict[str, tuple[str, frozenset, frozenset]] = {
         ONLY_STUDENT,
         EVERYONE - ONLY_STUDENT,
     ),
+    # Live, content, inquiries
+    "live-session-list": ("/api/v1/live-sessions", EVERYONE, frozenset()),
+    "live-session-detail": ("/api/v1/live-sessions/{live}", LEARNING, OUTSIDERS),
+    "announcement-list": ("/api/v1/announcements", EVERYONE, frozenset()),
+    "inquiry-list": ("/api/v1/inquiries", EVERYONE, frozenset()),
+    "inquiry-detail": (
+        "/api/v1/inquiries/{inquiry}",
+        frozenset({R.SYSTEM_ADMIN, R.SITE_MANAGER}),
+        EVERYONE - {R.SYSTEM_ADMIN, R.SITE_MANAGER},
+    ),
+    "page-list": (
+        "/api/v1/content/pages",
+        frozenset({R.SYSTEM_ADMIN, R.SITE_MANAGER}),
+        frozenset(),
+    ),
+    "news-list": ("/api/v1/content/news", frozenset({R.SYSTEM_ADMIN, R.SITE_MANAGER}), frozenset()),
+    "redirect-list": (
+        "/api/v1/content/redirects",
+        frozenset({R.SYSTEM_ADMIN, R.SITE_MANAGER}),
+        frozenset(),
+    ),
+    "site-settings": (
+        "/api/v1/content/site-settings",
+        frozenset({R.SYSTEM_ADMIN, R.SITE_MANAGER}),
+        frozenset(),
+    ),
+    "menu": (
+        "/api/v1/content/menus/header",
+        frozenset({R.SYSTEM_ADMIN, R.SITE_MANAGER}),
+        frozenset(),
+    ),
+    "event-list": (
+        "/api/v1/content/events",
+        frozenset({R.SYSTEM_ADMIN, R.SITE_MANAGER, R.EVENTS_MANAGER}),
+        frozenset(),
+    ),
+    "media-list": (
+        "/api/v1/content/media",
+        frozenset({R.SYSTEM_ADMIN, R.SITE_MANAGER, R.EVENTS_MANAGER}),
+        frozenset(),
+    ),
     # Student affairs
     "regulation-list": ("/api/v1/regulations", EVERYONE, frozenset()),
     "regulation-detail": ("/api/v1/regulations/{regulation}", EVERYONE, frozenset()),
@@ -231,9 +272,27 @@ _L = "learning.tests.test_learning::"
 _F = "files.tests.test_files::"
 _N = "notifications.tests.test_notifications::"
 _EX = "exams.tests.test_exams::"
+_LV = "live.tests.test_live::"
+_IQ = "inquiries.tests.test_inquiries::"
+_CT = "content.tests.test_content::"
 _RS = "results.tests.test_results::"
 _SA = "student_affairs.tests.test_student_affairs::"
 COVERED_ELSEWHERE = {
+    "live-session-join": _LV + "test_link_is_encrypted_hidden_and_timed",
+    "live-session-cancel": _LV + "test_bad_links_cancel_and_reminder",
+    "inquiry-reply": _IQ + "test_general_inquiry_goes_to_the_site_manager",
+    "inquiry-whatsapp": _IQ + "test_general_inquiry_goes_to_the_site_manager",
+    "inquiry-transition": _IQ + "test_general_inquiry_goes_to_the_site_manager",
+    "inquiry-assign": _IQ + "test_assign_only_to_handlers",
+    "inquiry-reroute": _IQ + "test_admission_inquiries_route_to_department_registrars",
+    "announcement-detail": _CT + "test_announcement_scopes_and_feed",
+    "announcement-publish": _CT + "test_announcement_scopes_and_feed",
+    "announcement-archive": _CT + "test_archive_announcement",
+    "page-detail": _CT + "test_pages_are_sanitized_and_public_when_published",
+    "news-detail": _CT + "test_publishing_asks_for_one_debounced_rebuild",
+    "event-detail": _CT + "test_events_media_menus_redirects_settings",
+    "media-detail": _CT + "test_events_media_menus_redirects_settings",
+    "redirect-detail": _CT + "test_events_media_menus_redirects_settings",
     "exam-publish": _EX + "test_builder_permissions_and_publishing",
     "exam-close": _EX + "test_close_submits_running_attempts",
     "exam-release": _EX + "test_visibility_modes",
@@ -476,7 +535,31 @@ def _learning_world(users, offering, student):
         status="submitted",
         score=0,
     )
+    from contacts.models import Contact
+    from inquiries.models import Inquiry
+    from live.models import LiveSession
+
+    live = LiveSession(
+        scope="offering",
+        offering=offering,
+        title="l",
+        provider="meet",
+        starts_at=timezone.now() + timedelta(hours=1),
+        ends_at=timezone.now() + timedelta(hours=2),
+        host=teacher,
+    )
+    live.join_url = "https://meet.google.com/abc"
+    live.save()
+    inquiry = Inquiry.objects.create(
+        reference_no="INQ-26-TEST01",
+        contact=Contact.objects.create(name="زائر", email="v@x.test"),
+        type="general",
+        subject="s",
+        message="m",
+    )
     return {
+        "live": live.public_id,
+        "inquiry": inquiry.public_id,
         "exam": exam.public_id,
         "attempt": attempt.public_id,
         "result_batch": batch.public_id,

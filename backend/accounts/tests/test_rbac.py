@@ -45,7 +45,7 @@ def test_supervisor_is_manager_without_delete(make_user, it_dept):
 
 
 def test_roles_without_staff_capabilities(make_user):
-    for role in (Role.STUDENT, Role.TEACHER, Role.TA, Role.EVENTS_MANAGER):
+    for role in (Role.STUDENT, Role.TEACHER, Role.TA):
         assert rbac.capabilities_of(make_user(role)) == {}, role
 
 

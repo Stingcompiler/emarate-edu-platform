@@ -1,8 +1,13 @@
 import {
   Award,
   Bell,
+  CalendarDays,
   ClipboardCheck,
   ClipboardList,
+  Globe,
+  Inbox,
+  Megaphone,
+  Radio,
   Download,
   FileUp,
   FolderLock,
@@ -58,6 +63,15 @@ export function navFor(me: Me | null | undefined, unread: number): NavItem[] {
   );
   if (me?.student || teaches)
     items.push({ label: "الاختبارات", to: "/exams", icon: ClipboardList, end: false });
+  if (me?.student || teaches) items.push({ label: "البث", to: "/live", icon: Radio, end: false });
+  items.push({ label: "الإعلانات", to: "/announcements", icon: Megaphone, end: false });
+  if (hasRole(me, "site_manager", "head_registrar", "registrar", "system_admin")) {
+    items.push({ label: "الاستفسارات", to: "/inquiries", icon: Inbox, end: false });
+  }
+  if (can(me, "content.manage"))
+    items.push({ label: "محتوى الموقع", to: "/site", icon: Globe, end: false });
+  if (can(me, "events.manage"))
+    items.push({ label: "الفعاليات", to: "/events", icon: CalendarDays, end: false });
   if (me?.student) {
     items.push({ label: "النتائج", to: "/results", icon: Award });
     items.push({ label: "اللوائح", to: "/regulations", icon: ScrollText });

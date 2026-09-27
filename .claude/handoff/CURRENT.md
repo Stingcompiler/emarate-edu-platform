@@ -1,50 +1,58 @@
-# Handoff — Phase 5 done → Phase 6 (live, content, inquiries) — 2026-09-28
+# Handoff — Phase 6 done → Phase 7 (admissions + registrars) — 2026-09-28
 
 ## Where things stand
-- **Phases 1–4 are merged** to `main` (PRs #3–#6).
-- **Phase 5 (exams)** is complete on `feat/phase-5-exams`. Its PR is opened in this step; merge it once CI is green.
-  - The app's Auto-fix may watch it. GitHub auto-merge is disabled, so merge manually with `gh pr merge --merge`.
+- **Phases 1–5 are merged** to `main` (PRs #3–#7).
+- **Phase 6 (live, content, inquiries)** is complete on `feat/phase-6-content`. Its PR is opened in this step; merge it once CI is green.
+  - GitHub auto-merge is disabled, so merge manually with `gh pr merge --merge`.
 - **Verified locally:**
-  - 244 tests pass on SQLite; 243 pass plus 1 skip on Postgres;
+  - 268 tests pass on SQLite; 267 pass plus 1 skip on Postgres;
   - migrations reverse on both databases;
   - the schema has 0 warnings;
-  - ruff, typecheck, build and prettier pass;
-  - the k6 load test with 500 concurrent students passes (see `scripts/loadtest/README.md`).
-  - The exam flow was checked in the browser pane at 390 and 1280: start, answer, reload persistence, submit, result.
+  - ruff, typecheck, build and prettier pass.
+  - Pages were checked in the pane: inquiries at 1280 (read via page text; pane screenshots at 1280 can be stale), live and announcements at 390.
 
-## What Phase 5 delivered
-- **`exams` app:**
-  - `question_types.py` is the registry (`validate` / `clean_answer` / `grade` / `correct_answer`).
-  - `services.py`: build and lock, `problems()`, publish/close/release/delete, `start` (resume or race-safe), `save_answer` (time plus grace, no-backtrack), `submit` (idempotent), `close_expired` (beat), extend/reopen/invalidate, `grade_answer`, `stats`.
-  - Endpoints: `/exams` (+publish, close, release, problems, questions[/id], questions-order, start, attempts, stats) and `/exam-attempts/<id>` (+answers/<qid>, submit, signals, result, extend, reopen, invalidate, answers/<qid>/grade).
-  - Beat tasks: `close-expired-attempts` (1 min) and `remind-exams-starting` (5 min).
-  - The `learning.access` flag `publish` means manage or teacher, never a TA.
-- `MisconductReport.attempt` links a report to an exam attempt.
-- **Load testing:** `config/settings/loadtest.py`, `manage.py seed_loadtest` (refuses other settings), and `scripts/loadtest/exam.js` with its README.
+## What Phase 6 delivered
+- **`live`:** LiveSession for an offering or a cohort.
+  - `join_url` is a property that encrypts and decrypts via `core/crypto.py` (Fernet + HKDF from `FIELD_ENCRYPTION_KEY`, falling back to SECRET_KEY).
+  - `/live-sessions` (+join, cancel). Beat `remind-live-sessions`.
+- **`content`:**
+  - Page (blocks cleaned by `content/sanitize.py`), Announcement (scope and audience; `services.may_announce`, `feed_q`, `public_q`), News, Event, MediaAsset (ImageField on the `public` storage), Menu/MenuItem, Redirect, SiteSettings.
+  - Management endpoints under `/api/v1/content/*` (capabilities `content.manage` and `events.manage`) and `/api/v1/announcements`.
+  - Public endpoints under `/api/public/{site,pages,news,events,announcements,menus,redirects}`, with a 60 s cache.
+  - `request_site_rebuild()` is debounced and calls `SITE_REBUILD_HOOK_URL` (empty until Phase 9).
+- **`contacts`:** `Contact` plus `match_or_create` (by email or phone, never by name).
+- **`inquiries`:**
+  - Public: `/api/public/inquiries` (POST; `contact` throttle 5/hour; `website` honeypot) and `/api/public/inquiries/<ref>` (status only).
+  - Staff: `/api/v1/inquiries` (+reply by email or internal note, whatsapp, transition, assign, reroute). Routing is in `inquiries/services.py`.
+- **Dependencies:** nh3, pillow, cryptography (explicit).
 - **Portal pages:**
-  - `/exams`, `/exams/new`, `/exams/:id` (student start screen or staff overview), `/exams/:id/edit`, `/exams/:id/monitor`, `/exams/:id/stats`.
-  - `/exam-attempts/:id`: the focused TakeExam screen. `lib/exam.ts` holds the clock offset, pending queue and flags.
-  - `/exam-attempts/:id/result`.
-- **Seed:** `seed_demo` adds an open IT101 quiz with five question types.
+  - `/live` (+new), `/announcements` (+new), `/inquiries` (+`/:id`; two panes on desktop).
+  - `/site` (+pages/:id, news/:id, media, redirects), `/events` (+`/:id`).
+- **Seed:** a live session, public and course announcements, the "about" page, an open-day event, and two inquiries.
 
-## Next steps (Phase 6 — live + content + inquiries, docs/02 §8)
-1. Read docs/02 §4.9 (`live`), §4.10–4.12 (`content`, `inquiries`), §6, docs/05 §6, and docs/03 rows for live sessions, content and inquiries (+WhatsApp). Boards:
+## Next steps (Phase 7 — admissions + registrars, docs/02 §4.10–4.11, §8.3)
+1. Read docs/02 §4.10–4.11 and §8 Phase 7, docs/05 §6 (`contacts`, `admissions`) and §8.3, and docs/03 §3.2–3.3 (head registrar, registrar). Boards:
    ```bash
-   python3 scripts/boards.py list Live
-   python3 scripts/boards.py list Site
-   python3 scripts/boards.py list Inquir
-   python3 scripts/boards.py list Announcement
-   python3 scripts/boards.py list Event
+   python3 scripts/boards.py list Visitor
+   python3 scripts/boards.py list Registrar
+   python3 scripts/boards.py list Head
+   python3 scripts/boards.py list FormBuilder
+   python3 scripts/boards.py list Application
    ```
-2. **`live`:** LiveSession for an offering or a cohort; provider links only.
-   - The join URL is encrypted at rest (use a Fernet-like key from settings with the stdlib and `cryptography`, which is already installed via pywebpush).
-   - The link is returned only to allowed users; a beat task sends a reminder 30 minutes before.
-3. **`content`:** Page (blocks JSON), Announcement (scope + audience, publish/expire, pinned), News, Event, MediaAsset (public storage), Menu, Redirect.
-   - Rich text is sanitized server-side (`nh3`, a small dependency).
-   - Public endpoints go under `/api/public/*` with Cache-Control.
-   - A "rebuild site" hook is a placeholder until Phase 9.
-4. **`inquiries`:** from a visitor contact (the OTP visitor session comes in Phase 7; accept a public form with throttling now). Routing per docs/03 §8, status history, email replies, and WhatsApp links (`wa.me` from the normalized phone).
-5. **Portal pages:** follow the responsive-page skill with both boards. Add permission-matrix rows, extend the seed, test on both databases, open the PR, merge when green, and update this handoff.
+2. **`contacts`:** ContactOTP (email now; SMS/WhatsApp later) and VisitorSession (a short JWT scoped to `contact:{id}`, 30 minutes) under `/api/visitor/*`.
+   - "Track my request": email or phone, then OTP, then everything for that contact. A reference number alone shows status only.
+3. **`admissions`:**
+   - AdmissionCycle, ProgramIntake (form template override), ApplicationFormTemplate (versioned JSON schema plus the visual builder board DesktopFormBuilder).
+   - Application with a state machine: draft → submitted → under_review → missing_documents → eligible → accepted/rejected/waitlisted → registered/activated; append-only history; `allowed_transitions` in responses.
+   - ApplicationDocument (private files, purpose `application`), ApplicationMessage, ApplicationAssignment.
+   - Routing to the program department's registrars or the head registrar, with claim and assign.
+   - Final decision by the head registrar, or delegated per `SystemSettings.delegate_decisions_to_registrars`.
+   - `register_applicant` creates a StudentRecord (via UniversityNumberSequence) plus an ActivationToken and an email.
+   - `Idempotency-Key` on submit.
+4. Link inquiries to the contact visitor session. Admission inquiries already route to registrars.
+5. **Portal:** head registrar dashboard (DesktopHeadRegistrar), registrar application pages (DesktopApplicationDetail), form builder, cycles and intakes.
+   - The visitor apply wizard (5 steps) belongs to the public site; build the API now, and the UI either in the portal as a public route or in Phase 9 (Astro islands). Decide and note it.
+6. Add permission-matrix rows, extend the seed, test on both databases, open the PR, merge when green, and update this handoff.
 
 ## Decisions made (don't revisit)
 - **Roles are rows (`role`, `department`), not Django Groups.** Mention this deviation from docs/03 §10 in PRs that touch roles.
@@ -72,6 +80,7 @@
 - **Results:** committed results change only through approved corrections (the admin is read-only too). Re-importing an existing student+course is an error row.
 - **Display:** RTL layouts need `dir="ltr"` (or \u2066…\u2069) around letter grades and university numbers, otherwise "C+" renders as "+C".
 - **Exams:** the server owns time. Answers are saved per question; the client keeps a local queue and must sync **one request at a time** (overlapping PUTs let an older answer win). Focus signals are throttled to one per kind every 15 s. The focused exam shell has no sidebar or tabs.
+- **Content:** rich HTML is always sanitized server-side (nh3 allow-list), so the portal may render it with `dangerouslySetInnerHTML`. Public announcements are college-wide only. Visitors are never looked up by name.
 - **Pagination:** every paginated model has a default ordering, and a pytest filterwarning turns unordered pagination into an error.
 
 ## Gotchas found

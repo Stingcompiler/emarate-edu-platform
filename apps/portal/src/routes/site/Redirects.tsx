@@ -1,0 +1,93 @@
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Trash2 } from "lucide-react";
+import { useState } from "react";
+
+import { PortalShell } from "../../components/PortalShell";
+import { Button, Card, Notice, problemMessage } from "../../components/ui";
+import { api } from "../../lib/api";
+
+/** Board: DesktopSiteRedirects (desktop). Phone derived as a card list. 404 suggestions arrive with the public site (Phase 9). */
+export function Redirects() {
+  const client = useQueryClient();
+  const list = useQuery({
+    queryKey: ["site", "redirects"],
+    queryFn: async () => (await api.GET("/api/v1/content/redirects")).data?.results ?? [],
+  });
+  const [from, setFrom] = useState("");
+  const [to, setTo] = useState("");
+  const refresh = () => client.invalidateQueries({ queryKey: ["site", "redirects"] });
+  const add = useMutation({
+    mutationFn: async () => {
+      const { data, error } = await api.POST("/api/v1/content/redirects", {
+        body: { from_path: from, to_path: to, permanent: true },
+      });
+      if (!data) throw error;
+    },
+    onSuccess: () => {
+      setFrom("");
+      setTo("");
+      void refresh();
+    },
+  });
+  const remove = useMutation({
+    mutationFn: async (id: number) => {
+      await api.DELETE("/api/v1/content/redirects/{id}", { params: { path: { id } } });
+    },
+    onSuccess: refresh,
+  });
+  return (
+    <PortalShell
+      title="التحويلات"
+      subtitle={`${(list.data?.length ?? 0).toLocaleString("ar")} نشطة`}
+      back={{ label: "محتوى الموقع", to: "/site" }}
+    >
+      <div className="max-w-3xl">
+        <Card className="flex flex-wrap items-center gap-2 p-3">
+          <input
+            dir="ltr"
+            value={from}
+            onChange={(e) => setFrom(e.target.value)}
+            placeholder="/old-path"
+            className="min-h-10 flex-1 rounded-lg border border-border bg-surface px-3 text-sm"
+          />
+          <span className="text-text-muted" aria-hidden>
+            ←
+          </span>
+          <input
+            dir="ltr"
+            value={to}
+            onChange={(e) => setTo(e.target.value)}
+            placeholder="/new-path"
+            className="min-h-10 flex-1 rounded-lg border border-border bg-surface px-3 text-sm"
+          />
+          <Button onClick={() => add.mutate()} disabled={!from || !to || add.isPending}>
+            + تحويل
+          </Button>
+        </Card>
+        {add.isError && (
+          <div className="mt-3">
+            <Notice>{problemMessage(add.error)}</Notice>
+          </div>
+        )}
+        <Card className="mt-4 divide-y divide-border-soft">
+          {(list.data ?? []).map((r) => (
+            <div key={r.id} className="flex items-center gap-3 px-4 py-3 text-sm" dir="ltr">
+              <span className="min-w-0 flex-1 truncate font-mono text-text">
+                {r.from_path} → {r.to_path}
+              </span>
+              <span className="text-xs text-text-muted">{r.hits} hits</span>
+              <button
+                type="button"
+                aria-label="حذف"
+                onClick={() => remove.mutate(r.id)}
+                className="text-danger-strong"
+              >
+                <Trash2 size={16} />
+              </button>
+            </div>
+          ))}
+        </Card>
+      </div>
+    </PortalShell>
+  );
+}
