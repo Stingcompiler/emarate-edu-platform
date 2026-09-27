@@ -75,6 +75,7 @@ class AudienceCountSerializer(serializers.Serializer):
 
 
 class AudienceOptionSerializer(serializers.Serializer):
+    group = serializers.ChoiceField(choices=["college", "department", "cohort", "course", "staff"])
     label = serializers.CharField()
     audience = serializers.JSONField()
     count = serializers.IntegerField()

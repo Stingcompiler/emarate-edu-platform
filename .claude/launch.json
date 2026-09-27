@@ -1,0 +1,31 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "api",
+      "runtimeExecutable": "uv",
+      "runtimeArgs": [
+        "run",
+        "--project",
+        "backend",
+        "python",
+        "backend/manage.py",
+        "runserver",
+        "127.0.0.1:8000"
+      ],
+      "port": 8000
+    },
+    {
+      "name": "portal",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--filter", "@ecst/portal", "dev"],
+      "port": 5173
+    },
+    {
+      "name": "boards",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["scripts/boards.py", "serve"],
+      "port": 8799
+    }
+  ]
+}

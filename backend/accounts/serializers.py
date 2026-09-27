@@ -1,3 +1,4 @@
+from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
 from organization.models import Department
@@ -45,10 +46,12 @@ class MeSerializer(serializers.ModelSerializer):
             "student",
         ]
 
+    @extend_schema_field(RoleAssignmentSerializer(many=True))
     def get_roles(self, obj) -> list[dict]:
         rows = obj.role_assignments.select_related("department")
         return RoleAssignmentSerializer(rows, many=True).data
 
+    @extend_schema_field(serializers.DictField(child=ScopeSerializer()))
     def get_capabilities(self, obj) -> dict[str, dict]:
         return {
             name: {"everything": scope.everything, "departments": sorted(scope.departments)}

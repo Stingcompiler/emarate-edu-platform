@@ -116,7 +116,7 @@ class SentViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
         return Response({"count": audiences.resolve(clean).count()})
 
     @extend_schema(responses=AudienceOptionSerializer(many=True))
-    @action(detail=False, methods=["get"])
+    @action(detail=False, methods=["get"], pagination_class=None)
     def audiences(self, request):
         return Response(audiences.options(request.user))
 

@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#1f2b47" />
+    <title>لا يوجد اتصال — بوابة كلية الإمارات</title>
+    <style>
+      body {
+        margin: 0;
+        min-height: 100dvh;
+        display: grid;
+        place-items: center;
+        background: #f4f5f7;
+        color: #1f2b47;
+        font-family: "IBM Plex Sans Arabic", system-ui, sans-serif;
+        text-align: center;
+        padding: 24px;
+      }
+      p {
+        color: #576075;
+        line-height: 1.6;
+      }
+      button {
+        min-height: 44px;
+        padding: 0 20px;
+        border: 0;
+        border-radius: 10px;
+        background: #2d64a7;
+        color: #fff;
+        font: inherit;
+        font-weight: 600;
+      }
+      @media (prefers-color-scheme: dark) {
+        body {
+          background: #0c111c;
+          color: #eef0f3;
+        }
+        p {
+          color: #c0c3cb;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <img src="/icons/icon-192.png" alt="" width="64" height="64" style="border-radius: 16px" />
+      <h1>لا يوجد اتصال بالإنترنت</h1>
+      <p>تحقق من الشبكة ثم أعد المحاولة. ستعود الصفحة كما كانت.</p>
+      <button type="button" onclick="location.reload()">إعادة المحاولة</button>
+    </main>
+  </body>
+</html>

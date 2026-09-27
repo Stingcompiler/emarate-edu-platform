@@ -207,43 +207,70 @@ def resolve(audience: dict) -> QuerySet:
 
 
 def options(sender) -> list[dict]:
-    """Ready-made audiences for the compose form, limited to the sender's scope."""
+    """Ready-made audiences for the compose form, limited to the sender's scope.
+
+    ``group`` lets the form show one radio per group: single audiences
+    (college, department, staff) directly, cohorts and courses as a picker.
+    Cohorts with nobody to reach are left out.
+    """
     roles = rbac.roles_of(sender)
     found: list[dict] = []
 
-    def add(label: str, audience: dict) -> None:
+    def add(group: str, label: str, audience: dict, *, keep_empty: bool = True) -> None:
         clean = normalize(audience)
-        if is_allowed(sender, clean):
-            found.append({"label": label, "audience": clean, "count": resolve(clean).count()})
+        if not is_allowed(sender, clean):
+            return
+        count = resolve(clean).count()
+        if count or keep_empty:
+            found.append({"group": group, "label": label, "audience": clean, "count": count})
 
     if roles & {Role.SYSTEM_ADMIN, Role.SITE_MANAGER, Role.EVENTS_MANAGER}:
-        add("كل مستخدمي الكلية", {"type": "college", "members": "all"})
+        add("college", "كل مستخدمي الكلية", {"type": "college", "members": "all"})
     if roles & {Role.SYSTEM_ADMIN, Role.HEAD_REGISTRAR, Role.STUDENT_AFFAIRS}:
-        add("كل طلاب الكلية", {"type": "college", "members": "students"})
+        add("college", "كل طلاب الكلية", {"type": "college", "members": "students"})
     if roles & {Role.SYSTEM_ADMIN, Role.ACADEMIC_AFFAIRS}:
-        add("كل الأساتذة والمعيدين", {"type": "role", "roles": ["teacher", "ta"]})
+        add("staff", "كل الأساتذة والمعيدين", {"type": "role", "roles": ["teacher", "ta"]})
 
     scope = rbac.scope_for(sender, "learning.manage")
     if not scope.none and not scope.everything:
         for department in Department.objects.filter(pk__in=scope.departments):
-            add(f"كل طلاب قسم {department.name}", {"type": "department", "ids": [department.pk]})
+            add(
+                "department",
+                f"كل طلاب قسم {department.name_ar}",
+                {"type": "department", "ids": [department.pk]},
+            )
             for program in department.programs.filter(is_active=True):
                 for level in range(1, program.levels_count + 1):
                     add(
-                        f"{program.name} — المستوى {level}",
+                        "cohort",
+                        f"{program.name_ar} — المستوى {level}",
                         {"type": "program", "ids": [program.pk], "level": level},
+                        keep_empty=False,
                     )
+            for offering in CourseOffering.objects.filter(
+                course__department=department, term__is_current=True
+            ).select_related("course"):
+                add(
+                    "course",
+                    f"{offering.course.code} — {offering.course.name_ar} ({offering.section})",
+                    {"type": "offering", "ids": [offering.pk]},
+                    keep_empty=False,
+                )
             add(
-                f"أساتذة ومعيدو قسم {department.name}",
+                "staff",
+                f"أساتذة ومعيدو قسم {department.name_ar}",
                 {"type": "department", "ids": [department.pk], "members": "staff"},
             )
-    for teaching in OfferingInstructor.objects.filter(user=sender).select_related(
-        "offering__course", "offering__term"
-    ):
-        offering = teaching.offering
-        if offering.term.is_current:
+    teaching = OfferingInstructor.objects.filter(
+        user=sender, offering__term__is_current=True
+    ).select_related("offering__course")
+    listed = {tuple(o["audience"].get("ids", [])) for o in found if o["group"] == "course"}
+    for row in teaching:
+        offering = row.offering
+        if (offering.pk,) not in listed:
             add(
-                f"طلاب {offering.course.code} — {offering.course.name_ar}",
+                "course",
+                f"{offering.course.code} — {offering.course.name_ar} ({offering.section})",
                 {"type": "offering", "ids": [offering.pk]},
             )
     return found
