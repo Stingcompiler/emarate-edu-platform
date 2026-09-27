@@ -306,6 +306,7 @@ class Command(BaseCommand):
             record.save(update_fields=["user", "updated_at"])
 
         self._phase4(users, autumn)
+        self._exam(users, autumn)
         return {
             "departments": Department.objects.count(),
             "programs": Program.objects.count(),
@@ -476,6 +477,71 @@ class Command(BaseCommand):
                     reported_by=users[Role.TEACHER],
                     evidence="تطابق إجابات 9 أسئلة مع محاولة طالب آخر خلال دقيقة واحدة.",
                 )
+
+    def _exam(self, users, term) -> None:
+        """An open week-long quiz in IT101 with one question of each type."""
+        from datetime import timedelta
+
+        from django.utils import timezone
+
+        from exams.models import Choice, Exam, Question
+
+        offering = CourseOffering.objects.filter(term=term, course__code="IT101").first()
+        if offering is None or Exam.objects.filter(offering=offering).exists():
+            return
+        now = timezone.now()
+        exam = Exam.objects.create(
+            offering=offering,
+            title="اختبار قصير 1 — أساسيات البرمجة",
+            opens_at=now - timedelta(hours=1),
+            closes_at=now + timedelta(days=7),
+            duration_minutes=20,
+            pass_marks=5,
+            show_answers=True,
+            status=Exam.Status.PUBLISHED,
+            created_by=users[Role.TEACHER],
+        )
+        specs = [
+            (
+                "single",
+                "ما ناتج تنفيذ الكود التالي؟\n```\nx = [3, 1, 4]\nprint(len(x))\n```",
+                2,
+                [("3", True), ("4", False), ("1", False), ("خطأ", False)],
+                {},
+            ),
+            (
+                "multiple",
+                "اختر أنواع البيانات الأساسية في بايثون:",
+                2,
+                [("int", True), ("str", True), ("array", False), ("float", True)],
+                {"partial": True},
+            ),
+            (
+                "true_false",
+                "المتغير في بايثون يحتاج تعريف نوعه قبل الاستخدام.",
+                1,
+                [],
+                {"answer": False},
+            ),
+            (
+                "fill_blank",
+                "الدالة التي تطبع على الشاشة في بايثون هي ____",
+                1,
+                [],
+                {"accepted": ["print"]},
+            ),
+            ("short_answer", "اشرح الفرق بين القائمة والصف (tuple) باختصار.", 4, [], {}),
+        ]
+        for order, (kind, text, marks, choices, config) in enumerate(specs, start=1):
+            q = Question.objects.create(
+                exam=exam, order=order, type=kind, text=text, marks=marks, config=config
+            )
+            Choice.objects.bulk_create(
+                [
+                    Choice(question=q, order=i, text=t, is_correct=c)
+                    for i, (t, c) in enumerate(choices, start=1)
+                ]
+            )
 
     def _user(self, email, name, password, role, department) -> User:
         user = User.objects.filter(email=email).first()

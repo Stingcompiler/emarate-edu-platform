@@ -2,6 +2,7 @@ import {
   Award,
   Bell,
   ClipboardCheck,
+  ClipboardList,
   Download,
   FileUp,
   FolderLock,
@@ -46,6 +47,17 @@ export function navFor(me: Me | null | undefined, unread: number): NavItem[] {
   const items: NavItem[] = [
     { label: "الإشعارات", to: "/notifications", icon: Bell, badge: unread },
   ];
+  const teaches = hasRole(
+    me,
+    "teacher",
+    "ta",
+    "department_manager",
+    "department_supervisor",
+    "academic_affairs",
+    "system_admin",
+  );
+  if (me?.student || teaches)
+    items.push({ label: "الاختبارات", to: "/exams", icon: ClipboardList, end: false });
   if (me?.student) {
     items.push({ label: "النتائج", to: "/results", icon: Award });
     items.push({ label: "اللوائح", to: "/regulations", icon: ScrollText });

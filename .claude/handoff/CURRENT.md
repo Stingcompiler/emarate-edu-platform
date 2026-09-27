@@ -1,60 +1,50 @@
-# Handoff — Phase 4 done → Phase 5 (exams) — 2026-09-28
+# Handoff — Phase 5 done → Phase 6 (live, content, inquiries) — 2026-09-28
 
 ## Where things stand
-- **Phases 1–3 are merged** to `main` (PRs #3, #4, #5).
-- **Phase 4 (results + student affairs)** is complete on `feat/phase-4-results`. Its PR is opened in this step; merge it once CI is green.
-  - The app's Auto-fix watches the PR for CI failures. GitHub auto-merge is disabled, so merge manually with `gh pr merge --merge`.
+- **Phases 1–4 are merged** to `main` (PRs #3–#6).
+- **Phase 5 (exams)** is complete on `feat/phase-5-exams`. Its PR is opened in this step; merge it once CI is green.
+  - The app's Auto-fix may watch it. GitHub auto-merge is disabled, so merge manually with `gh pr merge --merge`.
 - **Verified locally:**
-  - 224 tests pass on SQLite; 223 pass plus 1 skip on Postgres;
+  - 244 tests pass on SQLite; 243 pass plus 1 skip on Postgres;
   - migrations reverse on both databases;
   - the schema has 0 warnings;
-  - ruff, typecheck, build and prettier pass.
-  - Pages were checked in the browser pane at 390 and 1280, using the demo data from `seed_demo`.
+  - ruff, typecheck, build and prettier pass;
+  - the k6 load test with 500 concurrent students passes (see `scripts/loadtest/README.md`).
+  - The exam flow was checked in the browser pane at 390 and 1280: start, answer, reload persistence, submit, result.
 
-## What Phase 4 delivered
-- **`results` app:**
-  - `importer.py` (reads tables via `students.importer.read_table`), then commit, publish/unpublish and delete (uncommitted only).
-  - `GradingScale.for_program()` / `.grade()`.
-  - `ResultCorrection`: the results officer requests, academic affairs decides; approval bumps the version and notifies the student.
-  - `student_view()` for `/me/results`, which applies `ResultDisplaySettings` and `TermResultRelease` hiding.
-  - CSV export: results staff and teachers only.
-- **`student_affairs` app:**
-  - Regulations: draft, publish, new version supersedes; acknowledgements.
-  - StudentCase with events: notes, decide, publish to student, close/reopen. `/me/cases` hides internal notes.
-  - MisconductReport: resolve converts it to a case or dismisses it.
-  - `students/<id>/status`: suspend or reinstate, with a reason.
-- **Files:** a StoredFile's offering is now optional. Purposes `regulation` and `case` have policies with `needs_offering=False`.
-- **Capabilities** (`rbac.py`): `results.manage`, `results.view`, `results.correct`, `results.approve`, `results.settings`, `regulations.manage`, `cases.manage`, `cases.view`, `students.status`.
+## What Phase 5 delivered
+- **`exams` app:**
+  - `question_types.py` is the registry (`validate` / `clean_answer` / `grade` / `correct_answer`).
+  - `services.py`: build and lock, `problems()`, publish/close/release/delete, `start` (resume or race-safe), `save_answer` (time plus grace, no-backtrack), `submit` (idempotent), `close_expired` (beat), extend/reopen/invalidate, `grade_answer`, `stats`.
+  - Endpoints: `/exams` (+publish, close, release, problems, questions[/id], questions-order, start, attempts, stats) and `/exam-attempts/<id>` (+answers/<qid>, submit, signals, result, extend, reopen, invalidate, answers/<qid>/grade).
+  - Beat tasks: `close-expired-attempts` (1 min) and `remind-exams-starting` (5 min).
+  - The `learning.access` flag `publish` means manage or teacher, never a TA.
+- `MisconductReport.attempt` links a report to an exam attempt.
+- **Load testing:** `config/settings/loadtest.py`, `manage.py seed_loadtest` (refuses other settings), and `scripts/loadtest/exam.js` with its README.
 - **Portal pages:**
-  - `/results`, `/results/search`, `/results/settings`.
-  - `/result-imports` (+`/:id`), `/result-corrections`.
-  - `/regulations` (+`/new`, `/:id`).
-  - `/cases` (+`/new`, `/new?report=`, `/:id`).
-  - `lib/nav.ts` builds navigation from `me.capabilities`. Helpers: `StatusBadge`, `CodeTile`, `lib/upload.ts`.
-- **Seed:** now adds published IT level-1 results, two regulations, a case and a misconduct report.
+  - `/exams`, `/exams/new`, `/exams/:id` (student start screen or staff overview), `/exams/:id/edit`, `/exams/:id/monitor`, `/exams/:id/stats`.
+  - `/exam-attempts/:id`: the focused TakeExam screen. `lib/exam.ts` holds the clock offset, pending queue and flags.
+  - `/exam-attempts/:id/result`.
+- **Seed:** `seed_demo` adds an open IT101 quiz with five question types.
 
-## Next steps (Phase 5 — exams, docs/02 §8, docs/05 §6 `exams`, §8.5)
-1. Read docs/05 §6 `exams` and §8.5, docs/03 rows for exams, and the boards:
+## Next steps (Phase 6 — live + content + inquiries, docs/02 §8)
+1. Read docs/02 §4.9 (`live`), §4.10–4.12 (`content`, `inquiries`), §6, docs/05 §6, and docs/03 rows for live sessions, content and inquiries (+WhatsApp). Boards:
    ```bash
-   python3 scripts/boards.py list Exam
+   python3 scripts/boards.py list Live
+   python3 scripts/boards.py list Site
+   python3 scripts/boards.py list Inquir
+   python3 scripts/boards.py list Announcement
+   python3 scripts/boards.py list Event
    ```
-   Desktop boards: DesktopExamBuilder, DesktopStudentExam, DesktopDeptExams.
-2. **Backend `exams` app:**
-   - Models: Exam, Question (+config JSON), Choice, ExamAttempt, StudentAnswer.
-   - Question types go through a registry.
-   - Server-timed attempts: `started_at`/`deadline_at` from the server, answer upsert rejected after deadline + grace, idempotent submit (`Idempotency-Key`).
-   - A beat task closes expired attempts. Auto-grading, with `needs_manual` for essays.
-   - Permissions: a TA can't publish or close exams; a department manager can delete; a supervisor can't.
-3. **Connect the rest:**
-   - `MisconductReport.attempt`, linking reports to exam attempts.
-   - Exam notifications: published, and starting within the hour.
-4. **Portal:**
-   - Exam builder (desktop board).
-   - Taking an exam in a focused shell with no sidebar: phone + DesktopStudentExam.
-   - The exam result screen.
-   - The teacher's results and statistics.
-5. **Load test:** 500 concurrent attempts locally with k6 (install via brew, not Docker). Record the results in the PR.
-6. Add a permission-matrix row for every endpoint, extend the seed, test on both databases, open the PR, merge when green, and update this handoff.
+2. **`live`:** LiveSession for an offering or a cohort; provider links only.
+   - The join URL is encrypted at rest (use a Fernet-like key from settings with the stdlib and `cryptography`, which is already installed via pywebpush).
+   - The link is returned only to allowed users; a beat task sends a reminder 30 minutes before.
+3. **`content`:** Page (blocks JSON), Announcement (scope + audience, publish/expire, pinned), News, Event, MediaAsset (public storage), Menu, Redirect.
+   - Rich text is sanitized server-side (`nh3`, a small dependency).
+   - Public endpoints go under `/api/public/*` with Cache-Control.
+   - A "rebuild site" hook is a placeholder until Phase 9.
+4. **`inquiries`:** from a visitor contact (the OTP visitor session comes in Phase 7; accept a public form with throttling now). Routing per docs/03 §8, status history, email replies, and WhatsApp links (`wa.me` from the normalized phone).
+5. **Portal pages:** follow the responsive-page skill with both boards. Add permission-matrix rows, extend the seed, test on both databases, open the PR, merge when green, and update this handoff.
 
 ## Decisions made (don't revisit)
 - **Roles are rows (`role`, `department`), not Django Groups.** Mention this deviation from docs/03 §10 in PRs that touch roles.
@@ -81,9 +71,12 @@
   - Active chips use `bg-text text-bg`, which contrasts in both themes.
 - **Results:** committed results change only through approved corrections (the admin is read-only too). Re-importing an existing student+course is an error row.
 - **Display:** RTL layouts need `dir="ltr"` (or \u2066…\u2069) around letter grades and university numbers, otherwise "C+" renders as "+C".
+- **Exams:** the server owns time. Answers are saved per question; the client keeps a local queue and must sync **one request at a time** (overlapping PUTs let an older answer win). Focus signals are throttled to one per kind every 15 s. The focused exam shell has no sidebar or tabs.
 - **Pagination:** every paginated model has a default ordering, and a pytest filterwarning turns unordered pagination into an error.
 
 ## Gotchas found
+- **Tailwind order:** `hidden` does not beat a component's own `inline-flex`. Wrap the component in a `hidden lg:block` element instead.
+- **Load testing on macOS:** `kern.ipc.somaxconn` is 128, so don't open 500 sockets in the same millisecond. Spread arrivals over time.
 - **Response timing:** responses are serialized before `transaction.on_commit` fan-outs run. Read counts from the DB in tests, not from the create response.
 - **Localized names:** the API's `name` field follows Accept-Language (English browsers get English), so server-built labels use `name_ar` explicitly.
 - **Empty Q():** `Q() | x` drops the empty Q, which silently lost college-wide viewers. Use `Q(pk__isnull=False)` or `Q(<fk>__isnull=False)` for "everything" (see `learning.access.staff_offerings_q`, `rbac.Scope.q`).

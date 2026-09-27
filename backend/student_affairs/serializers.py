@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
 from academic.models import CourseOffering
+from exams.models import ExamAttempt
 from files.models import StoredFile
 from files.serializers import StoredFileSerializer
 from students.models import StudentRecord
@@ -136,11 +137,15 @@ class ReportSerializer(serializers.ModelSerializer):
     course_code = serializers.CharField(source="offering.course.code", read_only=True)
     reported_by = serializers.CharField(source="reported_by.full_name_ar", read_only=True)
     case = serializers.SlugRelatedField(slug_field="public_id", read_only=True)
+    attempt = serializers.SlugRelatedField(
+        slug_field="public_id", queryset=ExamAttempt.objects.all(), required=False, allow_null=True
+    )
 
     class Meta:
         model = MisconductReport
         fields = [
             "public_id",
+            "attempt",
             "offering",
             "course_code",
             "student_record",

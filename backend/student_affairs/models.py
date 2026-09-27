@@ -129,8 +129,8 @@ class StudentCaseEvent(models.Model):
 
 
 class MisconductReport(PublicIdModel, TimestampedModel):
-    """A teacher's report of cheating; student affairs converts it into a case or dismisses it.
-    The link to an exam attempt arrives with the exams app (Phase 5)."""
+    """A teacher's report of cheating (optionally on an exam attempt); student
+    affairs converts it into a case or dismisses it."""
 
     class Status(models.TextChoices):
         NEW = "new", "جديد"
@@ -147,6 +147,13 @@ class MisconductReport(PublicIdModel, TimestampedModel):
         settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="+"
     )
     evidence = models.TextField()
+    attempt = models.ForeignKey(
+        "exams.ExamAttempt",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="misconduct_reports",
+    )
     status = models.CharField(max_length=10, choices=Status.choices, default=Status.NEW)
     case = models.ForeignKey(
         StudentCase, on_delete=models.SET_NULL, null=True, blank=True, related_name="reports"

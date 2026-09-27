@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     "notifications",
     "results",
     "student_affairs",
+    "exams",
 ]
 
 MIDDLEWARE = [
@@ -142,6 +143,8 @@ CELERY_BEAT_SCHEDULE = {
         "schedule": 30 * 60,
     },
     "deliver-outbox": {"task": "notifications.tasks.deliver_outbox", "schedule": 5 * 60},
+    "close-expired-attempts": {"task": "exams.tasks.close_expired_attempts", "schedule": 60},
+    "remind-exams-starting": {"task": "exams.tasks.remind_exams_starting", "schedule": 5 * 60},
 }
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
@@ -207,6 +210,8 @@ SPECTACULAR_SETTINGS = {
         "MisconductStatusEnum": "student_affairs.models.MisconductReport.Status",
         "StudentStatusChangeEnum": ["active", "suspended"],
         "StudentRecordStatusEnum": "students.models.StudentRecord.Status",
+        "ExamStatusEnum": "exams.models.Exam.Status",
+        "AttemptStatusEnum": "exams.models.ExamAttempt.Status",
     },
 }
 
