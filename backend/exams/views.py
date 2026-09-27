@@ -19,7 +19,9 @@ from .serializers import (
     AnswerInputSerializer,
     AttemptSerializer,
     AttemptSummarySerializer,
+    ExamResultSerializer,
     ExamSerializer,
+    ExamStatsSerializer,
     ExtendSerializer,
     GradeAnswerSerializer,
     QuestionSerializer,
@@ -27,9 +29,7 @@ from .serializers import (
     ReleaseSerializer,
     ReopenSerializer,
     ReorderSerializer,
-    ExamResultSerializer,
     SignalSerializer,
-    ExamStatsSerializer,
 )
 
 

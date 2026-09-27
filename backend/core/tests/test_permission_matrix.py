@@ -193,6 +193,19 @@ READS: dict[str, tuple[str, frozenset, frozenset]] = {
     "grading-scale-list": ("/api/v1/results/grading-scales", RESULTS, frozenset()),
     "term-release-list": ("/api/v1/results/term-releases", RESULTS, frozenset()),
     "me-results": ("/api/v1/me/results", ONLY_STUDENT, EVERYONE - ONLY_STUDENT),
+    # Exams (the world's exam is published in IT101; the student has a submitted attempt)
+    "exam-list": ("/api/v1/exams", EVERYONE, frozenset()),
+    "exam-detail": ("/api/v1/exams/{exam}", LEARNING, OUTSIDERS),
+    "exam-questions": ("/api/v1/exams/{exam}/questions", LEARNING_STAFF, OUTSIDERS),
+    "exam-problems": ("/api/v1/exams/{exam}/problems", LEARNING_STAFF, OUTSIDERS),
+    "exam-attempts": ("/api/v1/exams/{exam}/attempts", LEARNING_STAFF, OUTSIDERS),
+    "exam-stats": ("/api/v1/exams/{exam}/stats", LEARNING_STAFF, OUTSIDERS),
+    "exam-attempt-detail": ("/api/v1/exam-attempts/{attempt}", LEARNING, OUTSIDERS),
+    "exam-attempt-result": (
+        "/api/v1/exam-attempts/{attempt}/result",
+        ONLY_STUDENT,
+        EVERYONE - ONLY_STUDENT,
+    ),
     # Student affairs
     "regulation-list": ("/api/v1/regulations", EVERYONE, frozenset()),
     "regulation-detail": ("/api/v1/regulations/{regulation}", EVERYONE, frozenset()),
@@ -217,9 +230,23 @@ READS: dict[str, tuple[str, frozenset, frozenset]] = {
 _L = "learning.tests.test_learning::"
 _F = "files.tests.test_files::"
 _N = "notifications.tests.test_notifications::"
+_EX = "exams.tests.test_exams::"
 _RS = "results.tests.test_results::"
 _SA = "student_affairs.tests.test_student_affairs::"
 COVERED_ELSEWHERE = {
+    "exam-publish": _EX + "test_builder_permissions_and_publishing",
+    "exam-close": _EX + "test_close_submits_running_attempts",
+    "exam-release": _EX + "test_visibility_modes",
+    "exam-question": _EX + "test_builder_permissions_and_publishing",
+    "exam-reorder": _EX + "test_reorder_questions",
+    "exam-start": _EX + "test_student_takes_the_exam",
+    "exam-attempt-answer": _EX + "test_student_takes_the_exam",
+    "exam-attempt-submit": _EX + "test_student_takes_the_exam",
+    "exam-attempt-signals": _EX + "test_monitor_extend_reopen_invalidate_and_stats",
+    "exam-attempt-extend": _EX + "test_monitor_extend_reopen_invalidate_and_stats",
+    "exam-attempt-reopen": _EX + "test_monitor_extend_reopen_invalidate_and_stats",
+    "exam-attempt-invalidate": _EX + "test_monitor_extend_reopen_invalidate_and_stats",
+    "exam-attempt-grade": _EX + "test_student_takes_the_exam",
     "result-import-commit": _RS + "test_import_preview_commit_publish",
     "result-import-publish": _RS + "test_import_preview_commit_publish",
     "result-import-unpublish": _RS + "test_import_preview_commit_publish",
@@ -429,7 +456,29 @@ def _learning_world(users, offering, student):
     report = MisconductReport.objects.create(
         offering=offering, student_record=student, reported_by=teacher, evidence="e"
     )
+    from exams.models import Exam, ExamAttempt
+
+    exam = Exam.objects.create(
+        offering=offering,
+        title="e",
+        opens_at=timezone.now() - timedelta(hours=1),
+        closes_at=timezone.now() + timedelta(hours=1),
+        duration_minutes=30,
+        status="published",
+        created_by=teacher,
+    )
+    attempt = ExamAttempt.objects.create(
+        exam=exam,
+        student_record=student,
+        started_at=timezone.now(),
+        deadline_at=timezone.now() + timedelta(minutes=30),
+        submitted_at=timezone.now(),
+        status="submitted",
+        score=0,
+    )
     return {
+        "exam": exam.public_id,
+        "attempt": attempt.public_id,
         "result_batch": batch.public_id,
         "result": result.pk,
         "correction": correction.public_id,
