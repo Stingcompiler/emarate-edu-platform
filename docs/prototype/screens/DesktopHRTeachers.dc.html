@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="ar">
+<head>
+<meta charset="utf-8">
+<title>سطح المكتب — الموارد البشرية: جدول مؤشرات الأساتذة</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'IBM Plex Sans Arabic',system-ui,sans-serif;background:#F4F5F7;color:#1F2B47}
+a{color:#2D64A7;text-decoration:none}
+.scr{width:1280px;height:800px;position:relative;overflow:hidden;background:#F4F5F7;direction:rtl;text-align:right;box-sizing:border-box;display:flex}
+.side{width:240px;flex-shrink:0;background:#1F2B47;color:#fff;padding:20px 16px;box-sizing:border-box;display:flex;flex-direction:column}
+.logo{display:flex;align-items:center;gap:10px;font-size:14px;font-weight:700;padding:4px 6px 22px}
+.logo i{width:32px;height:32px;border-radius:9px;background:#fff;display:block}
+.nv{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;font-size:14px;color:rgba(255,255,255,.75);margin-bottom:2px}
+.nv svg{width:18px;height:18px}
+.nv.on{background:rgba(255,255,255,.12);color:#fff;font-weight:600}
+.me{margin-top:auto;display:flex;align-items:center;gap:10px;padding:10px 6px;border-top:1px solid rgba(255,255,255,.12)}
+.me .av{width:34px;height:34px;border-radius:17px;background:#1E7F4F;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700}
+.me .t{font-size:13px;font-weight:600}.me .s{font-size:11px;color:rgba(255,255,255,.6)}
+.main{flex:1;min-width:0;display:flex;flex-direction:column}
+.bar{height:60px;display:flex;align-items:center;gap:14px;padding:0 28px;background:#fff;border-bottom:1px solid #E7E9EE}
+.bar h1{font-size:18px;font-weight:700;margin:0}
+.bar .term{font-size:12px;font-weight:600;background:#EEF0F3;color:#576075;padding:5px 10px;border-radius:999px}
+.bar .act{margin-right:auto;display:flex;gap:8px}
+.btn{font-size:13px;font-weight:700;padding:9px 14px;border-radius:10px;white-space:nowrap}
+.b-pri{background:#2D64A7;color:#fff}.b-sec{background:#F0F1F4;color:#1F2B47}.b-acc{background:#B02544;color:#fff}
+.wrap{flex:1;overflow:auto;padding:22px 28px;box-sizing:border-box}
+.flt{display:flex;gap:8px;margin-bottom:16px;align-items:center}
+.flt span{font-size:12px;font-weight:600;border:1px solid #E7E9EE;background:#fff;border-radius:9px;padding:7px 12px;color:#1F2B47}
+.flt span small{color:#8F95A3;font-weight:500;margin-left:6px}
+.flt .on{background:#1F2B47;border-color:#1F2B47;color:#fff}
+.flt .th{margin-right:auto;font-size:12px;color:#8F95A3}
+.grp{background:#fff;border-radius:16px;border:1px solid #E7E9EE;overflow:hidden}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{font-size:11px;font-weight:600;color:#8F95A3;text-align:center;padding:9px 10px;background:#F8F9FB;border-bottom:1px solid #EEF0F3;white-space:nowrap}
+th:first-child,td:first-child{text-align:right;padding-right:16px}
+th small{display:block;font-weight:500;color:#C7CAD1}
+td{padding:10px;border-top:1px solid #EEF0F3;text-align:center;direction:ltr;font-variant-numeric:tabular-nums;vertical-align:middle}
+td:first-child{direction:rtl}
+.av{display:inline-flex;width:28px;height:28px;border-radius:14px;background:#E5ECF4;color:#1F4674;font-size:9px;font-weight:700;align-items:center;justify-content:center;margin-left:8px;vertical-align:middle}
+.dp{font-size:11px;color:#8F95A3;display:block;margin-right:36px}
+.ok{color:#14603A}.wn{color:#8A5A14;background:#FBF3E3;border-radius:6px;padding:2px 6px}.bd{color:#922B20;background:#FBE9E7;border-radius:6px;padding:2px 6px;font-weight:700}
+.st{display:inline-block;width:10px;height:10px;border-radius:5px}
+.chip{font-size:11px;font-weight:600;padding:3px 8px;border-radius:999px;white-space:nowrap;direction:rtl}
+.c-ok{background:#E6F4EC;color:#14603A}.c-warn{background:#FBF3E3;color:#8A5A14}.c-bad{background:#FBE9E7;color:#922B20}.c-neu{background:#EEF0F3;color:#576075}
+.mini{font-size:11px;font-weight:700;padding:5px 9px;border-radius:7px;background:#F0F1F4;color:#1F2B47;direction:rtl;display:inline-block}
+.mini.acc{background:#F5E4E8;color:#7B192F}
+.foot{display:flex;justify-content:space-between;padding:10px 16px;font-size:12px;color:#8F95A3;border-top:1px solid #EEF0F3}
+tr.sel td{background:#FFF7F6}
+</style>
+</helmet>
+<div class="scr" style="width: 1280px; height: 800px">
+<aside class="side">
+<div class="logo"><i></i>منصة الكلية</div>
+<a class="nv" href="HRHome.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8v9a2 2 0 0 1-2 2h-4v-7h-6v7H5a2 2 0 0 1-2-2z"/></svg>الرئيسية</a>
+<a class="nv on" href="DesktopHRTeachers.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>الأساتذة والمؤشرات</a>
+<a class="nv" href="HRNoticeNew.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4z"/></svg>التنبيهات المرسلة</a>
+<a class="nv" href="DesktopHRTeachers.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l4-4 4 4 5-6"/></svg>التقارير</a>
+<div class="me"><span class="av">س ب</span><span><div class="t">أ. سلوى بابكر</div><div class="s">الموارد البشرية</div></span></div>
+</aside>
+<div class="main">
+<div class="bar"><h1>مؤشرات الأساتذة · 46</h1><span class="term">خريف 2026 · حتى الأسبوع 4</span><div class="act"><a class="btn b-sec" href="DesktopHRTeachers.dc.html">مقارنة بربيع 2026</a><a class="btn b-sec" href="DesktopHRTeachers.dc.html">تصدير CSV</a><a class="btn b-pri" href="DesktopHRTeachers.dc.html">تقرير PDF</a></div></div>
+<div class="wrap">
+<div class="flt"><span class="on">الكل 46</span><span>تحت الحد 5</span><span>تنبيه 9</span><span>ضمن الحدود 32</span><span>القسم<small>الكل</small></span><span>الدور<small>أساتذة + معيدون</small></span><span class="th">الحدود: تصحيح ≤ 3 أيام · رفع ≥ 75% · رد ≥ 70%</span></div>
+<div class="grp"><table>
+<thead><tr><th>الأستاذ</th><th>مواد<small>طلاب</small></th><th>محاضرات<small>مرفوعة / مخططة</small></th><th>انتظام الرفع<small>%</small></th><th>واجبات<small>منشورة</small></th><th>اختبارات</th><th>زمن التصحيح<small>يوم</small></th><th>غير مصحح<small>%</small></th><th>جلسات بث<small>منفذة / مخططة</small></th><th>الرد<small>%</small></th><th>الحالة</th><th></th></tr></thead>
+<tbody>
+<tr class="sel"><td><span class="av">ك ح</span>أ. خالد حسن عبد الله<span class="dp">تقنية المعلومات · محاضر</span></td><td>2 · 94</td><td>6 / 16</td><td class="bd">38</td><td>2</td><td>0</td><td class="bd">6.4</td><td class="bd">38</td><td>4 / 5</td><td class="wn">65</td><td><span class="chip c-bad">تحت الحد</span></td><td><a class="mini acc" href="HRNoticeNew.dc.html">تنبيه</a> <a class="mini" href="AcademicAffairsTeacher.dc.html">الملف</a></td></tr>
+<tr><td><span class="av">س م</span>أ. سامي محمد إدريس<span class="dp">الهندسة · أستاذ</span></td><td>3 · 121</td><td>9 / 24</td><td class="wn">58</td><td>3</td><td>1</td><td class="bd">5.1</td><td class="wn">24</td><td class="bd">1 / 5</td><td class="ok">82</td><td><span class="chip c-bad">تحت الحد</span></td><td><a class="mini acc" href="HRNoticeNew.dc.html">تنبيه</a> <a class="mini" href="AcademicAffairsTeacher.dc.html">الملف</a></td></tr>
+<tr><td><span class="av">ل ع</span>أ. ليلى عبد الرحيم<span class="dp">إدارة الأعمال · محاضر</span></td><td>2 · 88</td><td>4 / 16</td><td class="bd">25</td><td>1</td><td>0</td><td class="ok">2.2</td><td class="ok">8</td><td>3 / 4</td><td class="bd">40</td><td><span class="chip c-bad">تحت الحد</span></td><td><a class="mini" href="HRNoticeNew.dc.html">مُنبَّهة</a> <a class="mini" href="AcademicAffairsTeacher.dc.html">الملف</a></td></tr>
+<tr><td><span class="av">أ م</span>أ. أحمد محمود<span class="dp">تقنية المعلومات · أستاذ</span></td><td>1 · 58</td><td>4 / 8</td><td class="ok">100</td><td>2</td><td>1</td><td class="wn">3.4</td><td class="wn">31</td><td>4 / 4</td><td class="ok">91</td><td><span class="chip c-warn">تنبيه</span></td><td><a class="mini" href="AcademicAffairsTeacher.dc.html">الملف</a></td></tr>
+<tr><td><span class="av">ه ع</span>د. هالة عبد الرحمن<span class="dp">تقنية المعلومات · مشرف القسم</span></td><td>2 · 132</td><td>9 / 16</td><td class="ok">100</td><td>3</td><td>2</td><td class="ok">1.4</td><td class="ok">5</td><td>4 / 4</td><td class="ok">96</td><td><span class="chip c-ok">ضمن الحدود</span></td><td><a class="mini" href="AcademicAffairsTeacher.dc.html">الملف</a></td></tr>
+<tr><td><span class="av">س ع</span>د. سلمى عبد الله<span class="dp">تقنية المعلومات · أستاذ</span></td><td>2 · 97</td><td>10 / 16</td><td class="ok">100</td><td>4</td><td>1</td><td class="ok">1.1</td><td class="ok">0</td><td>4 / 4</td><td class="ok">98</td><td><span class="chip c-ok">ضمن الحدود</span></td><td><a class="mini" href="AcademicAffairsTeacher.dc.html">الملف</a></td></tr>
+<tr><td><span class="av">ط م</span>د. طارق محجوب<span class="dp">علوم الحاسوب · مدير القسم</span></td><td>1 · 44</td><td>4 / 8</td><td class="ok">100</td><td>2</td><td>1</td><td class="ok">1.9</td><td class="ok">6</td><td>4 / 4</td><td class="ok">88</td><td><span class="chip c-ok">ضمن الحدود</span></td><td><a class="mini" href="AcademicAffairsTeacher.dc.html">الملف</a></td></tr>
+<tr><td><span class="av">ن س</span>أ. نهى سليمان<span class="dp">تقنية المعلومات · معيدة (تصحح)</span></td><td>1 · 58</td><td>—</td><td>—</td><td>—</td><td>—</td><td class="ok">1.6</td><td class="ok">12</td><td>—</td><td class="ok">85</td><td><span class="chip c-ok">ضمن الحدود</span></td><td><a class="mini" href="AcademicAffairsTeacher.dc.html">الملف</a></td></tr>
+<tr><td><span class="av">ي ب</span>د. ياسر بشير<span class="dp">تقنية المعلومات · أستاذ</span></td><td>0 · 0</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td><span class="chip c-neu">بلا مواد</span></td><td><a class="mini" href="AcademicAffairsTeacher.dc.html">الملف</a></td></tr>
+<tr><td colspan="12" style="text-align: center; color: #2D64A7; font-weight: 600; direction: rtl">عرض 37 آخرين</td></tr>
+</tbody></table><div class="foot"><span>للاطلاع والتنبيه الفردي فقط — الموارد البشرية لا تعدّل التعيينات ولا ترسل إشعارات جماعية. الحدود تضبطها الشؤون العلمية.</span><span>يُحدَّث ليليًا 02:00</span></div></div>
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":800}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

@@ -1000,6 +1000,87 @@
       "w": 1280,
       "x": 4080,
       "y": 17761
+    },
+    "DesktopTeacherToday.dc.html": {
+      "h": 800,
+      "is_interactive": true,
+      "radius": 12,
+      "title": "سطح مكتب الأستاذ — اليوم",
+      "w": 1280,
+      "x": 0,
+      "y": 18948
+    },
+    "DesktopTeacherGrading.dc.html": {
+      "h": 800,
+      "is_interactive": true,
+      "radius": 12,
+      "title": "سطح مكتب الأستاذ — تصحيح متسلسل (تسليم + لوحة درجات)",
+      "w": 1280,
+      "x": 1360,
+      "y": 18948
+    },
+    "DesktopTeacherGradebook.dc.html": {
+      "h": 800,
+      "is_interactive": true,
+      "radius": 12,
+      "title": "سطح مكتب الأستاذ — سجل الدرجات",
+      "w": 1280,
+      "x": 2720,
+      "y": 18948
+    },
+    "DesktopTeacherCourse.dc.html": {
+      "h": 800,
+      "is_interactive": true,
+      "radius": 12,
+      "title": "سطح مكتب الأستاذ — المادة (المحاضرات: ترتيب ونشر)",
+      "w": 1280,
+      "x": 4080,
+      "y": 18948
+    },
+    "DesktopHRTeachers.dc.html": {
+      "h": 800,
+      "is_interactive": true,
+      "radius": 12,
+      "title": "سطح المكتب — الموارد البشرية: جدول مؤشرات الأساتذة",
+      "w": 1280,
+      "x": 0,
+      "y": 20135
+    },
+    "DesktopAcademicAffairs.dc.html": {
+      "h": 800,
+      "is_interactive": true,
+      "radius": 12,
+      "title": "سطح المكتب — الشؤون العلمية: الأقسام والأساتذة والتعيينات",
+      "w": 1280,
+      "x": 1360,
+      "y": 20135
+    },
+    "DesktopStudentAffairsCases.dc.html": {
+      "h": 800,
+      "is_interactive": true,
+      "radius": 12,
+      "title": "سطح المكتب — شؤون الطلاب: الحالات واللوائح",
+      "w": 1280,
+      "x": 2720,
+      "y": 20135
+    },
+    "DesktopSiteInquiries.dc.html": {
+      "h": 800,
+      "is_interactive": true,
+      "radius": 12,
+      "title": "سطح المكتب — مدير الموقع: الاستفسارات (جدول + تفاصيل + WhatsApp)",
+      "w": 1280,
+      "x": 4080,
+      "y": 20135
+    },
+    "FontCompare.dc.html": {
+      "h": 800,
+      "is_interactive": true,
+      "radius": 12,
+      "title": "مقارنة الخطوط — نفس الشاشة بأربعة خطوط عربية",
+      "w": 1280,
+      "x": 0,
+      "y": 21322
     }
   },
   "createdOnFiles": {
@@ -1145,6 +1226,30 @@
       "w": 240,
       "x": 0,
       "y": 17501
+    },
+    "row16": {
+      "kind": "title1",
+      "maxW": 5360,
+      "text": "سطح مكتب الأستاذ — اليوم · تصحيح متسلسل (تسليم + Rubric + اقتراح آلي) · سجل الدرجات · المادة (ترتيب المحاضرات ونشرها)",
+      "w": 240,
+      "x": 0,
+      "y": 18688
+    },
+    "row17": {
+      "kind": "title1",
+      "maxW": 5360,
+      "text": "سطح المكتب (ج) — الموارد البشرية (جدول المؤشرات) · الشؤون العلمية (الأقسام والقيادات والتعيينات) · شؤون الطلاب (الحالات واللوائح) · مدير الموقع (الاستفسارات + WhatsApp)",
+      "w": 240,
+      "x": 0,
+      "y": 19875
+    },
+    "row18": {
+      "kind": "title1",
+      "maxW": 1280,
+      "text": "مقارنة الخطوط — IBM Plex Sans Arabic (المعتمد) مقابل Almarai · Cairo · Noto Kufi Arabic على الشاشة نفسها",
+      "w": 240,
+      "x": 0,
+      "y": 21062
     }
   },
   "order": [
@@ -1258,7 +1363,16 @@
     "DesktopStudentToday.dc.html",
     "DesktopStudentCourse.dc.html",
     "DesktopStudentExam.dc.html",
-    "DesktopStudentResults.dc.html"
+    "DesktopStudentResults.dc.html",
+    "DesktopTeacherToday.dc.html",
+    "DesktopTeacherGrading.dc.html",
+    "DesktopTeacherGradebook.dc.html",
+    "DesktopTeacherCourse.dc.html",
+    "DesktopHRTeachers.dc.html",
+    "DesktopAcademicAffairs.dc.html",
+    "DesktopStudentAffairsCases.dc.html",
+    "DesktopSiteInquiries.dc.html",
+    "FontCompare.dc.html"
   ],
   "pages": [],
   "title": "ECST Portal Prototype"

@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="ar">
+<head>
+<meta charset="utf-8">
+<title>سطح المكتب — شؤون الطلاب: الحالات واللوائح</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'IBM Plex Sans Arabic',system-ui,sans-serif;background:#F4F5F7;color:#1F2B47}
+a{color:#2D64A7;text-decoration:none}
+.scr{width:1280px;height:800px;position:relative;overflow:hidden;background:#F4F5F7;direction:rtl;text-align:right;box-sizing:border-box;display:flex}
+.side{width:240px;flex-shrink:0;background:#1F2B47;color:#fff;padding:20px 16px;box-sizing:border-box;display:flex;flex-direction:column}
+.logo{display:flex;align-items:center;gap:10px;font-size:14px;font-weight:700;padding:4px 6px 22px}
+.logo i{width:32px;height:32px;border-radius:9px;background:#fff;display:block}
+.nv{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;font-size:14px;color:rgba(255,255,255,.75);margin-bottom:2px}
+.nv svg{width:18px;height:18px}
+.nv.on{background:rgba(255,255,255,.12);color:#fff;font-weight:600}
+.nv .n{margin-right:auto;font-size:11px;font-weight:700;background:#B02544;padding:2px 7px;border-radius:999px}
+.me{margin-top:auto;display:flex;align-items:center;gap:10px;padding:10px 6px;border-top:1px solid rgba(255,255,255,.12)}
+.me .av{width:34px;height:34px;border-radius:17px;background:#6A4C93;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700}
+.me .t{font-size:13px;font-weight:600}.me .s{font-size:11px;color:rgba(255,255,255,.6)}
+.main{flex:1;min-width:0;display:flex;flex-direction:column}
+.bar{height:60px;display:flex;align-items:center;gap:14px;padding:0 28px;background:#fff;border-bottom:1px solid #E7E9EE}
+.bar h1{font-size:18px;font-weight:700;margin:0}
+.bar .act{margin-right:auto;display:flex;gap:8px}
+.btn{font-size:13px;font-weight:700;padding:9px 14px;border-radius:10px;white-space:nowrap}
+.b-pri{background:#2D64A7;color:#fff}.b-sec{background:#F0F1F4;color:#1F2B47}
+.wrap{flex:1;overflow:auto;padding:22px 28px;box-sizing:border-box}
+.cols{display:grid;grid-template-columns:1fr 380px;gap:20px}
+.grp{background:#fff;border-radius:16px;border:1px solid #E7E9EE;overflow:hidden;margin-bottom:20px}
+.hd{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid #EEF0F3}
+.hd h2{font-size:14px;font-weight:700;margin:0;flex:1}
+.hd .f{display:flex;gap:6px}
+.hd .f span{font-size:11px;font-weight:600;padding:5px 10px;border-radius:999px;background:#F0F1F4;color:#576075}
+.hd .f .on{background:#1F2B47;color:#fff}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{font-size:11px;font-weight:600;color:#8F95A3;text-align:right;padding:9px 16px;background:#F8F9FB;border-bottom:1px solid #EEF0F3}
+td{padding:10px 16px;border-top:1px solid #EEF0F3;vertical-align:middle}
+tr.sel td{background:#F2F6FB}
+.ty{display:inline-flex;width:30px;height:30px;border-radius:9px;align-items:center;justify-content:center;font-size:10px;font-weight:700;margin-left:8px;vertical-align:middle}
+.ref{font-size:11px;color:#8F95A3;direction:ltr;display:inline-block}
+.chip{font-size:11px;font-weight:600;padding:3px 8px;border-radius:999px;white-space:nowrap}
+.c-ok{background:#E6F4EC;color:#14603A}.c-warn{background:#FBF3E3;color:#8A5A14}.c-bad{background:#FBE9E7;color:#922B20}.c-neu{background:#EEF0F3;color:#576075}.c-info{background:#E5ECF4;color:#1F4674}
+.age{direction:ltr;text-align:right}
+.age.l{color:#922B20;font-weight:700}
+.det{padding:16px}
+.det h3{font-size:15px;font-weight:700;margin:0 0 2px}
+.det .m{font-size:12px;color:#576075;margin-bottom:12px}
+.kv{display:flex;gap:10px;font-size:12px;padding:6px 0;border-top:1px solid #EEF0F3}
+.kv .k{width:80px;color:#8F95A3;flex-shrink:0}.kv .v{font-weight:600;flex:1}
+.tl{margin-top:10px}
+.ev{display:flex;gap:10px;padding:7px 0;font-size:12px;position:relative}
+.ev+.ev:before{content:"";position:absolute;right:7px;top:-10px;height:16px;width:2px;background:#E7E9EE}
+.ev i{width:16px;height:16px;border-radius:8px;border:2px solid #C7CAD1;box-sizing:border-box;background:#fff;flex-shrink:0;margin-top:1px}
+.ev.d i{border-color:#1E7F4F;background:#1E7F4F}.ev.c i{border-color:#B7791F;box-shadow:0 0 0 3px #FBF3E3}
+.ev .t{font-weight:600}.ev .s{font-size:11px;color:#8F95A3}
+.dec{margin-top:12px;border:1.5px solid #E7E9EE;border-radius:12px;padding:10px 12px}
+.dec label{display:block;font-size:11px;font-weight:600;color:#8F95A3;margin-bottom:6px}
+.dec .opts{display:flex;flex-wrap:wrap;gap:5px}
+.dec .opts span{font-size:11px;font-weight:600;padding:5px 9px;border-radius:999px;border:1px solid #E7E9EE;color:#576075}
+.dec .opts .on{background:#1F2B47;border-color:#1F2B47;color:#fff}
+.dec .in{margin-top:8px;font-size:12px;border:1px solid #E7E9EE;border-radius:8px;padding:7px 10px;background:#F8F9FB;color:#576075;line-height:1.6}
+.acts{display:flex;gap:8px;margin-top:12px}
+.acts a{flex:1;text-align:center}
+.reg{padding:6px 16px}
+.rg{display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid #EEF0F3;font-size:13px}
+.rg:first-child{border-top:0}
+.rg .n{flex:1;font-weight:600}.rg .n small{display:block;font-size:11px;color:#8F95A3;font-weight:500}
+.rg .bar{width:80px;height:6px;border-radius:3px;background:#EEF0F3;overflow:hidden;direction:ltr}
+.rg .bar i{display:block;height:100%;background:#2D64A7}
+.rg .p{font-size:12px;font-weight:700;direction:ltr;width:36px;text-align:right}
+</style>
+</helmet>
+<div class="scr" style="width: 1280px; height: 800px">
+<aside class="side">
+<div class="logo"><i></i>منصة الكلية</div>
+<a class="nv" href="StudentAffairsHome.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8v9a2 2 0 0 1-2 2h-4v-7h-6v7H5a2 2 0 0 1-2-2z"/></svg>الرئيسية</a>
+<a class="nv on" href="DesktopStudentAffairsCases.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>الحالات<span class="n">14</span></a>
+<a class="nv" href="StudentAffairsCases.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>بلاغات الغش<span class="n">2</span></a>
+<a class="nv" href="StudentAffairsRegulationNew.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>اللوائح والإقرارات</a>
+<a class="nv" href="AdminNotify.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4z"/></svg>إشعار للطلاب</a>
+<a class="nv" href="DesktopStudentAffairsCases.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l4-4 4 4 5-6"/></svg>التقارير</a>
+<div class="me"><span class="av">إ ط</span><span><div class="t">أ. إيمان الطيب</div><div class="s">أمين شؤون الطلاب</div></span></div>
+</aside>
+<div class="main">
+<div class="bar"><h1>الحالات</h1><div class="act"><a class="btn b-sec" href="DesktopStudentAffairsCases.dc.html">تصدير (بلا أسماء)</a><a class="btn b-pri" href="StudentAffairsCaseNew.dc.html">+ حالة</a></div></div>
+<div class="wrap">
+<div class="cols">
+<div>
+<div class="grp"><div class="hd"><h2>الحالات المفتوحة · 14</h2><div class="f"><span class="on">مفتوحة</span><span>بلاغات 2</span><span>مقفلة 41</span><span>النوع ▾</span><span>القسم ▾</span></div></div>
+<table>
+<thead><tr><th>الحالة</th><th>الطالب</th><th>القسم</th><th>المرحلة</th><th>العمر</th><th>آخر إجراء</th></tr></thead>
+<tbody>
+<tr class="sel"><td><span class="ty" style="background: #FBE9E7; color: #922B20">غش</span>اشتباه غش — اختبار منتصف الفصل <span class="ref">C-2026-019</span></td><td>يوسف عادل محمد</td><td>تقنية المعلومات</td><td><span class="chip c-bad">قيد التحقيق</span></td><td class="age">0 ي</td><td>فُتحت من بلاغ MR-0009 · اليوم</td></tr>
+<tr><td><span class="ty" style="background: #FBE9E7; color: #922B20">غش</span>محاولتان متطابقتان <span class="ref">C-2026-018</span></td><td>هاني عبد الرحمن</td><td>علوم الحاسوب</td><td><span class="chip c-bad">قيد التحقيق</span></td><td class="age">6 ي</td><td>جلسة استماع الثلاثاء</td></tr>
+<tr><td><span class="ty" style="background: #FBF3E3; color: #8A5A14">أك</span>إنذار أكاديمي ثانٍ <span class="ref">C-2026-014</span></td><td>عمر صالح عبد الله</td><td>تقنية المعلومات</td><td><span class="chip c-warn">بانتظار الطالب</span></td><td class="age l">19 ي</td><td>أُرسل تذكير · قبل 5 أيام</td></tr>
+<tr><td><span class="ty" style="background: #FBF3E3; color: #8A5A14">أك</span>انقطاع عن الدراسة <span class="ref">C-2026-012</span></td><td>آية الفاتح</td><td>إدارة الأعمال</td><td><span class="chip c-warn">تواصل مع ولي الأمر</span></td><td class="age l">23 ي</td><td>مكالمة · قبل 8 أيام</td></tr>
+<tr><td><span class="ty" style="background: #E5ECF4; color: #1F4674">سل</span>إتلاف معمل — 4 طلاب <span class="ref">C-2026-016</span></td><td>مجموعة (4)</td><td>الهندسة</td><td><span class="chip c-info">القرار قيد الصياغة</span></td><td class="age">9 ي</td><td>محضر اللجنة · أمس</td></tr>
+<tr><td><span class="ty" style="background: #EEF0F3; color: #576075">اج</span>طلب تأجيل رسوم <span class="ref">C-2026-017</span></td><td>— (سرية)</td><td>تقنية المعلومات</td><td><span class="chip c-neu">مفتوحة</span></td><td class="age">4 ي</td><td>محوّلة من مسجل القسم</td></tr>
+<tr><td colspan="6" style="text-align: center; color: #2D64A7; font-weight: 600">عرض 8 أخرى</td></tr>
+</tbody></table></div>
+<div class="grp"><div class="hd"><h2>اللوائح والإقرارات</h2><a href="StudentAffairsRegulationNew.dc.html" style="font-size: 12px; font-weight: 600">+ لائحة</a></div><div class="reg">
+<div class="rg"><span class="n">لائحة السلوك 2026<small>منشورة 1 سبتمبر · كل الطلاب</small></span><span class="bar"><i style="width: 78%"></i></span><span class="p">78%</span><span class="chip c-ok">منشورة</span></div>
+<div class="rg"><span class="n">لائحة الامتحانات 2026<small>مسودة · الإقرار شرط لبدء الاختبارات</small></span><span class="bar"><i style="width: 0%"></i></span><span class="p">—</span><span class="chip c-neu">مسودة</span></div>
+<div class="rg"><span class="n">ضوابط المعامل<small>منشورة 2025 · الهندسة + تقنية المعلومات</small></span><span class="bar"><i style="width: 94%"></i></span><span class="p">94%</span><span class="chip c-ok">منشورة</span></div>
+</div></div>
+</div>
+<div>
+<div class="grp"><div class="det"><h3>C-2026-019 · اشتباه غش</h3><div class="m">يوسف عادل محمد · 26-IT-0088 · تقنية المعلومات · المستوى 1</div>
+<div class="kv"><span class="k">المصدر</span><span class="v">بلاغ MR-0009 · أ. أحمد محمود</span></div>
+<div class="kv"><span class="k">الاختبار</span><span class="v">منتصف الفصل — هياكل البيانات</span></div>
+<div class="kv"><span class="k">المرفقات</span><span class="v">سجل المحاولة · لقطة المراقبة</span></div>
+<div class="kv"><span class="k">النتيجة</span><span class="v">معلّقة مؤقتًا</span></div>
+<div class="tl">
+<div class="ev d"><i></i><span><div class="t">بلاغ من الأستاذ</div><div class="s">اليوم 09:40</div></span></div>
+<div class="ev d"><i></i><span><div class="t">فُتحت الحالة وأُشعر الطالب</div><div class="s">اليوم 10:15 · إيمان الطيب</div></span></div>
+<div class="ev c"><i></i><span><div class="t">جلسة استماع</div><div class="s">الثلاثاء 30 سبتمبر · 11:00</div></span></div>
+<div class="ev"><i></i><span><div class="t">القرار والنشر للطالب</div><div class="s">—</div></span></div>
+</div>
+<div class="dec"><label>القرار (بعد الاستماع)</label><div class="opts"><span>حفظ الحالة</span><span class="on">إنذار</span><span>إلغاء نتيجة الاختبار</span><span>إعادة الاختبار</span><span>إحالة للجنة</span></div><div class="in">السريان: من تاريخ القرار · يُنشر للطالب في «حالتي» ويُشعر مدير القسم</div></div>
+<div class="acts"><a class="btn b-sec" href="AdminCase.dc.html">ملاحظة داخلية</a><a class="btn b-pri" href="AdminCase.dc.html">فتح الحالة كاملة</a></div>
+</div></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":800}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>
