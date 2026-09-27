@@ -1,0 +1,21 @@
+{
+  "name": "@ecst/landing",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev --port 4321 --ignore-lock",
+    "build": "astro build",
+    "preview": "astro preview"
+  },
+  "dependencies": {
+    "@ecst/ui": "workspace:*",
+    "@fontsource/ibm-plex-sans-arabic": "^5.3.0",
+    "@fontsource/noto-kufi-arabic": "^5.3.0",
+    "astro": "^7.3.5"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.3.3",
+    "tailwindcss": "^4.3.3"
+  }
+}

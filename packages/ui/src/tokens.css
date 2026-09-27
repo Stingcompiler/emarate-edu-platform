@@ -1,0 +1,72 @@
+/*
+ * Role tokens — what components actually use (docs/06 §2.6, §2.7).
+ * They point at the raw scales declared in theme.css (`@theme static`) and are
+ * the only values that change between light and dark mode.
+ */
+
+:root {
+  --bg: var(--color-n0);
+  --bg-subtle: var(--color-n50);
+  --surface: var(--color-n0);
+  --surface-alt: var(--color-n100);
+  --border: var(--color-n300);
+  --border-soft: var(--color-n200);
+  --text: var(--color-n800);
+  --text-muted: var(--color-n500);
+  --text-inverse: #ffffff;
+  --primary: var(--color-primary-500);
+  --primary-hover: var(--color-primary-600);
+  --primary-soft: var(--color-primary-100);
+  --accent: var(--color-accent-500);
+  --accent-hover: var(--color-accent-600);
+  --accent-soft: var(--color-accent-100);
+  --header-bg: var(--color-navy-500);
+  --focus-ring: var(--color-primary-300);
+
+  /* Typography rules (§3): secondary text never below 12px (11px is for
+     chips/badges only); Arabic line height at least 1.6. */
+  --text-secondary-min: 0.75rem;
+  --leading-arabic: 1.6;
+
+  --dur-fast: 150ms;
+  --dur-base: 200ms;
+}
+
+/* Dark mode (§2.6): explicit choice, or the system preference by default. */
+:root[data-theme="dark"] {
+  --bg: #0c111c;
+  --bg-subtle: #111727;
+  --surface: #151e31;
+  --surface-alt: #1a243c;
+  --border: #2a3349;
+  --border-soft: #1f2b47;
+  --text: #f1f2f3;
+  --text-muted: #c0c3cb;
+  --primary: #96b1d3;
+  --primary-hover: #c4d3e6;
+  --primary-soft: #18375b;
+  --accent: #d792a1;
+  --accent-hover: #e8c1ca;
+  --accent-soft: #460e1b;
+  --header-bg: #0c111c;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0c111c;
+    --bg-subtle: #111727;
+    --surface: #151e31;
+    --surface-alt: #1a243c;
+    --border: #2a3349;
+    --border-soft: #1f2b47;
+    --text: #f1f2f3;
+    --text-muted: #c0c3cb;
+    --primary: #96b1d3;
+    --primary-hover: #c4d3e6;
+    --primary-soft: #18375b;
+    --accent: #d792a1;
+    --accent-hover: #e8c1ca;
+    --accent-soft: #460e1b;
+    --header-bg: #0c111c;
+  }
+}

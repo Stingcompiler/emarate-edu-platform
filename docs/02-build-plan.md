@@ -207,7 +207,8 @@ HRNotice (teacher, sent_by, subject, body, acknowledged_at) → يولّد Notif
 
 كل مرحلة تنتهي بـ: Migrations، Seeds، اختبارات صلاحيات، توثيق API.
 
-### Phase 0 — الأساس
+### Phase 0 — الأساس ✅
+> **مُنجز.** ملاحظات التنفيذ: Django 6.1 (إعداد `MAILERS` الجديد بدل `EMAIL_BACKEND` المُهمَل)، ruff يقوم مقام black، TypeScript 5.9 (الإصدار 7 لا يوفّر واجهة المترجم التي يحتاجها `openapi-typescript`)، تخزين Bunny مؤجّل إلى Phase 2 ويُنبَّه عليه بفحص `check --deploy` (`core.W001`).
 - هيكلة Monorepo (`backend/`, `apps/portal`, `apps/landing`, `packages/*`)، لا `dist` في Git، إعدادات `dev` (SQLite/Eager/Console) و`prod` (Postgres/Redis/Anymail/Bunny) + `scripts/dev.sh`، pre-commit، CI على SQLite وPostgres.
 - Backend جديد: إعدادات مقسمة (base/dev/test/prod)، Redis، Celery، Anymail، Storage خاص/عام، Throttling، CSP، Logging، drf-spectacular.
 - **قبول:** `scripts/dev.sh` → API صحي على SQLite بلا أي خدمة خارجية، اختبار واحد يمر على SQLite وPostgres في CI، توليد Client من OpenAPI.

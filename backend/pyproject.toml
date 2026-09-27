@@ -1,0 +1,56 @@
+[project]
+name = "ecst-backend"
+version = "0.1.0"
+description = "Emirates College for Science & Technology — platform API"
+requires-python = ">=3.13,<3.15"
+dependencies = [
+    "Django>=6.1,<6.2",
+    "djangorestframework>=3.18,<3.19",
+    "drf-spectacular>=0.30,<0.31",
+    "celery>=5.6,<5.7",
+    "dj-database-url>=3.1,<4",
+]
+
+[project.optional-dependencies]
+# Production-only services. Development runs with none of these (docs/05 §4).
+prod = [
+    "psycopg[binary]>=3.2,<4",
+    "redis>=6,<7",
+    "django-anymail[brevo,resend]>=15,<16",
+    "gunicorn>=23,<24",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.4,<9",
+    "pytest-django>=4.14,<5",
+    "ruff>=0.16,<0.17",
+    # Lets the test suite run against a local/CI PostgreSQL (DATABASE_URL).
+    "psycopg[binary]>=3.2,<4",
+]
+
+[tool.uv]
+package = false
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "config.settings.test"
+python_files = ["test_*.py"]
+# Migrations run in tests on purpose: they must work on SQLite and PostgreSQL (docs/05 §4 rule 8).
+addopts = "-ra --strict-markers"
+testpaths = ["."]
+
+[tool.ruff]
+target-version = "py313"
+line-length = 100
+extend-exclude = ["*/migrations/*"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "DJ", "S", "SIM", "RUF"]
+ignore = [
+    "RUF012", # mutable class attributes are idiomatic in Django/DRF (Meta, fields)
+]
+
+[tool.ruff.lint.per-file-ignores]
+"**/tests/**" = ["S101", "S105", "S106"]
+"config/settings/dev.py" = ["S105"]
+"config/settings/test.py" = ["S105"]

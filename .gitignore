@@ -10,6 +10,8 @@ backend/.env.*
 backend/media/
 backend/staticfiles/
 backend/db.sqlite3
+backend/db.sqlite3-*
+backend/sent-emails/
 .pytest_cache/
 .ruff_cache/
 .mypy_cache/
@@ -27,8 +29,7 @@ apps/*/.env.*
 !apps/*/.env.example
 packages/api/src/generated/
 
-# ─── Docker / Local data ───────────────────────────────────────────
-.docker-data/
+# ─── Local data ────────────────────────────────────────────────────
 *.log
 
 # ─── OS / IDE ──────────────────────────────────────────────────────

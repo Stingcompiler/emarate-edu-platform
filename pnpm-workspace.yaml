@@ -1,0 +1,6 @@
+packages:
+  - apps/*
+  - packages/*
+# Dependency install scripts are blocked by default (pnpm 12); approve only known ones.
+allowBuilds:
+  esbuild: true

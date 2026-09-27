@@ -1,0 +1,22 @@
+{
+  "name": "@ecst/api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Typed API client generated from the backend OpenAPI schema.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "generate": "node scripts/generate.mjs",
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "openapi-fetch": "^0.17.0"
+  },
+  "devDependencies": {
+    "@ecst/config": "workspace:*",
+    "openapi-typescript": "^7.13.0",
+    "typescript": "~5.9.3"
+  }
+}

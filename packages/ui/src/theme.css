@@ -1,0 +1,132 @@
+/*
+ * ECST design system for Tailwind 4 — the entry point every app imports:
+ *
+ *   @import "tailwindcss";
+ *   @import "@ecst/ui/theme.css";
+ *
+ * Values mirror docs/06-design-system.md §2–§3; change them there first.
+ *
+ * Two layers, with no overlapping names (so nothing can refer to itself):
+ *   1. `@theme static` below — the raw scales (brand, neutrals, semantic,
+ *      radius, shadow, type). `static` emits every variable even if unused,
+ *      because tokens.css builds on them.
+ *   2. tokens.css — role variables (--bg, --text, --primary, …) that switch
+ *      between light and dark. The `@theme inline` block maps them to
+ *      utilities: bg-bg, text-text, bg-primary, border-border, …
+ */
+@import "./tokens.css";
+
+@theme static {
+  /* Brand scales (§2.1) */
+  --color-primary-50: #f2f5f9;
+  --color-primary-100: #e5ecf4;
+  --color-primary-200: #c4d3e6;
+  --color-primary-300: #96b1d3;
+  --color-primary-400: #618abd;
+  --color-primary-500: #2d64a7;
+  --color-primary-600: #26558d;
+  --color-primary-700: #1f4674;
+  --color-primary-800: #18375b;
+  --color-primary-900: #122842;
+
+  --color-accent-50: #faf1f3;
+  --color-accent-100: #f5e4e8;
+  --color-accent-200: #e8c1ca;
+  --color-accent-300: #d792a1;
+  --color-accent-400: #c35b72;
+  --color-accent-500: #b02544;
+  --color-accent-600: #951f39;
+  --color-accent-700: #7b192f;
+  --color-accent-800: #601425;
+  --color-accent-900: #460e1b;
+
+  --color-navy-50: #f1f2f3;
+  --color-navy-100: #e4e5e8;
+  --color-navy-200: #c0c3cb;
+  --color-navy-300: #8f95a3;
+  --color-navy-400: #576075;
+  --color-navy-500: #1f2b47;
+  --color-navy-600: #1a243c;
+  --color-navy-700: #151e31;
+  --color-navy-800: #111727;
+  --color-navy-900: #0c111c;
+
+  /* Neutrals (§2.2) */
+  --color-n0: #ffffff;
+  --color-n50: #f7f8fa;
+  --color-n100: #eef0f3;
+  --color-n200: #dcdfe5;
+  --color-n300: #c0c3cb;
+  --color-n400: #8f95a3;
+  --color-n500: #576075;
+  --color-n600: #3b4459;
+  --color-n800: #1f2b47;
+  --color-n900: #111318;
+
+  /* Semantic (§2.3) — danger differs from accent on purpose */
+  --color-success: #1e7f4f;
+  --color-success-soft: #e6f4ec;
+  --color-success-strong: #14603a;
+  --color-warning: #b7791f;
+  --color-warning-soft: #fbf3e3;
+  --color-warning-strong: #8a5a14;
+  --color-danger: #c0392b;
+  --color-danger-soft: #fbe9e7;
+  --color-danger-strong: #922b20;
+  --color-info: #2d64a7;
+  --color-info-soft: #e5ecf4;
+  --color-info-strong: #1f4674;
+  --color-neutral: #576075;
+  --color-neutral-soft: #eef0f3;
+  --color-neutral-strong: #3b4459;
+
+  /* Type (§3): Plex everywhere; Noto Kufi only for public-site headings ≥ 1.5rem */
+  --font-sans: "IBM Plex Sans Arabic", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+  --font-display: "Noto Kufi Arabic", "IBM Plex Sans Arabic", system-ui, sans-serif;
+
+  /* Shape and depth */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --shadow-sm: 0 1px 2px rgb(31 43 71 / 0.06);
+  --shadow-md: 0 4px 12px rgb(31 43 71 / 0.08);
+  --shadow-lg: 0 12px 32px rgb(31 43 71 / 0.12);
+
+  /* Motion */
+  --ease-brand: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* Role utilities — these follow light/dark automatically. */
+@theme inline {
+  --color-bg: var(--bg);
+  --color-bg-subtle: var(--bg-subtle);
+  --color-surface: var(--surface);
+  --color-surface-alt: var(--surface-alt);
+  --color-border: var(--border);
+  --color-border-soft: var(--border-soft);
+  --color-text: var(--text);
+  --color-text-muted: var(--text-muted);
+  --color-text-inverse: var(--text-inverse);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-soft: var(--primary-soft);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-soft: var(--accent-soft);
+  --color-header: var(--header-bg);
+}
+
+@layer base {
+  html {
+    font-family: var(--font-sans);
+    line-height: var(--leading-arabic);
+    color: var(--text);
+    background: var(--bg-subtle);
+    -webkit-text-size-adjust: 100%;
+  }
+  :focus-visible {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 2px;
+  }
+}
