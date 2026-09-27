@@ -10,6 +10,8 @@ from files import views as files
 from learning import views as learning
 from notifications import views as notifications
 from organization import views as organization
+from results import views as results
+from student_affairs import views as student_affairs
 from students import views as students
 
 router = SimpleRouter(trailing_slash=False)
@@ -35,6 +37,17 @@ router.register("submissions", learning.SubmissionViewSet, basename="submission"
 router.register("notifications/sent", notifications.SentViewSet, basename="notification-sent")
 router.register("notifications", notifications.InboxViewSet, basename="notification")
 router.register("hr-notices", notifications.HRNoticeViewSet, basename="hr-notice")
+router.register("result-imports", results.ResultImportViewSet, basename="result-import")
+router.register("result-corrections", results.CorrectionViewSet, basename="result-correction")
+router.register("results/grading-scales", results.GradingScaleViewSet, basename="grading-scale")
+router.register("results/term-releases", results.TermReleaseViewSet, basename="term-release")
+router.register("results", results.ResultViewSet, basename="result")
+router.register("regulations", student_affairs.RegulationViewSet, basename="regulation")
+router.register("cases", student_affairs.CaseViewSet, basename="case")
+router.register("me/cases", student_affairs.MyCasesViewSet, basename="my-case")
+router.register(
+    "misconduct-reports", student_affairs.MisconductReportViewSet, basename="misconduct-report"
+)
 
 urlpatterns = [
     path("auth/login", accounts.LoginView.as_view(), name="auth-login"),
@@ -75,6 +88,13 @@ urlpatterns = [
         "push/subscriptions/remove",
         notifications.PushUnsubscribeView.as_view(),
         name="push-unsubscribe",
+    ),
+    path("me/results", results.MyResultsView.as_view(), name="me-results"),
+    path("results/settings", results.DisplaySettingsView.as_view(), name="result-settings"),
+    path(
+        "students/<uuid:public_id>/status",
+        student_affairs.StudentStatusView.as_view(),
+        name="student-status",
     ),
     path("", include(router.urls)),
 ]

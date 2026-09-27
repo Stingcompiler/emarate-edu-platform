@@ -37,6 +37,8 @@ def upload(meta: RequestMeta, *, purpose: str, offering, uploaded) -> StoredFile
     found = access.policy(purpose)
     if found is None:
         raise ValidationError({"purpose": ["Unknown purpose."]})
+    if found.needs_offering and offering is None:
+        raise ValidationError({"offering": ["Choose the course."]})
     if not found.can_upload(meta.actor, offering):
         raise PermissionDenied("You cannot upload files to this course.")
     try:
@@ -63,7 +65,7 @@ def upload(meta: RequestMeta, *, purpose: str, offering, uploaded) -> StoredFile
             "file.upload",
             stored,
             new={"purpose": purpose, "size": stored.size},
-            department_id=offering.course.department_id,
+            department_id=offering.course.department_id if offering else None,
         )
     return stored
 

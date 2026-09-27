@@ -8,7 +8,9 @@ from .models import Purpose, StoredFile, VideoAsset
 class FileUploadSerializer(serializers.Serializer):
     file = serializers.FileField()
     purpose = serializers.ChoiceField(choices=Purpose.choices)
-    offering = serializers.PrimaryKeyRelatedField(queryset=CourseOffering.objects.all())
+    offering = serializers.PrimaryKeyRelatedField(
+        queryset=CourseOffering.objects.all(), required=False, allow_null=True
+    )
 
 
 class StoredFileSerializer(serializers.ModelSerializer):

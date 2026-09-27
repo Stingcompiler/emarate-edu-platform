@@ -94,6 +94,17 @@ def _hash_national_id(value: str) -> str:
 
 
 def read_rows(name: str, content: bytes) -> list[dict[str, str]]:
+    rows, _ = read_table(name, content, HEADERS, REQUIRED)
+    return rows
+
+
+def read_table(
+    name: str, content: bytes, headers: dict[str, str], required: tuple[str, ...]
+) -> tuple[list[dict], list[str]]:
+    """Read the first sheet (xlsx) or a UTF-8 CSV into dicts keyed by field name.
+
+    Returns the rows and the detected field columns. Blank lines are skipped.
+    """
     if len(content) > MAX_BYTES:
         raise ImportFileError("The file is larger than 5 MB.")
     lower = name.lower()
@@ -108,8 +119,8 @@ def read_rows(name: str, content: bytes) -> list[dict[str, str]]:
         raise ImportFileError("Upload an Excel (.xlsx) or CSV file.")
     if not table:
         raise ImportFileError("The file is empty.")
-    header = [HEADERS.get(str(h).strip().lower(), HEADERS.get(str(h).strip())) for h in table[0]]
-    missing = [f for f in REQUIRED if f not in header]
+    header = [headers.get(str(h).strip().lower(), headers.get(str(h).strip())) for h in table[0]]
+    missing = [f for f in required if f not in header]
     if missing:
         raise ImportFileError(f"Missing required columns: {', '.join(missing)}.")
     rows = []
@@ -123,7 +134,7 @@ def read_rows(name: str, content: bytes) -> list[dict[str, str]]:
         rows.append(row)
     if len(rows) > MAX_ROWS:
         raise ImportFileError(f"The file has more than {MAX_ROWS} rows.")
-    return rows
+    return rows, [h for h in header if h]
 
 
 def _parse_date(value) -> str | None:

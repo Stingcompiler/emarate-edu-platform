@@ -40,7 +40,7 @@ class FileUploadView(APIView):
         stored = services.upload(
             RequestMeta.from_request(request),
             purpose=data.validated_data["purpose"],
-            offering=data.validated_data["offering"],
+            offering=data.validated_data.get("offering"),
             uploaded=data.validated_data["file"],
         )
         return Response(StoredFileSerializer(stored).data, status=status.HTTP_201_CREATED)

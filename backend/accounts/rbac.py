@@ -110,6 +110,36 @@ CAPABILITIES: dict[str, frozenset[Role]] = {
     ),
     "learning.manage": frozenset({R.SYSTEM_ADMIN, R.DEPARTMENT_MANAGER, R.DEPARTMENT_SUPERVISOR}),
     "learning.delete": frozenset({R.SYSTEM_ADMIN, R.DEPARTMENT_MANAGER}),
+    # Results (docs/03 §3.4): the file is the source; corrections need approval.
+    "results.manage": frozenset(
+        {R.SYSTEM_ADMIN, R.RESULTS_OFFICER, R.DEPARTMENT_MANAGER, R.DEPARTMENT_SUPERVISOR}
+    ),
+    "results.view": frozenset(
+        {
+            R.SYSTEM_ADMIN,
+            R.HEAD_REGISTRAR,
+            R.RESULTS_OFFICER,
+            R.DEPARTMENT_MANAGER,
+            R.DEPARTMENT_SUPERVISOR,
+        }
+    ),
+    "results.correct": frozenset({R.SYSTEM_ADMIN, R.RESULTS_OFFICER}),
+    "results.approve": frozenset({R.SYSTEM_ADMIN, R.ACADEMIC_AFFAIRS}),
+    "results.settings": frozenset({R.SYSTEM_ADMIN, R.RESULTS_OFFICER}),
+    # Student affairs (docs/03 §3.14)
+    "regulations.manage": frozenset({R.SYSTEM_ADMIN, R.STUDENT_AFFAIRS}),
+    "cases.manage": frozenset({R.SYSTEM_ADMIN, R.STUDENT_AFFAIRS}),
+    "cases.view": frozenset(
+        {
+            R.SYSTEM_ADMIN,
+            R.STUDENT_AFFAIRS,
+            R.HEAD_REGISTRAR,
+            R.ACADEMIC_AFFAIRS,
+            R.DEPARTMENT_MANAGER,
+            R.DEPARTMENT_SUPERVISOR,
+        }
+    ),
+    "students.status": frozenset({R.SYSTEM_ADMIN, R.STUDENT_AFFAIRS}),
     # Users and roles
     "users.view": frozenset({R.SYSTEM_ADMIN, R.ACADEMIC_AFFAIRS, R.HEAD_REGISTRAR}),
     # Audit log: system admin sees everything; department roles their department.
