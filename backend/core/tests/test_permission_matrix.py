@@ -57,6 +57,19 @@ STUDENTS = frozenset(
 )
 IMPORTS = frozenset({R.SYSTEM_ADMIN, R.HEAD_REGISTRAR})
 AUDIT = frozenset({R.SYSTEM_ADMIN, R.DEPARTMENT_MANAGER, R.DEPARTMENT_SUPERVISOR})
+# In the world below, the teacher and TA are assigned to IT101 and the student is enrolled.
+LEARNING_STAFF = frozenset(
+    {
+        R.SYSTEM_ADMIN,
+        R.ACADEMIC_AFFAIRS,
+        R.DEPARTMENT_MANAGER,
+        R.DEPARTMENT_SUPERVISOR,
+        R.TEACHER,
+        R.TA,
+    }
+)
+LEARNING = LEARNING_STAFF | {R.STUDENT}
+OUTSIDERS = EVERYONE - LEARNING  # learning objects outside your courses are 404
 
 # url name → (path template, roles allowed to read, roles that get 404 instead of 403)
 READS: dict[str, tuple[str, frozenset, frozenset]] = {
@@ -109,10 +122,41 @@ READS: dict[str, tuple[str, frozenset, frozenset]] = {
     ),
     "audit-log-list": ("/api/v1/audit-logs", AUDIT, frozenset()),
     "audit-log-detail": ("/api/v1/audit-logs/{audit}", AUDIT, frozenset()),
+    "lecture-list": ("/api/v1/lectures", EVERYONE, frozenset()),
+    "lecture-detail": ("/api/v1/lectures/{lecture}", LEARNING, OUTSIDERS),
+    "assignment-list": ("/api/v1/assignments", EVERYONE, frozenset()),
+    "assignment-detail": ("/api/v1/assignments/{assignment}", LEARNING, OUTSIDERS),
+    "assignment-submissions": (
+        "/api/v1/assignments/{assignment}/submissions",
+        LEARNING_STAFF,
+        OUTSIDERS,  # the enrolled student gets 403
+    ),
+    "assignment-my-submission": (
+        "/api/v1/assignments/{assignment}/my-submission",
+        frozenset({R.STUDENT}),
+        EVERYONE - {R.STUDENT},
+    ),
+    "submission-detail": ("/api/v1/submissions/{submission}", LEARNING, OUTSIDERS),
+    "file-url": ("/api/v1/files/{file}/url", LEARNING, OUTSIDERS),
+    "video-playback": ("/api/v1/videos/{video}/playback", LEARNING, OUTSIDERS),
 }
 
 # url name → "module::test" that pins down its (write) rules.
+_L = "learning.tests.test_learning::"
+_F = "files.tests.test_files::"
 COVERED_ELSEWHERE = {
+    "lecture-publish": _L + "test_students_see_published_lectures_only",
+    "lecture-unpublish": _L + "test_resource_removal_and_unpublish",
+    "lecture-add-resource": _L + "test_lecture_file_link_is_signed_and_scoped",
+    "lecture-remove-resource": _L + "test_resource_removal_and_unpublish",
+    "assignment-publish": _L + "test_drafts_are_hidden_and_publish_needs_submission_types",
+    "assignment-close": _L + "test_assignment_with_submissions_cannot_be_deleted",
+    "assignment-submit": _L + "test_submit_resubmit_and_grade",
+    "submission-grade": _L + "test_submit_resubmit_and_grade",
+    "submission-approve": _L + "test_rule_grading_is_a_suggestion_until_approved",
+    "file-upload": _L + "test_upload_permissions",
+    "video-ticket": _F + "test_student_cannot_request_upload_tickets",
+    "video-local-upload": _F + "test_local_video_flow",
     "role-assignment-detail": (
         "core.tests.test_permission_matrix::test_revoking_follows_the_same_rules"
     ),
@@ -178,6 +222,7 @@ def world(users, college, it_dept, it_program, term, it_offering, make_student, 
     audit = AuditLog.objects.create(
         action="test", target_type="x", target_id="1", target_repr="x", department=it_dept
     )
+    learning = _learning_world(users, it_offering, student)
     return {
         "college": college.pk,
         "dept": it_dept.pk,
@@ -192,6 +237,64 @@ def world(users, college, it_dept, it_program, term, it_offering, make_student, 
         "teacher": users[R.TEACHER].public_id,
         "registration": registration.public_id,
         "audit": audit.pk,
+        **learning,
+    }
+
+
+def _learning_world(users, offering, student):
+    from datetime import timedelta
+
+    from django.utils import timezone
+
+    from conftest import pdf_upload
+    from files.models import StoredFile, VideoAsset
+    from learning.models import Assignment, Lecture, LectureResource, Submission
+
+    teacher = users[R.TEACHER]
+    offering.instructors.create(user=teacher, role="teacher")
+    offering.instructors.create(user=users[R.TA], role="ta")
+    student.user = users[R.STUDENT]
+    student.save()
+    lecture = Lecture.objects.create(
+        offering=offering, title_ar="م1", is_published=True, created_by=teacher
+    )
+    stored = StoredFile.objects.create(
+        purpose="lecture",
+        offering=offering,
+        file=pdf_upload(),
+        name="notes.pdf",
+        size=10,
+        mime="application/pdf",
+        sha256="0" * 64,
+        uploaded_by=teacher,
+    )
+    video = VideoAsset.objects.create(
+        offering=offering,
+        title="v",
+        provider="local",
+        file=pdf_upload("v.mp4"),
+        status="ready",
+        uploaded_by=teacher,
+    )
+    LectureResource.objects.create(lecture=lecture, kind="file", title="f", file=stored)
+    LectureResource.objects.create(lecture=lecture, kind="video", title="v", video=video)
+    assignment = Assignment.objects.create(
+        offering=offering,
+        title="w1",
+        due_at=timezone.now() + timedelta(days=1),
+        submission_types=["text"],
+        status="published",
+        created_by=teacher,
+    )
+    submission = Submission.objects.create(
+        assignment=assignment, student_record=student, first_submitted_at=timezone.now()
+    )
+    return {
+        "lecture": lecture.public_id,
+        "assignment": assignment.public_id,
+        "submission": submission.public_id,
+        "file": stored.public_id,
+        "video": video.public_id,
     }
 
 

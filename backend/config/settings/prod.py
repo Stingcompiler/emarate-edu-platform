@@ -35,9 +35,21 @@ ANYMAIL = {
 }
 INSTALLED_APPS = [*INSTALLED_APPS, "anymail"]  # noqa: F405
 
-# File storage: Bunny Storage (private + public zones) arrives with Phase 2.
-# Until then production would write to local disk; the deploy check
-# `core.W001` makes that impossible to miss (`manage.py check --deploy`).
+# ─── Files: Bunny Storage (private zone) + signed CDN links + Bunny Stream ─
+# Set MEDIA_BACKEND=local only for a throwaway deployment; `check --deploy`
+# then warns (core.W001).
+MEDIA_BACKEND = env("MEDIA_BACKEND", "bunny")
+if MEDIA_BACKEND == "bunny":
+    BUNNY_STORAGE_HOST = env("BUNNY_STORAGE_HOST", "https://storage.bunnycdn.com")
+    BUNNY_STORAGE_ZONE = env("BUNNY_STORAGE_ZONE", required=True)
+    BUNNY_STORAGE_KEY = env("BUNNY_STORAGE_KEY", required=True)
+    BUNNY_PULL_ZONE_URL = env("BUNNY_PULL_ZONE_URL", required=True)
+    BUNNY_TOKEN_KEY = env("BUNNY_TOKEN_KEY", required=True)
+    BUNNY_STREAM_LIBRARY_ID = env("BUNNY_STREAM_LIBRARY_ID", required=True)
+    BUNNY_STREAM_API_KEY = env("BUNNY_STREAM_API_KEY", required=True)
+    BUNNY_STREAM_TOKEN_KEY = env("BUNNY_STREAM_TOKEN_KEY", required=True)
+    BUNNY_WEBHOOK_SECRET = env("BUNNY_WEBHOOK_SECRET", required=True)
+    STORAGES = {**STORAGES, "default": {"BACKEND": "files.bunny.BunnyStorage"}}  # noqa: F405
 
 # ─── HTTPS hardening ──────────────────────────────────────────────────────
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")

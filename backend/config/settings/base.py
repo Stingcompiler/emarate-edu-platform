@@ -37,6 +37,8 @@ INSTALLED_APPS = [
     "academic",
     "students",
     "accounts",
+    "files",
+    "learning",
 ]
 
 MIDDLEWARE = [
@@ -110,6 +112,21 @@ STORAGES = {
     "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
 }
 
+# ─── Private files and videos (files app, docs/05 §8.8) ───────────────────
+# "local": signed links served by Django (development); "bunny": Bunny
+# Storage + token-authenticated CDN links + Bunny Stream (production).
+MEDIA_BACKEND = "local"
+VIDEO_MAX_MB = 4096
+BUNNY_STORAGE_HOST = "https://storage.bunnycdn.com"
+BUNNY_STORAGE_ZONE = ""
+BUNNY_STORAGE_KEY = ""
+BUNNY_PULL_ZONE_URL = ""
+BUNNY_TOKEN_KEY = ""
+BUNNY_STREAM_LIBRARY_ID = ""
+BUNNY_STREAM_API_KEY = ""
+BUNNY_STREAM_TOKEN_KEY = ""
+BUNNY_WEBHOOK_SECRET = ""
+
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # ─── Cache (LocMem in development; Redis in production) ───────────────────
@@ -160,6 +177,7 @@ SPECTACULAR_SETTINGS = {
         "CheckResultEnum": ["ok", "error"],
         "RoleEnum": "accounts.rbac.Role",
         "TeachingKindEnum": "academic.models.DepartmentMembership.Kind",
+        "ResourceKindEnum": "learning.models.LectureResource.Kind",
     },
 }
 

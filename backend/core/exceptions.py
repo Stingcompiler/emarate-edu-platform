@@ -60,7 +60,7 @@ def problem_exception_handler(exc: Exception, context: dict[str, Any]) -> Respon
         body = problem(
             response.status_code,
             detail=str(_("One or more fields are invalid.")),
-            code="invalid",
+            code=getattr(exc, "problem_code", "invalid"),
             errors=_flatten(exc.detail),
         )
     elif isinstance(exc, exceptions.APIException):

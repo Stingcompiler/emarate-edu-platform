@@ -6,6 +6,8 @@ from rest_framework.routers import SimpleRouter
 from academic import views as academic
 from accounts import views as accounts
 from audit import views as audit
+from files import views as files
+from learning import views as learning
 from organization import views as organization
 from students import views as students
 
@@ -26,6 +28,9 @@ router.register(
     "registration-requests", accounts.RegistrationRequestViewSet, basename="registration-request"
 )
 router.register("audit-logs", audit.AuditLogViewSet, basename="audit-log")
+router.register("lectures", learning.LectureViewSet, basename="lecture")
+router.register("assignments", learning.AssignmentViewSet, basename="assignment")
+router.register("submissions", learning.SubmissionViewSet, basename="submission")
 
 urlpatterns = [
     path("auth/login", accounts.LoginView.as_view(), name="auth-login"),
@@ -43,6 +48,17 @@ urlpatterns = [
         "departments/<int:department_id>/members/<int:membership_id>",
         academic.DepartmentMemberDetailView.as_view(),
         name="department-member-detail",
+    ),
+    path("files", files.FileUploadView.as_view(), name="file-upload"),
+    path("files/<uuid:public_id>/url", files.FileUrlView.as_view(), name="file-url"),
+    path("videos/upload-ticket", files.VideoTicketView.as_view(), name="video-ticket"),
+    path(
+        "videos/<uuid:public_id>/upload",
+        files.VideoLocalUploadView.as_view(),
+        name="video-local-upload",
+    ),
+    path(
+        "videos/<uuid:public_id>/playback", files.VideoPlaybackView.as_view(), name="video-playback"
     ),
     path("", include(router.urls)),
 ]

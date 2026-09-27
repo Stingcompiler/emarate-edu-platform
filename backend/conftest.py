@@ -163,3 +163,37 @@ def api():
 def last_code() -> str:
     """The 6-digit code in the most recent email."""
     return re.search(r"\b(\d{6})\b", mail.outbox[-1].body).group(1)
+
+
+@pytest.fixture
+def classroom(make_user, make_student, it_offering, it_program):
+    """IT101 this term: a teacher, a TA and an enrolled student with an account."""
+    from academic.models import Enrollment
+
+    teacher = make_user(Role.TEACHER)
+    ta = make_user(Role.TA)
+    it_offering.instructors.create(user=teacher, role="teacher")
+    it_offering.instructors.create(user=ta, role="ta")
+    student = make_user(Role.STUDENT)
+    record = make_student(it_program, "26-IT-0100", user=student)
+    Enrollment.objects.create(offering=it_offering, student_record=record)
+    return type(
+        "Classroom",
+        (),
+        {
+            "offering": it_offering,
+            "teacher": teacher,
+            "ta": ta,
+            "student": student,
+            "record": record,
+        },
+    )
+
+
+PDF = b"%PDF-1.4\n1 0 obj<<>>endobj\ntrailer<<>>\n%%EOF\n"
+
+
+def pdf_upload(name: str = "notes.pdf", content: bytes = PDF):
+    from django.core.files.uploadedfile import SimpleUploadedFile
+
+    return SimpleUploadedFile(name, content, "application/pdf")
