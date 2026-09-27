@@ -1,0 +1,5 @@
+@import "tailwindcss";
+@import "@ecst/ui/theme.css";
+
+/* Tailwind scans these packages too, so shared components get their classes. */
+@source "../../../packages/ui/src";

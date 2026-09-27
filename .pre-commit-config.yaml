@@ -1,0 +1,39 @@
+# Install once:  uvx pre-commit install
+# Run by hand:   uvx pre-commit run --all-files
+# ruff replaces black + isort + flake8 (ruff format is black-compatible).
+exclude: ^docs/prototype/
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: trailing-whitespace
+        exclude: \.md$
+      - id: end-of-file-fixer
+      - id: check-yaml
+        exclude: ^pnpm-lock\.yaml$ # pnpm 12 writes a multi-document lockfile
+      - id: check-toml
+      - id: check-json
+        exclude: tsconfig.*\.json$ # tsconfig allows comments
+      - id: check-merge-conflict
+      - id: check-added-large-files
+        args: [--maxkb=800]
+      - id: detect-private-key
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.16.9
+    hooks:
+      - id: ruff-check
+        args: [--fix, --config, backend/pyproject.toml]
+        files: ^(backend|scripts)/.*\.py$
+      - id: ruff-format
+        args: [--config, backend/pyproject.toml]
+        files: ^(backend|scripts)/.*\.py$
+
+  - repo: local
+    hooks:
+      - id: prettier
+        name: prettier
+        entry: pnpm exec prettier --write --ignore-unknown
+        language: system
+        files: ^(apps|packages)/.*\.(ts|tsx|mjs|astro|css|json|html)$|^[^/]+\.(json|yaml|yml)$

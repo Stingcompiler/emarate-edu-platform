@@ -15,17 +15,56 @@
 | [docs/07-pages-spec.md](docs/07-pages-spec.md) | خريطة الصفحات ومواصفة كل صفحة في الموقع العام والبوابة لكل دور |
 | [docs/brand/brand-identity.md](docs/brand/brand-identity.md) | الهوية البصرية المشتقة من الشعار: الألوان، الخطوط، Tokens، نسخ الشعار |
 
-## البنية (مخطط)
+## البنية
 
 ```
-backend/            Django 6 + DRF + Celery        — الـ API الوحيد
-apps/portal/        React 19 + Vite + TypeScript   — البوابة (portal.eust.edu.sd)
-apps/landing/       Astro + React islands          — الموقع العام (eust.edu.sd)
-packages/ui/        مكوّنات + Design Tokens
-packages/api/       Client مولَّد من OpenAPI
+backend/            Django 6.1 + DRF + Celery      — الـ API الوحيد (config/settings: base · dev · test · prod)
+apps/portal/        React 19 + Vite + TypeScript   — البوابة (PWA)
+apps/landing/       Astro (SSG)                    — الموقع العام
+packages/ui/        Design Tokens + Tailwind theme — مصدر واحد للألوان والخطوط
+packages/api/       Client مولَّد من OpenAPI       — أنواع مشتركة بين الخادم والواجهتين
+packages/config/    tsconfig مشترك
+scripts/dev.sh      تشغيل الكل محليًا
 docs/               المستندات المرجعية
 ```
 
 ## التشغيل محليًا
 
-بلا Docker وبلا خدمات خارجية في التطوير: **SQLite** + Celery Eager + بريد Console. الإنتاج: **PostgreSQL** + Redis + Celery + Bunny. التفاصيل في `docs/05-system-design.md` §4، وتُستكمل أوامر التشغيل في Phase 0 بعد اعتماد الخطة.
+بلا Docker وبلا أي خدمة خارجية: **SQLite** + Celery يعمل داخل العملية + بريد يُطبع في الطرفية ويُحفظ في `backend/sent-emails/` + ذاكرة مؤقتة محلية. الإنتاج: **PostgreSQL** + Redis + Celery + Bunny (التفاصيل في `docs/05-system-design.md` §4).
+
+**المتطلبات:** [uv](https://docs.astral.sh/uv/) (Python 3.13) و[pnpm](https://pnpm.io/) (Node ≥ 22.12). لا شيء غيرهما.
+
+```bash
+pnpm dev
+```
+
+يثبّت الاعتماديات، يطبّق الـ Migrations، يولّد عميل الـ API، ثم يشغّل:
+
+| الخدمة | العنوان |
+|---|---|
+| الـ API (Django) | http://127.0.0.1:8000/api/public/health — التوثيق: `/api/docs/` |
+| البوابة | http://localhost:5173 (تمرّر `/api` إلى Django عبر الوكيل) |
+| الموقع العام | http://localhost:4321 |
+
+`Ctrl+C` يوقف الخدمات الثلاث. للـ API وحده: `scripts/dev.sh --api-only`.
+
+### أوامر مفيدة
+
+| الأمر | ماذا يفعل |
+|---|---|
+| `cd backend && uv run pytest` | الاختبارات على SQLite |
+| `cd backend && DATABASE_URL=postgres:///ecst uv run pytest` | الاختبارات نفسها على PostgreSQL محلي |
+| `cd backend && uv run ruff check . && uv run ruff format .` | الفحص والتنسيق (ruff بدل black + isort) |
+| `pnpm api:generate` | إعادة توليد عميل الـ API بعد تغيير أي Endpoint |
+| `pnpm typecheck && pnpm build` | فحص الأنواع وبناء الواجهتين |
+| `uvx pre-commit install` | تفعيل فحوص ما قبل الـ Commit |
+
+الـ CI (GitHub Actions) يشغّل اختبارات الخادم على **SQLite وPostgreSQL** معًا، ويولّد العميل ويبني الواجهتين في كل Pull Request.
+
+## الحالة
+
+| المرحلة | الحالة |
+|---|---|
+| التخطيط والتصميم والنموذج الأولي | ✅ (المستندات 01–09 + 147 شاشة في `docs/prototype/`) |
+| Phase 0 — الأساس | ✅ |
+| Phase 1 — النواة (الهيكل الأكاديمي، الحسابات، الأدوار، الاستيراد) | التالي |

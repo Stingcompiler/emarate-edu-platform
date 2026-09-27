@@ -1,0 +1,8 @@
+# Planning documents and prototype sources are hand-authored; do not reformat.
+docs/
+backend/
+pnpm-lock.yaml
+**/dist/
+**/.astro/
+packages/api/src/generated/
+*.md

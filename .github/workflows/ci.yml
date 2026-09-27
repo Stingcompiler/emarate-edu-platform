@@ -1,0 +1,75 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  backend:
+    name: Backend (${{ matrix.database }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # Every test runs on both engines (docs/05 §4, §11).
+        database: [sqlite, postgres]
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: ecst
+          POSTGRES_PASSWORD: ecst
+          POSTGRES_DB: ecst
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U ecst" --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      DATABASE_URL: ${{ matrix.database == 'postgres' && 'postgres://ecst:ecst@localhost:5432/ecst' || '' }}
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v5
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.13"
+          enable-cache: true
+      - run: uv sync --locked
+      - name: Lint (backend and repo scripts)
+        run: |
+          uv run ruff check . ../scripts
+          uv run ruff format --check . ../scripts
+      - name: Migrations are complete
+        run: uv run python manage.py makemigrations --check --dry-run
+      - name: Tests
+        run: uv run pytest -W error::DeprecationWarning
+
+  frontend:
+    name: Frontend (typecheck, build, API client)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.13"
+          enable-cache: true
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: uv sync --locked --project backend
+      - run: pnpm install --frozen-lockfile
+      - name: Generate the API client from the backend schema
+        run: pnpm api:generate
+      - run: pnpm format:check
+      - run: pnpm typecheck
+      - run: pnpm build
