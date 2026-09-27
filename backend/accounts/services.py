@@ -19,7 +19,7 @@ from django.utils import timezone
 from rest_framework.exceptions import PermissionDenied, ValidationError
 
 from audit.services import SYSTEM, RequestMeta, record
-from core.errors import Conflict, Locked
+from core.errors import Conflict, Invalid, Locked
 from core.text import names_match
 from organization.models import SystemSettings
 from students.models import StudentRecord
@@ -73,12 +73,12 @@ def start_registration(university_number: str, full_name: str, email: str) -> Re
 def verify_registration(request: RegistrationRequest, code: str) -> None:
     """Step 2. Confirms the student owns the email."""
     if request.status != RegistrationRequest.Status.OTP_PENDING:
-        raise ValidationError({"code": ["Invalid or expired code."]}, code="invalid_code")
+        raise Invalid({"code": ["Invalid or expired code."]}, code="invalid_code")
     result = otp.check(request.otp, code)
     if result is otp.OTPResult.TOO_MANY_ATTEMPTS:
         raise Locked("Too many attempts. Start the registration again.")
     if result is not otp.OTPResult.OK or request.student_record_id is None:
-        raise ValidationError({"code": ["Invalid or expired code."]}, code="invalid_code")
+        raise Invalid({"code": ["Invalid or expired code."]}, code="invalid_code")
     request.status = RegistrationRequest.Status.VERIFIED
     request.verified_at = timezone.now()
     request.save(update_fields=["status", "verified_at", "updated_at"])
@@ -87,7 +87,7 @@ def verify_registration(request: RegistrationRequest, code: str) -> None:
 def complete_registration(request: RegistrationRequest, password: str) -> User:
     """Step 3. Creates the account. Active immediately, or pending approval."""
     if request.status != RegistrationRequest.Status.VERIFIED:
-        raise ValidationError({"request_id": ["Verify your email first."]}, code="not_verified")
+        raise Invalid({"request_id": ["Verify your email first."]}, code="not_verified")
     student = request.student_record
     password_validation.validate_password(password, User(email=request.email))
     config = SystemSettings.load()
@@ -204,7 +204,7 @@ def login(identifier: str, password: str) -> User:
         if pending is not None and pending.check_password(password):
             raise PermissionDenied("Your account is waiting for approval.", code="pending_approval")
         cache.set(key, failures + 1, timeout=settings.LOGIN_LOCKOUT_SECONDS)
-        raise ValidationError(
+        raise Invalid(
             {"non_field_errors": ["Incorrect email/university number or password."]},
             code="invalid_credentials",
         )
@@ -238,7 +238,7 @@ def reset_password(email: str, code: str, new_password: str) -> None:
     if result is otp.OTPResult.TOO_MANY_ATTEMPTS:
         raise Locked("Too many attempts. Request a new code.")
     if result is not otp.OTPResult.OK or user is None:
-        raise ValidationError({"code": ["Invalid or expired code."]}, code="invalid_code")
+        raise Invalid({"code": ["Invalid or expired code."]}, code="invalid_code")
     password_validation.validate_password(new_password, user)
     with transaction.atomic():
         user.set_password(new_password)
@@ -324,7 +324,7 @@ def activate(token: str, password: str) -> User:
         .first()
     )
     if row is None or row.used_at is not None or row.expires_at <= timezone.now():
-        raise ValidationError({"token": ["This link is invalid or expired."]}, code="invalid_token")
+        raise Invalid({"token": ["This link is invalid or expired."]}, code="invalid_token")
     password_validation.validate_password(password, row.user)
     with transaction.atomic():
         user = row.user

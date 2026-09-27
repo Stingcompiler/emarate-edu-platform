@@ -51,3 +51,6 @@ def test_seed_is_complete_and_idempotent(db, settings, monkeypatch):
     codes = {course["code"] for course in client.get("/api/v1/me/courses").data}
     assert {"IT101", "IT100", "MATH101"} <= codes
     assert "IT201" not in codes  # level 2
+    lectures = client.get("/api/v1/lectures").data["count"]
+    assignments = client.get("/api/v1/assignments").data["count"]
+    assert lectures >= 2 and assignments >= 1

@@ -20,6 +20,7 @@ from academic.models import AcademicYear, Course, CourseOffering, DepartmentMemb
 from accounts.models import RoleAssignment, User
 from accounts.rbac import DEPARTMENT_SCOPED_ROLES, Role
 from audit.services import RequestMeta
+from learning.models import Lecture
 from organization.models import College, Department, Program, SystemSettings
 from students.models import StudentRecord
 
@@ -294,6 +295,8 @@ class Command(BaseCommand):
         for program_code, level in {(p, lv) for p, lv, _ in COHORTS}:
             academic_services.bulk_enroll(meta, autumn, programs[program_code], level)
 
+        self._learning(users, autumn)
+
         # A ready-made student account on the first IT record.
         record = StudentRecord.objects.get(university_number="26-IT-0001")
         if record.user_id is None:
@@ -309,7 +312,56 @@ class Command(BaseCommand):
             "offerings": CourseOffering.objects.filter(term=autumn).count(),
             "students": StudentRecord.objects.count(),
             "users": User.objects.count(),
+            "lectures": Lecture.objects.count(),
         }
+
+    def _learning(self, users, term) -> None:
+        """Two lectures and an assignment for each course the demo teacher teaches."""
+        from datetime import timedelta
+
+        from django.utils import timezone
+
+        from learning.models import Assignment, Lecture, LectureResource
+
+        teacher = users[Role.TEACHER]
+        for offering in CourseOffering.objects.filter(term=term, instructors__user=teacher):
+            code = offering.course.code
+            for order, (title, topic) in enumerate(
+                [("المحاضرة الأولى: مدخل", "intro"), ("المحاضرة الثانية: المفاهيم", "concepts")],
+                start=1,
+            ):
+                lecture, created = Lecture.objects.get_or_create(
+                    offering=offering,
+                    order=order,
+                    defaults={
+                        "title_ar": title,
+                        "is_published": True,
+                        "published_at": timezone.now(),
+                        "created_by": teacher,
+                    },
+                )
+                if created:
+                    LectureResource.objects.create(
+                        lecture=lecture,
+                        kind=LectureResource.Kind.LINK,
+                        title="مرجع المحاضرة",
+                        url=f"https://example.org/{code.lower()}/{topic}",
+                    )
+            Assignment.objects.get_or_create(
+                offering=offering,
+                title=f"الواجب الأول — {offering.course.name_ar}",
+                defaults={
+                    "description": "حل التمارين في نهاية المحاضرة الأولى.",
+                    "due_at": timezone.now() + timedelta(days=7),
+                    "late_policy": Assignment.LatePolicy.PENALTY,
+                    "late_penalty_percent": 10,
+                    "late_until": timezone.now() + timedelta(days=9),
+                    "submission_types": ["file", "text"],
+                    "allowed_extensions": ["pdf", "docx"],
+                    "status": Assignment.Status.PUBLISHED,
+                    "created_by": teacher,
+                },
+            )
 
     def _user(self, email, name, password, role, department) -> User:
         user = User.objects.filter(email=email).first()

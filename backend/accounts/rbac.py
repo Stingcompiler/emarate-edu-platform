@@ -103,6 +103,13 @@ CAPABILITIES: dict[str, frozenset[Role]] = {
     "enrollment.manage": frozenset(
         {R.SYSTEM_ADMIN, R.HEAD_REGISTRAR, R.DEPARTMENT_MANAGER, R.DEPARTMENT_SUPERVISOR}
     ),
+    # Lectures, assignments and grading, beyond a user's own teaching (docs/03 §7).
+    # Teachers/TAs act on the offerings they are assigned to (learning.access).
+    "learning.view": frozenset(
+        {R.SYSTEM_ADMIN, R.ACADEMIC_AFFAIRS, R.DEPARTMENT_MANAGER, R.DEPARTMENT_SUPERVISOR}
+    ),
+    "learning.manage": frozenset({R.SYSTEM_ADMIN, R.DEPARTMENT_MANAGER, R.DEPARTMENT_SUPERVISOR}),
+    "learning.delete": frozenset({R.SYSTEM_ADMIN, R.DEPARTMENT_MANAGER}),
     # Users and roles
     "users.view": frozenset({R.SYSTEM_ADMIN, R.ACADEMIC_AFFAIRS, R.HEAD_REGISTRAR}),
     # Audit log: system admin sees everything; department roles their department.
@@ -150,7 +157,8 @@ class Scope:
 
     def q(self, department_field: str) -> Q:
         if self.everything:
-            return Q()
+            # Not Q(): an empty Q vanishes when OR-ed with another condition.
+            return Q(pk__isnull=False)
         return (
             Q(**{f"{department_field}__in": self.departments}) if self.departments else Q(pk__in=[])
         )
