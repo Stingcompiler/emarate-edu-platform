@@ -107,10 +107,16 @@
 | body | 1rem / 1.7 | 400 | النص |
 | body-strong | 1rem / 1.7 | 600 | تأكيد |
 | small | 0.875rem / 1.6 | 400 | جداول، مساعدة |
-| caption | 0.75rem / 1.5 | 500 | شارات، تسميات |
+| caption | 0.75rem / 1.5 | 500 | شارات، تسميات، رقاقات (Chips) فقط — **ليس** للنص الثانوي |
 | mono | 0.875rem | 500 | الأرقام الجامعية، الرموز، الأرقام المرجعية (`tabular-nums`) |
 
 الخط: **IBM Plex Sans Arabic** (400/500/600/700) مستضاف ذاتيًا؛ بديل `system-ui`. الأرقام غربية (0-9) افتراضيًا. العربية: `line-height ≥ 1.6`، لا `letter-spacing`، لا أحرف كبيرة قسرية للاتيني داخل العربية.
+
+**قرارات الخط (بعد مقارنة Plex / Almarai / Cairo / Noto Kufi على الشاشة نفسها — لوحة «مقارنة الخطوط» في النموذج):**
+1. **البوابة كلها بـ Plex** — محايد، أرقام جدولية، لاتيني من العائلة نفسها.
+2. **الحد الأدنى للنص الثانوي (.s / meta / وصف تحت العنوان) = 12px (0.75rem)** لا 11px؛ عند 11px تضيق أسنان Plex على الهاتف. 11px مسموح فقط داخل الرقاقات والشارات (caption) وبوزن 600.
+3. **النص الثانوي بـ `line-height 1.6`** حتى داخل صفوف القوائم.
+4. **الموقع العام (Astro) فقط:** خط عرض `--font-display: "Noto Kufi Arabic"` (600/700) لعناوين Hero و H1/H2 الكبيرة (≥ 1.5rem) لإعطاء الهوية طابعًا أقوى؛ كل ما دونها Plex. لا يُستخدم Kufi في البوابة إطلاقًا ولا في النصوص الجارية.
 
 ---
 
@@ -162,6 +168,7 @@
   --radius-sm:6px; --radius-md:10px; --radius-lg:16px; --radius-full:9999px;
   --shadow-sm:0 1px 2px rgb(31 43 71/.06); --shadow-md:0 4px 12px rgb(31 43 71/.08); --shadow-lg:0 12px 32px rgb(31 43 71/.12);
   --font-sans:"IBM Plex Sans Arabic",system-ui,sans-serif; --font-mono:"IBM Plex Mono",ui-monospace,monospace;
+  --font-display:"Noto Kufi Arabic",var(--font-sans); /* الموقع العام فقط — عناوين ≥ 1.5rem */
   --dur-fast:150ms; --dur-base:200ms; --ease:cubic-bezier(.2,.8,.2,1);
 }
 :root[data-theme="dark"] { /* §2.6 */ }

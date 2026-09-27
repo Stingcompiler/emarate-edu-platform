@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="ar">
+<head>
+<meta charset="utf-8">
+<title>شؤون الطلاب — ملف طالب (حالات وإقرارات)</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'IBM Plex Sans Arabic',system-ui,sans-serif;background:#F4F5F7;color:#1F2B47}
+a{color:#2D64A7;text-decoration:none}
+.scr{width:390px;height:844px;position:relative;overflow:hidden;background:#F4F5F7;direction:rtl;text-align:right;box-sizing:border-box}
+.body{position:absolute;top:0;left:0;right:0;bottom:0;overflow-y:auto;padding:54px 16px 110px;box-sizing:border-box}
+.back{display:flex;align-items:center;gap:2px;font-size:15px;color:#2D64A7;font-weight:600}
+.back svg{width:22px;height:22px}
+.who{display:flex;align-items:center;gap:12px;margin-top:14px}
+.av{width:52px;height:52px;border-radius:26px;background:#E5ECF4;color:#1F4674;font-weight:700;font-size:15px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.nm{font-size:18px;font-weight:700}.s{font-size:13px;color:#576075;margin-top:2px;line-height:1.6}
+.chip{font-size:11px;font-weight:600;padding:4px 9px;border-radius:999px;white-space:nowrap}
+.c-bad{background:#FBE9E7;color:#922B20}.c-ok{background:#E6F4EC;color:#14603A}.c-warn{background:#FBF3E3;color:#8A5A14}.c-neu{background:#EEF0F3;color:#576075}
+.kp{display:grid;grid-template-columns:repeat(3, 1fr);gap:8px;margin-top:14px}
+.kp div{background:#fff;border:1px solid #E7E9EE;border-radius:14px;padding:10px 8px;text-align:center}
+.kp b{display:block;font-size:20px;font-weight:700;direction:ltr}.kp span{font-size:12px;color:#8F95A3}
+.lbl{font-size:12px;font-weight:600;color:#8F95A3;margin:18px 4px 6px;display:flex;justify-content:space-between}
+.lbl a{font-weight:600}
+.grp{background:#fff;border-radius:16px;border:1px solid #E7E9EE;overflow:hidden}
+.li{display:flex;align-items:center;gap:12px;padding:12px 14px;color:#1F2B47}
+.li+.li{border-top:1px solid #EEF0F3}
+.ty{width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0}
+.t{font-size:14px;font-weight:600;line-height:1.35}.m{font-size:12px;color:#576075;margin-top:2px;line-height:1.6}
+.grow{flex:1;min-width:0}
+.ack{display:flex;align-items:center;gap:12px;padding:11px 14px}
+.ack+.ack{border-top:1px solid #EEF0F3}
+.ack .t{flex:1}
+.pub{background:#FBF3E3;border-radius:12px;padding:10px 12px;font-size:12px;color:#8A5A14;line-height:1.6;margin-top:10px}
+.pub b{color:#1F2B47;display:block;font-size:13px}
+.fix{position:absolute;left:16px;right:16px;bottom:24px;display:flex;gap:8px}
+.btn{display:flex;align-items:center;justify-content:center;height:48px;border-radius:13px;font-size:14px;font-weight:600;flex:1}
+.b-pri{background:#2D64A7;color:#fff}.b-sec{background:#fff;color:#1F2B47;border:1.5px solid #E7E9EE}
+</style>
+</helmet>
+<div class="scr" style="width: 390px; height: 844px">
+<div class="body">
+<a class="back" href="StudentAffairsCases.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg><span>الحالات</span></a>
+<div class="who"><span class="av">ع ص</span><div style="flex: 1"><div class="nm">عمر صالح عبد الله</div><div class="s">26-IT-0093 · تقنية المعلومات · المستوى الأول · منتظم</div></div><span class="chip c-warn">إنذار ثانٍ</span></div>
+<div class="kp"><div><b>2</b><span>حالات مفتوحة</span></div><div><b>1</b><span>مقفلة</span></div><div><b>2/3</b><span>إقرارات</span></div></div>
+<div class="pub"><b>حالة منشورة للطالب</b>إنذار أكاديمي ثانٍ — ساري من 8 سبتمبر 2026 · يظهر في «حالتي» · بلا نشاط في المنصة منذ 3 أسابيع</div>
+<div class="lbl"><span>الحالات</span><a href="StudentAffairsCaseNew.dc.html">+ حالة</a></div>
+<div class="grp">
+<a class="li" href="AdminCase.dc.html"><span class="ty" style="background: #FBF3E3; color: #8A5A14">أك</span><span class="grow"><div class="t">إنذار أكاديمي ثانٍ · C-2026-014</div><div class="m">مفتوحة 19 يومًا · بانتظار رد الطالب · تذكير أُرسل قبل 5 أيام</div></span><span class="chip c-warn">مفتوحة</span></a>
+<a class="li" href="AdminCase.dc.html"><span class="ty" style="background: #EEF0F3; color: #576075">اج</span><span class="grow"><div class="t">تعثّر — طلب دعم · C-2026-020</div><div class="m">سرية · فُتحت اليوم من مسجل القسم</div></span><span class="chip c-neu">جديدة</span></a>
+<a class="li" href="AdminCase.dc.html"><span class="ty" style="background: #E6F4EC; color: #14603A">أك</span><span class="grow"><div class="t">إنذار أكاديمي أول · C-2026-003</div><div class="m">مقفلة 20 مايو 2026 · القرار: إنذار · أقرّ بالاطلاع</div></span><span class="chip c-ok">مقفلة</span></a>
+</div>
+<div class="lbl"><span>الإقرارات باللوائح</span><a href="AdminNotify.dc.html">تذكير</a></div>
+<div class="grp">
+<div class="ack"><span class="t">لائحة السلوك 2026<div class="m">أقرّ 12 سبتمبر 2026</div></span><span class="chip c-ok">مُقرّ</span></div>
+<div class="ack"><span class="t">ضوابط المعامل<div class="m">أقرّ 3 سبتمبر 2026</div></span><span class="chip c-ok">مُقرّ</span></div>
+<div class="ack"><span class="t">لائحة الامتحانات 2026<div class="m">لم يقرّ — شرط لبدء الاختبارات</div></span><span class="chip c-bad">لم يقرّ</span></div>
+</div>
+<div class="lbl"><span>الاتصال (للحالات فقط)</span></div>
+<div class="grp">
+<div class="li"><span class="grow"><div class="t">ولي الأمر</div><div class="m">صالح عبد الله · +249 91 *** 4410 · آخر تواصل 15 سبتمبر</div></span></div>
+<div class="li"><span class="grow"><div class="t">مسجل القسم</div><div class="m">محمد النور · تقنية المعلومات</div></span></div>
+</div>
+</div>
+<div class="fix"><a class="btn b-sec" href="AdminNotify.dc.html">إشعار للطالب</a><a class="btn b-pri" href="StudentAffairsCaseNew.dc.html">فتح حالة</a></div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="ar">
+<head>
+<meta charset="utf-8">
+<title>مسؤول المسجلين — المسجلون وربطهم بالأقسام</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'IBM Plex Sans Arabic',system-ui,sans-serif;background:#F4F5F7;color:#1F2B47}
+a{color:#2D64A7;text-decoration:none}
+.scr{width:390px;height:844px;position:relative;overflow:hidden;background:#F4F5F7;direction:rtl;text-align:right;box-sizing:border-box}
+.body{position:absolute;top:0;left:0;right:0;bottom:0;overflow-y:auto;padding:54px 16px 110px;box-sizing:border-box}
+.back{display:flex;align-items:center;gap:2px;font-size:15px;color:#2D64A7;font-weight:600}
+.back svg{width:22px;height:22px}
+.h1{font-size:24px;font-weight:700;margin:10px 0 2px}
+.s{font-size:13px;color:#576075;line-height:1.6}
+.lbl{font-size:12px;font-weight:600;color:#8F95A3;margin:18px 4px 6px;display:flex;justify-content:space-between}
+.lbl a{font-weight:600}
+.grp{background:#fff;border-radius:16px;border:1px solid #E7E9EE;overflow:hidden}
+.rg{padding:12px 14px}
+.rg+.rg{border-top:1px solid #EEF0F3}
+.rg .top{display:flex;align-items:center;gap:12px}
+.av{width:40px;height:40px;border-radius:20px;background:#E5ECF4;color:#1F4674;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.rg .t{font-size:15px;font-weight:600}.rg .m{font-size:12px;color:#576075;margin-top:2px}
+.rg .grow{flex:1;min-width:0}
+.ld{width:56px;text-align:left;direction:ltr}
+.ld b{display:block;font-size:16px;font-weight:700}.ld small{font-size:10px;color:#8F95A3}
+.deps{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.deps span{font-size:12px;font-weight:600;padding:5px 10px;border-radius:999px;background:#E5ECF4;color:#1F4674;display:flex;align-items:center;gap:6px}
+.deps span i{color:#8FA5C2;font-style:normal}
+.deps .add{background:transparent;border:1.5px dashed #C7CAD1;color:#8F95A3}
+.warn{background:#FBF3E3;color:#8A5A14;border-radius:10px;padding:8px 10px;font-size:12px;margin-top:8px;line-height:1.6}
+.cov{padding:10px 14px}
+.cv{display:flex;align-items:center;gap:10px;padding:8px 0;font-size:13px}
+.cv+.cv{border-top:1px solid #EEF0F3}
+.cv .n{flex:1;font-weight:600}
+.cv .who{font-size:12px;color:#576075}
+.cv .bad{color:#922B20;font-weight:700;font-size:12px}
+.fix{position:absolute;left:16px;right:16px;bottom:24px}
+.btn{display:flex;align-items:center;justify-content:center;height:50px;border-radius:14px;font-size:15px;font-weight:600;background:#2D64A7;color:#fff}
+</style>
+</helmet>
+<div class="scr" style="width: 390px; height: 844px">
+<div class="body">
+<a class="back" href="HeadRegistrarHome.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg><span>القبول</span></a>
+<h1 class="h1">المسجلون · 5</h1>
+<div class="s">الربط بالأقسام يحدد ما يراه المسجل وما يُوزَّع عليه تلقائيًا. الحسابات تُنشأ من مدير النظام.</div>
+<div class="lbl"><span>تغطية الأقسام</span><a href="HeadRegistrarRegistrars.dc.html">قواعد التوزيع</a></div>
+<div class="grp"><div class="cov">
+<div class="cv"><span class="n">تقنية المعلومات</span><span class="who">محمد النور · رشا خالد</span></div>
+<div class="cv"><span class="n">علوم الحاسوب</span><span class="who">محمد النور · علي محجوب</span></div>
+<div class="cv"><span class="n">الهندسة</span><span class="bad">بلا مسجل — 19 طلبًا غير موزع</span></div>
+<div class="cv"><span class="n">إدارة الأعمال</span><span class="who">هند عبد الله</span></div>
+</div></div>
+<div class="lbl"><span>المسجلون والحمل الحالي</span></div>
+<div class="grp">
+<div class="rg"><div class="top"><span class="av">م ن</span><span class="grow"><div class="t">محمد النور</div><div class="m">m.alnour@ecst.edu.sd · نشط اليوم</div></span><span class="ld"><b>92</b><small>طلبًا</small></span></div><div class="deps"><span>تقنية المعلومات<i>×</i></span><span>علوم الحاسوب<i>×</i></span><span class="add">+ قسم</span></div></div>
+<div class="rg"><div class="top"><span class="av">ر خ</span><span class="grow"><div class="t">رشا خالد</div><div class="m">نشطة اليوم</div></span><span class="ld"><b>78</b><small>طلبًا</small></span></div><div class="deps"><span>تقنية المعلومات<i>×</i></span><span class="add">+ قسم</span></div></div>
+<div class="rg"><div class="top"><span class="av">ه ع</span><span class="grow"><div class="t">هند عبد الله</div><div class="m">نشطة أمس</div></span><span class="ld"><b>66</b><small>طلبًا</small></span></div><div class="deps"><span>إدارة الأعمال<i>×</i></span><span class="add">+ قسم</span></div></div>
+<div class="rg"><div class="top"><span class="av">ع م</span><span class="grow"><div class="t">علي محجوب</div><div class="m">نشط قبل 3 أيام</div></span><span class="ld"><b>53</b><small>طلبًا</small></span></div><div class="deps"><span>علوم الحاسوب<i>×</i></span><span class="add">+ قسم</span></div></div>
+<div class="rg"><div class="top"><span class="av" style="background: #FBF3E3; color: #8A5A14">ط ب</span><span class="grow"><div class="t">طارق بشير</div><div class="m">حساب جديد · لم يُربط بقسم</div></span><span class="ld"><b>0</b><small>طلبات</small></span></div><div class="deps"><span class="add" style="border-color: #2D64A7; color: #2D64A7">+ الهندسة (مقترح)</span></div><div class="warn">ربطه بالهندسة يوزّع عليه 19 طلبًا غير موزع فورًا.</div></div>
+</div>
+</div>
+<div class="fix"><a class="btn" href="HeadRegistrarHome.dc.html">حفظ الربط</a></div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

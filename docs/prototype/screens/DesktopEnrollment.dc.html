@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="ar">
+<head>
+<meta charset="utf-8">
+<title>سطح المكتب — مسؤول المسجلين: التسجيل في المواد (Enrollment) حسب الفصل</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'IBM Plex Sans Arabic',system-ui,sans-serif;background:#F4F5F7;color:#1F2B47}
+a{color:#2D64A7;text-decoration:none}
+.scr{width:1280px;height:800px;position:relative;overflow:hidden;background:#F4F5F7;direction:rtl;text-align:right;box-sizing:border-box;display:flex}
+.side{width:240px;flex-shrink:0;background:#1F2B47;color:#fff;padding:20px 16px;box-sizing:border-box;display:flex;flex-direction:column}
+.logo{display:flex;align-items:center;gap:10px;font-size:14px;font-weight:700;padding:4px 6px 22px}
+.logo i{width:32px;height:32px;border-radius:9px;background:#fff;display:block}
+.nv{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;font-size:14px;color:rgba(255,255,255,.75);margin-bottom:2px}
+.nv svg{width:18px;height:18px}
+.nv.on{background:rgba(255,255,255,.12);color:#fff;font-weight:600}
+.me{margin-top:auto;display:flex;align-items:center;gap:10px;padding:10px 6px;border-top:1px solid rgba(255,255,255,.12)}
+.me .av{width:34px;height:34px;border-radius:17px;background:#2D64A7;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700}
+.me .t{font-size:13px;font-weight:600}.me .s{font-size:12px;color:rgba(255,255,255,.6)}
+.main{flex:1;min-width:0;display:flex;flex-direction:column}
+.bar{height:60px;display:flex;align-items:center;gap:14px;padding:0 28px;background:#fff;border-bottom:1px solid #E7E9EE}
+.bar h1{font-size:18px;font-weight:700;margin:0}
+.bar .term{font-size:12px;font-weight:600;background:#EEF0F3;color:#576075;padding:5px 10px;border-radius:999px}
+.bar .act{margin-right:auto;display:flex;gap:8px}
+.btn{font-size:13px;font-weight:700;padding:9px 14px;border-radius:10px;white-space:nowrap}
+.b-pri{background:#2D64A7;color:#fff}.b-sec{background:#F0F1F4;color:#1F2B47}
+.wrap{flex:1;overflow:auto;padding:22px 28px;box-sizing:border-box}
+.kp{display:grid;grid-template-columns:repeat(4, 1fr);gap:12px;margin-bottom:18px}
+.kp div{background:#fff;border:1px solid #E7E9EE;border-radius:14px;padding:12px 14px}
+.kp b{display:block;font-size:24px;font-weight:700;line-height:1.1;direction:ltr;text-align:right}
+.kp span{font-size:12px;color:#8F95A3}
+.kp small{display:block;font-size:12px;margin-top:4px;color:#14603A}.kp small.w{color:#8A5A14}
+.cols{display:grid;grid-template-columns:1fr 360px;gap:20px}
+.grp{background:#fff;border-radius:16px;border:1px solid #E7E9EE;overflow:hidden;margin-bottom:20px}
+.hd{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid #EEF0F3}
+.hd h2{font-size:14px;font-weight:700;margin:0;flex:1}
+.hd .f{display:flex;gap:6px}
+.hd .f span{font-size:11px;font-weight:600;padding:5px 10px;border-radius:999px;background:#F0F1F4;color:#576075}
+.hd .f .on{background:#1F2B47;color:#fff}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{font-size:11px;font-weight:600;color:#8F95A3;text-align:right;padding:9px 14px;background:#F8F9FB;border-bottom:1px solid #EEF0F3}
+td{padding:10px 14px;border-top:1px solid #EEF0F3;vertical-align:middle}
+.num{direction:ltr;text-align:right}
+.bar2{display:inline-block;width:110px;height:8px;border-radius:4px;background:#EEF0F3;overflow:hidden;direction:ltr;vertical-align:middle;margin-left:8px}
+.bar2 i{display:block;height:100%;background:#2D64A7;border-radius:4px}
+.chip{font-size:11px;font-weight:600;padding:3px 8px;border-radius:999px;white-space:nowrap}
+.c-ok{background:#E6F4EC;color:#14603A}.c-warn{background:#FBF3E3;color:#8A5A14}.c-neu{background:#EEF0F3;color:#576075}
+.mini{font-size:11px;font-weight:700;padding:5px 9px;border-radius:7px;background:#F0F1F4;color:#1F2B47}
+.mini.pri{background:#2D64A7;color:#fff}
+.wz{padding:14px 16px}
+.wz .k{display:block;font-size:11px;font-weight:600;color:#8F95A3;margin:10px 0 4px}
+.wz .k:first-child{margin-top:0}
+.wz .v{font-size:13px;font-weight:600;border:1px solid #E7E9EE;border-radius:8px;padding:7px 10px;background:#F8F9FB}
+.wz .cr{display:flex;align-items:center;gap:8px;font-size:12px;padding:6px 0;border-top:1px solid #EEF0F3}
+.wz .cr:first-of-type{border-top:0}
+.wz .cr i{width:16px;height:16px;border-radius:5px;background:#2D64A7;flex-shrink:0}
+.wz .cr .c{direction:ltr;font-weight:700;width:52px}
+.wz .cr .n{flex:1}.wz .cr .h{color:#8F95A3}
+.wz .cnt{background:#1F2B47;color:#fff;border-radius:10px;padding:10px 12px;font-size:12px;margin-top:12px;line-height:1.7}
+.wz .cnt b{font-size:18px;direction:ltr;display:block}
+.wz .warn{background:#FBF3E3;color:#8A5A14;border-radius:8px;padding:8px 10px;font-size:12px;margin-top:8px;line-height:1.6}
+.log{padding:6px 16px}
+.lg{display:flex;gap:10px;padding:8px 0;border-top:1px solid #EEF0F3;font-size:12px;color:#576075}
+.lg:first-child{border-top:0}
+.lg b{color:#1F2B47;font-weight:600}
+.lg small{margin-right:auto;color:#8F95A3;white-space:nowrap}
+</style>
+</helmet>
+<div class="scr" style="width: 1280px; height: 800px">
+<aside class="side">
+<div class="logo"><i></i>منصة الكلية</div>
+<a class="nv" href="DesktopHeadRegistrar.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8v9a2 2 0 0 1-2 2h-4v-7h-6v7H5a2 2 0 0 1-2-2z"/></svg>القبول</a>
+<a class="nv" href="HeadRegistrarApplications.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>كل الطلبات</a>
+<a class="nv" href="HeadRegistrarStudent.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>سجل الطلاب</a>
+<a class="nv on" href="DesktopEnrollment.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>التسجيل في المواد</a>
+<a class="nv" href="DesktopStudentsImport.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21V9M8 13l4-4 4 4"/><path d="M20 16.6A5 5 0 0 0 18 7h-1.3A8 8 0 1 0 4 15.2"/></svg>استيراد سجل الطلاب</a>
+<a class="nv" href="HeadRegistrarRegistrars.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>المسجلون والأقسام</a>
+<a class="nv" href="HeadRegistrarCycles.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>دورات القبول</a>
+<div class="me"><span class="av">ن ف</span><span><div class="t">أ. نجلاء الفكي</div><div class="s">مسؤول المسجلين</div></span></div>
+</aside>
+<div class="main">
+<div class="bar"><h1>التسجيل في المواد</h1><span class="term">خريف 2026/2027 · نافذة التسجيل حتى 5 أكتوبر</span><div class="act"><a class="btn b-sec" href="DesktopEnrollment.dc.html">تصدير</a><a class="btn b-sec" href="DesktopEnrollment.dc.html">تسجيل فردي</a><a class="btn b-pri" href="DesktopEnrollment.dc.html">+ تسجيل جماعي</a></div></div>
+<div class="wrap">
+<div class="kp"><div><b>1,412</b><span>طالبًا منتظمًا</span></div><div><b>1,356</b><span>مسجلون في مواد</span><small>96%</small></div><div><b>56</b><span>غير مسجلين</span><small class="w">38 مقبولون جدد · 18 آخرون</small></div><div><b>62</b><span>تقديمًا مفتوحًا</span><small>4 أقسام</small></div></div>
+<div class="cols">
+<div>
+<div class="grp"><div class="hd"><h2>التغطية حسب البرنامج والمستوى</h2><div class="f"><span class="on">الكل</span><span>غير مكتمل 6</span><span>القسم ▾</span></div></div>
+<table>
+<thead><tr><th>البرنامج · المستوى</th><th>الطلاب</th><th>مسجلون</th><th>التغطية</th><th>المواد الافتراضية</th><th>الحالة</th><th></th></tr></thead>
+<tbody>
+<tr><td>تقنية المعلومات · 1</td><td class="num">118</td><td class="num">102</td><td><span class="bar2"><i style="width: 86%"></i></span><span class="num">86%</span></td><td class="num">5 · 15 س</td><td><span class="chip c-warn">16 غير مسجل</span></td><td><a class="mini pri" href="DesktopEnrollment.dc.html">تسجيل الباقين</a></td></tr>
+<tr><td>تقنية المعلومات · 2</td><td class="num">104</td><td class="num">104</td><td><span class="bar2"><i style="width: 100%"></i></span><span class="num">100%</span></td><td class="num">6 · 18 س</td><td><span class="chip c-ok">مكتمل</span></td><td><a class="mini" href="DesktopEnrollment.dc.html">عرض</a></td></tr>
+<tr><td>تقنية المعلومات · 3</td><td class="num">98</td><td class="num">98</td><td><span class="bar2"><i style="width: 100%"></i></span><span class="num">100%</span></td><td class="num">6 · 18 س</td><td><span class="chip c-ok">مكتمل</span></td><td><a class="mini" href="DesktopEnrollment.dc.html">عرض</a></td></tr>
+<tr><td>علوم الحاسوب · 1</td><td class="num">96</td><td class="num">82</td><td><span class="bar2"><i style="width: 85%"></i></span><span class="num">85%</span></td><td class="num">5 · 15 س</td><td><span class="chip c-warn">14 غير مسجل</span></td><td><a class="mini pri" href="DesktopEnrollment.dc.html">تسجيل الباقين</a></td></tr>
+<tr><td>الذكاء الاصطناعي · 1</td><td class="num">58</td><td class="num">50</td><td><span class="bar2"><i style="width: 86%"></i></span><span class="num">86%</span></td><td class="num">5 · 15 س</td><td><span class="chip c-warn">8 غير مسجل</span></td><td><a class="mini pri" href="DesktopEnrollment.dc.html">تسجيل الباقين</a></td></tr>
+<tr><td>الهندسة المدنية · 1</td><td class="num">42</td><td class="num">32</td><td><span class="bar2"><i style="width: 76%"></i></span><span class="num">76%</span></td><td class="num">6 · 18 س</td><td><span class="chip c-warn">10 غير مسجل</span></td><td><a class="mini pri" href="DesktopEnrollment.dc.html">تسجيل الباقين</a></td></tr>
+<tr><td>إدارة الأعمال · 1</td><td class="num">88</td><td class="num">80</td><td><span class="bar2"><i style="width: 91%"></i></span><span class="num">91%</span></td><td class="num">5 · 15 س</td><td><span class="chip c-warn">8 غير مسجل</span></td><td><a class="mini pri" href="DesktopEnrollment.dc.html">تسجيل الباقين</a></td></tr>
+<tr><td colspan="7" style="text-align: center; color: #2D64A7; font-weight: 600">عرض 17 مجموعة أخرى</td></tr>
+</tbody></table></div>
+</div>
+<div>
+<div class="grp"><div class="hd"><h2>تسجيل جماعي — تقنية المعلومات · المستوى 1</h2></div><div class="wz">
+<span class="k">الفصل</span><div class="v">خريف 2026/2027</div>
+<span class="k">النطاق</span><div class="v">المستوى 1 · بكالوريوس تقنية المعلومات · غير المسجلين فقط</div>
+<span class="k">المواد (من خطة البرنامج)</span>
+<div class="cr"><i></i><span class="c">IT101</span><span class="n">مقدمة في البرمجة</span><span class="h">3 س</span></div>
+<div class="cr"><i></i><span class="c">MTH101</span><span class="n">رياضيات 1</span><span class="h">3 س</span></div>
+<div class="cr"><i></i><span class="c">ENG101</span><span class="n">لغة إنجليزية 1</span><span class="h">3 س</span></div>
+<div class="cr"><i></i><span class="c">PHY101</span><span class="n">فيزياء</span><span class="h">3 س</span></div>
+<div class="cr"><i></i><span class="c">GEN101</span><span class="n">مهارات دراسية</span><span class="h">3 س</span></div>
+<div class="cnt"><b>16</b>طالبًا سيُسجَّلون في 5 مواد · لا يتأثر 102 المسجلون · يُشعَر الطلاب ومدير القسم</div>
+<div class="warn">3 من الـ 16 لم يفعّلوا حساباتهم بعد — سيُسجَّلون ويرون موادهم عند التفعيل.</div>
+<a class="btn b-pri" href="DesktopEnrollment.dc.html" style="display: block; text-align: center; margin-top: 10px">تنفيذ التسجيل</a>
+</div></div>
+<div class="grp"><div class="hd"><h2>آخر عمليات التسجيل</h2></div><div class="log">
+<div class="lg"><b>د. مصطفى الأمين</b> سجّل 2 (IT · 1)<small>اليوم 10:20</small></div>
+<div class="lg"><b>نجلاء الفكي</b> تسجيل جماعي 104 (IT · 2)<small>1 سبتمبر</small></div>
+<div class="lg"><b>نجلاء الفكي</b> سحب طالب من CS201 (طلب رسمي)<small>28 أغسطس</small></div>
+</div></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":800}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

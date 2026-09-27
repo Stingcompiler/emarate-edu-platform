@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="ar">
+<head>
+<meta charset="utf-8">
+<title>سطح المكتب — طلاب القسم + طلبات التسجيل</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'IBM Plex Sans Arabic',system-ui,sans-serif;background:#F4F5F7;color:#1F2B47}
+a{color:#2D64A7;text-decoration:none}
+.scr{width:1280px;height:800px;position:relative;overflow:hidden;background:#F4F5F7;direction:rtl;text-align:right;box-sizing:border-box;display:flex}
+.side{width:240px;flex-shrink:0;background:#1F2B47;color:#fff;padding:20px 16px;box-sizing:border-box;display:flex;flex-direction:column}
+.logo{display:flex;align-items:center;gap:10px;font-size:14px;font-weight:700;padding:4px 6px 22px}
+.logo i{width:32px;height:32px;border-radius:9px;background:#fff;display:block}
+.nv{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;font-size:14px;color:rgba(255,255,255,.75);margin-bottom:2px}
+.nv svg{width:18px;height:18px}
+.nv.on{background:rgba(255,255,255,.12);color:#fff;font-weight:600}
+.nv .n{margin-right:auto;font-size:11px;font-weight:700;background:#B02544;padding:2px 7px;border-radius:999px}
+.me{margin-top:auto;display:flex;align-items:center;gap:10px;padding:10px 6px;border-top:1px solid rgba(255,255,255,.12)}
+.me .av{width:34px;height:34px;border-radius:17px;background:#2D64A7;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700}
+.me .t{font-size:13px;font-weight:600}.me .s{font-size:12px;color:rgba(255,255,255,.6)}
+.main{flex:1;min-width:0;display:flex;flex-direction:column}
+.bar{height:60px;display:flex;align-items:center;gap:14px;padding:0 28px;background:#fff;border-bottom:1px solid #E7E9EE}
+.bar h1{font-size:18px;font-weight:700;margin:0}
+.bar .act{margin-right:auto;display:flex;gap:8px}
+.btn{font-size:13px;font-weight:700;padding:9px 14px;border-radius:10px;white-space:nowrap}
+.b-pri{background:#2D64A7;color:#fff}.b-sec{background:#F0F1F4;color:#1F2B47}.b-ok{background:#1E7F4F;color:#fff}
+.wrap{flex:1;overflow:auto;padding:22px 28px;box-sizing:border-box}
+.tabs{display:flex;gap:6px;margin-bottom:14px}
+.tabs a{font-size:13px;font-weight:600;padding:8px 14px;border-radius:999px;background:#fff;border:1px solid #E7E9EE;color:#576075;display:flex;gap:6px;align-items:center}
+.tabs .on{background:#1F2B47;border-color:#1F2B47;color:#fff}
+.tabs .n{font-size:11px;font-weight:700;background:#B02544;color:#fff;padding:1px 6px;border-radius:999px}
+.flt{display:flex;gap:8px;margin-bottom:14px;align-items:center}
+.flt span{font-size:12px;font-weight:600;border:1px solid #E7E9EE;background:#fff;border-radius:9px;padding:7px 12px;color:#1F2B47}
+.flt span small{color:#8F95A3;font-weight:500;margin-left:6px}
+.flt .srch{flex:1;max-width:280px;color:#8F95A3;font-weight:500}
+.cols{display:grid;grid-template-columns:1fr 340px;gap:20px}
+.grp{background:#fff;border-radius:16px;border:1px solid #E7E9EE;overflow:hidden;margin-bottom:20px}
+.hd{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid #EEF0F3}
+.hd h2{font-size:14px;font-weight:700;margin:0;flex:1}.hd span{font-size:12px;color:#8F95A3}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{font-size:11px;font-weight:600;color:#8F95A3;text-align:right;padding:9px 14px;background:#F8F9FB;border-bottom:1px solid #EEF0F3}
+td{padding:9px 14px;border-top:1px solid #EEF0F3;vertical-align:middle}
+.ck{display:inline-block;width:18px;height:18px;border-radius:6px;border:2px solid #C7CAD1;box-sizing:border-box;vertical-align:middle}
+.ck.on{background:#2D64A7;border-color:#2D64A7}
+.av{display:inline-flex;width:26px;height:26px;border-radius:13px;background:#E5ECF4;color:#1F4674;font-size:9px;font-weight:700;align-items:center;justify-content:center;margin-left:8px;vertical-align:middle}
+.num{direction:ltr;text-align:right}
+.chip{font-size:11px;font-weight:600;padding:3px 8px;border-radius:999px;white-space:nowrap}
+.c-ok{background:#E6F4EC;color:#14603A}.c-warn{background:#FBF3E3;color:#8A5A14}.c-neu{background:#EEF0F3;color:#576075}.c-bad{background:#FBE9E7;color:#922B20}
+.sel{display:flex;align-items:center;gap:10px;padding:10px 16px;background:#E5ECF4;font-size:13px;color:#1F4674;border-top:1px solid #D5E0EE}
+.sel b{font-weight:700}.sel .a{margin-right:auto;display:flex;gap:6px}
+.sel .a span{font-size:12px;font-weight:700;background:#fff;padding:6px 10px;border-radius:8px}
+.rq{display:flex;align-items:center;gap:10px;padding:11px 16px}
+.rq+.rq{border-top:1px solid #EEF0F3}
+.rq .av2{width:34px;height:34px;border-radius:17px;background:#E5ECF4;color:#1F4674;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.rq .t{font-size:13px;font-weight:600}.rq .s{font-size:12px;color:#8F95A3;margin-top:1px}
+.rq .grow{flex:1}
+.mini{font-size:11px;font-weight:700;padding:6px 9px;border-radius:7px;white-space:nowrap}
+.m-ok{background:#E6F4EC;color:#14603A}.m-bad{background:#FBE9E7;color:#922B20}
+.bulk{padding:14px 16px}
+.bulk .k{display:block;font-size:11px;font-weight:600;color:#8F95A3;margin:10px 0 4px}
+.bulk .k:first-child{margin-top:0}
+.bulk .v{font-size:13px;font-weight:600;border:1px solid #E7E9EE;border-radius:8px;padding:7px 10px;background:#F8F9FB}
+.bulk .cnt{background:#1F2B47;color:#fff;border-radius:10px;padding:10px 12px;font-size:12px;margin-top:12px;line-height:1.7}
+.bulk .cnt b{font-size:18px;direction:ltr;display:block}
+</style>
+</helmet>
+<div class="scr" style="width: 1280px; height: 800px">
+<aside class="side">
+<div class="logo"><i></i>منصة الكلية</div>
+<a class="nv" href="DesktopDeptDashboard.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8v9a2 2 0 0 1-2 2h-4v-7h-6v7H5a2 2 0 0 1-2-2z"/></svg>لوحة القسم</a>
+<a class="nv" href="DesktopDeptDashboard.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>المواد والتعيينات</a>
+<a class="nv" href="DesktopDeptLectures.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>المحاضرات</a>
+<a class="nv" href="DesktopDeptProfessors.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>الأساتذة والمعيدون</a>
+<a class="nv on" href="DesktopDeptStudents.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>الطلاب<span class="n">12</span></a>
+<a class="nv" href="DesktopResultsImport.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21V9M8 13l4-4 4 4"/><path d="M20 16.6A5 5 0 0 0 18 7h-1.3A8 8 0 1 0 4 15.2"/></svg>رفع النتائج</a>
+<a class="nv" href="DesktopDeptReports.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l4-4 4 4 5-6"/></svg>التقارير</a>
+<a class="nv" href="DesktopDeptOperations.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>سجل العمليات</a>
+<div class="me"><span class="av">م أ</span><span><div class="t">د. مصطفى الأمين</div><div class="s">مدير قسم تقنية المعلومات</div></span></div>
+</aside>
+<div class="main">
+<div class="bar"><h1>طلاب القسم — تقنية المعلومات · 412</h1><div class="act"><a class="btn b-sec" href="DesktopDeptStudents.dc.html">تصدير CSV</a><a class="btn b-sec" href="AdminNotify.dc.html">إشعار لمجموعة</a></div></div>
+<div class="wrap">
+<div class="tabs"><a class="on" href="DesktopDeptStudents.dc.html">الطلاب 412</a><a href="DesktopDeptStudents.dc.html">طلبات التسجيل<span class="n">12</span></a><a href="DesktopDeptStudents.dc.html">غير مسجلين في مواد 16</a></div>
+<div class="flt"><span class="srch">بحث بالاسم أو الرقم الجامعي</span><span>المستوى<small>الكل</small></span><span>البرنامج<small>الكل 3</small></span><span>الحالة<small>منتظم</small></span><span>التسجيل<small>الكل</small></span></div>
+<div class="cols">
+<div>
+<div class="grp">
+<table>
+<thead><tr><th style="width: 36px"><span class="ck"></span></th><th>الطالب</th><th>الرقم</th><th>البرنامج</th><th>المستوى</th><th>مواد الفصل</th><th>المعدل</th><th>الحالة</th></tr></thead>
+<tbody>
+<tr><td><span class="ck on"></span></td><td><span class="av">ه ص</span>هبة صلاح الدين</td><td class="num">26-IT-0142</td><td>تقنية المعلومات</td><td class="num">1</td><td class="num" style="color: #8A5A14; font-weight: 600">0 — غير مسجلة</td><td class="num">—</td><td><span class="chip c-ok">منتظمة · جديدة</span></td></tr>
+<tr><td><span class="ck on"></span></td><td><span class="av">ع ط</span>عبد الرحمن طه</td><td class="num">26-IT-0143</td><td>تقنية المعلومات</td><td class="num">1</td><td class="num" style="color: #8A5A14; font-weight: 600">0 — غير مسجل</td><td class="num">—</td><td><span class="chip c-ok">منتظم · جديد</span></td></tr>
+<tr><td><span class="ck"></span></td><td><span class="av">أ م</span>أحمد محمد عثمان</td><td class="num">24-IT-0031</td><td>تقنية المعلومات</td><td class="num">3</td><td class="num">6 · 18 س</td><td class="num">3.42</td><td><span class="chip c-ok">منتظم</span></td></tr>
+<tr><td><span class="ck"></span></td><td><span class="av">س م</span>سارة محمد الأمين</td><td class="num">25-IT-0074</td><td>تقنية المعلومات</td><td class="num">2</td><td class="num">6 · 18 س</td><td class="num">3.42</td><td><span class="chip c-ok">منتظمة</span></td></tr>
+<tr><td><span class="ck"></span></td><td><span class="av">ع ص</span>عمر صالح عبد الله</td><td class="num">26-IT-0093</td><td>تقنية المعلومات</td><td class="num">1</td><td class="num">5 · 15 س</td><td class="num">1.9</td><td><span class="chip c-warn">إنذار أكاديمي</span></td></tr>
+<tr><td><span class="ck"></span></td><td><span class="av">ي ع</span>يوسف عادل محمد</td><td class="num">26-IT-0088</td><td>تقنية المعلومات</td><td class="num">1</td><td class="num">5 · 15 س</td><td class="num">2.7</td><td><span class="chip c-bad">حالة مفتوحة</span></td></tr>
+<tr><td><span class="ck"></span></td><td><span class="av">ل ع</span>لينا عبد الله محمد</td><td class="num">26-IS-0012</td><td>نظم المعلومات</td><td class="num">1</td><td class="num">5 · 15 س</td><td class="num">—</td><td><span class="chip c-ok">منتظمة</span></td></tr>
+<tr><td><span class="ck"></span></td><td><span class="av">م ع</span>محمد عبد الله الطيب</td><td class="num">23-IT-0011</td><td>تقنية المعلومات</td><td class="num">4</td><td class="num">4 · 12 س</td><td class="num">3.71</td><td><span class="chip c-ok">منتظم</span></td></tr>
+<tr><td colspan="8" style="text-align: center; color: #2D64A7; font-weight: 600">عرض 404 طالبًا آخر</td></tr>
+</tbody></table>
+<div class="sel"><span>محدد <b>طالبان</b> غير مسجلين في مواد</span><div class="a"><span>تسجيل في مواد المستوى 1 (5 مواد)</span><span>إشعار</span><span>تصدير</span></div></div>
+</div>
+</div>
+<div>
+<div class="grp"><div class="hd"><h2>طلبات التسجيل · 12</h2><a href="AdminApprovals.dc.html" style="font-size: 12px; font-weight: 600">الكل</a></div>
+<div class="rq"><span class="av2">م ف</span><span class="grow"><div class="t">مازن الفاتح</div><div class="s">الرقم 26-IT-0201 غير موجود في السجل · أمس</div></span><a class="mini m-bad" href="AdminApprovals.dc.html">رفض</a></div>
+<div class="rq"><span class="av2">ن ح</span><span class="grow"><div class="t">نور حسن</div><div class="s">26-IT-0144 · بريد متحقق · اليوم</div></span><a class="mini m-ok" href="AdminApprovals.dc.html">اعتماد</a></div>
+<div class="rq"><span class="av2">ب ع</span><span class="grow"><div class="t">بلال عوض الكريم</div><div class="s">26-IT-0145 · بريد متحقق · اليوم</div></span><a class="mini m-ok" href="AdminApprovals.dc.html">اعتماد</a></div>
+<div class="rq" style="justify-content: center"><a href="AdminApprovals.dc.html" style="font-size: 13px; font-weight: 600">9 طلبات أخرى — اعتماد جماعي للمتحققين</a></div>
+</div>
+<div class="grp"><div class="hd"><h2>تسجيل جماعي في المواد</h2></div><div class="bulk">
+<span class="k">الفصل</span><div class="v">خريف 2026/2027</div>
+<span class="k">المستوى · البرنامج</span><div class="v">المستوى 1 · كل البرامج</div>
+<span class="k">المواد</span><div class="v" style="font-weight: 500">IT101 · MTH101 · ENG101 · PHY101 · GEN101 (5 مواد · 15 ساعة)</div>
+<div class="cnt"><b>16</b>طالبًا غير مسجل في المستوى 1 سيُسجَّلون · لا يتأثر المسجلون · يمكن السحب فرديًا بعدها</div>
+<a class="btn b-pri" href="DesktopDeptStudents.dc.html" style="display: block; text-align: center; margin-top: 10px">تسجيل 16 طالبًا</a>
+</div></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":800}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

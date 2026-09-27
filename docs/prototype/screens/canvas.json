@@ -1081,6 +1081,123 @@
       "w": 1280,
       "x": 0,
       "y": 21322
+    },
+    "AuthReset.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 40,
+      "title": "المصادقة — كلمة مرور جديدة (بعد OTP)",
+      "w": 390,
+      "x": 0,
+      "y": 22509
+    },
+    "VisitorAnnouncements.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 40,
+      "title": "الزائر — الإعلانات العامة واللوائح المنشورة",
+      "w": 390,
+      "x": 470,
+      "y": 22509
+    },
+    "HeadRegistrarRegistrars.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 40,
+      "title": "مسؤول المسجلين — المسجلون وربطهم بالأقسام",
+      "w": 390,
+      "x": 940,
+      "y": 22509
+    },
+    "ResultsOfficerCorrections.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 40,
+      "title": "مسؤول النتائج — طلبات التعديل",
+      "w": 390,
+      "x": 1410,
+      "y": 22509
+    },
+    "ResultsOfficerSettings.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 40,
+      "title": "مسؤول النتائج — إعدادات عرض النتائج",
+      "w": 390,
+      "x": 1880,
+      "y": 22509
+    },
+    "StudentAffairsStudent.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 40,
+      "title": "شؤون الطلاب — ملف طالب (حالات وإقرارات)",
+      "w": 390,
+      "x": 2350,
+      "y": 22509
+    },
+    "StaffSettings.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 40,
+      "title": "مشترك — إعدادات الحساب (الأستاذ والإداريون)",
+      "w": 390,
+      "x": 2820,
+      "y": 22509
+    },
+    "DesktopDeptLectures.dc.html": {
+      "h": 800,
+      "is_interactive": true,
+      "radius": 12,
+      "title": "سطح المكتب — محاضرات القسم (إحصاءات واتجاه)",
+      "w": 1280,
+      "x": 0,
+      "y": 23696
+    },
+    "DesktopDeptStudents.dc.html": {
+      "h": 800,
+      "is_interactive": true,
+      "radius": 12,
+      "title": "سطح المكتب — طلاب القسم + طلبات التسجيل",
+      "w": 1280,
+      "x": 1360,
+      "y": 23696
+    },
+    "DesktopEnrollment.dc.html": {
+      "h": 800,
+      "is_interactive": true,
+      "radius": 12,
+      "title": "سطح المكتب — مسؤول المسجلين: التسجيل في المواد (Enrollment) حسب الفصل",
+      "w": 1280,
+      "x": 2720,
+      "y": 23696
+    },
+    "DesktopRolesMatrix.dc.html": {
+      "h": 800,
+      "is_interactive": true,
+      "radius": 12,
+      "title": "سطح المكتب — مدير النظام: الأدوار والصلاحيات (مصفوفة للقراءة + تعيين)",
+      "w": 1280,
+      "x": 4080,
+      "y": 23696
+    },
+    "DesktopSiteMedia.dc.html": {
+      "h": 800,
+      "is_interactive": true,
+      "radius": 12,
+      "title": "سطح المكتب — مدير الموقع: الوسائط والقوائم والإعدادات",
+      "w": 1280,
+      "x": 5440,
+      "y": 23696
+    },
+    "DesktopStyleguide.dc.html": {
+      "h": 800,
+      "is_interactive": true,
+      "radius": 12,
+      "title": "سطح المكتب — /dev/styleguide: الرموز والمكونات (بعد قرارات الخط)",
+      "w": 1280,
+      "x": 6800,
+      "y": 23696
     }
   },
   "createdOnFiles": {
@@ -1250,6 +1367,22 @@
       "w": 240,
       "x": 0,
       "y": 21062
+    },
+    "row19": {
+      "kind": "title1",
+      "maxW": 3210,
+      "text": "الجولة الأخيرة (هاتف) — كلمة مرور جديدة · الإعلانات العامة واللوائح · المسجلون والأقسام · طلبات التعديل · إعدادات عرض النتائج · ملف طالب (شؤون الطلاب) · إعدادات حساب الموظفين",
+      "w": 240,
+      "x": 0,
+      "y": 22249
+    },
+    "row20": {
+      "kind": "title1",
+      "maxW": 8080,
+      "text": "الجولة الأخيرة (سطح المكتب) — محاضرات القسم · طلاب القسم + طلبات التسجيل + تسجيل جماعي · Enrollment حسب الفصل · مصفوفة الأدوار · الوسائط والقوائم والإعدادات · /dev/styleguide بعد قرارات الخط",
+      "w": 240,
+      "x": 0,
+      "y": 23436
     }
   },
   "order": [
@@ -1372,7 +1505,20 @@
     "DesktopAcademicAffairs.dc.html",
     "DesktopStudentAffairsCases.dc.html",
     "DesktopSiteInquiries.dc.html",
-    "FontCompare.dc.html"
+    "FontCompare.dc.html",
+    "AuthReset.dc.html",
+    "VisitorAnnouncements.dc.html",
+    "HeadRegistrarRegistrars.dc.html",
+    "ResultsOfficerCorrections.dc.html",
+    "ResultsOfficerSettings.dc.html",
+    "StudentAffairsStudent.dc.html",
+    "StaffSettings.dc.html",
+    "DesktopDeptLectures.dc.html",
+    "DesktopDeptStudents.dc.html",
+    "DesktopEnrollment.dc.html",
+    "DesktopRolesMatrix.dc.html",
+    "DesktopSiteMedia.dc.html",
+    "DesktopStyleguide.dc.html"
   ],
   "pages": [],
   "title": "ECST Portal Prototype"

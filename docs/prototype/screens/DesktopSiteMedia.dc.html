@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="ar">
+<head>
+<meta charset="utf-8">
+<title>سطح المكتب — مدير الموقع: الوسائط والقوائم والإعدادات</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'IBM Plex Sans Arabic',system-ui,sans-serif;background:#F4F5F7;color:#1F2B47}
+a{color:#2D64A7;text-decoration:none}
+.scr{width:1280px;height:800px;position:relative;overflow:hidden;background:#F4F5F7;direction:rtl;text-align:right;box-sizing:border-box;display:flex}
+.side{width:240px;flex-shrink:0;background:#1F2B47;color:#fff;padding:20px 16px;box-sizing:border-box;display:flex;flex-direction:column}
+.logo{display:flex;align-items:center;gap:10px;font-size:14px;font-weight:700;padding:4px 6px 22px}
+.logo i{width:32px;height:32px;border-radius:9px;background:#fff;display:block}
+.nv{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;font-size:14px;color:rgba(255,255,255,.75);margin-bottom:2px}
+.nv svg{width:18px;height:18px}
+.nv.on{background:rgba(255,255,255,.12);color:#fff;font-weight:600}
+.me{margin-top:auto;display:flex;align-items:center;gap:10px;padding:10px 6px;border-top:1px solid rgba(255,255,255,.12)}
+.me .av{width:34px;height:34px;border-radius:17px;background:#B7791F;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700}
+.me .t{font-size:13px;font-weight:600}.me .s{font-size:12px;color:rgba(255,255,255,.6)}
+.main{flex:1;min-width:0;display:flex;flex-direction:column}
+.bar{height:60px;display:flex;align-items:center;gap:14px;padding:0 28px;background:#fff;border-bottom:1px solid #E7E9EE}
+.bar h1{font-size:18px;font-weight:700;margin:0}
+.bar .act{margin-right:auto;display:flex;gap:8px}
+.btn{font-size:13px;font-weight:700;padding:9px 14px;border-radius:10px;white-space:nowrap}
+.b-pri{background:#2D64A7;color:#fff}.b-sec{background:#F0F1F4;color:#1F2B47}
+.wrap{flex:1;overflow:auto;padding:22px 28px;box-sizing:border-box}
+.tabs{display:flex;gap:6px;margin-bottom:14px}
+.tabs a{font-size:13px;font-weight:600;padding:8px 14px;border-radius:999px;background:#fff;border:1px solid #E7E9EE;color:#576075}
+.tabs .on{background:#1F2B47;border-color:#1F2B47;color:#fff}
+.cols{display:grid;grid-template-columns:1fr 340px;gap:20px}
+.grp{background:#fff;border-radius:16px;border:1px solid #E7E9EE;overflow:hidden;margin-bottom:20px}
+.hd{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid #EEF0F3}
+.hd h2{font-size:14px;font-weight:700;margin:0;flex:1}
+.hd .f{display:flex;gap:6px}
+.hd .f span{font-size:11px;font-weight:600;padding:5px 10px;border-radius:999px;background:#F0F1F4;color:#576075}
+.hd .f .on{background:#1F2B47;color:#fff}
+.grid{display:grid;grid-template-columns:repeat(5, 1fr);gap:12px;padding:14px 16px}
+.md{border:1px solid #E7E9EE;border-radius:12px;overflow:hidden}
+.md.sel{border-color:#2D64A7;box-shadow:0 0 0 3px rgba(45,100,167,.15)}
+.md .th{height:90px;background:linear-gradient(135deg,#1F2B47,#2D64A7);position:relative}
+.md .th.g{background:linear-gradient(135deg,#B02544,#6E1A2E)}.md .th.n{background:linear-gradient(135deg,#8FA5C2,#C7CAD1)}.md .th.lg{background:#fff;display:flex;align-items:center;justify-content:center}
+.md .th.lg i{width:44px;height:44px;border-radius:12px;background:#1F2B47;display:block}
+.md .th .k{position:absolute;top:6px;left:6px;font-size:9px;font-weight:700;background:rgba(255,255,255,.85);color:#1F2B47;padding:2px 6px;border-radius:999px;direction:ltr}
+.md .th .w{position:absolute;top:6px;right:6px;font-size:9px;font-weight:700;background:#FBF3E3;color:#8A5A14;padding:2px 6px;border-radius:999px}
+.md .b{padding:8px 10px}
+.md .n{font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.md .m{font-size:11px;color:#8F95A3;margin-top:2px}
+.up{margin:0 16px 16px;border:1.5px dashed #C7CAD1;border-radius:12px;padding:14px;text-align:center;font-size:12px;color:#8F95A3;line-height:1.6}
+.up b{display:block;color:#1F2B47}
+.pr{padding:14px 16px}
+.pr .prev{height:120px;border-radius:12px;background:linear-gradient(135deg,#1F2B47,#2D64A7);margin-bottom:12px}
+.pr .k{display:block;font-size:11px;font-weight:600;color:#8F95A3;margin:10px 0 4px}
+.pr .k:first-of-type{margin-top:0}
+.pr .v{font-size:13px;font-weight:600;border:1px solid #E7E9EE;border-radius:8px;padding:7px 10px;background:#F8F9FB}
+.pr .v.dim{color:#8F95A3;font-weight:500;font-style:normal}
+.pr .use{font-size:12px;color:#576075;line-height:1.7;padding:6px 0;border-top:1px solid #EEF0F3;margin-top:10px}
+.pr .use b{color:#1F2B47}
+.acts{display:flex;gap:8px;margin-top:12px}
+.acts a{flex:1;text-align:center}
+.mn{padding:8px 16px 14px}
+.mi{display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid #E7E9EE;border-radius:9px;margin-top:6px;font-size:13px;font-weight:600;background:#fff}
+.mi .g{color:#C7CAD1}.mi .u{margin-right:auto;font-size:11px;color:#8F95A3;direction:ltr;font-weight:500}
+.mi.sub{margin-right:22px}
+.st{padding:6px 16px 12px}
+.sr{display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid #EEF0F3;font-size:13px}
+.sr:first-child{border-top:0}
+.sr .n{width:120px;color:#576075}.sr .v{flex:1;font-weight:600}
+.sr .v.ltr{direction:ltr;text-align:right}
+</style>
+</helmet>
+<div class="scr" style="width: 1280px; height: 800px">
+<aside class="side">
+<div class="logo"><i></i>منصة الكلية</div>
+<a class="nv" href="SiteManagerHome.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8v9a2 2 0 0 1-2 2h-4v-7h-6v7H5a2 2 0 0 1-2-2z"/></svg>حالة الموقع</a>
+<a class="nv" href="DesktopSiteCMS.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>الصفحات</a>
+<a class="nv" href="SiteManagerAnnouncementNew.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v16H4z"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>الأخبار والإعلانات</a>
+<a class="nv" href="DesktopSiteInquiries.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>الاستفسارات</a>
+<a class="nv on" href="DesktopSiteMedia.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>الوسائط والقوائم</a>
+<a class="nv" href="DesktopSiteMedia.dc.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>إعدادات الموقع</a>
+<div class="me"><span class="av">ر ش</span><span><div class="t">أ. ريم الشيخ</div><div class="s">مدير الموقع</div></span></div>
+</aside>
+<div class="main">
+<div class="bar"><h1>الوسائط والقوائم والإعدادات</h1><div class="act"><a class="btn b-sec" href="DesktopSiteMedia.dc.html">تنظيف غير المستخدم (14)</a><a class="btn b-pri" href="DesktopSiteMedia.dc.html">+ رفع</a></div></div>
+<div class="wrap">
+<div class="tabs"><a class="on" href="DesktopSiteMedia.dc.html">الوسائط 186</a><a href="DesktopSiteMedia.dc.html">القوائم</a><a href="DesktopSiteMedia.dc.html">إعدادات الموقع</a><a href="DesktopSiteMedia.dc.html">التحويلات 6</a></div>
+<div class="cols">
+<div>
+<div class="grp"><div class="hd"><h2>المعرض</h2><div class="f"><span class="on">الكل</span><span>صور 162</span><span>مستندات 18</span><span>شعارات 6</span><span>بلا alt 9</span><span>غير مستخدم 14</span></div></div>
+<div class="grid">
+<div class="md sel"><div class="th"><span class="k">1600×900</span></div><div class="b"><div class="n">hero-admissions-2026.jpg</div><div class="m">412 KB · اليوم</div></div></div>
+<div class="md"><div class="th g"><span class="k">1600×900</span></div><div class="b"><div class="n">graduation-14.jpg</div><div class="m">688 KB · 3 سبتمبر</div></div></div>
+<div class="md"><div class="th n"><span class="k">1200×800</span><span class="w">بلا alt</span></div><div class="b"><div class="n">lab-cyber-01.jpg</div><div class="m">520 KB · 10 يوليو</div></div></div>
+<div class="md"><div class="th lg"><i></i><span class="k">SVG</span></div><div class="b"><div class="n">logo-primary.svg</div><div class="m">14 KB · شعار</div></div></div>
+<div class="md"><div class="th n"><span class="k">PDF</span></div><div class="b"><div class="n">exam-schedule-spring-2026.pdf</div><div class="m">1.1 MB · 12 سبتمبر</div></div></div>
+<div class="md"><div class="th" style="background: linear-gradient(135deg,#6A4C93,#2D64A7)"><span class="k">1200×800</span></div><div class="b"><div class="n">dean-portrait.jpg</div><div class="m">310 KB · 2025</div></div></div>
+<div class="md"><div class="th n"><span class="k">1200×800</span><span class="w">غير مستخدم</span></div><div class="b"><div class="n">campus-old-2019.jpg</div><div class="m">740 KB · 2019</div></div></div>
+<div class="md"><div class="th g"><span class="k">1200×1200</span></div><div class="b"><div class="n">event-open-day.jpg</div><div class="m">455 KB · 20 سبتمبر</div></div></div>
+<div class="md"><div class="th" style="background: linear-gradient(135deg,#1E7F4F,#14603A)"><span class="k">1600×900</span></div><div class="b"><div class="n">sudatel-signing.jpg</div><div class="m">602 KB · 28 أغسطس</div></div></div>
+<div class="md"><div class="th lg"><i style="background: #B02544"></i><span class="k">SVG</span></div><div class="b"><div class="n">logo-mono-white.svg</div><div class="m">12 KB · شعار</div></div></div>
+</div>
+<div class="up"><b>أفلت ملفات هنا أو انقر للرفع</b>JPG/PNG/WebP/SVG/PDF حتى 10 MB · تُولَّد نسخ WebP بثلاثة أحجام تلقائيًا · الاسم البديل (alt) بلغتين مطلوب للصور</div>
+</div>
+<div class="grp"><div class="hd"><h2>قوائم الموقع — الهيدر (سحب وإفلات)</h2><a href="DesktopSiteMedia.dc.html" style="font-size: 12px; font-weight: 600">الفوتر</a></div><div class="mn">
+<div class="mi"><span class="g">⋮⋮</span>الرئيسية<span class="u">/</span></div>
+<div class="mi"><span class="g">⋮⋮</span>عن الكلية<span class="u">/about</span></div>
+<div class="mi sub"><span class="g">⋮⋮</span>كلمة العميد<span class="u">/about/dean</span></div>
+<div class="mi"><span class="g">⋮⋮</span>الأقسام والبرامج<span class="u">/departments</span></div>
+<div class="mi"><span class="g">⋮⋮</span>القبول<span class="u">/admissions</span></div>
+<div class="mi"><span class="g">⋮⋮</span>الأخبار والفعاليات<span class="u">/news</span></div>
+<div class="mi"><span class="g">⋮⋮</span>تواصل معنا<span class="u">/contact</span></div>
+</div></div>
+</div>
+<div>
+<div class="grp"><div class="hd"><h2>hero-admissions-2026.jpg</h2></div><div class="pr">
+<div class="prev"></div>
+<span class="k">النص البديل — عربي (مطلوب)</span><div class="v">طلاب أمام المبنى الرئيسي لكلية الإمارات في يوم التعريف</div>
+<span class="k">النص البديل — English</span><div class="v dim">Students in front of the main building on open day</div>
+<span class="k">الملف</span><div class="v" style="direction: ltr; text-align: right; font-weight: 500">JPG · 1600×900 · 412 KB · WebP: 400/800/1600</div>
+<div class="use"><b>مستخدمة في 2:</b> الرئيسية (Hero) · إعلان «فتح باب القبول 2026»</div>
+<div class="acts"><a class="btn b-sec" href="DesktopSiteMedia.dc.html">استبدال</a><a class="btn b-sec" href="DesktopSiteMedia.dc.html">نسخ الرابط</a></div>
+</div></div>
+<div class="grp"><div class="hd"><h2>إعدادات الموقع (مختصر)</h2><a href="DesktopSiteMedia.dc.html" style="font-size: 12px; font-weight: 600">الكل</a></div><div class="st">
+<div class="sr"><span class="n">الاسم</span><span class="v">كلية الإمارات للعلوم والتقنية</span></div>
+<div class="sr"><span class="n">النطاق</span><span class="v ltr">ecst.edu.sd</span></div>
+<div class="sr"><span class="n">WhatsApp الرسمي</span><span class="v ltr">+249 91 000 0000</span></div>
+<div class="sr"><span class="n">SEO الافتراضي</span><span class="v">عنوان | كلية الإمارات للعلوم والتقنية</span></div>
+<div class="sr"><span class="n">إعادة البناء</span><span class="v">تلقائي عند النشر · آخرها 10:42</span></div>
+</div></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":800}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>
