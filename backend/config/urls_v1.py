@@ -6,6 +6,7 @@ from rest_framework.routers import SimpleRouter
 from academic import views as academic
 from accounts import views as accounts
 from audit import views as audit
+from exams import views as exams
 from files import views as files
 from learning import views as learning
 from notifications import views as notifications
@@ -42,6 +43,8 @@ router.register("result-corrections", results.CorrectionViewSet, basename="resul
 router.register("results/grading-scales", results.GradingScaleViewSet, basename="grading-scale")
 router.register("results/term-releases", results.TermReleaseViewSet, basename="term-release")
 router.register("results", results.ResultViewSet, basename="result")
+router.register("exams", exams.ExamViewSet, basename="exam")
+router.register("exam-attempts", exams.AttemptViewSet, basename="exam-attempt")
 router.register("regulations", student_affairs.RegulationViewSet, basename="regulation")
 router.register("cases", student_affairs.CaseViewSet, basename="case")
 router.register("me/cases", student_affairs.MyCasesViewSet, basename="my-case")

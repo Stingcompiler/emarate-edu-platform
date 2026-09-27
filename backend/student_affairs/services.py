@@ -251,16 +251,26 @@ def set_closed(meta: RequestMeta, case: StudentCase, closed: bool) -> StudentCas
 # ─── Misconduct reports ───────────────────────────────────────────────────
 
 
-def report_misconduct(meta: RequestMeta, *, offering, student_record, evidence) -> MisconductReport:
+def report_misconduct(
+    meta: RequestMeta, *, offering, student_record, evidence, attempt=None
+) -> MisconductReport:
     user = meta.actor
     teaches = OfferingInstructor.objects.filter(offering=offering, user=user).exists()
     if not (teaches or rbac.can(user, "learning.manage", offering.course.department_id)):
         raise PermissionDenied("You can report only in courses you teach or manage.")
     if not Enrollment.objects.filter(offering=offering, student_record=student_record).exists():
         raise ValidationError({"student_record": ["This student is not in the course."]})
+    if attempt is not None and (
+        attempt.student_record_id != student_record.pk or attempt.exam.offering_id != offering.pk
+    ):
+        raise ValidationError({"attempt": ["The attempt belongs to another student or course."]})
     with transaction.atomic():
         report = MisconductReport.objects.create(
-            offering=offering, student_record=student_record, reported_by=user, evidence=evidence
+            offering=offering,
+            student_record=student_record,
+            reported_by=user,
+            evidence=evidence,
+            attempt=attempt,
         )
         record(meta, "misconduct.report", report, department_id=offering.course.department_id)
         staff = get_user_model().objects.filter(

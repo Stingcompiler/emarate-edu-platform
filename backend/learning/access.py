@@ -30,6 +30,7 @@ class OfferingAccess:
     delete_own: bool = False
     grade: bool = False
     submit: bool = False
+    publish: bool = False  # publish/close exams: not TAs (docs/03 §3.9)
 
     @property
     def any(self) -> bool:
@@ -62,6 +63,7 @@ def for_offering(user, offering) -> OfferingAccess:
         delete_own=teaching == "teacher",
         grade=manage or teaching == "teacher" or (teaching == "ta" and offering.ta_can_grade),
         submit=enrolled,
+        publish=manage or teaching == "teacher",
     )
 
 
