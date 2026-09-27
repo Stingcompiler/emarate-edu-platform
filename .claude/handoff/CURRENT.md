@@ -1,6 +1,10 @@
-# Handoff — Phase 2 done → Phase 3 (notifications + PWA) — 2026-09-28
+# Handoff — Phase 3 in progress (notifications + PWA) — 2026-09-28
 
 ## Where things stand
+- **Phases 1 and 2 are merged** to `main` (PRs #3 and #4).
+- **Phase 3 is on branch `feat/phase-3-notifications`.**
+  - The backend is **done and committed**: the `notifications` app, audiences per docs/03 §8, fan-out, VAPID push, email outbox, HR notices, automatic events and the due reminder beat. 190 tests pass on SQLite, 189 plus 1 skip on Postgres.
+  - **Next is the portal:** sign-in, the shell, the notification centre, compose, preferences, the install screen and the Service Worker. After that, open the PR.
 - **Phase 1** merged to `main` (PR #3).
 - **Phase 2 (learning)** is complete on branch `feat/phase-2-learning`. Its PR against `main` is opened in this step; merge it as soon as CI is green.
   - If you find it still open, check CI once, fix failures, `gh pr merge --merge`, then branch Phase 3 off `main`.
