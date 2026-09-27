@@ -140,6 +140,9 @@ CAPABILITIES: dict[str, frozenset[Role]] = {
         }
     ),
     "students.status": frozenset({R.SYSTEM_ADMIN, R.STUDENT_AFFAIRS}),
+    # Website content (docs/03 §3.12–3.13)
+    "content.manage": frozenset({R.SYSTEM_ADMIN, R.SITE_MANAGER}),
+    "events.manage": frozenset({R.SYSTEM_ADMIN, R.SITE_MANAGER, R.EVENTS_MANAGER}),
     # Users and roles
     "users.view": frozenset({R.SYSTEM_ADMIN, R.ACADEMIC_AFFAIRS, R.HEAD_REGISTRAR}),
     # Audit log: system admin sees everything; department roles their department.

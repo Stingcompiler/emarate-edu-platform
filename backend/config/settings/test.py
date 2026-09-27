@@ -28,7 +28,7 @@ REST_FRAMEWORK = {
     **REST_FRAMEWORK,
     # Throttling is exercised by dedicated tests, not by every request.
     "DEFAULT_THROTTLE_RATES": {
-        scope: "10000/minute" for scope in ("anon", "user", "login", "otp", "otp_ip")
+        scope: "10000/minute" for scope in ("anon", "user", "login", "otp", "otp_ip", "contact")
     },
 }
 

@@ -51,6 +51,7 @@ if MEDIA_BACKEND == "bunny":
     BUNNY_WEBHOOK_SECRET = env("BUNNY_WEBHOOK_SECRET", required=True)
     STORAGES = {**STORAGES, "default": {"BACKEND": "files.bunny.BunnyStorage"}}  # noqa: F405
 
+FIELD_ENCRYPTION_KEY = env("FIELD_ENCRYPTION_KEY", required=True)
 VAPID_PUBLIC_KEY = env("VAPID_PUBLIC_KEY", required=True)
 VAPID_PRIVATE_KEY = env("VAPID_PRIVATE_KEY", required=True)
 VAPID_SUBJECT = env("VAPID_SUBJECT", "mailto:it@ecst.edu.sd")

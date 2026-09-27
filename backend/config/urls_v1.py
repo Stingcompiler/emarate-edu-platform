@@ -6,9 +6,12 @@ from rest_framework.routers import SimpleRouter
 from academic import views as academic
 from accounts import views as accounts
 from audit import views as audit
+from content import views as content
 from exams import views as exams
 from files import views as files
+from inquiries import views as inquiries
 from learning import views as learning
+from live import views as live
 from notifications import views as notifications
 from organization import views as organization
 from results import views as results
@@ -45,6 +48,14 @@ router.register("results/term-releases", results.TermReleaseViewSet, basename="t
 router.register("results", results.ResultViewSet, basename="result")
 router.register("exams", exams.ExamViewSet, basename="exam")
 router.register("exam-attempts", exams.AttemptViewSet, basename="exam-attempt")
+router.register("live-sessions", live.LiveSessionViewSet, basename="live-session")
+router.register("inquiries", inquiries.InquiryViewSet, basename="inquiry")
+router.register("announcements", content.AnnouncementViewSet, basename="announcement")
+router.register("content/pages", content.PageViewSet, basename="page")
+router.register("content/news", content.NewsViewSet, basename="news")
+router.register("content/events", content.EventViewSet, basename="event")
+router.register("content/media", content.MediaAssetViewSet, basename="media")
+router.register("content/redirects", content.RedirectViewSet, basename="redirect")
 router.register("regulations", student_affairs.RegulationViewSet, basename="regulation")
 router.register("cases", student_affairs.CaseViewSet, basename="case")
 router.register("me/cases", student_affairs.MyCasesViewSet, basename="my-case")
@@ -99,5 +110,7 @@ urlpatterns = [
         student_affairs.StudentStatusView.as_view(),
         name="student-status",
     ),
+    path("content/site-settings", content.SiteSettingsView.as_view(), name="site-settings"),
+    path("content/menus/<slug:key>", content.MenuView.as_view(), name="menu"),
     path("", include(router.urls)),
 ]

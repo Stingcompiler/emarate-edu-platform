@@ -22,7 +22,7 @@ PASSWORD_HASHERS = ["django.contrib.auth.hashers.MD5PasswordHasher"]  # logins a
 REST_FRAMEWORK = {
     **REST_FRAMEWORK,
     "DEFAULT_THROTTLE_RATES": {
-        scope: "100000/minute" for scope in ("anon", "user", "login", "otp", "otp_ip")
+        scope: "100000/minute" for scope in ("anon", "user", "login", "otp", "otp_ip", "contact")
     },
 }
 LOGGING = {"version": 1, "disable_existing_loggers": False, "root": {"level": "WARNING"}}
