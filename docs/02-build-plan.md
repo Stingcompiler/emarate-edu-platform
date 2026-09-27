@@ -9,7 +9,8 @@
 | # | القرار | الأثر على التصميم |
 |---|---|---|
 | D1 | البيانات الحالية غير مطلوبة | قاعدة بيانات جديدة؛ لا Data migrations؛ حرية كاملة في الـ Schema |
-| D2 | لا أهمية للإنتاج الآن؛ **لا Docker إطلاقًا** | تطوير محلي بخدمات Homebrew (postgresql@16 + redis + mailpit)؛ النشر مرحلة أخيرة |
+| D2 | لا أهمية للإنتاج الآن؛ **لا Docker إطلاقًا**؛ **SQLite للتطوير، PostgreSQL للإنتاج** | التطوير بلا أي خدمات خارجية (SQLite + Celery Eager + بريد Console + Cache محلي + ملفات محلية)؛ الإنتاج Postgres + Redis + Celery + Bunny. قواعد التوافق في `05-system-design.md` §4 |
+| D21 | **لا يبدأ التنفيذ** قبل عرض الخطة الكاملة (الهوية، تصميم النظام، نظام تصميم الصفحات) واعتمادها | المستندات 05/06/07 + brand |
 | D3 | الرقم الجامعي تملكه الكلية ويُرفع من ملف | `StudentRecord` يُنشأ من الاستيراد فقط (Validate → Preview → Commit) |
 | D4 | التحقق: رقم جامعي + بريد الطالب الخاص + OTP | البريد يثبت ملكية البريد لا الهوية → أضفت طبقة اعتماد قابلة للتفعيل (انظر 4.3) |
 | D5 | البث روابط خارجية فقط (Teams/Meet/Zoom) | `LiveSession` = رابط مقيّد بالصلاحية + إشعار؛ لا Webhooks ولا حضور تلقائي ولا تسجيل |
@@ -68,7 +69,7 @@
 | `packages/config` | tsconfig/eslint/tailwind preset | – |
 
 ### أدوات
-خدمات Homebrew محلية بلا Docker (postgresql@16، redis، mailpit لمعاينة البريد) تُدار بـ `brew services` وسكربت `scripts/dev.sh` يشغّل الخادم وCelery والواجهات معًا، GitHub Actions (lint + tests + build بخدمات Postgres/Redis المدمجة في الـ Runner)، pre-commit (ruff, black, eslint, prettier).
+بلا Docker وبلا خدمات محلية: SQLite (`backend/db.sqlite3`)، Celery بوضع Eager، بريد Console/ملف، Cache محلي (LocMem)، وسائط في `backend/media/`. سكربت `scripts/dev.sh` يشغّل الخادم والواجهتين معًا. GitHub Actions يشغّل الاختبارات على SQLite **و** Postgres (خدمة في الـ Runner) لضمان التوافق. pre-commit (ruff, black, eslint, prettier).
 
 ---
 
@@ -207,9 +208,9 @@ HRNotice (teacher, sent_by, subject, body, acknowledged_at) → يولّد Notif
 كل مرحلة تنتهي بـ: Migrations، Seeds، اختبارات صلاحيات، توثيق API.
 
 ### Phase 0 — الأساس
-- هيكلة Monorepo (`backend/`, `apps/portal`, `apps/landing`, `packages/*`)، لا `dist` في Git، خدمات Homebrew (postgresql@16 موجود؛ redis + mailpit) + `scripts/dev.sh`، pre-commit، CI.
+- هيكلة Monorepo (`backend/`, `apps/portal`, `apps/landing`, `packages/*`)، لا `dist` في Git، إعدادات `dev` (SQLite/Eager/Console) و`prod` (Postgres/Redis/Anymail/Bunny) + `scripts/dev.sh`، pre-commit، CI على SQLite وPostgres.
 - Backend جديد: إعدادات مقسمة (base/dev/test/prod)، Redis، Celery، Anymail، Storage خاص/عام، Throttling، CSP، Logging، drf-spectacular.
-- **قبول:** `scripts/dev.sh` → API صحي على Postgres المحلي، اختبار واحد يمر، توليد Client من OpenAPI.
+- **قبول:** `scripts/dev.sh` → API صحي على SQLite بلا أي خدمة خارجية، اختبار واحد يمر على SQLite وPostgres في CI، توليد Client من OpenAPI.
 
 ### Phase 1 — النواة
 - `organization`, `academic`, `students`, `accounts` (تسجيل OTP + اعتماد)، `rbac`, `audit`.

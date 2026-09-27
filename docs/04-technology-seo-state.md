@@ -24,8 +24,8 @@
 | التقنية | الاستخدام | لماذا هذه تحديدًا |
 |---|---|---|
 | **Django 6 + DRF** | كل منطق الأعمال والـ API | Migrations وORM ناضجان، Permissions/Groups مدمجة تناسب 14 دورًا، Admin مجاني للفريق، الفريق يعرفه. |
-| **PostgreSQL 16** | قاعدة البيانات | JSONB (إجابات نماذج التقديم، إجابات الاختبارات، مخططات القوالب)، قيود Check/Unique، فهارس جزئية، Full-text search بالعربية لاحقًا. |
-| **Redis 7** | Cache، Throttle، Broker، جلسات OTP | خيار واحد يخدم ثلاث حاجات؛ متاح على Render. |
+| **PostgreSQL 16** (إنتاج) / **SQLite** (تطوير) | قاعدة البيانات | Postgres في الإنتاج: JSONB، قيود Check/Unique، فهارس جزئية، `pg_trgm` للبحث العربي. SQLite في التطوير: صفر إعداد؛ الكود يلتزم بالمشترك بينهما (`JSONField`، قيود قياسية، لا `ArrayField`/`contrib.postgres` إلا خلف شرط `connection.vendor`). |
+| **Redis 7** (إنتاج فقط) | Cache، Throttle، Broker، جلسات OTP | خيار واحد يخدم ثلاث حاجات؛ في التطوير: LocMem cache + Celery Eager + جلسات OTP في قاعدة البيانات. |
 | **Celery + Beat** | استيراد الطلاب/النتائج، إرسال Push/بريد، إغلاق الاختبارات تلقائيًا، تذكير المواعيد، إعادة بناء الموقع، توليد PDF | أي عمل يزيد عن ثانية يخرج من دورة الطلب حتى لا يجمّد الخادم (المشكلة الحالية في رفع الفيديو). |
 | **SimpleJWT (كوكيز HttpOnly) + token_blacklist** | مصادقة البوابة | يبقى النمط الحالي مع إصلاحه: Access 15 دقيقة، Refresh دوّار يُبطل عند الخروج، `SameSite=Lax` + CSRF على الطلبات المُعدِّلة. |
 | **drf-spectacular** | OpenAPI 3 | توليد أنواع TypeScript وClient تلقائيًا؛ توثيق حي. |
@@ -50,7 +50,7 @@
 | `packages/config` | tsconfig/eslint/prettier/tailwind preset | توحيد. |
 
 ### 1.4 أدوات التطوير والنشر
-بلا Docker: خدمات Homebrew محلية (postgresql@16, redis, mailpit) + `scripts/dev.sh`، GitHub Actions (ruff/black/pytest + tsc/eslint/vitest/build)، pre-commit، Renovate للتحديثات. النشر لاحقًا: Render (Web + Worker + Redis + Postgres مدفوعة) + Cloudflare Pages للموقع والبوابة + Cloudflare أمام الـ API.
+بلا Docker وبلا خدمات محلية: التطوير على SQLite + Celery Eager + بريد Console + Cache محلي (`scripts/dev.sh` يكفي)؛ الإنتاج Postgres + Redis + Celery + Anymail + Bunny. GitHub Actions (ruff/black/pytest على SQLite وPostgres + tsc/eslint/vitest/build)، pre-commit، Renovate للتحديثات. النشر لاحقًا: Render (Web + Worker + Redis + Postgres مدفوعة) + Cloudflare Pages للموقع والبوابة + Cloudflare أمام الـ API.
 
 ---
 
