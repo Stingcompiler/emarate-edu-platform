@@ -305,6 +305,7 @@ class Command(BaseCommand):
             )
             record.save(update_fields=["user", "updated_at"])
 
+        self._phase4(users, autumn)
         return {
             "departments": Department.objects.count(),
             "programs": Program.objects.count(),
@@ -362,6 +363,119 @@ class Command(BaseCommand):
                     "created_by": teacher,
                 },
             )
+
+    def _phase4(self, users, term) -> None:
+        """Published results for the IT level-1 cohort, regulations, a case and a report."""
+        from decimal import Decimal
+
+        from django.core.files.base import ContentFile
+        from django.utils import timezone
+
+        from academic.models import Enrollment
+        from results.models import AcademicResult, GradingScale, ResultImportBatch
+        from student_affairs.models import (
+            MisconductReport,
+            Regulation,
+            StudentCase,
+            StudentCaseEvent,
+        )
+
+        officer = users[Role.RESULTS_OFFICER]
+        if not ResultImportBatch.objects.exists():
+            batch = ResultImportBatch.objects.create(
+                file=ContentFile(b"demo", name="demo-results.csv"),
+                file_name="نتائج تقنية المعلومات — المستوى الأول.csv",
+                scope=ResultImportBatch.Scope.DEPARTMENT,
+                department=Department.objects.get(code="IT"),
+                term=term,
+                uploaded_by=officer,
+                status=ResultImportBatch.Status.PUBLISHED,
+                summary={"rows": 0, "create": 0, "error": 0},
+                detected_columns=["university_number", "course_code", "score"],
+                committed_at=timezone.now(),
+                published_at=timezone.now(),
+            )
+            scores = [91, 84, 78, 88, 67, 73, 95, 58]
+            enrollments = Enrollment.objects.filter(
+                offering__term=term, student_record__program__code="BIT", student_record__level=1
+            ).select_related("student_record", "offering__course")
+            rows = []
+            for n, enrollment in enumerate(enrollments):
+                score = Decimal(scores[n % len(scores)])
+                ranges = GradingScale.for_program(enrollment.student_record.program_id)
+                letter, points = GradingScale.grade(ranges, score)
+                rows.append(
+                    AcademicResult(
+                        student_record=enrollment.student_record,
+                        offering=enrollment.offering,
+                        term=term,
+                        score=score,
+                        letter=letter,
+                        grade_points=points,
+                        status="fail" if letter == "F" else "pass",
+                        is_published=True,
+                        published_at=timezone.now(),
+                        published_by=officer,
+                        import_batch=batch,
+                    )
+                )
+            AcademicResult.objects.bulk_create(rows)
+            batch.summary = {
+                "rows": len(rows),
+                "create": len(rows),
+                "error": 0,
+                "committed": len(rows),
+            }
+            batch.save(update_fields=["summary"])
+
+        affairs = users[Role.STUDENT_AFFAIRS]
+        Regulation.objects.get_or_create(
+            title="لائحة الامتحانات 2026",
+            defaults={
+                "body": "1. الحضور: يدخل الطالب الاختبار خلال النافذة المحددة.\n"
+                "2. النزاهة: الخروج المتكرر من شاشة الاختبار مخالفة تُحال إلى شؤون الطلاب.\n"
+                "3. الأعطال: انقطاع الإنترنت لا يُبطل المحاولة.",
+                "category": "exams",
+                "version": "2026",
+                "requires_acknowledgement": True,
+                "status": "published",
+                "published_at": timezone.now(),
+                "created_by": affairs,
+            },
+        )
+        Regulation.objects.get_or_create(
+            title="دليل الطالب الأكاديمي",
+            defaults={
+                "body": "الخطط الدراسية، الحضور، الانسحاب والإضافة.",
+                "category": "academic",
+                "version": "1.1",
+                "status": "published",
+                "published_at": timezone.now(),
+                "created_by": affairs,
+            },
+        )
+        other = (
+            StudentRecord.objects.filter(program__code="BIT", level=1)
+            .exclude(university_number="26-IT-0001")
+            .first()
+        )
+        if other and not StudentCase.objects.exists():
+            case = StudentCase.objects.create(
+                student_record=other,
+                kind=StudentCase.Kind.ACADEMIC,
+                title="إنذار أكاديمي — غياب متكرر",
+                description="تجاوز الغياب 25% في مادتين.",
+                opened_by=affairs,
+            )
+            StudentCaseEvent.objects.create(case=case, kind="opened", by=affairs)
+            offering = CourseOffering.objects.filter(term=term, course__code="IT101").first()
+            if offering:
+                MisconductReport.objects.create(
+                    offering=offering,
+                    student_record=other,
+                    reported_by=users[Role.TEACHER],
+                    evidence="تطابق إجابات 9 أسئلة مع محاولة طالب آخر خلال دقيقة واحدة.",
+                )
 
     def _user(self, email, name, password, role, department) -> User:
         user = User.objects.filter(email=email).first()

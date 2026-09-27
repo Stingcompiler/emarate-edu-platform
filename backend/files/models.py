@@ -18,6 +18,8 @@ from core.models import PublicIdModel, TimestampedModel
 class Purpose(models.TextChoices):
     LECTURE = "lecture", "مورد محاضرة"
     SUBMISSION = "submission", "تسليم واجب"
+    REGULATION = "regulation", "لائحة"
+    CASE = "case", "مرفق حالة طالب"
 
 
 def _upload_to(instance, filename: str) -> str:
@@ -30,7 +32,12 @@ def _upload_to(instance, filename: str) -> str:
 class StoredFile(PublicIdModel, TimestampedModel):
     purpose = models.CharField(max_length=20, choices=Purpose.choices)
     offering = models.ForeignKey(
-        "academic.CourseOffering", on_delete=models.PROTECT, related_name="files"
+        "academic.CourseOffering",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="files",
+        help_text="Course files only; regulations and case attachments have none.",
     )
     file = models.FileField(upload_to=_upload_to, max_length=255)
     name = models.CharField(max_length=255, help_text="Original name, shown on download.")

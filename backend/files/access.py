@@ -16,6 +16,7 @@ class Policy:
     can_read: Callable  # (user, stored_file) -> bool
     allowed_extensions: frozenset[str] | None = None
     max_mb: int = 50
+    needs_offering: bool = True
 
 
 _POLICIES: dict[str, Policy] = {}

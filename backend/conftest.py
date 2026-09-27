@@ -197,3 +197,9 @@ def pdf_upload(name: str = "notes.pdf", content: bytes = PDF):
     from django.core.files.uploadedfile import SimpleUploadedFile
 
     return SimpleUploadedFile(name, content, "application/pdf")
+
+
+def csv_upload(name: str, *lines: str):
+    from django.core.files.uploadedfile import SimpleUploadedFile
+
+    return SimpleUploadedFile(name, ("\n".join(lines) + "\n").encode("utf-8-sig"), "text/csv")

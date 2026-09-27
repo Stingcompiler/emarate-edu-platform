@@ -70,6 +70,27 @@ LEARNING_STAFF = frozenset(
 )
 LEARNING = LEARNING_STAFF | {R.STUDENT}
 OUTSIDERS = EVERYONE - LEARNING  # learning objects outside your courses are 404
+RESULTS = frozenset(
+    {
+        R.SYSTEM_ADMIN,
+        R.HEAD_REGISTRAR,
+        R.RESULTS_OFFICER,
+        R.DEPARTMENT_MANAGER,
+        R.DEPARTMENT_SUPERVISOR,
+    }
+)
+CORRECTIONS = frozenset({R.SYSTEM_ADMIN, R.RESULTS_OFFICER, R.ACADEMIC_AFFAIRS})
+CASES = frozenset(
+    {
+        R.SYSTEM_ADMIN,
+        R.STUDENT_AFFAIRS,
+        R.HEAD_REGISTRAR,
+        R.ACADEMIC_AFFAIRS,
+        R.DEPARTMENT_MANAGER,
+        R.DEPARTMENT_SUPERVISOR,
+    }
+)
+ONLY_STUDENT = frozenset({R.STUDENT})
 
 # url name → (path template, roles allowed to read, roles that get 404 instead of 403)
 READS: dict[str, tuple[str, frozenset, frozenset]] = {
@@ -151,6 +172,40 @@ READS: dict[str, tuple[str, frozenset, frozenset]] = {
     ),
     "push-config": ("/api/v1/push/config", EVERYONE, frozenset()),
     "hr-notice-list": ("/api/v1/hr-notices", EVERYONE, frozenset()),
+    # Results (the world's teacher teaches IT101, whose result is below)
+    "result-import-list": ("/api/v1/result-imports", RESULTS, frozenset()),
+    "result-import-detail": ("/api/v1/result-imports/{result_batch}", RESULTS, frozenset()),
+    "result-import-rows": ("/api/v1/result-imports/{result_batch}/rows", RESULTS, frozenset()),
+    "result-list": ("/api/v1/results", EVERYONE, frozenset()),
+    "result-detail": (
+        "/api/v1/results/{result}",
+        RESULTS | {R.TEACHER},
+        EVERYONE - RESULTS - {R.TEACHER},
+    ),
+    "result-export": ("/api/v1/results/export?term={term}", RESULTS | {R.TEACHER}, frozenset()),
+    "result-correction-list": ("/api/v1/result-corrections", CORRECTIONS, frozenset()),
+    "result-correction-detail": (
+        "/api/v1/result-corrections/{correction}",
+        CORRECTIONS,
+        frozenset(),
+    ),
+    "result-settings": ("/api/v1/results/settings", RESULTS, frozenset()),
+    "grading-scale-list": ("/api/v1/results/grading-scales", RESULTS, frozenset()),
+    "term-release-list": ("/api/v1/results/term-releases", RESULTS, frozenset()),
+    "me-results": ("/api/v1/me/results", ONLY_STUDENT, EVERYONE - ONLY_STUDENT),
+    # Student affairs
+    "regulation-list": ("/api/v1/regulations", EVERYONE, frozenset()),
+    "regulation-detail": ("/api/v1/regulations/{regulation}", EVERYONE, frozenset()),
+    "case-list": ("/api/v1/cases", CASES, frozenset()),
+    "case-detail": ("/api/v1/cases/{case}", CASES, frozenset()),
+    "my-case-list": ("/api/v1/me/cases", EVERYONE, frozenset()),
+    "my-case-detail": ("/api/v1/me/cases/{case}", ONLY_STUDENT, EVERYONE - ONLY_STUDENT),
+    "misconduct-report-list": ("/api/v1/misconduct-reports", EVERYONE, frozenset()),
+    "misconduct-report-detail": (
+        "/api/v1/misconduct-reports/{report}",
+        CASES | {R.TEACHER},
+        EVERYONE - CASES - {R.TEACHER},
+    ),
     "hr-notice-detail": (
         "/api/v1/hr-notices/{hr_notice}",
         frozenset({R.SYSTEM_ADMIN, R.HR, R.TEACHER}),
@@ -162,7 +217,26 @@ READS: dict[str, tuple[str, frozenset, frozenset]] = {
 _L = "learning.tests.test_learning::"
 _F = "files.tests.test_files::"
 _N = "notifications.tests.test_notifications::"
+_RS = "results.tests.test_results::"
+_SA = "student_affairs.tests.test_student_affairs::"
 COVERED_ELSEWHERE = {
+    "result-import-commit": _RS + "test_import_preview_commit_publish",
+    "result-import-publish": _RS + "test_import_preview_commit_publish",
+    "result-import-unpublish": _RS + "test_import_preview_commit_publish",
+    "result-corrections": _RS + "test_corrections_need_academic_affairs",
+    "result-correction-decide": _RS + "test_corrections_need_academic_affairs",
+    "grading-scale-detail": _RS + "test_gpa_uses_credit_hours_and_program_scale",
+    "term-release-detail": _RS + "test_display_rules",
+    "regulation-publish": _SA + "test_regulation_lifecycle",
+    "regulation-new-version": _SA + "test_regulation_lifecycle",
+    "regulation-acknowledge": _SA + "test_regulation_lifecycle",
+    "case-notes": _SA + "test_cases",
+    "case-decide": _SA + "test_cases",
+    "case-publish": _SA + "test_cases",
+    "case-close": _SA + "test_cases",
+    "case-reopen": _SA + "test_cases",
+    "misconduct-report-resolve": _SA + "test_misconduct_reports",
+    "student-status": _SA + "test_student_status",
     "notification-read": _N + "test_inbox_read_and_counts",
     "notification-read-all": _N + "test_inbox_read_and_counts",
     "notification-sent-preview": _N + "test_audience_options_and_preview",
@@ -316,7 +390,52 @@ def _learning_world(users, offering, student):
     from notifications.models import HRNotice
 
     notice = HRNotice.objects.create(teacher=teacher, sent_by=users[R.HR], subject="s", body="b")
+    from results.models import AcademicResult, ResultCorrection, ResultImportBatch
+    from student_affairs.models import MisconductReport, Regulation, StudentCase
+
+    batch = ResultImportBatch.objects.create(
+        file=pdf_upload("r.csv"),
+        file_name="r.csv",
+        scope="department",
+        department=offering.course.department,
+        term=offering.term,
+        uploaded_by=users[R.RESULTS_OFFICER],
+        status="published",
+    )
+    result = AcademicResult.objects.create(
+        student_record=student,
+        offering=offering,
+        term=offering.term,
+        score=80,
+        letter="B+",
+        grade_points="3.5",
+        status="pass",
+        is_published=True,
+        import_batch=batch,
+    )
+    correction = ResultCorrection.objects.create(
+        result=result, requested_by=users[R.RESULTS_OFFICER], new={"score": "85"}, reason="r"
+    )
+    regulation = Regulation.objects.create(
+        title="r", body="b", status="published", created_by=users[R.STUDENT_AFFAIRS]
+    )
+    case = StudentCase.objects.create(
+        student_record=student,
+        kind="conduct",
+        title="c",
+        published_to_student=True,
+        opened_by=users[R.STUDENT_AFFAIRS],
+    )
+    report = MisconductReport.objects.create(
+        offering=offering, student_record=student, reported_by=teacher, evidence="e"
+    )
     return {
+        "result_batch": batch.public_id,
+        "result": result.pk,
+        "correction": correction.public_id,
+        "regulation": regulation.public_id,
+        "case": case.public_id,
+        "report": report.public_id,
         "hr_notice": notice.public_id,
         "lecture": lecture.public_id,
         "assignment": assignment.public_id,

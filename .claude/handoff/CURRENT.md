@@ -1,54 +1,60 @@
-# Handoff — Phase 3 done → Phase 4 (results + student affairs) — 2026-09-28
+# Handoff — Phase 4 done → Phase 5 (exams) — 2026-09-28
 
 ## Where things stand
-- **Phases 1–2 are merged** to `main` (PRs #3 and #4).
-- **Phase 3 (notifications + PWA)** is complete on `feat/phase-3-notifications`. Its PR is opened in this step; merge it once CI is green.
-  - GitHub auto-merge is disabled for this repo, so merge manually with `gh pr merge --merge`.
+- **Phases 1–3 are merged** to `main` (PRs #3, #4, #5).
+- **Phase 4 (results + student affairs)** is complete on `feat/phase-4-results`. Its PR is opened in this step; merge it once CI is green.
+  - The app's Auto-fix watches the PR for CI failures. GitHub auto-merge is disabled, so merge manually with `gh pr merge --merge`.
 - **Verified locally:**
-  - 190 tests pass on SQLite; 189 pass plus 1 skip on Postgres;
+  - 224 tests pass on SQLite; 223 pass plus 1 skip on Postgres;
   - migrations reverse on both databases;
   - the schema has 0 warnings;
   - ruff, typecheck, build and prettier pass.
-  - Portal pages were checked in the browser pane at 390, 768 and 1280, plus dark mode.
-  - The Service Worker was verified in real headless Chrome over CDP: it registers, activates and caches the shell. The pane itself can't fetch SW scripts, which is a pane limitation.
+  - Pages were checked in the browser pane at 390 and 1280, using the demo data from `seed_demo`.
 
-## What Phase 3 delivered
-- **Backend `notifications` app:**
-  - `audience.py`: validate, authorize per docs/03 §8, resolve, and `options()` for the compose form (groups: college, department, cohort, course, staff).
-  - `services.py`: `send`, `notify`, `notify_audience`, idempotent `fan_out` that honours preferences, and HR notices.
-  - `push.py`: VAPID keys; dev creates `backend/.vapid-dev.json`, and `manage.py vapid_keys` prints production keys.
-  - `tasks.py`: fan_out, send_push, deliver_outbox with backoff, remind_due_assignments (beat).
-  - `events.py`: the automatic notifications.
-  - Other apps call `notifications.events.*` inside their transactions.
-- **Endpoints:**
-  - `/api/v1/notifications` (+read, read-all, unread-count), `notifications/sent` (+preview, audiences), `notifications/preferences`.
-  - `push/config`, `push/subscriptions`, `push/subscriptions/remove`.
-  - `hr-notices` (+acknowledge).
-  - New fields: `CourseOffering.ta_can_notify` and `Assignment.reminder_sent_at`.
-- **Portal (`apps/portal`):**
-  - Routes: `/login`, `/register`, `/forgot-password`, `/notifications`, `/notifications/new`, `/settings`, `/install`, `/system`, 404.
-  - `PortalShell` holds the role nav, unread badges, bell and sign-out. The phone NavigationBar is a light large title that collapses to a glass bar (docs/09).
-  - `lib/auth.tsx` provides `useMe`, `RequireAuth` and sign-out. `lib/push.ts`, `lib/theme.ts` and `components/ui.tsx` hold the primitives.
-  - `packages/api` refreshes the session once on a 401 and replays the request.
-  - `public/sw.js` is hand-written. Dev registers `/sw.js?dev=1`, which handles push only (no caching).
-- **Dev servers:** `.claude/launch.json` defines api, portal and boards. The preview tool in this app looked in another folder, so start them from the shell. Vite listens on `localhost`, not 127.0.0.1.
+## What Phase 4 delivered
+- **`results` app:**
+  - `importer.py` (reads tables via `students.importer.read_table`), then commit, publish/unpublish and delete (uncommitted only).
+  - `GradingScale.for_program()` / `.grade()`.
+  - `ResultCorrection`: the results officer requests, academic affairs decides; approval bumps the version and notifies the student.
+  - `student_view()` for `/me/results`, which applies `ResultDisplaySettings` and `TermResultRelease` hiding.
+  - CSV export: results staff and teachers only.
+- **`student_affairs` app:**
+  - Regulations: draft, publish, new version supersedes; acknowledgements.
+  - StudentCase with events: notes, decide, publish to student, close/reopen. `/me/cases` hides internal notes.
+  - MisconductReport: resolve converts it to a case or dismisses it.
+  - `students/<id>/status`: suspend or reinstate, with a reason.
+- **Files:** a StoredFile's offering is now optional. Purposes `regulation` and `case` have policies with `needs_offering=False`.
+- **Capabilities** (`rbac.py`): `results.manage`, `results.view`, `results.correct`, `results.approve`, `results.settings`, `regulations.manage`, `cases.manage`, `cases.view`, `students.status`.
+- **Portal pages:**
+  - `/results`, `/results/search`, `/results/settings`.
+  - `/result-imports` (+`/:id`), `/result-corrections`.
+  - `/regulations` (+`/new`, `/:id`).
+  - `/cases` (+`/new`, `/new?report=`, `/:id`).
+  - `lib/nav.ts` builds navigation from `me.capabilities`. Helpers: `StatusBadge`, `CodeTile`, `lib/upload.ts`.
+- **Seed:** now adds published IT level-1 results, two regulations, a case and a misconduct report.
 
-## Next steps (Phase 4 — results + student affairs, docs/02 §8)
-1. Read docs/02 §8 Phase 4, docs/05 §6 `results` and `student_affairs`, §8.4, and docs/03 rows for results, corrections and student affairs. Boards:
+## Next steps (Phase 5 — exams, docs/02 §8, docs/05 §6 `exams`, §8.5)
+1. Read docs/05 §6 `exams` and §8.5, docs/03 rows for exams, and the boards:
    ```bash
-   python3 scripts/boards.py list Results
-   python3 scripts/boards.py list StudentAffairs
-   python3 scripts/boards.py list DesktopResults
+   python3 scripts/boards.py list Exam
    ```
-2. **Backend `results`:**
-   - Import a finished results file (results officer college-wide; department manager/supervisor for their department): validate, preview, commit.
-   - GradingScale, publish per term (TermResultRelease) and display settings.
-   - ResultCorrection approved by academic affairs.
-   - Student view, and a PDF transcript. WeasyPrint is heavy; decide or defer and note it.
-   - Notify on publish or correction via `notifications.events`.
-3. **Backend `student_affairs`:** regulations with acknowledgement, student cases with events, and misconduct reports (exam linkage completes in Phase 5). Regulatory notifications.
-4. **Portal pages:** follow the responsive-page skill. Match both boards where they exist; say "derived" in the PR where one is missing.
-5. Add a permission-matrix row for every endpoint, extend the seed, test on both databases, open the PR, merge when green, and update this handoff.
+   Desktop boards: DesktopExamBuilder, DesktopStudentExam, DesktopDeptExams.
+2. **Backend `exams` app:**
+   - Models: Exam, Question (+config JSON), Choice, ExamAttempt, StudentAnswer.
+   - Question types go through a registry.
+   - Server-timed attempts: `started_at`/`deadline_at` from the server, answer upsert rejected after deadline + grace, idempotent submit (`Idempotency-Key`).
+   - A beat task closes expired attempts. Auto-grading, with `needs_manual` for essays.
+   - Permissions: a TA can't publish or close exams; a department manager can delete; a supervisor can't.
+3. **Connect the rest:**
+   - `MisconductReport.attempt`, linking reports to exam attempts.
+   - Exam notifications: published, and starting within the hour.
+4. **Portal:**
+   - Exam builder (desktop board).
+   - Taking an exam in a focused shell with no sidebar: phone + DesktopStudentExam.
+   - The exam result screen.
+   - The teacher's results and statistics.
+5. **Load test:** 500 concurrent attempts locally with k6 (install via brew, not Docker). Record the results in the PR.
+6. Add a permission-matrix row for every endpoint, extend the seed, test on both databases, open the PR, merge when green, and update this handoff.
 
 ## Decisions made (don't revisit)
 - **Roles are rows (`role`, `department`), not Django Groups.** Mention this deviation from docs/03 §10 in PRs that touch roles.
@@ -73,6 +79,8 @@
 - **Portal:**
   - Links point only to pages that exist (`lib/links.ts`, `lib/nav.ts`); notification links to future pages still mark items read.
   - Active chips use `bg-text text-bg`, which contrasts in both themes.
+- **Results:** committed results change only through approved corrections (the admin is read-only too). Re-importing an existing student+course is an error row.
+- **Display:** RTL layouts need `dir="ltr"` (or \u2066…\u2069) around letter grades and university numbers, otherwise "C+" renders as "+C".
 - **Pagination:** every paginated model has a default ordering, and a pytest filterwarning turns unordered pagination into an error.
 
 ## Gotchas found

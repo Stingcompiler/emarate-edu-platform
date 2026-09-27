@@ -175,3 +175,88 @@ export function problemMessage(error: unknown, fallback = "حدث خطأ. أعد
   }
   return fallback;
 }
+
+const TONES = {
+  neutral: "bg-neutral-soft text-neutral-strong",
+  info: "bg-info-soft text-info-strong",
+  warning: "bg-warning-soft text-warning-strong",
+  success: "bg-success-soft text-success-strong",
+  danger: "bg-danger-soft text-danger-strong",
+} as const;
+
+/** Status colours are fixed across the system (docs/06 §2.4). */
+const STATUS_TONE: Record<string, keyof typeof TONES> = {
+  draft: "neutral",
+  closed: "neutral",
+  superseded: "neutral",
+  unpublished: "neutral",
+  open: "info",
+  new: "info",
+  validated: "info",
+  pending: "warning",
+  has_errors: "warning",
+  suggested: "warning",
+  committed: "success",
+  published: "success",
+  approved: "success",
+  decided: "success",
+  converted: "success",
+  pass: "success",
+  rejected: "danger",
+  dismissed: "danger",
+  fail: "danger",
+  absent: "danger",
+  withdrawn: "neutral",
+  incomplete: "warning",
+};
+
+export function StatusBadge({ status, label }: { status: string; label: string }) {
+  const tone = TONES[STATUS_TONE[status] ?? "neutral"];
+  return (
+    <span
+      className={`inline-flex shrink-0 items-center rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${tone}`}
+    >
+      {label}
+    </span>
+  );
+}
+
+/** A small rounded code tile (course code / initials), as on the boards. */
+export function CodeTile({ top, bottom }: { top: string; bottom?: string }) {
+  return (
+    <span className="grid size-11 shrink-0 place-items-center rounded-lg bg-primary-soft text-center leading-tight text-primary-700">
+      <span className="text-[11px] font-semibold">{top}</span>
+      {bottom && <span className="text-sm font-bold">{bottom}</span>}
+    </span>
+  );
+}
+
+/** Splits "IT101" into ["IT", "101"] for CodeTile. */
+export function splitCode(code: string): [string, string] {
+  const match = /^([A-Za-z]+)(.*)$/.exec(code);
+  return match ? [match[1] ?? code, match[2] ?? ""] : [code, ""];
+}
+
+export const STATUS_LABELS: Record<string, string> = {
+  validated: "جاهزة للاعتماد",
+  has_errors: "بها أخطاء",
+  committed: "معتمدة",
+  published: "منشورة",
+  unpublished: "أُلغي نشرها",
+  rejected: "مرفوضة",
+  pending: "معلّق",
+  approved: "مقبول",
+  pass: "ناجح",
+  fail: "راسب",
+  absent: "غائب",
+  withdrawn: "منسحب",
+  incomplete: "غير مكتمل",
+  draft: "مسودة",
+  superseded: "مستبدلة",
+  open: "مفتوحة",
+  decided: "صدر قرار",
+  closed: "مغلقة",
+  new: "جديد",
+  converted: "حُوّل إلى حالة",
+  dismissed: "رُفض",
+};

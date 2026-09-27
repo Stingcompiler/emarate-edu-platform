@@ -40,6 +40,8 @@ INSTALLED_APPS = [
     "files",
     "learning",
     "notifications",
+    "results",
+    "student_affairs",
 ]
 
 MIDDLEWARE = [
@@ -195,6 +197,16 @@ SPECTACULAR_SETTINGS = {
         "ResourceKindEnum": "learning.models.LectureResource.Kind",
         "NotificationCategoryEnum": "notifications.models.Category",
         "SendCategoryEnum": ["course", "college", "results"],
+        "ResultBatchStatusEnum": "results.models.ResultImportBatch.Status",
+        "AcademicResultStatusEnum": "results.models.AcademicResult.Status",
+        "CorrectionStatusEnum": "results.models.ResultCorrection.Status",
+        "RegulationStatusEnum": "student_affairs.models.Regulation.Status",
+        "StudentCaseKindEnum": "student_affairs.models.StudentCase.Kind",
+        "StudentCaseStatusEnum": "student_affairs.models.StudentCase.Status",
+        "CaseEventKindEnum": "student_affairs.models.StudentCaseEvent.Kind",
+        "MisconductStatusEnum": "student_affairs.models.MisconductReport.Status",
+        "StudentStatusChangeEnum": ["active", "suspended"],
+        "StudentRecordStatusEnum": "students.models.StudentRecord.Status",
     },
 }
 

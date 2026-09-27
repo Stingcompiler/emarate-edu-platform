@@ -65,8 +65,9 @@ class MeSerializer(serializers.ModelSerializer):
         return {
             "public_id": str(record_.public_id),
             "university_number": record_.university_number,
-            "program": record_.program.name,
-            "department": record_.department.name,
+            # The portal is Arabic-first; the API's `name` follows Accept-Language.
+            "program": record_.program.name_ar,
+            "department": record_.department.name_ar,
             "level": record_.level,
             "status": record_.status,
         }
