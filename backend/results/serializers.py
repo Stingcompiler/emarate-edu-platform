@@ -180,6 +180,7 @@ class TermReleaseSerializer(serializers.ModelSerializer):
 
 
 class MyResultRowSerializer(serializers.Serializer):
+    correction_pending = serializers.BooleanField()
     course_code = serializers.CharField()
     course_name = serializers.CharField()
     credit_hours = serializers.IntegerField()
@@ -192,6 +193,8 @@ class MyResultRowSerializer(serializers.Serializer):
 class MyTermSerializer(serializers.Serializer):
     term = serializers.IntegerField()
     term_name = serializers.CharField()
+    credit_hours = serializers.IntegerField()
+    published_at = serializers.DateTimeField(allow_null=True)
     gpa = serializers.DecimalField(max_digits=4, decimal_places=2, allow_null=True)
     results = MyResultRowSerializer(many=True)
 
@@ -220,9 +223,14 @@ class MyResultsSerializer(serializers.Serializer):
                 {
                     "term": t["term"].pk,
                     "term_name": t["term"].name_ar,
+                    "credit_hours": sum(r.offering.course.credit_hours for r in t["rows"]),
+                    "published_at": max(
+                        (r.published_at for r in t["rows"] if r.published_at), default=None
+                    ),
                     "gpa": t["gpa"] if show["gpa"] else None,
                     "results": [
                         {
+                            "correction_pending": r.pk in view["pending"],
                             "course_code": r.offering.course.code,
                             "course_name": r.offering.course.name_ar,
                             "credit_hours": r.offering.course.credit_hours,

@@ -256,7 +256,13 @@ def student_view(record_) -> dict:
     if not display.history_open:
         ordered = ordered[:1]
     all_rows = [r for t in ordered for r in t["rows"]]
+    pending = set(
+        ResultCorrection.objects.filter(
+            result__in=all_rows, status=ResultCorrection.Status.PENDING
+        ).values_list("result_id", flat=True)
+    )
     return {
+        "pending": pending,
         "display": display,
         "terms": [{"term": t["term"], "rows": t["rows"], "gpa": _gpa(t["rows"])} for t in ordered],
         "cumulative_gpa": _gpa(all_rows),

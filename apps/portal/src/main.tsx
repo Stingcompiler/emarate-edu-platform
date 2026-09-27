@@ -10,6 +10,18 @@ import { createRoot } from "react-dom/client";
 import { createBrowserRouter, Navigate, RouterProvider } from "react-router";
 
 import { RequireAuth } from "./lib/auth";
+import { CaseDetail } from "./routes/affairs/CaseDetail";
+import { CaseNew } from "./routes/affairs/CaseNew";
+import { Cases } from "./routes/affairs/Cases";
+import { RegulationDetail } from "./routes/affairs/RegulationDetail";
+import { RegulationNew } from "./routes/affairs/RegulationNew";
+import { Regulations } from "./routes/affairs/Regulations";
+import { Corrections } from "./routes/results/Corrections";
+import { ResultImportDetail } from "./routes/results/ImportDetail";
+import { ResultImports } from "./routes/results/Imports";
+import { MyResults } from "./routes/results/MyResults";
+import { ResultSettings } from "./routes/results/ResultSettings";
+import { ResultSearch } from "./routes/results/Search";
 import { Compose } from "./routes/Compose";
 import { ForgotPassword } from "./routes/ForgotPassword";
 import { Install } from "./routes/Install";
@@ -37,6 +49,18 @@ const router = createBrowserRouter([
   { path: "/notifications/new", element: signedIn(<Compose />) },
   { path: "/settings", element: signedIn(<Settings />) },
   { path: "/install", element: signedIn(<Install />) },
+  { path: "/results", element: signedIn(<MyResults />) },
+  { path: "/results/search", element: signedIn(<ResultSearch />) },
+  { path: "/results/settings", element: signedIn(<ResultSettings />) },
+  { path: "/result-imports", element: signedIn(<ResultImports />) },
+  { path: "/result-imports/:id", element: signedIn(<ResultImportDetail />) },
+  { path: "/result-corrections", element: signedIn(<Corrections />) },
+  { path: "/regulations", element: signedIn(<Regulations />) },
+  { path: "/regulations/new", element: signedIn(<RegulationNew />) },
+  { path: "/regulations/:id", element: signedIn(<RegulationDetail />) },
+  { path: "/cases", element: signedIn(<Cases />) },
+  { path: "/cases/new", element: signedIn(<CaseNew />) },
+  { path: "/cases/:id", element: signedIn(<CaseDetail />) },
   { path: "/system", element: <SystemStatus /> },
   { path: "*", element: <NotFound /> },
 ]);

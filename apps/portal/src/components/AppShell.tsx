@@ -1,4 +1,4 @@
-import { ChevronRight, type LucideIcon } from "lucide-react";
+import { ChevronRight, type LucideIcon, Menu } from "lucide-react";
 import { type ReactNode, useEffect, useState } from "react";
 import { NavLink } from "react-router";
 
@@ -194,6 +194,62 @@ export function Badge({ count, className = "" }: { count?: number; className?: s
 }
 
 function BottomTabs({ items }: { items: NavItem[] }) {
+  const [open, setOpen] = useState(false);
+  const overflow = items.length > 5;
+  const tabs = overflow ? items.slice(0, 4) : items;
+  const rest = overflow ? items.slice(4) : [];
+  const restBadge = rest.reduce((sum, item) => sum + (item.badge ?? 0), 0);
+  return (
+    <>
+      {open && (
+        <div
+          className="fixed inset-0 z-30 lg:hidden"
+          role="dialog"
+          aria-modal="true"
+          aria-label="المزيد"
+        >
+          <button
+            type="button"
+            aria-label="إغلاق"
+            className="absolute inset-0 bg-black/30"
+            onClick={() => setOpen(false)}
+          />
+          <nav className="absolute inset-x-0 bottom-0 rounded-t-3xl bg-surface p-3 pb-[max(1rem,env(safe-area-inset-bottom))] shadow-lg">
+            <div className="mx-auto mb-2 h-1 w-10 rounded-full bg-border" aria-hidden />
+            {rest.map((item) => {
+              const Icon = item.icon;
+              return (
+                <NavLink
+                  key={item.to}
+                  to={item.to}
+                  end={item.end ?? true}
+                  onClick={() => setOpen(false)}
+                  className="flex min-h-12 items-center gap-3 rounded-xl px-3 text-[15px] text-text hover:bg-surface-alt"
+                >
+                  <Icon size={22} strokeWidth={1.75} aria-hidden className="text-text-muted" />
+                  {item.label}
+                  <Badge count={item.badge} className="ms-auto" />
+                </NavLink>
+              );
+            })}
+          </nav>
+        </div>
+      )}
+      <MainTabs
+        items={tabs}
+        more={overflow ? { onClick: () => setOpen(true), badge: restBadge } : undefined}
+      />
+    </>
+  );
+}
+
+function MainTabs({
+  items,
+  more,
+}: {
+  items: NavItem[];
+  more?: { onClick: () => void; badge: number };
+}) {
   return (
     <nav
       aria-label="التنقل الرئيسي"
@@ -218,6 +274,17 @@ function BottomTabs({ items }: { items: NavItem[] }) {
           </NavLink>
         );
       })}
+      {more && (
+        <button
+          type="button"
+          onClick={more.onClick}
+          className="relative flex min-h-11 w-16 flex-col items-center justify-center gap-0.5 text-xs text-navy-300"
+        >
+          <Menu size={24} strokeWidth={1.75} aria-hidden />
+          المزيد
+          <Badge count={more.badge} className="absolute -top-1 start-9" />
+        </button>
+      )}
     </nav>
   );
 }
