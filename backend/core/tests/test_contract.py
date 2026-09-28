@@ -6,8 +6,10 @@ the WSGI app as a system admin (the role that reaches the most endpoints).
 
 import pytest
 import schemathesis
+from django.core import signals
 from django.core.cache import cache
 from django.core.wsgi import get_wsgi_application
+from django.db import close_old_connections
 from hypothesis import HealthCheck, assume, settings
 from rest_framework_simplejwt.tokens import RefreshToken
 from schemathesis.checks import not_a_server_error
@@ -22,7 +24,14 @@ CSRF = "c" * 32
 def admin_headers(make_user):
     admin = make_user(Role.SYSTEM_ADMIN)
     access = str(RefreshToken.for_user(admin).access_token)
-    return {"Cookie": f"access={access}; csrftoken={CSRF}", "X-CSRFToken": CSRF}
+    # Requests go through the real WSGI handler, whose request signals close the database
+    # connection — and with it the test transaction on PostgreSQL. Django's test client
+    # detaches the same handler for the same reason.
+    signals.request_started.disconnect(close_old_connections)
+    signals.request_finished.disconnect(close_old_connections)
+    yield {"Cookie": f"access={access}; csrftoken={CSRF}", "X-CSRFToken": CSRF}
+    signals.request_started.connect(close_old_connections)
+    signals.request_finished.connect(close_old_connections)
 
 
 @schema.parametrize()
