@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
 from academic.models import AcademicYear
@@ -139,6 +140,7 @@ class StaffApplicationSerializer(serializers.ModelSerializer):
         source="student_record.university_number", read_only=True, default=None
     )
     allowed_transitions = serializers.SerializerMethodField()
+    labels = serializers.SerializerMethodField()
     documents = serializers.SerializerMethodField()
     history = ApplicationHistorySerializer(many=True, read_only=True)
     messages = ApplicationMessageSerializer(many=True, read_only=True)
@@ -162,6 +164,7 @@ class StaffApplicationSerializer(serializers.ModelSerializer):
             "decision_note",
             "university_number",
             "allowed_transitions",
+            "labels",
             "documents",
             "history",
             "messages",
@@ -176,7 +179,17 @@ class StaffApplicationSerializer(serializers.ModelSerializer):
     def get_allowed_transitions(self, obj) -> list[str]:
         return services.allowed_transitions(self.context["request"].user, obj)
 
-    def get_documents(self, obj) -> list[dict] | None:
+    def get_labels(self, obj) -> dict[str, str]:
+        """Readable labels for answer keys and document types (the form the applicant filled)."""
+        schema = obj.form_template.schema if obj.form_template_id else {}
+        labels = {f["key"]: f.get("label", f["key"]) for f in services.schema_fields(schema)}
+        for doc in obj.intake.required_documents:
+            if doc.get("key"):
+                labels.setdefault(doc["key"], doc.get("label", doc["key"]))
+        return labels
+
+    @extend_schema_field(ApplicationDocumentSerializer(many=True, allow_null=True))
+    def get_documents(self, obj):
         # Department manager/supervisor see counts and names, never the documents (docs/03 §3.6).
         if not self._reviewer(obj):
             return None

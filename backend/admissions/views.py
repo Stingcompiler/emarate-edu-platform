@@ -166,6 +166,7 @@ class ApplicationViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, views
                 "intake__cycle",
                 "assigned_registrar",
                 "student_record",
+                "form_template",
             )
             .prefetch_related("history__changed_by", "messages__author", "documents")
         )

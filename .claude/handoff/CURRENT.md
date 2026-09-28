@@ -1,58 +1,54 @@
-# Handoff — Phase 6 done → Phase 7 (admissions + registrars) — 2026-09-28
+# Handoff — Phase 7 done → Phase 8 (reports + HR + PDF) — 2026-09-28
 
 ## Where things stand
-- **Phases 1–5 are merged** to `main` (PRs #3–#7).
-- **Phase 6 (live, content, inquiries)** is complete on `feat/phase-6-content`. Its PR is opened in this step; merge it once CI is green.
-  - GitHub auto-merge is disabled, so merge manually with `gh pr merge --merge`.
+- **Phases 1–6 are merged** to `main` (PRs #3–#8).
+- **Phase 7 (admissions + registrars)** is complete on `feat/phase-7-admissions`. Its PR is opened in this step; merge it once CI is green with `gh pr merge --merge` (auto-merge is disabled).
 - **Verified locally:**
-  - 268 tests pass on SQLite; 267 pass plus 1 skip on Postgres;
-  - migrations reverse on both databases;
-  - the schema has 0 warnings;
-  - ruff, typecheck, build and prettier pass.
-  - Pages were checked in the pane: inquiries at 1280 (read via page text; pane screenshots at 1280 can be stale), live and announcements at 390.
+  - 281 tests pass on SQLite; 280 pass plus 1 skip on Postgres;
+  - admissions migrations reverse on both databases;
+  - the schema has 0 warnings; ruff, typecheck, build and prettier pass;
+  - the seed reruns cleanly.
+  - Pages were walked in the pane. The visitor flow was checked at 390 (verify, program, form, documents, review, submit, track). The staff flow was checked at 1280 and 390 (list, detail with claim, document review, eligible, accept, register → 26-IT-0029; cycles; form builder new version → publish).
 
-## What Phase 6 delivered
-- **`live`:** LiveSession for an offering or a cohort.
-  - `join_url` is a property that encrypts and decrypts via `core/crypto.py` (Fernet + HKDF from `FIELD_ENCRYPTION_KEY`, falling back to SECRET_KEY).
-  - `/live-sessions` (+join, cancel). Beat `remind-live-sessions`.
-- **`content`:**
-  - Page (blocks cleaned by `content/sanitize.py`), Announcement (scope and audience; `services.may_announce`, `feed_q`, `public_q`), News, Event, MediaAsset (ImageField on the `public` storage), Menu/MenuItem, Redirect, SiteSettings.
-  - Management endpoints under `/api/v1/content/*` (capabilities `content.manage` and `events.manage`) and `/api/v1/announcements`.
-  - Public endpoints under `/api/public/{site,pages,news,events,announcements,menus,redirects}`, with a 60 s cache.
-  - `request_site_rebuild()` is debounced and calls `SITE_REBUILD_HOOK_URL` (empty until Phase 9).
-- **`contacts`:** `Contact` plus `match_or_create` (by email or phone, never by name).
-- **`inquiries`:**
-  - Public: `/api/public/inquiries` (POST; `contact` throttle 5/hour; `website` honeypot) and `/api/public/inquiries/<ref>` (status only).
-  - Staff: `/api/v1/inquiries` (+reply by email or internal note, whatsapp, transition, assign, reroute). Routing is in `inquiries/services.py`.
-- **Dependencies:** nh3, pillow, cryptography (explicit).
-- **Portal pages:**
-  - `/live` (+new), `/announcements` (+new), `/inquiries` (+`/:id`; two panes on desktop).
-  - `/site` (+pages/:id, news/:id, media, redirects), `/events` (+`/:id`).
-- **Seed:** a live session, public and course announcements, the "about" page, an open-day event, and two inquiries.
+## What Phase 7 delivered
+- **`contacts`:** OTP via `accounts.otp` (purpose CONTACT) and `contacts/visitor.py`.
+  - VisitorSession lasts 30 minutes. Clients send `Authorization: Visitor <token>`.
+  - `VisitorAuthentication` and `IsVisitor` set `request.contact`.
+- **`admissions`:**
+  - Models: AdmissionCycle, ProgramIntake (`accepting()`, required_documents, capacity), ApplicationFormTemplate (versioned; publishing freezes it; `new-version`), Application, ApplicationDocument (its own private FileField, download resolver "a"), ApplicationStatusHistory (append-only), ApplicationMessage (internal, email or applicant), ApplicationAssignment.
+  - The state machine is `services.TRANSITIONS`. `allowed_transitions` and `labels` (field and document labels) come back in staff responses.
+  - Routing goes to the program department's registrars, else the head registrar.
+  - Deciding needs `admissions.manage`, or a registrar when `delegate_decisions_to_registrars` is on.
+  - `register_applicant` creates the StudentRecord with a `YY-DEPT-NNNN` university number and emails it. `complete_registration` and `decide_registration` call `mark_activated`.
+  - Submit accepts an `Idempotency-Key`. Beat `expire_applications` runs daily.
+  - URLs: `/api/v1/{admission-cycles,intakes,form-templates,applications}`, `/api/public/{intakes,visitor/otp,visitor/verify,applications/<ref>}`, `/api/visitor/*`.
+- **Portal:**
+  - Public (no account): `/apply` (5-step wizard; resumes with `?app=<id>`; the draft saves) and `/track`. Both live in `routes/visitor/` with `lib/visitor.ts`, and the session is kept in sessionStorage.
+  - Staff: `/applications` (counters, filters, cards on phone, table on desktop), `/applications/:id` (answers, documents with link, accept and reject, history, messages, claim, transitions, register), `/admissions/cycles` (new cycle, open or close intakes, add programs) and `/admissions/forms` (field editor, draft, publish, new version).
+  - Navigation: `admissions.view` shows "الطلبات"; `admissions.manage` adds cycles and forms.
+- **Decision:** the visitor pages are portal public routes. Phase 9 (Astro) links to `/apply` and `/track` and does not rebuild them.
+- **Seed:** an open cycle, a published default form, an intake per program, and three applications (one under review with the registrar).
 
-## Next steps (Phase 7 — admissions + registrars, docs/02 §4.10–4.11, §8.3)
-1. Read docs/02 §4.10–4.11 and §8 Phase 7, docs/05 §6 (`contacts`, `admissions`) and §8.3, and docs/03 §3.2–3.3 (head registrar, registrar). Boards:
+## Next steps (Phase 8 — reports, docs/02 §4.14 and §8 Phase 8)
+1. Read docs/02 §4.14, docs/03 §3.11 (hr) and the academic affairs role, and docs/07 §2.11. Boards:
    ```bash
-   python3 scripts/boards.py list Visitor
-   python3 scripts/boards.py list Registrar
-   python3 scripts/boards.py list Head
-   python3 scripts/boards.py list FormBuilder
-   python3 scripts/boards.py list Application
+   python3 scripts/boards.py list Report
+   python3 scripts/boards.py list HR
+   python3 scripts/boards.py list Transcript
    ```
-2. **`contacts`:** ContactOTP (email now; SMS/WhatsApp later) and VisitorSession (a short JWT scoped to `contact:{id}`, 30 minutes) under `/api/visitor/*`.
-   - "Track my request": email or phone, then OTP, then everything for that contact. A reference number alone shows status only.
-3. **`admissions`:**
-   - AdmissionCycle, ProgramIntake (form template override), ApplicationFormTemplate (versioned JSON schema plus the visual builder board DesktopFormBuilder).
-   - Application with a state machine: draft → submitted → under_review → missing_documents → eligible → accepted/rejected/waitlisted → registered/activated; append-only history; `allowed_transitions` in responses.
-   - ApplicationDocument (private files, purpose `application`), ApplicationMessage, ApplicationAssignment.
-   - Routing to the program department's registrars or the head registrar, with claim and assign.
-   - Final decision by the head registrar, or delegated per `SystemSettings.delegate_decisions_to_registrars`.
-   - `register_applicant` creates a StudentRecord (via UniversityNumberSequence) plus an ActivationToken and an email.
-   - `Idempotency-Key` on submit.
-4. Link inquiries to the contact visitor session. Admission inquiries already route to registrars.
-5. **Portal:** head registrar dashboard (DesktopHeadRegistrar), registrar application pages (DesktopApplicationDetail), form builder, cycles and intakes.
-   - The visitor apply wizard (5 steps) belongs to the public site; build the API now, and the UI either in the portal as a public route or in Phase 9 (Astro islands). Decide and note it.
-6. Add permission-matrix rows, extend the seed, test on both databases, open the PR, merge when green, and update this handoff.
+   - Desktop: DesktopDeptReports, DesktopAdmissionsReports, DesktopStudentAffairsReports (no names), DesktopHRReports, DesktopHRTeachers.
+   - Phone: HRHome, HRNoticeNew, AcademicAffairsTeacher, StudentTranscript. Where there is no phone or desktop board, derive it from docs/06 §4/§9 and say so in the PR.
+2. **`reports` app** (read-only aggregates; no N+1; every query is department-scoped through `rbac.Scope`):
+   - Department: offerings, lecture uploads, assignments, grading backlog, results summary.
+   - Academic affairs: the college-wide version plus per-teacher files.
+   - Admissions: counts by status, program and cycle, conversion to registered.
+   - Student affairs: case counts by kind and status, never names.
+   - **HR teacher performance per term:** lectures, assignments, exams, average grading time, ungraded ratio, upload gaps, announced live sessions, plus HR notices (directed notifications to a teacher).
+3. **PDF export:** the transcript was deferred from Phase 4, plus report PDFs.
+   - WeasyPrint needs system libraries (pango), so check `brew list pango` first.
+   - If it's unavailable, render HTML-print pages in the portal (print CSS) as a no-dependency fallback and note it. Don't install system packages without evidence they are needed.
+4. Portal pages per the boards. The department manager dashboard only gets additions.
+5. Add permission-matrix rows for every new endpoint, extend the seed, run both databases, open the PR, merge when green, and update this handoff.
 
 ## Decisions made (don't revisit)
 - **Roles are rows (`role`, `department`), not Django Groups.** Mention this deviation from docs/03 §10 in PRs that touch roles.
@@ -96,6 +92,10 @@
 - **Test settings:** InMemoryStorage for uploads, all throttle scopes at 10000/min, and a long SECRET_KEY (short keys trigger a JWT warning).
 - **Enum names:** drf-spectacular's `ENUM_NAME_OVERRIDES` covers RoleEnum and TeachingKindEnum. Add new shared choice sets there, or the schema gate fails.
 - **Audit IP:** `RequestMeta.from_request` trusts `X-Forwarded-For`. Restrict it to the proxy in Phase 11 (Render sets it).
+- **Visitor auth:** visitor endpoints use `VisitorAuthentication` only. Staff cookies never apply there, and the portal adds the header through the `visitorApi` middleware for `/api/visitor/` URLs only.
+- **SerializerMethodField types:** a method returning nested serializer data needs `@extend_schema_field(Serializer(many=True))`. Otherwise the TypeScript type is `unknown`.
+- **Seed reruns:** seed helpers must be idempotent (`get_or_create`) because an app can be migrated to zero while `contacts` keeps its rows.
+- **Pane screenshots:** they can lag a click. Use `get_page_text` to confirm the step changed before assuming a bug.
 - **Earlier gotchas:**
   - build constraint lists with sorted sets;
   - Django 6.1 uses `MAILERS`;

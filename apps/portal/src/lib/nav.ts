@@ -2,6 +2,9 @@ import {
   Award,
   Bell,
   CalendarDays,
+  CalendarRange,
+  FileText,
+  LayoutTemplate,
   ClipboardCheck,
   ClipboardList,
   Globe,
@@ -75,6 +78,12 @@ export function navFor(me: Me | null | undefined, unread: number): NavItem[] {
   if (me?.student) {
     items.push({ label: "النتائج", to: "/results", icon: Award });
     items.push({ label: "اللوائح", to: "/regulations", icon: ScrollText });
+  }
+  if (can(me, "admissions.view"))
+    items.push({ label: "الطلبات", to: "/applications", icon: FileText, end: false });
+  if (can(me, "admissions.manage")) {
+    items.push({ label: "دورات القبول", to: "/admissions/cycles", icon: CalendarRange });
+    items.push({ label: "قوالب التقديم", to: "/admissions/forms", icon: LayoutTemplate });
   }
   if (can(me, "results.manage"))
     items.push({ label: "رفع النتائج", to: "/result-imports", icon: FileUp, end: false });

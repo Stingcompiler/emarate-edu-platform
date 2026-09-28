@@ -180,6 +180,8 @@ def test_full_journey(api, intake, make_user, it_dept, ba_dept, django_capture_o
         review.post(f"{url}/transition", {"to": "missing_documents", "note": "صورة الهوية"})
     assert "صورة الهوية" in mail.outbox[-1].body
     doc = moved.data["documents"][0]["public_id"]
+    assert moved.data["labels"]["school"] == "المدرسة"
+    assert moved.data["labels"]["certificate"] == "الشهادة"
     link = review.get(f"{url}/documents/{doc}/link")
     assert link.status_code == 200 and APIClient().get(link.data["url"]).status_code == 200
     assert api(manager).get(f"{url}/documents/{doc}/link").status_code == 403
