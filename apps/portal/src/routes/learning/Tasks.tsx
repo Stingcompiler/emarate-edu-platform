@@ -12,6 +12,7 @@ import {
   taskState,
   useAssignments,
 } from "../../lib/learning";
+import { examPhase } from "../exams/Exams";
 
 const GROUPS: { key: TaskState[]; label: string }[] = [
   { key: ["late"], label: "متأخر" },
@@ -33,7 +34,7 @@ export function Tasks() {
     .filter((a) => a.status !== "draft")
     .sort((a, b) => a.due_at.localeCompare(b.due_at));
   const upcomingExams = (exams.data ?? []).filter(
-    (e) => new Date(e.closes_at).getTime() > now && e.status === "published",
+    (e) => e.status === "published" && examPhase(e, now).key !== "closed",
   );
   const open = list.filter((a) => !["submitted", "graded"].includes(taskState(a)));
   return (

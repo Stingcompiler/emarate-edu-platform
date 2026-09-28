@@ -14,6 +14,12 @@ from .models import Category
 from .services import notify, notify_audience
 
 
+def _num(value) -> str:
+    """9.00 → 9, 8.50 → 8.5 (marks are stored with two decimals)."""
+    text = f"{value:f}"
+    return text.rstrip("0").rstrip(".") if "." in text else text
+
+
 def lecture_published(lecture) -> None:
     offering = lecture.offering
     notify_audience(
@@ -46,7 +52,7 @@ def grade_released(submission) -> None:
         [user],
         category=Category.COURSE,
         title=f"تم تصحيح {submission.assignment.title}",
-        body=f"الدرجة {grade.final_score} من {submission.assignment.max_grade}",
+        body=f"الدرجة {_num(grade.final_score)} من {_num(submission.assignment.max_grade)}",
         action_url=f"/assignments/{submission.assignment.public_id}",
     )
 

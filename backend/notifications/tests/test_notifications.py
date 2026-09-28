@@ -280,10 +280,11 @@ def test_automatic_notifications(
             .data
         )
         teacher.put(f"/api/v1/submissions/{submission['public_id']}/grade", {"score": "9"})
-    titles = [
-        n["title"] for n in api(classroom.student).get("/api/v1/notifications").data["results"]
-    ]
+    notices = api(classroom.student).get("/api/v1/notifications").data["results"]
+    titles = [n["title"] for n in notices]
     assert titles == ["تم تصحيح واجب 2", "واجب جديد: واجب 2", "محاضرة جديدة: المحاضرة 3"]
+    assert notices[0]["body"].startswith("الدرجة 9 من ")  # no trailing ".00"
+    assert ".00" not in notices[0]["body"]
 
     manager = make_user(Role.DEPARTMENT_MANAGER, department=it_dept)
     teacher2 = make_user(Role.TEACHER)

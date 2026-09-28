@@ -8,6 +8,7 @@ import { api } from "../../lib/api";
 import { useMe } from "../../lib/auth";
 import { when } from "../../lib/format";
 import { dueLabel, splitCourse, taskState, useAssignments, useLectures } from "../../lib/learning";
+import { examPhase } from "../exams/Exams";
 
 const DAY = 86_400_000;
 
@@ -71,7 +72,7 @@ export function Today() {
       .filter(
         (e) =>
           e.status === "published" &&
-          new Date(e.closes_at).getTime() > now &&
+          examPhase(e, now).key !== "closed" &&
           new Date(e.opens_at).getTime() < horizon,
       )
       .map((e) => ({
