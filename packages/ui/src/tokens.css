@@ -49,6 +49,20 @@
   --accent-hover: #e8c1ca;
   --accent-soft: #460e1b;
   --header-bg: #0c111c;
+  /* Status colours and "strong text on soft" (primary-700) are raw scale values, so dark
+   * mode redefines them here: soft backgrounds become dark tints, strong text becomes light.
+   * Keeps WCAG AA (docs/06 §1) — checked by e2e/tests/a11y.spec.ts. */
+  --color-primary-700: #c4d3e6;
+  --color-success-soft: #12301f;
+  --color-success-strong: #86d3a8;
+  --color-warning-soft: #3a2a0e;
+  --color-warning-strong: #f0c36b;
+  --color-danger-soft: #3d1612;
+  --color-danger-strong: #f19a8f;
+  --color-info-soft: #16304f;
+  --color-info-strong: #a9c3e3;
+  --color-neutral-soft: #1f2b47;
+  --color-neutral-strong: #c0c3cb;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -68,5 +82,19 @@
     --accent-hover: #e8c1ca;
     --accent-soft: #460e1b;
     --header-bg: #0c111c;
+    /* Status colours and "strong text on soft" (primary-700) are raw scale values, so dark
+     * mode redefines them here: soft backgrounds become dark tints, strong text becomes light.
+     * Keeps WCAG AA (docs/06 §1) — checked by e2e/tests/a11y.spec.ts. */
+    --color-primary-700: #c4d3e6;
+    --color-success-soft: #12301f;
+    --color-success-strong: #86d3a8;
+    --color-warning-soft: #3a2a0e;
+    --color-warning-strong: #f0c36b;
+    --color-danger-soft: #3d1612;
+    --color-danger-strong: #f19a8f;
+    --color-info-soft: #16304f;
+    --color-info-strong: #a9c3e3;
+    --color-neutral-soft: #1f2b47;
+    --color-neutral-strong: #c0c3cb;
   }
 }
