@@ -45,6 +45,13 @@ import { ResultImportDetail } from "./routes/results/ImportDetail";
 import { ResultImports } from "./routes/results/Imports";
 import { MyResults } from "./routes/results/MyResults";
 import { Home } from "./routes/Home";
+import { Approvals } from "./routes/department/Approvals";
+import { Audit } from "./routes/department/Audit";
+import { DepartmentDashboard } from "./routes/department/Dashboard";
+import { DepartmentLectures } from "./routes/department/Lectures";
+import { Members } from "./routes/department/Members";
+import { Offerings } from "./routes/department/Offerings";
+import { DepartmentStudents } from "./routes/department/Students";
 import { Assignment } from "./routes/learning/Assignment";
 import { AssignmentEditor } from "./routes/learning/AssignmentEditor";
 import { Grade } from "./routes/learning/Grade";
@@ -146,6 +153,13 @@ const router = createBrowserRouter([
   { path: "/applications/:id", element: signedIn(<ApplicationDetail />) },
   { path: "/admissions/cycles", element: signedIn(<Cycles />) },
   { path: "/admissions/forms", element: signedIn(<FormBuilder />) },
+  { path: "/department", element: signedIn(<DepartmentDashboard />) },
+  { path: "/department/courses", element: signedIn(<Offerings />) },
+  { path: "/department/lectures", element: signedIn(<DepartmentLectures />) },
+  { path: "/department/teachers", element: signedIn(<Members />) },
+  { path: "/department/students", element: signedIn(<DepartmentStudents />) },
+  { path: "/department/approvals", element: signedIn(<Approvals />) },
+  { path: "/department/audit", element: signedIn(<Audit />) },
   { path: "/reports", element: signedIn(<DepartmentReport />) },
   { path: "/reports/admissions", element: signedIn(<AdmissionsReport />) },
   { path: "/reports/affairs", element: signedIn(<AffairsReport />) },

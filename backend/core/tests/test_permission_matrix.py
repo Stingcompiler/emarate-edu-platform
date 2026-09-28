@@ -316,6 +316,13 @@ READS: dict[str, tuple[str, frozenset, frozenset]] = {
     "transcript": ("/api/v1/transcripts/26-IT-0001", RESULTS_VIEW, frozenset()),
     # Anyone signed in may ask; it only lists courses the user teaches.
     "grading-queue": ("/api/v1/grading-queue", EVERYONE, frozenset()),
+    "teacher-directory": (
+        "/api/v1/teachers-directory?search=ab",
+        frozenset(
+            {R.SYSTEM_ADMIN, R.ACADEMIC_AFFAIRS, R.DEPARTMENT_MANAGER, R.DEPARTMENT_SUPERVISOR}
+        ),
+        frozenset(),
+    ),
     # Course gradebook: its instructors and department learning staff (docs/03 §3.6–3.9)
     "gradebook": (
         "/api/v1/gradebooks/{offering}",

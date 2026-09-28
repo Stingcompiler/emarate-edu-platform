@@ -1,7 +1,7 @@
 from django.db.models import Count, Prefetch, Q
 from django.http import Http404
 from django.shortcuts import get_object_or_404
-from drf_spectacular.utils import extend_schema
+from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
@@ -38,6 +38,7 @@ from .serializers import (
     MembershipSerializer,
     MyCourseSerializer,
     OfferingSerializer,
+    PersonSerializer,
     TermSerializer,
 )
 
@@ -269,3 +270,34 @@ class MyCoursesView(APIView):
             offering.my_role = teaching[offering.pk]
             courses.append(offering)
         return Response(MyCourseSerializer(courses, many=True).data)
+
+
+@extend_schema(tags=["academic"])
+class TeacherDirectoryView(APIView):
+    """Find teacher/TA accounts to add to a department (board DesktopDeptProfessors).
+
+    Only for those who manage memberships; returns names and emails of active
+    teaching accounts, never other users.
+    """
+
+    permission_classes = [IsAuthenticated, capability("membership.manage")]
+
+    @extend_schema(
+        operation_id="teachers_directory",
+        parameters=[OpenApiParameter("search", str, required=True)],
+        responses=PersonSerializer(many=True),
+    )
+    def get(self, request):
+        from accounts.models import User
+        from accounts.rbac import Role
+
+        term = request.query_params.get("search", "").strip()
+        if len(term) < 2:
+            return Response([])
+        people = (
+            User.objects.filter(is_active=True, role_assignments__role__in=[Role.TEACHER, Role.TA])
+            .filter(Q(full_name_ar__icontains=term) | Q(email__icontains=term))
+            .distinct()
+            .order_by("full_name_ar")[:20]
+        )
+        return Response(PersonSerializer(people, many=True).data)

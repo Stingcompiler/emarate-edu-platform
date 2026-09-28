@@ -3,6 +3,10 @@ import {
   Bell,
   CalendarDays,
   BarChart3,
+  History,
+  LayoutDashboard,
+  Library,
+  Users,
   BookOpen,
   ListChecks,
   Sun,
@@ -57,7 +61,36 @@ export function can(me: Me | null | undefined, capability: string): boolean {
  * four as tabs and the rest under «المزيد»). Role dashboards join as their
  * phases land; no link points to a page that isn't built.
  */
+/**
+ * Department manager / supervisor: the dashboard keeps exactly its sections, in
+ * this order (docs/02 §4.15, owner rule); new tabs are appended, never inserted.
+ */
+function departmentNav(me: Me | null | undefined, unread: number): NavItem[] {
+  const teaches = hasRole(me, "teacher", "ta");
+  return [
+    { label: "الرئيسية", to: "/department", icon: LayoutDashboard },
+    { label: "المواد", to: "/department/courses", icon: BookOpen },
+    { label: "المحاضرات", to: "/department/lectures", icon: Library },
+    { label: "الأساتذة", to: "/department/teachers", icon: UserCheck },
+    { label: "طلاب القسم", to: "/department/students", icon: Users },
+    { label: "التقارير", to: "/reports", icon: BarChart3 },
+    { label: "النتائج", to: "/result-imports", icon: FileUp, end: false },
+    { label: "سجل العمليات", to: "/department/audit", icon: History },
+    ...(teaches ? [{ label: "موادي", to: "/courses", icon: BookOpen, end: false }] : []),
+    // Additions (never replace the sections above).
+    { label: "طلبات التسجيل", to: "/department/approvals", icon: ClipboardCheck },
+    { label: "الاختبارات", to: "/exams", icon: ClipboardList, end: false },
+    { label: "جلسات البث", to: "/live", icon: Radio, end: false },
+    { label: "الإعلانات", to: "/announcements", icon: Megaphone, end: false },
+    { label: "الإشعارات", to: "/notifications", icon: Bell, badge: unread },
+    { label: "إشعار جديد", to: "/notifications/new", icon: Send },
+    { label: "الإعدادات", to: "/settings", icon: Settings },
+    { label: "تثبيت التطبيق", to: "/install", icon: Download },
+  ];
+}
+
 export function navFor(me: Me | null | undefined, unread: number): NavItem[] {
+  if (hasRole(me, "department_manager", "department_supervisor")) return departmentNav(me, unread);
   const items: NavItem[] = [];
   if (me?.student) items.push({ label: "اليوم", to: "/", icon: Sun });
   if (me?.student || hasRole(me, "teacher", "ta"))
