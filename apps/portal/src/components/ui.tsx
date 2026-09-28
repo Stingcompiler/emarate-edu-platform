@@ -5,6 +5,8 @@ import type {
   TextareaHTMLAttributes,
 } from "react";
 
+import { CountUp } from "./motion";
+
 /** Small shared primitives for portal pages; tokens only (docs/06). */
 
 export function Button({
@@ -339,7 +341,9 @@ export function SideFigures({ title, rows }: { title?: string; rows: [string, Re
       <dl className="grid grid-cols-2 gap-3">
         {rows.map(([label, value]) => (
           <div key={label} className="rounded-lg bg-surface-alt p-3">
-            <dd className="text-xl font-bold text-text">{value}</dd>
+            <dd className="text-xl font-bold text-text">
+              {typeof value === "number" ? <CountUp value={value} /> : value}
+            </dd>
             <dt className="text-xs text-text-muted">{label}</dt>
           </div>
         ))}

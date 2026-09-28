@@ -135,7 +135,7 @@ export function Notifications() {
               >
                 {DAY_LABELS[group]}
               </h2>
-              <Card className="divide-y divide-border-soft overflow-hidden">
+              <Card className="motion-stagger divide-y divide-border-soft overflow-hidden">
                 {rows.map((item) => (
                   <NotificationRow key={item.id} item={item} onOpen={() => open(item)} />
                 ))}

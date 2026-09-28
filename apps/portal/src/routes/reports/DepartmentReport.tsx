@@ -109,7 +109,7 @@ export function DepartmentReport() {
         <>
           <div className="mt-4 grid grid-cols-2 gap-2 lg:grid-cols-5">
             <Kpi
-              value={num(k.offerings)}
+              value={k.offerings ?? "—"}
               label="مادة مفتوحة"
               note={
                 k.without_teacher ? (
@@ -120,12 +120,12 @@ export function DepartmentReport() {
               }
             />
             <Kpi
-              value={num(k.lectures)}
+              value={k.lectures ?? "—"}
               label="محاضرة مرفوعة"
               note={`+${num(k.lectures_30d)} في 30 يومًا`}
             />
             <Kpi
-              value={num(k.students)}
+              value={k.students ?? "—"}
               label="طالبًا"
               note={`${pct(k.enrolled_percent)} مسجلون في مواد`}
             />

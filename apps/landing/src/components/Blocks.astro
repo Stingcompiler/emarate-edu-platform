@@ -24,6 +24,7 @@ const { blocks } = Astro.props;
       <div set:html={b.html} />
     ) : b.type === "image" && b.url ? (
       <img
+        data-reveal="image"
         src={b.url}
         alt={b.alt ?? ""}
         loading="lazy"

@@ -175,9 +175,24 @@ const lead = L(
 
     <section>
       <h2 class="font-display text-xl font-bold">{L("الخطوات", "Steps")}</h2>
+      {/* Desktop: a line draws across the four steps, which then appear in order. */}
+      <div
+        class="mt-4 hidden h-1 overflow-hidden rounded-full bg-border-soft lg:block"
+        aria-hidden="true"
+      >
+        <div
+          data-reveal="line"
+          class="h-full rounded-full bg-primary"
+          style={`--origin: ${lang === "ar" ? "right" : "left"}`}
+        ></div>
+      </div>
       <ol class="mt-4 grid gap-3 md:grid-cols-2 lg:grid-cols-4">
         {steps.map(([head, body], i) => (
-          <li class="flex gap-3 rounded-2xl border border-border-soft bg-surface p-4">
+          <li
+            data-reveal
+            style={`--i: ${i + 1}`}
+            class="flex gap-3 rounded-2xl border border-border-soft bg-surface p-4"
+          >
             <span class="grid size-8 shrink-0 place-items-center rounded-full bg-primary text-sm font-bold text-white">
               {num(lang, i + 1)}
             </span>

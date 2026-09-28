@@ -3,6 +3,7 @@ import { CheckCircle2 } from "lucide-react";
 import { Link } from "react-router";
 
 import { PortalShell } from "../../components/PortalShell";
+import { ProgressRing } from "../../components/motion";
 import { Card, CodeTile, EmptyState, SectionLabel } from "../../components/ui";
 import { api } from "../../lib/api";
 import {
@@ -49,6 +50,17 @@ export function Tasks() {
     <PortalShell
       title="المهام"
       subtitle={`${count(open.length, UPCOMING)}${upcomingExams.length ? ` · ${count(upcomingExams.length, N.exam)}` : ""}`}
+      titleAction={
+        list.length > 0 ? (
+          <ProgressRing
+            value={list.length - open.length}
+            max={list.length}
+            label={`أنجزت ${(list.length - open.length).toLocaleString("ar")} من ${list.length.toLocaleString("ar")}`}
+          >
+            {`${(list.length - open.length).toLocaleString("ar")}/${list.length.toLocaleString("ar")}`}
+          </ProgressRing>
+        ) : undefined
+      }
     >
       {!list.length && !upcomingExams.length ? (
         <Card>
@@ -64,7 +76,7 @@ export function Tasks() {
                 <SectionLabel>
                   {g.label} · {items.length.toLocaleString("ar")}
                 </SectionLabel>
-                <Card className="divide-y divide-border-soft">
+                <Card className="motion-stagger divide-y divide-border-soft">
                   {items.map((a) => {
                     const [top, bottom] = splitCourse(a.course_code);
                     const state = taskState(a, now);

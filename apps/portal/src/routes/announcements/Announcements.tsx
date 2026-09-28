@@ -81,7 +81,7 @@ export function Announcements() {
             <EmptyState icon={<Megaphone size={24} aria-hidden />} title="لا إعلانات" />
           </Card>
         ) : (
-          <div className="mt-4 grid items-start gap-3 xl:grid-cols-2">
+          <div className="motion-stagger mt-4 grid items-start gap-3 xl:grid-cols-2">
             {items.map((a) => (
               <AnnouncementCard key={a.public_id} item={a} />
             ))}
