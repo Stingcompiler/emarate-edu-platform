@@ -13,6 +13,7 @@ import {
 } from "../../components/ui";
 import { api } from "../../lib/api";
 import { num } from "../../lib/reports";
+import { count, N } from "../../lib/format";
 
 const DEGREE: Record<string, string> = {
   diploma: "دبلوم",
@@ -119,7 +120,7 @@ export function Structure() {
   return (
     <PortalShell
       title="الهيكل الأكاديمي"
-      subtitle={`${colleges.data?.[0]?.name_ar ?? ""} · ${num(departments.data?.length ?? 0)} أقسام · ${num(programs.data?.length ?? 0)} برنامجًا`}
+      subtitle={`${colleges.data?.[0]?.name_ar ?? ""} · ${count(departments.data?.length ?? 0, N.department)} · ${count(programs.data?.length ?? 0, N.program)}`}
       back={{ label: "إدارة النظام", to: "/system" }}
     >
       {err ? (
@@ -140,7 +141,10 @@ export function Structure() {
               >
                 <span>{d.name_ar}</span>
                 <span className="text-xs text-text-muted">
-                  {num((programs.data ?? []).filter((p) => p.department === d.id).length)} برامج
+                  {count(
+                    (programs.data ?? []).filter((p) => p.department === d.id).length,
+                    N.program,
+                  )}
                 </span>
               </button>
             ))}
@@ -286,7 +290,7 @@ export function Structure() {
                 <bdi className="font-mono text-xs text-text-muted">{p.code}</bdi>
                 <b>{p.name_ar}</b>
                 <span className="text-text-muted">{DEGREE[p.degree] ?? p.degree}</span>
-                <span className="text-text-muted">{num(p.duration_terms)} فصول</span>
+                <span className="text-text-muted">{count(p.duration_terms, N.term)}</span>
                 <span className="text-text-muted">{num(p.levels_count)}</span>
                 <StatusBadge
                   status={p.is_active ? "approved" : "closed"}

@@ -30,7 +30,7 @@ export function HRHome() {
           <Card className="p-4">
             <div className="flex items-center justify-between">
               <p className="text-sm font-semibold text-text">
-                التوزيع · {num(r.summary.members)} أستاذًا ومعيدًا · {r.term.name}
+                التوزيع · الأساتذة والمعيدون {num(r.summary.members)} · {r.term.name}
               </p>
               <Link to="/hr/report" className="text-xs font-semibold text-primary">
                 التقرير

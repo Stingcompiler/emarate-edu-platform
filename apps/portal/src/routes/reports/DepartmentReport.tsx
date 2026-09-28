@@ -5,7 +5,7 @@ import { PortalShell } from "../../components/PortalShell";
 import { Card, SectionLabel } from "../../components/ui";
 import { api } from "../../lib/api";
 import { useMe } from "../../lib/auth";
-import { when } from "../../lib/format";
+import { when, count, N } from "../../lib/format";
 import {
   Bars,
   Delta,
@@ -132,7 +132,7 @@ export function DepartmentReport() {
             <Kpi
               value={days(k.grading_days)}
               label="متوسط التصحيح"
-              note={`الحد ${num(r.thresholds.grading_days)} أيام`}
+              note={`الحد ${count(r.thresholds.grading_days, N.day)}`}
               tone={
                 k.grading_days != null && k.grading_days > r.thresholds.grading_days
                   ? "danger"
@@ -184,8 +184,8 @@ export function DepartmentReport() {
                     </span>
                     <span className="col-start-1 text-xs text-text-muted lg:col-start-auto lg:text-sm lg:text-text">
                       <span className="lg:hidden">
-                        {num(c.students)} طالبًا · {num(c.lectures)}/{num(c.planned)} محاضرات ·
-                        تسليم {pct(c.submission_percent)} · غير مصحح {num(c.ungraded)}
+                        {count(c.students, N.student)} · {num(c.lectures)}/{num(c.planned)} محاضرات
+                        · تسليم {pct(c.submission_percent)} · غير مصحح {num(c.ungraded)}
                       </span>
                       <span className="hidden lg:inline">{num(c.students)}</span>
                     </span>

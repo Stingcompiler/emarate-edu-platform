@@ -4,6 +4,7 @@ import { useParams } from "react-router";
 import { api } from "../../lib/api";
 import { num } from "../../lib/reports";
 import { PrintLayout, PrintTable } from "./PrintLayout";
+import { count, N } from "../../lib/format";
 
 /** Official transcript for results staff (board StudentTranscript's «سجل أكاديمي رسمي PDF»). */
 export function PrintTranscript() {
@@ -75,7 +76,7 @@ export function PrintTranscript() {
         <section key={term.term} className="break-inside-avoid">
           <h2 className="mb-1 flex justify-between font-bold">
             <span>
-              {term.term} · {num(term.credit_hours)} ساعة
+              {term.term} · {count(term.credit_hours, N.hour)}
             </span>
             <span dir="ltr">{term.gpa ?? "—"}</span>
           </h2>
@@ -127,7 +128,7 @@ export function PrintMyResults() {
         <section key={term.term} className="break-inside-avoid">
           <h2 className="mb-1 flex justify-between font-bold">
             <span>
-              {term.term_name} · {num(term.credit_hours)} ساعة
+              {term.term_name} · {count(term.credit_hours, N.hour)}
             </span>
             <span dir="ltr">{term.gpa ?? ""}</span>
           </h2>

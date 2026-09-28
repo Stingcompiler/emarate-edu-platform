@@ -9,6 +9,7 @@ import { useMe } from "../../lib/auth";
 import { useCurrentTerm, useDepartment, useOfferings } from "../../lib/department";
 import { can } from "../../lib/nav";
 import { TeacherStatus, days, initials, num } from "../../lib/reports";
+import { count, N } from "../../lib/format";
 
 /** Board: DesktopDeptProfessors (desktop, list + detail); phone derived — list then detail. */
 export function Members() {
@@ -154,7 +155,7 @@ export function Members() {
               {courseOf(selected.user.public_id).map((o) => (
                 <p key={o.id} className="text-sm">
                   <bdi className="font-mono text-xs text-text-muted">{o.course_detail.code}</bdi>{" "}
-                  {o.course_detail.name_ar} · {num(o.enrolled_count)} طالبًا
+                  {o.course_detail.name_ar} · {count(o.enrolled_count, N.student)}
                 </p>
               ))}
               {!courseOf(selected.user.public_id).length && (

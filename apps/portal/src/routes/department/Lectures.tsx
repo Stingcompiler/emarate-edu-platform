@@ -7,7 +7,7 @@ import { Card, CodeTile, SectionLabel, StatusBadge, splitCode } from "../../comp
 import { api } from "../../lib/api";
 import { useMe } from "../../lib/auth";
 import { useCurrentTerm, useDepartment, useOfferings } from "../../lib/department";
-import { when } from "../../lib/format";
+import { when, count, N } from "../../lib/format";
 import { useLectures } from "../../lib/learning";
 import { can } from "../../lib/nav";
 import { num } from "../../lib/reports";
@@ -62,7 +62,9 @@ export function DepartmentLectures() {
                     >
                       <b className="block truncate">{l.title_ar}</b>
                       <span className="text-xs text-text-muted">
-                        {l.resources.length ? `${num(l.resources.length)} موارد` : "بلا موارد"}
+                        {l.resources.length
+                          ? `${count(l.resources.length, N.resource)}`
+                          : "بلا موارد"}
                         {l.published_at ? ` · ${when(l.published_at)}` : ""}
                       </span>
                     </Link>

@@ -9,6 +9,7 @@ import { useMe } from "../../lib/auth";
 import { useCurrentTerm } from "../../lib/department";
 import { initials, num, useDepartments } from "../../lib/reports";
 import { Inbox } from "./Inbox";
+import { count, N } from "../../lib/format";
 
 /** Board: AcademicAffairsHome (phone); desktop derived — decisions beside department leadership. */
 export function AcademicHome() {
@@ -59,7 +60,7 @@ export function AcademicHome() {
   return (
     <PortalShell
       title="الشؤون العلمية"
-      subtitle={`${me.data?.full_name_ar ?? ""} · ${num(departments.data?.length ?? 0)} أقسام · ${num(teachers.data?.summary.members ?? 0)} أستاذًا ومعيدًا${term.data ? ` · ${term.data.name_ar}` : ""}`}
+      subtitle={`${me.data?.full_name_ar ?? ""} · ${count(departments.data?.length ?? 0, N.department)} · الأساتذة والمعيدون ${num(teachers.data?.summary.members ?? 0)}${term.data ? ` · ${term.data.name_ar}` : ""}`}
     >
       <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_380px] lg:items-start lg:gap-6">
         <div className="space-y-4">

@@ -7,6 +7,7 @@ import { api } from "../../lib/api";
 import { useMe } from "../../lib/auth";
 import { useDepartment } from "../../lib/department";
 import { downloadCsv, num } from "../../lib/reports";
+import { count, N } from "../../lib/format";
 
 /** Arabic wording for audit actions; unknown ones fall back to "<object>: <verb>". */
 const ACTIONS: Record<string, string> = {
@@ -224,7 +225,7 @@ export function Audit() {
   return (
     <PortalShell
       title="سجل العمليات"
-      subtitle={`${department?.name_ar ?? "كل الكلية"} · ${num(list.data?.count ?? 0)} عملية · كل عملية تُسجَّل بالقيمة قبل/بعد ولا تُحذف`}
+      subtitle={`${department?.name_ar ?? "كل الكلية"} · ${count(list.data?.count ?? 0, N.operation)} · كل عملية تُسجَّل بالقيمة قبل/بعد ولا تُحذف`}
       back={
         everything
           ? { label: "إدارة النظام", to: "/system" }

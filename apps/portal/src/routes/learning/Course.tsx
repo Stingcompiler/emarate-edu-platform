@@ -14,7 +14,7 @@ import {
   StatusBadge,
 } from "../../components/ui";
 import { api } from "../../lib/api";
-import { when } from "../../lib/format";
+import { when, count, N } from "../../lib/format";
 import {
   dueLabel,
   splitCourse,
@@ -80,7 +80,7 @@ export function Course() {
       title={course?.name_ar ?? "المادة"}
       subtitle={
         course
-          ? `${people.map((p) => `${p.role === "ta" ? "معيد: " : ""}${p.user.full_name_ar}`).join(" · ") || "بلا أستاذ"} · شعبة \u2068${course.section}\u2069 · ${course.credit_hours.toLocaleString("ar")} ساعات`
+          ? `${people.map((p) => `${p.role === "ta" ? "معيد: " : ""}${p.user.full_name_ar}`).join(" · ") || "بلا أستاذ"} · شعبة \u2068${course.section}\u2069 · ${count(course.credit_hours, N.hour)}`
           : undefined
       }
       back={{ label: "موادي", to: "/courses" }}
@@ -185,7 +185,7 @@ export function Course() {
                         <span className="min-w-0 flex-1">
                           <span className="block truncate font-semibold text-text">{a.title}</span>
                           <span className="text-xs text-text-muted">
-                            {when(a.due_at)} · {Number(a.max_grade).toLocaleString("ar")} درجة
+                            {when(a.due_at)} · {count(Number(a.max_grade), N.mark)}
                           </span>
                         </span>
                         {staff ? (
@@ -233,8 +233,8 @@ export function Course() {
                               {e.title}
                             </span>
                             <span className="text-xs text-text-muted">
-                              {when(e.opens_at)} · {e.duration_minutes.toLocaleString("ar")} دقيقة ·{" "}
-                              {e.questions_count.toLocaleString("ar")} سؤالًا
+                              {when(e.opens_at)} · {count(e.duration_minutes, N.minute)} ·{" "}
+                              {count(e.questions_count, N.question)}
                             </span>
                           </span>
                         </Link>

@@ -14,6 +14,7 @@ import {
 } from "../../components/ui";
 import { api } from "../../lib/api";
 import { formatClock } from "../../lib/exam";
+import { count, N } from "../../lib/format";
 
 type Row = Schemas["AttemptSummary"];
 const LABEL: Record<string, string> = {
@@ -122,7 +123,7 @@ export function ExamMonitor() {
                   <span className="text-xs text-text-muted">
                     <span dir="ltr">{s.university_number}</span>
                     {quiet(r) && " · آخر حفظ قبل أكثر من دقيقتين — انقطاع؟"}
-                    {meta.blur ? ` · غادر الشاشة ${meta.blur.toLocaleString("ar")} مرة` : ""}
+                    {meta.blur ? ` · غادر الشاشة ${count(meta.blur, N.time)}` : ""}
                   </span>
                 </span>
                 {r.remaining_seconds !== null ? (

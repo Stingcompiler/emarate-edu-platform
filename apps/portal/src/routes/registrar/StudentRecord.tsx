@@ -8,6 +8,7 @@ import { useMe } from "../../lib/auth";
 import { can } from "../../lib/nav";
 import { initials, num } from "../../lib/reports";
 import { STUDENT_STATUS } from "./StudentRecords";
+import { count, N } from "../../lib/format";
 
 /** Board: HeadRegistrarStudent (phone); desktop derived — data beside enrolment. */
 export function StudentRecord() {
@@ -99,7 +100,7 @@ export function StudentRecord() {
             {enrollments.data && (
               <>
                 <SectionLabel>
-                  التسجيل · {num(current.length)} مواد · {num(hours)} ساعة
+                  التسجيل · {count(current.length, N.course)} · {count(hours, N.hour)}
                 </SectionLabel>
                 <Card className="divide-y divide-border-soft text-sm">
                   {enrollments.data.map((e) => (

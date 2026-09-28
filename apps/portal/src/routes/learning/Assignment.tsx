@@ -13,7 +13,7 @@ import {
   problemMessage,
 } from "../../components/ui";
 import { api } from "../../lib/api";
-import { when } from "../../lib/format";
+import { when, count, N } from "../../lib/format";
 import { dueLabel, fmtSize, openFile, useMyCourses } from "../../lib/learning";
 import { asForm, formData } from "../../lib/upload";
 
@@ -53,7 +53,7 @@ export function Assignment() {
       }
       subtitle={
         a
-          ? `${a.course_name} · ${Number(a.max_grade).toLocaleString("ar")} درجة · حتى ${absolute(a.due_at)}`
+          ? `${a.course_name} · ${count(Number(a.max_grade), N.mark)} · حتى ${absolute(a.due_at)}`
           : undefined
       }
       back={a ? { label: a.course_name, to: `/courses/${a.offering}` } : undefined}
@@ -122,8 +122,7 @@ function StudentView({ a }: { a: A }) {
             <p className="px-4 py-3">
               ملف{" "}
               {a.allowed_extensions?.length ? <bdi>({a.allowed_extensions.join(", ")})</bdi> : ""} ·
-              حتى <bdi>{a.max_file_size_mb} MB</bdi> · {a.max_files?.toLocaleString("ar")} ملفات كحد
-              أقصى
+              حتى <bdi>{a.max_file_size_mb} MB</bdi> · {count(a.max_files, N.file)} كحد أقصى
             </p>
           )}
           {(a.link_fields ?? []).map((f) => (
@@ -337,7 +336,7 @@ function Submissions({ id, max }: { id: string; max: string }) {
   return (
     <>
       <p className="mb-3 text-sm text-text-muted">
-        {rows.length.toLocaleString("ar")} تسليمًا · {waiting.toLocaleString("ar")} بانتظار التصحيح
+        {count(rows.length, N.submission)} · {waiting.toLocaleString("ar")} بانتظار التصحيح
       </p>
       <Card className="divide-y divide-border-soft">
         {rows.map((r) => (

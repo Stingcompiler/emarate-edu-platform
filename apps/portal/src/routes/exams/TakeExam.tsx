@@ -26,6 +26,7 @@ import {
   textParts,
   TYPE_LABEL,
 } from "../../lib/exam";
+import { count, N } from "../../lib/format";
 
 const LETTERS = ["A", "B", "C", "D", "E", "F", "G", "H"];
 const clock = new Intl.DateTimeFormat("ar", {
@@ -265,7 +266,7 @@ function ExamRunner({ attempt }: { attempt: AttemptPayload }) {
           <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-semibold text-text">{attempt.exam.title}</p>
             <p className="hidden truncate text-xs text-text-muted lg:block">
-              {attempt.exam.course_name} · {questions.length.toLocaleString("ar")} سؤالًا · محاولة{" "}
+              {attempt.exam.course_name} · {count(questions.length, N.question)} · محاولة{" "}
               {attempt.attempt_no} من {attempt.exam.max_attempts}
             </p>
           </div>
@@ -293,7 +294,7 @@ function ExamRunner({ attempt }: { attempt: AttemptPayload }) {
           <div className="flex items-center justify-between gap-3 text-sm text-text-muted">
             <span>
               السؤال {(index + 1).toLocaleString("ar")} من {questions.length.toLocaleString("ar")} ·{" "}
-              {TYPE_LABEL[question.type]} · {Number(question.marks).toLocaleString("ar")} درجة
+              {TYPE_LABEL[question.type]} · {count(Number(question.marks), N.mark)}
             </span>
             <button
               type="button"

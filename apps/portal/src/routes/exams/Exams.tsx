@@ -15,6 +15,7 @@ import {
 } from "../../components/ui";
 import { api } from "../../lib/api";
 import { useMe } from "../../lib/auth";
+import { count, N } from "../../lib/format";
 
 type Exam = Schemas["Exam"];
 const when = new Intl.DateTimeFormat("ar", {
@@ -104,7 +105,7 @@ export function Exams() {
                         </span>
                         <span className="text-xs text-text-muted">
                           {exam.course_name} · {when.format(new Date(exam.opens_at))} ·{" "}
-                          {exam.duration_minutes.toLocaleString("ar")} دقيقة
+                          {count(exam.duration_minutes, N.minute)}
                         </span>
                       </span>
                       <StatusBadge status={phase.key} label={phase.label} />

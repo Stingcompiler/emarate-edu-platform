@@ -5,6 +5,7 @@ import { PortalShell } from "../../components/PortalShell";
 import { Card, Notice, SectionLabel, problemMessage } from "../../components/ui";
 import { api } from "../../lib/api";
 import { initials, num, useDepartments } from "../../lib/reports";
+import { count, N } from "../../lib/format";
 
 /** Board: HeadRegistrarRegistrars — link registrars to departments (what they see and are routed). */
 export function Registrars() {
@@ -92,7 +93,7 @@ export function Registrars() {
               <span className="min-w-0 flex-1">
                 <b className="block text-text">{u.full_name_ar}</b>
                 <span className="text-xs text-text-muted">
-                  <bdi>{u.email}</bdi> · {num(load.data?.[u.full_name_ar] ?? 0)} طلبًا
+                  <bdi>{u.email}</bdi> · {count(load.data?.[u.full_name_ar] ?? 0, N.application)}
                 </span>
               </span>
               <span className="flex flex-wrap items-center gap-1.5">

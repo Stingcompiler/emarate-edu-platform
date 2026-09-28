@@ -7,6 +7,7 @@ import { Button, Card, Chip, Notice, SectionLabel, problemMessage } from "../../
 import { api } from "../../lib/api";
 import { TOPIC_LABEL, days, initials, num, pct } from "../../lib/reports";
 import { ROLE_LINE, useTeachersReport } from "./Teachers";
+import { count, N } from "../../lib/format";
 
 const TEMPLATES: Record<string, (d: string) => string> = {
   grading: (d) =>
@@ -167,7 +168,7 @@ export function NoticeNew() {
             <Card className="divide-y divide-border-soft text-sm">
               <div className="flex justify-between px-4 py-3">
                 <span className="text-text-muted">
-                  متوسط زمن التصحيح (الحد {num(report.data?.thresholds.grading_days)} أيام)
+                  متوسط زمن التصحيح (الحد {count(report.data?.thresholds.grading_days, N.day)})
                 </span>
                 <b>{days(teacher.grading_days)}</b>
               </div>

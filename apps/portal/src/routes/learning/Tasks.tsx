@@ -13,6 +13,7 @@ import {
   useAssignments,
 } from "../../lib/learning";
 import { examPhase } from "../exams/Exams";
+import { type Noun, count, N } from "../../lib/format";
 
 const GROUPS: { key: TaskState[]; label: string }[] = [
   { key: ["late"], label: "متأخر" },
@@ -21,6 +22,13 @@ const GROUPS: { key: TaskState[]; label: string }[] = [
   { key: ["later"], label: "لاحقًا" },
   { key: ["submitted", "graded"], label: "مكتمل" },
 ];
+
+const UPCOMING: Noun = {
+  one: "مهمة قادمة",
+  two: "مهمتان قادمتان",
+  few: "مهام قادمة",
+  many: "مهمة قادمة",
+};
 
 /** Board: StudentTasks (phone); desktop derived — groups in two columns. */
 export function Tasks() {
@@ -40,7 +48,7 @@ export function Tasks() {
   return (
     <PortalShell
       title="المهام"
-      subtitle={`${open.length.toLocaleString("ar")} مهام قادمة${upcomingExams.length ? ` · ${upcomingExams.length.toLocaleString("ar")} اختبارات` : ""}`}
+      subtitle={`${count(open.length, UPCOMING)}${upcomingExams.length ? ` · ${count(upcomingExams.length, N.exam)}` : ""}`}
     >
       {!list.length && !upcomingExams.length ? (
         <Card>
@@ -70,7 +78,7 @@ export function Tasks() {
                         <span className="min-w-0 flex-1">
                           <span className="block truncate font-semibold text-text">{a.title}</span>
                           <span className="text-xs text-text-muted">
-                            {a.course_name} · {Number(a.max_grade).toLocaleString("ar")} درجة
+                            {a.course_name} · {count(Number(a.max_grade), N.mark)}
                             {state === "late" && a.late_policy === "penalty"
                               ? ` · خصم ${a.late_penalty_percent}٪`
                               : ""}
@@ -102,8 +110,8 @@ export function Tasks() {
                         <span className="min-w-0 flex-1">
                           <span className="block truncate font-semibold text-text">{e.title}</span>
                           <span className="text-xs text-text-muted">
-                            اختبار · {e.duration_minutes.toLocaleString("ar")} دقيقة ·{" "}
-                            {e.questions_count.toLocaleString("ar")} سؤالًا
+                            اختبار · {count(e.duration_minutes, N.minute)} ·{" "}
+                            {count(e.questions_count, N.question)}
                           </span>
                         </span>
                         <span className="shrink-0 text-xs font-semibold text-warning-strong">

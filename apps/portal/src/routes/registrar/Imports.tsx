@@ -6,7 +6,7 @@ import { Link, useNavigate, useParams } from "react-router";
 import { PortalShell } from "../../components/PortalShell";
 import { Button, Card, Notice, StatusBadge, problemMessage } from "../../components/ui";
 import { api } from "../../lib/api";
-import { when } from "../../lib/format";
+import { when, count, N } from "../../lib/format";
 import { num } from "../../lib/reports";
 import { asForm, formData } from "../../lib/upload";
 
@@ -90,7 +90,7 @@ export function StudentImports() {
               <span className="min-w-0 flex-1">
                 <b className="block truncate text-sm text-text">{b.file_name}</b>
                 <span className="text-xs text-text-muted">
-                  {b.uploaded_by} · {when(b.created_at)} · {num(s.rows ?? 0)} صفًا · إنشاء{" "}
+                  {b.uploaded_by} · {when(b.created_at)} · {count(s.rows ?? 0, N.row)} · إنشاء{" "}
                   {num(s.create ?? 0)} · تحديث {num(s.update ?? 0)} · أخطاء {num(s.error ?? 0)}
                 </span>
               </span>
@@ -159,7 +159,9 @@ function ImportDetailBody({ id }: { id: string }) {
   return (
     <PortalShell
       title={b ? b.file_name : "دفعة استيراد"}
-      subtitle={b ? `${IMPORT_STATUS[b.status] ?? b.status} · ${num(s.rows ?? 0)} صفًا` : undefined}
+      subtitle={
+        b ? `${IMPORT_STATUS[b.status] ?? b.status} · ${count(s.rows ?? 0, N.row)}` : undefined
+      }
       back={{ label: "الاستيراد", to: "/student-imports" }}
     >
       {b && (
