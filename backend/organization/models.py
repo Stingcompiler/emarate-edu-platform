@@ -40,6 +40,9 @@ class Program(BilingualNameModel, TimestampedModel):
     degree = models.CharField(max_length=20, choices=Degree.choices)
     levels_count = models.PositiveSmallIntegerField()
     duration_terms = models.PositiveSmallIntegerField()
+    # Public site copy (docs/02 §6); plain text, shown on the program page.
+    description_ar = models.TextField(blank=True)
+    description_en = models.TextField(blank=True)
     is_active = models.BooleanField(default=True)
 
     class Meta:

@@ -67,3 +67,51 @@ def test_deploy_check_flags_local_private_storage(settings):
     ids = {message.id for message in run_checks(include_deployment_checks=True)}
 
     assert "core.W001" in ids
+
+
+def test_public_cors_only_for_site_origins(client, settings, db):
+    settings.PUBLIC_SITE_ORIGINS = ["https://ecst.edu.sd"]
+    site = {"HTTP_ORIGIN": "https://ecst.edu.sd"}
+    preflight = client.options(
+        "/api/public/inquiries", HTTP_ACCESS_CONTROL_REQUEST_METHOD="POST", **site
+    )
+    assert preflight.status_code == 204
+    assert preflight["Access-Control-Allow-Origin"] == "https://ecst.edu.sd"
+    assert "Access-Control-Allow-Credentials" not in preflight
+    got = client.get("/api/public/health", **site)
+    assert got["Access-Control-Allow-Origin"] == "https://ecst.edu.sd"
+    other = client.get("/api/public/health", HTTP_ORIGIN="https://evil.test")
+    assert "Access-Control-Allow-Origin" not in other
+    private = client.get("/api/v1/me", **site)
+    assert "Access-Control-Allow-Origin" not in private
+
+
+def test_site_build_token_skips_the_public_read_throttle(client, settings, db):
+    from django.core.cache import cache
+
+    settings.SITE_BUILD_TOKEN = "build-secret"
+    settings.REST_FRAMEWORK = {
+        **settings.REST_FRAMEWORK,
+        "DEFAULT_THROTTLE_RATES": {
+            **settings.REST_FRAMEWORK["DEFAULT_THROTTLE_RATES"],
+            "public_read": "2/minute",
+        },
+    }
+    from rest_framework.settings import api_settings
+
+    api_settings.reload()
+    from core.throttles import PublicReadThrottle
+
+    PublicReadThrottle.THROTTLE_RATES = api_settings.DEFAULT_THROTTLE_RATES
+    cache.clear()
+    try:
+        codes = [client.get("/api/public/stats").status_code for _ in range(3)]
+        assert codes == [200, 200, 429]
+        built = client.get("/api/public/stats", HTTP_X_SITE_BUILD="build-secret")
+        assert built.status_code == 200
+        wrong = client.get("/api/public/stats", HTTP_X_SITE_BUILD="nope")
+        assert wrong.status_code == 429
+    finally:
+        cache.clear()
+        del PublicReadThrottle.THROTTLE_RATES  # back to the class default
+        api_settings.reload()

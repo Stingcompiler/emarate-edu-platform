@@ -1,0 +1,64 @@
+---
+import PageHead from "../../../components/PageHead.astro";
+import Base from "../../../layouts/Base.astro";
+import { type Event, events, get } from "../../../lib/api";
+import { LANGS, type Lang, fmtDate, t } from "../../../lib/i18n";
+
+export async function getStaticPaths() {
+  const items = await events();
+  const full = await Promise.all(
+    items.map((e) => get<Event | null>(`events/${encodeURIComponent(e.slug)}`, null)),
+  );
+  return LANGS.flatMap((lang) =>
+    full
+      .filter((e): e is Event => !!e)
+      .map((e) => ({ params: { lang, slug: e.slug }, props: { item: e } })),
+  );
+}
+const lang = Astro.params.lang as Lang;
+const { item: e } = Astro.props as { item: Event };
+const when = fmtDate(lang, e.starts_at, {
+  weekday: "long",
+  day: "numeric",
+  month: "long",
+  year: "numeric",
+  hour: "numeric",
+  minute: "2-digit",
+});
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Event",
+  name: e.title,
+  startDate: e.starts_at,
+  endDate: e.ends_at,
+  eventStatus: "https://schema.org/EventScheduled",
+  eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
+  location: {
+    "@type": "Place",
+    name: e.location || "كلية الإمارات للعلوم والتقنية",
+    address: "الخرطوم، السودان",
+  },
+  organizer: { "@type": "CollegeOrUniversity", name: "كلية الإمارات للعلوم والتقنية" },
+};
+---
+
+<Base lang={lang} title={e.title} path={`events/${e.slug}/`} jsonLd={jsonLd} image={e.cover_url}>
+  <PageHead
+    lang={lang}
+    title={e.title}
+    lead={`${when}${e.location ? ` · ${e.location}` : ""}`}
+    crumbs={[[t(lang, "news"), "news/"]]}
+  >
+    {e.registration_url && (
+      <a
+        href={e.registration_url}
+        class="mt-5 inline-flex rounded-lg bg-accent px-5 py-3 text-sm font-semibold text-white hover:bg-accent-hover"
+      >
+        {t(lang, "register")}
+      </a>
+    )}
+  </PageHead>
+  <article class="mx-auto max-w-3xl px-4 py-10 lg:px-8">
+    <div class="space-y-4 text-base leading-8" set:html={e.description} />
+  </article>
+</Base>

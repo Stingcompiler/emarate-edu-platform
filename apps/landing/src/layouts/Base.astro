@@ -3,31 +3,206 @@ import "@fontsource/ibm-plex-sans-arabic/400.css";
 import "@fontsource/ibm-plex-sans-arabic/600.css";
 import "@fontsource/noto-kufi-arabic/700.css";
 import "../styles/global.css";
+import { PORTAL, site as loadSite } from "../lib/api";
+import { type Lang, dir, href, pick, t } from "../lib/i18n";
 
 interface Props {
+  lang: Lang;
   title: string;
-  description: string;
+  description?: string;
+  /** Path after /{lang}/ for the other-language link and hreflang. */
+  path?: string;
+  jsonLd?: object | object[];
+  image?: string | null;
 }
 
-const { title, description } = Astro.props;
-const canonical = new URL(Astro.url.pathname, Astro.site);
+const { lang, title, description, path = "", jsonLd, image } = Astro.props;
+const s = await loadSite();
+const siteName = pick(lang, s.name_ar, s.name_en);
+const shortName = siteName.split(" ").slice(0, 2).join(" ");
+const other: Lang = lang === "ar" ? "en" : "ar";
+const canonical = new URL(href(lang, path), Astro.site);
+const alternate = (l: Lang) => new URL(href(l, path), Astro.site).toString();
+const desc = description || s.seo?.description || s.tagline || siteName;
+const fullTitle = title === siteName ? title : `${title} — ${siteName}`;
+const nav = [
+  ["about", "about/"],
+  ["departments", "departments/"],
+  ["programs", "programs/"],
+  ["news", "news/"],
+  ["contact", "contact/"],
+] as const;
+const current = Astro.url.pathname;
 ---
 
 <!doctype html>
 <!-- The public site is a white brand surface (docs/brand); dark mode is portal-only (D27). -->
-<html lang="ar" dir="rtl" data-theme="light" class="bg-bg">
+<html lang={lang} dir={dir(lang)} data-theme="light" class="bg-bg">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{title}</title>
-    <meta name="description" content={description} />
+    <title>{fullTitle}</title>
+    <meta name="description" content={desc} />
     <link rel="canonical" href={canonical} />
-    <meta property="og:title" content={title} />
-    <meta property="og:description" content={description} />
-    <meta property="og:locale" content="ar_SD" />
+    <link rel="alternate" hreflang="ar" href={alternate("ar")} />
+    <link rel="alternate" hreflang="en" href={alternate("en")} />
+    <link rel="alternate" hreflang="x-default" href={alternate("ar")} />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={siteName} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={desc} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:locale" content={lang === "ar" ? "ar_SD" : "en_GB"} />
+    {image && <meta property="og:image" content={image} />}
+    <meta name="twitter:card" content={image ? "summary_large_image" : "summary"} />
+    <meta name="theme-color" content="#0b2447" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    {jsonLd && <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />}
   </head>
-  <body class="bg-bg text-text">
-    <slot />
+  <body class="flex min-h-dvh flex-col bg-bg text-text">
+    <a
+      href="#main"
+      class="sr-only focus:not-sr-only focus:absolute focus:m-2 focus:rounded focus:bg-surface focus:px-3 focus:py-2"
+    >
+      {lang === "ar" ? "تخطَّ إلى المحتوى" : "Skip to content"}
+    </a>
+    <header class="sticky top-0 z-20 border-b border-border-soft bg-surface/90 backdrop-blur">
+      <div class="mx-auto flex h-16 max-w-6xl items-center gap-4 px-4 lg:px-8">
+        <a href={href(lang)} class="flex min-w-0 items-center gap-2 text-sm font-bold text-text">
+          <img src="/favicon.svg" alt="" width="32" height="32" class="rounded-md" />
+          <span class="truncate sm:hidden">{shortName}</span>
+          <span class="hidden truncate sm:inline">{siteName}</span>
+        </a>
+        <nav
+          class="ms-auto hidden items-center gap-1 lg:flex"
+          aria-label={lang === "ar" ? "الرئيسية" : "Main"}
+        >
+          {nav.map(([key, p]) => (
+            <a
+              href={href(lang, p)}
+              class:list={[
+                "rounded-md px-3 py-2 text-sm font-semibold hover:bg-surface-alt",
+                current.startsWith(href(lang, p)) ? "text-primary" : "text-text-muted",
+              ]}
+            >
+              {t(lang, key)}
+            </a>
+          ))}
+        </nav>
+        <a
+          href={href(other, path)}
+          hreflang={other}
+          class="hidden text-xs font-semibold text-text-muted hover:text-text sm:ms-auto sm:inline lg:ms-0"
+        >
+          {t(lang, "other")}
+        </a>
+        <a
+          href={`${PORTAL}/login`}
+          class="ms-auto whitespace-nowrap rounded-md bg-surface-alt px-3 py-2 text-xs font-semibold text-text hover:bg-border-soft sm:ms-0 sm:text-sm"
+        >
+          {t(lang, "portal")}
+        </a>
+        <details class="relative lg:hidden">
+          <summary
+            class="grid size-10 cursor-pointer list-none place-items-center rounded-md hover:bg-surface-alt"
+            aria-label={lang === "ar" ? "القائمة" : "Menu"}
+          >
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              aria-hidden="true"
+            >
+              <path d="M4 7h16M4 12h16M4 17h16" />
+            </svg>
+          </summary>
+          <div class="absolute end-0 top-12 w-56 rounded-xl border border-border-soft bg-surface p-2 shadow-lg">
+            {nav.map(([key, p]) => (
+              <a
+                href={href(lang, p)}
+                class="block rounded-md px-3 py-2.5 text-sm font-semibold hover:bg-surface-alt"
+              >
+                {t(lang, key)}
+              </a>
+            ))}
+            <a
+              href={`${PORTAL}/track`}
+              class="block rounded-md px-3 py-2.5 text-sm font-semibold text-primary hover:bg-surface-alt"
+            >
+              {t(lang, "track")}
+            </a>
+            <a
+              href={href(other, path)}
+              hreflang={other}
+              class="block rounded-md px-3 py-2.5 text-sm font-semibold text-text-muted hover:bg-surface-alt sm:hidden"
+            >
+              {t(lang, "other")}
+            </a>
+          </div>
+        </details>
+      </div>
+    </header>
+
+    <main id="main" class="flex-1">
+      <slot />
+    </main>
+
+    <footer class="mt-16 bg-header text-sm text-navy-100">
+      <div class="mx-auto grid max-w-6xl gap-8 px-4 py-10 sm:grid-cols-3 lg:px-8">
+        <div>
+          <p class="font-bold text-white">{siteName}</p>
+          {s.tagline && <p class="mt-2 leading-6">{s.tagline}</p>}
+        </div>
+        <nav class="grid grid-cols-2 gap-2" aria-label={lang === "ar" ? "روابط" : "Links"}>
+          {nav.map(([key, p]) => (
+            <a href={href(lang, p)} class="hover:text-white">
+              {t(lang, key)}
+            </a>
+          ))}
+          <a href={`${PORTAL}/apply`} class="hover:text-white">
+            {t(lang, "apply")}
+          </a>
+          <a href={`${PORTAL}/track`} class="hover:text-white">
+            {t(lang, "track")}
+          </a>
+          <a href={href(lang, "p/privacy/")} class="hover:text-white">
+            {t(lang, "privacy")}
+          </a>
+        </nav>
+        <address class="space-y-1 not-italic leading-6">
+          {s.address && <p>{s.address}</p>}
+          {s.phone && (
+            <p>
+              <a href={`tel:${s.phone.replace(/\s/g, "")}`} dir="ltr" class="hover:text-white">
+                {s.phone}
+              </a>
+            </p>
+          )}
+          {s.email && (
+            <p>
+              <a href={`mailto:${s.email}`} class="hover:text-white">
+                {s.email}
+              </a>
+            </p>
+          )}
+          {s.whatsapp_e164 && (
+            <p>
+              <a
+                href={`https://wa.me/${s.whatsapp_e164.replace("+", "")}`}
+                class="hover:text-white"
+              >
+                WhatsApp
+              </a>
+            </p>
+          )}
+        </address>
+      </div>
+      <p class="border-t border-navy-700 py-4 text-center text-xs text-navy-300">
+        © {new Date().getFullYear()} {siteName}
+      </p>
+    </footer>
   </body>
 </html>

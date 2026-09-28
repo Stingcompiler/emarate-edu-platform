@@ -5,6 +5,7 @@ from admissions import views as admissions
 from content import views as content
 from files import views as files
 from inquiries import views as inquiries
+from organization import public as catalogue
 
 from . import views
 
@@ -35,7 +36,17 @@ urlpatterns = [
         admissions.PublicApplicationStatusView.as_view(),
         name="public-application-status",
     ),
+    path("pages", catalogue.PublicPagesView.as_view(), name="public-pages"),
     path("pages/<str:slug>", content.PublicPageView.as_view(), name="public-page"),
+    path("departments", catalogue.PublicDepartmentsView.as_view(), name="public-departments"),
+    path(
+        "departments/<str:code>",
+        catalogue.PublicDepartmentView.as_view(),
+        name="public-department",
+    ),
+    path("programs", catalogue.PublicProgramsView.as_view(), name="public-programs"),
+    path("programs/<str:code>", catalogue.PublicProgramView.as_view(), name="public-program"),
+    path("stats", catalogue.PublicStatsView.as_view(), name="public-stats"),
     path("news", content.PublicNewsList.as_view(), name="public-news"),
     path("news/<str:slug>", content.PublicNewsDetail.as_view(), name="public-news-detail"),
     path("events", content.PublicEventList.as_view(), name="public-events"),

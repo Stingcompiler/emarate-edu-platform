@@ -1,0 +1,41 @@
+---
+import type { Block } from "../lib/api";
+
+interface Props {
+  blocks: Block[];
+}
+const { blocks } = Astro.props;
+---
+
+<div class="prose-site space-y-4 text-base leading-8 text-text">
+  {blocks.map((b) =>
+    b.type === "heading" ? (
+      <h2 class="pt-2 font-display text-xl font-bold">{b.text}</h2>
+    ) : b.type === "paragraph" ? (
+      <p class="whitespace-pre-line">{b.text}</p>
+    ) : b.type === "html" ? (
+      <div set:html={b.html} />
+    ) : b.type === "image" && b.url ? (
+      <img
+        src={b.url}
+        alt={b.alt ?? ""}
+        loading="lazy"
+        decoding="async"
+        class="w-full rounded-2xl"
+      />
+    ) : b.type === "cta" && b.url ? (
+      <a
+        href={b.url}
+        class="inline-flex rounded-lg bg-accent px-5 py-3 text-sm font-semibold text-white hover:bg-accent-hover"
+      >
+        {b.text}
+      </a>
+    ) : b.type === "list" && b.items ? (
+      <ul class="list-disc space-y-1 ps-6">
+        {b.items.map((item) => (
+          <li>{item}</li>
+        ))}
+      </ul>
+    ) : null,
+  )}
+</div>

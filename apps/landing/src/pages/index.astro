@@ -1,53 +1,18 @@
 ---
-import Base from "../layouts/Base.astro";
-
-const jsonLd = {
-  "@context": "https://schema.org",
-  "@type": "CollegeOrUniversity",
-  name: "كلية الإمارات للعلوم والتقنية",
-  alternateName: "Emirates College for Science & Technology",
-  url: "https://ecst.edu.sd",
-  address: { "@type": "PostalAddress", addressLocality: "الخرطوم", addressCountry: "SD" },
-};
+// "/" → Arabic home. Static hosts serve this file; the meta refresh and the
+// link cover browsers and crawlers (canonical points at /ar/).
+const target = new URL("/ar/", Astro.site).toString();
 ---
 
-<Base
-  title="كلية الإمارات للعلوم والتقنية"
-  description="برامج تطبيقية في تقنية المعلومات وعلوم الحاسوب والهندسة وإدارة الأعمال — تقديم إلكتروني ومتابعة للطلب من الهاتف."
->
-  <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
-  <header class="flex items-center justify-between px-4 py-4 sm:px-8">
-    <span class="flex items-center gap-2 text-sm font-semibold">
-      <img src="/favicon.svg" alt="" width="32" height="32" class="rounded-md" />
-      كلية الإمارات للعلوم والتقنية
-    </span>
-    <a
-      href="http://localhost:5173"
-      class="rounded-md bg-surface-alt px-3 py-2 text-sm font-semibold text-text"
-    >
-      دخول البوابة
-    </a>
-  </header>
-
-  <main class="mx-auto max-w-3xl px-4 pb-16 pt-10 sm:px-8">
-    <p class="text-sm font-semibold text-accent">الموقع العام — قيد البناء</p>
-    <h1 class="mt-2 font-display text-4xl font-bold leading-snug text-text sm:text-5xl">
-      تعليم تقني يبدأ من هنا.
-    </h1>
-    <p class="mt-4 max-w-xl text-base text-text-muted">
-      هذا هيكل الموقع العام (Astro). في المرحلة 9 تُبنى صفحاته من قاعدة البيانات عند كل نشر من لوحة
-      فريق الموقع، مع صفحات البرامج والقبول والأخبار المهيأة لمحركات البحث.
-    </p>
-    <div class="mt-8 flex flex-wrap gap-3">
-      <span class="rounded-full bg-primary-soft px-3 py-1 text-xs font-semibold text-primary">
-        Astro SSG
-      </span>
-      <span class="rounded-full bg-primary-soft px-3 py-1 text-xs font-semibold text-primary">
-        RTL
-      </span>
-      <span class="rounded-full bg-primary-soft px-3 py-1 text-xs font-semibold text-primary">
-        Noto Kufi للعناوين · Plex للنص
-      </span>
-    </div>
-  </main>
-</Base>
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="refresh" content="0; url=/ar/" />
+    <link rel="canonical" href={target} />
+    <title>كلية الإمارات للعلوم والتقنية</title>
+  </head>
+  <body>
+    <a href="/ar/">كلية الإمارات للعلوم والتقنية</a> · <a href="/en/">English</a>
+  </body>
+</html>

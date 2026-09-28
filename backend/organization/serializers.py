@@ -33,6 +33,8 @@ class ProgramSerializer(serializers.ModelSerializer):
             "degree",
             "levels_count",
             "duration_terms",
+            "description_ar",
+            "description_en",
             "is_active",
         ]
         read_only_fields = ["name"]

@@ -15,6 +15,10 @@ CSRF_TRUSTED_ORIGINS = env_list(
     "DJANGO_CSRF_TRUSTED_ORIGINS", ["http://localhost:5173", "http://127.0.0.1:5173"]
 )
 
+PUBLIC_SITE_ORIGINS = env_list(
+    "PUBLIC_SITE_ORIGINS", ["http://localhost:4321", "http://127.0.0.1:4321"]
+)
+
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",

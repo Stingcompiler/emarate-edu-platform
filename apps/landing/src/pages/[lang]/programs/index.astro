@@ -1,0 +1,105 @@
+---
+import PageHead from "../../../components/PageHead.astro";
+import ProgramCard from "../../../components/ProgramCard.astro";
+import Base from "../../../layouts/Base.astro";
+import { programs } from "../../../lib/api";
+import { type Lang, degree, fmtDate, langPaths, num, pick, t } from "../../../lib/i18n";
+
+export const getStaticPaths = langPaths;
+const lang = Astro.params.lang as Lang;
+const all = await programs();
+const open = all.filter((p) => p.intake?.accepting);
+const closes = open.map((p) => p.intake!.closes_at).sort()[0];
+const groups = [...new Set(all.map((p) => p.department_code))].map((code) => {
+  const items = all.filter((p) => p.department_code === code);
+  return { name: pick(lang, items[0]!.department_name, items[0]!.department_name_en), items };
+});
+const degrees = [...new Map(all.map((p) => [p.degree, p.degree_label])).entries()];
+const lead =
+  lang === "ar"
+    ? `${num(lang, all.length)} برنامجًا في ${num(lang, groups.length)} أقسام${open.length ? ` · ${num(lang, open.length)} مفتوحة للتقديم حتى ${fmtDate(lang, closes!)}` : ""}`
+    : `${all.length} programs in ${groups.length} departments${open.length ? ` · ${open.length} open until ${fmtDate(lang, closes!)}` : ""}`;
+---
+
+<Base lang={lang} title={t(lang, "programs")} path="programs/">
+  <PageHead
+    lang={lang}
+    title={t(lang, "programs")}
+    lead={lead}
+    crumbs={[[t(lang, "programs"), "programs/"]]}
+  >
+    <div
+      class="mt-5 flex flex-wrap gap-2"
+      role="group"
+      aria-label={lang === "ar" ? "تصفية" : "Filter"}
+    >
+      <button type="button" data-filter="all" aria-pressed="true" class="chip">
+        {t(lang, "all")}
+      </button>
+      {degrees.map(([key, label]) => (
+        <button type="button" data-filter={`degree:${key}`} aria-pressed="false" class="chip">
+          {degree(lang, key, label)}
+        </button>
+      ))}
+      <button type="button" data-filter="open" aria-pressed="false" class="chip">
+        {t(lang, "open")}
+      </button>
+    </div>
+  </PageHead>
+  <div class="mx-auto max-w-6xl space-y-10 px-4 py-10 lg:px-8">
+    {groups.map((g) => (
+      <section data-group>
+        <h2 class="font-display text-xl font-bold">
+          {g.name}{" "}
+          <span class="text-sm font-normal text-text-muted">· {num(lang, g.items.length)}</span>
+        </h2>
+        <div class="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {g.items.map((p) => (
+            <ProgramCard lang={lang} program={p} />
+          ))}
+        </div>
+      </section>
+    ))}
+    {!all.length && (
+      <p class="text-text-muted">{lang === "ar" ? "لا برامج منشورة بعد." : "No programs yet."}</p>
+    )}
+  </div>
+</Base>
+
+<style>
+  .chip {
+    border-radius: 9999px;
+    border: 1px solid var(--color-border-soft);
+    background: var(--color-surface);
+    padding: 0.35rem 0.9rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
+  }
+  .chip[aria-pressed="true"] {
+    background: var(--color-text);
+    color: var(--color-bg);
+  }
+</style>
+
+<script>
+  // Progressive enhancement: without JS every program stays visible.
+  const buttons = document.querySelectorAll<HTMLButtonElement>("[data-filter]");
+  buttons.forEach((button) =>
+    button.addEventListener("click", () => {
+      const filter = button.dataset.filter!;
+      buttons.forEach((b) => b.setAttribute("aria-pressed", String(b === button)));
+      document.querySelectorAll<HTMLElement>("[data-degree]").forEach((card) => {
+        const show =
+          filter === "all" ||
+          (filter === "open" && card.dataset.open === "1") ||
+          filter === `degree:${card.dataset.degree}`;
+        card.hidden = !show;
+      });
+      document.querySelectorAll<HTMLElement>("[data-group]").forEach((group) => {
+        group.hidden = ![...group.querySelectorAll<HTMLElement>("[data-degree]")].some(
+          (c) => !c.hidden,
+        );
+      });
+    }),
+  );
+</script>
