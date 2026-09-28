@@ -28,6 +28,11 @@ class ContactThrottle(AnonRateThrottle):
     scope = "contact"  # docs/05 §7: 5/hour per IP
 
 
+class ContactStatusThrottle(AnonRateThrottle):
+    # Checking a reference must not use up the 5 inquiries an hour a visitor may send.
+    scope = "contact_status"
+
+
 @extend_schema(tags=["public"])
 class PublicInquiryView(APIView):
     """The site's contact form. Returns a reference number to follow up with."""
@@ -64,7 +69,7 @@ class PublicInquiryStatusView(APIView):
 
     permission_classes = [AllowAny]
     authentication_classes = []
-    throttle_classes = [ContactThrottle]
+    throttle_classes = [ContactStatusThrottle]
 
     @extend_schema(operation_id="public_inquiry_status", responses=PublicReceiptSerializer)
     def get(self, request, reference_no):
