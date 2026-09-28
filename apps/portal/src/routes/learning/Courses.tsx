@@ -71,7 +71,7 @@ export function Courses() {
                   )}
                   <div className="mt-auto flex items-center justify-between pt-3 text-xs">
                     <span className="text-text-muted">
-                      {published.toLocaleString("ar")} محاضرات منشورة
+                      المحاضرات المنشورة: {published.toLocaleString("ar")}
                     </span>
                     {student &&
                       (late ? (

@@ -5,7 +5,7 @@ import { Link, useParams } from "react-router";
 import { PortalShell } from "../../components/PortalShell";
 import { Button, Card, EmptyState, StatusBadge } from "../../components/ui";
 import { api } from "../../lib/api";
-import { formatClock } from "../../lib/exam";
+import { formatClock, textParts } from "../../lib/exam";
 
 type Review = {
   order: number;
@@ -105,9 +105,24 @@ export function ExamResult() {
                       )}
                     </span>
                     <div className="min-w-0 text-sm">
-                      <p className="font-semibold text-text">
-                        {q.order.toLocaleString("ar")}. {q.text.split("```")[0]}
-                      </p>
+                      {textParts(q.text).map((part, i) =>
+                        part.code ? (
+                          <pre
+                            key={i}
+                            dir="ltr"
+                            className="mt-2 overflow-x-auto rounded-lg bg-navy-800 p-3 font-mono text-xs leading-relaxed text-navy-50"
+                          >
+                            {part.value}
+                          </pre>
+                        ) : (
+                          part.value.trim() && (
+                            <p key={i} className="whitespace-pre-line font-semibold text-text">
+                              {i === 0 && `${q.order.toLocaleString("ar")}. `}
+                              {part.value}
+                            </p>
+                          )
+                        ),
+                      )}
                       <p className="mt-1 text-text-muted">
                         إجابتك: <span dir="auto">{show(q.your_answer, q.choices)}</span>
                         {!q.is_correct && q.correct_answer !== null && (

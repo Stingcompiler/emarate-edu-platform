@@ -102,7 +102,7 @@ export function Me() {
               to="/print/my-results"
               icon={<FileText size={18} aria-hidden />}
               label="كشف النتائج (طباعة / PDF)"
-              note={results.data ? `${num(results.data.terms.length)} فصول` : undefined}
+              note={results.data ? `الفصول: ${num(results.data.terms.length)}` : undefined}
             />
             <Row to="/exams" icon={<ClipboardList size={18} aria-hidden />} label="الاختبارات" />
             <Row to="/live" icon={<Radio size={18} aria-hidden />} label="البث المباشر" />

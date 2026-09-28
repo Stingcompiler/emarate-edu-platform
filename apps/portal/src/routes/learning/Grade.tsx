@@ -120,8 +120,10 @@ export function Grade() {
               </span>
             </Card>
             {v.content && (
-              <Card className="whitespace-pre-line p-4 text-sm leading-7 text-text">
-                {v.content}
+              <Card className="p-4 text-sm leading-7 text-text">
+                <p dir="auto" className="whitespace-pre-line">
+                  {v.content}
+                </p>
               </Card>
             )}
             {(((v.files as string[]) ?? []).length > 0 ||

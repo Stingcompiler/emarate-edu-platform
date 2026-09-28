@@ -33,8 +33,16 @@ export function examPhase(exam: Exam, now = Date.now()): { key: string; label: s
     new Date(exam.closes_at).getTime() <= now
   )
     return { key: "closed", label: "منتهٍ" };
+  if (attemptsUsedUp(exam)) return { key: "closed", label: "أنهيته" };
   if (new Date(exam.opens_at).getTime() > now) return { key: "open", label: "مجدول" };
   return { key: "published", label: "جارٍ الآن" };
+}
+
+/** Student only: every allowed attempt is finished, so nothing is left to do. */
+function attemptsUsedUp(exam: Exam): boolean {
+  const mine = (exam.my_attempts ?? []) as { status: string }[];
+  if (!mine.length || mine.some((a) => a.status === "in_progress")) return false;
+  return mine.length >= (exam.max_attempts ?? 1);
 }
 
 /** Student: upcoming, open and done exams. Staff: exams of their courses. Desktop board: DesktopDeptExams. */

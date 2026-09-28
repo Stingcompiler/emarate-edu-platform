@@ -132,11 +132,11 @@ function StudentView({ a }: { a: A }) {
               {s.current_version.is_late ? "متأخر" : "في الوقت"}
             </p>
             <p className="text-xs text-text-muted">
-              {when(s.current_version.submitted_at)} · {s.versions_count.toLocaleString("ar")}{" "}
-              إصدارات محفوظة
+              {when(s.current_version.submitted_at)} · الإصدارات المحفوظة:{" "}
+              {s.versions_count.toLocaleString("ar")}
             </p>
             {s.current_version.content && (
-              <p className="whitespace-pre-line rounded-lg bg-surface-alt p-3">
+              <p dir="auto" className="whitespace-pre-line rounded-lg bg-surface-alt p-3">
                 {s.current_version.content}
               </p>
             )}
@@ -290,6 +290,7 @@ function SubmitForm({ a, again, onDone }: { a: A; again: boolean; onDone: () => 
       <label className="block text-xs text-text-muted">
         {types.includes("text") ? "الإجابة / ملاحظة" : "ملاحظة للأستاذ (اختياري)"}
         <textarea
+          dir="auto"
           value={content}
           onChange={(e) => setContent(e.target.value)}
           className="mt-1 block min-h-24 w-full rounded-lg border border-border bg-surface p-2 text-sm"
