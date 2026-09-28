@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 
 import { PortalShell } from "../../components/PortalShell";
-import { Card, Notice, SectionLabel } from "../../components/ui";
+import { Card, Notice, SectionLabel, ScrollRegion } from "../../components/ui";
 import { api } from "../../lib/api";
 import {
   ExportBar,
@@ -101,40 +101,45 @@ export function AffairsReport() {
           <div className="mt-6 lg:grid lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start lg:gap-6">
             <div className="space-y-4">
               <SectionLabel>الحالات حسب النوع والقسم</SectionLabel>
-              <Card className="overflow-x-auto p-4">
-                <table className="w-full min-w-[480px] text-sm">
-                  <thead className="text-xs text-text-muted">
-                    <tr>
-                      {["القسم", ...kinds.map((k) => KIND[k] ?? k), "المجموع", "لكل 100 طالب"].map(
-                        (h) => (
+              <Card className="p-4">
+                <ScrollRegion label="الحالات حسب النوع والقسم">
+                  <table className="w-full min-w-[480px] text-sm">
+                    <thead className="text-xs text-text-muted">
+                      <tr>
+                        {[
+                          "القسم",
+                          ...kinds.map((k) => KIND[k] ?? k),
+                          "المجموع",
+                          "لكل 100 طالب",
+                        ].map((h) => (
                           <th key={h} className="py-2 text-start font-normal">
                             {h}
                           </th>
-                        ),
-                      )}
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-border-soft">
-                    {r.rows.map((row) => (
-                      <tr key={row.department}>
-                        <td className="py-2 font-semibold">{row.department || "—"}</td>
-                        {kinds.map((k) => (
-                          <td key={k}>{num(row.by_kind[k] ?? 0)}</td>
                         ))}
-                        <td className="font-semibold">{num(row.total)}</td>
-                        <td>{num(row.per_100, 1)}</td>
                       </tr>
-                    ))}
-                    <tr className="font-semibold">
-                      <td className="py-2">الكلية</td>
-                      {totals.map((t, i) => (
-                        <td key={i}>{num(t)}</td>
+                    </thead>
+                    <tbody className="divide-y divide-border-soft">
+                      {r.rows.map((row) => (
+                        <tr key={row.department}>
+                          <td className="py-2 font-semibold">{row.department || "—"}</td>
+                          {kinds.map((k) => (
+                            <td key={k}>{num(row.by_kind[k] ?? 0)}</td>
+                          ))}
+                          <td className="font-semibold">{num(row.total)}</td>
+                          <td>{num(row.per_100, 1)}</td>
+                        </tr>
                       ))}
-                      <td>{num(r.total)}</td>
-                      <td>{r.students ? num((100 * r.total) / r.students, 1) : "—"}</td>
-                    </tr>
-                  </tbody>
-                </table>
+                      <tr className="font-semibold">
+                        <td className="py-2">الكلية</td>
+                        {totals.map((t, i) => (
+                          <td key={i}>{num(t)}</td>
+                        ))}
+                        <td>{num(r.total)}</td>
+                        <td>{r.students ? num((100 * r.total) / r.students, 1) : "—"}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </ScrollRegion>
               </Card>
               <SectionLabel>القرارات في الحالات المقفلة · {num(r.closed)}</SectionLabel>
               <Card className="flex flex-wrap gap-2 p-4">
