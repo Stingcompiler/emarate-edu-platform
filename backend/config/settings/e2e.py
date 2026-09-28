@@ -12,6 +12,7 @@ DATABASES = {
     "default": {**DATABASES["default"], "NAME": env("E2E_DB", str(BASE_DIR / "e2e.sqlite3"))}
 }
 CSRF_TRUSTED_ORIGINS = ["http://localhost:5174", "http://127.0.0.1:5174"]
+PUBLIC_SITE_ORIGINS = ["http://localhost:4322", "http://127.0.0.1:4322"]
 MAILERS = {
     "default": {
         "BACKEND": "core.mail.DevEmailBackend",
