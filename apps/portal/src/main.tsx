@@ -50,6 +50,10 @@ import { Structure } from "./routes/admin/Structure";
 import { AdminUser } from "./routes/admin/User";
 import { AdminUsers } from "./routes/admin/Users";
 import { Home } from "./routes/Home";
+import { AcademicHome } from "./routes/homes/AcademicHome";
+import { AffairsHome } from "./routes/homes/AffairsHome";
+import { ResultsHome } from "./routes/homes/ResultsHome";
+import { Me, MyStatus } from "./routes/learning/Me";
 import { RegistrarHome } from "./routes/registrar/Home";
 import { StudentImportDetail, StudentImports } from "./routes/registrar/Imports";
 import { Registrars } from "./routes/registrar/Registrars";
@@ -123,6 +127,11 @@ const router = createBrowserRouter([
   { path: "/submissions/:id", element: signedIn(<Grade />) },
   { path: "/grading", element: signedIn(<Grading />) },
   { path: "/tasks", element: signedIn(<Tasks />) },
+  { path: "/me", element: signedIn(<Me />) },
+  { path: "/me/status", element: signedIn(<MyStatus />) },
+  { path: "/results-office", element: signedIn(<ResultsHome />) },
+  { path: "/academic", element: signedIn(<AcademicHome />) },
+  { path: "/affairs", element: signedIn(<AffairsHome />) },
   { path: "/notifications", element: signedIn(<Notifications />) },
   { path: "/notifications/new", element: signedIn(<Compose />) },
   { path: "/settings", element: signedIn(<Settings />) },

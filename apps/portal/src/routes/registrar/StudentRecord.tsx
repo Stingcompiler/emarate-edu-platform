@@ -29,6 +29,13 @@ export function StudentRecord() {
         })
       ).data?.results ?? [],
   });
+  const cases = useQuery({
+    queryKey: ["cases", "student", id],
+    enabled: can(me.data, "cases.view"),
+    queryFn: async () =>
+      (await api.GET("/api/v1/cases", { params: { query: { student_record__public_id: id } } }))
+        .data?.results ?? [],
+  });
   const s = student.data;
   const current = (enrollments.data ?? []).filter((e) => e.status === "active");
   const hours = current.reduce(
@@ -118,6 +125,33 @@ export function StudentRecord() {
                   {!enrollments.data.length && (
                     <p className="px-4 py-3 text-text-muted">غير مسجل في مواد.</p>
                   )}
+                </Card>
+              </>
+            )}
+            {cases.data && (
+              <>
+                <SectionLabel>الحالات · {num(cases.data.length)}</SectionLabel>
+                <Card className="divide-y divide-border-soft text-sm">
+                  {cases.data.map((c) => (
+                    <Link
+                      key={c.public_id}
+                      to={`/cases/${c.public_id}`}
+                      className="flex items-center justify-between gap-3 px-4 py-2.5 hover:bg-surface-alt"
+                    >
+                      <span>{c.title}</span>
+                      <StatusBadge
+                        status={c.status}
+                        label={
+                          c.status === "open"
+                            ? "مفتوحة"
+                            : c.status === "decided"
+                              ? "صدر قرار"
+                              : "مقفلة"
+                        }
+                      />
+                    </Link>
+                  ))}
+                  {!cases.data.length && <p className="px-4 py-3 text-text-muted">لا حالات.</p>}
                 </Card>
               </>
             )}

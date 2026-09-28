@@ -6,6 +6,7 @@ import {
   History,
   LayoutDashboard,
   Library,
+  UserRound,
   Users,
   BookOpen,
   Building2,
@@ -100,7 +101,21 @@ export function navFor(me: Me | null | undefined, unread: number): NavItem[] {
     items.push({ label: "إعدادات النظام", to: "/system/settings", icon: SlidersHorizontal });
     items.push({ label: "التدقيق", to: "/audit", icon: History });
   }
-  if (me?.student) items.push({ label: "اليوم", to: "/", icon: Sun });
+  if (me?.student) {
+    return [
+      { label: "اليوم", to: "/", icon: Sun },
+      { label: "موادي", to: "/courses", icon: BookOpen, end: false },
+      { label: "المهام", to: "/tasks", icon: ListChecks },
+      { label: "الإشعارات", to: "/notifications", icon: Bell, badge: unread },
+      { label: "أنا", to: "/me", icon: UserRound, end: false },
+    ];
+  }
+  if (hasRole(me, "results_officer"))
+    items.push({ label: "الرئيسية", to: "/results-office", icon: LayoutDashboard });
+  if (hasRole(me, "academic_affairs"))
+    items.push({ label: "الرئيسية", to: "/academic", icon: LayoutDashboard });
+  if (hasRole(me, "student_affairs"))
+    items.push({ label: "الرئيسية", to: "/affairs", icon: LayoutDashboard });
   if (me?.student || hasRole(me, "teacher", "ta"))
     items.push({ label: "موادي", to: "/courses", icon: BookOpen, end: false });
   if (me?.student) items.push({ label: "المهام", to: "/tasks", icon: ListChecks });

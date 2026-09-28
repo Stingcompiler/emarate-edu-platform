@@ -18,11 +18,11 @@ export function Home() {
     [hasRole(m, "department_manager", "department_supervisor"), "/department"],
     [hasRole(m, "hr"), "/hr"],
     [can(m, "admissions.view"), "/registrar"],
-    [can(m, "results.manage"), "/result-imports"],
-    [hasRole(m, "student_affairs"), "/cases"],
+    [hasRole(m, "results_officer"), "/results-office"],
+    [hasRole(m, "student_affairs"), "/affairs"],
     [can(m, "content.manage"), "/site"],
     [can(m, "events.manage"), "/events"],
-    [hasRole(m, "academic_affairs"), "/hr/teachers"],
+    [hasRole(m, "academic_affairs"), "/academic"],
   ];
   const to = rules.find(([ok]) => ok)?.[1] ?? "/notifications";
   return <Navigate to={to} replace />;

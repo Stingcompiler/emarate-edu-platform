@@ -29,6 +29,16 @@ class ScopeSerializer(serializers.Serializer):
     departments = serializers.ListField(child=serializers.IntegerField())
 
 
+class MeStudentSerializer(serializers.Serializer):
+    public_id = serializers.UUIDField()
+    university_number = serializers.CharField()
+    program = serializers.CharField()
+    department = serializers.CharField()
+    level = serializers.IntegerField()
+    status = serializers.CharField()
+    status_label = serializers.CharField()
+
+
 class MeSerializer(serializers.ModelSerializer):
     roles = serializers.SerializerMethodField()
     capabilities = serializers.SerializerMethodField()
@@ -60,6 +70,7 @@ class MeSerializer(serializers.ModelSerializer):
             for name, scope in rbac.capabilities_of(obj).items()
         }
 
+    @extend_schema_field(MeStudentSerializer(allow_null=True))
     def get_student(self, obj) -> dict | None:
         record_ = getattr(obj, "student_record", None)
         if record_ is None:
@@ -72,6 +83,7 @@ class MeSerializer(serializers.ModelSerializer):
             "department": record_.department.name_ar,
             "level": record_.level,
             "status": record_.status,
+            "status_label": record_.get_status_display(),
         }
 
 
@@ -164,9 +176,10 @@ class RoleGrantSerializer(serializers.Serializer):
 
 class RoleAssignmentDetailSerializer(RoleAssignmentSerializer):
     user = serializers.SlugRelatedField(slug_field="public_id", read_only=True)
+    user_name = serializers.CharField(source="user.full_name_ar", read_only=True)
 
     class Meta(RoleAssignmentSerializer.Meta):
-        fields = [*RoleAssignmentSerializer.Meta.fields, "user"]
+        fields = [*RoleAssignmentSerializer.Meta.fields, "user", "user_name"]
 
 
 class RegistrationRequestSerializer(serializers.ModelSerializer):
