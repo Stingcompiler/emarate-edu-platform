@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Paperclip, Upload } from "lucide-react";
+import { Paperclip, Pencil, Upload } from "lucide-react";
 import { useRef, useState } from "react";
 import { Link, useParams } from "react-router";
 
@@ -41,6 +41,16 @@ export function Assignment() {
   return (
     <PortalShell
       title={a?.title ?? "واجب"}
+      titleAction={
+        staff ? (
+          <Link to={`/assignments/${id}/edit`}>
+            <Button variant="secondary" className="min-h-9 px-3">
+              <Pencil size={16} aria-hidden />
+              تعديل
+            </Button>
+          </Link>
+        ) : undefined
+      }
       subtitle={
         a
           ? `${a.course_name} · ${Number(a.max_grade).toLocaleString("ar")} درجة · حتى ${absolute(a.due_at)}`

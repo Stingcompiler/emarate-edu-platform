@@ -21,10 +21,19 @@ export function TeacherToday() {
   const mine = (assignments.data ?? []).filter((a) => ids.has(a.offering) && a.status !== "draft");
   const queue = useGradingQueue();
   const pending = queue.data?.counts.pending ?? 0;
-  const byCourse = (queue.data?.groups ?? []).map((g) => ({
-    name: g.assignment.course_name,
-    n: g.submissions.length,
-  }));
+  // One entry per course: a course with several assignments is counted once.
+  const byCourse = [
+    ...(queue.data?.groups ?? [])
+      .reduce(
+        (acc, g) =>
+          acc.set(
+            g.assignment.course_name,
+            (acc.get(g.assignment.course_name) ?? 0) + g.submissions.length,
+          ),
+        new Map<string, number>(),
+      )
+      .entries(),
+  ].map(([name, n]) => ({ name, n }));
   const live = useQuery({
     queryKey: ["live"],
     queryFn: async () => (await api.GET("/api/v1/live-sessions")).data?.results ?? [],
@@ -50,6 +59,7 @@ export function TeacherToday() {
       )
       .map((s) => ({
         at: s.starts_at,
+        now: new Date(s.starts_at).getTime() <= now,
         key: `l${s.public_id}`,
         title: `بث: ${s.course_name || s.title}`,
         meta: s.title,
@@ -64,10 +74,11 @@ export function TeacherToday() {
           new Date(e.opens_at).getTime() < horizon,
       )
       .map((e) => ({
-        at: e.closes_at,
+        at: e.opens_at,
+        now: new Date(e.opens_at).getTime() <= now,
         key: `e${e.public_id}`,
         title: `${e.title} — ${new Date(e.opens_at).getTime() <= now ? "جارٍ" : "يبدأ قريبًا"}`,
-        meta: e.course_name,
+        meta: `${e.course_name} · يُغلق ${dueLabel(e.closes_at, now).replace(/^بعد /, "خلال ")}`,
         to: `/exams/${e.public_id}/monitor`,
         tag: "مراقبة",
       })),
@@ -75,6 +86,7 @@ export function TeacherToday() {
       .filter((a) => new Date(a.due_at).getTime() > now && new Date(a.due_at).getTime() < horizon)
       .map((a) => ({
         at: a.due_at,
+        now: false,
         key: `a${a.public_id}`,
         title: `ينتهي موعد ${a.title}`,
         meta: a.course_name,
@@ -116,7 +128,12 @@ export function TeacherToday() {
                 className="flex items-center gap-3 px-4 py-3 hover:bg-surface-alt"
               >
                 <span className="w-14 shrink-0 text-center text-xs text-text-muted">
-                  {new Date(i.at).toLocaleTimeString("ar", { hour: "numeric", minute: "2-digit" })}
+                  {i.now
+                    ? "الآن"
+                    : new Date(i.at).toLocaleTimeString("ar", {
+                        hour: "numeric",
+                        minute: "2-digit",
+                      })}
                 </span>
                 <span className="min-w-0 flex-1">
                   <b className="block truncate text-sm text-text">{i.title}</b>

@@ -1,12 +1,19 @@
 import { useQuery } from "@tanstack/react-query";
-import { ExternalLink, FileText, Link2, PlayCircle } from "lucide-react";
+import { ExternalLink, FileText, Link2, Pencil, PlayCircle } from "lucide-react";
 import { useState } from "react";
 import { Link, useParams } from "react-router";
 
 import { PortalShell } from "../../components/PortalShell";
 import { Button, Card, SectionLabel } from "../../components/ui";
 import { api } from "../../lib/api";
-import { dueLabel, fmtSize, openFile, useAssignments, useLectures } from "../../lib/learning";
+import {
+  dueLabel,
+  fmtSize,
+  openFile,
+  useAssignments,
+  useLectures,
+  useMyCourses,
+} from "../../lib/learning";
 
 type Resource = NonNullable<ReturnType<typeof useLectures>["data"]>[number]["resources"][number];
 
@@ -30,9 +37,22 @@ export function Lecture() {
   const next = index >= 0 && index < list.length - 1 ? list[index + 1] : undefined;
   const related = (assignments.data ?? []).filter((a) => a.lecture === id);
   const video = l?.resources.find((r) => r.kind === "video" && r.video);
+  const courses = useMyCourses();
+  const course = courses.data?.find((c) => c.offering_id === l?.offering);
+  const staff = !!course && course.my_role !== "student";
   return (
     <PortalShell
       title={l?.title_ar ?? "المحاضرة"}
+      titleAction={
+        staff ? (
+          <Link to={`/lectures/${id}/edit`}>
+            <Button variant="secondary" className="min-h-9 px-3">
+              <Pencil size={16} aria-hidden />
+              تعديل
+            </Button>
+          </Link>
+        ) : undefined
+      }
       subtitle={
         l
           ? `المحاضرة ${String(l.order ?? 0).padStart(2, "0")} · ${l.type === "lab" ? "عملي" : "نظري"}${list.length ? ` · ${index + 1} من ${list.length}` : ""}`
