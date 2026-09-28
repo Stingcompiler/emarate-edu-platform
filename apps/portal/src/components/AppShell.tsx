@@ -286,7 +286,7 @@ function MainTabs({
             end={item.end ?? true}
             className={({ isActive }) =>
               `relative flex min-h-11 min-w-0 flex-1 flex-col items-center justify-center gap-0.5 text-xs ${
-                isActive ? "font-semibold text-primary" : "text-navy-300"
+                isActive ? "font-semibold text-primary" : "text-text-muted"
               }`
             }
           >
@@ -302,7 +302,7 @@ function MainTabs({
         <button
           type="button"
           onClick={more.onClick}
-          className="relative flex min-h-11 min-w-0 flex-1 flex-col items-center justify-center gap-0.5 text-xs text-navy-300"
+          className="relative flex min-h-11 min-w-0 flex-1 flex-col items-center justify-center gap-0.5 text-xs text-text-muted"
         >
           <Menu size={24} strokeWidth={1.75} aria-hidden />
           <span className="whitespace-nowrap">المزيد</span>
