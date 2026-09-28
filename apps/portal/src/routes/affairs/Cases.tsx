@@ -155,7 +155,7 @@ export function Cases() {
                 <span
                   className={`text-xs ${age(c.created_at) > 14 ? "font-semibold text-danger-strong" : "text-text-muted"}`}
                 >
-                  {age(c.created_at).toLocaleString("ar")} يومًا
+                  {ageLabel(age(c.created_at))}
                 </span>
               </Link>
             ))}
@@ -235,4 +235,12 @@ export function KindTile({ kind, small }: { kind: string; small?: boolean }) {
       {k?.short ?? "؟"}
     </span>
   );
+}
+
+/** Days a case has been open, with Arabic number agreement. */
+function ageLabel(days: number): string {
+  if (days < 1) return "اليوم";
+  if (days === 1) return "يوم";
+  if (days === 2) return "يومان";
+  return `${days.toLocaleString("ar")} ${days <= 10 ? "أيام" : "يومًا"}`;
 }
