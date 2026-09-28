@@ -2,7 +2,7 @@
 import ProgramCard from "../../components/ProgramCard.astro";
 import Base from "../../layouts/Base.astro";
 import { PORTAL, events, news, programs, site, stats } from "../../lib/api";
-import { arrow, fmtDate, href, type Lang, langPaths, num, pick, t } from "../../lib/i18n";
+import { arrow, fmtDate, href, type Lang, langPaths, num, pick, t, count, N } from "../../lib/i18n";
 
 export const getStaticPaths = langPaths;
 const lang = Astro.params.lang as Lang;
@@ -67,8 +67,8 @@ const jsonLd = {
         </h1>
         <p class="mt-4 max-w-xl text-base leading-7 text-text-muted">
           {lang === "ar"
-            ? `${num(lang, st.programs || all.length)} برنامجًا في ${num(lang, st.departments)} أقسام — تقديم إلكتروني بالكامل ومتابعة للطلب من هاتفك.`
-            : `${num(lang, st.programs || all.length)} programs in ${num(lang, st.departments)} departments — apply online and follow your application from your phone.`}
+            ? `${count(lang, st.programs || all.length, N.program)} في ${count(lang, st.departments, N.department)} — تقديم إلكتروني بالكامل ومتابعة للطلب من هاتفك.`
+            : `${count(lang, st.programs || all.length, N.program)} in ${count(lang, st.departments, N.department)} — apply online and follow your application from your phone.`}
         </p>
         <div class="mt-6 flex flex-wrap gap-3">
           <a
@@ -92,7 +92,7 @@ const jsonLd = {
         >
           <p class="text-sm text-navy-200">
             {lang === "ar"
-              ? `يُغلق التقديم بعد ${num(lang, daysLeft)} يومًا`
+              ? `يُغلق التقديم بعد ${daysLeft === 1 ? "يوم" : count(lang, daysLeft, N.day)}`
               : `Applications close in ${daysLeft} days`}
           </p>
           <p class="mt-2 font-display text-2xl font-bold">

@@ -3,7 +3,7 @@ import "@fontsource/ibm-plex-sans-arabic/400.css";
 import "@fontsource/ibm-plex-sans-arabic/600.css";
 import "@fontsource/noto-kufi-arabic/700.css";
 import "../styles/global.css";
-import { PORTAL, site as loadSite } from "../lib/api";
+import { PORTAL, site as loadSite, pages } from "../lib/api";
 import { type Lang, dir, href, pick, t } from "../lib/i18n";
 
 interface Props {
@@ -18,6 +18,8 @@ interface Props {
 
 const { lang, title, description, path = "", jsonLd, image } = Astro.props;
 const s = await loadSite();
+// Linked only once the site manager has published it — never a link to a 404.
+const hasPrivacy = (await pages()).some((p) => p.slug === "privacy");
 const siteName = pick(lang, s.name_ar, s.name_en);
 const shortName = siteName.split(" ").slice(0, 2).join(" ");
 const other: Lang = lang === "ar" ? "en" : "ar";
@@ -168,9 +170,11 @@ const current = Astro.url.pathname;
           <a href={`${PORTAL}/track`} class="hover:text-white">
             {t(lang, "track")}
           </a>
-          <a href={href(lang, "p/privacy/")} class="hover:text-white">
-            {t(lang, "privacy")}
-          </a>
+          {hasPrivacy && (
+            <a href={href(lang, "p/privacy/")} class="hover:text-white">
+              {t(lang, "privacy")}
+            </a>
+          )}
         </nav>
         <address class="space-y-1 not-italic leading-6">
           {s.address && <p>{s.address}</p>}

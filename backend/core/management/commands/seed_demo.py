@@ -609,6 +609,30 @@ class Command(BaseCommand):
                 ],
             },
         )
+        # The footer links to it; the real text is the college's to write (demo only).
+        Page.objects.get_or_create(
+            slug="privacy",
+            defaults={
+                "title_ar": "سياسة الخصوصية",
+                "title_en": "Privacy policy",
+                "status": "published",
+                "author": site,
+                "blocks": [
+                    {"type": "paragraph", "text": "نص تجريبي — تستبدله الكلية بسياستها المعتمدة."},
+                    {"type": "heading", "text": "ما نجمعه"},
+                    {
+                        "type": "paragraph",
+                        "text": "بيانات التقديم والتواصل التي تدخلها ومستنداتك، "
+                        "لغرض القبول والتواصل معك فقط.",
+                    },
+                    {"type": "heading", "text": "من يطّلع عليها"},
+                    {
+                        "type": "paragraph",
+                        "text": "مسجلو الأقسام المعنيون وحدهم، ولا تُشارك مع أي جهة خارج الكلية.",
+                    },
+                ],
+            },
+        )
         Event.objects.get_or_create(
             slug="open-day",
             defaults={

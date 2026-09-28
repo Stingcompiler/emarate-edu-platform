@@ -2,7 +2,7 @@
 import PageHead from "../../../components/PageHead.astro";
 import Base from "../../../layouts/Base.astro";
 import { departments } from "../../../lib/api";
-import { type Lang, href, langPaths, num, pick, t } from "../../../lib/i18n";
+import { type Lang, href, langPaths, num, pick, t, count, N } from "../../../lib/i18n";
 
 export const getStaticPaths = langPaths;
 const lang = Astro.params.lang as Lang;
@@ -11,8 +11,8 @@ const programs = depts.reduce((n, d) => n + d.programs.length, 0);
 const teachers = depts.reduce((n, d) => n + d.teachers, 0);
 const lead =
   lang === "ar"
-    ? `${num(lang, depts.length)} أقسام أكاديمية · ${num(lang, programs)} برنامجًا · ${num(lang, teachers)} عضو هيئة تدريس`
-    : `${depts.length} departments · ${programs} programs · ${teachers} faculty`;
+    ? `${count(lang, depts.length, N.department)} · ${count(lang, programs, N.program)} · ${count(lang, teachers, N.faculty)}`
+    : `${count(lang, depts.length, N.department)} · ${count(lang, programs, N.program)} · ${count(lang, teachers, N.faculty)}`;
 ---
 
 <Base lang={lang} title={t(lang, "departments")} path="departments/">

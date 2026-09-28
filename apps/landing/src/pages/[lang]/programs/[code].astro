@@ -61,7 +61,7 @@ const jsonLd = {
             : `Applications open until ${fmtDate(lang, p.intake!.closes_at)}`}
           {p.intake!.seats_left !== null &&
             (lang === "ar"
-              ? ` · ${num(lang, p.intake!.seats_left)} مقعدًا متبقيًا`
+              ? ` · المقاعد المتبقية: ${num(lang, p.intake!.seats_left)}`
               : ` · ${p.intake!.seats_left} seats left`)}
         </span>
         <a
