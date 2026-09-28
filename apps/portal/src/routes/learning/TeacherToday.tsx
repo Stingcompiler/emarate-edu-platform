@@ -151,9 +151,11 @@ export function TeacherToday() {
         </section>
         <aside className="mt-6 space-y-4 lg:mt-0">
           <SectionLabel>إجراءات سريعة</SectionLabel>
-          <div className="grid grid-cols-4 gap-2 text-center text-xs">
+          <div className="grid auto-cols-fr grid-flow-col gap-2 text-center text-xs">
             {[
-              { to: "/announcements/new", label: "إعلان", icon: Megaphone },
+              ...(teaching.some((c) => c.my_role === "teacher" || c.ta_can_notify)
+                ? [{ to: "/announcements/new", label: "إعلان", icon: Megaphone }]
+                : []),
               { to: "/live/new", label: "جلسة بث", icon: Radio },
               {
                 to: teaching[0] ? `/lectures/new?offering=${teaching[0].offering_id}` : "/courses",

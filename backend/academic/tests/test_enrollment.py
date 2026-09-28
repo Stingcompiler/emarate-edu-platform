@@ -135,3 +135,9 @@ def test_my_courses(api, make_user, it_offering, ba_offering, cohort):
     teaching = api(teacher).get("/api/v1/me/courses").data
     assert [(c["code"], c["my_role"]) for c in teaching] == [("IT101", "teacher")]
     assert [c["my_role"] for c in api(ta).get("/api/v1/me/courses").data] == ["ta"]
+
+    # The TA's permissions travel with the course so the UI offers only what is allowed.
+    ba_offering.ta_can_notify = True
+    ba_offering.save()
+    [row] = api(ta).get("/api/v1/me/courses").data
+    assert (row["ta_can_grade"], row["ta_can_notify"]) == (False, True)

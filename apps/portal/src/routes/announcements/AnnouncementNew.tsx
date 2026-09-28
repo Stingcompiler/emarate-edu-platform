@@ -84,7 +84,8 @@ export function AnnouncementNew() {
         });
     }
     for (const c of courses.data ?? []) {
-      if (c.my_role !== "student")
+      // A TA announces to a course only when the teacher allowed it (docs/03 §3.9).
+      if (c.my_role === "teacher" || (c.my_role === "ta" && c.ta_can_notify))
         list.push({
           key: `o${c.offering_id}`,
           label: `طلاب ${c.code} — ${c.name_ar}`,
@@ -129,6 +130,9 @@ export function AnnouncementNew() {
     <PortalShell title="إعلان جديد" back={{ label: "الإعلانات", to: "/announcements" }}>
       <div className="max-w-2xl">
         <SectionLabel>إلى</SectionLabel>
+        {courses.isSuccess && !options.length && (
+          <Notice>لا يمكنك نشر إعلانات الآن. اطلب من أستاذ المادة السماح للمعيد بالإعلان.</Notice>
+        )}
         <Card className="divide-y divide-border-soft">
           {options.map((o) => (
             <label
