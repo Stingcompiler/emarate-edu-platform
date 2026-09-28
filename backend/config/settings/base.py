@@ -203,6 +203,7 @@ REST_FRAMEWORK = {
         "otp": "5/hour",  # per email target
         "otp_ip": "20/hour",  # per IP, across targets
         "contact": "5/hour",  # public contact form per IP (docs/05 §7)
+        "contact_status": "60/hour",  # checking an inquiry by its reference number
     },
     "EXCEPTION_HANDLER": "core.exceptions.problem_exception_handler",
     "TEST_REQUEST_DEFAULT_FORMAT": "json",

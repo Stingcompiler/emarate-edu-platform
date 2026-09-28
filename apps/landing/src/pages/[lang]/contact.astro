@@ -151,28 +151,60 @@ const answers = await related(lang, ["admissions", "fees", "programs", "calendar
       >
         {L("إرسال الاستفسار", "Send your question")}
       </button>
-      <div id="contact-done" class="hidden rounded-2xl bg-success-soft p-5 text-success-strong">
+      <div
+        id="contact-done"
+        tabindex="-1"
+        role="status"
+        class="hidden rounded-2xl bg-success-soft p-5 text-success-strong"
+      >
         <p class="font-bold">{L("وصل استفسارك.", "We received your message.")}</p>
         <p class="mt-1 text-sm">
           {L("الرقم المرجعي — احتفظ به:", "Your reference number — keep it:")}{" "}
           <b id="contact-ref" dir="ltr" class="font-mono text-lg"></b>
         </p>
-        <a href={`${PORTAL}/track`} class="mt-3 inline-block text-sm font-semibold underline">
-          {t(lang, "track")}
+        <p class="mt-2 text-sm leading-6">
+          {L(
+            "يصلك الرد على البريد أو الهاتف الذي كتبته. تحقق من حالته في أي وقت برقمه من «سبق أن راسلتنا؟».",
+            "The reply reaches the email or phone you gave. Check its status any time with the number under «Already wrote to us?».",
+          )}
+        </p>
+        <a
+          id="contact-track"
+          href={`${PORTAL}/track`}
+          class="mt-3 hidden text-sm font-semibold underline"
+        >
+          {L("أو تابع كل طلباتك ببريدك", "Or follow everything with your email")}
         </a>
       </div>
     </form>
     <aside class="space-y-3 text-sm lg:sticky lg:top-24 lg:h-fit">
       <div class="rounded-2xl border border-border-soft bg-surface p-4 leading-6">
         <b class="block">{L("سبق أن راسلتنا؟", "Already wrote to us?")}</b>
-        <p class="mt-1 text-text-muted">
-          {L(
-            "تابع الرد برقمك المرجعي وبريدك — بلا حساب.",
-            "Follow the reply with your reference number and email — no account.",
-          )}
-        </p>
+        {/* Works for everyone, also those who wrote with a phone only (the portal's
+            «تابع طلبك» needs an email). The API shows the status only — no names. */}
+        <form id="status" data-api={API} class="mt-2 flex gap-2" novalidate>
+          <label for="status-ref" class="sr-only">
+            {L("الرقم المرجعي", "Reference number")}
+          </label>
+          <input
+            id="status-ref"
+            name="ref"
+            dir="ltr"
+            required
+            autocomplete="off"
+            placeholder="INQ-26-A1B2C3"
+            class="field !mt-0 min-w-0 flex-1 font-mono uppercase"
+          />
+          <button
+            type="submit"
+            class="shrink-0 rounded-lg border border-border px-3 font-semibold text-text hover:bg-surface-alt"
+          >
+            {L("تحقق", "Check")}
+          </button>
+        </form>
+        <p id="status-result" role="status" class="mt-2 hidden"></p>
         <a href={`${PORTAL}/track`} class="mt-2 inline-block font-semibold text-primary">
-          {t(lang, "track")}
+          {L("أو تابع كل طلباتك ببريدك", "Or follow everything with your email")}
         </a>
       </div>
       <SideLinks
@@ -337,10 +369,14 @@ const answers = await related(lang, ["admissions", "fees", "programs", "calendar
               : ""),
         );
       document.getElementById("contact-ref")!.textContent = body.reference_no;
+      // The portal's follow-up works by email; with a phone only, the reference is the way.
+      document.getElementById("contact-track")!.classList.toggle("hidden", !data.email);
       form
         .querySelectorAll("fieldset, label, button[type=submit]")
         .forEach((el) => el.classList.add("hidden"));
-      document.getElementById("contact-done")!.classList.remove("hidden");
+      const done = document.getElementById("contact-done")!;
+      done.classList.remove("hidden");
+      done.focus();
     } catch (e) {
       error.textContent =
         (e as Error).message ||
@@ -349,6 +385,39 @@ const answers = await related(lang, ["admissions", "fees", "programs", "calendar
           : "Could not send. Check your connection and retry.");
       error.classList.remove("hidden");
       button.disabled = false;
+    }
+  });
+
+  // «سبق أن راسلتنا؟»: the status of an inquiry by its reference number.
+  const statusForm = document.getElementById("status") as HTMLFormElement;
+  const statusResult = document.getElementById("status-result")!;
+  statusForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const ref = (new FormData(statusForm).get("ref") as string).trim().toUpperCase();
+    const show = (text: string, ok: boolean) => {
+      statusResult.textContent = text;
+      statusResult.className = `mt-2 font-semibold ${ok ? "text-success-strong" : "text-danger-strong"}`;
+    };
+    if (!/^INQ-\d{2}-[0-9A-F]{6}$/.test(ref))
+      return show(
+        ar
+          ? "اكتب الرقم كما وصلك، مثل INQ-26-A1B2C3."
+          : "Type the number as you got it, e.g. INQ-26-A1B2C3.",
+        false,
+      );
+    try {
+      const response = await fetch(
+        `${statusForm.dataset.api}/api/public/inquiries/${encodeURIComponent(ref)}`,
+        { headers: { "Accept-Language": ar ? "ar" : "en" } },
+      );
+      if (response.status === 404)
+        return show(ar ? "لا يوجد استفسار بهذا الرقم." : "No inquiry has this number.", false);
+      if (response.status === 429)
+        return show(ar ? "محاولات كثيرة، حاول لاحقًا." : "Too many tries, try later.", false);
+      const body = await response.json();
+      show(`${body.reference_no}: ${body.status_label}`, true);
+    } catch {
+      show(ar ? "تعذّر الاتصال. أعد المحاولة." : "Could not connect. Try again.", false);
     }
   });
 </script>

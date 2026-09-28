@@ -23,7 +23,16 @@ REST_FRAMEWORK = {
     **REST_FRAMEWORK,
     "DEFAULT_THROTTLE_RATES": {
         scope: "100000/minute"
-        for scope in ("anon", "user", "login", "otp", "otp_ip", "contact", "public_read")
+        for scope in (
+            "anon",
+            "user",
+            "login",
+            "otp",
+            "otp_ip",
+            "contact",
+            "contact_status",
+            "public_read",
+        )
     },
 }
 LOGGING = {"version": 1, "disable_existing_loggers": False, "root": {"level": "WARNING"}}
