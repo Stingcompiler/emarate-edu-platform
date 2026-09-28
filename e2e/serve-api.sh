@@ -8,4 +8,6 @@ rm -f e2e.sqlite3 e2e.sqlite3-wal e2e.sqlite3-shm
 rm -rf sent-emails-e2e
 uv run python manage.py migrate --noinput -v 0
 uv run python manage.py seed_demo >/dev/null
-exec uv run python manage.py runserver 127.0.0.1:8001 --noreload
+# The venv's python directly (not `uv run`), so the process Playwright stops at the end is the
+# server itself — otherwise an orphaned runserver keeps :8001 busy for the next run.
+exec .venv/bin/python manage.py runserver 127.0.0.1:8001 --noreload

@@ -20,6 +20,8 @@ const { program: p } = Astro.props as { program: ProgramDetail };
 const name = pick(lang, p.name_ar, p.name_en);
 const description = pick(lang, p.description_ar, p.description_en);
 const open = !!p.intake?.accepting;
+// Opens the application with this programme listed first (portal /apply?program=).
+const applyUrl = `${PORTAL}/apply?program=${encodeURIComponent(p.code)}`;
 const jsonLd = {
   "@context": "https://schema.org",
   "@type": "EducationalOccupationalProgram",
@@ -43,6 +45,7 @@ const jsonLd = {
   path={`programs/${p.code}/`}
   description={description || undefined}
   jsonLd={jsonLd}
+  bottomBar={open}
 >
   <PageHead
     lang={lang}
@@ -65,7 +68,7 @@ const jsonLd = {
               : ` · ${p.intake!.seats_left} seats left`)}
         </span>
         <a
-          href={`${PORTAL}/apply`}
+          href={applyUrl}
           class="ms-auto rounded-lg bg-primary px-4 py-2 font-semibold text-white hover:bg-primary-hover"
         >
           {t(lang, "apply")}
@@ -149,4 +152,34 @@ const jsonLd = {
       </a>
     </aside>
   </div>
+  {open && (
+    <>
+      {/* Phone: the page is long, so the way to apply stays in reach (board VisitorProgram). */}
+      <div class="fixed inset-x-0 bottom-0 z-20 flex gap-2 border-t border-border-soft bg-surface/95 p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur lg:hidden">
+        <a
+          href={applyUrl}
+          class="flex min-h-12 flex-1 items-center justify-center rounded-xl bg-accent px-4 font-semibold text-white hover:bg-accent-hover"
+        >
+          {lang === "ar" ? "قدّم لهذا البرنامج" : "Apply to this programme"}
+        </a>
+        <a
+          href={href(lang, "contact/")}
+          aria-label={lang === "ar" ? "تواصل معنا" : "Contact us"}
+          class="grid size-12 shrink-0 place-items-center rounded-xl border border-border bg-surface text-primary hover:bg-surface-alt"
+        >
+          <svg
+            width="22"
+            height="22"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            aria-hidden="true"
+          >
+            <path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-5A8 8 0 1 1 21 12z" />
+          </svg>
+        </a>
+      </div>
+    </>
+  )}
 </Base>
