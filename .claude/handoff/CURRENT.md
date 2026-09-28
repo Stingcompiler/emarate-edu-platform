@@ -1,8 +1,10 @@
-# Handoff — Phase 9 done → Phase 10 (portal identity + role dashboards) — 2026-09-28
+# Handoff — Phase 10 in progress (portal identity + role dashboards) — 2026-09-28
 
 ## Where things stand
-- **Phases 1–8 are merged** to `main` (PRs #3–#10).
-- **Phase 9 (public site)** is complete on `feat/phase-9-landing`. Its PR is opened in this step; merge it once CI is green with `gh pr merge --merge` (auto-merge is disabled for the repo).
+- **Phases 1–9 are merged** to `main` (PRs #3–#11).
+- **Phase 10** is in progress on `feat/phase-10-portal` (pushed; no PR yet — open one PR when the phase is done).
+  - **Done (commit 23f8728):** student learning pages — `/` role home (student Today), `/courses`, `/courses/:id`, `/lectures/:id`, `/assignments/:id` (submit; staff see submissions), `/tasks`. Assignments API gained `course_code`, `course_name`, `mine`.
+  - **Next chunks:** (2) teacher: TeacherToday home, lecture editor (`/lectures/new?offering=`, resources: file/link/video TUS), assignment editor (`/assignments/new?offering=`), grading `/submissions/:id`, course students and gradebook; (3) department manager sections (§4.15) + approvals; (4) registrar/head registrar student records and imports; (5) system admin users/structure/settings; (6) remaining role homes, accessibility, responsive tables, PWA onboarding.
 - **Verified locally:**
   - 304 tests pass on SQLite; 303 pass plus 1 skip on Postgres;
   - the schema is clean;
