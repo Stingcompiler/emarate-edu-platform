@@ -44,11 +44,11 @@ export function AcademicHome() {
         })
       ).data?.results ?? [],
   });
-  const noSupervisor = (departments.data ?? []).filter(
-    (d) =>
-      !(leaders.data ?? []).some(
-        (r) => r.role === "department_supervisor" && r.department === d.id,
-      ),
+  const has = (id: number, role: string) =>
+    (leaders.data ?? []).some((r) => r.role === role && r.department === id);
+  // A department missing its manager or its supervisor needs an appointment.
+  const unled = (departments.data ?? []).filter(
+    (d) => !has(d.id, "department_manager") || !has(d.id, "department_supervisor"),
   );
   const slow = (teachers.data?.rows ?? []).filter(
     (t) => t.grading_days != null && t.grading_days > (teachers.data?.thresholds.grading_days ?? 3),
@@ -73,9 +73,19 @@ export function AcademicHome() {
                 to: "/result-corrections",
               },
               {
-                n: noSupervisor.length,
-                title: "أقسام بلا مشرف",
-                meta: noSupervisor.map((d) => d.name_ar).join(" · "),
+                n: unled.length,
+                title: "أقسام تنقصها قيادة",
+                meta: unled
+                  .map(
+                    (d) =>
+                      `${d.name_ar} (${[
+                        !has(d.id, "department_manager") && "مدير",
+                        !has(d.id, "department_supervisor") && "مشرف",
+                      ]
+                        .filter(Boolean)
+                        .join(" و")})`,
+                  )
+                  .join(" · "),
                 to: "/system/users",
                 tone: "danger",
               },
@@ -133,7 +143,10 @@ export function AcademicHome() {
                       {r.role === "department_manager" ? "مدير القسم" : "مشرف القسم"}: {r.user_name}
                     </p>
                   ))}
-                  {!heads.some((r) => r.role === "department_supervisor") && (
+                  {!has(d.id, "department_manager") && (
+                    <p className="mt-1 text-xs font-semibold text-danger-strong">بلا مدير</p>
+                  )}
+                  {!has(d.id, "department_supervisor") && (
                     <p className="mt-1 text-xs font-semibold text-danger-strong">بلا مشرف</p>
                   )}
                 </div>

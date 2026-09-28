@@ -13,6 +13,7 @@ import {
   problemMessage,
 } from "../../components/ui";
 import { api } from "../../lib/api";
+import { useMe } from "../../lib/auth";
 import { initials, useDepartments } from "../../lib/reports";
 import { DEPARTMENT_ROLES, ROLE_LABEL } from "./roles";
 
@@ -31,7 +32,10 @@ export function AdminUser() {
     void client.invalidateQueries({ queryKey: ["user", id] });
     void client.invalidateQueries({ queryKey: ["users"] });
   };
-  const [role, setRole] = useState("teacher");
+  // Only roles the server lets this user grant (rbac.GRANTS).
+  const grantable = useMe().data?.grantable_roles ?? [];
+  const [picked, setRole] = useState("");
+  const role = picked || Object.keys(ROLE_LABEL).find((k) => grantable.includes(k)) || "";
   const [department, setDepartment] = useState("");
   const grant = useMutation({
     mutationFn: async () => {
@@ -85,8 +89,8 @@ export function AdminUser() {
                 <bdi className="text-xs text-text-muted">{u.email}</bdi>
               </span>
               <StatusBadge
-                status={u.is_active ? "approved" : "closed"}
-                label={u.is_active ? "نشط" : "معطّل"}
+                status={u.is_active ? (u.last_login ? "approved" : "pending") : "closed"}
+                label={u.is_active ? (u.last_login ? "نشط" : "دعوة معلّقة") : "معطّل"}
               />
             </Card>
             <SectionLabel>الحساب</SectionLabel>
@@ -130,57 +134,64 @@ export function AdminUser() {
                       {r.department_name ? `النطاق: ${r.department_name}` : "على مستوى الكلية"}
                     </span>
                   </span>
-                  <button
-                    type="button"
-                    aria-label="سحب الدور"
-                    onClick={() => revoke.mutate(r.id)}
-                    className="grid size-8 place-items-center rounded-full text-text-muted hover:bg-surface-alt hover:text-danger-strong"
-                  >
-                    <X size={15} aria-hidden />
-                  </button>
+                  {grantable.includes(r.role) && (
+                    <button
+                      type="button"
+                      aria-label="سحب الدور"
+                      onClick={() => revoke.mutate(r.id)}
+                      className="grid size-8 place-items-center rounded-full text-text-muted hover:bg-surface-alt hover:text-danger-strong"
+                    >
+                      <X size={15} aria-hidden />
+                    </button>
+                  )}
                 </div>
               ))}
               {!u.roles.length && <p className="px-4 py-3 text-sm text-text-muted">بلا أدوار.</p>}
             </Card>
-            <Card className="space-y-2 p-4">
-              <p className="text-sm font-semibold">+ إضافة دور أو نطاق</p>
-              <select
-                value={role}
-                onChange={(e) => setRole(e.target.value)}
-                className="block min-h-10 w-full rounded-lg border border-border bg-surface px-3 text-sm"
-                aria-label="الدور"
-              >
-                {Object.entries(ROLE_LABEL)
-                  .filter(([k]) => k !== "student")
-                  .map(([k, l]) => (
-                    <option key={k} value={k}>
-                      {l}
-                    </option>
-                  ))}
-              </select>
-              {DEPARTMENT_ROLES.has(role) && (
+            {(grant.isError || revoke.isError) && (
+              <Notice>{problemMessage(grant.error ?? revoke.error)}</Notice>
+            )}
+            {grantable.length > 0 && (
+              <Card className="space-y-2 p-4">
+                <p className="text-sm font-semibold">+ إضافة دور أو نطاق</p>
                 <select
-                  value={department}
-                  onChange={(e) => setDepartment(e.target.value)}
+                  value={role}
+                  onChange={(e) => setRole(e.target.value)}
                   className="block min-h-10 w-full rounded-lg border border-border bg-surface px-3 text-sm"
-                  aria-label="القسم"
+                  aria-label="الدور"
                 >
-                  <option value="">اختر القسم</option>
-                  {(departments.data ?? []).map((d) => (
-                    <option key={d.id} value={d.id}>
-                      {d.name_ar}
-                    </option>
-                  ))}
+                  {Object.entries(ROLE_LABEL)
+                    .filter(([k]) => grantable.includes(k))
+                    .map(([k, l]) => (
+                      <option key={k} value={k}>
+                        {l}
+                      </option>
+                    ))}
                 </select>
-              )}
-              <Button
-                className="w-full"
-                disabled={(DEPARTMENT_ROLES.has(role) && !department) || grant.isPending}
-                onClick={() => grant.mutate()}
-              >
-                إضافة
-              </Button>
-            </Card>
+                {DEPARTMENT_ROLES.has(role) && (
+                  <select
+                    value={department}
+                    onChange={(e) => setDepartment(e.target.value)}
+                    className="block min-h-10 w-full rounded-lg border border-border bg-surface px-3 text-sm"
+                    aria-label="القسم"
+                  >
+                    <option value="">اختر القسم</option>
+                    {(departments.data ?? []).map((d) => (
+                      <option key={d.id} value={d.id}>
+                        {d.name_ar}
+                      </option>
+                    ))}
+                  </select>
+                )}
+                <Button
+                  className="w-full"
+                  disabled={(DEPARTMENT_ROLES.has(role) && !department) || grant.isPending}
+                  onClick={() => grant.mutate()}
+                >
+                  إضافة
+                </Button>
+              </Card>
+            )}
           </div>
         </div>
       )}

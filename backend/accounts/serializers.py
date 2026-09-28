@@ -42,6 +42,8 @@ class MeStudentSerializer(serializers.Serializer):
 class MeSerializer(serializers.ModelSerializer):
     roles = serializers.SerializerMethodField()
     capabilities = serializers.SerializerMethodField()
+    creatable_roles = serializers.SerializerMethodField()
+    grantable_roles = serializers.SerializerMethodField()
     student = serializers.SerializerMethodField()
 
     class Meta:
@@ -55,6 +57,8 @@ class MeSerializer(serializers.ModelSerializer):
             "must_change_password",
             "roles",
             "capabilities",
+            "creatable_roles",
+            "grantable_roles",
             "student",
         ]
 
@@ -69,6 +73,14 @@ class MeSerializer(serializers.ModelSerializer):
             name: {"everything": scope.everything, "departments": sorted(scope.departments)}
             for name, scope in rbac.capabilities_of(obj).items()
         }
+
+    def get_creatable_roles(self, obj) -> list[str]:
+        """Staff roles this user may create accounts for (rbac.CREATABLE_ACCOUNTS)."""
+        return sorted(role.value for role in rbac.creatable_accounts(obj))
+
+    def get_grantable_roles(self, obj) -> list[str]:
+        """Roles this user may grant or revoke (rbac.GRANTS)."""
+        return sorted(role.value for role in rbac.grantable_roles(obj))
 
     @extend_schema_field(MeStudentSerializer(allow_null=True))
     def get_student(self, obj) -> dict | None:
