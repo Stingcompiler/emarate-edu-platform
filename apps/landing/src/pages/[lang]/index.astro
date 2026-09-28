@@ -279,11 +279,30 @@ const jsonLd = {
       <ul class="mt-4 divide-y divide-border-soft rounded-2xl border border-border-soft bg-surface">
         {latest.slice(0, 3).map((n) => (
           <li>
-            <a href={href(lang, `news/${n.slug}/`)} class="block px-4 py-3 hover:bg-surface-alt">
-              <b class="block text-text">{n.title}</b>
-              {n.publish_at && (
-                <span class="text-xs text-text-muted">{fmtDate(lang, n.publish_at)}</span>
+            <a
+              href={href(lang, `news/${n.slug}/`)}
+              class="flex gap-3 px-4 py-3 hover:bg-surface-alt"
+            >
+              {n.cover_url && (
+                <img
+                  src={n.cover_url}
+                  alt=""
+                  loading="lazy"
+                  decoding="async"
+                  class="size-16 shrink-0 rounded-lg object-cover"
+                />
               )}
+              <span class="min-w-0">
+                {n.publish_at && (
+                  <span class="block text-xs text-text-muted">{fmtDate(lang, n.publish_at)}</span>
+                )}
+                <b class="block text-text">{n.title}</b>
+                {n.summary && (
+                  <span class="mt-0.5 line-clamp-2 block text-sm leading-6 text-text-muted">
+                    {n.summary}
+                  </span>
+                )}
+              </span>
             </a>
           </li>
         ))}

@@ -1,0 +1,50 @@
+---
+import { PORTAL, type Program } from "../lib/api";
+import { count, degree, fmtDate, href, type Lang, N, pick, t, years } from "../lib/i18n";
+
+/** A compact programme row for long lists (board VisitorPrograms): code, name, status, apply. */
+interface Props {
+  lang: Lang;
+  program: Program;
+}
+const { lang, program: p } = Astro.props;
+const open = !!p.intake?.accepting;
+---
+
+<li class="flex items-center gap-3 px-4 py-3" data-degree={p.degree} data-open={open ? "1" : "0"}>
+  <span
+    dir="ltr"
+    class="grid min-w-12 shrink-0 place-items-center rounded-lg bg-primary-soft px-2 py-1.5 text-xs font-bold text-primary-700"
+  >
+    {p.code}
+  </span>
+  <span class="min-w-0 flex-1">
+    <a
+      href={href(lang, `programs/${p.code}/`)}
+      class="line-clamp-2 block text-sm font-semibold text-text hover:text-primary"
+    >
+      {pick(lang, p.name_ar, p.name_en)}
+    </a>
+    <span class="text-xs text-text-muted">
+      {years(lang, p.duration_terms)} · {degree(lang, p.degree, p.degree_label)}
+      {p.credit_hours ? ` · ${count(lang, p.credit_hours, N.hour)}` : ""}
+    </span>
+  </span>
+  {open ? (
+    <a
+      href={`${PORTAL}/apply?program=${encodeURIComponent(p.code)}`}
+      class="shrink-0 rounded-full bg-success-soft px-2.5 py-1 text-[11px] font-semibold text-success-strong hover:underline"
+      aria-label={`${t(lang, "apply")} — ${pick(lang, p.name_ar, p.name_en)}`}
+    >
+      {t(lang, "open")}
+      {/* Phones: the page lead already gives the closing date. */}
+      <span class="hidden sm:inline">
+        · {fmtDate(lang, p.intake!.closes_at, { day: "numeric", month: "short" })}
+      </span>
+    </a>
+  ) : (
+    <span class="shrink-0 rounded-full bg-neutral-soft px-2.5 py-1 text-[11px] font-semibold text-neutral-strong">
+      {t(lang, "closed")}
+    </span>
+  )}
+</li>

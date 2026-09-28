@@ -62,13 +62,13 @@ class _Managed(viewsets.ModelViewSet):
         return [IsAuthenticated(), capability(self.capability_name)()]
 
     def perform_create(self, serializer):
-        obj = serializer.save(**{self.author_field: self.request.user})
+        obj = self._stamp(serializer.save(**{self.author_field: self.request.user}))
         record(_meta(self.request), f"{self.audit_name}.create", obj, new=snapshot(obj))
         self._maybe_rebuild(obj)
 
     def perform_update(self, serializer):
         old = snapshot(serializer.instance)
-        obj = serializer.save()
+        obj = self._stamp(serializer.save())
         record(_meta(self.request), f"{self.audit_name}.update", obj, old=old, new=snapshot(obj))
         self._maybe_rebuild(obj)
 
@@ -76,6 +76,19 @@ class _Managed(viewsets.ModelViewSet):
         record(_meta(self.request), f"{self.audit_name}.delete", instance, old=snapshot(instance))
         instance.delete()
         services.request_site_rebuild()
+
+    @staticmethod
+    def _stamp(obj):
+        """Publishing from the editor dates the item like the publish action does (the site
+        shows and sorts news by it)."""
+        if (
+            getattr(obj, "status", None) == Status.PUBLISHED
+            and hasattr(obj, "publish_at")
+            and obj.publish_at is None
+        ):
+            obj.publish_at = timezone.now()
+            obj.save(update_fields=["publish_at"])
+        return obj
 
     def _maybe_rebuild(self, obj):
         if getattr(obj, "status", None) == Status.PUBLISHED or obj.__class__ is Event:

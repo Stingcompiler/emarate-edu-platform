@@ -555,7 +555,7 @@ class Command(BaseCommand):
         from django.utils import timezone
 
         from contacts.models import Contact
-        from content.models import Announcement, Event, Page
+        from content.models import Announcement, Event, Page, SiteSettings
         from content.official import OFFICIAL_PAGES, ensure_drafts
         from content.official import blocks as official_blocks
         from inquiries.models import Inquiry, InquiryStatusHistory
@@ -609,13 +609,27 @@ class Command(BaseCommand):
             Page.objects.filter(slug=official.slug, author__isnull=True, status="draft").update(
                 status="published", blocks=official_blocks(official, demo=True)
             )
+
+        def at(days: int, hour: int):
+            """A plausible local time (events start on the hour, not at seed time)."""
+            day = timezone.localtime(now).replace(hour=hour, minute=0, second=0, microsecond=0)
+            return day + timedelta(days=days)
+
+        # Contact details so the footer, contact page and map link have something to show —
+        # obviously not real: the college enters its own in «محتوى الموقع ← الإعدادات».
+        site_settings = SiteSettings.load()
+        if not (site_settings.email or site_settings.phone or site_settings.address):
+            site_settings.email = "info@demo.ecst.test"
+            site_settings.phone = "+249 000 000 000"
+            site_settings.address = "عنوان تجريبي — الخرطوم، السودان"
+            site_settings.save()
         Event.objects.get_or_create(
             slug="orientation-2026",
             defaults={
                 "title": "الأسبوع التعريفي للطلاب الجدد",
                 "description": "<p>تعريف الطلاب الجدد بالأقسام والبوابة والخدمات.</p>",
-                "starts_at": now - timedelta(days=20),
-                "ends_at": now - timedelta(days=20) + timedelta(hours=4),
+                "starts_at": at(-20, 9),
+                "ends_at": at(-20, 13),
                 "location": "القاعة الكبرى",
                 "status": "published",
                 "created_by": users[Role.EVENTS_MANAGER],
@@ -626,8 +640,8 @@ class Command(BaseCommand):
             defaults={
                 "title": "يوم التعريف بالكلية",
                 "description": "<p>جولة في الأقسام والمعامل.</p>",
-                "starts_at": now + timedelta(days=10),
-                "ends_at": now + timedelta(days=10, hours=5),
+                "starts_at": at(10, 10),
+                "ends_at": at(10, 15),
                 "location": "القاعة الكبرى",
                 "status": "published",
                 "created_by": users[Role.EVENTS_MANAGER],

@@ -1,6 +1,6 @@
 ---
 import PageHead from "../../../components/PageHead.astro";
-import ProgramCard from "../../../components/ProgramCard.astro";
+import ProgramRow from "../../../components/ProgramRow.astro";
 import Base from "../../../layouts/Base.astro";
 import { programs } from "../../../lib/api";
 import { type Lang, degree, fmtDate, langPaths, num, pick, t, count, N } from "../../../lib/i18n";
@@ -53,11 +53,11 @@ const lead =
           {g.name}{" "}
           <span class="text-sm font-normal text-text-muted">· {num(lang, g.items.length)}</span>
         </h2>
-        <div class="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <ul class="mt-4 grid divide-y divide-border-soft overflow-hidden rounded-2xl border border-border-soft bg-surface lg:grid-cols-2 lg:divide-y-0 lg:[&>li]:border-b lg:[&>li]:border-border-soft lg:[&>li:nth-child(odd)]:border-e">
           {g.items.map((p) => (
-            <ProgramCard lang={lang} program={p} />
+            <ProgramRow lang={lang} program={p} />
           ))}
-        </div>
+        </ul>
       </section>
     ))}
     {!all.length && (
