@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from collections import defaultdict
 
-from django.db.models import Count, Q, Sum
+from django.db.models import Count, Q
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from drf_spectacular.utils import extend_schema
@@ -49,7 +49,8 @@ class PublicProgramSerializer(S.Serializer):
     department_name_en = S.CharField()
     duration_terms = S.IntegerField()
     levels_count = S.IntegerField()
-    credit_hours = S.IntegerField()
+    # The programme's stated total (Program.total_credit_hours); null until the college sets it.
+    credit_hours = S.IntegerField(allow_null=True)
     intake = IntakeStateSerializer(allow_null=True)
 
 
@@ -152,13 +153,6 @@ def _intakes(now) -> dict[int, dict]:
 def _programs(queryset) -> list[dict]:
     now = timezone.now()
     intakes = _intakes(now)
-    hours = dict(
-        Course.objects.filter(program__in=queryset)
-        .values("program_id")
-        .annotate(total=Sum("credit_hours"))
-        .order_by()
-        .values_list("program_id", "total")
-    )
     rows = []
     for p in queryset.select_related("department"):
         intake = intakes.get(p.id)
@@ -175,7 +169,7 @@ def _programs(queryset) -> list[dict]:
                 "department_name_en": p.department.name_en,
                 "duration_terms": p.duration_terms,
                 "levels_count": p.levels_count,
-                "credit_hours": hours.get(p.id) or 0,
+                "credit_hours": p.total_credit_hours,
                 "intake": intake,
                 "description_ar": p.description_ar,
                 "description_en": p.description_en,

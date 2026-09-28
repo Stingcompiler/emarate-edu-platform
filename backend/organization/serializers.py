@@ -33,11 +33,13 @@ class ProgramSerializer(serializers.ModelSerializer):
             "degree",
             "levels_count",
             "duration_terms",
+            "total_credit_hours",
             "description_ar",
             "description_en",
             "is_active",
         ]
         read_only_fields = ["name"]
+        extra_kwargs = {"total_credit_hours": {"min_value": 1, "max_value": 300}}
 
 
 class SystemSettingsSerializer(serializers.ModelSerializer):

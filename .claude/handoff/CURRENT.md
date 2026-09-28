@@ -1,4 +1,4 @@
-# Handoff — Public site UX review done (phase 4); waiting on the credit-hours decision — 2026-09-28
+# Handoff — Public site UX review done (phase 4); credit hours are a manual field — 2026-09-28
 
 ## Owner rule, said twice: large screens are designed, not only phones
 On 2026-09-28 the owner said «قم بمراجعه الصفحات لعرض الشاشات الكبري لا يجب ان يختصر عملك فقط علي شاشات الموبايل».
@@ -29,7 +29,7 @@ Delivered:
   - drafts are created after every migrate; slugs may be paths; a "note" block type;
   - the site builds and links a page only once it is published;
   - site API reads are capped at 6 at a time, retried, and failures are never cached.
-- **Phase 4 (`feat/landing-ux-phase4`):** 4(b) description fallback, 5 map link + demo contact, 7 compact programme rows, 8 news dates (bug: editor publishing never set `publish_at`; migration `content/0004` backfills), 9 contact per-field errors, 12 programme FAQ + FAQPage, 13, 16. Status table at the end of `docs/qa/landing-ux-review-2026-09.md`. **Open owner decision: credit-hours source (item 3).**
+- **Phase 4 (`feat/landing-ux-phase4`):** 4(b) description fallback, 5 map link + demo contact, 7 compact programme rows, 8 news dates (bug: editor publishing never set `publish_at`; migration `content/0004` backfills), 9 contact per-field errors, 12 programme FAQ + FAQPage, 13, 16. Status table at the end of `docs/qa/landing-ux-review-2026-09.md`. Item 3 decided by the owner: a manual field — `Program.total_credit_hours` (branch `feat/program-credit-hours`).
 
 ## Where things stand
 - **All phases 0–11 are merged** (PRs #2–#13); PR #14 (student walkthrough fixes) is merged too.

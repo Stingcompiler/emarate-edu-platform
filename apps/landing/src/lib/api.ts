@@ -107,7 +107,8 @@ export type Program = {
   department_name_en: string;
   duration_terms: number;
   levels_count: number;
-  credit_hours: number;
+  /** The college's stated total to graduate; null until it is entered (never a course sum). */
+  credit_hours: number | null;
   intake: Intake | null;
 };
 export type ProgramDetail = Program & {

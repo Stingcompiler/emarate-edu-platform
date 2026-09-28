@@ -40,6 +40,9 @@ class Program(BilingualNameModel, TimestampedModel):
     degree = models.CharField(max_length=20, choices=Degree.choices)
     levels_count = models.PositiveSmallIntegerField()
     duration_terms = models.PositiveSmallIntegerField()
+    # Credit hours to graduate, as the college states them (owner decision 2026-09-28): the
+    # public site shows this, never a sum of the courses entered so far. Blank → not shown.
+    total_credit_hours = models.PositiveSmallIntegerField(null=True, blank=True)
     # Public site copy (docs/02 §6); plain text, shown on the program page.
     description_ar = models.TextField(blank=True)
     description_en = models.TextField(blank=True)
@@ -54,6 +57,11 @@ class Program(BilingualNameModel, TimestampedModel):
             ),
             models.CheckConstraint(
                 condition=models.Q(duration_terms__gte=1), name="program_duration_terms_positive"
+            ),
+            models.CheckConstraint(
+                condition=models.Q(total_credit_hours__isnull=True)
+                | models.Q(total_credit_hours__gte=1, total_credit_hours__lte=300),
+                name="program_total_credit_hours_range",
             ),
         ]
 
