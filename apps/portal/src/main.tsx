@@ -7,7 +7,7 @@ import "./app.css";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { createBrowserRouter, Navigate, RouterProvider } from "react-router";
+import { createBrowserRouter, RouterProvider } from "react-router";
 
 import { RequireAuth } from "./lib/auth";
 import { ApplicationDetail } from "./routes/admissions/ApplicationDetail";
@@ -44,6 +44,12 @@ import { Corrections } from "./routes/results/Corrections";
 import { ResultImportDetail } from "./routes/results/ImportDetail";
 import { ResultImports } from "./routes/results/Imports";
 import { MyResults } from "./routes/results/MyResults";
+import { Home } from "./routes/Home";
+import { Assignment } from "./routes/learning/Assignment";
+import { Course } from "./routes/learning/Course";
+import { Courses } from "./routes/learning/Courses";
+import { Lecture } from "./routes/learning/Lecture";
+import { Tasks } from "./routes/learning/Tasks";
 import { HRHome } from "./routes/hr/Home";
 import { MyNotice } from "./routes/hr/MyNotice";
 import { NoticeNew } from "./routes/hr/NoticeNew";
@@ -83,7 +89,12 @@ const router = createBrowserRouter([
   { path: "/apply", element: <Apply /> },
   { path: "/track", element: <Track /> },
   // Role dashboards arrive with Phase 10; until then home is the notification centre.
-  { path: "/", element: signedIn(<Navigate to="/notifications" replace />) },
+  { path: "/", element: signedIn(<Home />) },
+  { path: "/courses", element: signedIn(<Courses />) },
+  { path: "/courses/:id", element: signedIn(<Course />) },
+  { path: "/lectures/:id", element: signedIn(<Lecture />) },
+  { path: "/assignments/:id", element: signedIn(<Assignment />) },
+  { path: "/tasks", element: signedIn(<Tasks />) },
   { path: "/notifications", element: signedIn(<Notifications />) },
   { path: "/notifications/new", element: signedIn(<Compose />) },
   { path: "/settings", element: signedIn(<Settings />) },

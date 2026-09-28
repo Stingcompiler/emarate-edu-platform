@@ -3,6 +3,9 @@ import {
   Bell,
   CalendarDays,
   BarChart3,
+  BookOpen,
+  ListChecks,
+  Sun,
   CalendarRange,
   GraduationCap,
   UserCheck,
@@ -55,9 +58,12 @@ export function can(me: Me | null | undefined, capability: string): boolean {
  * phases land; no link points to a page that isn't built.
  */
 export function navFor(me: Me | null | undefined, unread: number): NavItem[] {
-  const items: NavItem[] = [
-    { label: "الإشعارات", to: "/notifications", icon: Bell, badge: unread },
-  ];
+  const items: NavItem[] = [];
+  if (me?.student) items.push({ label: "اليوم", to: "/", icon: Sun });
+  if (me?.student || hasRole(me, "teacher", "ta"))
+    items.push({ label: "موادي", to: "/courses", icon: BookOpen, end: false });
+  if (me?.student) items.push({ label: "المهام", to: "/tasks", icon: ListChecks });
+  items.push({ label: "الإشعارات", to: "/notifications", icon: Bell, badge: unread });
   const teaches = hasRole(
     me,
     "teacher",

@@ -1,4 +1,4 @@
-from django.db.models import Q
+from django.db.models import Prefetch, Q
 from django.shortcuts import get_object_or_404
 from drf_spectacular.utils import extend_schema
 from rest_framework import mixins, status, viewsets
@@ -111,10 +111,13 @@ class AssignmentViewSet(viewsets.ModelViewSet):
         visible = access.staff_offerings_q(user) | (
             access.student_offerings_q(user) & ~Q(status=Assignment.Status.DRAFT)
         )
+        mine = Submission.objects.filter(student_record__user=user).select_related("grade")
         return (
             Assignment.objects.filter(visible)
             .select_related("offering__course", "lecture")
-            .prefetch_related("link_fields")
+            .prefetch_related(
+                "link_fields", Prefetch("submissions", mine, to_attr="my_submissions")
+            )
         )
 
     def create(self, request, *args, **kwargs):

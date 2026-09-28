@@ -345,3 +345,15 @@ def test_drafts_are_hidden_and_publish_needs_submission_types(api, classroom):
     )
     publish = api(classroom.teacher).post(f"/api/v1/assignments/{draft['public_id']}/publish")
     assert publish.status_code == 400
+
+
+def test_assignment_list_carries_my_submission(api, classroom):
+    assignment = _assignment(api, classroom)
+    student = api(classroom.student)
+    listed = student.get("/api/v1/assignments").data["results"][0]
+    assert listed["mine"] is None and listed["course_code"] == classroom.offering.course.code
+    student.post(f"/api/v1/assignments/{assignment}/submit", {"content": "حل"}, format="json")
+    mine = student.get(f"/api/v1/assignments/{assignment}").data["mine"]
+    assert mine["graded"] is False and mine["score"] is None and mine["is_late"] is False
+    # Staff never get a "mine" summary.
+    assert api(classroom.teacher).get(f"/api/v1/assignments/{assignment}").data["mine"] is None
