@@ -309,6 +309,7 @@ class Command(BaseCommand):
         self._exam(users, autumn)
         self._phase6(users, autumn)
         self._phase7(users, meta, year)
+        self._phase8(users, autumn)
         return {
             "departments": Department.objects.count(),
             "programs": Program.objects.count(),
@@ -765,6 +766,61 @@ class Command(BaseCommand):
                 reviewer = RequestMeta(actor=users[Role.REGISTRAR], user_agent="seed_demo")
                 admissions.claim(reviewer, application)
                 admissions.transition(reviewer, application, to="under_review")
+
+    def _phase8(self, users, term) -> None:
+        """Graded and waiting submissions (so the reports have numbers) and one HR notice."""
+        from datetime import timedelta
+        from decimal import Decimal
+
+        from django.utils import timezone
+
+        from learning.models import Assignment, Submission, SubmissionGrade
+        from notifications.models import HRNotice
+        from notifications.services import create_hr_notice
+
+        if HRNotice.objects.exists():
+            return
+        now = timezone.now()
+        teacher = users[Role.TEACHER]
+        for n, offering in enumerate(
+            CourseOffering.objects.filter(term=term, instructors__user=teacher).distinct()
+        ):
+            due = now - timedelta(days=12 - n)
+            assignment, _ = Assignment.objects.get_or_create(
+                offering=offering,
+                title="تمرين قصير",
+                defaults={
+                    "due_at": due,
+                    "status": Assignment.Status.PUBLISHED,
+                    "created_by": teacher,
+                },
+            )
+            records = [
+                e.student_record for e in offering.enrollments.select_related("student_record")[:10]
+            ]
+            for i, record_ in enumerate(records):
+                submission, created = Submission.objects.get_or_create(
+                    assignment=assignment,
+                    student_record=record_,
+                    defaults={"first_submitted_at": due - timedelta(hours=6 + i)},
+                )
+                if created and i % 3 != 2:  # a third still waits for grading
+                    SubmissionGrade.objects.create(
+                        submission=submission,
+                        score=Decimal(6 + i % 5),
+                        source=SubmissionGrade.Source.MANUAL,
+                        status=SubmissionGrade.Status.APPROVED,
+                        graded_by=teacher,
+                        graded_at=due + timedelta(days=2 + i % 4),
+                    )
+        create_hr_notice(
+            RequestMeta(actor=users[Role.HR], user_agent="seed_demo"),
+            teacher=teacher,
+            topic="grading",
+            body="نودّ لفت انتباهكم إلى أن متوسط زمن تصحيح التسليمات تجاوز الحد المعتمد (3 أيام). "
+            "نرجو معالجة المتأخر منها خلال أسبوع.",
+            requires_ack=True,
+        )
 
     def _user(self, email, name, password, role, department) -> User:
         user = User.objects.filter(email=email).first()

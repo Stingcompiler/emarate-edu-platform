@@ -25,6 +25,7 @@ EVERYONE = frozenset(Role)
 STRUCTURE = frozenset(
     {
         R.SYSTEM_ADMIN,
+        R.HR,
         R.HEAD_REGISTRAR,
         R.REGISTRAR,
         R.RESULTS_OFFICER,
@@ -56,6 +57,19 @@ STUDENTS = frozenset(
     }
 )
 IMPORTS = frozenset({R.SYSTEM_ADMIN, R.HEAD_REGISTRAR})
+REPORTS_DEPARTMENT = frozenset(
+    {R.SYSTEM_ADMIN, R.ACADEMIC_AFFAIRS, R.DEPARTMENT_MANAGER, R.DEPARTMENT_SUPERVISOR}
+)
+REPORTS_TEACHERS = REPORTS_DEPARTMENT | {R.HR}
+RESULTS_VIEW = frozenset(
+    {
+        R.SYSTEM_ADMIN,
+        R.HEAD_REGISTRAR,
+        R.RESULTS_OFFICER,
+        R.DEPARTMENT_MANAGER,
+        R.DEPARTMENT_SUPERVISOR,
+    }
+)
 AUDIT = frozenset({R.SYSTEM_ADMIN, R.DEPARTMENT_MANAGER, R.DEPARTMENT_SUPERVISOR})
 # In the world below, the teacher and TA are assigned to IT101 and the student is enrolled.
 LEARNING_STAFF = frozenset(
@@ -273,9 +287,33 @@ READS: dict[str, tuple[str, frozenset, frozenset]] = {
     ),
     "hr-notice-detail": (
         "/api/v1/hr-notices/{hr_notice}",
-        frozenset({R.SYSTEM_ADMIN, R.HR, R.TEACHER}),
-        EVERYONE - {R.SYSTEM_ADMIN, R.HR, R.TEACHER},
+        frozenset({R.SYSTEM_ADMIN, R.HR, R.ACADEMIC_AFFAIRS, R.TEACHER}),
+        EVERYONE - {R.SYSTEM_ADMIN, R.HR, R.ACADEMIC_AFFAIRS, R.TEACHER},
     ),
+    # Reports (docs/02 §4.14)
+    "report-department": ("/api/v1/reports/department", REPORTS_DEPARTMENT, frozenset()),
+    "report-teachers": ("/api/v1/reports/teachers", REPORTS_TEACHERS, frozenset()),
+    "report-teacher": (
+        "/api/v1/reports/teachers/{teacher}",
+        REPORTS_TEACHERS,
+        frozenset(),
+    ),
+    "report-admissions": (
+        "/api/v1/reports/admissions",
+        frozenset({R.SYSTEM_ADMIN, R.HEAD_REGISTRAR}),
+        frozenset(),
+    ),
+    "report-affairs": (
+        "/api/v1/reports/affairs",
+        frozenset({R.SYSTEM_ADMIN, R.STUDENT_AFFAIRS}),
+        frozenset(),
+    ),
+    "report-snapshot-list": (
+        "/api/v1/report-snapshots",
+        REPORTS_TEACHERS | {R.HEAD_REGISTRAR, R.STUDENT_AFFAIRS},
+        frozenset(),
+    ),
+    "transcript": ("/api/v1/transcripts/26-IT-0001", RESULTS_VIEW, frozenset()),
 }
 
 # url name → "module::test" that pins down its (write) rules.
@@ -353,6 +391,7 @@ COVERED_ELSEWHERE = {
     "push-subscribe": _N + "test_teacher_notifies_their_course_and_push_arrives",
     "push-unsubscribe": _N + "test_push_unsubscribe_and_config",
     "hr-notice-acknowledge": _N + "test_hr_notice",
+    "report-snapshot-detail": "reports.tests.test_reports::test_snapshots_are_frozen_and_scoped",
     "lecture-publish": _L + "test_students_see_published_lectures_only",
     "lecture-unpublish": _L + "test_resource_removal_and_unpublish",
     "lecture-add-resource": _L + "test_lecture_file_link_is_signed_and_scoped",

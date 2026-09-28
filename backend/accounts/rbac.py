@@ -57,6 +57,7 @@ CAPABILITIES: dict[str, frozenset[Role]] = {
     "structure.view": frozenset(
         {
             R.SYSTEM_ADMIN,
+            R.HR,  # term and department filters of the teacher reports
             R.HEAD_REGISTRAR,
             R.REGISTRAR,
             R.RESULTS_OFFICER,
@@ -153,6 +154,24 @@ CAPABILITIES: dict[str, frozenset[Role]] = {
             R.DEPARTMENT_SUPERVISOR,
         }
     ),
+    # Reports (docs/02 §4.14). Department roles read their departments only.
+    "reports.department": frozenset(
+        {R.SYSTEM_ADMIN, R.ACADEMIC_AFFAIRS, R.DEPARTMENT_MANAGER, R.DEPARTMENT_SUPERVISOR}
+    ),
+    "reports.teachers": frozenset(
+        {
+            R.SYSTEM_ADMIN,
+            R.ACADEMIC_AFFAIRS,
+            R.HR,
+            R.DEPARTMENT_MANAGER,
+            R.DEPARTMENT_SUPERVISOR,
+        }
+    ),
+    "reports.admissions": frozenset({R.SYSTEM_ADMIN, R.HEAD_REGISTRAR}),
+    "reports.affairs": frozenset({R.SYSTEM_ADMIN, R.STUDENT_AFFAIRS}),
+    # HR notices (docs/03 §3.11): one teacher at a time, never broadcast.
+    "hr.view": frozenset({R.SYSTEM_ADMIN, R.ACADEMIC_AFFAIRS, R.HR}),
+    "hr.notify": frozenset({R.SYSTEM_ADMIN, R.ACADEMIC_AFFAIRS, R.HR}),
     # Website content (docs/03 §3.12–3.13)
     "content.manage": frozenset({R.SYSTEM_ADMIN, R.SITE_MANAGER}),
     "events.manage": frozenset({R.SYSTEM_ADMIN, R.SITE_MANAGER, R.EVENTS_MANAGER}),

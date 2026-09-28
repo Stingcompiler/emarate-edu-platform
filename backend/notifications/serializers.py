@@ -139,6 +139,8 @@ class HRNoticeSerializer(serializers.ModelSerializer):
     )
     teacher_name = serializers.CharField(source="teacher.full_name_ar", read_only=True)
     sent_by = serializers.CharField(source="sent_by.full_name_ar", read_only=True)
+    subject = serializers.CharField(max_length=160, required=False, allow_blank=True, default="")
+    term_name = serializers.CharField(source="term.name_ar", read_only=True, default=None)
 
     class Meta:
         model = HRNotice
@@ -147,10 +149,25 @@ class HRNoticeSerializer(serializers.ModelSerializer):
             "teacher",
             "teacher_name",
             "sent_by",
+            "topic",
             "subject",
             "body",
             "requires_ack",
+            "cc_department_manager",
+            "evidence",
+            "term_name",
+            "opened_at",
             "acknowledged_at",
             "created_at",
         ]
-        read_only_fields = ["public_id", "teacher_name", "sent_by", "acknowledged_at", "created_at"]
+        read_only_fields = [
+            "public_id",
+            "teacher_name",
+            "sent_by",
+            "evidence",
+            "term_name",
+            "opened_at",
+            "acknowledged_at",
+            "created_at",
+        ]
+        extra_kwargs = {"requires_ack": {"default": True}}

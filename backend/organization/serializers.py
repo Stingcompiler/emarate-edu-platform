@@ -48,6 +48,9 @@ class SystemSettingsSerializer(serializers.ModelSerializer):
             "otp_ttl_minutes",
             "otp_max_attempts",
             "max_applications_per_cycle",
+            "grading_days_limit",
+            "upload_min_percent",
+            "planned_lectures_per_week",
             "updated_at",
         ]
         read_only_fields = ["updated_at"]
@@ -55,4 +58,7 @@ class SystemSettingsSerializer(serializers.ModelSerializer):
             "otp_ttl_minutes": {"min_value": 2, "max_value": 60},
             "otp_max_attempts": {"min_value": 3, "max_value": 10},
             "max_applications_per_cycle": {"min_value": 1, "max_value": 10},
+            "grading_days_limit": {"min_value": 1, "max_value": 30},
+            "upload_min_percent": {"min_value": 10, "max_value": 100},
+            "planned_lectures_per_week": {"min_value": 1, "max_value": 10},
         }

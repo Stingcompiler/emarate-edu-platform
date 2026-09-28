@@ -18,6 +18,11 @@ const BUILT = [
   "/events",
   "/applications",
   "/admissions",
+  "/reports",
+  "/hr",
+  "/hr-notices",
+  "/transcripts",
+  "/print",
 ];
 
 export function isBuiltPath(path: string): boolean {

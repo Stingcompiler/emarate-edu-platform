@@ -9,7 +9,6 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from accounts import rbac
-from accounts.rbac import Role
 from audit.services import RequestMeta
 
 from . import audience as audiences
@@ -218,10 +217,14 @@ class HRNoticeViewSet(
         if getattr(self, "swagger_fake_view", False):
             return HRNotice.objects.none()
         user = self.request.user
-        queryset = HRNotice.objects.select_related("teacher", "sent_by")
-        if rbac.has_role(user, Role.HR, Role.SYSTEM_ADMIN):
+        queryset = HRNotice.objects.select_related("teacher", "sent_by", "term")
+        if rbac.can(user, "hr.view"):
             return queryset
         return queryset.filter(teacher=user)
+
+    def retrieve(self, request, *args, **kwargs):
+        notice = services.open_hr_notice(self.get_object(), request.user)
+        return Response(self.get_serializer(notice).data)
 
     def create(self, request, *args, **kwargs):
         data = self.get_serializer(data=request.data)

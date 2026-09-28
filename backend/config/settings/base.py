@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     "inquiries",
     "content",
     "admissions",
+    "reports",
 ]
 
 MIDDLEWARE = [
@@ -211,6 +212,8 @@ SPECTACULAR_SETTINGS = {
     "ENUM_NAME_OVERRIDES": {
         "CheckResultEnum": ["ok", "error"],
         "RoleEnum": "accounts.rbac.Role",
+        "ReportKindEnum": "reports.models.ReportSnapshot.Kind",
+        "TeacherStatusEnum": ["below", "warn", "ok", "none"],
         "TeachingKindEnum": "academic.models.DepartmentMembership.Kind",
         "ResourceKindEnum": "learning.models.LectureResource.Kind",
         "NotificationCategoryEnum": "notifications.models.Category",

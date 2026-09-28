@@ -15,6 +15,7 @@ from learning import views as learning
 from live import views as live
 from notifications import views as notifications
 from organization import views as organization
+from reports import views as reports
 from results import views as results
 from student_affairs import views as student_affairs
 from students import views as students
@@ -56,6 +57,7 @@ router.register("admission-cycles", admissions.CycleViewSet, basename="admission
 router.register("intakes", admissions.IntakeViewSet, basename="intake")
 router.register("form-templates", admissions.TemplateViewSet, basename="form-template")
 router.register("applications", admissions.ApplicationViewSet, basename="application")
+router.register("report-snapshots", reports.ReportSnapshotViewSet, basename="report-snapshot")
 router.register("content/pages", content.PageViewSet, basename="page")
 router.register("content/news", content.NewsViewSet, basename="news")
 router.register("content/events", content.EventViewSet, basename="event")
@@ -109,6 +111,20 @@ urlpatterns = [
         name="push-unsubscribe",
     ),
     path("me/results", results.MyResultsView.as_view(), name="me-results"),
+    path("reports/department", reports.DepartmentReportView.as_view(), name="report-department"),
+    path("reports/teachers", reports.TeachersReportView.as_view(), name="report-teachers"),
+    path(
+        "reports/teachers/<uuid:public_id>",
+        reports.TeacherProfileView.as_view(),
+        name="report-teacher",
+    ),
+    path("reports/admissions", reports.AdmissionsReportView.as_view(), name="report-admissions"),
+    path("reports/affairs", reports.AffairsReportView.as_view(), name="report-affairs"),
+    path(
+        "transcripts/<str:university_number>",
+        reports.TranscriptView.as_view(),
+        name="transcript",
+    ),
     path("results/settings", results.DisplaySettingsView.as_view(), name="result-settings"),
     path(
         "students/<uuid:public_id>/status",

@@ -104,6 +104,29 @@ def hr_notice(notice):
     )
 
 
+def hr_notice_copy(notice):
+    """Copy to the teacher's department managers when the sender asks for it."""
+    from accounts.models import RoleAssignment
+    from accounts.rbac import Role
+
+    departments = list(
+        notice.teacher.department_memberships.values_list("department_id", flat=True)
+    )
+    managers = [
+        ra.user
+        for ra in RoleAssignment.objects.filter(
+            role=Role.DEPARTMENT_MANAGER, department_id__in=departments
+        ).select_related("user")
+    ]
+    return notify(
+        managers,
+        category=Category.HR,
+        title=f"نسخة تنبيه: {notice.subject} — {notice.teacher.full_name_ar}",
+        body=notice.body[:500],
+        action_url=f"/hr/teachers/{notice.teacher.public_id}",
+    )
+
+
 def remind_due_assignments() -> int:
     from learning.models import Assignment, Submission
 

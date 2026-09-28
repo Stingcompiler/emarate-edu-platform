@@ -114,6 +114,13 @@ class NotificationPreference(models.Model):
 class HRNotice(PublicIdModel, TimestampedModel):
     """A directed notice from HR to one teacher; it stays in the teacher's file."""
 
+    class Topic(models.TextChoices):
+        GRADING = "grading", "تأخر التصحيح"
+        UPLOADS = "uploads", "انتظام الرفع"
+        LIVE = "live", "البث المباشر"
+        REPLIES = "replies", "الرد على الطلاب"
+        OTHER = "other", "أخرى"
+
     teacher = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="hr_notices"
     )
@@ -124,6 +131,14 @@ class HRNotice(PublicIdModel, TimestampedModel):
     body = models.TextField(max_length=4000)
     requires_ack = models.BooleanField(default=False)
     acknowledged_at = models.DateTimeField(null=True, blank=True)
+    topic = models.CharField(max_length=10, choices=Topic.choices, default=Topic.OTHER)
+    # The teacher's indicators when the notice was sent (docs/02 §4.14), kept as evidence.
+    evidence = models.JSONField(default=dict, blank=True)
+    term = models.ForeignKey(
+        "academic.Term", on_delete=models.PROTECT, null=True, blank=True, related_name="+"
+    )
+    cc_department_manager = models.BooleanField(default=False)
+    opened_at = models.DateTimeField(null=True, blank=True)
     notification = models.ForeignKey(
         Notification, on_delete=models.SET_NULL, null=True, related_name="+"
     )

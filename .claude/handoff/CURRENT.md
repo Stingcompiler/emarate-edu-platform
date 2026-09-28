@@ -1,54 +1,45 @@
-# Handoff — Phase 7 done → Phase 8 (reports + HR + PDF) — 2026-09-28
+# Handoff — Phase 8 done → Phase 9 (public site, Astro) — 2026-09-28
 
 ## Where things stand
-- **Phases 1–6 are merged** to `main` (PRs #3–#8).
-- **Phase 7 (admissions + registrars)** is complete on `feat/phase-7-admissions`. Its PR is opened in this step; merge it once CI is green with `gh pr merge --merge` (auto-merge is disabled).
+- **Phases 1–7 are merged** to `main` (PRs #3–#9).
+- **Phase 8 (reports)** is complete on `feat/phase-8-reports`. Its PR is opened in this step; merge it once CI is green with `gh pr merge --merge` (auto-merge is disabled for the repo).
 - **Verified locally:**
-  - 281 tests pass on SQLite; 280 pass plus 1 skip on Postgres;
-  - admissions migrations reverse on both databases;
-  - the schema has 0 warnings; ruff, typecheck, build and prettier pass;
-  - the seed reruns cleanly.
-  - Pages were walked in the pane. The visitor flow was checked at 390 (verify, program, form, documents, review, submit, track). The staff flow was checked at 1280 and 390 (list, detail with claim, document review, eligible, accept, register → 26-IT-0029; cycles; form builder new version → publish).
+  - 299 tests pass on SQLite; 298 pass plus 1 skip on Postgres;
+  - migrations reverse on both databases;
+  - the schema has 0 warnings; ruff, typecheck, build and prettier pass.
+  - Pages were walked in the pane: HR home, teachers, profile, new notice → sent, HR report → export → A4 print page (1280); department report (1280 and 390); admissions and affairs reports (1280); transcript print; the teacher acknowledging a notice (390).
 
-## What Phase 7 delivered
-- **`contacts`:** OTP via `accounts.otp` (purpose CONTACT) and `contacts/visitor.py`.
-  - VisitorSession lasts 30 minutes. Clients send `Authorization: Visitor <token>`.
-  - `VisitorAuthentication` and `IsVisitor` set `request.contact`.
-- **`admissions`:**
-  - Models: AdmissionCycle, ProgramIntake (`accepting()`, required_documents, capacity), ApplicationFormTemplate (versioned; publishing freezes it; `new-version`), Application, ApplicationDocument (its own private FileField, download resolver "a"), ApplicationStatusHistory (append-only), ApplicationMessage (internal, email or applicant), ApplicationAssignment.
-  - The state machine is `services.TRANSITIONS`. `allowed_transitions` and `labels` (field and document labels) come back in staff responses.
-  - Routing goes to the program department's registrars, else the head registrar.
-  - Deciding needs `admissions.manage`, or a registrar when `delegate_decisions_to_registrars` is on.
-  - `register_applicant` creates the StudentRecord with a `YY-DEPT-NNNN` university number and emails it. `complete_registration` and `decide_registration` call `mark_activated`.
-  - Submit accepts an `Idempotency-Key`. Beat `expire_applications` runs daily.
-  - URLs: `/api/v1/{admission-cycles,intakes,form-templates,applications}`, `/api/public/{intakes,visitor/otp,visitor/verify,applications/<ref>}`, `/api/visitor/*`.
+## What Phase 7 delivered (short)
+- **Visitor OTP session** (`Authorization: Visitor <token>`, 30 min) with public portal routes `/apply` (5-step wizard) and `/track`. Phase 9 links to them and does not rebuild them.
+- **Admissions:** cycles, intakes, versioned forms, the state machine in `admissions/services.TRANSITIONS`, routing, claim and assign, decisions, and `register_applicant` → university number. Staff pages: `/applications`, `/admissions/cycles`, `/admissions/forms`.
+
+## What Phase 8 delivered
+- **`reports` app:**
+  - `metrics.py` (teacher rows, department, admissions and affairs builders; the query count is fixed and tested).
+  - `ReportSnapshot` (frozen exports with a SHA-256 digest; no edit or delete).
+  - Views under `/api/v1/reports/*`, `/api/v1/report-snapshots`, `/api/v1/transcripts/<number>`.
+- **Settings:** `SystemSettings` gained `grading_days_limit` (3), `upload_min_percent` (75) and `planned_lectures_per_week` (2).
+- **HR notices:** `notifications.HRNotice` gained topic, evidence, term, a department-manager CC and `opened_at`. Academic affairs can send too. HR now has `structure.view` (for the term and department filters).
 - **Portal:**
-  - Public (no account): `/apply` (5-step wizard; resumes with `?app=<id>`; the draft saves) and `/track`. Both live in `routes/visitor/` with `lib/visitor.ts`, and the session is kept in sessionStorage.
-  - Staff: `/applications` (counters, filters, cards on phone, table on desktop), `/applications/:id` (answers, documents with link, accept and reject, history, messages, claim, transitions, register), `/admissions/cycles` (new cycle, open or close intakes, add programs) and `/admissions/forms` (field editor, draft, publish, new version).
-  - Navigation: `admissions.view` shows "الطلبات"; `admissions.manage` adds cycles and forms.
-- **Decision:** the visitor pages are portal public routes. Phase 9 (Astro) links to `/apply` and `/track` and does not rebuild them.
-- **Seed:** an open cycle, a published default form, an intake per program, and three applications (one under review with the registrar).
+  - Report pages: `/reports`, `/reports/admissions`, `/reports/affairs`.
+  - HR pages: `/hr`, `/hr/teachers`, `/hr/teachers/:id`, `/hr/notices/new`, `/hr/report`.
+  - Teacher side: `/hr-notices/:id`.
+  - Transcripts: `/transcripts` → `/print/transcript/:number`.
+  - Print views: `/print/report/:id` and `/print/my-results` (a link on `/results`).
+  - Shared helpers live in `lib/reports.tsx` (Kpi, Bars, Delta, ExportBar, PastReports, downloadCsv, Picker).
+- **PDF decision:** browser print from A4 pages (`routes/print/PrintLayout.tsx`, `@page A4`). No server PDF libraries.
+- **Seed:** graded and waiting submissions for the demo teacher and one HR notice.
 
-## Next steps (Phase 8 — reports, docs/02 §4.14 and §8 Phase 8)
-1. Read docs/02 §4.14, docs/03 §3.11 (hr) and the academic affairs role, and docs/07 §2.11. Boards:
+## Next steps (Phase 9 — public site, docs/02 §6 and §8 Phase 9)
+1. Read docs/02 §6 (landing: Astro SSG from `/api/public/*`, `/ar` and `/en`, sitemap, OpenGraph, Schema.org, Core Web Vitals) and docs/06 (identity). Boards (phone): VisitorHome, VisitorAbout, VisitorPrograms, VisitorProgram, VisitorDepartments, VisitorDepartment, VisitorNews, VisitorContact. Desktop boards are missing: derive them from the shell rules and say so in the PR.
    ```bash
-   python3 scripts/boards.py list Report
-   python3 scripts/boards.py list HR
-   python3 scripts/boards.py list Transcript
+   python3 scripts/boards.py list Visitor
    ```
-   - Desktop: DesktopDeptReports, DesktopAdmissionsReports, DesktopStudentAffairsReports (no names), DesktopHRReports, DesktopHRTeachers.
-   - Phone: HRHome, HRNoticeNew, AcademicAffairsTeacher, StudentTranscript. Where there is no phone or desktop board, derive it from docs/06 §4/§9 and say so in the PR.
-2. **`reports` app** (read-only aggregates; no N+1; every query is department-scoped through `rbac.Scope`):
-   - Department: offerings, lecture uploads, assignments, grading backlog, results summary.
-   - Academic affairs: the college-wide version plus per-teacher files.
-   - Admissions: counts by status, program and cycle, conversion to registered.
-   - Student affairs: case counts by kind and status, never names.
-   - **HR teacher performance per term:** lectures, assignments, exams, average grading time, ungraded ratio, upload gaps, announced live sessions, plus HR notices (directed notifications to a teacher).
-3. **PDF export:** the transcript was deferred from Phase 4, plus report PDFs.
-   - WeasyPrint needs system libraries (pango), so check `brew list pango` first.
-   - If it's unavailable, render HTML-print pages in the portal (print CSS) as a no-dependency fallback and note it. Don't install system packages without evidence they are needed.
-4. Portal pages per the boards. The department manager dashboard only gets additions.
-5. Add permission-matrix rows for every new endpoint, extend the seed, run both databases, open the PR, merge when green, and update this handoff.
+2. `apps/landing` already has an Astro scaffold (`Base.astro`, `index.astro`, `global.css`). Build pages from `/api/public/{site,pages,news,events,announcements,menus,redirects}` plus the program and department endpoints (add public read endpoints if missing; check `content/urls_public.py`).
+3. **Interactive islands:** the contact form (`/api/public/inquiries`) and the program search. "Apply" and "Track" link to the portal's `/apply` and `/track` (a `PORTAL_URL` env var).
+4. **Rebuild on publish:** `content.request_site_rebuild()` calls `SITE_REBUILD_HOOK_URL` (currently empty). Document the Render static-site deploy-hook value for Phase 11.
+5. Handle redirects (`/api/public/redirects` → `_redirects` or Astro redirects at build time), the sitemap, robots, OG images, and `CollegeOrUniversity`/`Event`/`NewsArticle` JSON-LD.
+6. Keep it responsive (skill `responsive-page`) and RTL-first, with `astro dev --ignore-lock` (see gotchas). Add a CI build of the landing app.
 
 ## Decisions made (don't revisit)
 - **Roles are rows (`role`, `department`), not Django Groups.** Mention this deviation from docs/03 §10 in PRs that touch roles.
@@ -96,6 +87,8 @@
 - **SerializerMethodField types:** a method returning nested serializer data needs `@extend_schema_field(Serializer(many=True))`. Otherwise the TypeScript type is `unknown`.
 - **Seed reruns:** seed helpers must be idempotent (`get_or_create`) because an app can be migrated to zero while `contacts` keeps its rows.
 - **Pane screenshots:** they can lag a click. Use `get_page_text` to confirm the step changed before assuming a bug.
+- **Reports:** "now" drives weeks elapsed and grading age, so tests pass a fixed `now` to the metrics functions. Warm up once before counting queries (the first call creates the SystemSettings row).
+- **Print pages** live outside PortalShell and set `document.title` themselves. Wide report tables go full width; a 320px sidebar squeezes them at 1280.
 - **Earlier gotchas:**
   - build constraint lists with sorted sets;
   - Django 6.1 uses `MAILERS`;
