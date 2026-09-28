@@ -8,8 +8,11 @@ import {
   Card,
   EmptyState,
   SectionLabel,
+  SideFigures,
+  SideNote,
   StatusBadge,
   STATUS_LABELS,
+  WithSide,
 } from "../../components/ui";
 import { api } from "../../lib/api";
 import { useMe } from "../../lib/auth";
@@ -45,7 +48,30 @@ export function Regulations() {
         ) : undefined
       }
     >
-      <div className="max-w-3xl">
+      <WithSide
+        side={
+          <>
+            <SideFigures
+              rows={
+                staff
+                  ? [
+                      ["لائحة", items.length],
+                      ["منشورة", items.filter((r) => r.status === "published").length],
+                    ]
+                  : [
+                      ["تتطلب إقرارك", needed.length],
+                      ["للاطلاع", rest.length],
+                    ]
+              }
+            />
+            <SideNote title="الإقرار">
+              {staff
+                ? "اللائحة التي تتطلب إقرارًا تظهر للطالب أولًا حتى يقرّ بها، ويُسجَّل الإقرار باسمه ووقته."
+                : "اقرأ اللائحة ثم أقرّ بها؛ يُسجَّل إقرارك باسمك ووقته، ويبقى النص متاحًا لك دائمًا."}
+            </SideNote>
+          </>
+        }
+      >
         {!items.length && !list.isPending && (
           <Card>
             <EmptyState icon={<ScrollText size={24} aria-hidden />} title="لا لوائح منشورة" />
@@ -109,7 +135,7 @@ export function Regulations() {
             </Card>
           </>
         )}
-      </div>
+      </WithSide>
     </PortalShell>
   );
 }

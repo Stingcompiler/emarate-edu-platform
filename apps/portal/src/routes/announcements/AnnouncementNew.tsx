@@ -11,6 +11,7 @@ import {
   SectionLabel,
   TextArea,
   problemMessage,
+  WithSide,
 } from "../../components/ui";
 import { api } from "../../lib/api";
 import { hasRole, useMe } from "../../lib/auth";
@@ -128,7 +129,25 @@ export function AnnouncementNew() {
   });
   return (
     <PortalShell title="إعلان جديد" back={{ label: "الإعلانات", to: "/announcements" }}>
-      <div className="max-w-2xl">
+      <WithSide
+        side={
+          // Desktop: how the announcement will read, as it is typed.
+          <div>
+            <SectionLabel>معاينة</SectionLabel>
+            <Card className="p-4">
+              <p className="text-xs text-text-muted">{option?.label ?? "—"}</p>
+              <h2 className="mt-1 text-[17px] font-bold text-text">{title || "عنوان الإعلان"}</h2>
+              <div className="mt-2 space-y-2 text-sm leading-relaxed text-text">
+                {(body || "نص الإعلان يظهر هنا.").split(/\n{2,}/).map((para, i) => (
+                  <p key={i} className="whitespace-pre-line">
+                    {para}
+                  </p>
+                ))}
+              </div>
+            </Card>
+          </div>
+        }
+      >
         <SectionLabel>إلى</SectionLabel>
         {courses.isSuccess && !options.length && (
           <Notice>لا يمكنك نشر إعلانات الآن. اطلب من أستاذ المادة السماح للمعيد بالإعلان.</Notice>
@@ -176,7 +195,7 @@ export function AnnouncementNew() {
             نشر الإعلان
           </Button>
         </div>
-      </div>
+      </WithSide>
     </PortalShell>
   );
 }

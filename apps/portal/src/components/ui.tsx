@@ -316,3 +316,44 @@ export function ScrollRegion({
     </div>
   );
 }
+
+/**
+ * The large-screen layout (skill responsive-page §2a): the page's content beside a side
+ * column — summary figures, help, related actions — so a wide screen is not a narrow
+ * column in empty space. Phones show the side column after the content.
+ */
+export function WithSide({ side, children }: { side: ReactNode; children: ReactNode }) {
+  return (
+    <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_18rem] lg:items-start lg:gap-6 xl:grid-cols-[minmax(0,1fr)_20rem]">
+      <div className="min-w-0">{children}</div>
+      <aside className="mt-6 space-y-4 lg:sticky lg:top-6 lg:mt-0">{side}</aside>
+    </div>
+  );
+}
+
+/** Figures for a side column: [label, value] rows in one card. */
+export function SideFigures({ title, rows }: { title?: string; rows: [string, ReactNode][] }) {
+  return (
+    <Card className="p-4">
+      {title && <h2 className="mb-3 text-xs font-semibold text-text-muted">{title}</h2>}
+      <dl className="grid grid-cols-2 gap-3">
+        {rows.map(([label, value]) => (
+          <div key={label} className="rounded-lg bg-surface-alt p-3">
+            <dd className="text-xl font-bold text-text">{value}</dd>
+            <dt className="text-xs text-text-muted">{label}</dt>
+          </div>
+        ))}
+      </dl>
+    </Card>
+  );
+}
+
+/** A short explanation for a side column (how this page works, who sees what). */
+export function SideNote({ title, children }: { title: string; children: ReactNode }) {
+  return (
+    <Card className="p-4 text-sm leading-6">
+      <h2 className="font-semibold text-text">{title}</h2>
+      <div className="mt-1 text-text-muted">{children}</div>
+    </Card>
+  );
+}

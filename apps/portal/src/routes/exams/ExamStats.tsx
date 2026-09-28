@@ -48,7 +48,7 @@ export function ExamStats() {
       back={{ label: "الاختبار", to: `/exams/${id}` }}
     >
       {s && e && (
-        <div className="max-w-3xl">
+        <div>
           <Card className="grid grid-cols-2 divide-border-soft text-center sm:grid-cols-4 sm:divide-x sm:divide-x-reverse">
             {[
               { v: s.average ?? "—", l: `المتوسط /${Number(e.total_marks).toLocaleString("ar")}` },
@@ -71,7 +71,7 @@ export function ExamStats() {
               <div key={q.question} className="flex items-center gap-3 px-4 py-3">
                 <span className="w-6 text-sm font-bold text-text-muted">{q.order}</span>
                 <span className="min-w-0 flex-1 truncate text-sm text-text">{q.text}</span>
-                <span className="w-24">
+                <span className="w-24 lg:w-72">
                   <span className="block h-1.5 overflow-hidden rounded-full bg-surface-alt">
                     <span
                       className="block h-full bg-primary"
@@ -103,7 +103,7 @@ export function ExamStats() {
           )}
           {e.result_visibility === "manual" && (
             <Button
-              className="mt-5 w-full"
+              className="mt-5 w-full lg:w-auto"
               variant={e.results_released ? "secondary" : "primary"}
               onClick={() => release.mutate(!e.results_released)}
               disabled={release.isPending}

@@ -11,6 +11,7 @@ import {
   SectionLabel,
   StatusBadge,
   problemMessage,
+  WithSide,
 } from "../../components/ui";
 import { api } from "../../lib/api";
 import { formatClock } from "../../lib/exam";
@@ -93,7 +94,63 @@ export function ExamMonitor() {
       subtitle="يتحدث كل 30 ثانية"
       back={{ label: "الاختبار", to: `/exams/${id}` }}
     >
-      <div className="max-w-3xl">
+      {/* Desktop: the attempts; the chosen attempt's actions beside them. */}
+      <WithSide
+        side={
+          <div>
+            {picked ? (
+              <>
+                <SectionLabel>
+                  إجراء على محاولة {(picked.student as { full_name_ar: string }).full_name_ar}
+                </SectionLabel>
+                <Card className="space-y-3 p-4">
+                  <input
+                    value={reason}
+                    onChange={(e) => setReason(e.target.value)}
+                    placeholder="السبب (إلزامي لإعادة الفتح والإلغاء)"
+                    className="min-h-10 w-full rounded-lg border border-border bg-surface px-3 text-sm"
+                  />
+                  <div className="flex flex-wrap gap-2">
+                    {picked.status === "in_progress" && (
+                      <Button variant="secondary" onClick={() => act.mutate("extend")}>
+                        تمديد 5 دقائق
+                      </Button>
+                    )}
+                    {picked.status !== "in_progress" && picked.status !== "invalidated" && (
+                      <Button
+                        variant="secondary"
+                        disabled={!reason.trim()}
+                        onClick={() => act.mutate("reopen")}
+                      >
+                        إعادة فتح بسبب
+                      </Button>
+                    )}
+                    {picked.status !== "invalidated" && (
+                      <Button
+                        variant="secondary"
+                        className="text-danger-strong"
+                        disabled={!reason.trim()}
+                        onClick={() => act.mutate("invalidate")}
+                      >
+                        إلغاء المحاولة
+                      </Button>
+                    )}
+                  </div>
+                  {act.isError && <Notice>{problemMessage(act.error)}</Notice>}
+                  <p className="text-xs leading-relaxed text-text-muted">
+                    المحاولة المنقطعة تستمر بالحفظ على جهاز الطالب وتُرسل عند عودة الاتصال؛ يُغلقها
+                    الخادم تلقائيًا عند انتهاء الوقت.
+                  </p>
+                </Card>
+              </>
+            ) : (
+              <p className="hidden rounded-xl border border-dashed border-border px-4 py-6 text-center text-sm text-text-muted lg:block">
+                اختر محاولة لتمديدها أو إعادة فتحها أو إلغائها.
+              </p>
+            )}
+          </div>
+        }
+      >
         <Card className="grid grid-cols-3 divide-x divide-x-reverse divide-border-soft text-center">
           {[
             { n: counts.submitted, l: "أُرسل" },
@@ -145,53 +202,7 @@ export function ExamMonitor() {
             );
           })}
         </Card>
-        {picked && (
-          <>
-            <SectionLabel>
-              إجراء على محاولة {(picked.student as { full_name_ar: string }).full_name_ar}
-            </SectionLabel>
-            <Card className="space-y-3 p-4">
-              <input
-                value={reason}
-                onChange={(e) => setReason(e.target.value)}
-                placeholder="السبب (إلزامي لإعادة الفتح والإلغاء)"
-                className="min-h-10 w-full rounded-lg border border-border bg-surface px-3 text-sm"
-              />
-              <div className="flex flex-wrap gap-2">
-                {picked.status === "in_progress" && (
-                  <Button variant="secondary" onClick={() => act.mutate("extend")}>
-                    تمديد 5 دقائق
-                  </Button>
-                )}
-                {picked.status !== "in_progress" && picked.status !== "invalidated" && (
-                  <Button
-                    variant="secondary"
-                    disabled={!reason.trim()}
-                    onClick={() => act.mutate("reopen")}
-                  >
-                    إعادة فتح بسبب
-                  </Button>
-                )}
-                {picked.status !== "invalidated" && (
-                  <Button
-                    variant="secondary"
-                    className="text-danger-strong"
-                    disabled={!reason.trim()}
-                    onClick={() => act.mutate("invalidate")}
-                  >
-                    إلغاء المحاولة
-                  </Button>
-                )}
-              </div>
-              {act.isError && <Notice>{problemMessage(act.error)}</Notice>}
-              <p className="text-xs leading-relaxed text-text-muted">
-                المحاولة المنقطعة تستمر بالحفظ على جهاز الطالب وتُرسل عند عودة الاتصال؛ يُغلقها
-                الخادم تلقائيًا عند انتهاء الوقت.
-              </p>
-            </Card>
-          </>
-        )}
-      </div>
+      </WithSide>
     </PortalShell>
   );
 }

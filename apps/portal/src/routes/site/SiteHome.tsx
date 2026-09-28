@@ -4,7 +4,16 @@ import { useState } from "react";
 import { Link } from "react-router";
 
 import { PortalShell } from "../../components/PortalShell";
-import { Button, Card, Chip, SectionLabel, StatusBadge } from "../../components/ui";
+import {
+  Button,
+  Card,
+  Chip,
+  SectionLabel,
+  SideFigures,
+  SideNote,
+  StatusBadge,
+  WithSide,
+} from "../../components/ui";
 import { api } from "../../lib/api";
 import { when } from "../../lib/format";
 
@@ -29,7 +38,7 @@ export function SiteHome() {
       title="محتوى الموقع"
       subtitle={drafts ? `${drafts.toLocaleString("ar")} غير منشور` : "كل المحتوى منشور"}
     >
-      <div className="grid grid-cols-3 gap-2 sm:max-w-xl">
+      <div className="grid grid-cols-3 gap-2">
         {[
           { to: "/site/media", icon: Image, label: "الوسائط والقوائم" },
           { to: "/site/redirects", icon: Link2, label: "التحويلات" },
@@ -43,66 +52,97 @@ export function SiteHome() {
           </Link>
         ))}
       </div>
-      <div className="mt-5 flex items-center gap-2">
-        <Chip active={tab === "pages"} onClick={() => setTab("pages")}>
-          الصفحات
-        </Chip>
-        <Chip active={tab === "news"} onClick={() => setTab("news")}>
-          الأخبار
-        </Chip>
-        <Link to={tab === "pages" ? "/site/pages/new" : "/site/news/new"} className="ms-auto">
-          <Button className="min-h-9 px-3">
-            <Plus size={16} aria-hidden />
-            {tab === "pages" ? "صفحة" : "خبر"}
-          </Button>
-        </Link>
+      <div className="mt-5">
+        <WithSide
+          side={
+            <>
+              <SideFigures
+                title={tab === "pages" ? "الصفحات" : "الأخبار"}
+                rows={[
+                  [
+                    "منشورة",
+                    ((tab === "pages" ? pages : news).data ?? []).filter(
+                      (x) => x.status === "published",
+                    ).length,
+                  ],
+                  [
+                    "غير منشورة",
+                    ((tab === "pages" ? pages : news).data ?? []).filter(
+                      (x) => x.status !== "published",
+                    ).length,
+                  ],
+                ]}
+              />
+              <SideNote title="الصفحات الرسمية">
+                صفحات الكلية الرسمية (عن الكلية، كلمة العميد، الرسوم، الخصوصية…) موجودة مسوداتٍ فيها
+                إرشادات الكتابة. استبدل الإرشاد بالنص المعتمد ثم انشر؛ يظهر رابطها في قوائم الموقع
+                تلقائيًا.
+              </SideNote>
+            </>
+          }
+        >
+          <div className="flex items-center gap-2">
+            <Chip active={tab === "pages"} onClick={() => setTab("pages")}>
+              الصفحات
+            </Chip>
+            <Chip active={tab === "news"} onClick={() => setTab("news")}>
+              الأخبار
+            </Chip>
+            <Link to={tab === "pages" ? "/site/pages/new" : "/site/news/new"} className="ms-auto">
+              <Button className="min-h-9 px-3">
+                <Plus size={16} aria-hidden />
+                {tab === "pages" ? "صفحة" : "خبر"}
+              </Button>
+            </Link>
+          </div>
+          <SectionLabel>{tab === "pages" ? "صفحات الموقع" : "الأخبار"}</SectionLabel>
+          <Card className="divide-y divide-border-soft">
+            {tab === "pages"
+              ? (pages.data ?? []).map((p) => (
+                  <Link
+                    key={p.public_id}
+                    to={`/site/pages/${p.public_id}`}
+                    className="flex items-center gap-3 px-4 py-3 hover:bg-surface-alt"
+                  >
+                    <FileText size={18} className="text-text-muted" aria-hidden />
+                    <span className="min-w-0 flex-1">
+                      <span className="block text-sm font-semibold text-text">{p.title_ar}</span>
+                      <span className="text-xs text-text-muted" dir="ltr">
+                        /{p.path}/
+                      </span>
+                    </span>
+                    <StatusBadge
+                      status={p.status ?? "draft"}
+                      label={LABEL[p.status ?? "draft"] ?? ""}
+                    />
+                  </Link>
+                ))
+              : (news.data ?? []).map((n) => (
+                  <Link
+                    key={n.public_id}
+                    to={`/site/news/${n.public_id}`}
+                    className="flex items-center gap-3 px-4 py-3 hover:bg-surface-alt"
+                  >
+                    <Newspaper size={18} className="text-text-muted" aria-hidden />
+                    <span className="min-w-0 flex-1">
+                      <span className="block text-sm font-semibold text-text">{n.title}</span>
+                      <span className="text-xs text-text-muted">{when(n.updated_at)}</span>
+                    </span>
+                    <StatusBadge
+                      status={n.status ?? "draft"}
+                      label={LABEL[n.status ?? "draft"] ?? ""}
+                    />
+                  </Link>
+                ))}
+            {(tab === "pages" ? pages : news).isSuccess &&
+              !(tab === "pages" ? pages : news).data?.length && (
+                <p className="px-4 py-5 text-sm text-text-muted">
+                  {tab === "pages" ? "لا صفحات بعد." : "لا أخبار بعد. أضف أول خبر من زر «خبر»."}
+                </p>
+              )}
+          </Card>
+        </WithSide>
       </div>
-      <SectionLabel>{tab === "pages" ? "صفحات الموقع" : "الأخبار"}</SectionLabel>
-      <Card className="max-w-3xl divide-y divide-border-soft">
-        {tab === "pages"
-          ? (pages.data ?? []).map((p) => (
-              <Link
-                key={p.public_id}
-                to={`/site/pages/${p.public_id}`}
-                className="flex items-center gap-3 px-4 py-3 hover:bg-surface-alt"
-              >
-                <FileText size={18} className="text-text-muted" aria-hidden />
-                <span className="min-w-0 flex-1">
-                  <span className="block text-sm font-semibold text-text">{p.title_ar}</span>
-                  <span className="text-xs text-text-muted" dir="ltr">
-                    /{p.slug}
-                  </span>
-                </span>
-                <StatusBadge
-                  status={p.status ?? "draft"}
-                  label={LABEL[p.status ?? "draft"] ?? ""}
-                />
-              </Link>
-            ))
-          : (news.data ?? []).map((n) => (
-              <Link
-                key={n.public_id}
-                to={`/site/news/${n.public_id}`}
-                className="flex items-center gap-3 px-4 py-3 hover:bg-surface-alt"
-              >
-                <Newspaper size={18} className="text-text-muted" aria-hidden />
-                <span className="min-w-0 flex-1">
-                  <span className="block text-sm font-semibold text-text">{n.title}</span>
-                  <span className="text-xs text-text-muted">{when(n.updated_at)}</span>
-                </span>
-                <StatusBadge
-                  status={n.status ?? "draft"}
-                  label={LABEL[n.status ?? "draft"] ?? ""}
-                />
-              </Link>
-            ))}
-        {(tab === "pages" ? pages : news).isSuccess &&
-          !(tab === "pages" ? pages : news).data?.length && (
-            <p className="px-4 py-5 text-sm text-text-muted">
-              {tab === "pages" ? "لا صفحات بعد." : "لا أخبار بعد. أضف أول خبر من زر «خبر»."}
-            </p>
-          )}
-      </Card>
     </PortalShell>
   );
 }

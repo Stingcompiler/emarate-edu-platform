@@ -2,10 +2,10 @@ import type { Schemas } from "@ecst/api";
 import { useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Award, BellOff, BookOpen, Briefcase, Megaphone, UserCheck } from "lucide-react";
 import { useState } from "react";
-import { useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router";
 
 import { PortalShell, useUnreadCount } from "../components/PortalShell";
-import { Button, Card, Chip, EmptyState } from "../components/ui";
+import { Button, Card, Chip, EmptyState, SideFigures, SideNote, WithSide } from "../components/ui";
 import { api } from "../lib/api";
 import { DAY_LABELS, type DayGroup, dayGroup, when } from "../lib/format";
 import { isBuiltPath } from "../lib/links";
@@ -92,7 +92,19 @@ export function Notifications() {
 
   return (
     <PortalShell title="الإشعارات" titleAction={markAllButton}>
-      <div className="max-w-3xl">
+      <WithSide
+        side={
+          <>
+            <SideFigures rows={[["غير مقروءة", unreadCount.toLocaleString("ar")]]} />
+            <SideNote title="تصلك بالطريقة التي تختارها">
+              لكل فئة قنواتها: داخل التطبيق، وعلى الهاتف، وبالبريد.{" "}
+              <Link to="/settings" className="font-semibold text-primary">
+                الإعدادات
+              </Link>
+            </SideNote>
+          </>
+        }
+      >
         <div
           className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 lg:mx-0 lg:px-0"
           role="toolbar"
@@ -143,7 +155,7 @@ export function Notifications() {
             </Button>
           </div>
         )}
-      </div>
+      </WithSide>
     </PortalShell>
   );
 }

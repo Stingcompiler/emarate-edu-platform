@@ -3,7 +3,7 @@ import { Trash2 } from "lucide-react";
 import { useState } from "react";
 
 import { PortalShell } from "../../components/PortalShell";
-import { Button, Card, Notice, problemMessage } from "../../components/ui";
+import { Button, Card, Notice, SideNote, WithSide, problemMessage } from "../../components/ui";
 import { api } from "../../lib/api";
 
 /** Board: DesktopSiteRedirects (desktop). Phone derived as a card list. 404 suggestions arrive with the public site (Phase 9). */
@@ -41,7 +41,14 @@ export function Redirects() {
       subtitle={`${(list.data?.length ?? 0).toLocaleString("ar")} نشطة`}
       back={{ label: "محتوى الموقع", to: "/site" }}
     >
-      <div className="max-w-3xl">
+      <WithSide
+        side={
+          <SideNote title="متى تحتاج تحويلًا؟">
+            حين يتغير رابط صفحة أو تُحذف، أضف تحويلًا من الرابط القديم إلى الجديد حتى لا يصل من حفظه
+            أو وجده في Google إلى صفحة غير موجودة. العدّاد يبيّن كم مرة استُخدم.
+          </SideNote>
+        }
+      >
         <Card className="flex flex-wrap items-center gap-2 p-3">
           <input
             dir="ltr"
@@ -87,7 +94,7 @@ export function Redirects() {
             </div>
           ))}
         </Card>
-      </div>
+      </WithSide>
     </PortalShell>
   );
 }

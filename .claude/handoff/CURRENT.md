@@ -1,28 +1,34 @@
-# Handoff — Public site: all official pages (phase 3 next) — 2026-09-28
+# Handoff — Large-screen review done; UX review phase 4 next — 2026-09-28
 
-## Current work: «the public site carries every official page» (owner, 2026-09-28)
-Owner decisions: scope = **all pages including optional ones**; menus = **edited by the site manager**;
-content = **production gets drafts with structure + guidance text (published by the site manager),
-dev seed publishes demo texts clearly marked «تجريبي»**. Never invent official facts (names, fees, accreditation).
-- Done before: UX review `docs/qa/landing-ux-review-2026-09.md`; #28 sticky apply (item 1), #29 `/admissions` (item 2).
-- **Phase 1 — #30 merged:** `/regulations` (Regulation.is_public opt-in), `/calendar`, `/events` (+ past), `/announcements` (+ detail), news RSS.
-- **Phase 2 — #31 (`feat/landing-menus`):** two-level CMS menus; migration `content/0002_default_menus` holds the
-  full official URL structure; landing `lib/menus.ts` hides links whose page isn't built/published.
-  Merge when CI is green.
-- **#31 merged.** **Phase 3 is on `feat/landing-official-pages` (PR open), all checks green locally**
-  (pytest SQLite 663 / Postgres 662, format, typecheck, Vitest, build 100 pages, e2e landing 6/6).
-  Remaining: glance at the portal PageEditor for an official page (slug locked, hint shows the path), commit,
-  PR, merge when CI is green. What it does: `backend/content/official.py` (registry, drafts via post_migrate,
-  `public_path`, "note" block), Page.slug allows one "/", author nullable (migration 0003), pages list gains
-  `path` in registry order, landing `[lang]/[...path].astro`, legal links in the footer bar, dean's word on home,
-  about sub-page list, auto heads of department on /about/leadership, and `lib/api.ts` now caps parallel
-  requests (6), retries transient failures and never caches a failure (fixed dev/e2e 404s from "fetch failed").
-- **Phase 3 — original plan:** editorial official pages at the URLs already in the default menus:
-  `/about/{history,vision,dean,leadership,accreditation,partners,careers}`, `/academics/{student-guide,library}`,
-  `/admissions/{fees,equivalence}`, `/student-life/{affairs,activities,alumni}`, `/gallery`, legal `/privacy`
-  (now `/p/privacy`), `/terms`, `/accessibility`. Plan: CMS `Page` rows with those slugs (slug field may need `/`
-  or a separate `path`), created as drafts with guidance blocks in production; seed_demo publishes demo text marked
-  تجريبي; landing routes render them and `lib/menus.ts` `builtPath` learns the published ones; dean's word also on home.
+## Owner rule, said twice: large screens are designed, not only phones
+On 2026-09-28 the owner said «قم بمراجعه الصفحات لعرض الشاشات الكبري لا يجب ان يختصر عملك فقط علي شاشات الموبايل».
+Skill `responsive-page` §2a says how: use the width with grids and a side column, keep the header's container, and
+look at 1280/1440/1920 captures (an overflow check alone does not count).
+- **#33 merged (public site):** `WithAside` + `SideLinks` components; every page type reviewed at 1024–1920. The e2e
+  landing crawl (desktop) fails any `<main>` block narrower than 90% of the header container.
+- **Portal (`fix/portal-large-screens`, PR next):** `WithSide`, `SideFigures` and `SideNote` in `components/ui.tsx`.
+  No portal page keeps a `max-w-2xl/3xl` column any more. Every page is list + side column (figures, how it works),
+  a form + side column (settings, preview, actions), or a full-width table (exams, per board DesktopDeptExams).
+- **How to review:** a temporary Playwright spec signs in as each role through the e2e stack, captures every
+  navigation page at 1440 full-page, and `uv run --with pillow` builds contact sheets.
+  The script is in the scratchpad and not committed; recreate it if needed.
+
+## «The public site carries every official page» (owner, 2026-09-28) — phases 1–3 merged
+Owner decisions:
+- Scope: all pages, including the optional ones.
+- Menus: edited by the site manager.
+- Content: production gets drafts with structure and guidance text, which the site manager publishes; the dev seed
+  publishes demo texts clearly marked «تجريبي».
+- Never invent official facts (names, fees, accreditation).
+
+Delivered:
+- #28 sticky apply button; #29 `/admissions`.
+- #30 official data pages: regulations, calendar, events, announcements, RSS.
+- #31 two-level CMS menus; their default structure is in migration `content/0002`.
+- #32 19 official pages, from `backend/content/official.py`:
+  - drafts are created after every migrate; slugs may be paths; a "note" block type;
+  - the site builds and links a page only once it is published;
+  - site API reads are capped at 6 at a time, retried, and failures are never cached.
 - **Phase 4:** remaining UX review items in order 4(b) → 6 → 5 → 7 → 8 → 9 → 12. Open owner decision: credit-hours source (item 3).
 
 ## Where things stand

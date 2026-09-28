@@ -12,6 +12,7 @@ import {
   Field,
   Notice,
   SectionLabel,
+  SideNote,
   StatusBadge,
   TextArea,
   problemMessage,
@@ -48,7 +49,7 @@ export function ResultSearch() {
       title="بحث في النتائج"
       subtitle="التعديل لا يُنفَّذ مباشرة — يُرسل طلبًا لأمين الشؤون العلمية."
     >
-      <form onSubmit={search} className="flex max-w-xl gap-2">
+      <form onSubmit={search} className="flex gap-2 lg:max-w-[calc(100%-380px-1.5rem)]">
         <input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
@@ -63,9 +64,22 @@ export function ResultSearch() {
       </form>
 
       {submitted && !results.isPending && !rows.length && (
-        <Card className="mt-4 max-w-xl">
+        <Card className="mt-4">
           <EmptyState icon={<SearchIcon size={24} aria-hidden />} title="لا نتائج مطابقة" />
         </Card>
+      )}
+
+      {!submitted && (
+        // Before a search, explain what the page does instead of an empty wide screen.
+        <div className="mt-5 grid gap-3 lg:grid-cols-3">
+          <SideNote title="١ ابحث">
+            بالرقم الجامعي أو باسم الطالب؛ تظهر كل نتائجه المعتمدة.
+          </SideNote>
+          <SideNote title="٢ اختر النتيجة">تظهر درجتها وإصدارها وحالة نشرها.</SideNote>
+          <SideNote title="٣ اطلب التعديل">
+            بالقيمة الجديدة والسبب؛ لا تتغير قبل موافقة أمين الشؤون العلمية.
+          </SideNote>
+        </div>
       )}
 
       {student && (

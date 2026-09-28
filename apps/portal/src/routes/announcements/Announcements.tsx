@@ -5,7 +5,16 @@ import { useState } from "react";
 import { Link } from "react-router";
 
 import { PortalShell } from "../../components/PortalShell";
-import { Button, Card, Chip, EmptyState, StatusBadge } from "../../components/ui";
+import {
+  Button,
+  Card,
+  Chip,
+  EmptyState,
+  SideFigures,
+  SideNote,
+  StatusBadge,
+  WithSide,
+} from "../../components/ui";
 import { api } from "../../lib/api";
 import { useMe } from "../../lib/auth";
 import { when } from "../../lib/format";
@@ -18,7 +27,7 @@ const SCOPES = [
   { key: "college", label: "الكلية" },
 ];
 
-/** Board: StudentAnnouncements (phone). Desktop: derived — the same feed, one readable column. */
+/** Board: StudentAnnouncements (phone). Desktop: derived — the feed beside counts and who-sees-what. */
 export function Announcements() {
   const me = useMe();
   const [scope, setScope] = useState("");
@@ -42,7 +51,24 @@ export function Announcements() {
         ) : undefined
       }
     >
-      <div className="max-w-3xl">
+      <WithSide
+        side={
+          <>
+            <SideFigures
+              title="حسب النطاق"
+              rows={SCOPES.map((s) => [
+                s.label,
+                (feed.data ?? []).filter((a) => !s.key || a.scope === s.key).length,
+              ])}
+            />
+            <SideNote title="من يرى الإعلان؟">
+              {author
+                ? "إعلان المادة يصل طلابها، وإعلان القسم طلابه وأساتذته، وإعلان الكلية الجميع — في البوابة وعلى الهاتف."
+                : "تصلك إعلانات موادك وقسمك والكلية هنا وعلى هاتفك إن فعّلت الإشعارات."}
+            </SideNote>
+          </>
+        }
+      >
         <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 lg:mx-0 lg:px-0">
           {SCOPES.map((s) => (
             <Chip key={s.key} active={scope === s.key} onClick={() => setScope(s.key)}>
@@ -55,13 +81,13 @@ export function Announcements() {
             <EmptyState icon={<Megaphone size={24} aria-hidden />} title="لا إعلانات" />
           </Card>
         ) : (
-          <div className="mt-4 space-y-3">
+          <div className="mt-4 grid items-start gap-3 xl:grid-cols-2">
             {items.map((a) => (
               <AnnouncementCard key={a.public_id} item={a} />
             ))}
           </div>
         )}
-      </div>
+      </WithSide>
     </PortalShell>
   );
 }

@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useParams } from "react-router";
 
 import { PortalShell } from "../../components/PortalShell";
-import { Button, Card, Notice, SectionLabel, problemMessage } from "../../components/ui";
+import { Button, Card, Notice, SectionLabel, problemMessage, WithSide } from "../../components/ui";
 import { api } from "../../lib/api";
 import { TOPIC_LABEL, days, num, pct } from "../../lib/reports";
 
@@ -35,44 +35,51 @@ export function MyNotice() {
       back={{ label: "الإشعارات", to: "/notifications" }}
     >
       {n && (
-        <div className="max-w-2xl space-y-4">
-          <Card className="whitespace-pre-line p-4 text-sm leading-7 text-text">{n.body}</Card>
-          {e.term && (
-            <>
-              <SectionLabel>المؤشرات عند الإرسال — {String(e.term)}</SectionLabel>
-              <Card className="grid grid-cols-2 gap-3 p-4 text-sm sm:grid-cols-4">
-                <span>
-                  <b className="block text-lg">{days(e.grading_days as number | null)}</b>
-                  <span className="text-xs text-text-muted">زمن التصحيح</span>
-                </span>
-                <span>
-                  <b className="block text-lg">{pct(e.upload_percent as number | null)}</b>
-                  <span className="text-xs text-text-muted">انتظام الرفع</span>
-                </span>
-                <span>
-                  <b className="block text-lg">{num(e.ungraded as number | null)}</b>
-                  <span className="text-xs text-text-muted">غير مصحح</span>
-                </span>
-                <span>
-                  <b className="block text-lg">
-                    {num(e.live_held as number | null)}/{num(e.live_planned as number | null)}
-                  </b>
-                  <span className="text-xs text-text-muted">بث منفذ</span>
-                </span>
-              </Card>
-            </>
-          )}
-          {n.acknowledged_at ? (
-            <Notice tone="success">
-              أقررت بالاطلاع في {new Date(n.acknowledged_at).toLocaleString("ar")}.
-            </Notice>
-          ) : n.requires_ack ? (
-            <Button onClick={() => ack.mutate()} disabled={ack.isPending}>
-              أقرّ بالاطلاع
-            </Button>
-          ) : null}
-          {ack.isError && <Notice>{problemMessage(ack.error)}</Notice>}
-        </div>
+        <WithSide
+          side={
+            <div className="space-y-4">
+              {n.acknowledged_at ? (
+                <Notice tone="success">
+                  أقررت بالاطلاع في {new Date(n.acknowledged_at).toLocaleString("ar")}.
+                </Notice>
+              ) : n.requires_ack ? (
+                <Button onClick={() => ack.mutate()} disabled={ack.isPending}>
+                  أقرّ بالاطلاع
+                </Button>
+              ) : null}
+              {ack.isError && <Notice>{problemMessage(ack.error)}</Notice>}
+            </div>
+          }
+        >
+          <div className="space-y-4">
+            <Card className="whitespace-pre-line p-4 text-sm leading-7 text-text">{n.body}</Card>
+            {e.term && (
+              <>
+                <SectionLabel>المؤشرات عند الإرسال — {String(e.term)}</SectionLabel>
+                <Card className="grid grid-cols-2 gap-3 p-4 text-sm sm:grid-cols-4">
+                  <span>
+                    <b className="block text-lg">{days(e.grading_days as number | null)}</b>
+                    <span className="text-xs text-text-muted">زمن التصحيح</span>
+                  </span>
+                  <span>
+                    <b className="block text-lg">{pct(e.upload_percent as number | null)}</b>
+                    <span className="text-xs text-text-muted">انتظام الرفع</span>
+                  </span>
+                  <span>
+                    <b className="block text-lg">{num(e.ungraded as number | null)}</b>
+                    <span className="text-xs text-text-muted">غير مصحح</span>
+                  </span>
+                  <span>
+                    <b className="block text-lg">
+                      {num(e.live_held as number | null)}/{num(e.live_planned as number | null)}
+                    </b>
+                    <span className="text-xs text-text-muted">بث منفذ</span>
+                  </span>
+                </Card>
+              </>
+            )}
+          </div>
+        </WithSide>
       )}
     </PortalShell>
   );

@@ -57,91 +57,98 @@ export function Install() {
 
   return (
     <PortalShell title="تثبيت التطبيق" back={{ label: "الإعدادات", to: "/settings" }}>
-      <div className="mx-auto max-w-2xl">
-        <div className="text-center">
-          <img
-            src="/icons/icon-192.png"
-            alt=""
-            width={72}
-            height={72}
-            className="mx-auto rounded-2xl shadow-md"
-          />
-          <h2 className="mt-4 text-xl font-bold text-text">ثبّت بوابة الكلية على هاتفك</h2>
-          <p className="mt-1 text-sm text-text-muted">
-            تفتح كتطبيق بأيقونتها، وتصلك الإشعارات فورًا.
-          </p>
-        </div>
-
-        <div className="mt-6 grid grid-cols-3 gap-2">
-          {[
-            { icon: BellRing, label: "إشعارات فورية" },
-            { icon: CloudDownload, label: "يعمل مع اتصال ضعيف" },
-            { icon: Zap, label: "فتح أسرع" },
-          ].map(({ icon: Icon, label }) => (
-            <Card key={label} className="flex flex-col items-center gap-1.5 px-2 py-3 text-center">
-              <Icon size={20} className="text-primary" aria-hidden />
-              <span className="text-xs text-text">{label}</span>
-            </Card>
-          ))}
-        </div>
-
-        {installed ? (
-          <div className="mt-6">
-            <Notice tone="success">التطبيق مثبّت على هذا الجهاز.</Notice>
+      {/* Desktop: why install on one side, the steps for the phone on the other. */}
+      <div className="lg:grid lg:grid-cols-2 lg:items-start lg:gap-10">
+        <div>
+          <div className="text-center lg:text-start">
+            <img
+              src="/icons/icon-192.png"
+              alt=""
+              width={72}
+              height={72}
+              className="mx-auto rounded-2xl shadow-md lg:mx-0"
+            />
+            <h2 className="mt-4 text-xl font-bold text-text">ثبّت بوابة الكلية على هاتفك</h2>
+            <p className="mt-1 text-sm text-text-muted">
+              تفتح كتطبيق بأيقونتها، وتصلك الإشعارات فورًا.
+            </p>
           </div>
-        ) : (
-          <>
-            <div
-              role="tablist"
-              aria-label="نوع الهاتف"
-              className="mt-6 grid grid-cols-2 rounded-lg bg-surface-alt p-0.5"
-            >
-              {(["ios", "android"] as const).map((key) => (
-                <button
-                  key={key}
-                  role="tab"
-                  type="button"
-                  aria-selected={platform === key}
-                  onClick={() => setPlatform(key)}
-                  className={`min-h-10 rounded-md text-sm ${platform === key ? "bg-surface font-semibold text-text shadow-xs" : "text-text-muted"}`}
-                >
-                  {key === "ios" ? "iPhone" : "Android"}
-                </button>
-              ))}
-            </div>
-            <ol className="mt-4 divide-y divide-border-soft">
-              {STEPS[platform].map((step, index) => (
-                <li key={step.title} className="flex gap-3 py-3">
-                  <span className="grid size-7 shrink-0 place-items-center rounded-full bg-primary text-xs font-bold text-white">
-                    {(index + 1).toLocaleString("ar")}
-                  </span>
-                  <div>
-                    <p className="text-sm font-semibold text-text">{step.title}</p>
-                    <p className="mt-0.5 text-sm leading-relaxed text-text-muted">{step.body}</p>
-                  </div>
-                </li>
-              ))}
-            </ol>
-            {platform === "android" && prompt && (
-              <Button
-                className="mt-2 w-full"
-                onClick={async () => {
-                  await prompt.prompt();
-                  if ((await prompt.userChoice).outcome === "accepted") setInstalled(true);
-                  setPrompt(null);
-                }}
+
+          <div className="mt-6 grid grid-cols-3 gap-2">
+            {[
+              { icon: BellRing, label: "إشعارات فورية" },
+              { icon: CloudDownload, label: "يعمل مع اتصال ضعيف" },
+              { icon: Zap, label: "فتح أسرع" },
+            ].map(({ icon: Icon, label }) => (
+              <Card
+                key={label}
+                className="flex flex-col items-center gap-1.5 px-2 py-3 text-center"
               >
-                تثبيت التطبيق
-              </Button>
-            )}
-            {platform === "ios" && (
-              <p className="mt-2 flex items-center gap-1.5 text-xs text-text-muted">
-                <Share size={14} aria-hidden /> تعمل الإشعارات على iPhone بدءًا من iOS 16.4 بعد
-                التثبيت.
-              </p>
-            )}
-          </>
-        )}
+                <Icon size={20} className="text-primary" aria-hidden />
+                <span className="text-xs text-text">{label}</span>
+              </Card>
+            ))}
+          </div>
+        </div>
+        <div className="lg:mt-0">
+          {installed ? (
+            <div className="mt-6 lg:mt-0">
+              <Notice tone="success">التطبيق مثبّت على هذا الجهاز.</Notice>
+            </div>
+          ) : (
+            <>
+              <div
+                role="tablist"
+                aria-label="نوع الهاتف"
+                className="mt-6 grid grid-cols-2 rounded-lg bg-surface-alt p-0.5 lg:mt-0"
+              >
+                {(["ios", "android"] as const).map((key) => (
+                  <button
+                    key={key}
+                    role="tab"
+                    type="button"
+                    aria-selected={platform === key}
+                    onClick={() => setPlatform(key)}
+                    className={`min-h-10 rounded-md text-sm ${platform === key ? "bg-surface font-semibold text-text shadow-xs" : "text-text-muted"}`}
+                  >
+                    {key === "ios" ? "iPhone" : "Android"}
+                  </button>
+                ))}
+              </div>
+              <ol className="mt-4 divide-y divide-border-soft">
+                {STEPS[platform].map((step, index) => (
+                  <li key={step.title} className="flex gap-3 py-3">
+                    <span className="grid size-7 shrink-0 place-items-center rounded-full bg-primary text-xs font-bold text-white">
+                      {(index + 1).toLocaleString("ar")}
+                    </span>
+                    <div>
+                      <p className="text-sm font-semibold text-text">{step.title}</p>
+                      <p className="mt-0.5 text-sm leading-relaxed text-text-muted">{step.body}</p>
+                    </div>
+                  </li>
+                ))}
+              </ol>
+              {platform === "android" && prompt && (
+                <Button
+                  className="mt-2 w-full"
+                  onClick={async () => {
+                    await prompt.prompt();
+                    if ((await prompt.userChoice).outcome === "accepted") setInstalled(true);
+                    setPrompt(null);
+                  }}
+                >
+                  تثبيت التطبيق
+                </Button>
+              )}
+              {platform === "ios" && (
+                <p className="mt-2 flex items-center gap-1.5 text-xs text-text-muted">
+                  <Share size={14} aria-hidden /> تعمل الإشعارات على iPhone بدءًا من iOS 16.4 بعد
+                  التثبيت.
+                </p>
+              )}
+            </>
+          )}
+        </div>
       </div>
     </PortalShell>
   );

@@ -76,7 +76,19 @@ export function Exams() {
         ) : undefined
       }
     >
-      <div className="max-w-3xl">
+      {list.length > 0 && (
+        <div className="mb-2 grid grid-cols-2 gap-2 lg:grid-cols-4">
+          {groups.map((g) => (
+            <Card key={g.key} className="p-3">
+              <p className="text-xl font-bold text-text">
+                {list.filter((e) => examPhase(e, now).key === g.key).length}
+              </p>
+              <p className="text-xs text-text-muted">{g.label}</p>
+            </Card>
+          ))}
+        </div>
+      )}
+      <div>
         {!list.length && !exams.isPending && (
           <Card>
             <EmptyState icon={<ClipboardList size={24} aria-hidden />} title="لا اختبارات بعد" />
@@ -99,16 +111,33 @@ export function Exams() {
                       className="flex items-center gap-3 px-4 py-3 hover:bg-surface-alt"
                     >
                       <CodeTile top={top} bottom={bottom} />
-                      <span className="min-w-0 flex-1">
-                        <span className="block truncate text-sm font-semibold text-text">
-                          {exam.title}
+                      <span className="min-w-0 flex-1 lg:grid lg:grid-cols-[minmax(0,2fr)_minmax(0,1.2fr)_minmax(0,1fr)_6rem] lg:items-center lg:gap-4">
+                        <span className="block min-w-0">
+                          <span className="block truncate text-sm font-semibold text-text">
+                            {exam.title}
+                          </span>
+                          {/* Phones: one meta line; desktop: its own columns (DesktopDeptExams). */}
+                          <span className="text-xs text-text-muted lg:hidden">
+                            {exam.course_name} · {when.format(new Date(exam.opens_at))} ·{" "}
+                            {count(exam.duration_minutes, N.minute)}
+                          </span>
+                          <span className="hidden truncate text-xs text-text-muted lg:block">
+                            {exam.course_name}
+                          </span>
                         </span>
-                        <span className="text-xs text-text-muted">
-                          {exam.course_name} · {when.format(new Date(exam.opens_at))} ·{" "}
+                        <span className="hidden text-sm text-text lg:block">
+                          {when.format(new Date(exam.opens_at))}
+                        </span>
+                        <span className="hidden text-sm text-text-muted lg:block">
                           {count(exam.duration_minutes, N.minute)}
                         </span>
+                        <span className="hidden lg:block">
+                          <StatusBadge status={phase.key} label={phase.label} />
+                        </span>
                       </span>
-                      <StatusBadge status={phase.key} label={phase.label} />
+                      <span className="lg:hidden">
+                        <StatusBadge status={phase.key} label={phase.label} />
+                      </span>
                     </Link>
                   );
                 })}

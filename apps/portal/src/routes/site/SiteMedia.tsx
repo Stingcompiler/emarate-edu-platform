@@ -3,7 +3,16 @@ import { ArrowDown, ArrowUp, Plus, Trash2, Upload } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { PortalShell } from "../../components/PortalShell";
-import { Button, Card, Chip, Field, Notice, problemMessage } from "../../components/ui";
+import {
+  Button,
+  Card,
+  Chip,
+  Field,
+  Notice,
+  problemMessage,
+  SectionLabel,
+  WithSide,
+} from "../../components/ui";
 import { api } from "../../lib/api";
 import { asForm, formData } from "../../lib/upload";
 
@@ -153,7 +162,28 @@ function Menus() {
   const blank: Link = { label_ar: "", label_en: "", url: "/" };
 
   return (
-    <div className="max-w-3xl">
+    <WithSide
+      side={
+        // Desktop: a live preview of the menu as the site will group it.
+        <Card className="p-4">
+          <h2 className="text-xs font-semibold text-text-muted">معاينة</h2>
+          <ul className="mt-2 space-y-2 text-sm">
+            {items.map((it, i) => (
+              <li key={i}>
+                <span className="font-semibold text-text">{it.label_ar || "—"}</span>
+                {it.children.length > 0 && (
+                  <ul className="mt-1 space-y-0.5 border-s-2 border-border-soft ps-3 text-text-muted">
+                    {it.children.map((c, j) => (
+                      <li key={j}>{c.label_ar || "—"}</li>
+                    ))}
+                  </ul>
+                )}
+              </li>
+            ))}
+          </ul>
+        </Card>
+      }
+    >
       <div className="flex gap-2">
         <Chip active={key === "header"} onClick={() => setKey("header")}>
           القائمة العلوية
@@ -233,7 +263,7 @@ function Menus() {
           حُفظت القائمة؛ تظهر في الموقع بعد إعادة بنائه.
         </p>
       )}
-    </div>
+    </WithSide>
   );
 }
 
@@ -335,42 +365,52 @@ function SiteSettingsForm() {
   });
   const set = (patch: Partial<typeof form>) => setForm((f) => ({ ...f, ...patch }));
   return (
-    <div className="max-w-2xl">
-      <Card>
-        <Field
-          label="اسم الكلية"
-          value={form.name_ar}
-          onChange={(e) => set({ name_ar: e.target.value })}
-        />
-        <Field
-          label="الشعار النصي"
-          value={form.tagline}
-          onChange={(e) => set({ tagline: e.target.value })}
-        />
-        <Field
-          label="البريد"
-          dir="ltr"
-          value={form.email}
-          onChange={(e) => set({ email: e.target.value })}
-        />
-        <Field
-          label="الهاتف"
-          dir="ltr"
-          value={form.phone}
-          onChange={(e) => set({ phone: e.target.value })}
-        />
-        <Field
-          label="رقم WhatsApp (E.164)"
-          dir="ltr"
-          value={form.whatsapp_e164}
-          onChange={(e) => set({ whatsapp_e164: e.target.value })}
-        />
-        <Field
-          label="العنوان"
-          value={form.address}
-          onChange={(e) => set({ address: e.target.value })}
-        />
-      </Card>
+    <div>
+      <div className="grid gap-4 lg:grid-cols-2 lg:items-start">
+        <div>
+          <SectionLabel>الهوية</SectionLabel>
+          <Card>
+            <Field
+              label="اسم الكلية"
+              value={form.name_ar}
+              onChange={(e) => set({ name_ar: e.target.value })}
+            />
+            <Field
+              label="الشعار النصي"
+              value={form.tagline}
+              onChange={(e) => set({ tagline: e.target.value })}
+            />
+          </Card>
+        </div>
+        <div>
+          <SectionLabel>التواصل — يظهر في التذييل وصفحة «تواصل»</SectionLabel>
+          <Card>
+            <Field
+              label="البريد"
+              dir="ltr"
+              value={form.email}
+              onChange={(e) => set({ email: e.target.value })}
+            />
+            <Field
+              label="الهاتف"
+              dir="ltr"
+              value={form.phone}
+              onChange={(e) => set({ phone: e.target.value })}
+            />
+            <Field
+              label="رقم WhatsApp (E.164)"
+              dir="ltr"
+              value={form.whatsapp_e164}
+              onChange={(e) => set({ whatsapp_e164: e.target.value })}
+            />
+            <Field
+              label="العنوان"
+              value={form.address}
+              onChange={(e) => set({ address: e.target.value })}
+            />
+          </Card>
+        </div>
+      </div>
       {save.isSuccess && (
         <div className="mt-3">
           <Notice tone="success">حُفظت الإعدادات.</Notice>
