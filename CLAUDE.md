@@ -36,5 +36,5 @@ live in `docs/` (01–09); `docs/03-roles-and-permissions.md` wins any conflict.
 | Backend tests (SQLite / Postgres) | `cd backend && uv run pytest` · `DATABASE_URL=postgres:///ecst uv run pytest` |
 | Lint and format the backend | `cd backend && uv run ruff check . && uv run ruff format .` |
 | Regenerate the API client | `pnpm api:generate` |
-| Typecheck and build the frontend | `pnpm typecheck && pnpm build` |
+| Typecheck, test and build the frontend | `pnpm typecheck && pnpm test && pnpm build` |
 | Find a page's design boards | `python3 scripts/boards.py list "<keyword>"` |
