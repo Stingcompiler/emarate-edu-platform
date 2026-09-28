@@ -20,7 +20,7 @@ from academic.models import Course, DepartmentMembership
 from accounts.models import RoleAssignment
 from accounts.rbac import Role
 from content.models import Page, Status
-from content.views import PUBLIC_CACHE, _Public
+from content.views import PUBLIC_CACHE, _PublicRead
 from students.models import StudentRecord
 
 from .models import Department, Program
@@ -44,6 +44,7 @@ class PublicProgramSerializer(S.Serializer):
     degree_label = S.CharField()
     department_code = S.CharField()
     department_name = S.CharField()
+    department_name_en = S.CharField()
     duration_terms = S.IntegerField()
     levels_count = S.IntegerField()
     credit_hours = S.IntegerField()
@@ -163,6 +164,7 @@ def _programs(queryset) -> list[dict]:
                 "degree_label": p.get_degree_display(),
                 "department_code": p.department.code,
                 "department_name": p.department.name_ar,
+                "department_name_en": p.department.name_en,
                 "duration_terms": p.duration_terms,
                 "levels_count": p.levels_count,
                 "credit_hours": hours.get(p.id) or 0,
@@ -180,7 +182,7 @@ def _active_programs():
 
 @PUBLIC_CACHE
 @extend_schema(tags=["public"])
-class PublicProgramsView(_Public):
+class PublicProgramsView(_PublicRead):
     @extend_schema(
         operation_id="public_programs_list", responses=PublicProgramSerializer(many=True)
     )
@@ -190,7 +192,7 @@ class PublicProgramsView(_Public):
 
 @PUBLIC_CACHE
 @extend_schema(tags=["public"])
-class PublicProgramView(_Public):
+class PublicProgramView(_PublicRead):
     @extend_schema(operation_id="public_program_get", responses=PublicProgramDetailSerializer)
     def get(self, request, code):
         program = get_object_or_404(_active_programs(), code=code)
@@ -253,7 +255,7 @@ def _departments(queryset) -> list[dict]:
 
 @PUBLIC_CACHE
 @extend_schema(tags=["public"])
-class PublicDepartmentsView(_Public):
+class PublicDepartmentsView(_PublicRead):
     @extend_schema(
         operation_id="public_departments_list", responses=PublicDepartmentSerializer(many=True)
     )
@@ -264,7 +266,7 @@ class PublicDepartmentsView(_Public):
 
 @PUBLIC_CACHE
 @extend_schema(tags=["public"])
-class PublicDepartmentView(_Public):
+class PublicDepartmentView(_PublicRead):
     @extend_schema(operation_id="public_department_get", responses=PublicDepartmentSerializer)
     def get(self, request, code):
         department = Department.objects.filter(is_active=True, code=code)
@@ -275,7 +277,7 @@ class PublicDepartmentView(_Public):
 
 @PUBLIC_CACHE
 @extend_schema(tags=["public"])
-class PublicPagesView(_Public):
+class PublicPagesView(_PublicRead):
     """Published pages (for the sitemap and the build's page list)."""
 
     @extend_schema(operation_id="public_pages_list", responses=PublicPageRefSerializer(many=True))
@@ -291,7 +293,7 @@ class PublicPagesView(_Public):
 
 @PUBLIC_CACHE
 @extend_schema(tags=["public"])
-class PublicStatsView(_Public):
+class PublicStatsView(_PublicRead):
     """Headline numbers for the home page (counts only)."""
 
     @extend_schema(operation_id="public_stats_get", responses=PublicStatsSerializer)

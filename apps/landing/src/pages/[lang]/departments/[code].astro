@@ -1,0 +1,45 @@
+---
+import PageHead from "../../../components/PageHead.astro";
+import ProgramCard from "../../../components/ProgramCard.astro";
+import Base from "../../../layouts/Base.astro";
+import { type Department, departments } from "../../../lib/api";
+import { LANGS, type Lang, pick, t } from "../../../lib/i18n";
+
+export async function getStaticPaths() {
+  const depts = await departments();
+  return LANGS.flatMap((lang) =>
+    depts.map((d) => ({ params: { lang, code: d.code }, props: { department: d } })),
+  );
+}
+const lang = Astro.params.lang as Lang;
+const { department: d } = Astro.props as { department: Department };
+const name = pick(lang, d.name_ar, d.name_en);
+---
+
+<Base lang={lang} title={name} path={`departments/${d.code}/`} description={d.description}>
+  <PageHead
+    lang={lang}
+    title={lang === "ar" ? `قسم ${name}` : name}
+    lead={d.description}
+    crumbs={[
+      [t(lang, "departments"), "departments/"],
+      [name, `departments/${d.code}/`],
+    ]}
+  >
+    {d.manager && (
+      <p class="mt-4 text-sm">
+        <b>{d.manager}</b> · <span class="text-text-muted">{t(lang, "manager")}</span>
+      </p>
+    )}
+  </PageHead>
+  <section class="mx-auto max-w-6xl px-4 py-10 lg:px-8">
+    <h2 class="font-display text-xl font-bold">
+      {t(lang, "programs")} · {d.programs.length}
+    </h2>
+    <div class="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      {d.programs.map((p) => (
+        <ProgramCard lang={lang} program={p} />
+      ))}
+    </div>
+  </section>
+</Base>

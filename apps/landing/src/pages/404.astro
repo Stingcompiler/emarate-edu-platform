@@ -1,0 +1,31 @@
+---
+import Base from "../layouts/Base.astro";
+import { API } from "../lib/api";
+---
+
+<Base lang="ar" title="الصفحة غير موجودة">
+  <div class="mx-auto max-w-xl px-4 py-24 text-center" id="not-found" data-api={API}>
+    <p class="font-display text-6xl font-bold text-primary">404</p>
+    <h1 class="mt-4 text-2xl font-bold">الصفحة غير موجودة</h1>
+    <p class="mt-2 text-text-muted" lang="en" dir="ltr">
+      Page not found
+    </p>
+    <a
+      href="/ar/"
+      class="mt-8 inline-flex rounded-lg bg-primary px-5 py-3 text-sm font-semibold text-white"
+    >
+      الرئيسية
+    </a>
+  </div>
+</Base>
+
+<script>
+  // Old links the site team redirected in the CMS (DesktopSiteRedirects).
+  const api = document.getElementById("not-found")!.dataset.api;
+  fetch(`${api}/api/public/redirects?path=${encodeURIComponent(location.pathname)}`)
+    .then((r) => (r.ok ? r.json() : null))
+    .then((hit) => {
+      if (hit?.to_path) location.replace(hit.to_path);
+    })
+    .catch(() => {});
+</script>

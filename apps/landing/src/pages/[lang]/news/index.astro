@@ -1,0 +1,95 @@
+---
+import PageHead from "../../../components/PageHead.astro";
+import Base from "../../../layouts/Base.astro";
+import { announcements, events, news } from "../../../lib/api";
+import { type Lang, fmtDate, href, langPaths, t } from "../../../lib/i18n";
+
+export const getStaticPaths = langPaths;
+const lang = Astro.params.lang as Lang;
+const [items, evs, notes] = await Promise.all([news(), events(), announcements()]);
+const upcoming = evs
+  .filter((e) => new Date(e.ends_at) > new Date())
+  .sort((a, b) => a.starts_at.localeCompare(b.starts_at));
+---
+
+<Base lang={lang} title={t(lang, "news")} path="news/">
+  <PageHead lang={lang} title={t(lang, "news")} crumbs={[[t(lang, "news"), "news/"]]} />
+  <div class="mx-auto grid max-w-6xl gap-10 px-4 py-10 lg:grid-cols-[2fr_1fr] lg:px-8">
+    <section>
+      <h2 class="font-display text-xl font-bold">{t(lang, "latestNews")}</h2>
+      <div class="mt-4 grid gap-4 sm:grid-cols-2">
+        {items.map((n) => (
+          <a
+            href={href(lang, `news/${n.slug}/`)}
+            class="block overflow-hidden rounded-2xl border border-border-soft bg-surface hover:shadow-md"
+          >
+            {n.cover_url && (
+              <img
+                src={n.cover_url}
+                alt=""
+                loading="lazy"
+                decoding="async"
+                class="aspect-[16/9] w-full object-cover"
+              />
+            )}
+            <div class="p-4">
+              {n.publish_at && <p class="text-xs text-text-muted">{fmtDate(lang, n.publish_at)}</p>}
+              <h3 class="mt-1 font-bold text-text">{n.title}</h3>
+              {n.summary && <p class="mt-1 text-sm leading-6 text-text-muted">{n.summary}</p>}
+            </div>
+          </a>
+        ))}
+        {!items.length && (
+          <p class="text-sm text-text-muted">{lang === "ar" ? "لا أخبار بعد." : "No news yet."}</p>
+        )}
+      </div>
+    </section>
+    <aside class="space-y-8">
+      <section>
+        <h2 class="font-display text-xl font-bold">
+          {lang === "ar" ? "الفعاليات القادمة" : "Upcoming events"}
+        </h2>
+        <ul class="mt-4 space-y-3">
+          {upcoming.map((e) => (
+            <li>
+              <a
+                href={href(lang, `events/${e.slug}/`)}
+                class="flex gap-3 rounded-2xl border border-border-soft bg-surface p-3 hover:shadow-sm"
+              >
+                <span class="grid w-14 shrink-0 place-items-center rounded-xl bg-primary-soft py-1.5 text-center text-primary-700">
+                  <b class="block text-xl">{fmtDate(lang, e.starts_at, { day: "numeric" })}</b>
+                  <span class="text-[11px]">{fmtDate(lang, e.starts_at, { month: "short" })}</span>
+                </span>
+                <span>
+                  <b class="block text-sm text-text">{e.title}</b>
+                  <span class="text-xs text-text-muted">
+                    {fmtDate(lang, e.starts_at, { hour: "numeric", minute: "2-digit" })}
+                    {e.location ? ` · ${e.location}` : ""}
+                  </span>
+                </span>
+              </a>
+            </li>
+          ))}
+          {!upcoming.length && (
+            <li class="text-sm text-text-muted">
+              {lang === "ar" ? "لا فعاليات قادمة." : "No upcoming events."}
+            </li>
+          )}
+        </ul>
+      </section>
+      {notes.length > 0 && (
+        <section>
+          <h2 class="font-display text-xl font-bold">{t(lang, "announcements")}</h2>
+          <ul class="mt-4 space-y-3">
+            {notes.slice(0, 6).map((a) => (
+              <li class="rounded-2xl border border-border-soft bg-surface p-4">
+                <b class="block text-sm">{a.title}</b>
+                <div class="mt-1 text-sm leading-6 text-text-muted" set:html={a.body} />
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+    </aside>
+  </div>
+</Base>

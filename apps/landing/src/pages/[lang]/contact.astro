@@ -1,0 +1,224 @@
+---
+import PageHead from "../../components/PageHead.astro";
+import Base from "../../layouts/Base.astro";
+import { API, PORTAL, departments, site } from "../../lib/api";
+import { type Lang, langPaths, pick, t } from "../../lib/i18n";
+
+export const getStaticPaths = langPaths;
+const lang = Astro.params.lang as Lang;
+const [s, depts] = await Promise.all([site(), departments()]);
+const TYPES: [string, string, string][] = [
+  ["admission", "القبول والتقديم", "Admission"],
+  ["programs", "برنامج معين", "A program"],
+  ["fees", "الرسوم والمنح", "Fees & scholarships"],
+  ["registration", "التسجيل", "Registration"],
+  ["study", "الدراسة", "Study"],
+  ["technical", "مشكلة تقنية", "Technical issue"],
+  ["general", "أخرى", "Other"],
+];
+const L = (ar: string, en: string) => (lang === "ar" ? ar : en);
+---
+
+<Base lang={lang} title={t(lang, "contact")} path="contact/">
+  <PageHead
+    lang={lang}
+    title={L("تواصل معنا", "Contact us")}
+    lead={L(
+      "يصل استفسارك إلى الجهة المختصة ويُرد عليه عادةً خلال يوم عمل. تتابع الرد برقمك المرجعي — لا حاجة لحساب.",
+      "Your message reaches the right office, usually answered within a working day. Follow up with your reference number — no account needed.",
+    )}
+    crumbs={[[t(lang, "contact"), "contact/"]]}
+  />
+  <div class="mx-auto grid max-w-6xl gap-10 px-4 py-10 lg:grid-cols-[2fr_1fr] lg:px-8">
+    <form id="contact" data-api={API} data-lang={lang} class="space-y-5" novalidate>
+      <fieldset>
+        <legend class="text-sm font-semibold">{L("الموضوع", "Topic")}</legend>
+        <div class="mt-2 flex flex-wrap gap-2">
+          {TYPES.map(([value, ar, en], i) => (
+            <label class="cursor-pointer">
+              <input
+                type="radio"
+                name="type"
+                value={value}
+                checked={i === 0}
+                class="peer sr-only"
+              />
+              <span class="inline-block rounded-full border border-border-soft bg-surface px-3 py-1.5 text-sm font-semibold peer-checked:bg-text peer-checked:text-bg peer-focus-visible:ring-2">
+                {L(ar, en)}
+              </span>
+            </label>
+          ))}
+        </div>
+      </fieldset>
+      <div class="grid gap-4 sm:grid-cols-2">
+        <label class="block text-sm font-semibold">
+          {L("الاسم الكامل", "Full name")}
+          <input name="name" required maxlength="200" autocomplete="name" class="field" />
+        </label>
+        <label class="block text-sm font-semibold">
+          {L("البريد الإلكتروني", "Email")}
+          <input name="email" type="email" autocomplete="email" dir="ltr" class="field" />
+        </label>
+        <label class="block text-sm font-semibold">
+          {L("الهاتف (واتساب إن أمكن)", "Phone (WhatsApp if possible)")}
+          <input
+            name="phone"
+            type="tel"
+            autocomplete="tel"
+            dir="ltr"
+            placeholder="+249…"
+            class="field"
+          />
+        </label>
+        <label class="block text-sm font-semibold">
+          {L("القسم", "Department")}
+          <select name="department" class="field">
+            <option value="">{L("غير محدد", "Not specific")}</option>
+            {depts.map((d) => (
+              <option value={d.id}>{pick(lang, d.name_ar, d.name_en)}</option>
+            ))}
+          </select>
+        </label>
+      </div>
+      <label class="block text-sm font-semibold">
+        {L("عنوان الاستفسار", "Subject")}
+        <input name="subject" required maxlength="200" class="field" />
+      </label>
+      <label class="block text-sm font-semibold">
+        {L("رسالتك", "Message")}
+        <textarea name="message" required maxlength="4000" rows="6" class="field"></textarea>
+      </label>
+      <!-- Bots fill hidden fields; people never see this one. -->
+      <label class="hidden" aria-hidden="true">
+        Website
+        <input name="website" tabindex="-1" autocomplete="off" />
+      </label>
+      <p
+        id="contact-error"
+        role="alert"
+        class="hidden rounded-lg bg-danger-soft p-3 text-sm text-danger-strong"
+      ></p>
+      <button
+        type="submit"
+        class="rounded-lg bg-primary px-6 py-3 text-sm font-semibold text-white hover:bg-primary-hover disabled:opacity-60"
+      >
+        {L("إرسال", "Send")}
+      </button>
+      <div id="contact-done" class="hidden rounded-2xl bg-success-soft p-5 text-success-strong">
+        <p class="font-bold">{L("وصل استفسارك.", "We received your message.")}</p>
+        <p class="mt-1 text-sm">
+          {L("الرقم المرجعي — احتفظ به:", "Your reference number — keep it:")}{" "}
+          <b id="contact-ref" dir="ltr" class="font-mono text-lg"></b>
+        </p>
+        <a href={`${PORTAL}/track`} class="mt-3 inline-block text-sm font-semibold underline">
+          {t(lang, "track")}
+        </a>
+      </div>
+    </form>
+    <aside class="space-y-3 text-sm">
+      {s.phone && (
+        <a href={`tel:${s.phone.replace(/\s/g, "")}`} class="block rounded-2xl bg-bg-subtle p-4">
+          <span class="text-text-muted">{L("الهاتف", "Phone")}</span>
+          <b dir="ltr" class="block">
+            {s.phone}
+          </b>
+        </a>
+      )}
+      {s.email && (
+        <a href={`mailto:${s.email}`} class="block rounded-2xl bg-bg-subtle p-4">
+          <span class="text-text-muted">{L("البريد", "Email")}</span>
+          <b class="block">{s.email}</b>
+        </a>
+      )}
+      {s.whatsapp_e164 && (
+        <a
+          href={`https://wa.me/${s.whatsapp_e164.replace("+", "")}`}
+          class="block rounded-2xl bg-bg-subtle p-4"
+        >
+          <span class="text-text-muted">WhatsApp</span>
+          <b dir="ltr" class="block">
+            {s.whatsapp_e164}
+          </b>
+        </a>
+      )}
+      {s.address && (
+        <p class="rounded-2xl bg-bg-subtle p-4">
+          <span class="text-text-muted">{L("العنوان", "Address")}</span>
+          <b class="block">{s.address}</b>
+        </p>
+      )}
+    </aside>
+  </div>
+</Base>
+
+<style>
+  .field {
+    margin-top: 0.375rem;
+    display: block;
+    width: 100%;
+    min-height: 2.75rem;
+    border-radius: 0.5rem;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    padding: 0.5rem 0.75rem;
+    font-weight: 400;
+  }
+</style>
+
+<script>
+  const form = document.getElementById("contact") as HTMLFormElement;
+  const error = document.getElementById("contact-error")!;
+  const ar = form.dataset.lang === "ar";
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    error.classList.add("hidden");
+    const data = Object.fromEntries(new FormData(form)) as Record<string, string>;
+    if (
+      !data.name?.trim() ||
+      !data.subject?.trim() ||
+      !data.message?.trim() ||
+      (!data.email && !data.phone)
+    ) {
+      error.textContent = ar
+        ? "أكمل الاسم والعنوان والرسالة، وأعطنا بريدًا أو هاتفًا للرد."
+        : "Fill in name, subject and message, and give an email or phone for the reply.";
+      error.classList.remove("hidden");
+      return;
+    }
+    const button = form.querySelector("button[type=submit]") as HTMLButtonElement;
+    button.disabled = true;
+    try {
+      const response = await fetch(`${form.dataset.api}/api/public/inquiries`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Accept-Language": ar ? "ar" : "en" },
+        body: JSON.stringify({
+          ...data,
+          department: data.department ? Number(data.department) : null,
+        }),
+      });
+      const body = await response.json().catch(() => ({}));
+      if (!response.ok)
+        throw new Error(
+          body.detail ||
+            (response.status === 429
+              ? ar
+                ? "طلبات كثيرة، حاول لاحقًا."
+                : "Too many requests, try later."
+              : ""),
+        );
+      document.getElementById("contact-ref")!.textContent = body.reference_no;
+      form
+        .querySelectorAll("fieldset, label, button[type=submit]")
+        .forEach((el) => el.classList.add("hidden"));
+      document.getElementById("contact-done")!.classList.remove("hidden");
+    } catch (e) {
+      error.textContent =
+        (e as Error).message ||
+        (ar
+          ? "تعذّر الإرسال. تحقق من الاتصال وأعد المحاولة."
+          : "Could not send. Check your connection and retry.");
+      error.classList.remove("hidden");
+      button.disabled = false;
+    }
+  });
+</script>

@@ -1,45 +1,41 @@
-# Handoff — Phase 8 done → Phase 9 (public site, Astro) — 2026-09-28
+# Handoff — Phase 9 done → Phase 10 (portal identity + role dashboards) — 2026-09-28
 
 ## Where things stand
-- **Phases 1–7 are merged** to `main` (PRs #3–#9).
-- **Phase 8 (reports)** is complete on `feat/phase-8-reports`. Its PR is opened in this step; merge it once CI is green with `gh pr merge --merge` (auto-merge is disabled for the repo).
+- **Phases 1–8 are merged** to `main` (PRs #3–#10).
+- **Phase 9 (public site)** is complete on `feat/phase-9-landing`. Its PR is opened in this step; merge it once CI is green with `gh pr merge --merge` (auto-merge is disabled for the repo).
 - **Verified locally:**
-  - 299 tests pass on SQLite; 298 pass plus 1 skip on Postgres;
-  - migrations reverse on both databases;
-  - the schema has 0 warnings; ruff, typecheck, build and prettier pass.
-  - Pages were walked in the pane: HR home, teachers, profile, new notice → sent, HR report → export → A4 print page (1280); department report (1280 and 390); admissions and affairs reports (1280); transcript print; the teacher acknowledging a notice (390).
+  - 304 tests pass on SQLite; 303 pass plus 1 skip on Postgres;
+  - the schema is clean;
+  - the landing builds 48 pages in strict mode against the dev API.
+  - The site was walked in the pane: home at 390 and 1280, program page at 390, departments at 390, EN programs filter at 1280. The contact form was submitted cross-origin (got a reference number), and the 404 page followed a CMS redirect.
 
-## What Phase 7 delivered (short)
-- **Visitor OTP session** (`Authorization: Visitor <token>`, 30 min) with public portal routes `/apply` (5-step wizard) and `/track`. Phase 9 links to them and does not rebuild them.
-- **Admissions:** cycles, intakes, versioned forms, the state machine in `admissions/services.TRANSITIONS`, routing, claim and assign, decisions, and `register_applicant` → university number. Staff pages: `/applications`, `/admissions/cycles`, `/admissions/forms`.
+## Earlier phases (short)
+- **Phase 7:** visitor OTP session; public portal routes `/apply` and `/track`; the admissions workflow; staff pages `/applications`, `/admissions/*`.
+- **Phase 8:** the `reports` app (teacher indicators, department, admissions and affairs reports, frozen snapshots, transcripts); HR pages `/hr/*`; `/reports*`; print views `/print/*` (browser PDF).
 
-## What Phase 8 delivered
-- **`reports` app:**
-  - `metrics.py` (teacher rows, department, admissions and affairs builders; the query count is fixed and tested).
-  - `ReportSnapshot` (frozen exports with a SHA-256 digest; no edit or delete).
-  - Views under `/api/v1/reports/*`, `/api/v1/report-snapshots`, `/api/v1/transcripts/<number>`.
-- **Settings:** `SystemSettings` gained `grading_days_limit` (3), `upload_min_percent` (75) and `planned_lectures_per_week` (2).
-- **HR notices:** `notifications.HRNotice` gained topic, evidence, term, a department-manager CC and `opened_at`. Academic affairs can send too. HR now has `structure.view` (for the term and department filters).
-- **Portal:**
-  - Report pages: `/reports`, `/reports/admissions`, `/reports/affairs`.
-  - HR pages: `/hr`, `/hr/teachers`, `/hr/teachers/:id`, `/hr/notices/new`, `/hr/report`.
-  - Teacher side: `/hr-notices/:id`.
-  - Transcripts: `/transcripts` → `/print/transcript/:number`.
-  - Print views: `/print/report/:id` and `/print/my-results` (a link on `/results`).
-  - Shared helpers live in `lib/reports.tsx` (Kpi, Bars, Delta, ExportBar, PastReports, downloadCsv, Picker).
-- **PDF decision:** browser print from A4 pages (`routes/print/PrintLayout.tsx`, `@page A4`). No server PDF libraries.
-- **Seed:** graded and waiting submissions for the demo teacher and one HR notice.
+## What Phase 9 delivered
+- **`apps/landing` (Astro SSG):**
+  - `lib/api.ts` handles build-time reads, strict mode and the build token; `lib/i18n.ts` holds ar/en, direction, `pick()` fallback and arrows; `layouts/Base.astro` holds the header, footer, SEO and hreflang.
+  - Components: ProgramCard, Blocks (CMS page blocks), PageHead.
+  - Pages under `[lang]/`: index, about, departments (+[code]), programs (+[code]), news (+[slug]), events/[slug], contact, p/[slug]. Root pages: `/` → `/ar/`, `404.astro` (redirect lookup), `sitemap.xml.ts`, `robots.txt.ts`.
+- **API:**
+  - `organization/public.py`: `/api/public/{departments,departments/<code>,programs,programs/<code>,pages,stats}`. `Program` gained `description_ar/en`.
+  - `core/middleware.PublicCorsMiddleware`: CORS for `/api/public/*` from `PUBLIC_SITE_ORIGINS` only.
+  - `core/throttles.PublicReadThrottle` (scope `public_read`, 120/min per IP) covers catalogue and content reads. It skips the limit when `X-Site-Build` matches `SITE_BUILD_TOKEN`.
+  - `SITE_REBUILD_HOOK_URL` is now read from the environment.
+- **Env:** `backend/.env.example` (PUBLIC_SITE_ORIGINS, SITE_BUILD_TOKEN, SITE_REBUILD_HOOK_URL) and `apps/landing/.env.example` (PUBLIC_API_URL, PUBLIC_PORTAL_URL, SITE_BUILD_TOKEN, LANDING_STRICT=1).
 
-## Next steps (Phase 9 — public site, docs/02 §6 and §8 Phase 9)
-1. Read docs/02 §6 (landing: Astro SSG from `/api/public/*`, `/ar` and `/en`, sitemap, OpenGraph, Schema.org, Core Web Vitals) and docs/06 (identity). Boards (phone): VisitorHome, VisitorAbout, VisitorPrograms, VisitorProgram, VisitorDepartments, VisitorDepartment, VisitorNews, VisitorContact. Desktop boards are missing: derive them from the shell rules and say so in the PR.
-   ```bash
-   python3 scripts/boards.py list Visitor
-   ```
-2. `apps/landing` already has an Astro scaffold (`Base.astro`, `index.astro`, `global.css`). Build pages from `/api/public/{site,pages,news,events,announcements,menus,redirects}` plus the program and department endpoints (add public read endpoints if missing; check `content/urls_public.py`).
-3. **Interactive islands:** the contact form (`/api/public/inquiries`) and the program search. "Apply" and "Track" link to the portal's `/apply` and `/track` (a `PORTAL_URL` env var).
-4. **Rebuild on publish:** `content.request_site_rebuild()` calls `SITE_REBUILD_HOOK_URL` (currently empty). Document the Render static-site deploy-hook value for Phase 11.
-5. Handle redirects (`/api/public/redirects` → `_redirects` or Astro redirects at build time), the sitemap, robots, OG images, and `CollegeOrUniversity`/`Event`/`NewsArticle` JSON-LD.
-6. Keep it responsive (skill `responsive-page`) and RTL-first, with `astro dev --ignore-lock` (see gotchas). Add a CI build of the landing app.
+## Next steps (Phase 10 — portal identity, docs/02 §8 Phase 10, §4.15)
+1. **Role home dashboards** ("لوحة لكل دور"). Boards: AdminHome (department manager), RegistrarHome, HeadRegistrarHome, ResultsOfficerHome, AcademicAffairsHome, StudentAffairsHome, SiteManagerHome, SystemAdminHome, EventsManagerHome, plus the student and teacher homes (`python3 scripts/boards.py list Home`, `list Student`, `list Teacher`). Make `/` land on the role's home instead of `/notifications`.
+2. **Department manager dashboard constraint (§4.15, owner rule):**
+   - Keep exactly these sections: الرئيسية، المواد، المحاضرات، الأساتذة، طلاب القسم، التقارير، النتائج، سجل العمليات، موادي.
+   - New tabs are additions only: طلبات التسجيل، الاختبارات، جلسات البث، الإعلانات.
+   - The supervisor sees the same dashboard without delete buttons.
+   - Check which of these pages exist in the portal (many APIs exist from Phases 1–3: courses, offerings, lectures, members, students, audit) and build the missing ones.
+3. **Accessibility pass:** focus rings, labels, contrast, keyboard navigation in sheets and menus, `lang`/`dir` on mixed text.
+4. **Responsive tables:** audit wide tables at 390 (use the card-on-phone pattern).
+5. **PWA onboarding:** first-run install hint (Android prompt, iOS share → add to home screen); `/install` exists.
+6. Checks at 390 and 1280 for every new page, then docs, PR and merge.
 
 ## Decisions made (don't revisit)
 - **Roles are rows (`role`, `department`), not Django Groups.** Mention this deviation from docs/03 §10 in PRs that touch roles.
@@ -89,6 +85,8 @@
 - **Pane screenshots:** they can lag a click. Use `get_page_text` to confirm the step changed before assuming a bug.
 - **Reports:** "now" drives weeks elapsed and grading age, so tests pass a fixed `now` to the metrics functions. Warm up once before counting queries (the first call creates the SystemSettings row).
 - **Print pages** live outside PortalShell and set `document.title` themselves. Wide report tables go full width; a 320px sidebar squeezes them at 1280.
+- **Landing build:** a burst of anonymous reads hits the throttle (HTTP 429). Production builds send `X-Site-Build`; dev relies on the 120/min `public_read` scope. The build treats 404 as "absent" and any other failure as fatal only when `LANDING_STRICT=1`.
+- **Astro `[lang]` routes:** `getStaticPaths` must return every language × item; English arrows and links must not use absolute site URLs (the `alternate()` helper is for `<link hreflang>` only).
 - **Earlier gotchas:**
   - build constraint lists with sorted sets;
   - Django 6.1 uses `MAILERS`;

@@ -1,0 +1,49 @@
+---
+import PageHead from "../../../components/PageHead.astro";
+import Base from "../../../layouts/Base.astro";
+import { type News, get, news } from "../../../lib/api";
+import { LANGS, type Lang, fmtDate, t } from "../../../lib/i18n";
+
+export async function getStaticPaths() {
+  const items = await news();
+  const full = await Promise.all(
+    items.map((n) => get<News | null>(`news/${encodeURIComponent(n.slug)}`, null)),
+  );
+  return LANGS.flatMap((lang) =>
+    full
+      .filter((n): n is News => !!n)
+      .map((n) => ({ params: { lang, slug: n.slug }, props: { item: n } })),
+  );
+}
+const lang = Astro.params.lang as Lang;
+const { item: n } = Astro.props as { item: News };
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "NewsArticle",
+  headline: n.title,
+  description: n.summary || undefined,
+  datePublished: n.publish_at ?? undefined,
+  image: n.cover_url ? [n.cover_url] : undefined,
+  publisher: { "@type": "CollegeOrUniversity", name: "كلية الإمارات للعلوم والتقنية" },
+};
+---
+
+<Base
+  lang={lang}
+  title={n.title}
+  path={`news/${n.slug}/`}
+  description={n.summary}
+  jsonLd={jsonLd}
+  image={n.cover_url}
+>
+  <PageHead
+    lang={lang}
+    title={n.title}
+    lead={n.publish_at ? fmtDate(lang, n.publish_at) : undefined}
+    crumbs={[[t(lang, "news"), "news/"]]}
+  />
+  <article class="mx-auto max-w-3xl px-4 py-10 lg:px-8">
+    {n.cover_url && <img src={n.cover_url} alt="" class="mb-8 w-full rounded-2xl" />}
+    <div class="space-y-4 text-base leading-8" set:html={n.body} />
+  </article>
+</Base>

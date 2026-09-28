@@ -84,3 +84,34 @@ def test_public_cors_only_for_site_origins(client, settings, db):
     assert "Access-Control-Allow-Origin" not in other
     private = client.get("/api/v1/me", **site)
     assert "Access-Control-Allow-Origin" not in private
+
+
+def test_site_build_token_skips_the_public_read_throttle(client, settings, db):
+    from django.core.cache import cache
+
+    settings.SITE_BUILD_TOKEN = "build-secret"
+    settings.REST_FRAMEWORK = {
+        **settings.REST_FRAMEWORK,
+        "DEFAULT_THROTTLE_RATES": {
+            **settings.REST_FRAMEWORK["DEFAULT_THROTTLE_RATES"],
+            "public_read": "2/minute",
+        },
+    }
+    from rest_framework.settings import api_settings
+
+    api_settings.reload()
+    from core.throttles import PublicReadThrottle
+
+    PublicReadThrottle.THROTTLE_RATES = api_settings.DEFAULT_THROTTLE_RATES
+    cache.clear()
+    try:
+        codes = [client.get("/api/public/stats").status_code for _ in range(3)]
+        assert codes == [200, 200, 429]
+        built = client.get("/api/public/stats", HTTP_X_SITE_BUILD="build-secret")
+        assert built.status_code == 200
+        wrong = client.get("/api/public/stats", HTTP_X_SITE_BUILD="nope")
+        assert wrong.status_code == 429
+    finally:
+        cache.clear()
+        del PublicReadThrottle.THROTTLE_RATES  # back to the class default
+        api_settings.reload()

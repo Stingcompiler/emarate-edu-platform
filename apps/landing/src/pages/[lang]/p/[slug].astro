@@ -1,0 +1,30 @@
+---
+import Blocks from "../../../components/Blocks.astro";
+import PageHead from "../../../components/PageHead.astro";
+import Base from "../../../layouts/Base.astro";
+import { type Page, get, pages } from "../../../lib/api";
+import { LANGS, type Lang, pick } from "../../../lib/i18n";
+
+// Every published CMS page (privacy, policies…) at /{lang}/p/{slug}/.
+export async function getStaticPaths() {
+  const list = await pages();
+  const full = await Promise.all(
+    list.map((p) => get<Page | null>(`pages/${encodeURIComponent(p.slug)}`, null)),
+  );
+  return LANGS.flatMap((lang) =>
+    full
+      .filter((p): p is Page => !!p)
+      .map((p) => ({ params: { lang, slug: p.slug }, props: { page: p } })),
+  );
+}
+const lang = Astro.params.lang as Lang;
+const { page } = Astro.props as { page: Page };
+const title = pick(lang, page.title_ar, page.title_en);
+---
+
+<Base lang={lang} title={title} path={`p/${page.slug}/`} description={page.seo?.description}>
+  <PageHead lang={lang} title={title} />
+  <div class="mx-auto max-w-3xl px-4 py-10 lg:px-8">
+    <Blocks blocks={page.blocks} />
+  </div>
+</Base>

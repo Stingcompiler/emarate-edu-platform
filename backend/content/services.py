@@ -143,7 +143,7 @@ def public_q() -> Q:
 
 def request_site_rebuild() -> None:
     """Debounced (2 minutes) call to the static site's deploy hook (docs/05 §8.7).
-    The public site ships in Phase 9; without SITE_REBUILD_HOOK_URL this does nothing."""
+    Without SITE_REBUILD_HOOK_URL (the static host's deploy hook) this does nothing."""
     url = getattr(settings, "SITE_REBUILD_HOOK_URL", "")
     if not url or not cache.add("site-rebuild-pending", True, timeout=120):
         return

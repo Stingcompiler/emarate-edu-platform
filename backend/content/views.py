@@ -15,6 +15,7 @@ from rest_framework.views import APIView
 from accounts import rbac
 from audit.services import RequestMeta, record, snapshot
 from core.permissions import capability
+from core.throttles import PublicReadThrottle
 
 from . import services
 from .models import (
@@ -314,9 +315,15 @@ class _Public(APIView):
     authentication_classes = []
 
 
+class _PublicRead(_Public):
+    """Cached, read-only site content: a higher per-IP limit (and none for the site build)."""
+
+    throttle_classes = [PublicReadThrottle]
+
+
 @PUBLIC_CACHE
 @extend_schema(tags=["public"])
-class PublicPageView(_Public):
+class PublicPageView(_PublicRead):
     @extend_schema(responses=PageSerializer)
     def get(self, request, slug):
         return Response(PageSerializer(get_object_or_404(_published(Page.objects), slug=slug)).data)
@@ -324,7 +331,7 @@ class PublicPageView(_Public):
 
 @PUBLIC_CACHE
 @extend_schema(tags=["public"])
-class PublicNewsList(_Public):
+class PublicNewsList(_PublicRead):
     @extend_schema(responses=NewsSerializer(many=True))
     def get(self, request):
         return Response(
@@ -334,7 +341,7 @@ class PublicNewsList(_Public):
 
 @PUBLIC_CACHE
 @extend_schema(tags=["public"])
-class PublicNewsDetail(_Public):
+class PublicNewsDetail(_PublicRead):
     @extend_schema(responses=NewsSerializer)
     def get(self, request, slug):
         return Response(NewsSerializer(get_object_or_404(_published(News.objects), slug=slug)).data)
@@ -342,7 +349,7 @@ class PublicNewsDetail(_Public):
 
 @PUBLIC_CACHE
 @extend_schema(tags=["public"])
-class PublicEventList(_Public):
+class PublicEventList(_PublicRead):
     @extend_schema(responses=EventSerializer(many=True))
     def get(self, request):
         rows = Event.objects.filter(
@@ -353,7 +360,7 @@ class PublicEventList(_Public):
 
 @PUBLIC_CACHE
 @extend_schema(tags=["public"])
-class PublicEventDetail(_Public):
+class PublicEventDetail(_PublicRead):
     @extend_schema(responses=EventSerializer)
     def get(self, request, slug):
         event = get_object_or_404(Event.objects.exclude(status=Event.EventStatus.DRAFT), slug=slug)
@@ -362,7 +369,7 @@ class PublicEventDetail(_Public):
 
 @PUBLIC_CACHE
 @extend_schema(tags=["public"])
-class PublicAnnouncementList(_Public):
+class PublicAnnouncementList(_PublicRead):
     @extend_schema(
         operation_id="public_announcements_list", responses=AnnouncementSerializer(many=True)
     )
@@ -375,7 +382,7 @@ class PublicAnnouncementList(_Public):
 
 @PUBLIC_CACHE
 @extend_schema(tags=["public"])
-class PublicSiteSettingsView(_Public):
+class PublicSiteSettingsView(_PublicRead):
     @extend_schema(responses=SiteSettingsSerializer)
     def get(self, request):
         return Response(SiteSettingsSerializer(SiteSettings.load()).data)
@@ -383,14 +390,14 @@ class PublicSiteSettingsView(_Public):
 
 @PUBLIC_CACHE
 @extend_schema(tags=["public"])
-class PublicMenuView(_Public):
+class PublicMenuView(_PublicRead):
     @extend_schema(responses=MenuSerializer)
     def get(self, request, key):
         return Response(MenuSerializer(get_object_or_404(Menu, key=key)).data)
 
 
 @extend_schema(tags=["public"])
-class PublicRedirectView(_Public):
+class PublicRedirectView(_PublicRead):
     @extend_schema(
         parameters=[OpenApiParameter("path", str, required=True)], responses=RedirectSerializer
     )

@@ -139,7 +139,7 @@ BUNNY_STREAM_TOKEN_KEY = ""
 BUNNY_WEBHOOK_SECRET = ""
 
 # Deploy hook of the static public site (Phase 9); empty = no rebuilds.
-SITE_REBUILD_HOOK_URL = ""
+SITE_REBUILD_HOOK_URL = env("SITE_REBUILD_HOOK_URL", "")
 
 # Encrypts secrets stored in the database (live links). Set it in production so
 # rotating SECRET_KEY does not make stored values unreadable.
@@ -193,6 +193,7 @@ REST_FRAMEWORK = {
     ],
     "DEFAULT_THROTTLE_RATES": {
         "anon": "30/minute",
+        "public_read": "120/minute",  # cached site content (core.throttles)
         "user": "60/minute",
         "login": "10/minute",  # per IP (docs/05 §7)
         "otp": "5/hour",  # per email target
@@ -300,6 +301,8 @@ CSRF_COOKIE_SAMESITE = "Lax"
 CSRF_TRUSTED_ORIGINS = env_list("DJANGO_CSRF_TRUSTED_ORIGINS")
 # The public website (apps/landing) may call /api/public/* from these origins.
 PUBLIC_SITE_ORIGINS = env_list("PUBLIC_SITE_ORIGINS")
+# Shared with the landing build (header X-Site-Build) so it isn't throttled.
+SITE_BUILD_TOKEN = env("SITE_BUILD_TOKEN", "")
 
 # ─── Logging ──────────────────────────────────────────────────────────────
 LOG_LEVEL = env("DJANGO_LOG_LEVEL", "INFO")

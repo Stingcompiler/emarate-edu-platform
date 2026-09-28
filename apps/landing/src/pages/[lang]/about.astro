@@ -1,0 +1,66 @@
+---
+import Blocks from "../../components/Blocks.astro";
+import PageHead from "../../components/PageHead.astro";
+import Base from "../../layouts/Base.astro";
+import { type Page, departments, get, site, stats } from "../../lib/api";
+import { type Lang, href, langPaths, num, pick, t } from "../../lib/i18n";
+
+export const getStaticPaths = langPaths;
+const lang = Astro.params.lang as Lang;
+// The "about" CMS page, when the site team has published one.
+const [s, page, st, depts] = await Promise.all([
+  site(),
+  get<Page | null>("pages/about", null),
+  stats(),
+  departments(),
+]);
+const title = page ? pick(lang, page.title_ar, page.title_en) : t(lang, "about");
+---
+
+<Base lang={lang} title={title} path="about/" description={page?.seo?.description}>
+  <PageHead lang={lang} title={title} lead={s.tagline} crumbs={[[t(lang, "about"), "about/"]]} />
+  <div class="mx-auto grid max-w-6xl gap-10 px-4 py-10 lg:grid-cols-[2fr_1fr] lg:px-8">
+    <div>
+      {page ? (
+        <Blocks blocks={page.blocks} />
+      ) : (
+        <p class="text-text-muted">{pick(lang, s.name_ar, s.name_en)}</p>
+      )}
+    </div>
+    <aside class="space-y-4">
+      <div class="grid grid-cols-2 gap-2">
+        {[
+          [st.students, t(lang, "students")],
+          [st.teachers, t(lang, "teachers")],
+          [st.programs, t(lang, "programsCount")],
+          [st.departments, t(lang, "departmentsCount")],
+        ].map(([n, l]) => (
+          <div class="rounded-2xl bg-bg-subtle p-4 text-center">
+            <p class="font-display text-xl font-bold text-primary">{num(lang, Number(n))}</p>
+            <p class="text-xs text-text-muted">{l}</p>
+          </div>
+        ))}
+      </div>
+      {depts.some((d) => d.manager) && (
+        <div class="rounded-2xl border border-border-soft bg-surface p-4">
+          <h2 class="font-bold">{lang === "ar" ? "القيادة الأكاديمية" : "Academic leadership"}</h2>
+          <ul class="mt-3 space-y-2 text-sm">
+            {depts
+              .filter((d) => d.manager)
+              .map((d) => (
+                <li>
+                  <b class="block">{d.manager}</b>
+                  <a
+                    href={href(lang, `departments/${d.code}/`)}
+                    class="text-text-muted hover:text-primary"
+                  >
+                    {t(lang, "manager")} · {pick(lang, d.name_ar, d.name_en)}
+                  </a>
+                </li>
+              ))}
+          </ul>
+        </div>
+      )}
+    </aside>
+  </div>
+</Base>

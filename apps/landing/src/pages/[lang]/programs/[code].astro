@@ -1,0 +1,152 @@
+---
+import PageHead from "../../../components/PageHead.astro";
+import Base from "../../../layouts/Base.astro";
+import { PORTAL, type ProgramDetail, get, programs } from "../../../lib/api";
+import { arrow, fmtDate, href, type Lang, LANGS, num, pick, t } from "../../../lib/i18n";
+
+export async function getStaticPaths() {
+  const all = await programs();
+  const details = await Promise.all(
+    all.map((p) => get<ProgramDetail | null>(`programs/${p.code}`, null)),
+  );
+  return LANGS.flatMap((lang) =>
+    details
+      .filter((d): d is ProgramDetail => !!d)
+      .map((d) => ({ params: { lang, code: d.code }, props: { program: d } })),
+  );
+}
+const lang = Astro.params.lang as Lang;
+const { program: p } = Astro.props as { program: ProgramDetail };
+const name = pick(lang, p.name_ar, p.name_en);
+const description = pick(lang, p.description_ar, p.description_en);
+const open = !!p.intake?.accepting;
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "EducationalOccupationalProgram",
+  name: p.name_ar,
+  alternateName: p.name_en || undefined,
+  description: p.description_ar || undefined,
+  educationalCredentialAwarded: p.degree_label,
+  timeToComplete: `P${p.duration_terms / 2}Y`,
+  provider: {
+    "@type": "CollegeOrUniversity",
+    name: "كلية الإمارات للعلوم والتقنية",
+    url: Astro.site?.toString(),
+  },
+  ...(open ? { applicationDeadline: p.intake!.closes_at.slice(0, 10) } : {}),
+};
+---
+
+<Base
+  lang={lang}
+  title={name}
+  path={`programs/${p.code}/`}
+  description={description || undefined}
+  jsonLd={jsonLd}
+>
+  <PageHead
+    lang={lang}
+    title={name}
+    lead={description}
+    crumbs={[
+      [t(lang, "programs"), "programs/"],
+      [pick(lang, p.department_name, p.department_name_en), `departments/${p.department_code}/`],
+    ]}
+  >
+    {open && (
+      <div class="mt-5 flex flex-wrap items-center gap-3 rounded-2xl bg-success-soft p-4 text-sm text-success-strong">
+        <span class="font-semibold">
+          {lang === "ar"
+            ? `التقديم مفتوح حتى ${fmtDate(lang, p.intake!.closes_at)}`
+            : `Applications open until ${fmtDate(lang, p.intake!.closes_at)}`}
+          {p.intake!.seats_left !== null &&
+            (lang === "ar"
+              ? ` · ${num(lang, p.intake!.seats_left)} مقعدًا متبقيًا`
+              : ` · ${p.intake!.seats_left} seats left`)}
+        </span>
+        <a
+          href={`${PORTAL}/apply`}
+          class="ms-auto rounded-lg bg-primary px-4 py-2 font-semibold text-white hover:bg-primary-hover"
+        >
+          {t(lang, "apply")}
+        </a>
+      </div>
+    )}
+  </PageHead>
+  <div class="mx-auto grid max-w-6xl gap-10 px-4 py-10 lg:grid-cols-[2fr_1fr] lg:px-8">
+    <div>
+      <div class="grid grid-cols-3 gap-2 text-center">
+        {[
+          [p.duration_terms, t(lang, "terms")],
+          [p.credit_hours, t(lang, "hours")],
+          [p.levels_count, t(lang, "levels")],
+        ].map(([n, l]) => (
+          <div class="rounded-2xl bg-bg-subtle p-4">
+            <p class="font-display text-2xl font-bold text-primary">{num(lang, Number(n))}</p>
+            <p class="text-xs text-text-muted">{l}</p>
+          </div>
+        ))}
+      </div>
+      <h2 class="mt-10 font-display text-xl font-bold">{t(lang, "plan")}</h2>
+      <ol class="mt-4 space-y-3">
+        {p.plan.map((level) => (
+          <li class="rounded-2xl border border-border-soft bg-surface p-4">
+            <p class="text-sm font-bold text-primary">
+              {t(lang, "level")} {num(lang, level.level)}
+            </p>
+            <ul class="mt-2 flex flex-wrap gap-2">
+              {level.courses.map((c) => (
+                <li class="rounded-lg bg-surface-alt px-3 py-1.5 text-sm">
+                  {pick(lang, c.name_ar, c.name_en)}
+                </li>
+              ))}
+            </ul>
+          </li>
+        ))}
+        {!p.plan.length && (
+          <li class="text-sm text-text-muted">
+            {lang === "ar" ? "تُنشر الخطة قريبًا." : "Plan coming soon."}
+          </li>
+        )}
+      </ol>
+    </div>
+    <aside class="space-y-4">
+      {p.requirements_ar && (
+        <div class="rounded-2xl border border-border-soft bg-surface p-4 text-sm leading-6">
+          <h2 class="mb-2 font-bold">{lang === "ar" ? "شروط القبول" : "Requirements"}</h2>
+          {p.requirements_ar}
+        </div>
+      )}
+      {p.required_documents.length > 0 && (
+        <div class="rounded-2xl border border-border-soft bg-surface p-4">
+          <h2 class="font-bold">{t(lang, "documents")}</h2>
+          <ol class="mt-3 space-y-2 text-sm">
+            {p.required_documents.map((doc, i) => (
+              <li class="flex gap-2">
+                <span class="grid size-6 shrink-0 place-items-center rounded-full bg-primary-soft text-xs font-bold text-primary-700">
+                  {num(lang, i + 1)}
+                </span>
+                {doc.label}
+                {!doc.required && (
+                  <span class="text-text-muted">({lang === "ar" ? "اختياري" : "optional"})</span>
+                )}
+              </li>
+            ))}
+          </ol>
+        </div>
+      )}
+      <a
+        href={`${PORTAL}/track`}
+        class="block rounded-2xl bg-bg-subtle p-4 text-sm font-semibold text-primary"
+      >
+        {t(lang, "track")} {arrow(lang)}
+      </a>
+      <a
+        href={href(lang, "contact/")}
+        class="block rounded-2xl bg-bg-subtle p-4 text-sm font-semibold text-primary"
+      >
+        {lang === "ar" ? "لديك سؤال؟ تواصل معنا" : "Questions? Contact us"} {arrow(lang)}
+      </a>
+    </aside>
+  </div>
+</Base>
