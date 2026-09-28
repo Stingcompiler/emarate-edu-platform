@@ -4,6 +4,7 @@ import { useState } from "react";
 import { PortalShell } from "../../components/PortalShell";
 import { Button, Card } from "../../components/ui";
 import { api } from "../../lib/api";
+import { useMe } from "../../lib/auth";
 import { useDepartment } from "../../lib/department";
 import { downloadCsv, num } from "../../lib/reports";
 
@@ -63,7 +64,13 @@ const dayKey = (iso: string) =>
 
 /** Board: DesktopDeptOperations — every change with before/after; never deleted. */
 export function Audit() {
-  const { id, department } = useDepartment();
+  const me = useMe();
+  const everything = !!(
+    me.data?.capabilities?.["audit.view"] as { everything?: boolean } | undefined
+  )?.everything;
+  const dept = useDepartment();
+  const id = everything ? undefined : dept.id;
+  const department = everything ? undefined : dept.department;
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const list = useQuery({
@@ -99,8 +106,12 @@ export function Audit() {
   return (
     <PortalShell
       title="سجل العمليات"
-      subtitle={`${department?.name_ar ?? ""} · ${num(list.data?.count ?? 0)} عملية · كل عملية تُسجَّل بالقيمة قبل/بعد ولا تُحذف`}
-      back={{ label: "لوحة القسم", to: "/department" }}
+      subtitle={`${department?.name_ar ?? "كل الكلية"} · ${num(list.data?.count ?? 0)} عملية · كل عملية تُسجَّل بالقيمة قبل/بعد ولا تُحذف`}
+      back={
+        everything
+          ? { label: "إدارة النظام", to: "/system" }
+          : { label: "لوحة القسم", to: "/department" }
+      }
     >
       <div className="flex flex-wrap items-center gap-2">
         <input

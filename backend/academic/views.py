@@ -1,3 +1,4 @@
+from django.db import transaction
 from django.db.models import Count, Prefetch, Q
 from django.http import Http404
 from django.shortcuts import get_object_or_404
@@ -9,7 +10,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from accounts import rbac
-from audit.services import RequestMeta
+from audit.services import RequestMeta, record
 from core.permissions import capability
 from core.viewsets import ScopedModelViewSet
 from organization.models import Department
@@ -68,6 +69,29 @@ class TermViewSet(ScopedModelViewSet):
 
     def department_of(self, obj):
         return None
+
+    @extend_schema(request=None, responses=TermSerializer)
+    @action(detail=True, methods=["post"], url_path="set-current")
+    def set_current(self, request, pk=None):
+        """Make this the current term (and its year the current year); one of each at a time."""
+        term = self.get_object()
+        with transaction.atomic():
+            previous = Term.objects.filter(is_current=True).exclude(pk=term.pk).first()
+            Term.objects.filter(is_current=True).exclude(pk=term.pk).update(is_current=False)
+            AcademicYear.objects.filter(is_current=True).exclude(pk=term.academic_year_id).update(
+                is_current=False
+            )
+            AcademicYear.objects.filter(pk=term.academic_year_id).update(is_current=True)
+            term.is_current = True
+            term.save(update_fields=["is_current", "updated_at"])
+            record(
+                RequestMeta.from_request(request),
+                "term.set_current",
+                term,
+                old={"current": previous.pk if previous else None},
+                new={"current": term.pk},
+            )
+        return Response(TermSerializer(term).data)
 
 
 class CourseViewSet(ScopedModelViewSet):

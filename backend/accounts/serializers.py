@@ -208,3 +208,7 @@ class RegistrationDecisionSerializer(serializers.Serializer):
         if not attrs["approve"] and not attrs.get("reason"):
             raise serializers.ValidationError({"reason": ["Give a reason when rejecting."]})
         return attrs
+
+
+class UserActiveSerializer(serializers.Serializer):
+    is_active = serializers.BooleanField()

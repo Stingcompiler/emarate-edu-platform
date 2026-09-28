@@ -400,3 +400,34 @@ def revoke_role(meta: RequestMeta, assignment: RoleAssignment) -> None:
         )
         assignment.delete()
         rbac.clear_cache(user)
+
+
+def set_active(meta: RequestMeta, user: User, active: bool) -> User:
+    """Disable or re-enable a staff account (docs/03 §3.5, §7).
+
+    The system admin may change anyone but themself; academic affairs only
+    accounts whose roles it may create (teachers and TAs). Disabling signs the
+    user out everywhere; nothing is deleted.
+    """
+    if user.pk == meta.actor.pk:
+        raise PermissionDenied("You cannot disable your own account.")
+    held = {Role(r) for r in rbac.roles_of(user)}
+    if not rbac.has_role(meta.actor, Role.SYSTEM_ADMIN):
+        allowed = rbac.creatable_accounts(meta.actor)
+        if not held or not held <= allowed:
+            raise PermissionDenied()
+    if user.is_active == active:
+        return user
+    with transaction.atomic():
+        user.is_active = active
+        user.save(update_fields=["is_active"])
+        if not active:
+            _revoke_refresh_tokens(user)
+        record(
+            meta,
+            "account.activate" if active else "account.deactivate",
+            user,
+            old={"is_active": not active},
+            new={"is_active": active},
+        )
+    return user

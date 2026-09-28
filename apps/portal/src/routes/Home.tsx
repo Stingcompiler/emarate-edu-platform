@@ -14,6 +14,7 @@ export function Home() {
   if (m?.student) return <Today />;
   if (hasRole(m, "teacher", "ta")) return <TeacherToday />;
   const rules: [boolean, string][] = [
+    [hasRole(m, "system_admin"), "/system"],
     [hasRole(m, "department_manager", "department_supervisor"), "/department"],
     [hasRole(m, "hr"), "/hr"],
     [can(m, "admissions.view"), "/registrar"],
@@ -22,7 +23,6 @@ export function Home() {
     [can(m, "content.manage"), "/site"],
     [can(m, "events.manage"), "/events"],
     [hasRole(m, "academic_affairs"), "/hr/teachers"],
-    [hasRole(m, "system_admin"), "/system"],
   ];
   const to = rules.find(([ok]) => ok)?.[1] ?? "/notifications";
   return <Navigate to={to} replace />;

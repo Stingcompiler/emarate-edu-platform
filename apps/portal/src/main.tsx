@@ -44,6 +44,11 @@ import { Corrections } from "./routes/results/Corrections";
 import { ResultImportDetail } from "./routes/results/ImportDetail";
 import { ResultImports } from "./routes/results/Imports";
 import { MyResults } from "./routes/results/MyResults";
+import { AdminHome } from "./routes/admin/Home";
+import { AdminSettings } from "./routes/admin/Settings";
+import { Structure } from "./routes/admin/Structure";
+import { AdminUser } from "./routes/admin/User";
+import { AdminUsers } from "./routes/admin/Users";
 import { Home } from "./routes/Home";
 import { RegistrarHome } from "./routes/registrar/Home";
 import { StudentImportDetail, StudentImports } from "./routes/registrar/Imports";
@@ -89,7 +94,6 @@ import { NotFound } from "./routes/NotFound";
 import { Notifications } from "./routes/Notifications";
 import { Register } from "./routes/Register";
 import { Settings } from "./routes/Settings";
-import { SystemStatus } from "./routes/SystemStatus";
 
 // TanStack Query holds all server state (docs/04, D-no-Zustand).
 const queryClient = new QueryClient({
@@ -187,7 +191,12 @@ const router = createBrowserRouter([
   { path: "/cases", element: signedIn(<Cases />) },
   { path: "/cases/new", element: signedIn(<CaseNew />) },
   { path: "/cases/:id", element: signedIn(<CaseDetail />) },
-  { path: "/system", element: <SystemStatus /> },
+  { path: "/system", element: signedIn(<AdminHome />) },
+  { path: "/system/users", element: signedIn(<AdminUsers />) },
+  { path: "/system/users/:id", element: signedIn(<AdminUser />) },
+  { path: "/system/structure", element: signedIn(<Structure />) },
+  { path: "/system/settings", element: signedIn(<AdminSettings />) },
+  { path: "/audit", element: signedIn(<Audit />) },
   { path: "*", element: <NotFound /> },
 ]);
 

@@ -8,6 +8,7 @@ import {
   Library,
   Users,
   BookOpen,
+  Building2,
   ListChecks,
   Sun,
   CalendarRange,
@@ -92,6 +93,13 @@ function departmentNav(me: Me | null | undefined, unread: number): NavItem[] {
 export function navFor(me: Me | null | undefined, unread: number): NavItem[] {
   if (hasRole(me, "department_manager", "department_supervisor")) return departmentNav(me, unread);
   const items: NavItem[] = [];
+  if (hasRole(me, "system_admin")) {
+    items.push({ label: "إدارة النظام", to: "/system", icon: LayoutDashboard });
+    items.push({ label: "المستخدمون", to: "/system/users", icon: Users, end: false });
+    items.push({ label: "الهيكل الأكاديمي", to: "/system/structure", icon: Building2 });
+    items.push({ label: "إعدادات النظام", to: "/system/settings", icon: SlidersHorizontal });
+    items.push({ label: "التدقيق", to: "/audit", icon: History });
+  }
   if (me?.student) items.push({ label: "اليوم", to: "/", icon: Sun });
   if (me?.student || hasRole(me, "teacher", "ta"))
     items.push({ label: "موادي", to: "/courses", icon: BookOpen, end: false });
