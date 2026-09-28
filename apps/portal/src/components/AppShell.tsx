@@ -12,6 +12,8 @@ export type NavItem = {
   badge?: number;
   /** Match only the exact path (default) or also nested paths. */
   end?: boolean;
+  /** One-word label for the phone tab bar when `label` is too long to fit. */
+  short?: string;
 };
 
 type AppShellProps = {
@@ -222,24 +224,36 @@ function BottomTabs({ items }: { items: NavItem[] }) {
             className="absolute inset-0 bg-black/30"
             onClick={() => setOpen(false)}
           />
-          <nav className="absolute inset-x-0 bottom-0 rounded-t-3xl bg-surface p-3 pb-[max(1rem,env(safe-area-inset-bottom))] shadow-lg">
-            <div className="mx-auto mb-2 h-1 w-10 rounded-full bg-border" aria-hidden />
-            {rest.map((item) => {
-              const Icon = item.icon;
-              return (
-                <NavLink
-                  key={item.to}
-                  to={item.to}
-                  end={item.end ?? true}
-                  onClick={() => setOpen(false)}
-                  className="flex min-h-12 items-center gap-3 rounded-xl px-3 text-[15px] text-text hover:bg-surface-alt"
-                >
-                  <Icon size={22} strokeWidth={1.75} aria-hidden className="text-text-muted" />
-                  {item.label}
-                  <Badge count={item.badge} className="ms-auto" />
-                </NavLink>
-              );
-            })}
+          <nav className="absolute inset-x-0 bottom-0 flex max-h-[80dvh] flex-col rounded-t-3xl bg-surface pt-3 shadow-lg">
+            <div className="mx-auto mb-2 h-1 w-10 shrink-0 rounded-full bg-border" aria-hidden />
+            {/* Admin roles have many destinations: the list scrolls inside the sheet. */}
+            <div className="overflow-y-auto overscroll-contain px-3 pb-[max(1rem,env(safe-area-inset-bottom))]">
+              {rest.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <NavLink
+                    key={item.to}
+                    to={item.to}
+                    end={item.end ?? true}
+                    onClick={() => setOpen(false)}
+                    className={({ isActive }) =>
+                      `flex min-h-12 items-center gap-3 rounded-xl px-3 text-[15px] hover:bg-surface-alt ${
+                        isActive ? "bg-primary-soft font-semibold text-primary-700" : "text-text"
+                      }`
+                    }
+                  >
+                    <Icon
+                      size={22}
+                      strokeWidth={1.75}
+                      aria-hidden
+                      className="shrink-0 opacity-70"
+                    />
+                    {item.label}
+                    <Badge count={item.badge} className="ms-auto" />
+                  </NavLink>
+                );
+              })}
+            </div>
           </nav>
         </div>
       )}
@@ -271,13 +285,15 @@ function MainTabs({
             to={item.to}
             end={item.end ?? true}
             className={({ isActive }) =>
-              `relative flex min-h-11 w-16 flex-col items-center justify-center gap-0.5 text-xs ${
+              `relative flex min-h-11 min-w-0 flex-1 flex-col items-center justify-center gap-0.5 text-xs ${
                 isActive ? "font-semibold text-primary" : "text-navy-300"
               }`
             }
           >
             <Icon size={24} strokeWidth={1.75} aria-hidden />
-            {item.label}
+            <span className="max-w-full truncate whitespace-nowrap">
+              {item.short ?? item.label}
+            </span>
             <Badge count={item.badge} className="absolute -top-1 start-9" />
           </NavLink>
         );
@@ -286,10 +302,10 @@ function MainTabs({
         <button
           type="button"
           onClick={more.onClick}
-          className="relative flex min-h-11 w-16 flex-col items-center justify-center gap-0.5 text-xs text-navy-300"
+          className="relative flex min-h-11 min-w-0 flex-1 flex-col items-center justify-center gap-0.5 text-xs text-navy-300"
         >
           <Menu size={24} strokeWidth={1.75} aria-hidden />
-          المزيد
+          <span className="whitespace-nowrap">المزيد</span>
           <Badge count={more.badge} className="absolute -top-1 start-9" />
         </button>
       )}

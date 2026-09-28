@@ -14,6 +14,7 @@ import {
 } from "../../components/ui";
 import { api } from "../../lib/api";
 import { hasRole, useMe } from "../../lib/auth";
+import { when } from "../../lib/format";
 import { initials, num, useDepartments } from "../../lib/reports";
 import { DEPARTMENT_ROLES, ROLE_LABEL } from "./roles";
 
@@ -46,7 +47,8 @@ export function AdminUsers() {
     >
       <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start lg:gap-6">
         <div>
-          <div className="flex flex-wrap items-center gap-2">
+          {/* Phone: search on its own line, filters scroll sideways (board SystemAdminUsers). */}
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
             <input
               value={search}
               onChange={(e) => {
@@ -54,35 +56,37 @@ export function AdminUsers() {
                 setPage(1);
               }}
               placeholder="بحث بالاسم أو البريد"
-              className="min-h-10 flex-1 rounded-full border border-border-soft bg-surface px-4 text-sm sm:max-w-sm"
+              className="min-h-11 rounded-full border border-border-soft bg-surface px-4 text-sm sm:max-w-sm sm:flex-1"
             />
-            <Chip
-              active={active === true}
-              onClick={() => {
-                setActive(true);
-                setPage(1);
-              }}
-            >
-              نشط
-            </Chip>
-            <Chip
-              active={active === false}
-              onClick={() => {
-                setActive(false);
-                setPage(1);
-              }}
-            >
-              معطّل
-            </Chip>
-            <Chip
-              active={active === undefined}
-              onClick={() => {
-                setActive(undefined);
-                setPage(1);
-              }}
-            >
-              الكل
-            </Chip>
+            <div className="-mx-4 flex gap-2 overflow-x-auto px-4 sm:mx-0 sm:px-0">
+              <Chip
+                active={active === true}
+                onClick={() => {
+                  setActive(true);
+                  setPage(1);
+                }}
+              >
+                نشط
+              </Chip>
+              <Chip
+                active={active === false}
+                onClick={() => {
+                  setActive(false);
+                  setPage(1);
+                }}
+              >
+                معطّل
+              </Chip>
+              <Chip
+                active={active === undefined}
+                onClick={() => {
+                  setActive(undefined);
+                  setPage(1);
+                }}
+              >
+                الكل
+              </Chip>
+            </div>
           </div>
           <Card className="mt-3 divide-y divide-border-soft">
             {rows.map((u) => (
@@ -103,10 +107,7 @@ export function AdminUsers() {
                           `${ROLE_LABEL[r.role] ?? r.role}${r.department_name ? ` · ${r.department_name}` : ""}`,
                       )
                       .join("، ") || "بلا دور"}{" "}
-                    ·{" "}
-                    {u.last_login
-                      ? `دخول ${new Date(u.last_login).toLocaleDateString("ar")}`
-                      : "لم يفعّل الحساب"}
+                    · {u.last_login ? `دخول ${when(u.last_login)}` : "لم يفعّل الحساب"}
                   </span>
                 </span>
                 <StatusBadge

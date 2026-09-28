@@ -3,7 +3,7 @@ import { Activity, Building2, Mail, Settings2, Users } from "lucide-react";
 import { Link } from "react-router";
 
 import { PortalShell } from "../../components/PortalShell";
-import { Card, SectionLabel } from "../../components/ui";
+import { Card, SectionLabel, Switch } from "../../components/ui";
 import { api } from "../../lib/api";
 import { actionLabel } from "../department/Audit";
 import { useMe } from "../../lib/auth";
@@ -114,19 +114,20 @@ export function AdminHome() {
         <div className="space-y-4">
           <SectionLabel>إعدادات النظام</SectionLabel>
           <Card className="divide-y divide-border-soft text-sm">
-            <label className="flex items-center justify-between gap-3 px-4 py-3">
+            <div className="flex items-center justify-between gap-3 px-4 py-2">
               <span>
                 <b className="block">تسجيل الطلاب يتطلب موافقة مدير القسم</b>
                 <span className="text-xs text-text-muted">
                   مفعّل: يمرّ كل تسجيل على مدير القسم · معطّل: يسجل الطالب مباشرة
                 </span>
               </span>
-              <input
-                type="checkbox"
+              <Switch
                 checked={!!settings.data?.student_registration_requires_approval}
-                onChange={(e) => toggle.mutate(e.target.checked)}
+                onChange={(v) => toggle.mutate(v)}
+                disabled={!settings.data || toggle.isPending}
+                label="تسجيل الطلاب يتطلب موافقة مدير القسم"
               />
-            </label>
+            </div>
             <Link
               to="/system/structure"
               className="flex items-center gap-3 px-4 py-3 hover:bg-surface-alt"
