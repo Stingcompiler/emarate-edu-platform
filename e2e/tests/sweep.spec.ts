@@ -38,10 +38,12 @@ for (const account of ACCOUNTS) {
     // Students have exactly five tabs and no «المزيد».
     const more = page.getByRole("button", { name: "المزيد" });
     if (isMobile && (await more.count())) await more.click();
-    const hrefs = await page
-      .locator("nav a[href^='/']")
-      .evaluateAll((links) => [...new Set(links.map((a) => a.getAttribute("href")!))]);
-    expect(hrefs.length).toBeGreaterThan(2);
+    // The navigation renders once the user is loaded; wait for it before reading links.
+    const links = page.locator("nav a[href^='/']");
+    await expect.poll(() => links.count(), { timeout: 15_000 }).toBeGreaterThan(2);
+    const hrefs = await links.evaluateAll((all) => [
+      ...new Set(all.map((a) => a.getAttribute("href")!)),
+    ]);
 
     for (const href of hrefs) {
       current = href;
