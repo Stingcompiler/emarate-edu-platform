@@ -11,8 +11,10 @@ import {
   CodeTile,
   EmptyState,
   Notice,
+  SideNote,
   StatusBadge,
   STATUS_LABELS,
+  WithSide,
   problemMessage,
   splitCode,
 } from "../../components/ui";
@@ -24,7 +26,7 @@ import { can } from "../../lib/nav";
 type Correction = Schemas["Correction"];
 type Tab = "pending" | "approved" | "rejected";
 
-/** Board: ResultsOfficerCorrections (phone). Desktop: derived — the same list, wider. */
+/** Board: ResultsOfficerCorrections (phone). Desktop: derived — the list beside how a correction works. */
 export function Corrections() {
   const me = useMe();
   const approver = can(me.data, "results.approve");
@@ -42,7 +44,17 @@ export function Corrections() {
       title="طلبات التعديل"
       subtitle="تُنفَّذ فقط بعد موافقة أمين الشؤون العلمية، وتظهر القيمتان في سجل النتيجة."
     >
-      <div className="max-w-3xl">
+      <WithSide
+        side={
+          <SideNote title="كيف يُعدَّل نتيجة منشورة؟">
+            <ol className="list-decimal space-y-1 ps-4">
+              <li>يرفع مسؤول النتائج طلب التعديل بالسبب والقيمة الجديدة.</li>
+              <li>يوافق أمين الشؤون العلمية أو يرفض بملاحظة.</li>
+              <li>عند الموافقة تتغير النتيجة، وتبقى القيمتان في سجلها.</li>
+            </ol>
+          </SideNote>
+        }
+      >
         <div className="flex gap-2">
           <Chip active={tab === "pending"} onClick={() => setTab("pending")}>
             معلّقة {count("pending")}
@@ -65,7 +77,7 @@ export function Corrections() {
             ))}
           </Card>
         )}
-      </div>
+      </WithSide>
     </PortalShell>
   );
 }

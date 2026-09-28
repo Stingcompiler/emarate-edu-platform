@@ -3,7 +3,15 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 
 import { PortalShell } from "../../components/PortalShell";
-import { Button, Card, Field, Notice, TextArea, problemMessage } from "../../components/ui";
+import {
+  Button,
+  Card,
+  Field,
+  Notice,
+  TextArea,
+  problemMessage,
+  WithSide,
+} from "../../components/ui";
 import { api } from "../../lib/api";
 import { slugify } from "../../lib/format";
 
@@ -68,7 +76,42 @@ export function NewsEditor() {
       }
       back={{ label: "محتوى الموقع", to: "/site" }}
     >
-      <div className="max-w-2xl">
+      {/* Desktop: the article; its search preview and publishing beside. */}
+      <WithSide
+        side={
+          <div>
+            <Card className="mt-3 p-4 text-sm lg:mt-0">
+              <p className="text-xs text-text-muted">معاينة نتيجة البحث</p>
+              <p className="mt-1 text-xs text-success-strong" dir="ltr">
+                ecst.edu.sd › news › {form.slug || "…"}
+              </p>
+              <p className="font-semibold text-info-strong">{form.title || "العنوان"}</p>
+              <p className="text-text-muted">{form.summary || "المقتطف"}</p>
+            </Card>
+            {save.isError && (
+              <div className="mt-3">
+                <Notice>{problemMessage(save.error)}</Notice>
+              </div>
+            )}
+            <div className="mt-4 flex gap-2">
+              <Button
+                variant="secondary"
+                onClick={() => save.mutate("draft")}
+                disabled={!form.slug || !form.title || save.isPending}
+              >
+                حفظ مسودة
+              </Button>
+              <Button
+                className="flex-1"
+                onClick={() => save.mutate("published")}
+                disabled={!form.slug || !form.title || !form.body || save.isPending}
+              >
+                نشر
+              </Button>
+            </div>
+          </div>
+        }
+      >
         <Card>
           <Field
             label="العنوان"
@@ -104,36 +147,7 @@ export function NewsEditor() {
             onChange={(e) => set({ body: e.target.value })}
           />
         </Card>
-        <Card className="mt-3 p-4 text-sm">
-          <p className="text-xs text-text-muted">معاينة نتيجة البحث</p>
-          <p className="mt-1 text-xs text-success-strong" dir="ltr">
-            ecst.edu.sd › news › {form.slug || "…"}
-          </p>
-          <p className="font-semibold text-info-strong">{form.title || "العنوان"}</p>
-          <p className="text-text-muted">{form.summary || "المقتطف"}</p>
-        </Card>
-        {save.isError && (
-          <div className="mt-3">
-            <Notice>{problemMessage(save.error)}</Notice>
-          </div>
-        )}
-        <div className="mt-4 flex gap-2">
-          <Button
-            variant="secondary"
-            onClick={() => save.mutate("draft")}
-            disabled={!form.slug || !form.title || save.isPending}
-          >
-            حفظ مسودة
-          </Button>
-          <Button
-            className="flex-1"
-            onClick={() => save.mutate("published")}
-            disabled={!form.slug || !form.title || !form.body || save.isPending}
-          >
-            نشر
-          </Button>
-        </div>
-      </div>
+      </WithSide>
     </PortalShell>
   );
 }

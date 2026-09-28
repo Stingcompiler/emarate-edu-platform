@@ -11,6 +11,7 @@ import {
   StatusBadge,
   STATUS_LABELS,
   problemMessage,
+  WithSide,
 } from "../../components/ui";
 import { api } from "../../lib/api";
 import { useMe } from "../../lib/auth";
@@ -63,48 +64,66 @@ export function RegulationDetail() {
       }
     >
       {r && (
-        <div className="max-w-3xl space-y-4">
-          {staff && <StatusBadge status={r.status} label={STATUS_LABELS[r.status] ?? r.status} />}
-          {r.body && (
-            <Card className="p-4">
-              <p className="whitespace-pre-line text-[15px] leading-loose text-text">{r.body}</p>
-            </Card>
-          )}
-          {r.file_detail && (
-            <Button variant="secondary" onClick={() => openFile(r.file_detail!.public_id)}>
-              <FileText size={18} aria-hidden /> {r.file_detail.name}
-            </Button>
-          )}
-          {r.requires_acknowledgement && r.acknowledged === false && (
-            <Card className="sticky bottom-24 space-y-3 p-4 shadow-md lg:static lg:shadow-xs">
-              <label className="flex items-center gap-3 text-sm text-text">
-                <input
-                  type="checkbox"
-                  className="size-5 accent-[var(--color-primary)]"
-                  checked={agreed}
-                  onChange={(e) => setAgreed(e.target.checked)}
-                />
-                قرأت اللائحة وأقرّ بالالتزام بها
-              </label>
-              <Button
-                className="w-full"
-                disabled={!agreed || acknowledge.isPending}
-                onClick={() => acknowledge.mutate()}
-              >
-                تسجيل الإقرار
-              </Button>
-            </Card>
-          )}
-          {r.acknowledged && <Notice tone="success">أقررت بهذه اللائحة.</Notice>}
-          {staff && r.status === "draft" && (
-            <Button onClick={() => publish.mutate()} disabled={publish.isPending}>
-              نشر الإصدار {r.version}
-            </Button>
-          )}
-          {(acknowledge.isError || publish.isError) && (
-            <Notice>{problemMessage(acknowledge.error ?? publish.error)}</Notice>
-          )}
-        </div>
+        // Desktop: the text to read (and acknowledge) beside its file, status and actions.
+        <WithSide
+          side={
+            <div className="space-y-4">
+              {staff && (
+                <StatusBadge status={r.status} label={STATUS_LABELS[r.status] ?? r.status} />
+              )}
+              {r.file_detail && (
+                <Button
+                  variant="secondary"
+                  className="w-full"
+                  onClick={() => openFile(r.file_detail!.public_id)}
+                >
+                  <FileText size={18} aria-hidden /> {r.file_detail.name}
+                </Button>
+              )}
+              {r.acknowledged && <Notice tone="success">أقررت بهذه اللائحة.</Notice>}
+              {staff && r.status === "draft" && (
+                <Button
+                  className="w-full"
+                  onClick={() => publish.mutate()}
+                  disabled={publish.isPending}
+                >
+                  نشر الإصدار {r.version}
+                </Button>
+              )}
+              {(acknowledge.isError || publish.isError) && (
+                <Notice>{problemMessage(acknowledge.error ?? publish.error)}</Notice>
+              )}
+            </div>
+          }
+        >
+          <div className="space-y-4">
+            {r.body && (
+              <Card className="p-4">
+                <p className="whitespace-pre-line text-[15px] leading-loose text-text">{r.body}</p>
+              </Card>
+            )}
+            {r.requires_acknowledgement && r.acknowledged === false && (
+              <Card className="sticky bottom-24 space-y-3 p-4 shadow-md lg:static lg:shadow-xs">
+                <label className="flex items-center gap-3 text-sm text-text">
+                  <input
+                    type="checkbox"
+                    className="size-5 accent-[var(--color-primary)]"
+                    checked={agreed}
+                    onChange={(e) => setAgreed(e.target.checked)}
+                  />
+                  قرأت اللائحة وأقرّ بالالتزام بها
+                </label>
+                <Button
+                  className="w-full"
+                  disabled={!agreed || acknowledge.isPending}
+                  onClick={() => acknowledge.mutate()}
+                >
+                  تسجيل الإقرار
+                </Button>
+              </Card>
+            )}
+          </div>
+        </WithSide>
       )}
     </PortalShell>
   );

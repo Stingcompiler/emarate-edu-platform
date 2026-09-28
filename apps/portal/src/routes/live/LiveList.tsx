@@ -10,7 +10,10 @@ import {
   EmptyState,
   Notice,
   SectionLabel,
+  SideFigures,
+  SideNote,
   StatusBadge,
+  WithSide,
   problemMessage,
 } from "../../components/ui";
 import { api } from "../../lib/api";
@@ -79,7 +82,22 @@ export function LiveList() {
         ) : undefined
       }
     >
-      <div className="max-w-3xl">
+      <WithSide
+        side={
+          <>
+            <SideFigures
+              rows={[
+                ["جارٍ الآن", live.length],
+                ["قادمة", rows.length - live.length],
+              ]}
+            />
+            <SideNote title="الانضمام">
+              يُفتح الرابط في تطبيق المزوّد (Teams أو Zoom أو Meet). لا يظهر الرابط إلا للمسجلين في
+              المادة أو البرنامج، ويُسجَّل انضمامك.
+            </SideNote>
+          </>
+        }
+      >
         {join.isError && <Notice>{problemMessage(join.error)}</Notice>}
         {!rows.length && !sessions.isPending && (
           <Card>
@@ -144,7 +162,7 @@ export function LiveList() {
             </Card>
           </section>
         ))}
-      </div>
+      </WithSide>
     </PortalShell>
   );
 }

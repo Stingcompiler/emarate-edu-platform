@@ -12,6 +12,8 @@ import {
   SectionLabel,
   TextArea,
   problemMessage,
+  SideNote,
+  WithSide,
 } from "../../components/ui";
 import { api } from "../../lib/api";
 import { KIND } from "./Cases";
@@ -85,85 +87,97 @@ export function CaseNew() {
       back={{ label: "الحالات", to: "/cases" }}
       subtitle="الحالة سرية حتى تُنشر للطالب. كل تغيير يُسجَّل باسمك."
     >
-      <form onSubmit={submit} className="max-w-3xl">
-        {r ? (
-          <Card className="border-danger-soft p-4">
-            <p className="text-sm font-semibold text-text">
-              من بلاغ {r.reported_by} — {r.course_code}
-            </p>
-            <p className="mt-1 text-sm text-text-muted">
-              {r.student.full_name_ar} · <span dir="ltr">{r.student.university_number}</span>
-            </p>
-            <p className="mt-2 text-sm leading-relaxed text-text">«{r.evidence}»</p>
-          </Card>
-        ) : (
-          <>
-            <SectionLabel>النوع</SectionLabel>
-            <div className="flex flex-wrap gap-2">
-              {Object.entries(KIND).map(([key, k]) => (
-                <Chip
-                  key={key}
-                  active={kind === key}
-                  onClick={() => setKind(key as keyof typeof KIND)}
-                >
-                  {k.label}
-                </Chip>
-              ))}
-            </div>
-            <SectionLabel>الطالب</SectionLabel>
-            <Card>
-              <Field
-                label="الرقم الجامعي"
-                dir="ltr"
-                className="text-end"
-                value={number}
-                onChange={(e) => setNumber(e.target.value)}
-              />
-              {student && (
-                <p className="px-4 pb-3 text-sm text-text">
-                  {student.full_name_ar} · {student.program_name} · المستوى {student.level}
-                </p>
-              )}
+      <form onSubmit={submit}>
+        <WithSide
+          side={
+            <SideNote title="بعد فتح الحالة">
+              <ol className="list-decimal space-y-1 ps-4">
+                <li>تبقى سرية: لا يراها إلا المخوَّلون.</li>
+                <li>تُضاف الإفادات والمرفقات، ثم يُتخذ القرار.</li>
+                <li>يرى الطالب الحالة وقرارها فقط عند نشرها له.</li>
+              </ol>
+            </SideNote>
+          }
+        >
+          {r ? (
+            <Card className="border-danger-soft p-4">
+              <p className="text-sm font-semibold text-text">
+                من بلاغ {r.reported_by} — {r.course_code}
+              </p>
+              <p className="mt-1 text-sm text-text-muted">
+                {r.student.full_name_ar} · <span dir="ltr">{r.student.university_number}</span>
+              </p>
+              <p className="mt-2 text-sm leading-relaxed text-text">«{r.evidence}»</p>
             </Card>
-            <SectionLabel>التفاصيل</SectionLabel>
-            <Card>
-              <Field
-                label="العنوان"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                required
-              />
-              <TextArea
-                label="الوصف"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-              />
-            </Card>
-          </>
-        )}
-        {(open.isError || dismiss.isError) && (
-          <div className="mt-3">
-            <Notice>{problemMessage(open.error ?? dismiss.error)}</Notice>
-          </div>
-        )}
-        <div className="mt-5 flex gap-2">
-          {reportId && (
-            <Button
-              variant="secondary"
-              onClick={() => dismiss.mutate()}
-              disabled={dismiss.isPending}
-            >
-              رفض البلاغ
-            </Button>
+          ) : (
+            <>
+              <SectionLabel>النوع</SectionLabel>
+              <div className="flex flex-wrap gap-2">
+                {Object.entries(KIND).map(([key, k]) => (
+                  <Chip
+                    key={key}
+                    active={kind === key}
+                    onClick={() => setKind(key as keyof typeof KIND)}
+                  >
+                    {k.label}
+                  </Chip>
+                ))}
+              </div>
+              <SectionLabel>الطالب</SectionLabel>
+              <Card>
+                <Field
+                  label="الرقم الجامعي"
+                  dir="ltr"
+                  className="text-end"
+                  value={number}
+                  onChange={(e) => setNumber(e.target.value)}
+                />
+                {student && (
+                  <p className="px-4 pb-3 text-sm text-text">
+                    {student.full_name_ar} · {student.program_name} · المستوى {student.level}
+                  </p>
+                )}
+              </Card>
+              <SectionLabel>التفاصيل</SectionLabel>
+              <Card>
+                <Field
+                  label="العنوان"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  required
+                />
+                <TextArea
+                  label="الوصف"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                />
+              </Card>
+            </>
           )}
-          <Button
-            type="submit"
-            className="flex-1"
-            disabled={open.isPending || (!reportId && (!student || !title))}
-          >
-            فتح الحالة
-          </Button>
-        </div>
+          {(open.isError || dismiss.isError) && (
+            <div className="mt-3">
+              <Notice>{problemMessage(open.error ?? dismiss.error)}</Notice>
+            </div>
+          )}
+          <div className="mt-5 flex gap-2">
+            {reportId && (
+              <Button
+                variant="secondary"
+                onClick={() => dismiss.mutate()}
+                disabled={dismiss.isPending}
+              >
+                رفض البلاغ
+              </Button>
+            )}
+            <Button
+              type="submit"
+              className="flex-1"
+              disabled={open.isPending || (!reportId && (!student || !title))}
+            >
+              فتح الحالة
+            </Button>
+          </div>
+        </WithSide>
       </form>
     </PortalShell>
   );

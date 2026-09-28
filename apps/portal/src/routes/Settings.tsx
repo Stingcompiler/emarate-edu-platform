@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router";
 
 import { PortalShell } from "../components/PortalShell";
-import { Button, Card, SectionLabel } from "../components/ui";
+import { Button, Card, SectionLabel, WithSide } from "../components/ui";
 import { api } from "../lib/api";
 import { hasRole, useMe, useSignOut } from "../lib/auth";
 import { disablePush, enablePush, pushState, type PushState } from "../lib/push";
@@ -58,7 +58,36 @@ export function Settings() {
 
   return (
     <PortalShell title="الإعدادات">
-      <div className="max-w-3xl">
+      <WithSide
+        side={
+          <div>
+            <SectionLabel>المظهر</SectionLabel>
+            <Card className="flex min-h-14 items-center justify-between gap-3 px-4 py-2">
+              <span className="text-sm font-medium text-text">المظهر</span>
+              <ThemeSwitch />
+            </Card>
+
+            <SectionLabel>الحساب</SectionLabel>
+            <Card className="px-4 py-3">
+              <p className="text-sm font-semibold text-text">{me.data?.full_name_ar}</p>
+              <p className="mt-0.5 text-sm text-text-muted" dir="ltr">
+                {me.data?.email}
+              </p>
+            </Card>
+            <Button
+              variant="secondary"
+              className="mt-4 w-full text-danger-strong lg:hidden"
+              onClick={async () => {
+                await signOut();
+                navigate("/login", { replace: true });
+              }}
+            >
+              <LogOut size={18} aria-hidden className="rtl:-scale-x-100" />
+              تسجيل الخروج
+            </Button>
+          </div>
+        }
+      >
         <PushCard />
 
         <SectionLabel>الإشعارات — لكل فئة قنواتها</SectionLabel>
@@ -100,32 +129,7 @@ export function Settings() {
             </tbody>
           </table>
         </Card>
-
-        <SectionLabel>المظهر</SectionLabel>
-        <Card className="flex min-h-14 items-center justify-between gap-3 px-4 py-2">
-          <span className="text-sm font-medium text-text">المظهر</span>
-          <ThemeSwitch />
-        </Card>
-
-        <SectionLabel>الحساب</SectionLabel>
-        <Card className="px-4 py-3">
-          <p className="text-sm font-semibold text-text">{me.data?.full_name_ar}</p>
-          <p className="mt-0.5 text-sm text-text-muted" dir="ltr">
-            {me.data?.email}
-          </p>
-        </Card>
-        <Button
-          variant="secondary"
-          className="mt-4 w-full text-danger-strong lg:hidden"
-          onClick={async () => {
-            await signOut();
-            navigate("/login", { replace: true });
-          }}
-        >
-          <LogOut size={18} aria-hidden className="rtl:-scale-x-100" />
-          تسجيل الخروج
-        </Button>
-      </div>
+      </WithSide>
     </PortalShell>
   );
 }

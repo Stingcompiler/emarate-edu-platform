@@ -10,10 +10,13 @@ import {
   EmptyState,
   Field,
   Notice,
+  problemMessage,
   SectionLabel,
+  SideFigures,
+  SideNote,
   StatusBadge,
   TextArea,
-  problemMessage,
+  WithSide,
 } from "../../components/ui";
 import { api } from "../../lib/api";
 import { slugify } from "../../lib/format";
@@ -41,7 +44,26 @@ export function Events() {
         </Link>
       }
     >
-      <div className="max-w-3xl">
+      <WithSide
+        side={
+          <>
+            <SideFigures
+              rows={[
+                [
+                  "قادمة",
+                  (events.data ?? []).filter((e) => new Date(e.ends_at).getTime() > Date.now())
+                    .length,
+                ],
+                ["منشورة", (events.data ?? []).filter((e) => e.status === "published").length],
+              ]}
+            />
+            <SideNote title="على الموقع">
+              الفعالية المنشورة تظهر في صفحة الفعاليات والتقويم والرئيسية، وتبقى صفحتها بعد انتهائها
+              ضمن «فعاليات سابقة».
+            </SideNote>
+          </>
+        }
+      >
         {!events.data?.length ? (
           <Card>
             <EmptyState icon={<CalendarDays size={24} aria-hidden />} title="لا فعاليات بعد" />
@@ -75,7 +97,7 @@ export function Events() {
             ))}
           </Card>
         )}
-      </div>
+      </WithSide>
     </PortalShell>
   );
 }

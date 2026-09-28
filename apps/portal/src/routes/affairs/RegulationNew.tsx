@@ -13,6 +13,7 @@ import {
   SectionLabel,
   TextArea,
   problemMessage,
+  WithSide,
 } from "../../components/ui";
 import { api } from "../../lib/api";
 import { asForm, formData } from "../../lib/upload";
@@ -75,7 +76,66 @@ export function RegulationNew() {
       back={{ label: "اللوائح", to: "/regulations" }}
       subtitle="النشر يُشعر كل الطلاب؛ الإصدار السابق يُؤرشف ولا يُحذف."
     >
-      <div className="max-w-3xl">
+      {/* Desktop: the text on the main side, its settings and the actions beside it. */}
+      <WithSide
+        side={
+          <div>
+            <SectionLabel>الإقرار والسريان</SectionLabel>
+            <Card className="divide-y divide-border-soft">
+              <label className="flex min-h-14 items-center justify-between px-4 text-sm text-text">
+                يتطلب إقرار الاطلاع
+                <input
+                  type="checkbox"
+                  className="size-5 accent-[var(--color-primary)]"
+                  checked={ack}
+                  onChange={(e) => setAck(e.target.checked)}
+                />
+              </label>
+              <label className="flex min-h-14 items-center justify-between gap-3 px-4 text-sm text-text">
+                <span>
+                  تُنشر على موقع الكلية
+                  <span className="block text-xs text-text-muted">
+                    يراها الزوار في «اللوائح» بعد نشرها، مع ملف PDF إن وُجد
+                  </span>
+                </span>
+                <input
+                  type="checkbox"
+                  className="size-5 accent-[var(--color-primary)]"
+                  checked={isPublic}
+                  onChange={(e) => setPublic(e.target.checked)}
+                />
+              </label>
+              <Field
+                label="تاريخ السريان"
+                type="date"
+                value={effective}
+                onChange={(e) => setEffective(e.target.value)}
+              />
+            </Card>
+            {save.isError && (
+              <div className="mt-3">
+                <Notice>{problemMessage(save.error)}</Notice>
+              </div>
+            )}
+            <div className="mt-5 flex gap-2">
+              <Button
+                variant="secondary"
+                disabled={!title || save.isPending}
+                onClick={() => save.mutate(false)}
+              >
+                حفظ مسودة
+              </Button>
+              <Button
+                className="flex-1"
+                disabled={!title || (!body && !file) || save.isPending}
+                onClick={() => save.mutate(true)}
+              >
+                نشر اللائحة
+              </Button>
+            </div>
+          </div>
+        }
+      >
         <SectionLabel>اللائحة</SectionLabel>
         <Card>
           <Field
@@ -111,60 +171,7 @@ export function RegulationNew() {
             onChange={(e) => setFile(e.target.files?.[0] ?? null)}
           />
         </label>
-        <SectionLabel>الإقرار والسريان</SectionLabel>
-        <Card className="divide-y divide-border-soft">
-          <label className="flex min-h-14 items-center justify-between px-4 text-sm text-text">
-            يتطلب إقرار الاطلاع
-            <input
-              type="checkbox"
-              className="size-5 accent-[var(--color-primary)]"
-              checked={ack}
-              onChange={(e) => setAck(e.target.checked)}
-            />
-          </label>
-          <label className="flex min-h-14 items-center justify-between gap-3 px-4 text-sm text-text">
-            <span>
-              تُنشر على موقع الكلية
-              <span className="block text-xs text-text-muted">
-                يراها الزوار في «اللوائح» بعد نشرها، مع ملف PDF إن وُجد
-              </span>
-            </span>
-            <input
-              type="checkbox"
-              className="size-5 accent-[var(--color-primary)]"
-              checked={isPublic}
-              onChange={(e) => setPublic(e.target.checked)}
-            />
-          </label>
-          <Field
-            label="تاريخ السريان"
-            type="date"
-            value={effective}
-            onChange={(e) => setEffective(e.target.value)}
-          />
-        </Card>
-        {save.isError && (
-          <div className="mt-3">
-            <Notice>{problemMessage(save.error)}</Notice>
-          </div>
-        )}
-        <div className="mt-5 flex gap-2">
-          <Button
-            variant="secondary"
-            disabled={!title || save.isPending}
-            onClick={() => save.mutate(false)}
-          >
-            حفظ مسودة
-          </Button>
-          <Button
-            className="flex-1"
-            disabled={!title || (!body && !file) || save.isPending}
-            onClick={() => save.mutate(true)}
-          >
-            نشر اللائحة
-          </Button>
-        </div>
-      </div>
+      </WithSide>
     </PortalShell>
   );
 }

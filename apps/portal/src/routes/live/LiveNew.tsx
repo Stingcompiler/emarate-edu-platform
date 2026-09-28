@@ -11,6 +11,7 @@ import {
   Notice,
   SectionLabel,
   problemMessage,
+  WithSide,
 } from "../../components/ui";
 import { api } from "../../lib/api";
 
@@ -53,7 +54,44 @@ export function LiveNew() {
       subtitle="الرابط من المزوّد الخارجي — لا يراه إلا المسجلون في النطاق"
       back={{ label: "البث", to: "/live" }}
     >
-      <div className="max-w-2xl">
+      {/* Desktop: the session and its link; the time and saving beside. */}
+      <WithSide
+        side={
+          <div>
+            <SectionLabel>الموعد</SectionLabel>
+            <Card>
+              <Field
+                label="التاريخ"
+                type="date"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+              />
+              <Field
+                label="من"
+                type="time"
+                value={start}
+                onChange={(e) => setStart(e.target.value)}
+              />
+              <Field label="إلى" type="time" value={end} onChange={(e) => setEnd(e.target.value)} />
+            </Card>
+            <p className="mt-3 px-1 text-xs text-text-muted">
+              يُذكَّر الطلاب قبل 30 دقيقة، ويُفتح الرابط لهم قبل البدء بـ 15 دقيقة.
+            </p>
+            {save.isError && (
+              <div className="mt-3">
+                <Notice>{problemMessage(save.error)}</Notice>
+              </div>
+            )}
+            <Button
+              className="mt-4 w-full"
+              onClick={() => save.mutate()}
+              disabled={!title || !url || !teaching.length || save.isPending}
+            >
+              حفظ الجلسة
+            </Button>
+          </div>
+        }
+      >
         <SectionLabel>الجلسة</SectionLabel>
         <Card>
           <Field label="العنوان" value={title} onChange={(e) => setTitle(e.target.value)} />
@@ -88,33 +126,7 @@ export function LiveNew() {
             onChange={(e) => setUrl(e.target.value)}
           />
         </Card>
-        <SectionLabel>الموعد</SectionLabel>
-        <Card>
-          <Field
-            label="التاريخ"
-            type="date"
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-          />
-          <Field label="من" type="time" value={start} onChange={(e) => setStart(e.target.value)} />
-          <Field label="إلى" type="time" value={end} onChange={(e) => setEnd(e.target.value)} />
-        </Card>
-        <p className="mt-3 px-1 text-xs text-text-muted">
-          يُذكَّر الطلاب قبل 30 دقيقة، ويُفتح الرابط لهم قبل البدء بـ 15 دقيقة.
-        </p>
-        {save.isError && (
-          <div className="mt-3">
-            <Notice>{problemMessage(save.error)}</Notice>
-          </div>
-        )}
-        <Button
-          className="mt-4 w-full"
-          onClick={() => save.mutate()}
-          disabled={!title || !url || !teaching.length || save.isPending}
-        >
-          حفظ الجلسة
-        </Button>
-      </div>
+      </WithSide>
     </PortalShell>
   );
 }
