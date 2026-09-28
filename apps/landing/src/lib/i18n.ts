@@ -16,19 +16,19 @@ const T = {
   open: { ar: "يقبل الآن", en: "Open" },
   closed: { ar: "مغلق حاليًا", en: "Closed" },
   all: { ar: "الكل", en: "All" },
-  students: { ar: "طالب", en: "students" },
-  teachers: { ar: "عضو هيئة تدريس", en: "faculty" },
-  programsCount: { ar: "برنامجًا", en: "programs" },
-  departmentsCount: { ar: "أقسام", en: "departments" },
+  students: { ar: "الطلاب", en: "students" },
+  teachers: { ar: "أعضاء هيئة التدريس", en: "faculty" },
+  programsCount: { ar: "البرامج", en: "programs" },
+  departmentsCount: { ar: "الأقسام", en: "departments" },
   upcoming: { ar: "الفعالية القادمة", en: "Next event" },
   latestNews: { ar: "الأخبار", en: "News" },
   openPrograms: { ar: "البرامج المفتوحة", en: "Open programs" },
   plan: { ar: "الخطة الدراسية", en: "Study plan" },
   level: { ar: "المستوى", en: "Level" },
-  levels: { ar: "مستويات", en: "levels" },
+  levels: { ar: "المستويات", en: "levels" },
   documents: { ar: "المستندات المطلوبة", en: "Required documents" },
-  terms: { ar: "فصول", en: "terms" },
-  hours: { ar: "ساعة", en: "credit hours" },
+  terms: { ar: "الفصول الدراسية", en: "terms" },
+  hours: { ar: "الساعات المعتمدة", en: "credit hours" },
   manager: { ar: "مدير القسم", en: "Head of department" },
   privacy: { ar: "الخصوصية", en: "Privacy" },
   other: { ar: "English", en: "العربية" },
@@ -52,6 +52,42 @@ export const fmtDate = (
   opts: Intl.DateTimeFormatOptions = { day: "numeric", month: "long", year: "numeric" },
 ) => new Date(iso).toLocaleDateString(lang === "ar" ? "ar" : "en-GB", opts);
 export const num = (lang: Lang, n: number) => n.toLocaleString(lang === "ar" ? "ar" : "en");
+/** A counted noun in either language. Arabic: 1 and 100+ singular, 2 dual (without the
+ *  number), 3–10 plural, 11–99 accusative singular — «٥ أقسام», «قسمان», «١١ برنامجًا». */
+type Noun = { one: string; two: string; few: string; many: string; en: [string, string] };
+const arRule = new Intl.PluralRules("ar");
+export function count(lang: Lang, n: number, noun: Noun): string {
+  if (lang === "en") return `${num(lang, n)} ${n === 1 ? noun.en[0] : noun.en[1]}`;
+  const form = arRule.select(n);
+  if (form === "two") return noun.two;
+  const word = form === "few" ? noun.few : form === "many" ? noun.many : noun.one;
+  return `${num(lang, n)} ${word}`;
+}
+export const N = {
+  program: {
+    one: "برنامج",
+    two: "برنامجان",
+    few: "برامج",
+    many: "برنامجًا",
+    en: ["program", "programs"],
+  },
+  department: {
+    one: "قسم",
+    two: "قسمان",
+    few: "أقسام",
+    many: "قسمًا",
+    en: ["department", "departments"],
+  },
+  faculty: {
+    one: "عضو هيئة تدريس",
+    two: "عضوا هيئة تدريس",
+    few: "أعضاء هيئة تدريس",
+    many: "عضو هيئة تدريس",
+    en: ["faculty member", "faculty"],
+  },
+  day: { one: "يوم", two: "يومين", few: "أيام", many: "يومًا", en: ["day", "days"] },
+} satisfies Record<string, Noun>;
+
 export const years = (lang: Lang, terms: number) => {
   const y = terms / 2;
   if (lang === "en") return `${y} years`;

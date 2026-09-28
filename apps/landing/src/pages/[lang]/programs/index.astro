@@ -3,7 +3,7 @@ import PageHead from "../../../components/PageHead.astro";
 import ProgramCard from "../../../components/ProgramCard.astro";
 import Base from "../../../layouts/Base.astro";
 import { programs } from "../../../lib/api";
-import { type Lang, degree, fmtDate, langPaths, num, pick, t } from "../../../lib/i18n";
+import { type Lang, degree, fmtDate, langPaths, num, pick, t, count, N } from "../../../lib/i18n";
 
 export const getStaticPaths = langPaths;
 const lang = Astro.params.lang as Lang;
@@ -17,8 +17,8 @@ const groups = [...new Set(all.map((p) => p.department_code))].map((code) => {
 const degrees = [...new Map(all.map((p) => [p.degree, p.degree_label])).entries()];
 const lead =
   lang === "ar"
-    ? `${num(lang, all.length)} برنامجًا في ${num(lang, groups.length)} أقسام${open.length ? ` · ${num(lang, open.length)} مفتوحة للتقديم حتى ${fmtDate(lang, closes!)}` : ""}`
-    : `${all.length} programs in ${groups.length} departments${open.length ? ` · ${open.length} open until ${fmtDate(lang, closes!)}` : ""}`;
+    ? `${count(lang, all.length, N.program)} في ${count(lang, groups.length, N.department)}${open.length ? ` · ${num(lang, open.length)} مفتوحة للتقديم حتى ${fmtDate(lang, closes!)}` : ""}`
+    : `${count(lang, all.length, N.program)} in ${count(lang, groups.length, N.department)}${open.length ? ` · ${open.length} open until ${fmtDate(lang, closes!)}` : ""}`;
 ---
 
 <Base lang={lang} title={t(lang, "programs")} path="programs/">
