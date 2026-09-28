@@ -39,3 +39,6 @@ Thumbs.db
 .idea/
 *.swp
 backend/.vapid-dev.json
+
+# Hypothesis example database (contract tests)
+.hypothesis/

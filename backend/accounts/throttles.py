@@ -1,3 +1,5 @@
+import hashlib
+
 from rest_framework.throttling import AnonRateThrottle, SimpleRateThrottle
 
 
@@ -17,7 +19,11 @@ class OTPTargetThrottle(SimpleRateThrottle):
     scope = "otp"
 
     def get_cache_key(self, request, view):
-        email = str(request.data.get("email", "")).strip().lower()
-        if not email:
+        # A body that isn't an object (e.g. a JSON list) has no email; the view answers 400.
+        data = request.data if hasattr(request.data, "get") else {}
+        email = data.get("email")
+        if not isinstance(email, str) or not email.strip():
             return None
-        return self.cache_format % {"scope": self.scope, "ident": email}
+        # Hashed: user input never becomes a raw cache key.
+        ident = hashlib.sha256(email.strip().lower().encode()).hexdigest()
+        return self.cache_format % {"scope": self.scope, "ident": ident}
