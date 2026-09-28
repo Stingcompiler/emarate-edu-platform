@@ -37,4 +37,5 @@ live in `docs/` (01–09); `docs/03-roles-and-permissions.md` wins any conflict.
 | Lint and format the backend | `cd backend && uv run ruff check . && uv run ruff format .` |
 | Regenerate the API client | `pnpm api:generate` |
 | Typecheck, test and build the frontend | `pnpm typecheck && pnpm test && pnpm build` |
+| End-to-end tests (own API :8001 + portal :5174, fresh demo data) | `pnpm e2e` — first run locally uses the installed Google Chrome |
 | Find a page's design boards | `python3 scripts/boards.py list "<keyword>"` |
