@@ -3,7 +3,15 @@ import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router";
 
 import { PortalShell } from "../../components/PortalShell";
-import { Button, Card, Chip, Notice, SectionLabel, problemMessage } from "../../components/ui";
+import {
+  Button,
+  Card,
+  Chip,
+  Notice,
+  SectionLabel,
+  problemMessage,
+  SideNote,
+} from "../../components/ui";
 import { api } from "../../lib/api";
 import { TOPIC_LABEL, days, initials, num, pct } from "../../lib/reports";
 import { ROLE_LINE, useTeachersReport } from "./Teachers";
@@ -197,6 +205,14 @@ export function NoticeNew() {
                 </b>
               </div>
             </Card>
+          </aside>
+        )}
+        {!teacher && (
+          <aside className="mt-6 lg:mt-0">
+            <SideNote title="الأدلة المرفقة تلقائيًا">
+              اختر الأستاذ؛ تُرفق مؤشراته في الفصل الحالي مع التنبيه: زمن التصحيح، التسليمات غير
+              المصححة، انتظام رفع المحاضرات، والبث المنفذ.
+            </SideNote>
           </aside>
         )}
       </div>

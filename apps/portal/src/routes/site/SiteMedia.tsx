@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowDown, ArrowUp, Plus, Trash2, Upload } from "lucide-react";
+import { ArrowDown, ArrowUp, Image as ImageIcon, Plus, Trash2, Upload } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { PortalShell } from "../../components/PortalShell";
@@ -12,6 +12,7 @@ import {
   problemMessage,
   SectionLabel,
   WithSide,
+  EmptyState,
 } from "../../components/ui";
 import { api } from "../../lib/api";
 import { asForm, formData } from "../../lib/upload";
@@ -80,6 +81,14 @@ function Media() {
         <div className="mt-3">
           <Notice>{problemMessage(upload.error)}</Notice>
         </div>
+      )}
+      {media.isSuccess && !media.data.length && (
+        <Card className="mt-4">
+          <EmptyState icon={<ImageIcon size={24} aria-hidden />} title="لا صور بعد">
+            الصور المرفوعة هنا تُستخدم أغلفةً للأخبار والفعاليات وفي صفحات الموقع. اكتب لكل صورة
+            وصفًا (نصًا بديلًا) يقرؤه من لا يرى الصورة.
+          </EmptyState>
+        </Card>
       )}
       <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
         {(media.data ?? []).map((m) => (

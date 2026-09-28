@@ -66,7 +66,13 @@ export function TeacherProfile() {
       back={{ label: "الأساتذة", to: "/hr/teachers" }}
     >
       {p && t && (
-        <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start lg:gap-6">
+        <div
+          className={
+            p.notices || can(me.data, "hr.notify")
+              ? "lg:grid lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start lg:gap-6"
+              : "" // a viewer without HR tools: the indicators take the full width
+          }
+        >
           <div className="space-y-4">
             <Card className="flex items-center gap-3 p-4">
               <span className="grid size-12 place-items-center rounded-full bg-primary-soft font-semibold text-primary-700">
