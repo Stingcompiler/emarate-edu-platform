@@ -32,6 +32,7 @@ class IntakeStateSerializer(S.Serializer):
     id = S.IntegerField()
     accepting = S.BooleanField()
     cycle = S.CharField()
+    opens_at = S.DateTimeField()
     closes_at = S.DateTimeField()
     seats_left = S.IntegerField(allow_null=True)
 
@@ -133,6 +134,7 @@ def _intakes(now) -> dict[int, dict]:
             "id": intake.id,
             "accepting": intake.accepting(now),
             "cycle": intake.cycle.name,
+            "opens_at": intake.cycle.opens_at,
             "closes_at": intake.closes_at or intake.cycle.closes_at,
             "seats_left": max(0, intake.capacity - intake.taken) if intake.capacity else None,
             "requirements_ar": intake.requirements_ar,

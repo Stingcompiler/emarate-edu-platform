@@ -1,0 +1,301 @@
+---
+import PageHead from "../../../components/PageHead.astro";
+import Base from "../../../layouts/Base.astro";
+import { PORTAL, intakes, programs } from "../../../lib/api";
+import {
+  N,
+  arrow,
+  count,
+  fmtDate,
+  href,
+  type Lang,
+  langPaths,
+  num,
+  pick,
+  t,
+} from "../../../lib/i18n";
+
+// docs/07 §1 `/admissions`, board VisitorAdmissions: how to apply, the window, the open
+// programmes, the documents and common questions — before the visitor starts the wizard.
+export const getStaticPaths = langPaths;
+const lang = Astro.params.lang as Lang;
+const ar = lang === "ar";
+const L = (a: string, e: string) => (ar ? a : e);
+
+const [all, open] = await Promise.all([programs(), intakes()]);
+const accepting = all.filter((p) => p.intake?.accepting);
+const cycle = accepting[0]?.intake ?? all.find((p) => p.intake)?.intake ?? null;
+const closes = accepting.length
+  ? accepting
+      .map((p) => p.intake!.closes_at)
+      .sort()
+      .at(-1)!
+  : cycle?.closes_at;
+const daysLeft = closes
+  ? Math.max(0, Math.ceil((new Date(closes).getTime() - Date.now()) / 86_400_000))
+  : null;
+
+// Documents every open programme asks for; optional when any programme marks it optional.
+const docs = new Map<string, { label: string; required: boolean; count: number }>();
+for (const intake of open)
+  for (const d of intake.required_documents) {
+    const seen = docs.get(d.key);
+    docs.set(d.key, {
+      label: d.label,
+      required: (seen?.required ?? true) && d.required,
+      count: (seen?.count ?? 0) + 1,
+    });
+  }
+const general = [...docs.values()].filter((d) => d.count === open.length);
+
+const steps = [
+  [
+    L("تحقّق من بريدك", "Verify your email"),
+    L(
+      "أدخل بريدك وأكّد الرمز المرسل إليه — يُحفظ طلبك كمسودة بعد كل خطوة.",
+      "Enter your email and confirm the code we send — your application is saved as a draft after every step.",
+    ),
+  ],
+  [
+    L("اختر البرنامج", "Choose the programme"),
+    L(
+      "برنامج واحد لكل طلب؛ يمكنك تقديم طلب آخر لبرنامج ثانٍ بالبريد نفسه.",
+      "One programme per application; you can apply to another one with the same email.",
+    ),
+  ],
+  [
+    L("أكمل النموذج وارفع المستندات", "Fill in the form and upload documents"),
+    L(
+      "الأسئلة حسب البرنامج، وتكفي صورة واضحة بالهاتف للمستندات.",
+      "Questions depend on the programme; a clear phone photo of each document is enough.",
+    ),
+  ],
+  [
+    L("راجع وأرسل", "Review and submit"),
+    L(
+      "تستلم رقمًا مرجعيًا فورًا، ويصلك كل تحديث على بريدك.",
+      "You get a reference number at once, and every update reaches your email.",
+    ),
+  ],
+];
+
+const faq = [
+  [
+    L("هل يمكن التقديم لأكثر من برنامج؟", "Can I apply to more than one programme?"),
+    L(
+      "نعم، بطلب مستقل لكل برنامج بالبريد نفسه، وكل طلب يُراجع على حدة.",
+      "Yes — one application per programme with the same email; each is reviewed on its own.",
+    ),
+  ],
+  [
+    L("ما شروط القبول؟", "What are the admission requirements?"),
+    L(
+      "تختلف حسب البرنامج؛ تجدها في صفحة كل برنامج تحت «شروط القبول».",
+      "They depend on the programme; each programme page lists them under “Requirements”.",
+    ),
+  ],
+  [
+    L("كيف أتابع طلبي؟", "How do I follow my application?"),
+    L(
+      "من «تابع طلبك» ببريدك ورمز تحقق — بلا حساب أو كلمة مرور.",
+      "From “Track your application” with your email and a one-time code — no account needed.",
+    ),
+  ],
+  [
+    L("لديّ سؤال عن الرسوم أو المعادلة", "I have a question about fees or equivalence"),
+    L(
+      "أرسل استفسارك من صفحة «تواصل» ويرد عليك مسجل القسم المختص.",
+      "Send it from the Contact page and the department's registrar will reply.",
+    ),
+  ],
+];
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: faq.map(([q, a]) => ({
+    "@type": "Question",
+    name: q,
+    acceptedAnswer: { "@type": "Answer", text: a },
+  })),
+};
+const title = L("القبول", "Admission");
+const lead = L(
+  "أربع خطوات إلكترونية بالكامل، بلا حساب أو زيارة — تتابع طلبك ببريدك.",
+  "Four online steps, no account or visit needed — follow your application with your email.",
+);
+---
+
+<Base
+  lang={lang}
+  title={title}
+  path="admissions/"
+  description={cycle ? `${cycle.cycle} — ${lead}` : lead}
+  jsonLd={jsonLd}
+>
+  <PageHead lang={lang} title={L("كيف تلتحق بالكلية", "How to join the college")} lead={lead}>
+    {cycle && (
+      <p class="mt-4 inline-block rounded-full bg-accent-soft px-3 py-1 text-xs font-semibold text-accent-hover">
+        {cycle.cycle}
+      </p>
+    )}
+  </PageHead>
+
+  <div class="mx-auto max-w-6xl space-y-10 px-4 py-10 lg:px-8">
+    {cycle ? (
+      <ol
+        class="grid grid-cols-3 gap-2 text-center"
+        aria-label={L("مواعيد التقديم", "Application window")}
+      >
+        <li class="rounded-2xl bg-bg-subtle p-4">
+          <p class="text-xs text-text-muted">{L("فتح التقديم", "Opens")}</p>
+          <p class="mt-1 font-bold">
+            {fmtDate(lang, cycle.opens_at, { day: "numeric", month: "long" })}
+          </p>
+        </li>
+        <li
+          class:list={[
+            "rounded-2xl p-4",
+            accepting.length ? "bg-success-soft text-success-strong" : "bg-bg-subtle",
+          ]}
+        >
+          <p class="text-xs">{L("الآن", "Now")}</p>
+          <p class="mt-1 font-bold">
+            {accepting.length
+              ? `${L("مفتوح", "Open")} · ${count(lang, daysLeft ?? 0, N.day)}`
+              : L("مغلق", "Closed")}
+          </p>
+        </li>
+        <li class="rounded-2xl bg-bg-subtle p-4">
+          <p class="text-xs text-text-muted">{L("إغلاق التقديم", "Closes")}</p>
+          <p class="mt-1 font-bold">{fmtDate(lang, closes!, { day: "numeric", month: "long" })}</p>
+        </li>
+      </ol>
+    ) : (
+      <p class="rounded-2xl bg-bg-subtle p-4 text-sm">
+        {L(
+          "لا توجد دورة قبول مفتوحة حاليًا. تُعلن الدورة القادمة هنا وفي الأخبار.",
+          "No admission cycle is open right now. The next one will be announced here and in the news.",
+        )}
+      </p>
+    )}
+
+    <section>
+      <h2 class="font-display text-xl font-bold">{L("الخطوات", "Steps")}</h2>
+      <ol class="mt-4 grid gap-3 md:grid-cols-2 lg:grid-cols-4">
+        {steps.map(([head, body], i) => (
+          <li class="flex gap-3 rounded-2xl border border-border-soft bg-surface p-4">
+            <span class="grid size-8 shrink-0 place-items-center rounded-full bg-primary text-sm font-bold text-white">
+              {num(lang, i + 1)}
+            </span>
+            <span>
+              <b class="block">{head}</b>
+              <span class="mt-1 block text-sm leading-6 text-text-muted">{body}</span>
+            </span>
+          </li>
+        ))}
+      </ol>
+    </section>
+
+    <div class="grid gap-10 lg:grid-cols-[2fr_1fr]">
+      <section>
+        <h2 class="font-display text-xl font-bold">
+          {t(lang, "openPrograms")}{" "}
+          <span class="text-base font-normal text-text-muted">· {num(lang, accepting.length)}</span>
+        </h2>
+        {accepting.length ? (
+          <ul class="mt-4 divide-y divide-border-soft rounded-2xl border border-border-soft bg-surface">
+            {accepting.map((p) => (
+              <li>
+                <a
+                  href={href(lang, `programs/${p.code}/`)}
+                  class="flex items-center gap-3 px-4 py-3 hover:bg-surface-alt"
+                >
+                  <span class="min-w-0 flex-1">
+                    <b class="block truncate">{pick(lang, p.name_ar, p.name_en)}</b>
+                    <span class="text-xs text-text-muted">
+                      {pick(lang, p.department_name, p.department_name_en)}
+                      {p.intake!.seats_left !== null &&
+                        ` · ${L("المقاعد المتبقية", "Seats left")}: ${num(lang, p.intake!.seats_left)}`}
+                    </span>
+                  </span>
+                  <span class="rounded-full bg-success-soft px-2.5 py-1 text-xs font-semibold text-success-strong">
+                    {t(lang, "open")}
+                  </span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p class="mt-4 text-sm text-text-muted">
+            {L("لا برامج مفتوحة الآن.", "No programmes are open now.")}
+          </p>
+        )}
+      </section>
+
+      {general.length > 0 && (
+        <section>
+          <h2 class="font-display text-xl font-bold">
+            {L("المستندات العامة", "General documents")}
+          </h2>
+          <ul class="mt-4 space-y-2 rounded-2xl border border-border-soft bg-surface p-4 text-sm">
+            {general.map((d) => (
+              <li class="flex items-center justify-between gap-3">
+                {d.label}
+                {!d.required && <span class="text-text-muted">{L("اختياري", "optional")}</span>}
+              </li>
+            ))}
+          </ul>
+          <p class="mt-2 text-xs leading-5 text-text-muted">
+            {L(
+              "قد يطلب برنامج مستندات إضافية — تجدها في صفحته.",
+              "A programme may ask for more — see its page.",
+            )}
+          </p>
+        </section>
+      )}
+    </div>
+
+    <section>
+      <h2 class="font-display text-xl font-bold">{L("أسئلة شائعة", "Common questions")}</h2>
+      <div class="mt-4 divide-y divide-border-soft rounded-2xl border border-border-soft bg-surface">
+        {faq.map(([q, a]) => (
+          <details class="group px-4 py-3">
+            <summary class="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 font-semibold">
+              {q}
+              <span
+                class="text-text-muted transition-transform group-open:rotate-45"
+                aria-hidden="true"
+              >
+                +
+              </span>
+            </summary>
+            <p class="pb-2 text-sm leading-6 text-text-muted">{a}</p>
+          </details>
+        ))}
+      </div>
+    </section>
+
+    <div class="flex flex-wrap gap-3">
+      {accepting.length > 0 && (
+        <a
+          href={`${PORTAL}/apply`}
+          class="rounded-xl bg-accent px-5 py-3 font-semibold text-white hover:bg-accent-hover"
+        >
+          {t(lang, "apply")} {arrow(lang)}
+        </a>
+      )}
+      <a
+        href={`${PORTAL}/track`}
+        class="rounded-xl border border-border px-5 py-3 font-semibold hover:bg-surface-alt"
+      >
+        {t(lang, "track")}
+      </a>
+      <a
+        href={href(lang, "contact/")}
+        class="rounded-xl px-5 py-3 font-semibold text-primary hover:bg-surface-alt"
+      >
+        {L("لديك سؤال؟ تواصل معنا", "Questions? Contact us")}
+      </a>
+    </div>
+  </div>
+</Base>

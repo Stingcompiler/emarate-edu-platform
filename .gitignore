@@ -16,6 +16,7 @@ backend/sent-emails/
 backend/e2e.sqlite3*
 backend/sent-emails-e2e/
 e2e/test-results/
+/test-results/
 playwright-report/
 .pytest_cache/
 .ruff_cache/

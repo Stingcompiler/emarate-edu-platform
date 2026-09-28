@@ -15,6 +15,7 @@ export const GET: APIRoute = async ({ site }) => {
     "about/",
     "departments/",
     "programs/",
+    "admissions/",
     "news/",
     "contact/",
     ...depts.map((d) => `departments/${d.code}/`),
