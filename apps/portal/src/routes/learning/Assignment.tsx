@@ -340,7 +340,8 @@ function Submissions({ id, max }: { id: string; max: string }) {
                 {r.student.full_name_ar}
               </span>
               <span className="text-xs text-text-muted">
-                <bdi>{r.student.university_number}</bdi> · {when(r.current_version.submitted_at)}
+                <bdi>{r.student.university_number}</bdi> ·{" "}
+                {when(r.current_version?.submitted_at ?? r.first_submitted_at)}
                 {r.is_late ? " · متأخر" : ""} · إصدار {r.versions_count.toLocaleString("ar")}
               </span>
             </span>

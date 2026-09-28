@@ -774,7 +774,7 @@ class Command(BaseCommand):
 
         from django.utils import timezone
 
-        from learning.models import Assignment, Submission, SubmissionGrade
+        from learning.models import Assignment, Submission, SubmissionGrade, SubmissionVersion
         from notifications.models import HRNotice
         from notifications.services import create_hr_notice
 
@@ -799,11 +799,18 @@ class Command(BaseCommand):
                 e.student_record for e in offering.enrollments.select_related("student_record")[:10]
             ]
             for i, record_ in enumerate(records):
+                at = due - timedelta(hours=6 + i)
                 submission, created = Submission.objects.get_or_create(
                     assignment=assignment,
                     student_record=record_,
-                    defaults={"first_submitted_at": due - timedelta(hours=6 + i)},
+                    defaults={"first_submitted_at": at},
                 )
+                if created:
+                    version = SubmissionVersion.objects.create(
+                        submission=submission, version_no=1, content="حل التمرين.", submitted_at=at
+                    )
+                    submission.current_version = version
+                    submission.save(update_fields=["current_version", "updated_at"])
                 if created and i % 3 != 2:  # a third still waits for grading
                     SubmissionGrade.objects.create(
                         submission=submission,

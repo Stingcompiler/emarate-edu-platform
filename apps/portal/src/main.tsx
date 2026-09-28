@@ -46,6 +46,11 @@ import { ResultImports } from "./routes/results/Imports";
 import { MyResults } from "./routes/results/MyResults";
 import { Home } from "./routes/Home";
 import { Assignment } from "./routes/learning/Assignment";
+import { AssignmentEditor } from "./routes/learning/AssignmentEditor";
+import { Grade } from "./routes/learning/Grade";
+import { Grading } from "./routes/learning/Grading";
+import { LectureEditor } from "./routes/learning/LectureEditor";
+import { Students } from "./routes/learning/Students";
 import { Course } from "./routes/learning/Course";
 import { Courses } from "./routes/learning/Courses";
 import { Lecture } from "./routes/learning/Lecture";
@@ -92,8 +97,15 @@ const router = createBrowserRouter([
   { path: "/", element: signedIn(<Home />) },
   { path: "/courses", element: signedIn(<Courses />) },
   { path: "/courses/:id", element: signedIn(<Course />) },
+  { path: "/courses/:id/students", element: signedIn(<Students />) },
+  { path: "/lectures/new", element: signedIn(<LectureEditor />) },
   { path: "/lectures/:id", element: signedIn(<Lecture />) },
+  { path: "/lectures/:id/edit", element: signedIn(<LectureEditor />) },
+  { path: "/assignments/new", element: signedIn(<AssignmentEditor />) },
   { path: "/assignments/:id", element: signedIn(<Assignment />) },
+  { path: "/assignments/:id/edit", element: signedIn(<AssignmentEditor />) },
+  { path: "/submissions/:id", element: signedIn(<Grade />) },
+  { path: "/grading", element: signedIn(<Grading />) },
   { path: "/tasks", element: signedIn(<Tasks />) },
   { path: "/notifications", element: signedIn(<Notifications />) },
   { path: "/notifications/new", element: signedIn(<Compose />) },

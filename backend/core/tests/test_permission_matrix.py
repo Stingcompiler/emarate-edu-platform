@@ -314,6 +314,31 @@ READS: dict[str, tuple[str, frozenset, frozenset]] = {
         frozenset(),
     ),
     "transcript": ("/api/v1/transcripts/26-IT-0001", RESULTS_VIEW, frozenset()),
+    # Anyone signed in may ask; it only lists courses the user teaches.
+    "grading-queue": ("/api/v1/grading-queue", EVERYONE, frozenset()),
+    # Course gradebook: its instructors and department learning staff (docs/03 §3.6–3.9)
+    "gradebook": (
+        "/api/v1/gradebooks/{offering}",
+        frozenset(
+            {
+                R.SYSTEM_ADMIN,
+                R.ACADEMIC_AFFAIRS,
+                R.DEPARTMENT_MANAGER,
+                R.DEPARTMENT_SUPERVISOR,
+                R.TEACHER,
+                R.TA,
+            }
+        ),
+        EVERYONE
+        - {
+            R.SYSTEM_ADMIN,
+            R.ACADEMIC_AFFAIRS,
+            R.DEPARTMENT_MANAGER,
+            R.DEPARTMENT_SUPERVISOR,
+            R.TEACHER,
+            R.TA,
+        },
+    ),
 }
 
 # url name → "module::test" that pins down its (write) rules.

@@ -28,6 +28,7 @@ const BUILT = [
   "/assignments",
   "/submissions",
   "/tasks",
+  "/grading",
 ];
 
 export function isBuiltPath(path: string): boolean {

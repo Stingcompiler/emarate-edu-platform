@@ -1,16 +1,19 @@
+from decimal import Decimal
+
 from django.db.models import Prefetch, Q
 from django.shortcuts import get_object_or_404
-from drf_spectacular.utils import extend_schema
-from rest_framework import mixins, status, viewsets
+from drf_spectacular.utils import OpenApiParameter, extend_schema
+from rest_framework import mixins, serializers, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import NotFound
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from audit.services import RequestMeta
 
 from . import access, services
-from .models import Assignment, Lecture, LectureResource, Submission
+from .models import Assignment, Lecture, LectureResource, Submission, SubmissionGrade
 from .serializers import (
     AssignmentSerializer,
     GradeInputSerializer,
@@ -240,3 +243,185 @@ class SubmissionViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
     def approve(self, request, public_id=None):
         result = services.approve_grade(_meta(request), self.get_object())
         return Response(GradeSerializer(result).data)
+
+
+class GradebookCellSerializer(serializers.Serializer):
+    score = serializers.DecimalField(max_digits=7, decimal_places=2, allow_null=True)
+    status = serializers.ChoiceField(choices=["approved", "suggested", "submitted"])
+    late = serializers.BooleanField()
+    submission = serializers.UUIDField()
+
+
+class GradebookStudentSerializer(serializers.Serializer):
+    public_id = serializers.UUIDField()
+    university_number = serializers.CharField()
+    full_name_ar = serializers.CharField()
+    cells = serializers.DictField(child=GradebookCellSerializer())
+    total = serializers.DecimalField(max_digits=8, decimal_places=2)
+    submitted = serializers.IntegerField()
+
+
+class GradebookAssignmentSerializer(serializers.Serializer):
+    public_id = serializers.UUIDField()
+    title = serializers.CharField()
+    max_grade = serializers.DecimalField(max_digits=6, decimal_places=2)
+    due_at = serializers.DateTimeField()
+    status = serializers.CharField()
+
+
+class GradebookSerializer(serializers.Serializer):
+    assignments = GradebookAssignmentSerializer(many=True)
+    students = GradebookStudentSerializer(many=True)
+    max_total = serializers.DecimalField(max_digits=8, decimal_places=2)
+
+
+@extend_schema(tags=["learning"])
+class GradebookView(APIView):
+    """Roster + coursework grades of one offering, for its instructors and department staff.
+
+    Fixed query count: roster, assignments and all submissions (with grades)
+    are fetched once each and combined here.
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(responses=GradebookSerializer)
+    def get(self, request, offering_id):
+        from academic.models import CourseOffering, Enrollment
+
+        offering = get_object_or_404(
+            CourseOffering.objects.select_related("course"), pk=offering_id
+        )
+        if not access.for_offering(request.user, offering).view_all:
+            raise NotFound()
+        assignments = list(
+            Assignment.objects.filter(offering=offering)
+            .exclude(status=Assignment.Status.DRAFT)
+            .order_by("due_at", "id")
+        )
+        roster = list(
+            Enrollment.objects.filter(offering=offering, status=Enrollment.Status.ACTIVE)
+            .select_related("student_record")
+            .order_by("student_record__full_name_ar")
+        )
+        cells: dict[int, dict] = {e.student_record_id: {} for e in roster}
+        submissions = Submission.objects.filter(assignment__in=assignments).select_related(
+            "grade", "assignment"
+        )
+        for s in submissions:
+            grade = getattr(s, "grade", None)
+            status_ = "submitted" if grade is None else grade.status
+            score = (
+                grade.final_score
+                if grade and grade.status == "approved"
+                else (grade.score if grade else None)
+            )
+            cells.setdefault(s.student_record_id, {})[str(s.assignment.public_id)] = {
+                "score": score,
+                "status": status_,
+                "late": s.is_late,
+                "submission": s.public_id,
+            }
+        students = []
+        for e in roster:
+            mine = cells.get(e.student_record_id, {})
+            total = sum(
+                (c["score"] for c in mine.values() if c["status"] == "approved" and c["score"]),
+                Decimal(0),
+            )
+            students.append(
+                {
+                    "public_id": e.student_record.public_id,
+                    "university_number": e.student_record.university_number,
+                    "full_name_ar": e.student_record.full_name_ar,
+                    "cells": mine,
+                    "total": total,
+                    "submitted": len(mine),
+                }
+            )
+        data = {
+            "assignments": assignments,
+            "students": students,
+            "max_total": sum((a.max_grade for a in assignments), Decimal(0)),
+        }
+        return Response(GradebookSerializer(data).data)
+
+
+class QueueAssignmentSerializer(serializers.Serializer):
+    public_id = serializers.UUIDField()
+    title = serializers.CharField()
+    course_code = serializers.CharField(source="offering.course.code")
+    course_name = serializers.CharField(source="offering.course.name_ar")
+    max_grade = serializers.DecimalField(max_digits=6, decimal_places=2)
+    due_at = serializers.DateTimeField()
+
+
+class QueueGroupSerializer(serializers.Serializer):
+    assignment = QueueAssignmentSerializer()
+    submissions = SubmissionSerializer(many=True)
+
+
+class QueueCountsSerializer(serializers.Serializer):
+    pending = serializers.IntegerField()
+    suggested = serializers.IntegerField()
+    late = serializers.IntegerField()
+    done = serializers.IntegerField()
+
+
+class GradingQueueSerializer(serializers.Serializer):
+    counts = QueueCountsSerializer()
+    groups = QueueGroupSerializer(many=True)
+
+
+@extend_schema(tags=["learning"])
+class GradingQueueView(APIView):
+    """Submissions of the courses the user teaches, oldest first (board TeacherGrading).
+
+    One request instead of one per assignment; ``status`` filters the groups,
+    counts always cover everything.
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(
+        parameters=[OpenApiParameter("status", str, enum=["pending", "suggested", "late", "done"])],
+        responses=GradingQueueSerializer,
+    )
+    def get(self, request):
+        wanted = request.query_params.get("status", "pending")
+        rows = list(
+            Submission.objects.filter(
+                assignment__offering__instructors__user=request.user,
+                assignment__status__in=[Assignment.Status.PUBLISHED, Assignment.Status.CLOSED],
+            )
+            .select_related(
+                "assignment__offering__course", "student_record", "current_version", "grade"
+            )
+            .order_by("current_version__submitted_at", "first_submitted_at")
+            .distinct()
+        )
+
+        def state(s) -> set[str]:
+            grade = getattr(s, "grade", None)
+            approved = grade is not None and grade.status == SubmissionGrade.Status.APPROVED
+            tags = {"done"} if approved else {"pending"}
+            if grade is not None and grade.status == SubmissionGrade.Status.SUGGESTED:
+                tags.add("suggested")
+            if s.is_late and not approved:
+                tags.add("late")
+            return tags
+
+        counts = {"pending": 0, "suggested": 0, "late": 0, "done": 0}
+        groups: dict[int, dict] = {}
+        for s in rows:
+            tags = state(s)
+            for tag in tags:
+                counts[tag] += 1
+            if wanted in tags:
+                group = groups.setdefault(
+                    s.assignment_id, {"assignment": s.assignment, "submissions": []}
+                )
+                if len(group["submissions"]) < 200:
+                    group["submissions"].append(s)
+        data = {"counts": counts, "groups": list(groups.values())}
+        return Response(GradingQueueSerializer(data).data)

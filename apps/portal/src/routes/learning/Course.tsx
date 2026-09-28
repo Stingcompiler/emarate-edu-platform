@@ -104,7 +104,12 @@ export function Course() {
               ))}
             </div>
             {staff && (
-              <div className="ms-auto flex gap-2">
+              <div className="ms-auto flex flex-wrap gap-2">
+                <Link to={`/courses/${offering}/students`}>
+                  <Button variant="secondary" className="min-h-9 px-3">
+                    الطلاب ودفتر الدرجات
+                  </Button>
+                </Link>
                 <Link to={`/lectures/new?offering=${offering}`}>
                   <Button variant="secondary" className="min-h-9 px-3">
                     <Plus size={16} aria-hidden /> محاضرة

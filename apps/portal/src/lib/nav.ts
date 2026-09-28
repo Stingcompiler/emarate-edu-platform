@@ -63,6 +63,10 @@ export function navFor(me: Me | null | undefined, unread: number): NavItem[] {
   if (me?.student || hasRole(me, "teacher", "ta"))
     items.push({ label: "موادي", to: "/courses", icon: BookOpen, end: false });
   if (me?.student) items.push({ label: "المهام", to: "/tasks", icon: ListChecks });
+  if (hasRole(me, "teacher", "ta")) {
+    items.unshift({ label: "اليوم", to: "/", icon: Sun });
+    items.push({ label: "التصحيح", to: "/grading", icon: ClipboardCheck });
+  }
   items.push({ label: "الإشعارات", to: "/notifications", icon: Bell, badge: unread });
   const teaches = hasRole(
     me,
