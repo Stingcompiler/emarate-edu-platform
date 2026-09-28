@@ -1,14 +1,22 @@
-# Handoff — All phases done (0–11) → production deploy by the owner — 2026-09-28
+# Handoff — Role-by-role walkthrough in progress — 2026-09-28
 
 ## Where things stand
-- **Phases 1–10 are merged** to `main` (PRs #3–#12).
-- **Phase 11 (hardening and deploy)** is complete on `feat/phase-11-deploy`. Its PR is opened in this step; merge it once CI is green with `gh pr merge --merge`.
-- **After that merge, the build plan (docs/02 §8) is fully delivered.** What remains needs the owner's accounts and decisions (see "Owner actions").
-- **Verified locally:**
-  - 319 tests pass on SQLite; 318 pass plus 1 SQLite-only skip on Postgres;
-  - `check --deploy` with prod settings reports no issues; `collectstatic` works through WhiteNoise;
-  - a real `pg_dump` backup was encrypted, decrypted and restored into a fresh database;
-  - the activation page `/activate/:token` was walked end to end.
+- **All phases 0–11 are merged** to `main` (PRs #2–#13). PR #14 (student walkthrough fixes) is also merged.
+- **Current work:** the owner asked to sign in as every demo role one after another, try it,
+  write a report after each role and move on **without waiting** («سجل بكل المستخدمين وجرب مستخدم بعد الاخر…»).
+  - Branch `fix/role-walkthrough` (pushed, **no PR yet**): fixes found while testing, one commit per role.
+  - Report: `docs/qa/role-walkthrough-2026-09.md` (Arabic). Done: student, teacher, TA, dept manager,
+    dept supervisor, results officer, academic affairs.
+  - **Remaining roles, in order:** student_affairs, hr, head_registrar, registrar, site_manager,
+    events_manager, system_admin. After the last role: open the PR, merge when CI is green.
+- **Next PR after that:** Arabic API messages (docs/05 requires Arabic by `Accept-Language`).
+  About 180 service messages plus importer row errors are English and reach users. Plan: wrap them in
+  `gettext`, add `locale/ar/LC_MESSAGES/django.po`, enable `LocaleMiddleware`, and make sure stored
+  import row errors are Arabic.
+- **Dev login:** the demo accounts are `<handle>@demo.ecst.test`. `ta@` and `dept.supervisor@` have a different
+  password from the rest (seed_demo does not reset existing passwords). Look it up in the transcript, not here.
+- **Browser pane tip:** coordinate clicks don't land while a phone size is emulated. Use refs or JS clicks,
+  or the pane's natural width.
 
 ## What Phase 11 delivered
 - **`render.yaml`:**
