@@ -64,6 +64,10 @@ class SystemSettings(SingletonModel, TimestampedModel):
     otp_ttl_minutes = models.PositiveSmallIntegerField(default=10)
     otp_max_attempts = models.PositiveSmallIntegerField(default=5)
     max_applications_per_cycle = models.PositiveSmallIntegerField(default=3)
+    # Teacher-performance thresholds for reports and HR (docs/02 §4.14).
+    grading_days_limit = models.PositiveSmallIntegerField(default=3)
+    upload_min_percent = models.PositiveSmallIntegerField(default=75)
+    planned_lectures_per_week = models.PositiveSmallIntegerField(default=2)
 
     class Meta:
         verbose_name = "system settings"

@@ -267,3 +267,39 @@ def student_view(record_) -> dict:
         "terms": [{"term": t["term"], "rows": t["rows"], "gpa": _gpa(t["rows"])} for t in ordered],
         "cumulative_gpa": _gpa(all_rows),
     }
+
+
+def transcript(record_) -> dict:
+    """The official record: every published result, oldest term first (staff export).
+
+    Unlike ``student_view`` it ignores the student display settings; it is only
+    served to staff who hold ``results.view`` for the student's department.
+    """
+    results = (
+        AcademicResult.objects.filter(student_record=record_, is_published=True)
+        .select_related("offering__course", "term")
+        .order_by("term__starts_on", "offering__course__code")
+    )
+    terms: dict[int, dict] = {}
+    for result in results:
+        terms.setdefault(result.term_id, {"term": result.term, "rows": []})["rows"].append(result)
+    ordered = list(terms.values())
+    all_rows = [r for t in ordered for r in t["rows"]]
+    return {
+        "record": record_,
+        "terms": [
+            {
+                "term": t["term"],
+                "rows": t["rows"],
+                "gpa": _gpa(t["rows"]),
+                "credit_hours": sum(r.offering.course.credit_hours for r in t["rows"]),
+            }
+            for t in ordered
+        ],
+        "cumulative_gpa": _gpa(all_rows),
+        "earned_hours": sum(
+            r.offering.course.credit_hours
+            for r in all_rows
+            if r.status == AcademicResult.Status.PASS
+        ),
+    }

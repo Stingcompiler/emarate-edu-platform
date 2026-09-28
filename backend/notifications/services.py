@@ -184,7 +184,20 @@ def _email_body(notification: Notification) -> str:
 # ─── HR notices (docs/03 §3.11) ───────────────────────────────────────────
 
 
-def create_hr_notice(meta: RequestMeta, *, teacher, subject: str, body: str, requires_ack: bool):
+def create_hr_notice(
+    meta: RequestMeta,
+    *,
+    teacher,
+    body: str,
+    requires_ack: bool = True,
+    subject: str = "",
+    topic: str = "other",
+    cc_department_manager: bool = False,
+):
+    """A directed notice to one teacher, with this term's indicators attached."""
+    import json
+
+    from django.core.serializers.json import DjangoJSONEncoder
     from rest_framework.exceptions import PermissionDenied
 
     from accounts import rbac
@@ -193,21 +206,38 @@ def create_hr_notice(meta: RequestMeta, *, teacher, subject: str, body: str, req
     from . import events
     from .models import HRNotice
 
-    if not rbac.has_role(meta.actor, Role.HR, Role.SYSTEM_ADMIN):
+    if not rbac.can(meta.actor, "hr.notify"):
         raise PermissionDenied()
-    if not rbac.has_role(teacher, Role.TEACHER, Role.TA):
+    if not rbac.has_role(teacher, Role.TEACHER, Role.TA) or not teacher.is_active:
         raise ValidationError({"teacher": ["Choose a teacher or TA."]})
+    from reports.services import teacher_evidence
+
+    evidence, term = teacher_evidence(teacher)
     with transaction.atomic():
         notice = HRNotice.objects.create(
             teacher=teacher,
             sent_by=meta.actor,
-            subject=subject,
+            topic=topic,
+            subject=(subject.strip() or HRNotice.Topic(topic).label)[:160],
             body=body,
             requires_ack=requires_ack,
+            evidence=json.loads(json.dumps(evidence, cls=DjangoJSONEncoder)),
+            term=term,
+            cc_department_manager=cc_department_manager,
         )
         notice.notification = events.hr_notice(notice)
         notice.save(update_fields=["notification", "updated_at"])
-        record(meta, "hr_notice.send", notice, new={"teacher": teacher.email})
+        if cc_department_manager:
+            events.hr_notice_copy(notice)
+        record(meta, "hr_notice.send", notice, new={"teacher": teacher.email, "topic": topic})
+    return notice
+
+
+def open_hr_notice(notice, user):
+    """The teacher opening their notice marks it seen (HR sees "فُتح")."""
+    if notice.teacher_id == user.pk and notice.opened_at is None:
+        notice.opened_at = timezone.now()
+        notice.save(update_fields=["opened_at", "updated_at"])
     return notice
 
 
@@ -218,6 +248,7 @@ def acknowledge_hr_notice(meta: RequestMeta, notice):
         raise Conflict("Already acknowledged.", code="already_acknowledged")
     with transaction.atomic():
         notice.acknowledged_at = timezone.now()
-        notice.save(update_fields=["acknowledged_at", "updated_at"])
+        notice.opened_at = notice.opened_at or notice.acknowledged_at
+        notice.save(update_fields=["acknowledged_at", "opened_at", "updated_at"])
         record(meta, "hr_notice.acknowledge", notice)
     return notice
