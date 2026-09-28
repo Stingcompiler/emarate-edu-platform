@@ -250,7 +250,10 @@ const ext = (external: boolean) => (external ? { rel: "noopener", target: "_blan
     </main>
 
     <footer class="mt-16 bg-header text-sm text-navy-100">
-      <div class="mx-auto grid max-w-6xl grid-cols-2 gap-8 px-4 py-10 lg:grid-cols-[1.4fr_repeat(4,1fr)] lg:px-8">
+      <div
+        class="mx-auto grid max-w-6xl grid-cols-2 gap-8 px-4 py-10 lg:grid-cols-[var(--footer-cols)] lg:px-8"
+        style={`--footer-cols: 1.5fr repeat(${Math.max(footerColumns.length, 1)}, 1fr)`}
+      >
         <div class="col-span-2 lg:col-span-1">
           <p class="font-bold text-white">{siteName}</p>
           {s.tagline && <p class="mt-2 leading-6">{s.tagline}</p>}

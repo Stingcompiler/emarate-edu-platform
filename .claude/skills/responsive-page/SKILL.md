@@ -1,6 +1,6 @@
 ---
 name: responsive-page
-description: Build or change any page, screen, layout or UI component in apps/portal or apps/landing so it matches BOTH prototype references — the phone board (390×844) and the desktop board (1280×800) — and verify it at both sizes before calling it done. Use whenever a task touches what a user sees in the browser.
+description: Build or change any page, screen, layout or UI component in apps/portal or apps/landing so it matches BOTH prototype references — the phone board (390×844) and the desktop board (1280×800) — designs the large-screen layout as deliberately as the phone one, and verifies it at 390, 768, 1280, 1440 and 1920 before calling it done. Use whenever a task touches what a user sees in the browser.
 ---
 
 # Responsive pages: every page matches the phone AND the large-screen design
@@ -9,6 +9,12 @@ description: Build or change any page, screen, layout or UI component in apps/po
 is responsive and must match *both* designs in the reference prototype — the
 phone board and the desktop board. A page is not done until it has been
 checked at both sizes.
+
+**Said twice (2026-09-27 and 2026-09-28): large screens are not an afterthought.**
+The owner reviewed pages that were fine on the phone but on a wide screen were a
+narrow phone column floating in empty space. "No horizontal scroll at 1280" is
+*not* a large-screen check. Design the `lg:`/`xl:` layout on purpose (§2a) and
+look at it (§3).
 
 ## 1. Find the two references before writing code
 
@@ -49,18 +55,42 @@ Other rules:
 - **Special shells:** exam (focused, no sidebar at any size), auth (centred
   440px card), visitor tracking (800px card inside the public site).
 
+## 2a. Designing the large-screen layout
+
+A phone column stretched or centred on a 1440px screen is a bug. At `lg` and up:
+- **Use the width.** Lists of cards → grids (`lg:grid-cols-2`/`3`); lists of rows
+  with several fields → a table or a multi-column row; a page of text → text
+  column (≤ 72ch) **plus** a side column (related links, facts, actions, contact).
+  No single column narrower than ~60% of the container unless it is long-form
+  reading text *with* a side column, or a focused shell (auth, exam, tracking).
+- **Same container everywhere:** public site `max-w-6xl` (header, page head,
+  body, footer line up); portal content follows the shell. A body narrower than
+  its own header looks broken.
+- **Put secondary content beside, not below:** filters, summaries, "next step"
+  cards, related pages go in a side column on desktop and after the main content
+  on phones.
+- **Short pages:** no tiny content at the top of a 1920×1080 viewport with the rest
+  blank — give empty and short states a proper layout (illustration or guidance,
+  related actions).
+- **Readable measure:** paragraphs ≤ ~75 characters per line even inside wide
+  columns (`max-w-prose`/`max-w-3xl` on the text, not on the whole page).
+
 ## 3. Verify at both sizes (required before "done")
 
 1. Run the app (`pnpm dev`) and the boards (`python3 scripts/boards.py serve`, add
    `--ref …` if needed).
-2. In the browser pane, for **390×844** then **1280×800** (and a quick **768×1024**):
+2. In the browser pane, for **390×844** then **1280×800** (and a quick **768×1024**),
+   then headless captures at **1440×900** and **1920×1080**:
    `resize_window` → screenshot the page → screenshot the matching board at
    the same size → compare structure: shell, section order, hierarchy, key
    components and states. The goal is the same layout, not pixel identity.
 3. Check at every size:
    - no horizontal scroll: `document.documentElement.scrollWidth <= innerWidth`;
    - nothing clipped or overlapping; the bottom tab bar does not cover content;
-   - dark mode (portal only): `resize_window` with `colorScheme: "dark"`.
+   - dark mode (portal only): `resize_window` with `colorScheme: "dark"`;
+   - **at 1280/1440/1920 look at the screenshot and ask: does this use the screen
+     like the desktop board does?** Narrow centred column, one card per row, big
+     blank areas, content narrower than the header → fix it (§2a).
 4. Reset the viewport (`preset: "desktop"`) when finished.
 
    Tooling notes: use the browser pane for **phone sizes**. Headless Chrome

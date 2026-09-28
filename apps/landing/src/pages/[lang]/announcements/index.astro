@@ -1,8 +1,11 @@
 ---
 import PageHead from "../../../components/PageHead.astro";
+import SideLinks from "../../../components/SideLinks.astro";
+import WithAside from "../../../components/WithAside.astro";
 import Base from "../../../layouts/Base.astro";
-import { announcements } from "../../../lib/api";
+import { PORTAL, announcements } from "../../../lib/api";
 import { type Lang, fmtDate, href, langPaths, t } from "../../../lib/i18n";
+import { related } from "../../../lib/related";
 
 // docs/07 §1 `/announcements`: the college's public notices, pinned ones first.
 export const getStaticPaths = langPaths;
@@ -12,6 +15,7 @@ const items = (await announcements()).sort(
     Number(!!b.is_pinned) - Number(!!a.is_pinned) ||
     (b.publish_at ?? "").localeCompare(a.publish_at ?? ""),
 );
+const more = await related(lang, ["news", "events", "calendar"]);
 const text = (html: string) =>
   html
     .replace(/<[^>]+>/g, " ")
@@ -25,7 +29,7 @@ const text = (html: string) =>
     title={t(lang, "announcements")}
     crumbs={[[t(lang, "announcements"), "announcements/"]]}
   />
-  <div class="mx-auto max-w-3xl px-4 py-10 lg:px-8">
+  <WithAside>
     <ul class="divide-y divide-border-soft rounded-2xl border border-border-soft bg-surface">
       {items.map((a) => (
         <li>
@@ -54,5 +58,19 @@ const text = (html: string) =>
         </li>
       )}
     </ul>
-  </div>
+    <Fragment slot="aside">
+      <div class="rounded-2xl bg-bg-subtle p-4 text-sm leading-6">
+        <b class="block">{lang === "ar" ? "طالب في الكلية؟" : "A student here?"}</b>
+        <p class="mt-1 text-text-muted">
+          {lang === "ar"
+            ? "إعلانات قسمك ومقرراتك تصلك في البوابة وعلى هاتفك."
+            : "Your department's and courses' notices reach you in the portal and on your phone."}
+        </p>
+        <a href={`${PORTAL}/login`} class="mt-2 inline-block font-semibold text-primary">
+          {t(lang, "portal")}
+        </a>
+      </div>
+      <SideLinks lang={lang} title={lang === "ar" ? "ذو صلة" : "Related"} links={more} />
+    </Fragment>
+  </WithAside>
 </Base>

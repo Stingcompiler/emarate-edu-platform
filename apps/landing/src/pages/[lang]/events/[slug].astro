@@ -1,8 +1,11 @@
 ---
 import PageHead from "../../../components/PageHead.astro";
+import SideLinks from "../../../components/SideLinks.astro";
+import WithAside from "../../../components/WithAside.astro";
 import Base from "../../../layouts/Base.astro";
 import { type Event, events, get, pastEvents } from "../../../lib/api";
-import { LANGS, type Lang, fmtDate, t } from "../../../lib/i18n";
+import { LANGS, type Lang, fmtDate, href, t } from "../../../lib/i18n";
+import { related } from "../../../lib/related";
 
 export async function getStaticPaths() {
   // Ended events keep their pages (docs/07 §1): only the lists move them to «past».
@@ -27,6 +30,17 @@ const when = fmtDate(lang, e.starts_at, {
   hour: "numeric",
   minute: "2-digit",
 });
+const others = (await events())
+  .filter((o) => o.slug !== e.slug && new Date(o.ends_at) > new Date())
+  .sort((x, y) => x.starts_at.localeCompare(y.starts_at))
+  .slice(0, 4)
+  .map((o) => ({
+    label: o.title,
+    href: href(lang, `events/${o.slug}/`),
+    meta: fmtDate(lang, o.starts_at, { day: "numeric", month: "long" }),
+  }));
+const more = await related(lang, ["events", "calendar"]);
+const L = (ar: string, en: string) => (lang === "ar" ? ar : en);
 const jsonLd = {
   "@context": "https://schema.org",
   "@type": "Event",
@@ -65,7 +79,34 @@ const jsonLd = {
       </a>
     )}
   </PageHead>
-  <article class="mx-auto max-w-3xl px-4 py-10 lg:px-8">
-    <div class="space-y-4 text-base leading-8" set:html={e.description} />
-  </article>
+  <WithAside>
+    <article class="max-w-3xl">
+      {e.cover_url && <img src={e.cover_url} alt="" class="mb-8 w-full rounded-2xl" />}
+      <div class="space-y-4 text-base leading-8" set:html={e.description} />
+    </article>
+    <Fragment slot="aside">
+      <dl class="space-y-3 rounded-2xl bg-bg-subtle p-4 text-sm">
+        <div>
+          <dt class="text-text-muted">{L("الموعد", "When")}</dt>
+          <dd class="font-semibold">{when}</dd>
+        </div>
+        {e.location && (
+          <div>
+            <dt class="text-text-muted">{L("المكان", "Where")}</dt>
+            <dd class="font-semibold">{e.location}</dd>
+          </div>
+        )}
+        <div>
+          <dt class="text-text-muted">{L("الحالة", "Status")}</dt>
+          <dd class="font-semibold">{ended ? L("انتهت", "Ended") : L("قادمة", "Upcoming")}</dd>
+        </div>
+      </dl>
+      <SideLinks
+        lang={lang}
+        title={L("فعاليات قادمة أخرى", "Other upcoming events")}
+        links={others}
+      />
+      <SideLinks lang={lang} title={L("ذو صلة", "Related")} links={more} />
+    </Fragment>
+  </WithAside>
 </Base>

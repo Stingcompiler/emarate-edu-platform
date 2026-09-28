@@ -1,6 +1,7 @@
 ---
 import Blocks from "../../../components/Blocks.astro";
 import PageHead from "../../../components/PageHead.astro";
+import WithAside from "../../../components/WithAside.astro";
 import Base from "../../../layouts/Base.astro";
 import { type Page, get, pages } from "../../../lib/api";
 import { LANGS, type Lang, pick } from "../../../lib/i18n";
@@ -24,7 +25,9 @@ const title = pick(lang, page.title_ar, page.title_en);
 
 <Base lang={lang} title={title} path={`p/${page.slug}/`} description={page.seo?.description}>
   <PageHead lang={lang} title={title} />
-  <div class="mx-auto max-w-3xl px-4 py-10 lg:px-8">
-    <Blocks blocks={page.blocks} />
-  </div>
+  <WithAside>
+    <article class="max-w-3xl">
+      <Blocks blocks={page.blocks} />
+    </article>
+  </WithAside>
 </Base>

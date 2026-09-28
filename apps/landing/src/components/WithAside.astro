@@ -1,0 +1,18 @@
+---
+/**
+ * The public site's large-screen layout: the page's content beside a side column
+ * (related links, facts, actions), in the header's own container. On phones the side
+ * column follows the content. Long text keeps a readable measure inside the column.
+ */
+---
+
+<div class="mx-auto grid max-w-6xl gap-10 px-4 py-10 lg:grid-cols-[minmax(0,1fr)_18rem] lg:gap-12 lg:px-8 xl:grid-cols-[minmax(0,1fr)_20rem]">
+  <div class="min-w-0">
+    <slot />
+  </div>
+  {Astro.slots.has("aside") && (
+    <aside class="space-y-4 lg:sticky lg:top-24 lg:h-fit">
+      <slot name="aside" />
+    </aside>
+  )}
+</div>

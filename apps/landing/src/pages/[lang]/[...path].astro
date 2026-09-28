@@ -1,9 +1,12 @@
 ---
 import Blocks from "../../components/Blocks.astro";
 import PageHead from "../../components/PageHead.astro";
+import SideLinks from "../../components/SideLinks.astro";
+import WithAside from "../../components/WithAside.astro";
 import Base from "../../layouts/Base.astro";
 import { type Page, type PageRef, departments, page as loadPage, pages } from "../../lib/api";
 import { LANGS, type Lang, href, pick, t } from "../../lib/i18n";
+import { related } from "../../lib/related";
 
 // The college's official pages (backend content/official.py) at their own path —
 // /about/dean/, /admissions/fees/, /privacy/ … — once the site manager publishes them.
@@ -31,12 +34,20 @@ const path = Astro.params.path as string;
 const title = pick(lang, page.title_ar, page.title_en);
 const section = path.includes("/") ? path.split("/")[0]! : "";
 const crumb = SECTIONS[section];
-// The other published pages of the same section, for the side list.
+// The other published pages of the same section (or the other policies) for the side column.
+const LEGAL = ["privacy", "terms", "accessibility"];
 // Heads of department come from the departments' own data, never retyped.
 const heads = path === "about/leadership" ? (await departments()).filter((d) => d.manager) : [];
 const siblings = section
   ? all.filter((p) => p.path === section || p.path.startsWith(`${section}/`))
-  : [];
+  : LEGAL.includes(path)
+    ? all.filter((p) => LEGAL.includes(p.path))
+    : [];
+const sideTitle = crumb ? pick(lang, crumb[0], crumb[1]) : lang === "ar" ? "السياسات" : "Policies";
+const more = await related(
+  lang,
+  section === "admissions" ? ["admissions", "programs", "contact"] : ["contact"],
+);
 ---
 
 <Base lang={lang} title={title} path={`${path}/`} description={page.seo?.description}>
@@ -45,13 +56,8 @@ const siblings = section
     title={title}
     crumbs={crumb ? [[pick(lang, crumb[0], crumb[1]), crumb[2]]] : []}
   />
-  <div
-    class:list={[
-      "mx-auto grid gap-10 px-4 py-10 lg:px-8",
-      siblings.length > 1 ? "max-w-6xl lg:grid-cols-[1fr_16rem]" : "max-w-3xl",
-    ]}
-  >
-    <article class="min-w-0">
+  <WithAside>
+    <article class="max-w-3xl">
       <Blocks blocks={page.blocks} />
       {heads.length > 0 && (
         <section class="mt-8">
@@ -74,29 +80,19 @@ const siblings = section
         </section>
       )}
     </article>
-    {siblings.length > 1 && (
-      <nav
-        aria-label={crumb ? pick(lang, crumb[0], crumb[1]) : title}
-        class="h-fit rounded-2xl border border-border-soft bg-surface p-2 lg:sticky lg:top-24"
-      >
-        {crumb && (
-          <p class="px-3 pb-1 pt-2 text-xs font-semibold text-text-muted">
-            {pick(lang, crumb[0], crumb[1])}
-          </p>
-        )}
-        {siblings.map((p) => (
-          <a
-            href={href(lang, `${p.path}/`)}
-            aria-current={p.path === path ? "page" : undefined}
-            class:list={[
-              "block rounded-md px-3 py-2.5 text-sm hover:bg-surface-alt",
-              p.path === path ? "bg-surface-alt font-semibold text-primary" : "text-text",
-            ]}
-          >
-            {pick(lang, p.title_ar, p.title_en)}
-          </a>
-        ))}
-      </nav>
-    )}
-  </div>
+    <Fragment slot="aside">
+      {siblings.length > 1 && (
+        <SideLinks
+          lang={lang}
+          title={sideTitle}
+          links={siblings.map((p) => ({
+            label: pick(lang, p.title_ar, p.title_en),
+            href: href(lang, `${p.path}/`),
+            current: p.path === path,
+          }))}
+        />
+      )}
+      <SideLinks lang={lang} title={lang === "ar" ? "ذو صلة" : "Related"} links={more} />
+    </Fragment>
+  </WithAside>
 </Base>

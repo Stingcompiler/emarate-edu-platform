@@ -3,7 +3,7 @@ import PageHead from "../../../components/PageHead.astro";
 import ProgramCard from "../../../components/ProgramCard.astro";
 import Base from "../../../layouts/Base.astro";
 import { type Department, departments } from "../../../lib/api";
-import { LANGS, type Lang, pick, t } from "../../../lib/i18n";
+import { LANGS, type Lang, num, pick, t } from "../../../lib/i18n";
 
 export async function getStaticPaths() {
   const depts = await departments();
@@ -31,6 +31,18 @@ const name = pick(lang, d.name_ar, d.name_en);
         <b>{d.manager}</b> · <span class="text-text-muted">{t(lang, "manager")}</span>
       </p>
     )}
+    <dl class="mt-6 grid max-w-xl grid-cols-3 gap-2">
+      {[
+        [d.programs.length, t(lang, "programsCount")],
+        [d.teachers, t(lang, "teachers")],
+        [d.students, t(lang, "students")],
+      ].map(([n, label]) => (
+        <div class="rounded-2xl bg-surface p-3 text-center">
+          <dd class="font-display text-xl font-bold text-primary">{num(lang, Number(n))}</dd>
+          <dt class="text-xs text-text-muted">{label}</dt>
+        </div>
+      ))}
+    </dl>
   </PageHead>
   <section class="mx-auto max-w-6xl px-4 py-10 lg:px-8">
     <h2 class="font-display text-xl font-bold">
