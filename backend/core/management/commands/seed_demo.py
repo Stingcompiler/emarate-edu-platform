@@ -204,6 +204,11 @@ class Command(BaseCommand):
                         "duration_terms": terms,
                     },
                 )
+                if programs[p_code].total_credit_hours is None:
+                    # Demo totals (the prototype shows 132 for a 4-year bachelor); the
+                    # college enters its own in «الهيكل الأكاديمي».
+                    programs[p_code].total_credit_hours = {4: 68, 8: 132, 10: 160}.get(terms)
+                    programs[p_code].save(update_fields=["total_credit_hours"])
 
         year, _ = AcademicYear.objects.get_or_create(
             name="2026/2027",

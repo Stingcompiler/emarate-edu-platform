@@ -34,7 +34,11 @@ def test_departments_programs_and_plan(
     assert program.data["description_ar"] == "برنامج تطبيقي"
     level3 = next(level for level in program.data["plan"] if level["level"] == 3)
     assert level3["courses"][0]["code"] == "IT301"
-    assert program.data["credit_hours"] >= 3 and program.data["intake"] is None
+    # Never a sum of the courses entered so far: only the total the college states.
+    assert program.data["credit_hours"] is None and program.data["intake"] is None
+    it_program.total_credit_hours = 132
+    it_program.save()
+    assert anonymous.get(f"/api/public/programs/{it_program.code}").data["credit_hours"] == 132
     # No personal data: names of students never appear.
     assert "26-IT-0500" not in str(departments.data)
     stats = anonymous.get("/api/public/stats").data
@@ -104,3 +108,17 @@ def test_calendar_lists_this_years_terms_and_the_admission_window(api, term):
     data = api().get("/api/public/calendar").data
     assert term.name_ar in [t["name_ar"] for t in data["terms"]]
     assert data["admission"]["name"] == "قبول الخريف"
+
+
+def test_the_system_admin_sets_a_programmes_total_hours(api, it_program, make_user):
+    """Owner decision 2026-09-28: the total is a field the college fills in (1–300 or blank)."""
+    admin = api(make_user(Role.SYSTEM_ADMIN))
+    url = f"/api/v1/programs/{it_program.pk}"
+    assert (
+        admin.patch(url, {"total_credit_hours": 132}, format="json").data["total_credit_hours"]
+        == 132
+    )
+    assert admin.patch(url, {"total_credit_hours": 0}, format="json").status_code == 400
+    assert admin.patch(url, {"total_credit_hours": 301}, format="json").status_code == 400
+    assert admin.patch(url, {"total_credit_hours": None}, format="json").status_code == 200
+    assert api().get(f"/api/public/programs/{it_program.code}").data["credit_hours"] is None

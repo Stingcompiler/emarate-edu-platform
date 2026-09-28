@@ -5,12 +5,14 @@ import Base from "../../../layouts/Base.astro";
 import { PORTAL, type ProgramDetail, get, programs } from "../../../lib/api";
 import {
   arrow,
+  count,
   degree,
   faqLd,
   fmtDate,
   href,
   type Lang,
   LANGS,
+  N,
   num,
   pick,
   t,
@@ -50,8 +52,8 @@ const faq: [string, string][] = [
   [
     L("ما مدة الدراسة؟", "How long is the programme?"),
     L(
-      `${years(lang, p.duration_terms)} في ${num(lang, p.duration_terms)} فصول دراسية، ودرجته ${kind}.`,
-      `${years(lang, p.duration_terms)} over ${p.duration_terms} terms, awarding a ${kind}.`,
+      `${years(lang, p.duration_terms)} في ${num(lang, p.duration_terms)} فصول دراسية${p.credit_hours ? ` (${count(lang, p.credit_hours, N.hour)} معتمدة)` : ""}، ودرجته ${kind}.`,
+      `${years(lang, p.duration_terms)} over ${p.duration_terms} terms${p.credit_hours ? ` (${p.credit_hours} credit hours)` : ""}, awarding a ${kind}.`,
     ),
   ],
   ...(p.requirements_ar
@@ -105,6 +107,7 @@ const programLd = {
     name: "كلية الإمارات للعلوم والتقنية",
     url: Astro.site?.toString(),
   },
+  ...(p.credit_hours ? { numberOfCredits: p.credit_hours } : {}),
   ...(open ? { applicationDeadline: p.intake!.closes_at.slice(0, 10) } : {}),
 };
 const jsonLd = [programLd, faqLd(faq)];
@@ -152,12 +155,14 @@ const jsonLd = [programLd, faqLd(faq)];
   </PageHead>
   <div class="mx-auto grid max-w-6xl gap-10 px-4 py-10 lg:grid-cols-[2fr_1fr] lg:px-8">
     <div>
-      <div class="grid grid-cols-3 gap-2 text-center">
-        {[
-          [p.duration_terms, t(lang, "terms")],
-          [p.credit_hours, t(lang, "hours")],
-          [p.levels_count, t(lang, "levels")],
-        ].map(([n, l]) => (
+      <div class:list={["grid gap-2 text-center", p.credit_hours ? "grid-cols-3" : "grid-cols-2"]}>
+        {(
+          [
+            [p.duration_terms, t(lang, "terms")],
+            ...(p.credit_hours ? [[p.credit_hours, t(lang, "hours")]] : []),
+            [p.levels_count, t(lang, "levels")],
+          ] as [number, string][]
+        ).map(([n, l]) => (
           <div class="rounded-2xl bg-bg-subtle p-4">
             <p class="font-display text-2xl font-bold text-primary">{num(lang, Number(n))}</p>
             <p class="text-xs text-text-muted">{l}</p>

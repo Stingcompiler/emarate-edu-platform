@@ -83,16 +83,22 @@ export function Structure() {
     degree: "bachelor",
     levels_count: 4,
     duration_terms: 8,
+    total_credit_hours: "",
   });
   const addProgram = useMutation({
     mutationFn: async () => {
       const { data, error } = await api.POST("/api/v1/programs", {
-        body: { department: dept!.id, ...pForm, degree: pForm.degree as never },
+        body: {
+          department: dept!.id,
+          ...pForm,
+          degree: pForm.degree as never,
+          total_credit_hours: pForm.total_credit_hours ? Number(pForm.total_credit_hours) : null,
+        },
       });
       if (!data) throw error;
     },
     onSuccess: () => {
-      setP({ ...pForm, code: "", name_ar: "", name_en: "" });
+      setP({ ...pForm, code: "", name_ar: "", name_en: "", total_credit_hours: "" });
       void refresh("programs");
     },
   });
@@ -274,24 +280,32 @@ export function Structure() {
             قسم {dept?.name_ar ?? ""} — البرامج · {num(deptPrograms.length)}
           </SectionLabel>
           <Card className="divide-y divide-border-soft">
-            <div className="hidden grid-cols-[80px_minmax(0,1fr)_120px_80px_80px_80px] gap-3 bg-surface-alt px-4 py-2 text-xs text-text-muted md:grid">
-              <span>الرمز</span>
+            <div className="hidden grid-cols-[minmax(0,1fr)_88px_120px_76px_56px] gap-3 bg-surface-alt px-4 py-2 text-xs text-text-muted md:grid">
               <span>البرنامج</span>
               <span>الدرجة</span>
               <span>المدة</span>
-              <span>المستويات</span>
+              <span>الساعات</span>
               <span>الحالة</span>
             </div>
             {deptPrograms.map((p) => (
               <div
                 key={p.id}
-                className="grid gap-1 px-4 py-3 text-sm md:grid-cols-[80px_minmax(0,1fr)_120px_80px_80px_80px] md:items-center md:gap-3"
+                className="grid gap-1 px-4 py-3 text-sm md:grid-cols-[minmax(0,1fr)_88px_120px_76px_56px] md:items-center md:gap-3"
               >
-                <bdi className="font-mono text-xs text-text-muted">{p.code}</bdi>
-                <b>{p.name_ar}</b>
+                <span className="min-w-0">
+                  <bdi className="block font-mono text-xs text-text-muted">{p.code}</bdi>
+                  <b className="block">{p.name_ar}</b>
+                </span>
                 <span className="text-text-muted">{DEGREE[p.degree] ?? p.degree}</span>
-                <span className="text-text-muted">{count(p.duration_terms, N.term)}</span>
-                <span className="text-text-muted">{num(p.levels_count)}</span>
+                <span className="text-text-muted">
+                  {count(p.duration_terms, N.term)} · {num(p.levels_count)} مستويات
+                </span>
+                <HoursInput
+                  program={p.id}
+                  name={p.name_ar}
+                  value={p.total_credit_hours ?? null}
+                  onSaved={() => refresh("programs")}
+                />
                 <StatusBadge
                   status={p.is_active ? "approved" : "closed"}
                   label={p.is_active ? "نشط" : "موقوف"}
@@ -357,6 +371,18 @@ export function Structure() {
                     className="w-14 rounded border border-border px-1 py-1"
                   />
                 </label>
+                <label className="flex items-center gap-1 text-xs text-text-muted">
+                  ساعات للتخرج
+                  <input
+                    type="number"
+                    min={1}
+                    max={300}
+                    value={pForm.total_credit_hours}
+                    onChange={(e) => setP({ ...pForm, total_credit_hours: e.target.value })}
+                    placeholder="—"
+                    className="w-16 rounded border border-border px-1 py-1"
+                  />
+                </label>
                 <Button
                   className="ms-auto min-h-9 px-4"
                   disabled={!pForm.code || !pForm.name_ar}
@@ -370,5 +396,56 @@ export function Structure() {
         </section>
       </div>
     </PortalShell>
+  );
+}
+
+/**
+ * The programme's total credit hours to graduate, edited in place (owner decision
+ * 2026-09-28). The public site shows it; blank hides it — never a sum of the courses.
+ */
+function HoursInput({
+  program,
+  name,
+  value,
+  onSaved,
+}: {
+  program: number;
+  name: string;
+  value: number | null;
+  onSaved: () => void;
+}) {
+  const [draft, setDraft] = useState(value === null ? "" : String(value));
+  const save = useMutation({
+    mutationFn: async (next: number | null) => {
+      const { data, error } = await api.PATCH("/api/v1/programs/{id}", {
+        params: { path: { id: program } },
+        body: { total_credit_hours: next },
+      });
+      if (!data) throw error;
+    },
+    onSuccess: onSaved,
+  });
+  const commit = () => {
+    const next = draft.trim() ? Number(draft) : null;
+    if (next !== value) save.mutate(next);
+  };
+  return (
+    <span className="flex items-center gap-1">
+      <span className="text-xs text-text-muted md:hidden">ساعات للتخرج</span>
+      <input
+        type="number"
+        min={1}
+        max={300}
+        value={draft}
+        placeholder="—"
+        aria-label={`الساعات المعتمدة للتخرج — ${name}`}
+        aria-invalid={save.isError || undefined}
+        title={save.isError ? problemMessage(save.error) : undefined}
+        onChange={(e) => setDraft(e.target.value)}
+        onBlur={commit}
+        onKeyDown={(e) => e.key === "Enter" && (e.target as HTMLInputElement).blur()}
+        className={`w-16 rounded border px-1 py-1 text-sm ${save.isError ? "border-danger" : "border-border"}`}
+      />
+    </span>
   );
 }
