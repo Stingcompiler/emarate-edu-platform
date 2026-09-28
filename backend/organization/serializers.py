@@ -18,7 +18,7 @@ class DepartmentSerializer(serializers.ModelSerializer):
 
 
 class ProgramSerializer(serializers.ModelSerializer):
-    department_name = serializers.CharField(source="department.name", read_only=True)
+    department_name = serializers.CharField(source="department.name_ar", read_only=True)
 
     class Meta:
         model = Program

@@ -111,6 +111,9 @@ urlpatterns = [
         name="push-unsubscribe",
     ),
     path("me/results", results.MyResultsView.as_view(), name="me-results"),
+    path("gradebooks/<int:offering_id>", learning.GradebookView.as_view(), name="gradebook"),
+    path("grading-queue", learning.GradingQueueView.as_view(), name="grading-queue"),
+    path("teachers-directory", academic.TeacherDirectoryView.as_view(), name="teacher-directory"),
     path("reports/department", reports.DepartmentReportView.as_view(), name="report-department"),
     path("reports/teachers", reports.TeachersReportView.as_view(), name="report-teachers"),
     path(

@@ -3,6 +3,15 @@ import {
   Bell,
   CalendarDays,
   BarChart3,
+  History,
+  LayoutDashboard,
+  Library,
+  UserRound,
+  Users,
+  BookOpen,
+  Building2,
+  ListChecks,
+  Sun,
   CalendarRange,
   GraduationCap,
   UserCheck,
@@ -54,10 +63,67 @@ export function can(me: Me | null | undefined, capability: string): boolean {
  * four as tabs and the rest under «المزيد»). Role dashboards join as their
  * phases land; no link points to a page that isn't built.
  */
-export function navFor(me: Me | null | undefined, unread: number): NavItem[] {
-  const items: NavItem[] = [
+/**
+ * Department manager / supervisor: the dashboard keeps exactly its sections, in
+ * this order (docs/02 §4.15, owner rule); new tabs are appended, never inserted.
+ */
+function departmentNav(me: Me | null | undefined, unread: number): NavItem[] {
+  const teaches = hasRole(me, "teacher", "ta");
+  return [
+    { label: "الرئيسية", to: "/department", icon: LayoutDashboard },
+    { label: "المواد", to: "/department/courses", icon: BookOpen },
+    { label: "المحاضرات", to: "/department/lectures", icon: Library },
+    { label: "الأساتذة", to: "/department/teachers", icon: UserCheck },
+    { label: "طلاب القسم", to: "/department/students", icon: Users },
+    { label: "التقارير", to: "/reports", icon: BarChart3 },
+    { label: "النتائج", to: "/result-imports", icon: FileUp, end: false },
+    { label: "سجل العمليات", to: "/department/audit", icon: History },
+    ...(teaches ? [{ label: "موادي", to: "/courses", icon: BookOpen, end: false }] : []),
+    // Additions (never replace the sections above).
+    { label: "طلبات التسجيل", to: "/department/approvals", icon: ClipboardCheck },
+    { label: "الاختبارات", to: "/exams", icon: ClipboardList, end: false },
+    { label: "جلسات البث", to: "/live", icon: Radio, end: false },
+    { label: "الإعلانات", to: "/announcements", icon: Megaphone, end: false },
     { label: "الإشعارات", to: "/notifications", icon: Bell, badge: unread },
+    { label: "إشعار جديد", to: "/notifications/new", icon: Send },
+    { label: "الإعدادات", to: "/settings", icon: Settings },
+    { label: "تثبيت التطبيق", to: "/install", icon: Download },
   ];
+}
+
+export function navFor(me: Me | null | undefined, unread: number): NavItem[] {
+  if (hasRole(me, "department_manager", "department_supervisor")) return departmentNav(me, unread);
+  const items: NavItem[] = [];
+  if (hasRole(me, "system_admin")) {
+    items.push({ label: "إدارة النظام", to: "/system", icon: LayoutDashboard });
+    items.push({ label: "المستخدمون", to: "/system/users", icon: Users, end: false });
+    items.push({ label: "الهيكل الأكاديمي", to: "/system/structure", icon: Building2 });
+    items.push({ label: "إعدادات النظام", to: "/system/settings", icon: SlidersHorizontal });
+    items.push({ label: "التدقيق", to: "/audit", icon: History });
+  }
+  if (me?.student) {
+    return [
+      { label: "اليوم", to: "/", icon: Sun },
+      { label: "موادي", to: "/courses", icon: BookOpen, end: false },
+      { label: "المهام", to: "/tasks", icon: ListChecks },
+      { label: "الإشعارات", to: "/notifications", icon: Bell, badge: unread },
+      { label: "أنا", to: "/me", icon: UserRound, end: false },
+    ];
+  }
+  if (hasRole(me, "results_officer"))
+    items.push({ label: "الرئيسية", to: "/results-office", icon: LayoutDashboard });
+  if (hasRole(me, "academic_affairs"))
+    items.push({ label: "الرئيسية", to: "/academic", icon: LayoutDashboard });
+  if (hasRole(me, "student_affairs"))
+    items.push({ label: "الرئيسية", to: "/affairs", icon: LayoutDashboard });
+  if (me?.student || hasRole(me, "teacher", "ta"))
+    items.push({ label: "موادي", to: "/courses", icon: BookOpen, end: false });
+  if (me?.student) items.push({ label: "المهام", to: "/tasks", icon: ListChecks });
+  if (hasRole(me, "teacher", "ta")) {
+    items.unshift({ label: "اليوم", to: "/", icon: Sun });
+    items.push({ label: "التصحيح", to: "/grading", icon: ClipboardCheck });
+  }
+  items.push({ label: "الإشعارات", to: "/notifications", icon: Bell, badge: unread });
   const teaches = hasRole(
     me,
     "teacher",
@@ -82,8 +148,16 @@ export function navFor(me: Me | null | undefined, unread: number): NavItem[] {
     items.push({ label: "النتائج", to: "/results", icon: Award });
     items.push({ label: "اللوائح", to: "/regulations", icon: ScrollText });
   }
+  if (can(me, "admissions.review"))
+    items.push({ label: "القبول", to: "/registrar", icon: LayoutDashboard });
   if (can(me, "admissions.view"))
     items.push({ label: "الطلبات", to: "/applications", icon: FileText, end: false });
+  if (can(me, "students.import")) {
+    items.push({ label: "سجل الطلاب", to: "/students", icon: Users, end: false });
+    items.push({ label: "استيراد الطلاب", to: "/student-imports", icon: FileUp, end: false });
+  }
+  if (can(me, "admissions.manage") && hasRole(me, "head_registrar", "system_admin"))
+    items.push({ label: "المسجلون", to: "/registrars", icon: UserCheck });
   if (can(me, "admissions.manage")) {
     items.push({ label: "دورات القبول", to: "/admissions/cycles", icon: CalendarRange });
     items.push({ label: "قوالب التقديم", to: "/admissions/forms", icon: LayoutTemplate });

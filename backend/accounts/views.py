@@ -40,6 +40,7 @@ from .serializers import (
     RegistrationVerifySerializer,
     RoleAssignmentDetailSerializer,
     RoleGrantSerializer,
+    UserActiveSerializer,
     UserCreateSerializer,
     UserSerializer,
 )
@@ -302,10 +303,21 @@ class UserViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.Gen
         return Response(UserSerializer(user).data, status=status.HTTP_201_CREATED)
 
     def get_permissions(self):
-        if self.action == "create":
-            # Creating staff accounts is governed by rbac.CREATABLE_ACCOUNTS.
+        if self.action in ("create", "set_active"):
+            # Governed by rbac.CREATABLE_ACCOUNTS (checked in the service).
             return [IsAuthenticated()]
         return super().get_permissions()
+
+    @extend_schema(request=UserActiveSerializer, responses=UserSerializer)
+    @action(detail=True, methods=["post"], url_path="set-active")
+    def set_active(self, request, public_id=None):
+        target = get_object_or_404(User, public_id=public_id)
+        data = UserActiveSerializer(data=request.data)
+        data.is_valid(raise_exception=True)
+        user = services.set_active(
+            RequestMeta.from_request(request), target, data.validated_data["is_active"]
+        )
+        return Response(UserSerializer(user).data)
 
 
 class RoleAssignmentViewSet(

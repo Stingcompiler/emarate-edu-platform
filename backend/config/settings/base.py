@@ -194,7 +194,7 @@ REST_FRAMEWORK = {
     "DEFAULT_THROTTLE_RATES": {
         "anon": "30/minute",
         "public_read": "120/minute",  # cached site content (core.throttles)
-        "user": "60/minute",
+        "user": "240/minute",  # an SPA page makes ~10 requests; exams save per answer
         "login": "10/minute",  # per IP (docs/05 §7)
         "otp": "5/hour",  # per email target
         "otp_ip": "20/hour",  # per IP, across targets

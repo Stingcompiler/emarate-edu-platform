@@ -345,3 +345,62 @@ def test_drafts_are_hidden_and_publish_needs_submission_types(api, classroom):
     )
     publish = api(classroom.teacher).post(f"/api/v1/assignments/{draft['public_id']}/publish")
     assert publish.status_code == 400
+
+
+def test_assignment_list_carries_my_submission(api, classroom):
+    assignment = _assignment(api, classroom)
+    student = api(classroom.student)
+    listed = student.get("/api/v1/assignments").data["results"][0]
+    assert listed["mine"] is None and listed["course_code"] == classroom.offering.course.code
+    student.post(f"/api/v1/assignments/{assignment}/submit", {"content": "حل"}, format="json")
+    mine = student.get(f"/api/v1/assignments/{assignment}").data["mine"]
+    assert mine["graded"] is False and mine["score"] is None and mine["is_late"] is False
+    # Staff never get a "mine" summary.
+    assert api(classroom.teacher).get(f"/api/v1/assignments/{assignment}").data["mine"] is None
+
+
+def test_gradebook(api, classroom, make_user):
+    from accounts.rbac import Role
+
+    assignment = _assignment(api, classroom)
+    api(classroom.student).post(
+        f"/api/v1/assignments/{assignment}/submit", {"content": "حل"}, format="json"
+    )
+    url = f"/api/v1/gradebooks/{classroom.offering.pk}"
+    teacher = api(classroom.teacher)
+    book = teacher.get(url).data
+    row = book["students"][0]
+    assert row["cells"][assignment]["status"] == "submitted" and row["total"] == "0.00"
+    submission = row["cells"][assignment]["submission"]
+    teacher.put(
+        f"/api/v1/submissions/{submission}/grade", {"score": "8", "feedback": ""}, format="json"
+    )
+    book = teacher.get(url).data
+    assert book["students"][0]["total"] == "8.00" and book["max_total"] == "10.00"
+    assert api(classroom.student).get(url).status_code == 404
+    assert api(make_user(Role.TEACHER)).get(url).status_code == 404
+
+
+def test_grading_queue(api, classroom, make_user):
+    from accounts.rbac import Role
+
+    assignment = _assignment(api, classroom)
+    api(classroom.student).post(
+        f"/api/v1/assignments/{assignment}/submit", {"content": "حل"}, format="json"
+    )
+    teacher = api(classroom.teacher)
+    queue = teacher.get("/api/v1/grading-queue").data
+    assert (
+        queue["counts"]["pending"] == 1
+        and queue["groups"][0]["assignment"]["public_id"] == assignment
+    )
+    submission = queue["groups"][0]["submissions"][0]["public_id"]
+    teacher.put(
+        f"/api/v1/submissions/{submission}/grade", {"score": "9", "feedback": ""}, format="json"
+    )
+    after = teacher.get("/api/v1/grading-queue").data
+    assert (
+        after["counts"]["pending"] == 0 and after["counts"]["done"] == 1 and after["groups"] == []
+    )
+    assert teacher.get("/api/v1/grading-queue?status=done").data["groups"][0]["submissions"]
+    assert api(make_user(Role.TEACHER)).get("/api/v1/grading-queue").data["counts"]["pending"] == 0

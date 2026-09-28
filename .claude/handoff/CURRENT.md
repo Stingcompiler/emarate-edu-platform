@@ -1,41 +1,56 @@
-# Handoff — Phase 9 done → Phase 10 (portal identity + role dashboards) — 2026-09-28
+# Handoff — Phase 10 done → Phase 11 (hardening + deploy) — 2026-09-28
 
 ## Where things stand
-- **Phases 1–8 are merged** to `main` (PRs #3–#10).
-- **Phase 9 (public site)** is complete on `feat/phase-9-landing`. Its PR is opened in this step; merge it once CI is green with `gh pr merge --merge` (auto-merge is disabled for the repo).
+- **Phases 1–9 are merged** to `main` (PRs #3–#11).
+- **Phase 10 (portal identity + role dashboards)** is complete on `feat/phase-10-portal`. Its PR is opened in this step; merge it once CI is green with `gh pr merge --merge` (auto-merge is disabled for the repo).
 - **Verified locally:**
-  - 304 tests pass on SQLite; 303 pass plus 1 skip on Postgres;
-  - the schema is clean;
-  - the landing builds 48 pages in strict mode against the dev API.
-  - The site was walked in the pane: home at 390 and 1280, program page at 390, departments at 390, EN programs filter at 1280. The contact form was submitted cross-origin (got a reference number), and the 404 page followed a CMS redirect.
+  - 313 tests pass on SQLite and on Postgres (plus 1 SQLite-only skip);
+  - the schema is clean; ruff, typecheck, build and prettier pass.
+  - Every new page was walked in the pane at 1280 and most at 390, signed in as student, teacher, department manager, head registrar, system admin, academic affairs, student affairs and results officer.
 
 ## Earlier phases (short)
-- **Phase 7:** visitor OTP session; public portal routes `/apply` and `/track`; the admissions workflow; staff pages `/applications`, `/admissions/*`.
-- **Phase 8:** the `reports` app (teacher indicators, department, admissions and affairs reports, frozen snapshots, transcripts); HR pages `/hr/*`; `/reports*`; print views `/print/*` (browser PDF).
+- **Phase 7:** visitor OTP and the admissions workflow; public `/apply` and `/track`.
+- **Phase 8:** reports, HR indicators and notices, frozen snapshots, print/PDF views.
+- **Phase 9:** the Astro public site (ar/en), the public catalogue API, public CORS, the build token and strict builds.
 
-## What Phase 9 delivered
-- **`apps/landing` (Astro SSG):**
-  - `lib/api.ts` handles build-time reads, strict mode and the build token; `lib/i18n.ts` holds ar/en, direction, `pick()` fallback and arrows; `layouts/Base.astro` holds the header, footer, SEO and hreflang.
-  - Components: ProgramCard, Blocks (CMS page blocks), PageHead.
-  - Pages under `[lang]/`: index, about, departments (+[code]), programs (+[code]), news (+[slug]), events/[slug], contact, p/[slug]. Root pages: `/` → `/ar/`, `404.astro` (redirect lookup), `sitemap.xml.ts`, `robots.txt.ts`.
-- **API:**
-  - `organization/public.py`: `/api/public/{departments,departments/<code>,programs,programs/<code>,pages,stats}`. `Program` gained `description_ar/en`.
-  - `core/middleware.PublicCorsMiddleware`: CORS for `/api/public/*` from `PUBLIC_SITE_ORIGINS` only.
-  - `core/throttles.PublicReadThrottle` (scope `public_read`, 120/min per IP) covers catalogue and content reads. It skips the limit when `X-Site-Build` matches `SITE_BUILD_TOKEN`.
-  - `SITE_REBUILD_HOOK_URL` is now read from the environment.
-- **Env:** `backend/.env.example` (PUBLIC_SITE_ORIGINS, SITE_BUILD_TOKEN, SITE_REBUILD_HOOK_URL) and `apps/landing/.env.example` (PUBLIC_API_URL, PUBLIC_PORTAL_URL, SITE_BUILD_TOKEN, LANDING_STRICT=1).
+## What Phase 10 delivered
+- **Role homes (`/` via `routes/Home.tsx`):**
+  - Student: Today. Teacher: TeacherToday. Department manager/supervisor: `/department`. Registrars: `/registrar`.
+  - `/results-office`, `/academic`, `/affairs`, `/system` (admin), `/hr`, `/site`, `/events`.
+- **Student pages:** `/courses`, `/courses/:id`, `/lectures/:id`, `/assignments/:id` (submit), `/tasks`, `/me`, `/me/status`. Students get exactly five tabs: Today, My courses, Tasks, Notifications, Me.
+- **Teacher pages:**
+  - Editors: `/lectures/new|:id/edit` (TUS client in `lib/tus.ts`) and `/assignments/new|:id/edit`.
+  - Grading: `/grading` and `/submissions/:id`.
+  - Roster and gradebook: `/courses/:id/students`.
+- **Department manager (§4.15):** `/department` plus `/department/{courses,lectures,teachers,students,approvals,audit}`. The nav is the fixed list in `lib/nav.ts` `departmentNav()`.
+- **Registrar:** `/registrar`, `/students` (+`:id`), `/student-imports` (+`:id`), `/registrars`.
+- **System admin:** `/system`, `/system/{users,users/:id,structure,settings}`, `/audit`.
+- **New APIs:**
+  - `/gradebooks/<offering>`, `/grading-queue`, `/teachers-directory`.
+  - `users/<id>/set-active`, `terms/<id>/set-current`.
+  - Assignments `mine`/`course_code`/`course_name`; enrollments `?student_record__public_id=`; `/me` student typed; role assignments `user_name`.
+- **Behaviour changes:**
+  - The user throttle is now 240/min.
+  - Department and program names in several serializers now use `name_ar`.
+- **Accessibility and install:** skip link and `#main`, bidi isolation for Latin codes and numbers, a phone install hint (`components/InstallHint.tsx`) for students and teachers.
+- **Not done / follow-ups:**
+  - The student import does not enforce the `YY-DEPT-NNNN` university number pattern shown on the board; there is no documented rule.
+  - The site and events manager homes reuse the Phase 6 workspaces.
 
-## Next steps (Phase 10 — portal identity, docs/02 §8 Phase 10, §4.15)
-1. **Role home dashboards** ("لوحة لكل دور"). Boards: AdminHome (department manager), RegistrarHome, HeadRegistrarHome, ResultsOfficerHome, AcademicAffairsHome, StudentAffairsHome, SiteManagerHome, SystemAdminHome, EventsManagerHome, plus the student and teacher homes (`python3 scripts/boards.py list Home`, `list Student`, `list Teacher`). Make `/` land on the role's home instead of `/notifications`.
-2. **Department manager dashboard constraint (§4.15, owner rule):**
-   - Keep exactly these sections: الرئيسية، المواد، المحاضرات، الأساتذة، طلاب القسم، التقارير، النتائج، سجل العمليات، موادي.
-   - New tabs are additions only: طلبات التسجيل، الاختبارات، جلسات البث، الإعلانات.
-   - The supervisor sees the same dashboard without delete buttons.
-   - Check which of these pages exist in the portal (many APIs exist from Phases 1–3: courses, offerings, lectures, members, students, audit) and build the missing ones.
-3. **Accessibility pass:** focus rings, labels, contrast, keyboard navigation in sheets and menus, `lang`/`dir` on mixed text.
-4. **Responsive tables:** audit wide tables at 390 (use the card-on-phone pattern).
-5. **PWA onboarding:** first-run install hint (Android prompt, iOS share → add to home screen); `/install` exists.
-6. Checks at 390 and 1280 for every new page, then docs, PR and merge.
+## Next steps (Phase 11 — hardening and deploy, docs/02 §8 Phase 11, docs/05 §9)
+1. **Coverage:** add tests where the Phase 10 APIs have only happy paths (gradebook scoping for TAs without `ta_can_grade`, grading queue for TAs). Consider a coverage report in CI.
+2. **Load:** re-run `scripts/loadtest` (k6) against Postgres with the 240/min user throttle. Also load the landing build (static).
+3. **Backups:** daily Postgres backups plus a weekly encrypted `pg_dump` to Bunny, and a documented restore drill (runbook).
+4. **Deploy on Render** (no Docker — native Python and Node environments):
+   - Web (gunicorn/uvicorn), a Celery worker, Beat, Redis, and paid Postgres.
+   - Static sites for `apps/portal` (SPA rewrite to `index.html`) and `apps/landing` (`LANDING_STRICT=1`, `SITE_BUILD_TOKEN`), with the deploy hook in `SITE_REBUILD_HOOK_URL`.
+   - Cloudflare in front of the API.
+   - Write `render.yaml` and the environment variables from `.env.example` files.
+5. **Security:**
+   - Restrict `X-Forwarded-For` trust to the proxy (see the audit IP gotcha).
+   - Set HSTS and cookie flags in prod settings.
+   - Add Sentry (optional dependency), JSON logging, and an uptime check on `/api/public/health`.
+6. **Runbook docs** (`docs/runbook.md`): deploy, rollback, rotate keys, restore, incident steps. Then the final PR and merge.
 
 ## Decisions made (don't revisit)
 - **Roles are rows (`role`, `department`), not Django Groups.** Mention this deviation from docs/03 §10 in PRs that touch roles.
@@ -87,6 +102,9 @@
 - **Print pages** live outside PortalShell and set `document.title` themselves. Wide report tables go full width; a 320px sidebar squeezes them at 1280.
 - **Landing build:** a burst of anonymous reads hits the throttle (HTTP 429). Production builds send `X-Site-Build`; dev relies on the 120/min `public_read` scope. The build treats 404 as "absent" and any other failure as fatal only when `LANDING_STRICT=1`.
 - **Astro `[lang]` routes:** `getStaticPaths` must return every language × item; English arrows and links must not use absolute site URLs (the `alternate()` helper is for `<link hreflang>` only).
+- **Portal routes vs Django:** the Vite dev proxy forwards `/admin` to Django, so portal admin pages live under `/system/*`.
+- **Throttle:** SPA pages fan out; prefer one aggregated endpoint (grading queue, gradebook) over per-item requests. The user rate is 240/min.
+- **Seeded submissions** need a `SubmissionVersion`. Pages still guard `current_version?.` for old rows.
 - **Earlier gotchas:**
   - build constraint lists with sorted sets;
   - Django 6.1 uses `MAILERS`;

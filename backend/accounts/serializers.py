@@ -14,7 +14,9 @@ class LoginSerializer(serializers.Serializer):
 
 
 class RoleAssignmentSerializer(serializers.ModelSerializer):
-    department_name = serializers.CharField(source="department.name", read_only=True, default=None)
+    department_name = serializers.CharField(
+        source="department.name_ar", read_only=True, default=None
+    )
     role_label = serializers.CharField(source="get_role_display", read_only=True)
 
     class Meta:
@@ -25,6 +27,16 @@ class RoleAssignmentSerializer(serializers.ModelSerializer):
 class ScopeSerializer(serializers.Serializer):
     everything = serializers.BooleanField()
     departments = serializers.ListField(child=serializers.IntegerField())
+
+
+class MeStudentSerializer(serializers.Serializer):
+    public_id = serializers.UUIDField()
+    university_number = serializers.CharField()
+    program = serializers.CharField()
+    department = serializers.CharField()
+    level = serializers.IntegerField()
+    status = serializers.CharField()
+    status_label = serializers.CharField()
 
 
 class MeSerializer(serializers.ModelSerializer):
@@ -58,6 +70,7 @@ class MeSerializer(serializers.ModelSerializer):
             for name, scope in rbac.capabilities_of(obj).items()
         }
 
+    @extend_schema_field(MeStudentSerializer(allow_null=True))
     def get_student(self, obj) -> dict | None:
         record_ = getattr(obj, "student_record", None)
         if record_ is None:
@@ -70,6 +83,7 @@ class MeSerializer(serializers.ModelSerializer):
             "department": record_.department.name_ar,
             "level": record_.level,
             "status": record_.status,
+            "status_label": record_.get_status_display(),
         }
 
 
@@ -162,15 +176,16 @@ class RoleGrantSerializer(serializers.Serializer):
 
 class RoleAssignmentDetailSerializer(RoleAssignmentSerializer):
     user = serializers.SlugRelatedField(slug_field="public_id", read_only=True)
+    user_name = serializers.CharField(source="user.full_name_ar", read_only=True)
 
     class Meta(RoleAssignmentSerializer.Meta):
-        fields = [*RoleAssignmentSerializer.Meta.fields, "user"]
+        fields = [*RoleAssignmentSerializer.Meta.fields, "user", "user_name"]
 
 
 class RegistrationRequestSerializer(serializers.ModelSerializer):
     university_number = serializers.CharField(source="student_record.university_number")
     full_name_ar = serializers.CharField(source="student_record.full_name_ar")
-    program = serializers.CharField(source="student_record.program.name")
+    program = serializers.CharField(source="student_record.program.name_ar")
     level = serializers.IntegerField(source="student_record.level")
     official_email = serializers.CharField(source="student_record.email")
     email_matches_record = serializers.SerializerMethodField()
@@ -206,3 +221,7 @@ class RegistrationDecisionSerializer(serializers.Serializer):
         if not attrs["approve"] and not attrs.get("reason"):
             raise serializers.ValidationError({"reason": ["Give a reason when rejecting."]})
         return attrs
+
+
+class UserActiveSerializer(serializers.Serializer):
+    is_active = serializers.BooleanField()

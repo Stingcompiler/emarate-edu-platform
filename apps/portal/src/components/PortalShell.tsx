@@ -4,9 +4,10 @@ import { type ComponentProps, useEffect } from "react";
 import { Link, useNavigate } from "react-router";
 
 import { api } from "../lib/api";
-import { useMe, useSignOut } from "../lib/auth";
+import { hasRole, useMe, useSignOut } from "../lib/auth";
 import { navFor } from "../lib/nav";
 import { AppShell, Badge } from "./AppShell";
+import { InstallHint } from "./InstallHint";
 
 type Props = Omit<ComponentProps<typeof AppShell>, "nav" | "actions" | "eyebrow">;
 
@@ -48,6 +49,13 @@ export function PortalShell(props: Props) {
     <AppShell
       {...props}
       eyebrow={me.data?.full_name_ar}
+      // Students and teachers benefit most from push + offline: nudge them to install on phones.
+      children={
+        <>
+          {(me.data?.student || hasRole(me.data, "teacher", "ta")) && <InstallHint />}
+          {props.children}
+        </>
+      }
       nav={navFor(me.data, count)}
       actions={
         <>

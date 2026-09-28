@@ -314,6 +314,38 @@ READS: dict[str, tuple[str, frozenset, frozenset]] = {
         frozenset(),
     ),
     "transcript": ("/api/v1/transcripts/26-IT-0001", RESULTS_VIEW, frozenset()),
+    # Anyone signed in may ask; it only lists courses the user teaches.
+    "grading-queue": ("/api/v1/grading-queue", EVERYONE, frozenset()),
+    "teacher-directory": (
+        "/api/v1/teachers-directory?search=ab",
+        frozenset(
+            {R.SYSTEM_ADMIN, R.ACADEMIC_AFFAIRS, R.DEPARTMENT_MANAGER, R.DEPARTMENT_SUPERVISOR}
+        ),
+        frozenset(),
+    ),
+    # Course gradebook: its instructors and department learning staff (docs/03 §3.6–3.9)
+    "gradebook": (
+        "/api/v1/gradebooks/{offering}",
+        frozenset(
+            {
+                R.SYSTEM_ADMIN,
+                R.ACADEMIC_AFFAIRS,
+                R.DEPARTMENT_MANAGER,
+                R.DEPARTMENT_SUPERVISOR,
+                R.TEACHER,
+                R.TA,
+            }
+        ),
+        EVERYONE
+        - {
+            R.SYSTEM_ADMIN,
+            R.ACADEMIC_AFFAIRS,
+            R.DEPARTMENT_MANAGER,
+            R.DEPARTMENT_SUPERVISOR,
+            R.TEACHER,
+            R.TA,
+        },
+    ),
 }
 
 # url name → "module::test" that pins down its (write) rules.
@@ -391,6 +423,8 @@ COVERED_ELSEWHERE = {
     "push-subscribe": _N + "test_teacher_notifies_their_course_and_push_arrives",
     "push-unsubscribe": _N + "test_push_unsubscribe_and_config",
     "hr-notice-acknowledge": _N + "test_hr_notice",
+    "user-set-active": "accounts.tests.test_accounts::test_set_active",
+    "term-set-current": "academic.tests.test_academic::test_set_current_term",
     "report-snapshot-detail": "reports.tests.test_reports::test_snapshots_are_frozen_and_scoped",
     "lecture-publish": _L + "test_students_see_published_lectures_only",
     "lecture-unpublish": _L + "test_resource_removal_and_unpublish",

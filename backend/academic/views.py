@@ -1,7 +1,8 @@
+from django.db import transaction
 from django.db.models import Count, Prefetch, Q
 from django.http import Http404
 from django.shortcuts import get_object_or_404
-from drf_spectacular.utils import extend_schema
+from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
@@ -9,7 +10,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from accounts import rbac
-from audit.services import RequestMeta
+from audit.services import RequestMeta, record
 from core.permissions import capability
 from core.viewsets import ScopedModelViewSet
 from organization.models import Department
@@ -38,6 +39,7 @@ from .serializers import (
     MembershipSerializer,
     MyCourseSerializer,
     OfferingSerializer,
+    PersonSerializer,
     TermSerializer,
 )
 
@@ -67,6 +69,29 @@ class TermViewSet(ScopedModelViewSet):
 
     def department_of(self, obj):
         return None
+
+    @extend_schema(request=None, responses=TermSerializer)
+    @action(detail=True, methods=["post"], url_path="set-current")
+    def set_current(self, request, pk=None):
+        """Make this the current term (and its year the current year); one of each at a time."""
+        term = self.get_object()
+        with transaction.atomic():
+            previous = Term.objects.filter(is_current=True).exclude(pk=term.pk).first()
+            Term.objects.filter(is_current=True).exclude(pk=term.pk).update(is_current=False)
+            AcademicYear.objects.filter(is_current=True).exclude(pk=term.academic_year_id).update(
+                is_current=False
+            )
+            AcademicYear.objects.filter(pk=term.academic_year_id).update(is_current=True)
+            term.is_current = True
+            term.save(update_fields=["is_current", "updated_at"])
+            record(
+                RequestMeta.from_request(request),
+                "term.set_current",
+                term,
+                old={"current": previous.pk if previous else None},
+                new={"current": term.pk},
+            )
+        return Response(TermSerializer(term).data)
 
 
 class CourseViewSet(ScopedModelViewSet):
@@ -196,7 +221,13 @@ class EnrollmentViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewse
 
     serializer_class = EnrollmentSerializer
     permission_classes = [IsAuthenticated, capability("enrollment.manage")]
-    filterset_fields = ["offering", "status", "offering__term", "student_record__level"]
+    filterset_fields = [
+        "offering",
+        "status",
+        "offering__term",
+        "student_record__level",
+        "student_record__public_id",
+    ]
     search_fields = ["student_record__university_number", "student_record__full_name_ar"]
 
     def get_queryset(self):
@@ -269,3 +300,34 @@ class MyCoursesView(APIView):
             offering.my_role = teaching[offering.pk]
             courses.append(offering)
         return Response(MyCourseSerializer(courses, many=True).data)
+
+
+@extend_schema(tags=["academic"])
+class TeacherDirectoryView(APIView):
+    """Find teacher/TA accounts to add to a department (board DesktopDeptProfessors).
+
+    Only for those who manage memberships; returns names and emails of active
+    teaching accounts, never other users.
+    """
+
+    permission_classes = [IsAuthenticated, capability("membership.manage")]
+
+    @extend_schema(
+        operation_id="teachers_directory",
+        parameters=[OpenApiParameter("search", str, required=True)],
+        responses=PersonSerializer(many=True),
+    )
+    def get(self, request):
+        from accounts.models import User
+        from accounts.rbac import Role
+
+        term = request.query_params.get("search", "").strip()
+        if len(term) < 2:
+            return Response([])
+        people = (
+            User.objects.filter(is_active=True, role_assignments__role__in=[Role.TEACHER, Role.TA])
+            .filter(Q(full_name_ar__icontains=term) | Q(email__icontains=term))
+            .distinct()
+            .order_by("full_name_ar")[:20]
+        )
+        return Response(PersonSerializer(people, many=True).data)

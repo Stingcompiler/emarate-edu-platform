@@ -77,6 +77,14 @@ class RubricRuleSerializer(serializers.Serializer):
     label = serializers.CharField(required=False)
 
 
+class MySubmissionSummarySerializer(serializers.Serializer):
+    public_id = serializers.UUIDField()
+    submitted_at = serializers.DateTimeField()
+    is_late = serializers.BooleanField()
+    graded = serializers.BooleanField()
+    score = serializers.DecimalField(max_digits=7, decimal_places=2, allow_null=True)
+
+
 class AssignmentSerializer(serializers.ModelSerializer):
     offering = serializers.PrimaryKeyRelatedField(queryset=CourseOffering.objects.all())
     lecture = serializers.SlugRelatedField(
@@ -89,12 +97,18 @@ class AssignmentSerializer(serializers.ModelSerializer):
         child=serializers.CharField(max_length=10), required=False
     )
     link_fields = LinkFieldSerializer(many=True, required=False)
+    course_code = serializers.CharField(source="offering.course.code", read_only=True)
+    course_name = serializers.CharField(source="offering.course.name_ar", read_only=True)
+    mine = serializers.SerializerMethodField()
 
     class Meta:
         model = Assignment
         fields = [
             "public_id",
             "offering",
+            "course_code",
+            "course_name",
+            "mine",
             "lecture",
             "title",
             "description",
@@ -117,6 +131,23 @@ class AssignmentSerializer(serializers.ModelSerializer):
             "created_at",
         ]
         read_only_fields = ["public_id", "status", "created_at"]
+
+    @extend_schema_field(MySubmissionSummarySerializer(allow_null=True))
+    def get_mine(self, obj):
+        """The signed-in student's own submission (prefetched by the view); null for staff."""
+        mine = getattr(obj, "my_submissions", None)
+        if not mine:
+            return None
+        submission = mine[0]
+        grade = getattr(submission, "grade", None)
+        approved = grade is not None and grade.status == "approved"
+        return {
+            "public_id": submission.public_id,
+            "submitted_at": submission.first_submitted_at,
+            "is_late": submission.is_late,
+            "graded": approved,
+            "score": grade.final_score if approved else None,
+        }
 
     def validate_rubric(self, value):
         rules = value.get("rules", []) if isinstance(value, dict) else None

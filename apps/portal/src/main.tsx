@@ -7,7 +7,7 @@ import "./app.css";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { createBrowserRouter, Navigate, RouterProvider } from "react-router";
+import { createBrowserRouter, RouterProvider } from "react-router";
 
 import { RequireAuth } from "./lib/auth";
 import { ApplicationDetail } from "./routes/admissions/ApplicationDetail";
@@ -44,6 +44,38 @@ import { Corrections } from "./routes/results/Corrections";
 import { ResultImportDetail } from "./routes/results/ImportDetail";
 import { ResultImports } from "./routes/results/Imports";
 import { MyResults } from "./routes/results/MyResults";
+import { AdminHome } from "./routes/admin/Home";
+import { AdminSettings } from "./routes/admin/Settings";
+import { Structure } from "./routes/admin/Structure";
+import { AdminUser } from "./routes/admin/User";
+import { AdminUsers } from "./routes/admin/Users";
+import { Home } from "./routes/Home";
+import { AcademicHome } from "./routes/homes/AcademicHome";
+import { AffairsHome } from "./routes/homes/AffairsHome";
+import { ResultsHome } from "./routes/homes/ResultsHome";
+import { Me, MyStatus } from "./routes/learning/Me";
+import { RegistrarHome } from "./routes/registrar/Home";
+import { StudentImportDetail, StudentImports } from "./routes/registrar/Imports";
+import { Registrars } from "./routes/registrar/Registrars";
+import { StudentRecord } from "./routes/registrar/StudentRecord";
+import { StudentRecords } from "./routes/registrar/StudentRecords";
+import { Approvals } from "./routes/department/Approvals";
+import { Audit } from "./routes/department/Audit";
+import { DepartmentDashboard } from "./routes/department/Dashboard";
+import { DepartmentLectures } from "./routes/department/Lectures";
+import { Members } from "./routes/department/Members";
+import { Offerings } from "./routes/department/Offerings";
+import { DepartmentStudents } from "./routes/department/Students";
+import { Assignment } from "./routes/learning/Assignment";
+import { AssignmentEditor } from "./routes/learning/AssignmentEditor";
+import { Grade } from "./routes/learning/Grade";
+import { Grading } from "./routes/learning/Grading";
+import { LectureEditor } from "./routes/learning/LectureEditor";
+import { Students } from "./routes/learning/Students";
+import { Course } from "./routes/learning/Course";
+import { Courses } from "./routes/learning/Courses";
+import { Lecture } from "./routes/learning/Lecture";
+import { Tasks } from "./routes/learning/Tasks";
 import { HRHome } from "./routes/hr/Home";
 import { MyNotice } from "./routes/hr/MyNotice";
 import { NoticeNew } from "./routes/hr/NoticeNew";
@@ -66,7 +98,6 @@ import { NotFound } from "./routes/NotFound";
 import { Notifications } from "./routes/Notifications";
 import { Register } from "./routes/Register";
 import { Settings } from "./routes/Settings";
-import { SystemStatus } from "./routes/SystemStatus";
 
 // TanStack Query holds all server state (docs/04, D-no-Zustand).
 const queryClient = new QueryClient({
@@ -83,7 +114,24 @@ const router = createBrowserRouter([
   { path: "/apply", element: <Apply /> },
   { path: "/track", element: <Track /> },
   // Role dashboards arrive with Phase 10; until then home is the notification centre.
-  { path: "/", element: signedIn(<Navigate to="/notifications" replace />) },
+  { path: "/", element: signedIn(<Home />) },
+  { path: "/courses", element: signedIn(<Courses />) },
+  { path: "/courses/:id", element: signedIn(<Course />) },
+  { path: "/courses/:id/students", element: signedIn(<Students />) },
+  { path: "/lectures/new", element: signedIn(<LectureEditor />) },
+  { path: "/lectures/:id", element: signedIn(<Lecture />) },
+  { path: "/lectures/:id/edit", element: signedIn(<LectureEditor />) },
+  { path: "/assignments/new", element: signedIn(<AssignmentEditor />) },
+  { path: "/assignments/:id", element: signedIn(<Assignment />) },
+  { path: "/assignments/:id/edit", element: signedIn(<AssignmentEditor />) },
+  { path: "/submissions/:id", element: signedIn(<Grade />) },
+  { path: "/grading", element: signedIn(<Grading />) },
+  { path: "/tasks", element: signedIn(<Tasks />) },
+  { path: "/me", element: signedIn(<Me />) },
+  { path: "/me/status", element: signedIn(<MyStatus />) },
+  { path: "/results-office", element: signedIn(<ResultsHome />) },
+  { path: "/academic", element: signedIn(<AcademicHome />) },
+  { path: "/affairs", element: signedIn(<AffairsHome />) },
   { path: "/notifications", element: signedIn(<Notifications />) },
   { path: "/notifications/new", element: signedIn(<Compose />) },
   { path: "/settings", element: signedIn(<Settings />) },
@@ -123,6 +171,19 @@ const router = createBrowserRouter([
   { path: "/applications/:id", element: signedIn(<ApplicationDetail />) },
   { path: "/admissions/cycles", element: signedIn(<Cycles />) },
   { path: "/admissions/forms", element: signedIn(<FormBuilder />) },
+  { path: "/registrar", element: signedIn(<RegistrarHome />) },
+  { path: "/students", element: signedIn(<StudentRecords />) },
+  { path: "/students/:id", element: signedIn(<StudentRecord />) },
+  { path: "/student-imports", element: signedIn(<StudentImports />) },
+  { path: "/student-imports/:id", element: signedIn(<StudentImportDetail />) },
+  { path: "/registrars", element: signedIn(<Registrars />) },
+  { path: "/department", element: signedIn(<DepartmentDashboard />) },
+  { path: "/department/courses", element: signedIn(<Offerings />) },
+  { path: "/department/lectures", element: signedIn(<DepartmentLectures />) },
+  { path: "/department/teachers", element: signedIn(<Members />) },
+  { path: "/department/students", element: signedIn(<DepartmentStudents />) },
+  { path: "/department/approvals", element: signedIn(<Approvals />) },
+  { path: "/department/audit", element: signedIn(<Audit />) },
   { path: "/reports", element: signedIn(<DepartmentReport />) },
   { path: "/reports/admissions", element: signedIn(<AdmissionsReport />) },
   { path: "/reports/affairs", element: signedIn(<AffairsReport />) },
@@ -139,7 +200,12 @@ const router = createBrowserRouter([
   { path: "/cases", element: signedIn(<Cases />) },
   { path: "/cases/new", element: signedIn(<CaseNew />) },
   { path: "/cases/:id", element: signedIn(<CaseDetail />) },
-  { path: "/system", element: <SystemStatus /> },
+  { path: "/system", element: signedIn(<AdminHome />) },
+  { path: "/system/users", element: signedIn(<AdminUsers />) },
+  { path: "/system/users/:id", element: signedIn(<AdminUser />) },
+  { path: "/system/structure", element: signedIn(<Structure />) },
+  { path: "/system/settings", element: signedIn(<AdminSettings />) },
+  { path: "/audit", element: signedIn(<Audit />) },
   { path: "*", element: <NotFound /> },
 ]);
 

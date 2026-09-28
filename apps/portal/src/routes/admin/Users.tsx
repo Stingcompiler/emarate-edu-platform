@@ -1,0 +1,229 @@
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
+import { Link } from "react-router";
+
+import { PortalShell } from "../../components/PortalShell";
+import {
+  Button,
+  Card,
+  Chip,
+  Notice,
+  SectionLabel,
+  StatusBadge,
+  problemMessage,
+} from "../../components/ui";
+import { api } from "../../lib/api";
+import { initials, num, useDepartments } from "../../lib/reports";
+import { DEPARTMENT_ROLES, ROLE_LABEL } from "./roles";
+
+/** Board: SystemAdminUsers (phone); desktop derived — list beside "new staff account". */
+export function AdminUsers() {
+  const [search, setSearch] = useState("");
+  const [active, setActive] = useState<boolean | undefined>(true);
+  const [page, setPage] = useState(1);
+  const list = useQuery({
+    queryKey: ["users", search, active, page],
+    queryFn: async () =>
+      (
+        await api.GET("/api/v1/users", {
+          params: { query: { search: search || undefined, is_active: active, page } },
+        })
+      ).data ?? null,
+  });
+  const rows = list.data?.results ?? [];
+  return (
+    <PortalShell
+      title={`المستخدمون · ${num(list.data?.count ?? 0)}`}
+      subtitle="الأدوار الإدارية تُنشأ هنا · الطلاب من القبول · الأساتذة من الشؤون العلمية"
+      back={{ label: "إدارة النظام", to: "/system" }}
+    >
+      <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start lg:gap-6">
+        <div>
+          <div className="flex flex-wrap items-center gap-2">
+            <input
+              value={search}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setPage(1);
+              }}
+              placeholder="بحث بالاسم أو البريد"
+              className="min-h-10 flex-1 rounded-full border border-border-soft bg-surface px-4 text-sm sm:max-w-sm"
+            />
+            <Chip
+              active={active === true}
+              onClick={() => {
+                setActive(true);
+                setPage(1);
+              }}
+            >
+              نشط
+            </Chip>
+            <Chip
+              active={active === false}
+              onClick={() => {
+                setActive(false);
+                setPage(1);
+              }}
+            >
+              معطّل
+            </Chip>
+            <Chip
+              active={active === undefined}
+              onClick={() => {
+                setActive(undefined);
+                setPage(1);
+              }}
+            >
+              الكل
+            </Chip>
+          </div>
+          <Card className="mt-3 divide-y divide-border-soft">
+            {rows.map((u) => (
+              <Link
+                key={u.public_id}
+                to={`/system/users/${u.public_id}`}
+                className="flex items-center gap-3 px-4 py-3 hover:bg-surface-alt"
+              >
+                <span className="grid size-9 shrink-0 place-items-center rounded-full bg-primary-soft text-xs font-semibold text-primary-700">
+                  {initials(u.full_name_ar)}
+                </span>
+                <span className="min-w-0 flex-1">
+                  <b className="block truncate text-sm text-text">{u.full_name_ar}</b>
+                  <span className="block truncate text-xs text-text-muted">
+                    {u.roles
+                      .map(
+                        (r) =>
+                          `${ROLE_LABEL[r.role] ?? r.role}${r.department_name ? ` · ${r.department_name}` : ""}`,
+                      )
+                      .join("، ") || "بلا دور"}{" "}
+                    ·{" "}
+                    {u.last_login
+                      ? `دخول ${new Date(u.last_login).toLocaleDateString("ar")}`
+                      : "لم يفعّل الحساب"}
+                  </span>
+                </span>
+                <StatusBadge
+                  status={u.is_active ? (u.last_login ? "approved" : "pending") : "closed"}
+                  label={u.is_active ? (u.last_login ? "نشط" : "دعوة معلّقة") : "معطّل"}
+                />
+              </Link>
+            ))}
+            {!rows.length && <p className="px-4 py-4 text-sm text-text-muted">لا نتائج.</p>}
+          </Card>
+          <div className="mt-3 flex items-center justify-center gap-3 text-sm">
+            <Button
+              variant="secondary"
+              className="min-h-9 px-3"
+              disabled={!list.data?.previous}
+              onClick={() => setPage((p) => p - 1)}
+            >
+              السابق
+            </Button>
+            <span className="text-text-muted">صفحة {num(page)}</span>
+            <Button
+              variant="secondary"
+              className="min-h-9 px-3"
+              disabled={!list.data?.next}
+              onClick={() => setPage((p) => p + 1)}
+            >
+              التالي
+            </Button>
+          </div>
+        </div>
+        <aside className="mt-6 lg:mt-0">
+          <NewUser />
+        </aside>
+      </div>
+    </PortalShell>
+  );
+}
+
+function NewUser() {
+  const client = useQueryClient();
+  const departments = useDepartments();
+  const [f, setF] = useState({ full_name_ar: "", email: "", role: "registrar", department: "" });
+  const create = useMutation({
+    mutationFn: async () => {
+      const { data, error } = await api.POST("/api/v1/users", {
+        body: {
+          full_name_ar: f.full_name_ar,
+          email: f.email,
+          role: f.role as never,
+          department: DEPARTMENT_ROLES.has(f.role) && f.department ? Number(f.department) : null,
+        },
+      });
+      if (!data) throw error;
+    },
+    onSuccess: () => {
+      setF({ ...f, full_name_ar: "", email: "" });
+      void client.invalidateQueries({ queryKey: ["users"] });
+    },
+  });
+  const input = "block min-h-10 w-full rounded-lg border border-border bg-surface px-3 text-sm";
+  return (
+    <>
+      <SectionLabel>مستخدم إداري جديد</SectionLabel>
+      <Card className="space-y-2 p-4">
+        <input
+          value={f.full_name_ar}
+          onChange={(e) => setF({ ...f, full_name_ar: e.target.value })}
+          placeholder="الاسم الكامل"
+          className={input}
+        />
+        <input
+          dir="ltr"
+          type="email"
+          value={f.email}
+          onChange={(e) => setF({ ...f, email: e.target.value })}
+          placeholder="name@ecst.edu.sd"
+          className={input}
+        />
+        <select
+          value={f.role}
+          onChange={(e) => setF({ ...f, role: e.target.value })}
+          className={input}
+          aria-label="الدور"
+        >
+          {Object.entries(ROLE_LABEL)
+            .filter(([k]) => k !== "student")
+            .map(([k, l]) => (
+              <option key={k} value={k}>
+                {l}
+              </option>
+            ))}
+        </select>
+        {DEPARTMENT_ROLES.has(f.role) && (
+          <select
+            value={f.department}
+            onChange={(e) => setF({ ...f, department: e.target.value })}
+            className={input}
+            aria-label="القسم"
+          >
+            <option value="">اختر القسم</option>
+            {(departments.data ?? []).map((d) => (
+              <option key={d.id} value={d.id}>
+                {d.name_ar}
+              </option>
+            ))}
+          </select>
+        )}
+        {create.isError && <Notice>{problemMessage(create.error)}</Notice>}
+        {create.isSuccess && (
+          <Notice tone="success">أُنشئ الحساب وأُرسل رابط التفعيل (صالح 7 أيام) إلى بريده.</Notice>
+        )}
+        <Button
+          className="w-full"
+          disabled={
+            !f.full_name_ar.trim() ||
+            !f.email.includes("@") ||
+            (DEPARTMENT_ROLES.has(f.role) && !f.department) ||
+            create.isPending
+          }
+          onClick={() => create.mutate()}
+        >
+          إنشاء وإرسال رابط التفعيل
+        </Button>
+      </Card>
+    </>
+  );
+}
