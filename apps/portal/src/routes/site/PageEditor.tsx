@@ -108,8 +108,8 @@ export function PageEditor() {
               }
               hint={
                 page.data?.official
-                  ? `صفحة رسمية — تظهر على /${page.data.path}/ وفي قوائم الموقع بعد نشرها`
-                  : `تظهر على /${slug ? (page.data?.path ?? `p/${slug}`) : "p/…"}/`
+                  ? `صفحة رسمية — تظهر على \u2066/${page.data.path}/\u2069 وفي قوائم الموقع بعد نشرها`
+                  : `تظهر على \u2066/${slug ? (page.data?.path ?? `p/${slug}`) : "p/…"}/\u2069`
               }
             />
           </Card>
