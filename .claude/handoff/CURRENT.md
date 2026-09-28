@@ -1,8 +1,8 @@
-# Handoff — Phase 7 done → Phase 8 (reports + HR + PDF) — 2026-09-28
+# Handoff — Phase 8 in progress (backend done, portal next) — 2026-09-28
 
 ## Where things stand
-- **Phases 1–6 are merged** to `main` (PRs #3–#8).
-- **Phase 7 (admissions + registrars)** is complete on `feat/phase-7-admissions`. Its PR is opened in this step; merge it once CI is green with `gh pr merge --merge` (auto-merge is disabled).
+- **Phases 1–7 are merged** to `main` (PRs #3–#9).
+- **Phase 8** is on `feat/phase-8-reports`. The backend is committed (e1592e6): 299 tests on SQLite; 298 plus 1 skip on Postgres; migrations reversible; schema clean. **The portal pages are next** (see "Phase 8 status" below).
 - **Verified locally:**
   - 281 tests pass on SQLite; 280 pass plus 1 skip on Postgres;
   - admissions migrations reverse on both databases;
@@ -29,26 +29,27 @@
 - **Decision:** the visitor pages are portal public routes. Phase 9 (Astro) links to `/apply` and `/track` and does not rebuild them.
 - **Seed:** an open cycle, a published default form, an intake per program, and three applications (one under review with the registrar).
 
-## Next steps (Phase 8 — reports, docs/02 §4.14 and §8 Phase 8)
-1. Read docs/02 §4.14, docs/03 §3.11 (hr) and the academic affairs role, and docs/07 §2.11. Boards:
-   ```bash
-   python3 scripts/boards.py list Report
-   python3 scripts/boards.py list HR
-   python3 scripts/boards.py list Transcript
-   ```
-   - Desktop: DesktopDeptReports, DesktopAdmissionsReports, DesktopStudentAffairsReports (no names), DesktopHRReports, DesktopHRTeachers.
-   - Phone: HRHome, HRNoticeNew, AcademicAffairsTeacher, StudentTranscript. Where there is no phone or desktop board, derive it from docs/06 §4/§9 and say so in the PR.
-2. **`reports` app** (read-only aggregates; no N+1; every query is department-scoped through `rbac.Scope`):
-   - Department: offerings, lecture uploads, assignments, grading backlog, results summary.
-   - Academic affairs: the college-wide version plus per-teacher files.
-   - Admissions: counts by status, program and cycle, conversion to registered.
-   - Student affairs: case counts by kind and status, never names.
-   - **HR teacher performance per term:** lectures, assignments, exams, average grading time, ungraded ratio, upload gaps, announced live sessions, plus HR notices (directed notifications to a teacher).
-3. **PDF export:** the transcript was deferred from Phase 4, plus report PDFs.
-   - WeasyPrint needs system libraries (pango), so check `brew list pango` first.
-   - If it's unavailable, render HTML-print pages in the portal (print CSS) as a no-dependency fallback and note it. Don't install system packages without evidence they are needed.
-4. Portal pages per the boards. The department manager dashboard only gets additions.
-5. Add permission-matrix rows for every new endpoint, extend the seed, run both databases, open the PR, merge when green, and update this handoff.
+## Phase 8 status
+**Backend done** (app `reports`, plus extensions in `notifications` and `results`):
+- `reports/metrics.py` holds `teacher_rows`, `teachers_report`, `department_report`, `admissions_report` and `affairs_report`. The query count is fixed whatever the data size (tested).
+  - Upload regularity = published lectures ÷ (weeks elapsed × `SystemSettings.planned_lectures_per_week`).
+  - Grading time counts waiting submissions with their age. Status is below, warn, ok or none (`status_of`).
+- Endpoints:
+  - `/api/v1/reports/{department,teachers,teachers/<uuid>,admissions,affairs}`.
+  - `/api/v1/report-snapshots`: POST {kind, term?, department?, cycle?, year?, notes}. The server computes the data and freezes it with a digest; there is no edit or delete.
+  - `/api/v1/transcripts/<university_number>` (results.view, scoped).
+- **HR notices:** the model was already `notifications.HRNotice`, with `/api/v1/hr-notices` and acknowledge. It gained `topic`, `evidence` (metrics at send time), `term`, `cc_department_manager` and `opened_at`; a GET by the teacher marks it opened. The `hr.notify` capability covers sys, academic affairs and HR.
+- **Capabilities:** `reports.department` (sys, AA, DM, DS), `reports.teachers` (the same plus HR), `reports.admissions` (sys, head registrar), `reports.affairs` (sys, SA), `hr.view`, `hr.notify`.
+- **PDF decision:** no server-side PDF. WeasyPrint needs pango (absent), and there is no Docker. The portal renders print-ready pages (print CSS) and the browser saves them as PDF. Snapshots guarantee that the exported numbers are frozen.
+- **Not tracked:** the teacher "reply rate %" and the admissions "applicant sources" from the boards (no data). Show "—" or omit, and note it in the PR.
+
+**Portal next** (boards: DesktopDeptReports, DesktopHRTeachers, DesktopHRReports, HRHome, HRNoticeNew, AcademicAffairsTeacher, DesktopAdmissionsReports, DesktopStudentAffairsReports, StudentTranscript):
+1. `/reports` (department; DM and DS locked to their department, AA and sys pick one) with CSV (client-side) and "PDF" (snapshot, then print view).
+2. `/hr` (distribution, below-threshold list, by department, sent notices), `/hr/teachers` (table), `/hr/teachers/:id` (profile plus notices), `/hr/notices/new?teacher=` (topic, evidence preview, ack, CC).
+3. `/hr/report` (teachers snapshot plus print preview), `/reports/admissions`, `/reports/affairs`, and `/reports/snapshots/:id` (print layout for any kind).
+4. `/transcripts/:number` (staff print) and a print button on the student's `/results` (uses `/me/results`).
+5. Teacher side: `/hr-notices/:id` (the notification action URL) with acknowledge.
+6. Update nav and links, the seed (thresholds already default; add some grades and submissions for metrics), check visually at 390 and 1280, then docs, PR and merge.
 
 ## Decisions made (don't revisit)
 - **Roles are rows (`role`, `department`), not Django Groups.** Mention this deviation from docs/03 §10 in PRs that touch roles.
