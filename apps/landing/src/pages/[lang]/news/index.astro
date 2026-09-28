@@ -76,18 +76,37 @@ const upcoming = evs
             </li>
           )}
         </ul>
+        <a
+          href={href(lang, "events/")}
+          class="mt-3 inline-block text-sm font-semibold text-primary"
+        >
+          {lang === "ar" ? "كل الفعاليات والسابقة منها" : "All events, including past ones"}
+        </a>
       </section>
       {notes.length > 0 && (
         <section>
           <h2 class="font-display text-xl font-bold">{t(lang, "announcements")}</h2>
           <ul class="mt-4 space-y-3">
             {notes.slice(0, 6).map((a) => (
-              <li class="rounded-2xl border border-border-soft bg-surface p-4">
-                <b class="block text-sm">{a.title}</b>
-                <div class="mt-1 text-sm leading-6 text-text-muted" set:html={a.body} />
+              <li>
+                <a
+                  href={href(lang, `announcements/${a.public_id}/`)}
+                  class="block rounded-2xl border border-border-soft bg-surface p-4 hover:shadow-sm"
+                >
+                  <b class="block text-sm">{a.title}</b>
+                  {a.publish_at && (
+                    <span class="text-xs text-text-muted">{fmtDate(lang, a.publish_at)}</span>
+                  )}
+                </a>
               </li>
             ))}
           </ul>
+          <a
+            href={href(lang, "announcements/")}
+            class="mt-3 inline-block text-sm font-semibold text-primary"
+          >
+            {lang === "ar" ? "كل الإعلانات" : "All announcements"}
+          </a>
         </section>
       )}
     </aside>

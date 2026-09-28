@@ -1,18 +1,30 @@
 ---
 import ProgramCard from "../../components/ProgramCard.astro";
 import Base from "../../layouts/Base.astro";
-import { PORTAL, events, news, programs, site, stats } from "../../lib/api";
+import {
+  PORTAL,
+  announcements,
+  departments,
+  events,
+  news,
+  programs,
+  site,
+  stats,
+} from "../../lib/api";
 import { arrow, fmtDate, href, type Lang, langPaths, num, pick, t, count, N } from "../../lib/i18n";
 
 export const getStaticPaths = langPaths;
 const lang = Astro.params.lang as Lang;
-const [s, all, st, upcoming, latest] = await Promise.all([
+const [s, all, st, upcoming, latest, depts, notes] = await Promise.all([
   site(),
   programs(),
   stats(),
   events(),
   news(),
+  departments(),
+  announcements(),
 ]);
+const pinned = notes.filter((a) => a.is_pinned).slice(0, 2);
 const open = all.filter((p) => p.intake?.accepting);
 const closes = open.map((p) => p.intake!.closes_at).sort()[0];
 const daysLeft = closes
@@ -111,6 +123,47 @@ const jsonLd = {
           <p class="font-display text-2xl font-bold text-primary">{num(lang, Number(n))}</p>
           <p class="text-xs text-text-muted">{l}</p>
         </div>
+      ))}
+    </div>
+  </section>
+
+  {pinned.length > 0 && (
+    <section class="mx-auto max-w-6xl px-4 pt-8 lg:px-8" aria-label={t(lang, "announcements")}>
+      <ul class="space-y-2">
+        {pinned.map((a) => (
+          <li>
+            <a
+              href={href(lang, `announcements/${a.public_id}/`)}
+              class="flex items-center gap-3 rounded-2xl border border-accent-soft bg-accent-soft/40 px-4 py-3 hover:bg-accent-soft"
+            >
+              <span class="rounded-full bg-accent px-2 py-0.5 text-xs font-semibold text-white">
+                {lang === "ar" ? "إعلان" : "Notice"}
+              </span>
+              <b class="min-w-0 flex-1 truncate text-sm text-text">{a.title}</b>
+              <span class="text-sm text-primary">{arrow(lang)}</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )}
+
+  <section class="mx-auto max-w-6xl px-4 pt-10 lg:px-8">
+    <div class="flex items-end justify-between">
+      <h2 class="font-display text-2xl font-bold">{t(lang, "departments")}</h2>
+      <a href={href(lang, "departments/")} class="text-sm font-semibold text-primary">
+        {t(lang, "all")} · {num(lang, depts.length)}
+      </a>
+    </div>
+    <div class="mt-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
+      {depts.map((d) => (
+        <a
+          href={href(lang, `departments/${d.code}/`)}
+          class="rounded-2xl border border-border-soft bg-surface p-4 hover:shadow-md"
+        >
+          <b class="block text-text">{pick(lang, d.name_ar, d.name_en)}</b>
+          <span class="text-xs text-text-muted">{count(lang, d.programs.length, N.program)}</span>
+        </a>
       ))}
     </div>
   </section>

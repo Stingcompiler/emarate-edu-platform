@@ -60,6 +60,41 @@ def test_regulation_pdf_is_readable_once_published(api, affairs, classroom):
     )
 
 
+def test_public_regulations_are_opt_in(api, affairs):
+    """The website lists a regulation only when published *and* marked public."""
+    upload = (
+        api(affairs)
+        .post("/api/v1/files", {"file": pdf_upload(), "purpose": "regulation"}, format="multipart")
+        .data
+    )
+    internal = api(affairs).post("/api/v1/regulations", {"title": "داخلية"}).data
+    public = (
+        api(affairs)
+        .post(
+            "/api/v1/regulations",
+            {"title": "دليل الطالب", "file": upload["public_id"], "is_public": True},
+        )
+        .data
+    )
+    draft = api(affairs).post("/api/v1/regulations", {"title": "مسودة", "is_public": True}).data
+    for reg in (internal, public):
+        api(affairs).post(f"/api/v1/regulations/{reg['public_id']}/publish")
+
+    listed = api().get("/api/public/regulations").data
+    assert [r["title"] for r in listed] == ["دليل الطالب"]
+    assert listed[0]["has_file"] is True and listed[0]["category_label"]
+    # A static page links here; the API answers with a fresh signed link.
+    file_url = f"/api/public/regulations/{public['public_id']}/file"
+    response = api().get(file_url)
+    assert response.status_code == 302 and "/api/public/files/" in response["Location"]
+    assert response["Cache-Control"] == "no-store"
+    for hidden in (internal, draft):
+        assert api().get(f"/api/public/regulations/{hidden['public_id']}/file").status_code == 404
+    # A new version keeps the choice.
+    url = f"/api/v1/regulations/{public['public_id']}/new-version"
+    assert api(affairs).post(url).data["is_public"] is True
+
+
 def test_cases(
     api, affairs, classroom, make_user, it_dept, ba_dept, django_capture_on_commit_callbacks
 ):

@@ -442,6 +442,7 @@ class Command(BaseCommand):
                 "category": "exams",
                 "version": "2026",
                 "requires_acknowledgement": True,
+                "is_public": True,
                 "status": "published",
                 "published_at": timezone.now(),
                 "created_by": affairs,
@@ -453,6 +454,7 @@ class Command(BaseCommand):
                 "body": "الخطط الدراسية، الحضور، الانسحاب والإضافة.",
                 "category": "academic",
                 "version": "1.1",
+                "is_public": True,
                 "status": "published",
                 "published_at": timezone.now(),
                 "created_by": affairs,
@@ -631,6 +633,18 @@ class Command(BaseCommand):
                         "text": "مسجلو الأقسام المعنيون وحدهم، ولا تُشارك مع أي جهة خارج الكلية.",
                     },
                 ],
+            },
+        )
+        Event.objects.get_or_create(
+            slug="orientation-2026",
+            defaults={
+                "title": "الأسبوع التعريفي للطلاب الجدد",
+                "description": "<p>تعريف الطلاب الجدد بالأقسام والبوابة والخدمات.</p>",
+                "starts_at": now - timedelta(days=20),
+                "ends_at": now - timedelta(days=20) + timedelta(hours=4),
+                "location": "القاعة الكبرى",
+                "status": "published",
+                "created_by": users[Role.EVENTS_MANAGER],
             },
         )
         Event.objects.get_or_create(

@@ -1,0 +1,37 @@
+---
+import PageHead from "../../../components/PageHead.astro";
+import Base from "../../../layouts/Base.astro";
+import { type Announcement, announcements } from "../../../lib/api";
+import { LANGS, type Lang, fmtDate, t } from "../../../lib/i18n";
+
+export async function getStaticPaths() {
+  const items = await announcements();
+  return LANGS.flatMap((lang) =>
+    items.map((a) => ({ params: { lang, id: a.public_id }, props: { item: a } })),
+  );
+}
+const lang = Astro.params.lang as Lang;
+const { item: a } = Astro.props as { item: Announcement };
+const summary = a.body
+  .replace(/<[^>]+>/g, " ")
+  .replace(/\s+/g, " ")
+  .trim()
+  .slice(0, 160);
+---
+
+<Base
+  lang={lang}
+  title={a.title}
+  path={`announcements/${a.public_id}/`}
+  description={summary || undefined}
+>
+  <PageHead
+    lang={lang}
+    title={a.title}
+    lead={a.publish_at ? fmtDate(lang, a.publish_at) : undefined}
+    crumbs={[[t(lang, "announcements"), "announcements/"]]}
+  />
+  <article class="mx-auto max-w-3xl px-4 py-10 lg:px-8">
+    <div class="space-y-4 text-base leading-8" set:html={a.body} />
+  </article>
+</Base>

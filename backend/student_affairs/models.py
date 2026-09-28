@@ -27,6 +27,8 @@ class Regulation(PublicIdModel, TimestampedModel):
     version = models.CharField(max_length=20, default="1")
     effective_from = models.DateField(null=True, blank=True)
     requires_acknowledgement = models.BooleanField(default=False)
+    # Also listed on the public website (docs/07 §1 /regulations) once published.
+    is_public = models.BooleanField(default=False)
     status = models.CharField(max_length=12, choices=Status.choices, default=Status.DRAFT)
     published_at = models.DateTimeField(null=True, blank=True)
     replaces = models.ForeignKey(

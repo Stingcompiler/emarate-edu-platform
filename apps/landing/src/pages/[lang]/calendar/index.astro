@@ -1,0 +1,87 @@
+---
+import PageHead from "../../../components/PageHead.astro";
+import Base from "../../../layouts/Base.astro";
+import { calendar, events } from "../../../lib/api";
+import { type Lang, fmtDate, href, langPaths, pick } from "../../../lib/i18n";
+
+// The academic calendar from the terms the college already manages: no separate upkeep.
+export const getStaticPaths = langPaths;
+const lang = Astro.params.lang as Lang;
+const L = (a: string, e: string) => (lang === "ar" ? a : e);
+const [cal, upcoming] = await Promise.all([calendar(), events()]);
+const day = { day: "numeric", month: "long", year: "numeric" } as const;
+const rows = [
+  ...cal.terms.flatMap((term) => [
+    {
+      at: term.starts_on,
+      text: `${L("بداية", "Start of")} ${pick(lang, term.name_ar, term.name_en)}`,
+      current: term.is_current,
+    },
+    {
+      at: term.ends_on,
+      text: `${L("نهاية", "End of")} ${pick(lang, term.name_ar, term.name_en)}`,
+      current: term.is_current,
+    },
+  ]),
+  ...(cal.admission
+    ? [
+        {
+          at: cal.admission.opens_at.slice(0, 10),
+          text: `${L("فتح التقديم", "Applications open")} — ${cal.admission.name}`,
+          current: false,
+        },
+        {
+          at: cal.admission.closes_at.slice(0, 10),
+          text: `${L("إغلاق التقديم", "Applications close")} — ${cal.admission.name}`,
+          current: false,
+        },
+      ]
+    : []),
+].sort((a, b) => a.at.localeCompare(b.at));
+---
+
+<Base lang={lang} title={L("التقويم الأكاديمي", "Academic calendar")} path="calendar/">
+  <PageHead
+    lang={lang}
+    title={L("التقويم الأكاديمي", "Academic calendar")}
+    lead={L("مواعيد الفصول الدراسية والتقديم.", "Term and admission dates.")}
+    crumbs={[[L("التقويم الأكاديمي", "Academic calendar"), "calendar/"]]}
+  />
+  <div class="mx-auto grid max-w-6xl gap-10 px-4 py-10 lg:grid-cols-[2fr_1fr] lg:px-8">
+    <ol class="divide-y divide-border-soft rounded-2xl border border-border-soft bg-surface">
+      {rows.map((r) => (
+        <li class="flex items-center gap-4 px-4 py-3">
+          <time datetime={r.at} class="w-32 shrink-0 text-sm font-semibold text-primary">
+            {fmtDate(lang, r.at, day)}
+          </time>
+          <span class="text-sm">{r.text}</span>
+          {r.current && (
+            <span class="ms-auto rounded-full bg-success-soft px-2 py-0.5 text-xs font-semibold text-success-strong">
+              {L("الحالي", "Current")}
+            </span>
+          )}
+        </li>
+      ))}
+      {!rows.length && (
+        <li class="px-4 py-6 text-sm text-text-muted">
+          {L("يُنشر التقويم قريبًا.", "Coming soon.")}
+        </li>
+      )}
+    </ol>
+    <aside>
+      <h2 class="font-display text-lg font-bold">{L("الفعاليات القادمة", "Upcoming events")}</h2>
+      <ul class="mt-3 space-y-2 text-sm">
+        {upcoming.slice(0, 5).map((e) => (
+          <li>
+            <a href={href(lang, `events/${e.slug}/`)} class="text-primary hover:underline">
+              {fmtDate(lang, e.starts_at, { day: "numeric", month: "short" })} · {e.title}
+            </a>
+          </li>
+        ))}
+      </ul>
+      <a href={href(lang, "events/")} class="mt-3 inline-block text-sm font-semibold text-primary">
+        {L("كل الفعاليات", "All events")}
+      </a>
+    </aside>
+  </div>
+</Base>

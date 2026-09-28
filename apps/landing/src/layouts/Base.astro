@@ -38,6 +38,13 @@ const nav = [
   ["contact", "contact/"],
 ] as const;
 const current = Astro.url.pathname;
+// Footer-only links until the editable menus (phase 2) take over the navigation.
+const more = [
+  [lang === "ar" ? "الإعلانات" : "Announcements", "announcements/"],
+  [lang === "ar" ? "الفعاليات" : "Events", "events/"],
+  [lang === "ar" ? "التقويم الأكاديمي" : "Academic calendar", "calendar/"],
+  [lang === "ar" ? "اللوائح" : "Regulations", "regulations/"],
+] as const;
 ---
 
 <!doctype html>
@@ -49,6 +56,12 @@ const current = Astro.url.pathname;
     <title>{fullTitle}</title>
     <meta name="description" content={desc} />
     <link rel="canonical" href={canonical} />
+    <link
+      rel="alternate"
+      type="application/rss+xml"
+      title={lang === "ar" ? "أخبار الكلية" : "College news"}
+      href={href(lang, "news/rss.xml")}
+    />
     <link rel="alternate" hreflang="ar" href={alternate("ar")} />
     <link rel="alternate" hreflang="en" href={alternate("en")} />
     <link rel="alternate" hreflang="x-default" href={alternate("ar")} />
@@ -173,6 +186,11 @@ const current = Astro.url.pathname;
           <a href={`${PORTAL}/track`} class="hover:text-white">
             {t(lang, "track")}
           </a>
+          {more.map(([label, p]) => (
+            <a href={href(lang, p)} class="hover:text-white">
+              {label}
+            </a>
+          ))}
           {hasPrivacy && (
             <a href={href(lang, "p/privacy/")} class="hover:text-white">
               {t(lang, "privacy")}

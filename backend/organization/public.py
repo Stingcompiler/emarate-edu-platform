@@ -312,3 +312,64 @@ class PublicStatsView(_PublicRead):
                 }
             ).data
         )
+
+
+class CalendarTermSerializer(S.Serializer):
+    name_ar = S.CharField()
+    name_en = S.CharField()
+    starts_on = S.DateField()
+    ends_on = S.DateField()
+    is_current = S.BooleanField()
+
+
+class CalendarAdmissionSerializer(S.Serializer):
+    name = S.CharField()
+    opens_at = S.DateTimeField()
+    closes_at = S.DateTimeField()
+
+
+class PublicCalendarSerializer(S.Serializer):
+    terms = CalendarTermSerializer(many=True)
+    admission = CalendarAdmissionSerializer(allow_null=True)
+
+
+@PUBLIC_CACHE
+@extend_schema(tags=["public"])
+class PublicCalendarView(_PublicRead):
+    """The academic calendar: this year's and upcoming terms, and the admission window."""
+
+    @extend_schema(operation_id="public_calendar", responses=PublicCalendarSerializer)
+    def get(self, request):
+        from academic.models import Term
+        from admissions.models import AdmissionCycle
+
+        today = timezone.localdate()
+        current = Term.objects.filter(is_current=True).select_related("academic_year").first()
+        since = current.academic_year.starts_on if current else today
+        terms = Term.objects.filter(ends_on__gte=since).order_by("starts_on")
+        cycle = AdmissionCycle.objects.filter(is_active=True).order_by("-opens_at").first()
+        return Response(
+            PublicCalendarSerializer(
+                {
+                    "terms": [
+                        {
+                            "name_ar": t.name_ar,
+                            "name_en": t.name_en or t.name_ar,
+                            "starts_on": t.starts_on,
+                            "ends_on": t.ends_on,
+                            "is_current": t.is_current,
+                        }
+                        for t in terms
+                    ],
+                    "admission": (
+                        {
+                            "name": cycle.name,
+                            "opens_at": cycle.opens_at,
+                            "closes_at": cycle.closes_at,
+                        }
+                        if cycle
+                        else None
+                    ),
+                }
+            ).data
+        )

@@ -1,0 +1,47 @@
+---
+import EventRow from "../../../components/EventRow.astro";
+import PageHead from "../../../components/PageHead.astro";
+import Base from "../../../layouts/Base.astro";
+import { events, pastEvents } from "../../../lib/api";
+import { type Lang, langPaths } from "../../../lib/i18n";
+
+// docs/07 §1 `/events`: upcoming first, then the archive (ended events keep their pages).
+export const getStaticPaths = langPaths;
+const lang = Astro.params.lang as Lang;
+const L = (a: string, e: string) => (lang === "ar" ? a : e);
+const [upcoming, past] = await Promise.all([events(), pastEvents()]);
+upcoming.sort((a, b) => a.starts_at.localeCompare(b.starts_at));
+---
+
+<Base lang={lang} title={L("الفعاليات", "Events")} path="events/">
+  <PageHead
+    lang={lang}
+    title={L("الفعاليات", "Events")}
+    crumbs={[[L("الفعاليات", "Events"), "events/"]]}
+  />
+  <div class="mx-auto max-w-3xl space-y-10 px-4 py-10 lg:px-8">
+    <section>
+      <h2 class="font-display text-xl font-bold">{L("القادمة", "Upcoming")}</h2>
+      <ul class="mt-4 space-y-3">
+        {upcoming.map((e) => (
+          <EventRow lang={lang} event={e} />
+        ))}
+        {!upcoming.length && (
+          <li class="text-sm text-text-muted">
+            {L("لا فعاليات قادمة الآن.", "No upcoming events.")}
+          </li>
+        )}
+      </ul>
+    </section>
+    {past.length > 0 && (
+      <section>
+        <h2 class="font-display text-xl font-bold">{L("فعاليات سابقة", "Past events")}</h2>
+        <ul class="mt-4 space-y-3">
+          {past.map((e) => (
+            <EventRow lang={lang} event={e} />
+          ))}
+        </ul>
+      </section>
+    )}
+  </div>
+</Base>
