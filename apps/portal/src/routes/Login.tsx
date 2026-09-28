@@ -2,11 +2,11 @@ import { useQueryClient } from "@tanstack/react-query";
 import { type FormEvent, useEffect, useState } from "react";
 import { Link, Navigate, useNavigate, useSearchParams } from "react-router";
 
-import { AuthLayout, Button, Card, Field, Notice } from "../components/ui";
+import { AuthLayout, Button, Card, Field, Notice, PasswordField } from "../components/ui";
 import { api } from "../lib/api";
 import { useMe } from "../lib/auth";
 
-/** Board: Login (phone). Desktop: the same form in the centred auth card (docs/06 §9). */
+/** Board: Login (phone). Desktop: the form beside the portal panel (AuthLayout, docs/06 §9). */
 export function Login() {
   const me = useMe();
   const client = useQueryClient();
@@ -60,14 +60,14 @@ export function Login() {
             autoComplete="username"
             dir="ltr"
             className="text-end"
+            placeholder="26-IT-0042"
             value={identifier}
             onChange={(e) => setIdentifier(e.target.value)}
             required
             autoFocus
           />
-          <Field
+          <PasswordField
             label="كلمة المرور"
-            type="password"
             name="password"
             autoComplete="current-password"
             dir="ltr"
@@ -89,6 +89,18 @@ export function Login() {
           {busy ? "جارٍ الدخول…" : "تسجيل الدخول"}
         </Button>
       </form>
+      {/* Applicants often land here first: they need no account. */}
+      <p className="mt-8 border-t border-border-soft pt-5 text-sm text-text-muted">
+        تتقدّم للالتحاق؟{" "}
+        <Link to="/apply" className="font-semibold text-primary">
+          قدّم الآن
+        </Link>{" "}
+        أو{" "}
+        <Link to="/track" className="font-semibold text-primary">
+          تابع طلبك
+        </Link>{" "}
+        — بلا حساب.
+      </p>
     </AuthLayout>
   );
 }

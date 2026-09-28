@@ -1,7 +1,15 @@
 import { type FormEvent, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router";
 
-import { AuthLayout, Button, Card, Field, Notice, problemMessage } from "../components/ui";
+import {
+  AuthLayout,
+  Button,
+  Card,
+  Field,
+  Notice,
+  problemMessage,
+  PasswordField,
+} from "../components/ui";
 import { api } from "../lib/api";
 
 /** Boards: AuthForgot → AuthReset (phone); desktop uses the centred auth card. */
@@ -78,9 +86,8 @@ export function ForgotPassword() {
                 required
                 autoFocus
               />
-              <Field
+              <PasswordField
                 label="كلمة المرور الجديدة"
-                type="password"
                 autoComplete="new-password"
                 dir="ltr"
                 value={password}

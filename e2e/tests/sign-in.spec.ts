@@ -12,7 +12,7 @@ test("a student signs in with the university number and lands on Today", async (
 test("a wrong password shows an Arabic error and stays on login", async ({ page }) => {
   await page.goto("/login");
   await page.getByLabel("الرقم الجامعي أو البريد").fill("26-IT-0001");
-  await page.getByLabel("كلمة المرور").fill(`${PASSWORD}-wrong`);
+  await page.getByLabel("كلمة المرور", { exact: true }).fill(`${PASSWORD}-wrong`);
   await page.getByRole("button", { name: "تسجيل الدخول" }).click();
   await expect(page.getByText("غير صحيحة")).toBeVisible();
   await expect(page).toHaveURL(/\/login/);

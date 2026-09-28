@@ -5,6 +5,11 @@ import type {
   TextareaHTMLAttributes,
 } from "react";
 
+import { Eye, EyeOff } from "lucide-react";
+import { useState } from "react";
+
+import { SITE_URL } from "../lib/site";
+
 /** Small shared primitives for portal pages; tokens only (docs/06). */
 
 export function Button({
@@ -145,6 +150,12 @@ export function EmptyState({
 }
 
 /** Auth pages: full-bleed on phones, a centred 440px card on larger screens (docs/06 §9). */
+/**
+ * Sign-in, registration, password reset and activation (board Login, phone).
+ * Phones: the board — logo and title at the start, the form, one column.
+ * Large screens (derived, docs/06 §9): the form beside a navy panel that says what the
+ * portal is for, instead of a small card in an empty screen.
+ */
 export function AuthLayout({
   title,
   subtitle,
@@ -155,14 +166,96 @@ export function AuthLayout({
   children: ReactNode;
 }) {
   return (
-    <main className="min-h-dvh bg-bg px-4 pb-10 pt-[max(3rem,env(safe-area-inset-top))] sm:grid sm:place-items-center sm:bg-bg-subtle sm:py-12">
-      <div className="mx-auto w-full max-w-[440px] sm:rounded-2xl sm:border sm:border-border-soft sm:bg-surface sm:p-8 sm:shadow-md">
-        <img src="/favicon.svg" alt="" width={56} height={56} className="mx-auto" />
-        <h1 className="mt-4 text-center text-2xl font-bold text-text">{title}</h1>
-        {subtitle && <p className="mt-1 text-center text-sm text-text-muted">{subtitle}</p>}
-        <div className="mt-7">{children}</div>
-      </div>
-    </main>
+    <div className="min-h-dvh bg-bg lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)]">
+      <main className="flex min-h-dvh flex-col px-5 pb-6 pt-[max(3rem,env(safe-area-inset-top))] sm:px-8 lg:px-16 lg:pt-10">
+        <div className="mx-auto flex w-full max-w-[400px] flex-1 flex-col lg:justify-center">
+          <img src="/favicon.svg" alt="" width={56} height={56} />
+          <h1 className="mt-5 text-2xl font-bold text-text">{title}</h1>
+          {subtitle && <p className="mt-1 text-sm leading-6 text-text-muted">{subtitle}</p>}
+          <div className="mt-7">{children}</div>
+        </div>
+        <footer className="mx-auto mt-10 flex w-full max-w-[400px] flex-wrap items-center justify-between gap-2 text-xs text-text-muted">
+          <a href={SITE_URL} className="font-semibold hover:text-text">
+            العودة إلى موقع الكلية
+          </a>
+          <span>كلية الإمارات للعلوم والتقنية</span>
+        </footer>
+      </main>
+      <aside className="relative hidden overflow-hidden bg-header p-12 text-text-inverse lg:flex lg:flex-col lg:justify-between">
+        {/* Orbits like the logo's, very faint — the panel's only decoration. */}
+        <svg
+          aria-hidden="true"
+          viewBox="0 0 400 400"
+          className="pointer-events-none absolute -bottom-24 -start-24 size-[520px] opacity-[0.07]"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.5"
+        >
+          <ellipse cx="200" cy="200" rx="190" ry="80" />
+          <ellipse cx="200" cy="200" rx="190" ry="80" transform="rotate(60 200 200)" />
+          <ellipse cx="200" cy="200" rx="190" ry="80" transform="rotate(-60 200 200)" />
+          <circle cx="200" cy="200" r="34" />
+        </svg>
+        <p className="relative text-sm font-semibold opacity-80">كلية الإمارات للعلوم والتقنية</p>
+        <div className="relative max-w-md">
+          <p className="text-3xl font-bold leading-snug">
+            بوابتك إلى الكلية —
+            <br />
+            في مكان واحد.
+          </p>
+          <ul className="mt-8 space-y-4 text-sm leading-6 opacity-90">
+            {[
+              ["موادك ومحاضراتك", "المحاضرات والملفات والبث المباشر لكل مادة."],
+              ["مهامك ونتائجك", "الواجبات والاختبارات ومواعيدها، ودرجاتك حين تُنشر."],
+              ["إشعارات فورية", "على هاتفك حتى والتطبيق مغلق — لا يفوتك شيء."],
+            ].map(([head, body]) => (
+              <li key={head} className="flex gap-3">
+                <span className="mt-2 size-2 shrink-0 rounded-full bg-accent" aria-hidden="true" />
+                <span>
+                  <b className="block text-base">{head}</b>
+                  {body}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+        <p className="relative text-xs opacity-70">
+          للطلاب وأعضاء هيئة التدريس والإدارة. المتقدمون الجدد يستخدمون «قدّم الآن» و«تابع طلبك» بلا
+          حساب.
+        </p>
+      </aside>
+    </div>
+  );
+}
+
+/** A password field with a show/hide button (the board's field, plus a way to check typing). */
+export function PasswordField({
+  label,
+  hint,
+  ...props
+}: Omit<InputHTMLAttributes<HTMLInputElement>, "type"> & { label: string; hint?: string }) {
+  const [shown, setShown] = useState(false);
+  return (
+    <label className="block border-b border-border-soft px-4 py-2.5 last:border-b-0">
+      <span className="block text-xs text-text-muted">{label}</span>
+      <span className="mt-0.5 flex items-center gap-2">
+        <input
+          {...props}
+          type={shown ? "text" : "password"}
+          className="block min-w-0 flex-1 bg-transparent text-base text-text outline-none placeholder:text-n400"
+        />
+        <button
+          type="button"
+          onClick={() => setShown((s) => !s)}
+          aria-label={shown ? "إخفاء كلمة المرور" : "إظهار كلمة المرور"}
+          aria-pressed={shown}
+          className="-me-2 grid size-9 shrink-0 place-items-center rounded-md text-text-muted hover:bg-surface-alt hover:text-text"
+        >
+          {shown ? <EyeOff size={18} aria-hidden /> : <Eye size={18} aria-hidden />}
+        </button>
+      </span>
+      {hint && <span className="mt-1 block text-xs text-text-muted">{hint}</span>}
+    </label>
   );
 }
 

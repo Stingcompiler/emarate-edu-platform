@@ -1,7 +1,15 @@
 import { type FormEvent, useEffect, useState } from "react";
 import { Link } from "react-router";
 
-import { AuthLayout, Button, Card, Field, Notice, problemMessage } from "../components/ui";
+import {
+  AuthLayout,
+  Button,
+  Card,
+  Field,
+  Notice,
+  problemMessage,
+  PasswordField,
+} from "../components/ui";
 import { api } from "../lib/api";
 
 type Step = "details" | "code" | "password" | "done";
@@ -150,9 +158,8 @@ export function Register() {
             />
           )}
           {step === "password" && (
-            <Field
+            <PasswordField
               label="كلمة المرور"
-              type="password"
               autoComplete="new-password"
               dir="ltr"
               hint="8 أحرف على الأقل، ولا تكون شائعة أو مطابقة لبريدك."

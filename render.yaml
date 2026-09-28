@@ -128,6 +128,9 @@ services:
     runtime: static
     buildCommand: corepack enable && pnpm install --frozen-lockfile && pnpm --filter @ecst/portal build
     staticPublishPath: apps/portal/dist
+    envVars:
+      - key: VITE_SITE_URL # the public website, linked from the sign-in screens
+        value: https://ecst.edu.sd/ar/
     headers:
       - path: /sw.js
         name: Cache-Control
