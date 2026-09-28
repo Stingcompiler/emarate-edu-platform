@@ -26,6 +26,8 @@ prod = [
     "redis>=6,<7",
     "django-anymail[brevo,resend]>=15,<16",
     "gunicorn>=23,<24",
+    "sentry-sdk[django]>=2,<3",
+    "whitenoise>=6.8,<7",
 ]
 
 [dependency-groups]

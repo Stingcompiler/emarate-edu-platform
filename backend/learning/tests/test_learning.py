@@ -404,3 +404,17 @@ def test_grading_queue(api, classroom, make_user):
     )
     assert teacher.get("/api/v1/grading-queue?status=done").data["groups"][0]["submissions"]
     assert api(make_user(Role.TEACHER)).get("/api/v1/grading-queue").data["counts"]["pending"] == 0
+
+
+def test_grading_queue_respects_ta_delegation(api, classroom):
+    assignment = _assignment(api, classroom)
+    api(classroom.student).post(
+        f"/api/v1/assignments/{assignment}/submit", {"content": "حل"}, format="json"
+    )
+    ta = api(classroom.ta)
+    assert ta.get("/api/v1/grading-queue").data["counts"]["pending"] == 0
+    classroom.offering.ta_can_grade = True
+    classroom.offering.save()
+    assert ta.get("/api/v1/grading-queue").data["counts"]["pending"] == 1
+    # The gradebook is read access: TAs of the course see it either way.
+    assert ta.get(f"/api/v1/gradebooks/{classroom.offering.pk}").status_code == 200

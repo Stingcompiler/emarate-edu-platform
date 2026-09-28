@@ -56,6 +56,17 @@ VAPID_PUBLIC_KEY = env("VAPID_PUBLIC_KEY", required=True)
 VAPID_PRIVATE_KEY = env("VAPID_PRIVATE_KEY", required=True)
 VAPID_SUBJECT = env("VAPID_SUBJECT", "mailto:it@ecst.edu.sd")
 
+# Static files (Django admin, API docs) served by the web process itself.
+MIDDLEWARE = [
+    MIDDLEWARE[0],  # noqa: F405  SecurityMiddleware first
+    "whitenoise.middleware.WhiteNoiseMiddleware",
+    *MIDDLEWARE[1:],  # noqa: F405
+]
+STORAGES = {
+    **STORAGES,
+    "staticfiles": {"BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"},
+}
+
 # ─── HTTPS hardening ──────────────────────────────────────────────────────
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 SECURE_SSL_REDIRECT = env_bool("DJANGO_SECURE_SSL_REDIRECT", True)
@@ -70,3 +81,18 @@ LOGGING = {
     **LOGGING,
     "handlers": {"console": {"class": "logging.StreamHandler", "formatter": "json"}},
 }
+
+
+# ─── Error tracking (optional): set SENTRY_DSN to enable ──────────────────
+SENTRY_DSN = env("SENTRY_DSN", "")
+if SENTRY_DSN:
+    import sentry_sdk
+
+    sentry_sdk.init(
+        dsn=SENTRY_DSN,
+        environment=env("SENTRY_ENVIRONMENT", "production"),
+        release=env("RENDER_GIT_COMMIT", "") or None,
+        traces_sample_rate=float(env("SENTRY_TRACES_SAMPLE_RATE", "0.05")),
+        # Students' and applicants' data never leaves for Sentry.
+        send_default_pii=False,
+    )

@@ -109,5 +109,13 @@ class BunnyStorage(Storage):
         # Names are random UUIDs, so collisions are not a concern.
         return False
 
+    def listdir(self, path):
+        """(directories, files) directly under ``path`` (Bunny's list API)."""
+        url = self._url(path.rstrip("/") + "/")
+        entries = json.loads(_request("GET", url, headers={**self._headers(), "Accept": "*/*"}))
+        dirs = [e["ObjectName"] for e in entries if e.get("IsDirectory")]
+        files = [e["ObjectName"] for e in entries if not e.get("IsDirectory")]
+        return dirs, files
+
     def url(self, name):
         raise NotImplementedError("Private files are served through signed links only.")

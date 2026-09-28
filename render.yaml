@@ -1,0 +1,165 @@
+# Render Blueprint — ECST platform (docs/02 Phase 11, docs/runbook.md).
+# No Docker: native Python and static runtimes. Secrets are `sync: false`
+# (entered once in the Render dashboard, never committed).
+#
+#   api.ecst.edu.sd      → ecst-api (Django, gunicorn)
+#   portal.ecst.edu.sd   → ecst-portal (static SPA; /api/* rewritten to the API = same origin)
+#   ecst.edu.sd          → ecst-site (static Astro build; rebuilt by the CMS deploy hook)
+
+databases:
+  - name: ecst-db
+    plan: basic-1gb # paid: daily backups + point-in-time recovery
+    databaseName: ecst
+    user: ecst
+    postgresMajorVersion: "16"
+
+services:
+  - type: keyvalue
+    name: ecst-redis
+    plan: starter
+    ipAllowList: [] # private network only
+
+  # ─── API ────────────────────────────────────────────────────────────────
+  - type: web
+    name: ecst-api
+    runtime: python
+    plan: standard
+    rootDir: backend
+    buildCommand: pip install uv && uv sync --locked --extra prod && uv run python manage.py collectstatic --noinput
+    preDeployCommand: uv run python manage.py migrate --noinput && uv run python manage.py check --deploy --fail-level WARNING
+    startCommand: uv run gunicorn config.wsgi:application --bind 0.0.0.0:$PORT --worker-class gthread --workers 4 --threads 4 --timeout 60 --access-logfile -
+    healthCheckPath: /api/public/health
+    envVars: &backend-env
+      - key: PYTHON_VERSION
+        value: "3.13"
+      - key: DJANGO_SETTINGS_MODULE
+        value: config.settings.prod
+      - key: DJANGO_ALLOWED_HOSTS
+        value: api.ecst.edu.sd,ecst-api.onrender.com
+      - key: DJANGO_CSRF_TRUSTED_ORIGINS
+        value: https://portal.ecst.edu.sd
+      - key: PORTAL_BASE_URL
+        value: https://portal.ecst.edu.sd
+      - key: PUBLIC_SITE_ORIGINS
+        value: https://ecst.edu.sd,https://www.ecst.edu.sd
+      # Cloudflare → Render: verify with the audit log IPs after the first deploy (runbook §4).
+      - key: TRUSTED_PROXIES
+        value: "2"
+      - key: DATABASE_URL
+        fromDatabase: { name: ecst-db, property: connectionString }
+      - key: REDIS_URL
+        fromService: { type: keyvalue, name: ecst-redis, property: connectionString }
+      - key: DJANGO_SECRET_KEY
+        generateValue: true
+      - key: FIELD_ENCRYPTION_KEY
+        sync: false # keep a copy offline: losing it makes stored live links unreadable
+      - key: BACKUP_ENCRYPTION_KEY
+        sync: false # keep a copy offline: without it no backup can be restored
+      - key: SITE_BUILD_TOKEN
+        sync: false
+      - key: SITE_REBUILD_HOOK_URL
+        sync: false # ecst-site → Settings → Deploy Hook
+      - key: MAILER_BACKEND
+        value: anymail.backends.brevo.EmailBackend
+      - key: BREVO_API_KEY
+        sync: false
+      - key: DEFAULT_FROM_EMAIL
+        value: ECST <no-reply@ecst.edu.sd>
+      - key: VAPID_PUBLIC_KEY
+        sync: false
+      - key: VAPID_PRIVATE_KEY
+        sync: false
+      - key: MEDIA_BACKEND
+        value: bunny
+      - key: BUNNY_STORAGE_ZONE
+        sync: false
+      - key: BUNNY_STORAGE_KEY
+        sync: false
+      - key: BUNNY_STORAGE_HOST
+        value: https://storage.bunnycdn.com
+      - key: BUNNY_PULL_ZONE_URL
+        sync: false
+      - key: BUNNY_TOKEN_KEY
+        sync: false
+      - key: BUNNY_STREAM_LIBRARY_ID
+        sync: false
+      - key: BUNNY_STREAM_API_KEY
+        sync: false
+      - key: BUNNY_STREAM_TOKEN_KEY
+        sync: false
+      - key: BUNNY_WEBHOOK_SECRET
+        sync: false
+      - key: SENTRY_DSN
+        sync: false # optional
+
+  # ─── Background work (notifications fan-out, email outbox, reminders) ──
+  - type: worker
+    name: ecst-worker
+    runtime: python
+    plan: starter
+    rootDir: backend
+    buildCommand: pip install uv && uv sync --locked --extra prod
+    startCommand: uv run celery -A config worker --loglevel INFO --concurrency 4
+    envVars: *backend-env
+
+  - type: worker
+    name: ecst-beat
+    runtime: python
+    plan: starter
+    rootDir: backend
+    buildCommand: pip install uv && uv sync --locked --extra prod
+    startCommand: uv run celery -A config beat --loglevel INFO
+    envVars: *backend-env
+
+  # Weekly encrypted pg_dump to Bunny (backups/, newest 8 kept).
+  - type: cron
+    name: ecst-backup
+    runtime: python
+    plan: starter
+    rootDir: backend
+    schedule: "0 1 * * 5" # Friday 01:00 UTC (04:00 Khartoum)
+    buildCommand: pip install uv && uv sync --locked --extra prod
+    startCommand: uv run python manage.py backup_database
+    envVars: *backend-env
+
+  # ─── Portal (React SPA) ─────────────────────────────────────────────────
+  - type: web
+    name: ecst-portal
+    runtime: static
+    buildCommand: corepack enable && pnpm install --frozen-lockfile && pnpm --filter @ecst/portal build
+    staticPublishPath: apps/portal/dist
+    headers:
+      - path: /sw.js
+        name: Cache-Control
+        value: no-cache
+      - path: /assets/*
+        name: Cache-Control
+        value: public, max-age=31536000, immutable
+    routes:
+      # Same origin for cookies + CSRF: the portal proxies the API.
+      - type: rewrite
+        source: /api/*
+        destination: https://api.ecst.edu.sd/api/*
+      - type: rewrite
+        source: /*
+        destination: /index.html
+
+  # ─── Public website (Astro SSG) ─────────────────────────────────────────
+  - type: web
+    name: ecst-site
+    runtime: static
+    buildCommand: corepack enable && pnpm install --frozen-lockfile && pnpm --filter @ecst/landing build
+    staticPublishPath: apps/landing/dist
+    envVars:
+      - key: PUBLIC_API_URL
+        value: https://api.ecst.edu.sd
+      - key: PUBLIC_PORTAL_URL
+        value: https://portal.ecst.edu.sd
+      - key: LANDING_STRICT
+        value: "1"
+      - key: SITE_BUILD_TOKEN
+        sync: false # same value as the API's SITE_BUILD_TOKEN
+    headers:
+      - path: /_astro/*
+        name: Cache-Control
+        value: public, max-age=31536000, immutable

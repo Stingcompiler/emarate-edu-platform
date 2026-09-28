@@ -54,6 +54,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "core.middleware.PublicCorsMiddleware",
+    "core.middleware.PermissionsPolicyMiddleware",
     "django.middleware.csp.ContentSecurityPolicyMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.locale.LocaleMiddleware",
@@ -293,6 +294,16 @@ SECURE_CSP = {
     "frame-ancestors": [CSP.NONE],
 }
 SECURE_CONTENT_TYPE_NOSNIFF = True
+# Browser features the platform never uses (core.middleware.PermissionsPolicyMiddleware).
+PERMISSIONS_POLICY = (
+    "camera=(), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()"
+)
+
+# Proxies in front of the API that append to X-Forwarded-For (Cloudflare + Render = 2).
+# 0 ignores the header: clients cannot spoof their address in audit logs or throttles.
+TRUSTED_PROXIES = int(env("TRUSTED_PROXIES", "0"))
+# DRF: None would trust the whole header; 0 means REMOTE_ADDR only (same rule as core.net).
+REST_FRAMEWORK["NUM_PROXIES"] = TRUSTED_PROXIES
 SECURE_REFERRER_POLICY = "same-origin"
 X_FRAME_OPTIONS = "DENY"
 SESSION_COOKIE_HTTPONLY = True
@@ -303,6 +314,9 @@ CSRF_TRUSTED_ORIGINS = env_list("DJANGO_CSRF_TRUSTED_ORIGINS")
 PUBLIC_SITE_ORIGINS = env_list("PUBLIC_SITE_ORIGINS")
 # Shared with the landing build (header X-Site-Build) so it isn't throttled.
 SITE_BUILD_TOKEN = env("SITE_BUILD_TOKEN", "")
+# Encrypted weekly database dumps (core.backups): keep this key offline too.
+BACKUP_ENCRYPTION_KEY = env("BACKUP_ENCRYPTION_KEY", "")
+BACKUP_KEEP = int(env("BACKUP_KEEP", "8"))
 
 # ─── Logging ──────────────────────────────────────────────────────────────
 LOG_LEVEL = env("DJANGO_LOG_LEVEL", "INFO")

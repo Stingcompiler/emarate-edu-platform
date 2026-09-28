@@ -115,3 +115,21 @@ def test_site_build_token_skips_the_public_read_throttle(client, settings, db):
         cache.clear()
         del PublicReadThrottle.THROTTLE_RATES  # back to the class default
         api_settings.reload()
+
+
+def test_client_ip_trusts_only_configured_proxies(rf, settings):
+    from core.net import client_ip
+
+    request = rf.get("/", HTTP_X_FORWARDED_FOR="6.6.6.6, 1.2.3.4, 10.0.0.9", REMOTE_ADDR="10.0.0.1")
+    settings.TRUSTED_PROXIES = 0
+    assert client_ip(request) == "10.0.0.1"  # a client-supplied header is ignored
+    settings.TRUSTED_PROXIES = 2
+    assert client_ip(request) == "1.2.3.4"  # Cloudflare + Render appended the last two
+    settings.TRUSTED_PROXIES = 5
+    assert client_ip(request) == "6.6.6.6"
+
+
+def test_security_headers(client, db):
+    response = client.get("/api/public/health")
+    assert "camera=()" in response["Permissions-Policy"]
+    assert response["X-Content-Type-Options"] == "nosniff"

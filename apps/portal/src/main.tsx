@@ -49,6 +49,7 @@ import { AdminSettings } from "./routes/admin/Settings";
 import { Structure } from "./routes/admin/Structure";
 import { AdminUser } from "./routes/admin/User";
 import { AdminUsers } from "./routes/admin/Users";
+import { Activate } from "./routes/Activate";
 import { Home } from "./routes/Home";
 import { AcademicHome } from "./routes/homes/AcademicHome";
 import { AffairsHome } from "./routes/homes/AffairsHome";
@@ -110,6 +111,7 @@ const router = createBrowserRouter([
   { path: "/login", element: <Login /> },
   { path: "/register", element: <Register /> },
   { path: "/forgot-password", element: <ForgotPassword /> },
+  { path: "/activate/:token", element: <Activate /> },
   // Visitors (no account): apply and track — the public site links here (docs/03 §4).
   { path: "/apply", element: <Apply /> },
   { path: "/track", element: <Track /> },

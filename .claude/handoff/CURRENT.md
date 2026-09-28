@@ -1,56 +1,39 @@
-# Handoff — Phase 10 done → Phase 11 (hardening + deploy) — 2026-09-28
+# Handoff — All phases done (0–11) → production deploy by the owner — 2026-09-28
 
 ## Where things stand
-- **Phases 1–9 are merged** to `main` (PRs #3–#11).
-- **Phase 10 (portal identity + role dashboards)** is complete on `feat/phase-10-portal`. Its PR is opened in this step; merge it once CI is green with `gh pr merge --merge` (auto-merge is disabled for the repo).
+- **Phases 1–10 are merged** to `main` (PRs #3–#12).
+- **Phase 11 (hardening and deploy)** is complete on `feat/phase-11-deploy`. Its PR is opened in this step; merge it once CI is green with `gh pr merge --merge`.
+- **After that merge, the build plan (docs/02 §8) is fully delivered.** What remains needs the owner's accounts and decisions (see "Owner actions").
 - **Verified locally:**
-  - 313 tests pass on SQLite and on Postgres (plus 1 SQLite-only skip);
-  - the schema is clean; ruff, typecheck, build and prettier pass.
-  - Every new page was walked in the pane at 1280 and most at 390, signed in as student, teacher, department manager, head registrar, system admin, academic affairs, student affairs and results officer.
+  - 319 tests pass on SQLite; 318 pass plus 1 SQLite-only skip on Postgres;
+  - `check --deploy` with prod settings reports no issues; `collectstatic` works through WhiteNoise;
+  - a real `pg_dump` backup was encrypted, decrypted and restored into a fresh database;
+  - the activation page `/activate/:token` was walked end to end.
 
-## Earlier phases (short)
-- **Phase 7:** visitor OTP and the admissions workflow; public `/apply` and `/track`.
-- **Phase 8:** reports, HR indicators and notices, frozen snapshots, print/PDF views.
-- **Phase 9:** the Astro public site (ar/en), the public catalogue API, public CORS, the build token and strict builds.
+## What Phase 11 delivered
+- **`render.yaml`:**
+  - `ecst-api` (gunicorn gthread 4×4, WhiteNoise, health check, preDeploy migrate plus `check --deploy`), `ecst-worker`, `ecst-beat`, and the `ecst-backup` weekly cron.
+  - `ecst-redis`, `ecst-db` (Postgres 16 paid).
+  - `ecst-portal` (static; `/api/*` rewritten to the API, SPA fallback, `sw.js` no-cache) and `ecst-site` (static, `LANDING_STRICT=1`).
+- **Security:**
+  - `core/net.client_ip` and DRF `NUM_PROXIES` both follow `TRUSTED_PROXIES` (0 in dev; the header is ignored).
+  - `PermissionsPolicyMiddleware`; optional Sentry (`SENTRY_DSN`, no PII).
+  - The grading queue only lists courses the user may grade (teacher, or a TA with `ta_can_grade`).
+- **Backups:** `core/backups.py` plus the `backup_database` and `restore_database` commands, using `BACKUP_ENCRYPTION_KEY` and `BACKUP_KEEP`. `BunnyStorage.listdir` was added.
+- **Bootstrap:** `create_system_admin --email --name` prints a one-time activation link. The portal page `/activate/:token` (board AuthActivate) was missing since Phase 1 and now exists.
+- **Docs:** `docs/runbook.md`; env examples updated.
 
-## What Phase 10 delivered
-- **Role homes (`/` via `routes/Home.tsx`):**
-  - Student: Today. Teacher: TeacherToday. Department manager/supervisor: `/department`. Registrars: `/registrar`.
-  - `/results-office`, `/academic`, `/affairs`, `/system` (admin), `/hr`, `/site`, `/events`.
-- **Student pages:** `/courses`, `/courses/:id`, `/lectures/:id`, `/assignments/:id` (submit), `/tasks`, `/me`, `/me/status`. Students get exactly five tabs: Today, My courses, Tasks, Notifications, Me.
-- **Teacher pages:**
-  - Editors: `/lectures/new|:id/edit` (TUS client in `lib/tus.ts`) and `/assignments/new|:id/edit`.
-  - Grading: `/grading` and `/submissions/:id`.
-  - Roster and gradebook: `/courses/:id/students`.
-- **Department manager (§4.15):** `/department` plus `/department/{courses,lectures,teachers,students,approvals,audit}`. The nav is the fixed list in `lib/nav.ts` `departmentNav()`.
-- **Registrar:** `/registrar`, `/students` (+`:id`), `/student-imports` (+`:id`), `/registrars`.
-- **System admin:** `/system`, `/system/{users,users/:id,structure,settings}`, `/audit`.
-- **New APIs:**
-  - `/gradebooks/<offering>`, `/grading-queue`, `/teachers-directory`.
-  - `users/<id>/set-active`, `terms/<id>/set-current`.
-  - Assignments `mine`/`course_code`/`course_name`; enrollments `?student_record__public_id=`; `/me` student typed; role assignments `user_name`.
-- **Behaviour changes:**
-  - The user throttle is now 240/min.
-  - Department and program names in several serializers now use `name_ar`.
-- **Accessibility and install:** skip link and `#main`, bidi isolation for Latin codes and numbers, a phone install hint (`components/InstallHint.tsx`) for students and teachers.
-- **Not done / follow-ups:**
-  - The student import does not enforce the `YY-DEPT-NNNN` university number pattern shown on the board; there is no documented rule.
-  - The site and events manager homes reuse the Phase 6 workspaces.
+## Owner actions (not codeable here)
+1. Create the Render account and apply the Blueprint. Create the Cloudflare DNS records: `api.`, `portal.`, apex and `www`.
+2. Generate and store offline `FIELD_ENCRYPTION_KEY`, `BACKUP_ENCRYPTION_KEY` and `SITE_BUILD_TOKEN`, and create the VAPID keys (runbook §2).
+3. Set up Bunny Storage, the pull zone and Stream, and Brevo sending (verify the `ecst.edu.sd` domain).
+4. Provide the logo (SVG), and the real departments, programs and terms, or replace the demo data (docs/02 §9).
+5. After the first deploy, verify `TRUSTED_PROXIES` with `/audit` (runbook §4) and run a restore drill (§5).
 
-## Next steps (Phase 11 — hardening and deploy, docs/02 §8 Phase 11, docs/05 §9)
-1. **Coverage:** add tests where the Phase 10 APIs have only happy paths (gradebook scoping for TAs without `ta_can_grade`, grading queue for TAs). Consider a coverage report in CI.
-2. **Load:** re-run `scripts/loadtest` (k6) against Postgres with the 240/min user throttle. Also load the landing build (static).
-3. **Backups:** daily Postgres backups plus a weekly encrypted `pg_dump` to Bunny, and a documented restore drill (runbook).
-4. **Deploy on Render** (no Docker — native Python and Node environments):
-   - Web (gunicorn/uvicorn), a Celery worker, Beat, Redis, and paid Postgres.
-   - Static sites for `apps/portal` (SPA rewrite to `index.html`) and `apps/landing` (`LANDING_STRICT=1`, `SITE_BUILD_TOKEN`), with the deploy hook in `SITE_REBUILD_HOOK_URL`.
-   - Cloudflare in front of the API.
-   - Write `render.yaml` and the environment variables from `.env.example` files.
-5. **Security:**
-   - Restrict `X-Forwarded-For` trust to the proxy (see the audit IP gotcha).
-   - Set HSTS and cookie flags in prod settings.
-   - Add Sentry (optional dependency), JSON logging, and an uptime check on `/api/public/health`.
-6. **Runbook docs** (`docs/runbook.md`): deploy, rollback, rotate keys, restore, incident steps. Then the final PR and merge.
+## Possible next work (only if the owner asks)
+- A university-number pattern check in the student import (board shows `YY-DEPT-NNNN`; no documented rule).
+- A teacher reply-rate metric and applicant sources (the boards show them; there is no data today).
+- Frontend tests (Vitest/Playwright) and Schemathesis contract tests from docs/05 §11.
 
 ## Decisions made (don't revisit)
 - **Roles are rows (`role`, `department`), not Django Groups.** Mention this deviation from docs/03 §10 in PRs that touch roles.
