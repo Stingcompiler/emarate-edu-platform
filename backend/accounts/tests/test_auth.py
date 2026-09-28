@@ -187,3 +187,10 @@ def test_academic_affairs_cannot_create_admins(make_user, api):
         "ta",
         "teacher",
     ]
+
+
+def test_a_non_object_body_is_a_bad_request_not_a_crash(db):
+    """Found by the contract test: the per-email throttle read .get() on a JSON list."""
+    for path in ("/api/public/password/forgot", "/api/public/registration/start"):
+        response = APIClient().post(path, [None, None], format="json")
+        assert response.status_code == 400, (path, response.status_code)

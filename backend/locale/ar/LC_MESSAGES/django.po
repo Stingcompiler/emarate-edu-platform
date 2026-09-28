@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ecst-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-28 07:29+0200\n"
+"POT-Creation-Date: 2026-09-28 07:54+0200\n"
 "Language: ar\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -283,6 +283,12 @@ msgstr "خطأ"
 
 msgid "One or more fields are invalid."
 msgstr "بعض الحقول غير صحيحة."
+
+msgid "No endpoint matches this path."
+msgstr "لا يوجد مسار مطابق."
+
+msgid "An unexpected error occurred."
+msgstr "حدث خطأ غير متوقع."
 
 msgid ""
 "This item is in use and cannot be deleted. Deactivate or archive it instead."

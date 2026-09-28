@@ -5,6 +5,7 @@ from django.core.cache import cache
 from django.db import DatabaseError, connection
 from django.http import HttpRequest, JsonResponse
 from django.utils import timezone
+from django.utils.translation import gettext
 from drf_spectacular.utils import extend_schema, inline_serializer
 from rest_framework import serializers
 from rest_framework.decorators import api_view, permission_classes, throttle_classes
@@ -76,7 +77,7 @@ def health(request: Request) -> Response:
 
 def not_found(request: HttpRequest, exception: Exception | None = None) -> JsonResponse:
     return JsonResponse(
-        problem(404, detail="No endpoint matches this path.", code="not_found"),
+        problem(404, detail=gettext("No endpoint matches this path."), code="not_found"),
         status=404,
         content_type=PROBLEM_CONTENT_TYPE,
     )
@@ -84,7 +85,7 @@ def not_found(request: HttpRequest, exception: Exception | None = None) -> JsonR
 
 def server_error(request: HttpRequest) -> JsonResponse:
     return JsonResponse(
-        problem(500, detail="An unexpected error occurred.", code="server_error"),
+        problem(500, detail=gettext("An unexpected error occurred."), code="server_error"),
         status=500,
         content_type=PROBLEM_CONTENT_TYPE,
     )
