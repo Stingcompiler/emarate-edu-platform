@@ -95,10 +95,20 @@ export function navFor(me: Me | null | undefined, unread: number): NavItem[] {
   if (hasRole(me, "department_manager", "department_supervisor")) return departmentNav(me, unread);
   const items: NavItem[] = [];
   if (hasRole(me, "system_admin")) {
-    items.push({ label: "إدارة النظام", to: "/system", icon: LayoutDashboard });
+    items.push({ label: "إدارة النظام", short: "الرئيسية", to: "/system", icon: LayoutDashboard });
     items.push({ label: "المستخدمون", to: "/system/users", icon: Users, end: false });
-    items.push({ label: "الهيكل الأكاديمي", to: "/system/structure", icon: Building2 });
-    items.push({ label: "إعدادات النظام", to: "/system/settings", icon: SlidersHorizontal });
+    items.push({
+      label: "الهيكل الأكاديمي",
+      short: "الهيكل",
+      to: "/system/structure",
+      icon: Building2,
+    });
+    items.push({
+      label: "إعدادات النظام",
+      short: "الإعدادات",
+      to: "/system/settings",
+      icon: SlidersHorizontal,
+    });
     items.push({ label: "التدقيق", to: "/audit", icon: History });
   }
   if (me?.student) {

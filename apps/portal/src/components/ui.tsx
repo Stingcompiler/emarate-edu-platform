@@ -260,3 +260,36 @@ export const STATUS_LABELS: Record<string, string> = {
   converted: "حُوّل إلى حالة",
   dismissed: "رُفض",
 };
+
+/** iOS-style on/off switch (boards SystemAdminSettings, ResultSettings). 44px touch height. */
+export function Switch({
+  checked,
+  onChange,
+  label,
+  disabled,
+}: {
+  checked: boolean;
+  onChange: (value: boolean) => void;
+  label: string;
+  disabled?: boolean;
+}) {
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={checked}
+      aria-label={label}
+      disabled={disabled}
+      onClick={() => onChange(!checked)}
+      className="inline-grid min-h-11 shrink-0 place-items-center disabled:opacity-60"
+    >
+      <span
+        className={`relative block h-7 w-12 rounded-full transition-colors ${checked ? "bg-success" : "bg-n300"}`}
+      >
+        <span
+          className={`absolute top-0.5 size-6 rounded-full bg-white shadow transition-all ${checked ? "left-[22px]" : "left-0.5"}`}
+        />
+      </span>
+    </button>
+  );
+}

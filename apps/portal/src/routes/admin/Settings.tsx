@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 
 import { PortalShell } from "../../components/PortalShell";
-import { Button, Card, Notice, SectionLabel, problemMessage } from "../../components/ui";
+import { Button, Card, Notice, SectionLabel, Switch, problemMessage } from "../../components/ui";
 import { api } from "../../lib/api";
 
 type S = {
@@ -41,17 +41,13 @@ export function AdminSettings() {
   });
   if (!f) return <PortalShell title="الإعدادات">{null}</PortalShell>;
   const toggle = (k: keyof S, label: string, hint: string) => (
-    <label className="flex items-center justify-between gap-3 px-4 py-3">
+    <div className="flex min-h-14 items-center justify-between gap-3 px-4 py-2">
       <span>
         <b className="block text-sm">{label}</b>
         <span className="text-xs text-text-muted">{hint}</span>
       </span>
-      <input
-        type="checkbox"
-        checked={!!f[k]}
-        onChange={(e) => setF({ ...f, [k]: e.target.checked })}
-      />
-    </label>
+      <Switch checked={!!f[k]} onChange={(v) => setF({ ...f, [k]: v })} label={label} />
+    </div>
   );
   const number = (k: keyof S, label: string, hint: string, min: number, max: number) => (
     <label className="flex items-center justify-between gap-3 px-4 py-3">

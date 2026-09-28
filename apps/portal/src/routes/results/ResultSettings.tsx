@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 
 import { PortalShell } from "../../components/PortalShell";
-import { Button, Card, Notice, SectionLabel } from "../../components/ui";
+import { Button, Card, Notice, SectionLabel, Switch } from "../../components/ui";
 import { api } from "../../lib/api";
 
 type Display = Schemas["DisplaySettings"];
@@ -165,18 +165,7 @@ function Toggle({
         <span className="block text-sm font-medium text-text">{label}</span>
         {hint && <span className="block text-xs text-text-muted">{hint}</span>}
       </span>
-      <button
-        type="button"
-        role="switch"
-        aria-checked={on}
-        aria-label={label}
-        onClick={() => onChange(!on)}
-        className={`relative h-7 w-12 shrink-0 rounded-full transition-colors ${on ? "bg-success" : "bg-n300"}`}
-      >
-        <span
-          className={`absolute top-0.5 size-6 rounded-full bg-white shadow transition-all ${on ? "start-[22px]" : "start-0.5"}`}
-        />
-      </button>
+      <Switch checked={on} onChange={onChange} label={label} />
     </label>
   );
 }
