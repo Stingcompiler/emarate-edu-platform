@@ -2,7 +2,8 @@ import { defineConfig, devices } from "@playwright/test";
 
 /**
  * End-to-end tests of the critical flows (docs/05 §11): sign-in, taking an exam, applying.
- * Starts its own API (:8001, fresh demo data) and portal (:5174); `pnpm dev` is untouched.
+ * Starts its own API (:8001, fresh demo data), portal (:5174) and public site (:4322);
+ * `pnpm dev` is untouched.
  * Locally it drives the installed Google Chrome; CI installs Playwright's Chromium.
  */
 const CI = !!process.env.CI;
@@ -32,6 +33,17 @@ export default defineConfig({
       command: "bash e2e/serve-api.sh",
       cwd: "..",
       url: "http://127.0.0.1:8001/api/public/health",
+      timeout: 120_000,
+      reuseExistingServer: false,
+      stdout: "ignore",
+      stderr: "ignore",
+    },
+    {
+      // The public site (Astro) reads its content from the same test API.
+      command: "pnpm --filter @ecst/landing exec astro dev --port 4322 --ignore-lock",
+      cwd: "..",
+      url: "http://localhost:4322/ar/",
+      env: { PUBLIC_API_URL: "http://127.0.0.1:8001", PUBLIC_PORTAL_URL: "http://localhost:5174" },
       timeout: 120_000,
       reuseExistingServer: false,
       stdout: "ignore",
