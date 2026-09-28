@@ -1,8 +1,11 @@
 ---
 import PageHead from "../../../components/PageHead.astro";
+import SideLinks from "../../../components/SideLinks.astro";
+import WithAside from "../../../components/WithAside.astro";
 import Base from "../../../layouts/Base.astro";
 import { type Announcement, announcements } from "../../../lib/api";
-import { LANGS, type Lang, fmtDate, t } from "../../../lib/i18n";
+import { LANGS, type Lang, fmtDate, href, t } from "../../../lib/i18n";
+import { related } from "../../../lib/related";
 
 export async function getStaticPaths() {
   const items = await announcements();
@@ -12,6 +15,15 @@ export async function getStaticPaths() {
 }
 const lang = Astro.params.lang as Lang;
 const { item: a } = Astro.props as { item: Announcement };
+const others = (await announcements())
+  .filter((o) => o.public_id !== a.public_id)
+  .slice(0, 5)
+  .map((o) => ({
+    label: o.title,
+    href: href(lang, `announcements/${o.public_id}/`),
+    meta: o.publish_at ? fmtDate(lang, o.publish_at) : undefined,
+  }));
+const more = await related(lang, ["news", "events", "calendar"]);
 const summary = a.body
   .replace(/<[^>]+>/g, " ")
   .replace(/\s+/g, " ")
@@ -31,7 +43,17 @@ const summary = a.body
     lead={a.publish_at ? fmtDate(lang, a.publish_at) : undefined}
     crumbs={[[t(lang, "announcements"), "announcements/"]]}
   />
-  <article class="mx-auto max-w-3xl px-4 py-10 lg:px-8">
-    <div class="space-y-4 text-base leading-8" set:html={a.body} />
-  </article>
+  <WithAside>
+    <article class="max-w-3xl">
+      <div class="space-y-4 text-base leading-8" set:html={a.body} />
+    </article>
+    <Fragment slot="aside">
+      <SideLinks
+        lang={lang}
+        title={lang === "ar" ? "إعلانات أخرى" : "Other announcements"}
+        links={others}
+      />
+      <SideLinks lang={lang} title={lang === "ar" ? "ذو صلة" : "Related"} links={more} />
+    </Fragment>
+  </WithAside>
 </Base>

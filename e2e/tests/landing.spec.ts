@@ -5,7 +5,10 @@ import { expect, test } from "@playwright/test";
 // broken, fits the screen, is accessible (WCAG AA) and carries its SEO basics.
 const SITE = "http://localhost:4322";
 
-test("every public page loads, fits, is accessible and has its SEO basics", async ({ page }) => {
+test("every public page loads, fits, is accessible and has its SEO basics", async ({
+  page,
+  isMobile,
+}) => {
   test.setTimeout(600_000);
   const problems: string[] = [];
   let current = "";
@@ -32,8 +35,21 @@ test("every public page loads, fits, is accessible and has its SEO basics", asyn
       canonical: document.querySelector('link[rel="canonical"]')?.getAttribute("href"),
       imagesWithoutAlt: document.querySelectorAll("img:not([alt])").length,
       links: [...document.querySelectorAll("a[href^='/']")].map((a) => a.getAttribute("href")!),
+      // Large screens: every block of <main> spans the header's container (no phone-width
+      // column floating in the middle of a wide screen — owner rule, skill responsive-page).
+      narrow: (() => {
+        const header = document.querySelector("header > div")!.getBoundingClientRect().width;
+        return [...document.querySelectorAll("main > *")]
+          .map((el) => el.getBoundingClientRect().width)
+          .filter((w) => w > 0 && w < header * 0.9)
+          .map(Math.round);
+      })(),
     }));
     if (info.overflow > 0) problems.push(`${path}: overflows sideways by ${info.overflow}px`);
+    if (!isMobile && info.narrow.length)
+      problems.push(
+        `${path}: content narrower than the header on a wide screen (${info.narrow}px)`,
+      );
     if (!info.title) problems.push(`${path}: no <title>`);
     if (!info.description) problems.push(`${path}: no meta description`);
     if (info.h1 !== 1) problems.push(`${path}: ${info.h1} h1 elements`);

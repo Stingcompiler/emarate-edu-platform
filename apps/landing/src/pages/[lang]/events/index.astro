@@ -1,9 +1,12 @@
 ---
 import EventRow from "../../../components/EventRow.astro";
 import PageHead from "../../../components/PageHead.astro";
+import SideLinks from "../../../components/SideLinks.astro";
+import WithAside from "../../../components/WithAside.astro";
 import Base from "../../../layouts/Base.astro";
 import { events, pastEvents } from "../../../lib/api";
 import { type Lang, langPaths } from "../../../lib/i18n";
+import { related } from "../../../lib/related";
 
 // docs/07 §1 `/events`: upcoming first, then the archive (ended events keep their pages).
 export const getStaticPaths = langPaths;
@@ -11,6 +14,7 @@ const lang = Astro.params.lang as Lang;
 const L = (a: string, e: string) => (lang === "ar" ? a : e);
 const [upcoming, past] = await Promise.all([events(), pastEvents()]);
 upcoming.sort((a, b) => a.starts_at.localeCompare(b.starts_at));
+const more = await related(lang, ["calendar", "news", "announcements"]);
 ---
 
 <Base lang={lang} title={L("الفعاليات", "Events")} path="events/">
@@ -19,10 +23,10 @@ upcoming.sort((a, b) => a.starts_at.localeCompare(b.starts_at));
     title={L("الفعاليات", "Events")}
     crumbs={[[L("الفعاليات", "Events"), "events/"]]}
   />
-  <div class="mx-auto max-w-3xl space-y-10 px-4 py-10 lg:px-8">
+  <WithAside>
     <section>
       <h2 class="font-display text-xl font-bold">{L("القادمة", "Upcoming")}</h2>
-      <ul class="mt-4 space-y-3">
+      <ul class="mt-4 grid gap-3 xl:grid-cols-2">
         {upcoming.map((e) => (
           <EventRow lang={lang} event={e} />
         ))}
@@ -34,14 +38,21 @@ upcoming.sort((a, b) => a.starts_at.localeCompare(b.starts_at));
       </ul>
     </section>
     {past.length > 0 && (
-      <section>
+      <section class="mt-10">
         <h2 class="font-display text-xl font-bold">{L("فعاليات سابقة", "Past events")}</h2>
-        <ul class="mt-4 space-y-3">
+        <ul class="mt-4 grid gap-3 xl:grid-cols-2">
           {past.map((e) => (
             <EventRow lang={lang} event={e} />
           ))}
         </ul>
       </section>
     )}
-  </div>
+    <Fragment slot="aside">
+      <div class="rounded-2xl bg-bg-subtle p-4">
+        <p class="font-display text-3xl font-bold text-primary">{upcoming.length}</p>
+        <p class="text-sm text-text-muted">{L("فعاليات قادمة", "upcoming events")}</p>
+      </div>
+      <SideLinks lang={lang} title={L("ذو صلة", "Related")} links={more} />
+    </Fragment>
+  </WithAside>
 </Base>
