@@ -293,3 +293,23 @@ def test_official_pages_start_as_drafts_and_go_live_at_their_path(api, site):
     for slug in ("a/b/c", "/lead", "a b"):
         response = api(site).post("/api/v1/content/pages", {**bad, "slug": slug}, format="json")
         assert response.status_code == 400, slug
+
+
+@pytest.mark.django_db
+def test_publishing_from_the_editor_dates_the_news(api, site):
+    """The site shows and sorts news by publish_at; saving as published must set it."""
+    created = api(site).post(
+        "/api/v1/content/news",
+        {"slug": "lab", "title": "افتتاح المعمل", "body": "<p>نص</p>", "status": "published"},
+        format="json",
+    )
+    assert created.status_code == 201 and created.data["publish_at"]
+    draft = api(site).post(
+        "/api/v1/content/news",
+        {"slug": "later", "title": "لاحقًا", "body": "<p>x</p>"},
+        format="json",
+    )
+    assert draft.data["publish_at"] is None  # drafts stay undated
+    url = f"/api/v1/content/news/{draft.data['public_id']}"
+    assert api(site).patch(url, {"status": "published"}, format="json").data["publish_at"]
+    assert [n["slug"] for n in api().get("/api/public/news").data] == ["later", "lab"]

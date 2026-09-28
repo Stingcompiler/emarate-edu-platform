@@ -1,8 +1,21 @@
 ---
+import Faq from "../../../components/Faq.astro";
 import PageHead from "../../../components/PageHead.astro";
 import Base from "../../../layouts/Base.astro";
 import { PORTAL, type ProgramDetail, get, programs } from "../../../lib/api";
-import { arrow, fmtDate, href, type Lang, LANGS, num, pick, t } from "../../../lib/i18n";
+import {
+  arrow,
+  degree,
+  faqLd,
+  fmtDate,
+  href,
+  type Lang,
+  LANGS,
+  num,
+  pick,
+  t,
+  years,
+} from "../../../lib/i18n";
 
 export async function getStaticPaths() {
   const all = await programs();
@@ -20,9 +33,66 @@ const { program: p } = Astro.props as { program: ProgramDetail };
 const name = pick(lang, p.name_ar, p.name_en);
 const description = pick(lang, p.description_ar, p.description_en);
 const open = !!p.intake?.accepting;
+const L = (ar: string, en: string) => (lang === "ar" ? ar : en);
+const dept = pick(lang, p.department_name, p.department_name_en);
+const kind = degree(lang, p.degree, p.degree_label);
+const closes = open ? fmtDate(lang, p.intake!.closes_at) : "";
+// Search results need a description of their own even before the department writes one:
+// built only from the programme's data, never invented.
+const summary =
+  description ||
+  L(
+    `${name} — ${name.includes(kind) ? "" : `${kind}، `}${years(lang, p.duration_terms)}، قسم ${dept}.${open ? ` التقديم مفتوح حتى ${closes}.` : ""}`,
+    `${name} — ${name.includes(kind) ? "" : `${kind}, `}${years(lang, p.duration_terms)}, ${dept}.${open ? ` Applications open until ${closes}.` : ""}`,
+  );
+// Questions applicants ask, answered from the programme's own data (docs/07: FAQ + FAQPage).
+const faq: [string, string][] = [
+  [
+    L("ما مدة الدراسة؟", "How long is the programme?"),
+    L(
+      `${years(lang, p.duration_terms)} في ${num(lang, p.duration_terms)} فصول دراسية، ودرجته ${kind}.`,
+      `${years(lang, p.duration_terms)} over ${p.duration_terms} terms, awarding a ${kind}.`,
+    ),
+  ],
+  ...(p.requirements_ar
+    ? ([[L("ما شروط القبول؟", "What are the requirements?"), p.requirements_ar]] as [
+        string,
+        string,
+      ][])
+    : []),
+  ...(p.required_documents.length
+    ? ([
+        [
+          L("ما المستندات المطلوبة؟", "Which documents do I need?"),
+          p.required_documents
+            .map((d) => `${d.label}${d.required ? "" : L(" (اختياري)", " (optional)")}`)
+            .join(L("، ", ", ")),
+        ],
+      ] as [string, string][])
+    : []),
+  [
+    L("متى يُغلق التقديم؟", "When do applications close?"),
+    open
+      ? L(
+          `التقديم مفتوح حتى ${closes}${p.intake!.seats_left !== null ? `، والمقاعد المتبقية ${num(lang, p.intake!.seats_left)}` : ""}.`,
+          `Applications are open until ${closes}${p.intake!.seats_left !== null ? `, with ${p.intake!.seats_left} seats left` : ""}.`,
+        )
+      : L(
+          "التقديم مغلق حاليًا لهذا البرنامج. تُعلن الدورة القادمة في صفحة القبول.",
+          "Applications are closed for now; the next cycle is announced on the admissions page.",
+        ),
+  ],
+  [
+    L("كيف أقدّم وأتابع طلبي؟", "How do I apply and follow up?"),
+    L(
+      "إلكترونيًا بالكامل من «قدّم لهذا البرنامج»: تتحقق من بريدك، تكمل النموذج وترفع المستندات، ثم تتابع طلبك برقمه المرجعي من «تابع طلبك» — بلا حساب أو زيارة.",
+      "Entirely online from «Apply to this programme»: verify your email, fill in the form and upload the documents, then follow your application with its reference number — no account or visit.",
+    ),
+  ],
+];
 // Opens the application with this programme listed first (portal /apply?program=).
 const applyUrl = `${PORTAL}/apply?program=${encodeURIComponent(p.code)}`;
-const jsonLd = {
+const programLd = {
   "@context": "https://schema.org",
   "@type": "EducationalOccupationalProgram",
   name: p.name_ar,
@@ -37,13 +107,14 @@ const jsonLd = {
   },
   ...(open ? { applicationDeadline: p.intake!.closes_at.slice(0, 10) } : {}),
 };
+const jsonLd = [programLd, faqLd(faq)];
 ---
 
 <Base
   lang={lang}
   title={name}
   path={`programs/${p.code}/`}
-  description={description || undefined}
+  description={summary}
   jsonLd={jsonLd}
   bottomBar={open}
 >
@@ -62,10 +133,13 @@ const jsonLd = {
           {lang === "ar"
             ? `التقديم مفتوح حتى ${fmtDate(lang, p.intake!.closes_at)}`
             : `Applications open until ${fmtDate(lang, p.intake!.closes_at)}`}
-          {p.intake!.seats_left !== null &&
-            (lang === "ar"
-              ? ` · المقاعد المتبقية: ${num(lang, p.intake!.seats_left)}`
-              : ` · ${p.intake!.seats_left} seats left`)}
+          {p.intake!.seats_left !== null && (
+            <span class="whitespace-nowrap">
+              {lang === "ar"
+                ? ` · المقاعد المتبقية: ${num(lang, p.intake!.seats_left)}`
+                : ` · ${p.intake!.seats_left} seats left`}
+            </span>
+          )}
         </span>
         <a
           href={applyUrl}
@@ -112,6 +186,9 @@ const jsonLd = {
           </li>
         )}
       </ol>
+      <div class="mt-10">
+        <Faq title={L("أسئلة شائعة", "Common questions")} items={faq} />
+      </div>
     </div>
     <aside class="space-y-4">
       {p.requirements_ar && (

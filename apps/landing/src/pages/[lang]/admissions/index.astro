@@ -1,10 +1,12 @@
 ---
+import Faq from "../../../components/Faq.astro";
 import PageHead from "../../../components/PageHead.astro";
 import Base from "../../../layouts/Base.astro";
 import { PORTAL, intakes, programs } from "../../../lib/api";
 import {
   N,
   arrow,
+  faqLd,
   count,
   fmtDate,
   href,
@@ -109,15 +111,7 @@ const faq = [
     ),
   ],
 ];
-const jsonLd = {
-  "@context": "https://schema.org",
-  "@type": "FAQPage",
-  mainEntity: faq.map(([q, a]) => ({
-    "@type": "Question",
-    name: q,
-    acceptedAnswer: { "@type": "Answer", text: a },
-  })),
-};
+const jsonLd = faqLd(faq);
 const title = L("القبول", "Admission");
 const lead = L(
   "أربع خطوات إلكترونية بالكامل، بلا حساب أو زيارة — تتابع طلبك ببريدك.",
@@ -255,25 +249,7 @@ const lead = L(
       )}
     </div>
 
-    <section>
-      <h2 class="font-display text-xl font-bold">{L("أسئلة شائعة", "Common questions")}</h2>
-      <div class="mt-4 divide-y divide-border-soft rounded-2xl border border-border-soft bg-surface">
-        {faq.map(([q, a]) => (
-          <details class="group px-4 py-3">
-            <summary class="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 font-semibold">
-              {q}
-              <span
-                class="text-text-muted transition-transform group-open:rotate-45"
-                aria-hidden="true"
-              >
-                +
-              </span>
-            </summary>
-            <p class="pb-2 text-sm leading-6 text-text-muted">{a}</p>
-          </details>
-        ))}
-      </div>
-    </section>
+    <Faq title={L("أسئلة شائعة", "Common questions")} items={faq} />
 
     <div class="flex flex-wrap gap-3">
       {accepting.length > 0 && (

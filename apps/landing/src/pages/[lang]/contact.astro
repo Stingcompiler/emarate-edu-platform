@@ -57,11 +57,29 @@ const answers = await related(lang, ["admissions", "fees", "programs", "calendar
       <div class="grid gap-4 sm:grid-cols-2">
         <label class="block text-sm font-semibold">
           {L("الاسم الكامل", "Full name")}
-          <input name="name" required maxlength="200" autocomplete="name" class="field" />
+          <input
+            name="name"
+            required
+            maxlength="200"
+            autocomplete="name"
+            placeholder={L("الاسم كما في الشهادة", "Your full name")}
+            aria-describedby="e-name"
+            class="field"
+          />
+          <span id="e-name" class="field-error hidden"></span>
         </label>
         <label class="block text-sm font-semibold">
           {L("البريد الإلكتروني", "Email")}
-          <input name="email" type="email" autocomplete="email" dir="ltr" class="field" />
+          <input
+            name="email"
+            type="email"
+            autocomplete="email"
+            dir="ltr"
+            placeholder="name@example.com"
+            aria-describedby="e-email"
+            class="field"
+          />
+          <span id="e-email" class="field-error hidden"></span>
         </label>
         <label class="block text-sm font-semibold">
           {L("الهاتف (واتساب إن أمكن)", "Phone (WhatsApp if possible)")}
@@ -71,8 +89,10 @@ const answers = await related(lang, ["admissions", "fees", "programs", "calendar
             autocomplete="tel"
             dir="ltr"
             placeholder="+249…"
+            aria-describedby="e-phone"
             class="field"
           />
+          <span id="e-phone" class="field-error hidden"></span>
         </label>
         <label class="block text-sm font-semibold">
           {L("القسم", "Department")}
@@ -86,11 +106,34 @@ const answers = await related(lang, ["admissions", "fees", "programs", "calendar
       </div>
       <label class="block text-sm font-semibold">
         {L("عنوان الاستفسار", "Subject")}
-        <input name="subject" required maxlength="200" class="field" />
+        <input
+          name="subject"
+          required
+          maxlength="200"
+          placeholder={L(
+            "مثال: شروط القبول في تقنية المعلومات",
+            "e.g. Admission requirements for IT",
+          )}
+          aria-describedby="e-subject"
+          class="field"
+        />
+        <span id="e-subject" class="field-error hidden"></span>
       </label>
       <label class="block text-sm font-semibold">
         {L("رسالتك", "Message")}
-        <textarea name="message" required maxlength="4000" rows="6" class="field"></textarea>
+        <textarea
+          name="message"
+          required
+          maxlength="4000"
+          rows="6"
+          placeholder={L(
+            "اكتب سؤالك بالتفصيل — كلما كان أوضح كان الرد أسرع.",
+            "Write your question in detail — the clearer it is, the faster the reply.",
+          )}
+          aria-describedby="e-message"
+          class="field"
+        ></textarea>
+        <span id="e-message" class="field-error hidden"></span>
       </label>
       <!-- Bots fill hidden fields; people never see this one. -->
       <label class="hidden" aria-hidden="true">
@@ -104,9 +147,9 @@ const answers = await related(lang, ["admissions", "fees", "programs", "calendar
       ></p>
       <button
         type="submit"
-        class="rounded-lg bg-primary px-6 py-3 text-sm font-semibold text-white hover:bg-primary-hover disabled:opacity-60"
+        class="min-h-12 w-full rounded-lg bg-primary px-6 py-3 text-sm font-semibold text-white hover:bg-primary-hover disabled:opacity-60 sm:w-auto"
       >
-        {L("إرسال", "Send")}
+        {L("إرسال الاستفسار", "Send your question")}
       </button>
       <div id="contact-done" class="hidden rounded-2xl bg-success-soft p-5 text-success-strong">
         <p class="font-bold">{L("وصل استفسارك.", "We received your message.")}</p>
@@ -163,16 +206,38 @@ const answers = await related(lang, ["admissions", "fees", "programs", "calendar
         </a>
       )}
       {s.address && (
-        <p class="rounded-2xl bg-bg-subtle p-4">
+        <div class="rounded-2xl bg-bg-subtle p-4">
           <span class="text-text-muted">{L("العنوان", "Address")}</span>
           <b class="block">{s.address}</b>
-        </p>
+          {/* A link, not an embedded map: light, private, and no coordinates to invent. */}
+          <a
+            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(s.address)}`}
+            rel="noopener"
+            target="_blank"
+            class="mt-2 inline-block font-semibold text-primary"
+          >
+            {L("افتح في الخرائط", "Open in Maps")}
+          </a>
+        </div>
       )}
     </aside>
   </div>
 </Base>
 
 <style>
+  .field-error {
+    margin-top: 0.25rem;
+    display: block;
+    font-size: 0.8125rem;
+    font-weight: 400;
+    color: var(--color-danger-strong);
+  }
+  .field-error.hidden {
+    display: none;
+  }
+  .field[aria-invalid="true"] {
+    border-color: var(--color-danger);
+  }
   .field {
     margin-top: 0.375rem;
     display: block;
@@ -190,22 +255,62 @@ const answers = await related(lang, ["admissions", "fees", "programs", "calendar
   const form = document.getElementById("contact") as HTMLFormElement;
   const error = document.getElementById("contact-error")!;
   const ar = form.dataset.lang === "ar";
+  const FIELDS = ["name", "email", "phone", "subject", "message"];
+
+  /** Marks each field with its problem; focuses the first. True when there is any. */
+  function showErrors(problems: Record<string, string>): boolean {
+    let first: HTMLElement | null = null;
+    for (const name of FIELDS) {
+      const input = form.elements.namedItem(name) as HTMLElement | null;
+      const note = document.getElementById(`e-${name}`);
+      if (!input || !note) continue;
+      if (problems[name]) {
+        note.textContent = problems[name];
+        note.classList.remove("hidden");
+        input.setAttribute("aria-invalid", "true");
+        first ??= input;
+      } else {
+        note.classList.add("hidden");
+        input.removeAttribute("aria-invalid");
+      }
+    }
+    first?.focus();
+    return first !== null;
+  }
+  const flatten = (errors: Record<string, string[] | string>) =>
+    Object.fromEntries(
+      Object.entries(errors).map(([k, v]) => [k, Array.isArray(v) ? v.join(" ") : String(v)]),
+    );
+  // A field's note clears as soon as it is edited.
+  form.addEventListener("input", (event) => {
+    const input = event.target as HTMLElement & { name?: string };
+    if (!input.name) return;
+    input.removeAttribute("aria-invalid");
+    document.getElementById(`e-${input.name}`)?.classList.add("hidden");
+    if (input.name === "phone") {
+      // A phone also satisfies «email or phone».
+      (form.elements.namedItem("email") as HTMLElement).removeAttribute("aria-invalid");
+      document.getElementById("e-email")?.classList.add("hidden");
+    }
+  });
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
     error.classList.add("hidden");
     const data = Object.fromEntries(new FormData(form)) as Record<string, string>;
-    if (
-      !data.name?.trim() ||
-      !data.subject?.trim() ||
-      !data.message?.trim() ||
-      (!data.email && !data.phone)
-    ) {
-      error.textContent = ar
-        ? "أكمل الاسم والعنوان والرسالة، وأعطنا بريدًا أو هاتفًا للرد."
-        : "Fill in name, subject and message, and give an email or phone for the reply.";
-      error.classList.remove("hidden");
-      return;
-    }
+    // Each field says what is missing, next to it (UX review #9).
+    const problems: Record<string, string> = {};
+    const email = form.elements.namedItem("email") as HTMLInputElement;
+    if (!data.name?.trim()) problems.name = ar ? "اكتب اسمك." : "Enter your name.";
+    if (data.email && !email.checkValidity())
+      problems.email = ar ? "البريد غير صحيح — مثل name@example.com" : "Not a valid email.";
+    else if (!data.email && !data.phone?.trim())
+      problems.email = ar
+        ? "أعطنا بريدًا أو هاتفًا لنرد عليك."
+        : "Give an email or a phone for the reply.";
+    if (!data.subject?.trim())
+      problems.subject = ar ? "اكتب عنوانًا قصيرًا لسؤالك." : "Add a short subject.";
+    if (!data.message?.trim()) problems.message = ar ? "اكتب رسالتك." : "Write your message.";
+    if (showErrors(problems)) return;
     const button = form.querySelector("button[type=submit]") as HTMLButtonElement;
     button.disabled = true;
     try {
@@ -218,6 +323,10 @@ const answers = await related(lang, ["admissions", "fees", "programs", "calendar
         }),
       });
       const body = await response.json().catch(() => ({}));
+      if (!response.ok && body.errors && showErrors(flatten(body.errors))) {
+        button.disabled = false;
+        return;
+      }
       if (!response.ok)
         throw new Error(
           body.detail ||

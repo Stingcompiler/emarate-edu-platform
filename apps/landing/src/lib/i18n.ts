@@ -111,3 +111,13 @@ export const degree = (lang: Lang, key: string, label: string) =>
   lang === "en" ? (DEGREE_EN[key] ?? label) : label;
 /** "Forward" arrow for the reading direction. */
 export const arrow = (lang: Lang) => (lang === "ar" ? "←" : "→");
+/** schema.org FAQPage for the same questions a page shows (rich results). */
+export const faqLd = (items: [string, string][]) => ({
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: items.map(([q, a]) => ({
+    "@type": "Question",
+    name: q,
+    acceptedAnswer: { "@type": "Answer", text: a },
+  })),
+});
