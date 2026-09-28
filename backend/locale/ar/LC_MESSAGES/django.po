@@ -414,7 +414,7 @@ msgid "The video is not ready yet."
 msgstr "الفيديو غير جاهز بعد."
 
 msgid "Invalid phone number."
-msgstr "رقم هاتف غير صالح."
+msgstr "رقم الهاتف غير صحيح — اكتبه مثل 0912345678 أو +249912345678."
 
 msgid "Give an email or a phone number."
 msgstr "أدخل بريدًا إلكترونيًا أو رقم هاتف."

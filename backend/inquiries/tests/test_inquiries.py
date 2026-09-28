@@ -113,3 +113,41 @@ def test_assign_only_to_handlers(api, site, make_user, django_capture_on_commit_
         api(site).post(url, {"user": str(colleague.public_id)}).data["assigned_to_name"]
         == colleague.full_name_ar
     )
+
+
+def test_checking_a_reference_does_not_use_up_the_contact_form(client, settings, db):
+    """Status checks have their own limit: a visitor who checks five times can still write."""
+    from django.core.cache import cache
+    from rest_framework.settings import api_settings
+
+    from inquiries.views import ContactStatusThrottle, ContactThrottle
+
+    settings.REST_FRAMEWORK = {
+        **settings.REST_FRAMEWORK,
+        "DEFAULT_THROTTLE_RATES": {
+            **settings.REST_FRAMEWORK["DEFAULT_THROTTLE_RATES"],
+            "contact": "1/hour",
+            "contact_status": "3/hour",
+        },
+    }
+    api_settings.reload()
+    for throttle in (ContactThrottle, ContactStatusThrottle):
+        throttle.THROTTLE_RATES = api_settings.DEFAULT_THROTTLE_RATES
+    cache.clear()
+    try:
+        checks = [client.get("/api/public/inquiries/INQ-26-000000").status_code for _ in range(4)]
+        assert checks == [404, 404, 404, 429]
+        body = {
+            "name": "زائر",
+            "phone": "+249912345678",
+            "type": "general",
+            "subject": "سؤال",
+            "message": "نص",
+        }
+        assert client.post("/api/public/inquiries", body, "application/json").status_code == 201
+        assert client.post("/api/public/inquiries", body, "application/json").status_code == 429
+    finally:
+        cache.clear()
+        for throttle in (ContactThrottle, ContactStatusThrottle):
+            del throttle.THROTTLE_RATES
+        api_settings.reload()
