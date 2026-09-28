@@ -25,6 +25,7 @@ EVERYONE = frozenset(Role)
 STRUCTURE = frozenset(
     {
         R.SYSTEM_ADMIN,
+        R.HR,
         R.HEAD_REGISTRAR,
         R.REGISTRAR,
         R.RESULTS_OFFICER,

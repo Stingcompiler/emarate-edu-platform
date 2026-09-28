@@ -2,7 +2,10 @@ import {
   Award,
   Bell,
   CalendarDays,
+  BarChart3,
   CalendarRange,
+  GraduationCap,
+  UserCheck,
   FileText,
   LayoutTemplate,
   ClipboardCheck,
@@ -95,6 +98,17 @@ export function navFor(me: Me | null | undefined, unread: number): NavItem[] {
   if (can(me, "results.settings")) {
     items.push({ label: "إعدادات العرض", to: "/results/settings", icon: SlidersHorizontal });
   }
+  if (can(me, "reports.department"))
+    items.push({ label: "التقارير", to: "/reports", icon: BarChart3 });
+  if (can(me, "hr.view")) items.push({ label: "الموارد البشرية", to: "/hr", icon: UserCheck });
+  if (can(me, "reports.teachers"))
+    items.push({ label: "مؤشرات الأساتذة", to: "/hr/teachers", icon: UserCheck, end: false });
+  if (can(me, "reports.admissions"))
+    items.push({ label: "تقارير القبول", to: "/reports/admissions", icon: BarChart3 });
+  if (can(me, "reports.affairs"))
+    items.push({ label: "تقارير شؤون الطلاب", to: "/reports/affairs", icon: BarChart3 });
+  if (can(me, "results.view"))
+    items.push({ label: "السجل الأكاديمي", to: "/transcripts", icon: GraduationCap });
   if (can(me, "cases.view"))
     items.push({ label: "الحالات", to: "/cases", icon: FolderLock, end: false });
   if (can(me, "regulations.manage"))

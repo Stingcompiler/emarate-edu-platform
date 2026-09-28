@@ -57,6 +57,7 @@ CAPABILITIES: dict[str, frozenset[Role]] = {
     "structure.view": frozenset(
         {
             R.SYSTEM_ADMIN,
+            R.HR,  # term and department filters of the teacher reports
             R.HEAD_REGISTRAR,
             R.REGISTRAR,
             R.RESULTS_OFFICER,

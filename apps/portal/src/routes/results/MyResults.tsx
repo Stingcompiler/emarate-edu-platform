@@ -3,6 +3,8 @@ import { useQuery } from "@tanstack/react-query";
 import { Award } from "lucide-react";
 import { useState } from "react";
 
+import { Link } from "react-router";
+
 import { PortalShell } from "../../components/PortalShell";
 import {
   Card,
@@ -43,6 +45,13 @@ export function MyResults() {
         student
           ? `${student.university_number} · ${student.program} · المستوى ${student.level}`
           : undefined
+      }
+      titleAction={
+        term ? (
+          <Link to="/print/my-results" className="text-sm font-semibold text-primary">
+            طباعة / PDF
+          </Link>
+        ) : undefined
       }
     >
       {results.isPending ? null : !term ? (

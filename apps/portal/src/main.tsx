@@ -44,6 +44,18 @@ import { Corrections } from "./routes/results/Corrections";
 import { ResultImportDetail } from "./routes/results/ImportDetail";
 import { ResultImports } from "./routes/results/Imports";
 import { MyResults } from "./routes/results/MyResults";
+import { HRHome } from "./routes/hr/Home";
+import { MyNotice } from "./routes/hr/MyNotice";
+import { NoticeNew } from "./routes/hr/NoticeNew";
+import { HRReport } from "./routes/hr/Report";
+import { TeacherProfile } from "./routes/hr/TeacherProfile";
+import { Teachers } from "./routes/hr/Teachers";
+import { PrintReport } from "./routes/print/PrintReport";
+import { PrintMyResults, PrintTranscript } from "./routes/print/PrintTranscript";
+import { AdmissionsReport } from "./routes/reports/AdmissionsReport";
+import { AffairsReport } from "./routes/reports/AffairsReport";
+import { DepartmentReport } from "./routes/reports/DepartmentReport";
+import { TranscriptLookup } from "./routes/reports/TranscriptLookup";
 import { ResultSettings } from "./routes/results/ResultSettings";
 import { ResultSearch } from "./routes/results/Search";
 import { Compose } from "./routes/Compose";
@@ -111,6 +123,19 @@ const router = createBrowserRouter([
   { path: "/applications/:id", element: signedIn(<ApplicationDetail />) },
   { path: "/admissions/cycles", element: signedIn(<Cycles />) },
   { path: "/admissions/forms", element: signedIn(<FormBuilder />) },
+  { path: "/reports", element: signedIn(<DepartmentReport />) },
+  { path: "/reports/admissions", element: signedIn(<AdmissionsReport />) },
+  { path: "/reports/affairs", element: signedIn(<AffairsReport />) },
+  { path: "/hr", element: signedIn(<HRHome />) },
+  { path: "/hr/teachers", element: signedIn(<Teachers />) },
+  { path: "/hr/teachers/:id", element: signedIn(<TeacherProfile />) },
+  { path: "/hr/notices/new", element: signedIn(<NoticeNew />) },
+  { path: "/hr/report", element: signedIn(<HRReport />) },
+  { path: "/hr-notices/:id", element: signedIn(<MyNotice />) },
+  { path: "/transcripts", element: signedIn(<TranscriptLookup />) },
+  { path: "/print/report/:id", element: signedIn(<PrintReport />) },
+  { path: "/print/transcript/:number", element: signedIn(<PrintTranscript />) },
+  { path: "/print/my-results", element: signedIn(<PrintMyResults />) },
   { path: "/cases", element: signedIn(<Cases />) },
   { path: "/cases/new", element: signedIn(<CaseNew />) },
   { path: "/cases/:id", element: signedIn(<CaseDetail />) },
