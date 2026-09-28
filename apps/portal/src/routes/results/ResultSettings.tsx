@@ -123,6 +123,7 @@ export function ResultSettings() {
           <SectionLabel>نص التنويه أسفل النتائج</SectionLabel>
           <Card className="p-4">
             <textarea
+              aria-label="نص التنويه أسفل النتائج"
               value={notice}
               onChange={(e) => setNotice(e.target.value)}
               className="block min-h-24 w-full resize-y bg-transparent text-sm leading-relaxed text-text outline-none"

@@ -450,6 +450,8 @@ function QuestionText({ text }: { text: string }) {
           <pre
             key={i}
             dir="ltr"
+            tabIndex={0}
+            aria-label="كود"
             className="overflow-x-auto rounded-xl bg-navy-800 p-4 font-mono text-sm leading-relaxed text-navy-50"
           >
             {part.value}

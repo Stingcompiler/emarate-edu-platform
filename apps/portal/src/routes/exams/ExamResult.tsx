@@ -110,6 +110,8 @@ export function ExamResult() {
                           <pre
                             key={i}
                             dir="ltr"
+                            tabIndex={0}
+                            aria-label="كود"
                             className="mt-2 overflow-x-auto rounded-lg bg-navy-800 p-3 font-mono text-xs leading-relaxed text-navy-50"
                           >
                             {part.value}

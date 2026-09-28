@@ -4,7 +4,14 @@ import { useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
 
 import { PortalShell } from "../../components/PortalShell";
-import { Button, Card, Notice, StatusBadge, problemMessage } from "../../components/ui";
+import {
+  Button,
+  Card,
+  Notice,
+  StatusBadge,
+  problemMessage,
+  ScrollRegion,
+} from "../../components/ui";
 import { api } from "../../lib/api";
 import { when, count, N } from "../../lib/format";
 import { num } from "../../lib/reports";
@@ -214,58 +221,71 @@ function ImportDetailBody({ id }: { id: string }) {
               <Notice>{problemMessage(act.error)}</Notice>
             </div>
           )}
-          <Card className="mt-4 overflow-x-auto">
-            <table className="w-full min-w-[640px] text-sm">
-              <thead className="bg-surface-alt text-xs text-text-muted">
-                <tr>
-                  {["#", "الرقم الجامعي", "الاسم", "البرنامج", "المستوى", "البريد", "الإجراء"].map(
-                    (h) => (
+          <Card className="mt-4">
+            <ScrollRegion label="صفوف الملف">
+              <table className="w-full min-w-[640px] text-sm">
+                <thead className="bg-surface-alt text-xs text-text-muted">
+                  <tr>
+                    {[
+                      "#",
+                      "الرقم الجامعي",
+                      "الاسم",
+                      "البرنامج",
+                      "المستوى",
+                      "البريد",
+                      "الإجراء",
+                    ].map((h) => (
                       <th key={h} className="px-3 py-2 text-start font-normal">
                         {h}
                       </th>
-                    ),
-                  )}
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border-soft">
-                {shown.map((r) => {
-                  const n = (r.normalized ?? {}) as Record<string, string | number>;
-                  const errors = (r.errors ?? []) as string[];
-                  const changes = (r.changes ?? {}) as Record<string, [unknown, unknown]>;
-                  return (
-                    <tr key={r.row_no} className={r.action === "error" ? "bg-danger-soft/30" : ""}>
-                      <td className="px-3 py-2 text-text-muted">{num(r.row_no)}</td>
-                      <td className="px-3 py-2">
-                        <bdi className="font-mono text-xs">{String(n.university_number ?? "")}</bdi>
-                        {errors.length > 0 && (
-                          <span className="block text-xs text-danger-strong">
-                            {errors.join(" · ")}
-                          </span>
-                        )}
-                      </td>
-                      <td className="px-3 py-2">{String(n.full_name_ar ?? "")}</td>
-                      <td className="px-3 py-2">
-                        {programName(n.program_id) || String(n.program_code ?? "")}
-                      </td>
-                      <td className="px-3 py-2">
-                        {String(n.level ?? "")}
-                        {changes.level ? (
-                          <span className="block text-xs text-text-muted">
-                            كان: {String(changes.level[0])}
-                          </span>
-                        ) : null}
-                      </td>
-                      <td className="px-3 py-2">
-                        <bdi className="text-xs">{String(n.email ?? "")}</bdi>
-                      </td>
-                      <td className={`px-3 py-2 font-semibold ${ACTION[r.action]?.[1] ?? ""}`}>
-                        {ACTION[r.action]?.[0] ?? r.action}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border-soft">
+                  {shown.map((r) => {
+                    const n = (r.normalized ?? {}) as Record<string, string | number>;
+                    const errors = (r.errors ?? []) as string[];
+                    const changes = (r.changes ?? {}) as Record<string, [unknown, unknown]>;
+                    return (
+                      <tr
+                        key={r.row_no}
+                        className={r.action === "error" ? "bg-danger-soft/30" : ""}
+                      >
+                        <td className="px-3 py-2 text-text-muted">{num(r.row_no)}</td>
+                        <td className="px-3 py-2">
+                          <bdi className="font-mono text-xs">
+                            {String(n.university_number ?? "")}
+                          </bdi>
+                          {errors.length > 0 && (
+                            <span className="block text-xs text-danger-strong">
+                              {errors.join(" · ")}
+                            </span>
+                          )}
+                        </td>
+                        <td className="px-3 py-2">{String(n.full_name_ar ?? "")}</td>
+                        <td className="px-3 py-2">
+                          {programName(n.program_id) || String(n.program_code ?? "")}
+                        </td>
+                        <td className="px-3 py-2">
+                          {String(n.level ?? "")}
+                          {changes.level ? (
+                            <span className="block text-xs text-text-muted">
+                              كان: {String(changes.level[0])}
+                            </span>
+                          ) : null}
+                        </td>
+                        <td className="px-3 py-2">
+                          <bdi className="text-xs">{String(n.email ?? "")}</bdi>
+                        </td>
+                        <td className={`px-3 py-2 font-semibold ${ACTION[r.action]?.[1] ?? ""}`}>
+                          {ACTION[r.action]?.[0] ?? r.action}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </ScrollRegion>
           </Card>
         </>
       )}

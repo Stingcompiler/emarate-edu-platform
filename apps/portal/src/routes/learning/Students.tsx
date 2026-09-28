@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Link, useParams } from "react-router";
 
 import { PortalShell } from "../../components/PortalShell";
-import { Button, Card, Chip } from "../../components/ui";
+import { Button, Card, Chip, ScrollRegion } from "../../components/ui";
 import { api } from "../../lib/api";
 import { useMyCourses } from "../../lib/learning";
 import { downloadCsv, initials } from "../../lib/reports";
@@ -127,56 +127,58 @@ export function Students() {
           </Card>
         </>
       ) : (
-        <Card className="mt-3 overflow-x-auto">
-          <table className="w-full min-w-[560px] text-sm">
-            <thead className="bg-surface-alt text-xs text-text-muted">
-              <tr>
-                <th className="sticky start-0 bg-surface-alt px-3 py-2 text-start font-normal">
-                  الطالب
-                </th>
-                {b?.assignments.map((a) => (
-                  <th key={a.public_id} className="px-3 py-2 text-start font-normal">
-                    {a.title} /{Number(a.max_grade).toLocaleString("ar")}
+        <Card className="mt-3">
+          <ScrollRegion label="درجات الطلاب">
+            <table className="w-full min-w-[560px] text-sm">
+              <thead className="bg-surface-alt text-xs text-text-muted">
+                <tr>
+                  <th className="sticky start-0 bg-surface-alt px-3 py-2 text-start font-normal">
+                    الطالب
                   </th>
-                ))}
-                <th className="px-3 py-2 text-start font-normal">
-                  المجموع /{max.toLocaleString("ar")}
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border-soft">
-              {b?.students.map((s) => (
-                <tr key={s.public_id}>
-                  <td className="sticky start-0 bg-surface px-3 py-2 font-semibold">
-                    {s.full_name_ar}
-                  </td>
-                  {b.assignments.map((a) => {
-                    const c = s.cells[a.public_id];
-                    return (
-                      <td
-                        key={a.public_id}
-                        className={`px-3 py-2 ${c?.late ? "text-warning-strong" : ""}`}
-                      >
-                        {c ? (
-                          <Link to={`/submissions/${c.submission}`} className="hover:underline">
-                            {c.score != null ? Number(c.score).toLocaleString("ar") : "✓"}
-                            {c.status === "suggested" ? "*" : ""}
-                          </Link>
-                        ) : (
-                          "—"
-                        )}
-                      </td>
-                    );
-                  })}
-                  <td className="px-3 py-2 font-bold">{Number(s.total).toLocaleString("ar")}</td>
+                  {b?.assignments.map((a) => (
+                    <th key={a.public_id} className="px-3 py-2 text-start font-normal">
+                      {a.title} /{Number(a.max_grade).toLocaleString("ar")}
+                    </th>
+                  ))}
+                  <th className="px-3 py-2 text-start font-normal">
+                    المجموع /{max.toLocaleString("ar")}
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-          <p className="px-3 py-2 text-xs text-text-muted">
-            * اقتراح آلي بانتظار الاعتماد · ✓ سُلِّم ولم يُصحَّح · — لم يُسلَّم · المتأخر باللون
-            الكهرماني
-          </p>
+              </thead>
+              <tbody className="divide-y divide-border-soft">
+                {b?.students.map((s) => (
+                  <tr key={s.public_id}>
+                    <td className="sticky start-0 bg-surface px-3 py-2 font-semibold">
+                      {s.full_name_ar}
+                    </td>
+                    {b.assignments.map((a) => {
+                      const c = s.cells[a.public_id];
+                      return (
+                        <td
+                          key={a.public_id}
+                          className={`px-3 py-2 ${c?.late ? "text-warning-strong" : ""}`}
+                        >
+                          {c ? (
+                            <Link to={`/submissions/${c.submission}`} className="hover:underline">
+                              {c.score != null ? Number(c.score).toLocaleString("ar") : "✓"}
+                              {c.status === "suggested" ? "*" : ""}
+                            </Link>
+                          ) : (
+                            "—"
+                          )}
+                        </td>
+                      );
+                    })}
+                    <td className="px-3 py-2 font-bold">{Number(s.total).toLocaleString("ar")}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <p className="px-3 py-2 text-xs text-text-muted">
+              * اقتراح آلي بانتظار الاعتماد · ✓ سُلِّم ولم يُصحَّح · — لم يُسلَّم · المتأخر باللون
+              الكهرماني
+            </p>
+          </ScrollRegion>
         </Card>
       )}
     </PortalShell>
