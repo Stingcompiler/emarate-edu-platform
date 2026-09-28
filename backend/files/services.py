@@ -85,6 +85,21 @@ def _sign(storage_name: str, token_value: str) -> tuple[str, datetime]:
     return url, timezone.now() + timedelta(seconds=LINK_TTL)
 
 
+# Other apps store private files outside StoredFile (e.g. application documents
+# uploaded by visitors) and register how to resolve their signed tokens.
+_RESOLVERS: dict = {}
+
+
+def register_resolver(kind: str, resolver) -> None:
+    """``resolver(public_id) -> (file field, name, mime, inline)`` or None."""
+    _RESOLVERS[kind] = resolver
+
+
+def sign(storage_name: str, kind: str, public_id) -> tuple[str, datetime]:
+    """A 10-minute link for a private file; the caller has checked access."""
+    return _sign(storage_name, f"{kind}:{public_id}")
+
+
 def resolve_download(token: str):
     """Local development only: the signed token → (file field, name, mime, inline)."""
     try:
@@ -92,6 +107,11 @@ def resolve_download(token: str):
     except signing.BadSignature:
         raise NotFound() from None
     kind, _, public_id = value.partition(":")
+    if kind in _RESOLVERS:
+        found = _RESOLVERS[kind](public_id)
+        if found is None:
+            raise NotFound()
+        return found
     if kind == "f":
         stored = StoredFile.objects.filter(public_id=public_id).first()
         if stored is None:

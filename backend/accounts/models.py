@@ -125,6 +125,7 @@ class OneTimeCode(TimestampedModel):
     class Purpose(models.TextChoices):
         REGISTER = "register", "تسجيل طالب"
         PASSWORD_RESET = "password_reset", "استعادة كلمة المرور"
+        CONTACT = "contact", "تحقق زائر"
 
     purpose = models.CharField(max_length=20, choices=Purpose.choices)
     target = models.CharField(max_length=254)  # normalized email

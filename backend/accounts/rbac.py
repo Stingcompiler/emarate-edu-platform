@@ -140,6 +140,19 @@ CAPABILITIES: dict[str, frozenset[Role]] = {
         }
     ),
     "students.status": frozenset({R.SYSTEM_ADMIN, R.STUDENT_AFFAIRS}),
+    # Admissions (docs/03 §3.2–3.3): the head registrar runs admissions; registrars
+    # review their departments; department manager/supervisor read summaries.
+    "admissions.manage": frozenset({R.SYSTEM_ADMIN, R.HEAD_REGISTRAR}),
+    "admissions.review": frozenset({R.SYSTEM_ADMIN, R.HEAD_REGISTRAR, R.REGISTRAR}),
+    "admissions.view": frozenset(
+        {
+            R.SYSTEM_ADMIN,
+            R.HEAD_REGISTRAR,
+            R.REGISTRAR,
+            R.DEPARTMENT_MANAGER,
+            R.DEPARTMENT_SUPERVISOR,
+        }
+    ),
     # Website content (docs/03 §3.12–3.13)
     "content.manage": frozenset({R.SYSTEM_ADMIN, R.SITE_MANAGER}),
     "events.manage": frozenset({R.SYSTEM_ADMIN, R.SITE_MANAGER, R.EVENTS_MANAGER}),

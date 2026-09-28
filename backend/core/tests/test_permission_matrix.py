@@ -91,6 +91,10 @@ CASES = frozenset(
     }
 )
 ONLY_STUDENT = frozenset({R.STUDENT})
+ADMISSIONS = frozenset(
+    {R.SYSTEM_ADMIN, R.HEAD_REGISTRAR, R.REGISTRAR, R.DEPARTMENT_MANAGER, R.DEPARTMENT_SUPERVISOR}
+)
+ADMISSION_REVIEW = frozenset({R.SYSTEM_ADMIN, R.HEAD_REGISTRAR, R.REGISTRAR})
 
 # url name → (path template, roles allowed to read, roles that get 404 instead of 403)
 READS: dict[str, tuple[str, frozenset, frozenset]] = {
@@ -247,6 +251,13 @@ READS: dict[str, tuple[str, frozenset, frozenset]] = {
         frozenset({R.SYSTEM_ADMIN, R.SITE_MANAGER, R.EVENTS_MANAGER}),
         frozenset(),
     ),
+    # Admissions (the world's application is for an IT program)
+    "application-list": ("/api/v1/applications", ADMISSIONS, frozenset()),
+    "application-summary": ("/api/v1/applications/summary", ADMISSIONS, frozenset()),
+    "application-detail": ("/api/v1/applications/{application}", ADMISSIONS, frozenset()),
+    "intake-list": ("/api/v1/intakes", ADMISSIONS, frozenset()),
+    "admission-cycle-list": ("/api/v1/admission-cycles", ADMISSIONS, frozenset()),
+    "form-template-list": ("/api/v1/form-templates", ADMISSION_REVIEW, frozenset()),
     # Student affairs
     "regulation-list": ("/api/v1/regulations", EVERYONE, frozenset()),
     "regulation-detail": ("/api/v1/regulations/{regulation}", EVERYONE, frozenset()),
@@ -272,12 +283,25 @@ _L = "learning.tests.test_learning::"
 _F = "files.tests.test_files::"
 _N = "notifications.tests.test_notifications::"
 _EX = "exams.tests.test_exams::"
+_AD = "admissions.tests.test_admissions::"
 _LV = "live.tests.test_live::"
 _IQ = "inquiries.tests.test_inquiries::"
 _CT = "content.tests.test_content::"
 _RS = "results.tests.test_results::"
 _SA = "student_affairs.tests.test_student_affairs::"
 COVERED_ELSEWHERE = {
+    "application-claim": _AD + "test_claim_and_assign",
+    "application-assign": _AD + "test_claim_and_assign",
+    "application-transition": _AD + "test_full_journey",
+    "application-messages": _AD + "test_claim_and_assign",
+    "application-register": _AD + "test_full_journey",
+    "application-document-link": _AD + "test_full_journey",
+    "application-document-review": _AD + "test_full_journey",
+    "form-template-detail": _AD + "test_templates_freeze_on_publish",
+    "form-template-publish": _AD + "test_templates_freeze_on_publish",
+    "form-template-new-version": _AD + "test_templates_freeze_on_publish",
+    "intake-detail": _AD + "test_limits_duplicates_and_windows",
+    "admission-cycle-detail": _AD + "test_limits_duplicates_and_windows",
     "live-session-join": _LV + "test_link_is_encrypted_hidden_and_timed",
     "live-session-cancel": _LV + "test_bad_links_cancel_and_reminder",
     "inquiry-reply": _IQ + "test_general_inquiry_goes_to_the_site_manager",
@@ -557,7 +581,24 @@ def _learning_world(users, offering, student):
         subject="s",
         message="m",
     )
+    from admissions.models import AdmissionCycle, Application, ProgramIntake
+
+    cycle = AdmissionCycle.objects.create(
+        academic_year=offering.term.academic_year,
+        name="c",
+        opens_at=timezone.now() - timedelta(days=1),
+        closes_at=timezone.now() + timedelta(days=1),
+    )
+    intake = ProgramIntake.objects.create(cycle=cycle, program=student.program)
+    application = Application.objects.create(
+        reference_no="APP-2026-000001",
+        contact=Contact.objects.create(name="متقدم", email="a@x.test"),
+        intake=intake,
+        full_name="متقدم",
+        status="submitted",
+    )
     return {
+        "application": application.public_id,
         "live": live.public_id,
         "inquiry": inquiry.public_id,
         "exam": exam.public_id,

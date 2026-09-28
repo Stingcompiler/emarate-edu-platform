@@ -10,6 +10,12 @@ import { createRoot } from "react-dom/client";
 import { createBrowserRouter, Navigate, RouterProvider } from "react-router";
 
 import { RequireAuth } from "./lib/auth";
+import { ApplicationDetail } from "./routes/admissions/ApplicationDetail";
+import { Applications } from "./routes/admissions/Applications";
+import { Cycles } from "./routes/admissions/Cycles";
+import { FormBuilder } from "./routes/admissions/FormBuilder";
+import { Apply } from "./routes/visitor/Apply";
+import { Track } from "./routes/visitor/Track";
 import { CaseDetail } from "./routes/affairs/CaseDetail";
 import { CaseNew } from "./routes/affairs/CaseNew";
 import { Cases } from "./routes/affairs/Cases";
@@ -61,6 +67,9 @@ const router = createBrowserRouter([
   { path: "/login", element: <Login /> },
   { path: "/register", element: <Register /> },
   { path: "/forgot-password", element: <ForgotPassword /> },
+  // Visitors (no account): apply and track — the public site links here (docs/03 §4).
+  { path: "/apply", element: <Apply /> },
+  { path: "/track", element: <Track /> },
   // Role dashboards arrive with Phase 10; until then home is the notification centre.
   { path: "/", element: signedIn(<Navigate to="/notifications" replace />) },
   { path: "/notifications", element: signedIn(<Notifications />) },
@@ -98,6 +107,10 @@ const router = createBrowserRouter([
   { path: "/site/redirects", element: signedIn(<Redirects />) },
   { path: "/events", element: signedIn(<Events />) },
   { path: "/events/:id", element: signedIn(<EventEditor />) },
+  { path: "/applications", element: signedIn(<Applications />) },
+  { path: "/applications/:id", element: signedIn(<ApplicationDetail />) },
+  { path: "/admissions/cycles", element: signedIn(<Cycles />) },
+  { path: "/admissions/forms", element: signedIn(<FormBuilder />) },
   { path: "/cases", element: signedIn(<Cases />) },
   { path: "/cases/new", element: signedIn(<CaseNew />) },
   { path: "/cases/:id", element: signedIn(<CaseDetail />) },

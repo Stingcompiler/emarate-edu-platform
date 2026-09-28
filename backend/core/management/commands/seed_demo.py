@@ -308,6 +308,7 @@ class Command(BaseCommand):
         self._phase4(users, autumn)
         self._exam(users, autumn)
         self._phase6(users, autumn)
+        self._phase7(users, meta, year)
         return {
             "departments": Department.objects.count(),
             "programs": Program.objects.count(),
@@ -651,6 +652,119 @@ class Command(BaseCommand):
                     message=message,
                 )
                 InquiryStatusHistory.objects.create(inquiry=inquiry, to_status="new")
+
+    def _phase7(self, users, meta, year) -> None:
+        """An open admission cycle, a published form, one intake per program, three applications."""
+        from datetime import timedelta
+
+        from django.core.files.uploadedfile import SimpleUploadedFile
+        from django.utils import timezone
+
+        from admissions import services as admissions
+        from admissions.models import AdmissionCycle, ApplicationFormTemplate, ProgramIntake
+        from contacts.models import Contact
+
+        if AdmissionCycle.objects.exists():
+            return
+        now = timezone.now()
+        cycle = AdmissionCycle.objects.create(
+            academic_year=year,
+            name="قبول 2026/2027",
+            opens_at=now - timedelta(days=20),
+            closes_at=now + timedelta(days=60),
+        )
+        template = ApplicationFormTemplate.objects.create(
+            name="default",
+            created_by=users[Role.HEAD_REGISTRAR],
+            schema={
+                "steps": [
+                    {
+                        "title": "البيانات",
+                        "sections": [
+                            {
+                                "title": "المؤهل",
+                                "fields": [
+                                    {
+                                        "key": "birth_date",
+                                        "type": "date",
+                                        "label": "تاريخ الميلاد",
+                                        "required": True,
+                                    },
+                                    {
+                                        "key": "certificate_type",
+                                        "type": "select",
+                                        "label": "نوع الشهادة",
+                                        "required": True,
+                                        "options": ["سودانية", "عربية", "أجنبية"],
+                                    },
+                                    {
+                                        "key": "percentage",
+                                        "type": "number",
+                                        "label": "النسبة المئوية",
+                                        "required": True,
+                                        "min": 50,
+                                        "max": 100,
+                                    },
+                                    {"key": "school", "type": "text", "label": "المدرسة"},
+                                ],
+                            }
+                        ],
+                    }
+                ]
+            },
+        )
+        admissions.publish_template(meta, template)
+        documents = [
+            {"key": "certificate", "label": "الشهادة الثانوية", "required": True},
+            {"key": "id", "label": "الرقم الوطني أو الجواز", "required": True},
+            {"key": "photo", "label": "صورة شخصية", "required": False},
+        ]
+        intakes = {
+            program.code: ProgramIntake.objects.create(
+                cycle=cycle,
+                program=program,
+                capacity=120,
+                required_documents=documents,
+                requirements_ar="الشهادة الثانوية بنسبة لا تقل عن 60٪.",
+            )
+            for program in Program.objects.all()
+        }
+        pdf = b"%PDF-1.4\n%demo\n"
+        for n, (name, code, pct) in enumerate(
+            [
+                ("ريم عبد الله الطيب", "BIT", 87),
+                ("مهند صلاح الدين", "BIT", 74),
+                ("نسرين أحمد موسى", "BBA", 91),
+            ],
+            start=1,
+        ):
+            intake = intakes.get(code) or next(iter(intakes.values()))
+            contact, _ = Contact.objects.get_or_create(
+                email=f"applicant{n}@example.test", defaults={"name": name}
+            )
+            application = admissions.start(contact, intake)
+            admissions.update(
+                contact,
+                application,
+                phone_e164=f"+24991200000{n}",
+                answers={
+                    "birth_date": "2008-03-0" + str(n),
+                    "certificate_type": "سودانية",
+                    "percentage": pct,
+                },
+            )
+            for key in ("certificate", "id"):
+                admissions.add_document(
+                    contact,
+                    application,
+                    key,
+                    SimpleUploadedFile(f"{key}.pdf", pdf, "application/pdf"),
+                )
+            admissions.submit(contact, application)
+            if n == 1:
+                reviewer = RequestMeta(actor=users[Role.REGISTRAR], user_agent="seed_demo")
+                admissions.claim(reviewer, application)
+                admissions.transition(reviewer, application, to="under_review")
 
     def _user(self, email, name, password, role, department) -> User:
         user = User.objects.filter(email=email).first()
