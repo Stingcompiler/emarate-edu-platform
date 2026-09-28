@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router";
 
 import { PortalShell } from "../components/PortalShell";
+import { Segmented } from "../components/motion";
 import { Button, Card, SectionLabel, WithSide } from "../components/ui";
 import { api } from "../lib/api";
 import { hasRole, useMe, useSignOut } from "../lib/auth";
@@ -159,23 +160,15 @@ function ThemeSwitch() {
     { key: "system", label: "النظام" },
   ];
   return (
-    <div role="radiogroup" aria-label="المظهر" className="flex rounded-lg bg-surface-alt p-0.5">
-      {options.map((o) => (
-        <button
-          key={o.key}
-          type="button"
-          role="radio"
-          aria-checked={theme === o.key}
-          onClick={() => {
-            applyTheme(o.key);
-            setTheme(o.key);
-          }}
-          className={`min-h-9 rounded-md px-3 text-sm ${theme === o.key ? "bg-surface font-semibold text-text shadow-xs" : "text-text-muted"}`}
-        >
-          {o.label}
-        </button>
-      ))}
-    </div>
+    <Segmented
+      label="المظهر"
+      options={options}
+      value={theme}
+      onChange={(key) => {
+        applyTheme(key);
+        setTheme(key);
+      }}
+    />
   );
 }
 

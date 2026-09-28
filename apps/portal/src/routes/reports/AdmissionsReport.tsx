@@ -89,7 +89,7 @@ export function AdmissionsReport() {
         <>
           <div className="mt-4 grid grid-cols-2 gap-2 lg:grid-cols-5">
             <Kpi
-              value={num(r.total)}
+              value={r.total ?? "—"}
               label="طلبًا"
               note={
                 growth != null ? (
@@ -98,12 +98,12 @@ export function AdmissionsReport() {
               }
             />
             <Kpi
-              value={num(r.accepted)}
+              value={r.accepted ?? "—"}
               label="مقبولًا"
               note={`${pct(r.accepted_percent)} من الطلبات`}
             />
             <Kpi
-              value={num(r.converted)}
+              value={r.converted ?? "—"}
               label="حُوِّلوا إلى طلاب"
               note={`${num(r.not_converted)} لم يُحوَّلوا`}
             />
@@ -114,7 +114,7 @@ export function AdmissionsReport() {
               tone={r.first_reply_days != null && r.first_reply_days > 3 ? "danger" : undefined}
             />
             <Kpi
-              value={num(r.unassigned)}
+              value={r.unassigned ?? "—"}
               label="غير موزع"
               tone={r.unassigned ? "danger" : undefined}
             />

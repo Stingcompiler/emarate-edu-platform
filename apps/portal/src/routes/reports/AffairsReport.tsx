@@ -84,10 +84,10 @@ export function AffairsReport() {
       {r && (
         <>
           <div className="mt-4 grid grid-cols-2 gap-2 lg:grid-cols-5">
-            <Kpi value={num(r.total)} label="حالة هذا العام" note={`${num(r.closed)} مقفلة`} />
+            <Kpi value={r.total ?? "—"} label="حالة هذا العام" note={`${num(r.closed)} مقفلة`} />
             <Kpi value={days(r.close_days)} label="متوسط زمن الإقفال" note="الهدف 14 يومًا" />
             <Kpi
-              value={num(r.misconduct_cases)}
+              value={r.misconduct_cases ?? "—"}
               label="حالات غش"
               note={`${count(r.misconduct_from_exams, N.report)} من الاختبارات الإلكترونية`}
             />

@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { Link, useNavigate } from "react-router";
 
 import { Button, Card, Notice, problemMessage } from "../components/ui";
+import { CountUp } from "../components/motion";
 import { api } from "./api";
 import { count, N } from "./format";
 
@@ -62,7 +63,7 @@ export function Kpi({
   return (
     <Card className="px-4 py-3">
       <p className={`text-2xl font-bold ${tone === "danger" ? "text-danger-strong" : "text-text"}`}>
-        {value}
+        {typeof value === "number" ? <CountUp value={value} format={(n) => num(n)} /> : value}
       </p>
       <p className="text-xs text-text-muted">{label}</p>
       {note != null && <p className="mt-1 text-[11px] text-text-muted">{note}</p>}
@@ -106,13 +107,14 @@ export function Bars({
   const max = Math.max(1, ...values);
   return (
     <figure>
-      <div className="flex h-32 items-end gap-1.5" dir="ltr">
+      {/* Bars rise from their base in turn (motion.css .motion-bars). */}
+      <div className="motion-bars flex h-32 items-end gap-1.5" dir="ltr">
         {values.map((v, i) => (
           <div key={i} className="flex flex-1 flex-col items-center gap-1">
             <span className="text-[10px] text-text-muted">{num(v)}</span>
             <div
-              className={`w-full rounded-t ${i === values.length - 1 ? "bg-primary" : "bg-primary-soft"}`}
-              style={{ height: `${Math.max(4, (v / max) * 96)}px` }}
+              className={`motion-bar w-full rounded-t ${i === values.length - 1 ? "bg-primary" : "bg-primary-soft"}`}
+              style={{ height: `${Math.max(4, (v / max) * 96)}px`, ["--i" as string]: i }}
             />
             {labels && <span className="text-[10px] text-text-muted">{labels[i]}</span>}
           </div>

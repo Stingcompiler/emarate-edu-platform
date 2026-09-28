@@ -118,3 +118,41 @@ test("the site menus come from the CMS and behave like menus", async ({ page, is
     "/ar/privacy/",
   );
 });
+
+test("motion never leaves content hidden, and «reduce motion» turns it off", async ({ page }) => {
+  for (const path of ["/ar/", "/ar/admissions/", "/ar/news/", "/en/"]) {
+    await page.goto(SITE + path);
+    // Scroll through the page so every scroll-triggered element makes its entrance.
+    for (let y = 0; y < 6000; y += 500) {
+      await page.mouse.wheel(0, 500);
+      await page.waitForTimeout(80);
+    }
+    await page.waitForTimeout(1200);
+    const hidden = await page.evaluate(() =>
+      [...document.querySelectorAll<HTMLElement>("[data-reveal], [data-count], .motion-lines span")]
+        .filter(
+          (el) => el.classList.contains("is-pending") || Number(getComputedStyle(el).opacity) < 1,
+        )
+        .map((el) => el.outerHTML.slice(0, 80)),
+    );
+    expect(hidden, `${path}: ${hidden.join("\n")}`).toEqual([]);
+    // Counted figures end on their real value.
+    const counts = await page.evaluate(() =>
+      [...document.querySelectorAll<HTMLElement>("[data-count]")].map((el) => [
+        el.dataset.count,
+        el.textContent!.trim(),
+      ]),
+    );
+    for (const [target, text] of counts)
+      expect(text, path).toBe(Number(target).toLocaleString(path.startsWith("/ar") ? "ar" : "en"));
+  }
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto(`${SITE}/ar/admissions/`);
+  expect(await page.locator(".is-pending").count()).toBe(0);
+  const anim = await page.evaluate(() =>
+    [...document.querySelectorAll<HTMLElement>(".motion-lines span, [data-reveal]")].some(
+      (el) => parseFloat(getComputedStyle(el).animationDuration) > 0.01,
+    ),
+  );
+  expect(anim).toBe(false);
+});
