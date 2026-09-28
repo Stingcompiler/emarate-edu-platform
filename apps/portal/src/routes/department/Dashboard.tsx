@@ -259,7 +259,7 @@ export function DepartmentDashboard() {
                     <span className="min-w-0">
                       <b className="block text-sm text-text">{t.name}</b>
                       <span className="text-xs text-text-muted">
-                        تصحيح {days(t.grading_days)} · {num(t.ungraded)} غير مصحح
+                        تصحيح {days(t.grading_days)} · غير المصحح {num(t.ungraded)}
                       </span>
                     </span>
                   </Link>

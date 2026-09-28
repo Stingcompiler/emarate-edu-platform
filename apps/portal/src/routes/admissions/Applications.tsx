@@ -6,7 +6,7 @@ import { Link } from "react-router";
 import { PortalShell } from "../../components/PortalShell";
 import { Card, Chip, EmptyState, StatusBadge } from "../../components/ui";
 import { api } from "../../lib/api";
-import { when } from "../../lib/format";
+import { when, count, N } from "../../lib/format";
 import { STATUS_LABEL, STATUS_TONE } from "../../lib/visitor";
 
 const FILTERS = [
@@ -54,7 +54,7 @@ export function Applications() {
       title="الطلبات"
       subtitle={
         s
-          ? `${total.toLocaleString("ar")} طلبًا · غير موزعة ${s.unassigned.toLocaleString("ar")}`
+          ? `${count(total, N.application)} · غير موزعة ${s.unassigned.toLocaleString("ar")}`
           : undefined
       }
     >

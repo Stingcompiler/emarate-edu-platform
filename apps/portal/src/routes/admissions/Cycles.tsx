@@ -12,6 +12,7 @@ import {
   problemMessage,
 } from "../../components/ui";
 import { api } from "../../lib/api";
+import { count, N } from "../../lib/format";
 
 /** Board: HeadRegistrarCycles (phone); desktop derived — cycles + a table of intakes. */
 export function Cycles() {
@@ -160,7 +161,7 @@ export function Cycles() {
                 <span className="min-w-0 flex-1">
                   <span className="block text-sm font-semibold text-text">{i.program_name}</span>
                   <span className="text-xs text-text-muted">
-                    {i.department_name} · {(i.applications_count ?? 0).toLocaleString("ar")} طلبًا
+                    {i.department_name} · {count(i.applications_count ?? 0, N.application)}
                     {i.capacity ? ` · ${i.capacity} مقعد` : ""}
                   </span>
                 </span>

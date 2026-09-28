@@ -13,7 +13,8 @@
     - Role forms now offer only the roles the user may create or grant (`/me.creatable_roles` and `/me.grantable_roles`).
     - TA announcements depend on `ta_can_notify`, and TA grading metrics count only where `ta_can_grade` is on.
 - **Arabic API messages** (PR `feat/arabic-api-messages`): every service, validation and importer message is wrapped in `gettext` and translated in `backend/locale/ar/LC_MESSAGES/django.po`. The compiled `.mo` is committed because Render has no `msgfmt`. The portal always sends `Accept-Language: ar`. `core/tests/test_i18n.py` fails on any untranslated or uncompiled message; the workflow is in the `.po` header.
-- **Next:** one Arabic counting helper (`Intl.PluralRules("ar")`) to fix number–noun agreement across the portal ("3 صفًا", "1 مقبولًا", "2 مواد", "0 تسليمًا").
+- **Arabic counting:** `count(n, N.<noun>)` in `apps/portal/src/lib/format.ts` uses `Intl.PluralRules("ar")`. 1 and 100+ take the singular, 2 the dual without the number, 3–10 the plural, 11–99 the accusative singular. Add new nouns to `N`; don't write number + noun by hand. Phrases with an adjective are written as "label N" (e.g. «غير المصحح 3»).
+- **Nothing is pending from the walkthrough.** Remaining work needs the owner (see "Owner actions").
 - **Dev login:** demo accounts are `<handle>@demo.ecst.test`. `ta@` and `dept.supervisor@` have a different password from the rest (seed_demo doesn't reset existing passwords); see the transcript.
 - **Browser pane tips:**
   - Coordinate clicks don't land while a phone size is emulated; use refs or JS clicks.

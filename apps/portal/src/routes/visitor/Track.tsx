@@ -10,7 +10,7 @@ import {
   StatusBadge,
   problemMessage,
 } from "../../components/ui";
-import { when } from "../../lib/format";
+import { when, count, N } from "../../lib/format";
 import { asForm, formData } from "../../lib/upload";
 import {
   maskEmail,
@@ -87,7 +87,7 @@ export function Track() {
     Math.round((new Date(session.expires_at).getTime() - Date.now()) / 60_000),
   );
   return (
-    <VisitorLayout title="طلباتي" step={`جلسة متحققة · ${minutes.toLocaleString("ar")} دقيقة`}>
+    <VisitorLayout title="طلباتي" step={`جلسة متحققة · ${count(minutes, N.minute)}`}>
       <p className="text-sm text-text-muted" dir="auto">
         {maskEmail(session.email)} — تحققنا برمز أُرسل إلى بريدك
       </p>

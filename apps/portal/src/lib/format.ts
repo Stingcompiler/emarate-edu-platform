@@ -35,9 +35,55 @@ export function dayGroup(iso: string, now = new Date()): DayGroup {
   return "older";
 }
 
-export function count(n: number, one: string, many: string): string {
-  return `${n.toLocaleString("ar")} ${n === 1 ? one : many}`;
+/** A counted Arabic noun: 1 and 100+ take the singular, 2 the dual (said without the number),
+ *  3–10 the plural, 11–99 the accusative singular (e.g. سؤال، سؤالان، أسئلة، سؤالًا). */
+export type Noun = { one: string; two: string; few: string; many: string };
+
+const pluralRule = new Intl.PluralRules("ar");
+
+/** "٥ أسئلة", "سؤالان", "١٥ سؤالًا", "١٠٠ سؤال" — "—" when the number is unknown. */
+export function count(n: number | null | undefined, noun: Noun): string {
+  if (n == null) return "—";
+  const form = pluralRule.select(n);
+  if (form === "two") return noun.two;
+  const word = form === "few" ? noun.few : form === "many" ? noun.many : noun.one;
+  return `${n.toLocaleString("ar", { maximumFractionDigits: 1 })} ${word}`;
 }
+
+const noun = (one: string, two: string, few: string, many: string): Noun => ({
+  one,
+  two,
+  few,
+  many,
+});
+
+/** Nouns the portal counts. Add here rather than writing number + noun by hand. */
+export const N = {
+  application: noun("طلب", "طلبان", "طلبات", "طلبًا"),
+  acknowledgement: noun("إقرار", "إقراران", "إقرارات", "إقرارًا"),
+  case: noun("حالة", "حالتان", "حالات", "حالة"),
+  course: noun("مادة", "مادتان", "مواد", "مادة"),
+  day: noun("يوم", "يومان", "أيام", "يومًا"),
+  decision: noun("قرار", "قراران", "قرارات", "قرارًا"),
+  department: noun("قسم", "قسمان", "أقسام", "قسمًا"),
+  exam: noun("اختبار", "اختباران", "اختبارات", "اختبارًا"),
+  file: noun("ملف", "ملفان", "ملفات", "ملفًا"),
+  hour: noun("ساعة", "ساعتان", "ساعات", "ساعة"),
+  lecture: noun("محاضرة", "محاضرتان", "محاضرات", "محاضرة"),
+  mark: noun("درجة", "درجتان", "درجات", "درجة"),
+  minute: noun("دقيقة", "دقيقتان", "دقائق", "دقيقة"),
+  operation: noun("عملية", "عمليتان", "عمليات", "عملية"),
+  program: noun("برنامج", "برنامجان", "برامج", "برنامجًا"),
+  question: noun("سؤال", "سؤالان", "أسئلة", "سؤالًا"),
+  report: noun("بلاغ", "بلاغان", "بلاغات", "بلاغًا"),
+  resource: noun("مورد", "موردان", "موارد", "موردًا"),
+  row: noun("صف", "صفان", "صفوف", "صفًا"),
+  student: noun("طالب", "طالبان", "طلاب", "طالبًا"),
+  submission: noun("تسليم", "تسليمان", "تسليمات", "تسليمًا"),
+  task: noun("مهمة", "مهمتان", "مهام", "مهمة"),
+  term: noun("فصل", "فصلان", "فصول", "فصلًا"),
+  time: noun("مرة", "مرتان", "مرات", "مرة"),
+} satisfies Record<string, Noun>;
 
 /** URL slug from a title — Arabic letters are kept (the server's SlugField allows Unicode). */
 export function slugify(title: string, max = 100): string {

@@ -17,7 +17,7 @@ import {
 } from "../../components/ui";
 import { api } from "../../lib/api";
 import { useMe } from "../../lib/auth";
-import { when } from "../../lib/format";
+import { when, count, N } from "../../lib/format";
 import { asForm, formData } from "../../lib/upload";
 
 /** Boards: ResultsOfficerHome (phone), DesktopResultsImport step 1 (desktop). */
@@ -151,7 +151,7 @@ export function ResultImports() {
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-semibold text-text">{b.file_name}</p>
                     <p className="text-xs text-text-muted">
-                      {b.term_name} · {(b.summary as { rows?: number }).rows ?? 0} صفًا ·{" "}
+                      {b.term_name} · {count((b.summary as { rows?: number }).rows ?? 0, N.row)} ·{" "}
                       {b.uploaded_by} · {when(b.created_at)}
                     </p>
                   </div>

@@ -18,6 +18,7 @@ import {
   useDepartments,
 } from "../../lib/reports";
 import { STATUS_LABEL } from "../../lib/visitor";
+import { count, N } from "../../lib/format";
 
 const STAGES = ["submitted", "under_review", "missing_documents", "accepted", "rejected"] as const;
 const STAGE_TONE: Record<string, string> = {
@@ -194,8 +195,8 @@ export function AdmissionsReport() {
                     <span className="font-semibold text-text">{g.name}</span>
                   </span>
                   <span className="text-xs text-text-muted lg:hidden">
-                    {g.departments.join(" · ")} · {num(g.applications)} طلبًا · أول رد{" "}
-                    {days(g.first_reply_days)} · {num(g.decisions)} قرارات
+                    {g.departments.join(" · ")} · {count(g.applications, N.application)} · أول رد{" "}
+                    {days(g.first_reply_days)} · {count(g.decisions, N.decision)}
                   </span>
                   <bdi className="hidden text-xs lg:inline">{g.departments.join(" · ") || "—"}</bdi>
                   <span className="hidden lg:inline">{num(g.applications)}</span>

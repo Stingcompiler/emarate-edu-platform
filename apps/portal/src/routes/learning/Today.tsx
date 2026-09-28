@@ -6,7 +6,7 @@ import { PortalShell } from "../../components/PortalShell";
 import { Card, CodeTile, SectionLabel } from "../../components/ui";
 import { api } from "../../lib/api";
 import { useMe } from "../../lib/auth";
-import { when } from "../../lib/format";
+import { when, count, N } from "../../lib/format";
 import { dueLabel, splitCourse, taskState, useAssignments, useLectures } from "../../lib/learning";
 import { examPhase } from "../exams/Exams";
 
@@ -64,7 +64,7 @@ export function Today() {
         at: a.due_at,
         key: `a-${a.public_id}`,
         title: `تسليم: ${a.title}`,
-        meta: `${a.course_name} · ${Number(a.max_grade).toLocaleString("ar")} درجة`,
+        meta: `${a.course_name} · ${count(Number(a.max_grade), N.mark)}`,
         to: `/assignments/${a.public_id}`,
         tag: dueLabel(a.due_at, now),
       })),
@@ -79,7 +79,7 @@ export function Today() {
         at: e.opens_at,
         key: `e-${e.public_id}`,
         title: e.title,
-        meta: `${e.course_name} · ${e.duration_minutes.toLocaleString("ar")} دقيقة · ${e.questions_count.toLocaleString("ar")} سؤالًا`,
+        meta: `${e.course_name} · ${count(e.duration_minutes, N.minute)} · ${count(e.questions_count, N.question)}`,
         to: `/exams/${e.public_id}`,
         tag: new Date(e.opens_at).getTime() <= now ? "مفتوح" : dueLabel(e.opens_at, now),
       })),

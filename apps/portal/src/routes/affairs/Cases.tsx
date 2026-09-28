@@ -15,7 +15,7 @@ import {
 } from "../../components/ui";
 import { api } from "../../lib/api";
 import { useMe } from "../../lib/auth";
-import { when } from "../../lib/format";
+import { when, count, N } from "../../lib/format";
 import { can } from "../../lib/nav";
 
 export const KIND = {
@@ -201,7 +201,7 @@ export function Cases() {
                       <td
                         className={`px-3 ${age(c.created_at) > 14 ? "font-semibold text-danger-strong" : ""}`}
                       >
-                        {age(c.created_at).toLocaleString("ar")} ي
+                        {ageLabel(age(c.created_at))}
                       </td>
                       <td className="px-4 text-xs text-text-muted">
                         {last
@@ -239,8 +239,5 @@ export function KindTile({ kind, small }: { kind: string; small?: boolean }) {
 
 /** Days a case has been open, with Arabic number agreement. */
 function ageLabel(days: number): string {
-  if (days < 1) return "اليوم";
-  if (days === 1) return "يوم";
-  if (days === 2) return "يومان";
-  return `${days.toLocaleString("ar")} ${days <= 10 ? "أيام" : "يومًا"}`;
+  return days < 1 ? "اليوم" : count(days, N.day);
 }

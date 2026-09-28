@@ -18,6 +18,7 @@ import {
 } from "../../components/ui";
 import { api } from "../../lib/api";
 import { type QType, TYPE_LABEL } from "../../lib/exam";
+import { count, N } from "../../lib/format";
 
 type Question = Omit<Schemas["Question"], "choices"> & {
   choices?: { id?: number; text: string; is_correct?: boolean }[];
@@ -274,7 +275,7 @@ export function ExamEditor() {
             <div className="flex items-center justify-between">
               <SectionLabel>
                 الأسئلة · {(questions.data?.length ?? 0).toLocaleString("ar")} ·{" "}
-                {total.toLocaleString("ar")} درجة
+                {count(total, N.mark)}
               </SectionLabel>
               <StatusBadge
                 status={e.status}
@@ -348,7 +349,7 @@ function QuestionCard({
         </span>
         <div className="min-w-0 flex-1">
           <p className="text-xs text-text-muted">
-            {TYPE_LABEL[q.type as QType]} · {Number(q.marks ?? 0).toLocaleString("ar")} درجة
+            {TYPE_LABEL[q.type as QType]} · {count(Number(q.marks ?? 0), N.mark)}
           </p>
           <p className="mt-1 whitespace-pre-line text-sm font-semibold text-text">{q.text}</p>
           {q.choices && q.choices.length > 0 && (

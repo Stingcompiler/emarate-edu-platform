@@ -17,6 +17,7 @@ import {
 } from "../../components/ui";
 import { api } from "../../lib/api";
 import { useMe } from "../../lib/auth";
+import { count, N } from "../../lib/format";
 
 type Term = Schemas["MyTerm"];
 const date = new Intl.DateTimeFormat("ar", { day: "numeric", month: "long" });
@@ -152,7 +153,7 @@ function TermRows({ term, show }: { term: Term; show: Record<string, boolean> })
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-semibold text-text">{r.course_name}</p>
                 <p className="text-xs text-text-muted">
-                  {r.course_code} · {r.credit_hours.toLocaleString("ar")} ساعات
+                  {r.course_code} · {count(r.credit_hours, N.hour)}
                   {r.correction_pending && " · طلب تعديل قيد النظر"}
                 </p>
               </div>

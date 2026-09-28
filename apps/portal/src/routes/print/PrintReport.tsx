@@ -6,6 +6,7 @@ import { api } from "../../lib/api";
 import { TEACHER_STATUS, days, num, pct } from "../../lib/reports";
 import { STATUS_LABEL } from "../../lib/visitor";
 import { PrintLayout, PrintStats, PrintTable } from "./PrintLayout";
+import { count, N } from "../../lib/format";
 
 /** Print view of a frozen report snapshot (any kind). */
 export function PrintReport() {
@@ -104,7 +105,7 @@ function Teachers({ d }: { d: Schemas["TeachersReport"] }) {
       <p className="text-n600">
         {d.term.name}
         {d.previous ? ` مقابل ${d.previous.term}` : ""} · حتى الأسبوع {num(d.term.week)} · الحدود:
-        تصحيح ≤ {num(d.thresholds.grading_days)} أيام، رفع ≥ {num(d.thresholds.upload_percent)}٪
+        تصحيح ≤ {count(d.thresholds.grading_days, N.day)}، رفع ≥ {num(d.thresholds.upload_percent)}٪
       </p>
       <PrintStats
         items={[

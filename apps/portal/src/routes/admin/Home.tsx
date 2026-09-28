@@ -8,7 +8,7 @@ import { api } from "../../lib/api";
 import { actionLabel } from "../department/Audit";
 import { useMe } from "../../lib/auth";
 import { useCurrentTerm } from "../../lib/department";
-import { when } from "../../lib/format";
+import { when, count, N } from "../../lib/format";
 import { num } from "../../lib/reports";
 
 const GROUPS: { label: string; roles: string[] }[] = [
@@ -136,8 +136,8 @@ export function AdminHome() {
               <span className="flex-1">
                 <b className="block">الفصل الحالي والهيكل</b>
                 <span className="text-xs text-text-muted">
-                  {term.data?.name_ar ?? "—"} · {num(departments.data?.length ?? 0)} أقسام ·{" "}
-                  {num(programs.data?.length ?? 0)} برنامجًا
+                  {term.data?.name_ar ?? "—"} · {count(departments.data?.length ?? 0, N.department)}{" "}
+                  · {count(programs.data?.length ?? 0, N.program)}
                 </span>
               </span>
             </Link>

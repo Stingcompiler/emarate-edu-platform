@@ -6,7 +6,7 @@ import { PortalShell } from "../../components/PortalShell";
 import { Card, SectionLabel } from "../../components/ui";
 import { api } from "../../lib/api";
 import { useMe } from "../../lib/auth";
-import { when } from "../../lib/format";
+import { when, count, N } from "../../lib/format";
 import { num } from "../../lib/reports";
 import { Inbox } from "./Inbox";
 
@@ -59,7 +59,7 @@ export function AffairsHome() {
   return (
     <PortalShell
       title="شؤون الطلاب"
-      subtitle={`${me.data?.full_name_ar ?? ""} · اللوائح والحالات · ${num(students)} طالبًا`}
+      subtitle={`${me.data?.full_name_ar ?? ""} · اللوائح والحالات · ${count(students, N.student)}`}
     >
       <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_380px] lg:items-start lg:gap-6">
         <div className="space-y-4">

@@ -20,6 +20,7 @@ import {
   useDepartments,
   useTerms,
 } from "../../lib/reports";
+import { count, N } from "../../lib/format";
 
 export type TeacherRow = {
   public_id: string;
@@ -178,7 +179,7 @@ export function Teachers() {
         </label>
         {r && (
           <span className="text-xs text-text-muted">
-            الحدود: تصحيح ≤ {num(r.thresholds.grading_days)} أيام · رفع ≥{" "}
+            الحدود: تصحيح ≤ {count(r.thresholds.grading_days, N.day)} · رفع ≥{" "}
             {num(r.thresholds.upload_percent)}٪
           </span>
         )}
@@ -223,8 +224,9 @@ export function Teachers() {
                 <TeacherStatus status={t.status} />
               </span>
               <span className="col-span-3 text-xs text-text-muted xl:hidden">
-                {num(t.offerings)} مواد · تصحيح {days(t.grading_days)} · رفع {pct(t.upload_percent)}{" "}
-                · غير مصحح {pct(t.ungraded_percent)} · بث {num(t.live_held)}/{num(t.live_planned)}
+                {count(t.offerings, N.course)} · تصحيح {days(t.grading_days)} · رفع{" "}
+                {pct(t.upload_percent)} · غير مصحح {pct(t.ungraded_percent)} · بث {num(t.live_held)}
+                /{num(t.live_planned)}
               </span>
               <span className="hidden xl:inline">
                 {num(t.offerings)} · {num(t.students)}

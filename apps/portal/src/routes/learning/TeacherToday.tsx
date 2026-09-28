@@ -8,6 +8,7 @@ import { api } from "../../lib/api";
 import { useMe } from "../../lib/auth";
 import { dueLabel, useAssignments, useMyCourses } from "../../lib/learning";
 import { useGradingQueue } from "./Grading";
+import { count, N } from "../../lib/format";
 
 const DAY = 86_400_000;
 
@@ -102,7 +103,7 @@ export function TeacherToday() {
   return (
     <PortalShell
       title={`${hour < 12 ? "صباح الخير" : "مساء الخير"}، ${first}`}
-      subtitle={`${new Date().toLocaleDateString("ar", { weekday: "long", day: "numeric", month: "long" })} · ${students.toLocaleString("ar")} مواد`}
+      subtitle={`${new Date().toLocaleDateString("ar", { weekday: "long", day: "numeric", month: "long" })} · ${count(students, N.course)}`}
     >
       <Link to="/grading" className="block">
         <Card className="flex items-center gap-4 p-4 transition-shadow hover:shadow-md">

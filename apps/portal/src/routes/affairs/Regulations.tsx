@@ -14,6 +14,7 @@ import {
 import { api } from "../../lib/api";
 import { useMe } from "../../lib/auth";
 import { can } from "../../lib/nav";
+import { count, N } from "../../lib/format";
 
 const date = new Intl.DateTimeFormat("ar", { day: "numeric", month: "long", year: "numeric" });
 
@@ -90,7 +91,7 @@ export function Regulations() {
                     <span className="block text-sm font-semibold text-text">{r.title}</span>
                     <span className="text-xs text-text-muted">
                       {staff && r.acknowledgements_count !== null && r.requires_acknowledgement
-                        ? `${r.acknowledgements_count.toLocaleString("ar")} إقرارًا`
+                        ? `${count(r.acknowledgements_count, N.acknowledgement)}`
                         : r.file_detail
                           ? "PDF"
                           : "نص"}

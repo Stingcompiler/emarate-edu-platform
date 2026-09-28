@@ -5,12 +5,13 @@ import { Link, useNavigate } from "react-router";
 
 import { Button, Card, Notice, problemMessage } from "../components/ui";
 import { api } from "./api";
+import { count, N } from "./format";
 
 /** Numbers: Arabic digits in prose, "—" when there is no data. */
 export const num = (n: number | null | undefined, digits = 0) =>
   n == null ? "—" : n.toLocaleString("ar", { maximumFractionDigits: digits });
 export const pct = (n: number | null | undefined) => (n == null ? "—" : `${num(n)}٪`);
-export const days = (n: number | null | undefined) => (n == null ? "—" : `${num(n, 1)} يوم`);
+export const days = (n: number | null | undefined) => count(n, N.day);
 
 export const TEACHER_STATUS: Record<string, { label: string; tone: string }> = {
   below: { label: "تحت الحد", tone: "bg-danger-soft text-danger-strong" },

@@ -15,6 +15,7 @@ import {
   pct,
   useDepartments,
 } from "../../lib/reports";
+import { count, N } from "../../lib/format";
 
 const KIND: Record<string, string> = {
   exam_misconduct: "غش",
@@ -88,7 +89,7 @@ export function AffairsReport() {
             <Kpi
               value={num(r.misconduct_cases)}
               label="حالات غش"
-              note={`${num(r.misconduct_from_exams)} بلاغات من الاختبارات الإلكترونية`}
+              note={`${count(r.misconduct_from_exams, N.report)} من الاختبارات الإلكترونية`}
             />
             <Kpi
               value={pct(r.acknowledged_percent)}

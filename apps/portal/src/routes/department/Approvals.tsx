@@ -4,7 +4,7 @@ import { useState } from "react";
 import { PortalShell } from "../../components/PortalShell";
 import { Button, Card, Notice, problemMessage } from "../../components/ui";
 import { api } from "../../lib/api";
-import { when } from "../../lib/format";
+import { when, count, N } from "../../lib/format";
 import { initials, num } from "../../lib/reports";
 
 /** Board: AdminApprovals (phone); desktop derived — cards in two columns. */
@@ -47,13 +47,13 @@ export function Approvals() {
   return (
     <PortalShell
       title="طلبات التسجيل"
-      subtitle={`${num(rows.length)} طالبًا أكملوا رمز التحقق · الاعتماد يفعّل الحساب ويُشعر الطالب فورًا`}
+      subtitle={`${count(rows.length, N.student)} أكملوا رمز التحقق · الاعتماد يفعّل الحساب ويُشعر الطالب فورًا`}
       back={{ label: "لوحة القسم", to: "/department" }}
     >
       {matching.length > 1 && (
         <Card className="mb-4 flex flex-wrap items-center gap-3 p-4">
           <span className="flex-1 text-sm">
-            {num(matching.length)} طلبات بريدها مطابق للسجل الرسمي
+            {count(matching.length, N.application)} بريدها مطابق للسجل الرسمي
           </span>
           <Button onClick={() => approveAll.mutate()} disabled={approveAll.isPending}>
             اعتماد الـ{num(matching.length)} معًا

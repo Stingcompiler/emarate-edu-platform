@@ -12,6 +12,7 @@ import {
   useMyCourses,
   splitCourse,
 } from "../../lib/learning";
+import { count, N } from "../../lib/format";
 
 /** Boards: StudentCourses, TeacherCourses (phone); desktop derived — a card grid. */
 export function Courses() {
@@ -27,7 +28,7 @@ export function Courses() {
       title="موادي"
       subtitle={
         list.length
-          ? `${list[0]!.term}${student && me.data?.student ? ` · المستوى ${me.data.student.level}` : ""} · ${list.length.toLocaleString("ar")} مواد${student ? ` · ${hours.toLocaleString("ar")} ساعة` : ""}`
+          ? `${list[0]!.term}${student && me.data?.student ? ` · المستوى ${me.data.student.level}` : ""} · ${count(list.length, N.course)}${student ? ` · ${count(hours, N.hour)}` : ""}`
           : undefined
       }
     >
@@ -57,7 +58,7 @@ export function Courses() {
                       <p className="font-semibold text-text">{c.name_ar}</p>
                       <p className="text-xs text-text-muted">
                         {teacher ?? "بلا أستاذ"} · شعبة <bdi>{c.section}</bdi> ·{" "}
-                        {c.credit_hours.toLocaleString("ar")} ساعات
+                        {count(c.credit_hours, N.hour)}
                         {c.my_role !== "student"
                           ? ` · ${c.my_role === "ta" ? "معيد" : "أستاذ"}`
                           : ""}

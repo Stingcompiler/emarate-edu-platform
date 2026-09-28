@@ -8,6 +8,7 @@ import { useMe } from "../../lib/auth";
 import { can } from "../../lib/nav";
 import { TOPIC_LABEL, TeacherStatus, days, initials, num, pct } from "../../lib/reports";
 import { ROLE_LINE } from "./Teachers";
+import { count, N } from "../../lib/format";
 
 /** Board: AcademicAffairsTeacher (phone); desktop derived — indicators beside courses and notices. */
 export function TeacherProfile() {
@@ -35,7 +36,7 @@ export function TeacherProfile() {
             bad: t.upload_percent != null && t.upload_percent < limits.upload_percent,
           },
           {
-            label: `زمن التصحيح (الحد ${num(limits.grading_days)} أيام)`,
+            label: `زمن التصحيح (الحد ${count(limits.grading_days, N.day)})`,
             value: days(t.grading_days),
             ratio: Math.min(1, (t.grading_days ?? 0) / (limits.grading_days * 2)),
             bad: t.grading_days != null && t.grading_days > limits.grading_days,
@@ -58,7 +59,9 @@ export function TeacherProfile() {
     <PortalShell
       title={t?.name ?? "ملف أستاذ"}
       subtitle={
-        t ? `${ROLE_LINE(t)} · ${num(t.offerings)} مادة · ${num(t.students)} طالبًا` : undefined
+        t
+          ? `${ROLE_LINE(t)} · ${count(t.offerings, N.course)} · ${count(t.students, N.student)}`
+          : undefined
       }
       back={{ label: "الأساتذة", to: "/hr/teachers" }}
     >
@@ -121,8 +124,8 @@ export function TeacherProfile() {
                     {o.role === "ta" ? " · معيد" : ""}
                   </p>
                   <p className="text-xs text-text-muted">
-                    {num(o.students)} طالبًا · {num(o.lectures)}/{num(o.planned)} محاضرات ·{" "}
-                    {num(o.ungraded)} تسليمًا غير مصحح
+                    {count(o.students, N.student)} · {num(o.lectures)}/{num(o.planned)} محاضرات ·{" "}
+                    غير المصحح {num(o.ungraded)}
                   </p>
                 </div>
               ))}

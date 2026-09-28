@@ -20,6 +20,7 @@ import { Button, Card, SectionLabel } from "../../components/ui";
 import { api } from "../../lib/api";
 import { useMe, useSignOut } from "../../lib/auth";
 import { initials, num } from "../../lib/reports";
+import { count, N } from "../../lib/format";
 
 function Row({
   to,
@@ -121,7 +122,7 @@ export function Me() {
               to="/me/status"
               icon={<ShieldCheck size={18} aria-hidden />}
               label="حالتي الأكاديمية"
-              note={cases.data?.length ? `${num(cases.data.length)} حالات` : "لا حالات"}
+              note={cases.data?.length ? `${count(cases.data.length, N.case)}` : "لا حالات"}
             />
           </Card>
         </div>
@@ -184,7 +185,8 @@ export function MyStatus() {
       <Card className="bg-success-soft p-4 text-success-strong">
         <b className="text-lg">{s?.status_label ?? "منتظم"}</b>
         <p className="text-sm">
-          {courses.data?.[0]?.term ?? ""} · المستوى {num(s?.level ?? 0)} · {num(hours)} ساعة مسجلة
+          {courses.data?.[0]?.term ?? ""} · المستوى {num(s?.level ?? 0)} · الساعات المسجلة{" "}
+          {num(hours)}
         </p>
       </Card>
       <SectionLabel>التسجيل</SectionLabel>
