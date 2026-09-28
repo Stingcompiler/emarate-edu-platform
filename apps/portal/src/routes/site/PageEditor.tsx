@@ -16,7 +16,7 @@ import {
 import { api } from "../../lib/api";
 
 type Block = {
-  type: "heading" | "paragraph" | "html" | "image" | "cta";
+  type: "heading" | "paragraph" | "note" | "html" | "image" | "cta";
   text?: string;
   html?: string;
   url?: string;
@@ -25,6 +25,7 @@ type Block = {
 const TYPES: { key: Block["type"]; label: string }[] = [
   { key: "heading", label: "عنوان" },
   { key: "paragraph", label: "فقرة" },
+  { key: "note", label: "ملاحظة بارزة" },
   { key: "image", label: "صورة" },
   { key: "cta", label: "زر إجراء" },
   { key: "html", label: "HTML" },
@@ -100,10 +101,16 @@ export function PageEditor() {
               label="الرابط"
               dir="ltr"
               value={slug}
+              // An official page (about/dean, privacy …) keeps its address on the site.
+              disabled={page.data?.official}
               onChange={(e) =>
                 setSlug(e.target.value.replace(/[^a-z0-9؀-ۿ/-]/gi, "-").toLowerCase())
               }
-              hint="مثل about أو admissions"
+              hint={
+                page.data?.official
+                  ? `صفحة رسمية — تظهر على \u2066/${page.data.path}/\u2069 وفي قوائم الموقع بعد نشرها`
+                  : `تظهر على \u2066/${slug ? (page.data?.path ?? `p/${slug}`) : "p/…"}/\u2069`
+              }
             />
           </Card>
           <SectionLabel>الكتل</SectionLabel>
@@ -222,6 +229,13 @@ export function PageEditor() {
                 </h3>
               ) : b.type === "paragraph" ? (
                 <p key={i} className="whitespace-pre-line text-sm leading-loose text-text">
+                  {b.text}
+                </p>
+              ) : b.type === "note" ? (
+                <p
+                  key={i}
+                  className="whitespace-pre-line rounded-lg border border-warning/40 bg-warning-soft px-3 py-2 text-sm leading-relaxed text-text"
+                >
                   {b.text}
                 </p>
               ) : b.type === "cta" ? (

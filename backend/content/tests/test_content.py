@@ -27,7 +27,7 @@ def _png():
 
 def test_pages_are_sanitized_and_public_when_published(api, site, make_user):
     body = {
-        "slug": "about",
+        "slug": "open-day",
         "title_ar": "عن الكلية",
         "status": "draft",
         "blocks": [
@@ -52,11 +52,11 @@ def test_pages_are_sanitized_and_public_when_published(api, site, make_user):
     html = page.data["blocks"][0]["html"]
     assert "script" not in html and "onclick" not in html and "javascript" not in html
     assert len(page.data["blocks"]) == 1
-    assert api().get("/api/public/pages/about").status_code == 404
+    assert api().get("/api/public/pages/open-day").status_code == 404
     api(site).patch(
         f"/api/v1/content/pages/{page.data['public_id']}", {"status": "published"}, format="json"
     )
-    public = api().get("/api/public/pages/about")
+    public = api().get("/api/public/pages/open-day")
     assert public.status_code == 200 and "max-age=60" in public["Cache-Control"]
 
 
@@ -258,3 +258,38 @@ def test_the_site_starts_with_default_menus(api):
     assert {c["url"] for i in header for c in i["children"]} >= {"/programs", "/about/dean"}
     footer = api().get("/api/public/menus/footer").data["items"]
     assert all(i["children"] for i in footer)
+
+
+@pytest.mark.django_db
+def test_official_pages_start_as_drafts_and_go_live_at_their_path(api, site):
+    """docs/07 §1: every official page exists from the first deploy, but only as a draft
+    with writing guidance — the college publishes its own text (content/official.py)."""
+    from content.official import OFFICIAL_PAGES
+
+    listed = {
+        p["slug"]: p for p in api(site).get("/api/v1/content/pages?page_size=100").data["results"]
+    }
+    assert {o.slug for o in OFFICIAL_PAGES} <= set(listed)
+    dean = listed["about/dean"]
+    assert dean["status"] == "draft" and dean["official"] and dean["path"] == "about/dean"
+    assert api().get("/api/public/pages").data == []  # nothing public before publishing
+    assert api().get("/api/public/pages/about/dean").status_code == 404
+
+    url = f"/api/v1/content/pages/{dean['public_id']}"
+    assert api(site).patch(url, {"slug": "dean"}, format="json").status_code == 400  # fixed
+    assert api(site).patch(url, {"status": "published"}, format="json").status_code == 200
+    assert api().get("/api/public/pages/about/dean").data["title_ar"] == "كلمة العميد"
+    free = api(site).post(
+        "/api/v1/content/pages",
+        {"slug": "open-day-2026", "title_ar": "يوم مفتوح", "status": "published"},
+        format="json",
+    )
+    assert free.status_code == 201 and free.data["path"] == "p/open-day-2026"
+    assert {p["slug"]: p["path"] for p in api().get("/api/public/pages").data} == {
+        "about/dean": "about/dean",
+        "open-day-2026": "p/open-day-2026",
+    }
+    bad = {"title_ar": "x"}
+    for slug in ("a/b/c", "/lead", "a b"):
+        response = api(site).post("/api/v1/content/pages", {**bad, "slug": slug}, format="json")
+        assert response.status_code == 400, slug

@@ -5,9 +5,9 @@ import Base from "../../../layouts/Base.astro";
 import { type Page, get, pages } from "../../../lib/api";
 import { LANGS, type Lang, pick } from "../../../lib/i18n";
 
-// Every published CMS page (privacy, policies…) at /{lang}/p/{slug}/.
+// Published CMS pages other than the official ones (those live at their own path).
 export async function getStaticPaths() {
-  const list = await pages();
+  const list = (await pages()).filter((p) => p.path.startsWith("p/"));
   const full = await Promise.all(
     list.map((p) => get<Page | null>(`pages/${encodeURIComponent(p.slug)}`, null)),
   );

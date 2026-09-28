@@ -7,6 +7,7 @@ import {
   departments,
   events,
   news,
+  page,
   programs,
   site,
   stats,
@@ -15,7 +16,7 @@ import { arrow, fmtDate, href, type Lang, langPaths, num, pick, t, count, N } fr
 
 export const getStaticPaths = langPaths;
 const lang = Astro.params.lang as Lang;
-const [s, all, st, upcoming, latest, depts, notes] = await Promise.all([
+const [s, all, st, upcoming, latest, depts, notes, dean] = await Promise.all([
   site(),
   programs(),
   stats(),
@@ -23,7 +24,14 @@ const [s, all, st, upcoming, latest, depts, notes] = await Promise.all([
   news(),
   departments(),
   announcements(),
+  page("about/dean"), // shown here once the site manager publishes it
 ]);
+const deanWords = (dean?.blocks ?? [])
+  .filter((b) => b.type === "paragraph" && b.text)
+  .map((b) => b.text!)
+  .join(" ");
+const deanExcerpt = deanWords.length > 280 ? `${deanWords.slice(0, 280).trimEnd()}…` : deanWords;
+const deanPhoto = dean?.blocks.find((b) => b.type === "image" && b.url);
 const pinned = notes.filter((a) => a.is_pinned).slice(0, 2);
 const open = all.filter((p) => p.intake?.accepting);
 const closes = open.map((p) => p.intake!.closes_at).sort()[0];
@@ -181,6 +189,31 @@ const jsonLd = {
       ))}
     </div>
   </section>
+
+  {dean && deanExcerpt && (
+    <section class="mx-auto max-w-6xl px-4 pt-12 lg:px-8">
+      <div class="flex flex-col gap-5 rounded-2xl bg-bg-subtle p-5 sm:flex-row sm:items-start lg:p-8">
+        {deanPhoto && (
+          <img
+            src={deanPhoto.url}
+            alt={deanPhoto.alt ?? ""}
+            loading="lazy"
+            class="size-24 shrink-0 rounded-full object-cover"
+          />
+        )}
+        <div>
+          <h2 class="font-display text-xl font-bold">{pick(lang, dean.title_ar, dean.title_en)}</h2>
+          <p class="mt-2 max-w-3xl leading-8 text-text-muted">{deanExcerpt}</p>
+          <a
+            href={href(lang, "about/dean/")}
+            class="mt-3 inline-block text-sm font-semibold text-primary"
+          >
+            {lang === "ar" ? "اقرأ الكلمة كاملة" : "Read the full welcome"} {arrow(lang)}
+          </a>
+        </div>
+      </div>
+    </section>
+  )}
 
   <section class="mx-auto grid max-w-6xl gap-8 px-4 pt-12 lg:grid-cols-[1fr_2fr] lg:px-8">
     <div>

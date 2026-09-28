@@ -38,7 +38,7 @@ urlpatterns = [
         name="public-application-status",
     ),
     path("pages", catalogue.PublicPagesView.as_view(), name="public-pages"),
-    path("pages/<str:slug>", content.PublicPageView.as_view(), name="public-page"),
+    path("pages/<path:slug>", content.PublicPageView.as_view(), name="public-page"),
     path("departments", catalogue.PublicDepartmentsView.as_view(), name="public-departments"),
     path(
         "departments/<str:code>",

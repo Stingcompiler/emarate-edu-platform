@@ -52,7 +52,7 @@ def clean_html(value: str) -> str:
     )
 
 
-BLOCK_TYPES = {"heading", "paragraph", "html", "image", "cta", "list"}
+BLOCK_TYPES = {"heading", "paragraph", "note", "html", "image", "cta", "list"}
 
 
 def clean_blocks(blocks: list) -> list:

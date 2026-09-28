@@ -78,7 +78,8 @@ def test_program_intake_state_and_seats(api, it_program, term):
 
 def test_pages_list_only_published(api, make_user):
     author = make_user(Role.SITE_MANAGER)
-    Page.objects.create(slug="about", title_ar="عن الكلية", status="published", author=author)
+    # The official "about" page already exists as a system draft (content/official.py).
+    Page.objects.filter(slug="about").update(status="published")
     Page.objects.create(slug="draft", title_ar="مسودة", author=author)
     Page.objects.create(
         author=author,

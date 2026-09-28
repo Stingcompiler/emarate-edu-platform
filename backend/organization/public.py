@@ -20,6 +20,7 @@ from academic.models import Course, DepartmentMembership
 from accounts.models import RoleAssignment
 from accounts.rbac import Role
 from content.models import Page, Status
+from content.official import ORDER, public_path
 from content.views import PUBLIC_CACHE, _PublicRead
 from students.models import StudentRecord
 
@@ -92,9 +93,14 @@ class PublicDepartmentSerializer(S.Serializer):
 
 class PublicPageRefSerializer(S.Serializer):
     slug = S.CharField()
+    # Where the site serves it: official pages at their own path, the rest under p/.
+    path = S.SerializerMethodField()
     title_ar = S.CharField()
     title_en = S.CharField()
     updated_at = S.DateTimeField()
+
+    def get_path(self, page) -> str:
+        return public_path(page.slug)
 
 
 class PublicStatsSerializer(S.Serializer):
@@ -290,6 +296,8 @@ class PublicPagesView(_PublicRead):
             .filter(Q(publish_at__isnull=True) | Q(publish_at__lte=now))
             .order_by("slug")
         )
+        # Official pages in their natural order (about, history, vision …), then the rest.
+        pages = sorted(pages, key=lambda p: (ORDER.get(p.slug, len(ORDER)), p.slug))
         return Response(PublicPageRefSerializer(pages, many=True).data)
 
 

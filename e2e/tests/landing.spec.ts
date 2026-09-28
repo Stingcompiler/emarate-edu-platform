@@ -75,8 +75,9 @@ test("the programme page keeps «apply to this programme» in reach on the phone
 test("the site menus come from the CMS and behave like menus", async ({ page, isMobile }) => {
   await page.goto(`${SITE}/ar/`);
   const header = page.locator("header");
-  // Default menus (content migration 0002): grouped, and never a link to an unbuilt page.
-  await expect(header.locator('a[href="/ar/about/history/"]')).toHaveCount(0);
+  // Default menus (content migration 0002) link the official pages once published (the demo
+  // publishes them; the crawl above proves no menu link is a 404).
+  await expect(header.locator('a[href="/ar/about/dean/"]').first()).toBeAttached();
   const toggle = isMobile
     ? header.getByLabel("القائمة")
     : header.locator("nav summary", { hasText: "الأكاديمية" });
@@ -94,5 +95,10 @@ test("the site menus come from the CMS and behave like menus", async ({ page, is
     await toggle.click();
     await expect(header.getByRole("link", { name: "قدّم الآن" })).toBeVisible();
   }
-  await expect(page.locator("footer").getByRole("link", { name: "اللوائح" })).toBeVisible();
+  const footer = page.locator("footer");
+  await expect(footer.getByRole("link", { name: "اللوائح" })).toBeVisible();
+  await expect(footer.getByRole("link", { name: "سياسة الخصوصية" })).toHaveAttribute(
+    "href",
+    "/ar/privacy/",
+  );
 });

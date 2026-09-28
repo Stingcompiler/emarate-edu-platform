@@ -9,7 +9,15 @@ dev seed publishes demo texts clearly marked «تجريبي»**. Never invent of
 - **Phase 2 — #31 (`feat/landing-menus`):** two-level CMS menus; migration `content/0002_default_menus` holds the
   full official URL structure; landing `lib/menus.ts` hides links whose page isn't built/published.
   Merge when CI is green.
-- **Phase 3 — next (new branch from main after #31):** editorial official pages at the URLs already in the default menus:
+- **#31 merged.** **Phase 3 is on `feat/landing-official-pages` (PR open), all checks green locally**
+  (pytest SQLite 663 / Postgres 662, format, typecheck, Vitest, build 100 pages, e2e landing 6/6).
+  Remaining: glance at the portal PageEditor for an official page (slug locked, hint shows the path), commit,
+  PR, merge when CI is green. What it does: `backend/content/official.py` (registry, drafts via post_migrate,
+  `public_path`, "note" block), Page.slug allows one "/", author nullable (migration 0003), pages list gains
+  `path` in registry order, landing `[lang]/[...path].astro`, legal links in the footer bar, dean's word on home,
+  about sub-page list, auto heads of department on /about/leadership, and `lib/api.ts` now caps parallel
+  requests (6), retries transient failures and never caches a failure (fixed dev/e2e 404s from "fetch failed").
+- **Phase 3 — original plan:** editorial official pages at the URLs already in the default menus:
   `/about/{history,vision,dean,leadership,accreditation,partners,careers}`, `/academics/{student-guide,library}`,
   `/admissions/{fees,equivalence}`, `/student-life/{affairs,activities,alumni}`, `/gallery`, legal `/privacy`
   (now `/p/privacy`), `/terms`, `/accessibility`. Plan: CMS `Page` rows with those slugs (slug field may need `/`

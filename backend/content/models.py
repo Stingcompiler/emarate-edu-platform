@@ -2,7 +2,9 @@
 
 from django.conf import settings
 from django.core.files.storage import storages
+from django.core.validators import RegexValidator
 from django.db import models
+from django.utils.translation import gettext_lazy as _
 
 from core.models import PublicIdModel, SingletonModel, TimestampedModel
 
@@ -57,15 +59,22 @@ class MediaAsset(PublicIdModel, TimestampedModel):
         return self.alt_ar or self.file.name
 
 
+# A slug, or a one-level path for the official pages ("about/history", content/official.py).
+page_slug = RegexValidator(r"^[-\w]+(/[-\w]+)?\Z", _("Letters, digits, - or a single /."))
+
+
 class Page(PublicIdModel, TimestampedModel):
-    slug = models.SlugField(max_length=100, unique=True, allow_unicode=True)
+    slug = models.CharField(max_length=100, unique=True, validators=[page_slug])
     title_ar = models.CharField(max_length=200)
     title_en = models.CharField(max_length=200, blank=True)
     blocks = models.JSONField(default=list, blank=True)
     seo = models.JSONField(default=dict, blank=True)
     status = models.CharField(max_length=10, choices=Status.choices, default=Status.DRAFT)
     publish_at = models.DateTimeField(null=True, blank=True)
-    author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="+")
+    # Blank for the official drafts the system creates (content/official.py).
+    author = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="+", null=True, blank=True
+    )
 
     class Meta:
         ordering = ["slug"]
