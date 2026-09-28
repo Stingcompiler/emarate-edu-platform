@@ -9,9 +9,12 @@ export type Lecture = Schemas["Lecture"];
 const H = 3_600_000;
 const D = 24 * H;
 
-/** Arabic count of hours: 1 ساعة، 2 ساعتان، 3–10 ساعات، 11+ ساعة. */
-const hours = (n: number) =>
-  n === 1 ? "ساعة" : n === 2 ? "ساعتين" : n <= 10 ? `${n} ساعات` : `${n} ساعة`;
+/** A span after «بعد»/«متأخر» (genitive dual): ساعة، ساعتين، 5 ساعات، 15 ساعة. */
+const span = (n: number, one: string, two: string, few: string, many: string) =>
+  n === 1 ? one : n === 2 ? two : n <= 10 ? `${n} ${few}` : `${n} ${many}`;
+const hours = (n: number) => span(n, "ساعة", "ساعتين", "ساعات", "ساعة");
+const minutes = (n: number) => span(n, "دقيقة", "دقيقتين", "دقائق", "دقيقة");
+const days = (n: number) => span(n, "يومًا", "يومين", "أيام", "يومًا");
 
 /** "بعد 6 ساعات" / "متأخر يومين" / "غدًا 10:00" — short, relative, Arabic. */
 export function dueLabel(iso: string, now = Date.now()): string {
@@ -20,10 +23,9 @@ export function dueLabel(iso: string, now = Date.now()): string {
   if (diff < 0) {
     if (abs < H) return "انتهى الآن";
     if (abs < D) return `متأخر ${hours(Math.round(abs / H))}`;
-    const days = Math.round(abs / D);
-    return days === 1 ? "متأخر يومًا" : days === 2 ? "متأخر يومين" : `متأخر ${days} أيام`;
+    return `متأخر ${days(Math.round(abs / D))}`;
   }
-  if (diff < H) return `بعد ${Math.max(1, Math.round(diff / 60_000))} دقيقة`;
+  if (diff < H) return `بعد ${minutes(Math.max(1, Math.round(diff / 60_000)))}`;
   if (diff < D) return `بعد ${hours(Math.round(diff / H))}`;
   const time = new Date(iso).toLocaleTimeString("ar", { hour: "numeric", minute: "2-digit" });
   if (diff < 2 * D) return `غدًا ${time}`;
@@ -40,8 +42,8 @@ export function taskState(a: Assignment, now = Date.now()): TaskState {
   if (a.mine?.graded) return "graded";
   if (a.mine) return "submitted";
   const due = new Date(a.due_at).getTime();
-  const end = a.late_until ? new Date(a.late_until).getTime() : due;
-  if (due < now) return end >= now ? "late" : "late";
+  // Past due and not submitted is late, inside or after the late window alike.
+  if (due < now) return "late";
   const today = new Date(now);
   today.setHours(23, 59, 59, 999);
   if (due <= today.getTime()) return "today";

@@ -11,7 +11,8 @@
     "typecheck": "pnpm -r --if-present typecheck",
     "build": "pnpm -r --if-present build",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "test": "pnpm -r --if-present test"
   },
   "devDependencies": {
     "prettier": "^3.9.9",

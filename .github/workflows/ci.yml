@@ -74,4 +74,6 @@ jobs:
         run: pnpm api:generate
       - run: pnpm format:check
       - run: pnpm typecheck
+      - name: Unit and component tests (Vitest)
+        run: pnpm test
       - run: pnpm build
