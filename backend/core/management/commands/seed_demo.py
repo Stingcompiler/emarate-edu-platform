@@ -556,6 +556,8 @@ class Command(BaseCommand):
 
         from contacts.models import Contact
         from content.models import Announcement, Event, Page
+        from content.official import OFFICIAL_PAGES, ensure_drafts
+        from content.official import blocks as official_blocks
         from inquiries.models import Inquiry, InquiryStatusHistory
         from live.models import LiveSession
 
@@ -599,42 +601,14 @@ class Command(BaseCommand):
                     publish_at=now,
                     created_by=users[Role.TEACHER],
                 )
-        Page.objects.get_or_create(
-            slug="about",
-            defaults={
-                "title_ar": "عن الكلية",
-                "status": "published",
-                "author": site,
-                "blocks": [
-                    {"type": "heading", "text": "رسالتنا"},
-                    {"type": "paragraph", "text": "تعليم تقني تطبيقي يخدم سوق العمل."},
-                ],
-            },
-        )
-        # The footer links to it; the real text is the college's to write (demo only).
-        Page.objects.get_or_create(
-            slug="privacy",
-            defaults={
-                "title_ar": "سياسة الخصوصية",
-                "title_en": "Privacy policy",
-                "status": "published",
-                "author": site,
-                "blocks": [
-                    {"type": "paragraph", "text": "نص تجريبي — تستبدله الكلية بسياستها المعتمدة."},
-                    {"type": "heading", "text": "ما نجمعه"},
-                    {
-                        "type": "paragraph",
-                        "text": "بيانات التقديم والتواصل التي تدخلها ومستنداتك، "
-                        "لغرض القبول والتواصل معك فقط.",
-                    },
-                    {"type": "heading", "text": "من يطّلع عليها"},
-                    {
-                        "type": "paragraph",
-                        "text": "مسجلو الأقسام المعنيون وحدهم، ولا تُشارك مع أي جهة خارج الكلية.",
-                    },
-                ],
-            },
-        )
+        # The official pages (about, dean, fees, privacy …) exist as system drafts after
+        # migrate; the demo publishes them with a placeholder text marked as such. The
+        # college writes the real text — never invent official facts here.
+        ensure_drafts()
+        for official in OFFICIAL_PAGES:
+            Page.objects.filter(slug=official.slug, author__isnull=True, status="draft").update(
+                status="published", blocks=official_blocks(official, demo=True)
+            )
         Event.objects.get_or_create(
             slug="orientation-2026",
             defaults={

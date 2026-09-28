@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ecst-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-28 07:54+0200\n"
+"POT-Creation-Date: 2026-09-28 15:41+0200\n"
 "Language: ar\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -220,12 +220,18 @@ msgstr "هذا الاستفسار مغلق."
 msgid "Your session expired. Verify your email again."
 msgstr "انتهت جلستك. أكّد بريدك من جديد."
 
+msgid "Letters, digits, - or a single /."
+msgstr "حروف وأرقام و- أو / واحدة فقط."
+
 #, python-format
 msgid "Images are limited to %(MAX_IMAGE_MB)s MB."
 msgstr "حجم الصورة لا يتجاوز %(MAX_IMAGE_MB)s ميغابايت."
 
 msgid "Upload a PNG, JPEG, WebP or GIF image."
 msgstr "ارفع صورة بصيغة PNG أو JPEG أو WebP أو GIF."
+
+msgid "An official page keeps its address."
+msgstr "الصفحة الرسمية تحتفظ بعنوانها."
 
 msgid "Blocks are a list."
 msgstr "الكتل يجب أن تكون قائمة."

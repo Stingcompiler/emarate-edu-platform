@@ -2,18 +2,21 @@
 import Blocks from "../../components/Blocks.astro";
 import PageHead from "../../components/PageHead.astro";
 import Base from "../../layouts/Base.astro";
-import { type Page, departments, get, site, stats } from "../../lib/api";
-import { type Lang, href, langPaths, num, pick, t } from "../../lib/i18n";
+import { type Page, departments, get, pages, site, stats } from "../../lib/api";
+import { type Lang, arrow, href, langPaths, num, pick, t } from "../../lib/i18n";
 
 export const getStaticPaths = langPaths;
 const lang = Astro.params.lang as Lang;
 // The "about" CMS page, when the site team has published one.
-const [s, page, st, depts] = await Promise.all([
+const [s, page, st, depts, published] = await Promise.all([
   site(),
   get<Page | null>("pages/about", null),
   stats(),
   departments(),
+  pages(),
 ]);
+// The published "about" sub-pages (history, dean, leadership …).
+const more = published.filter((p) => p.path.startsWith("about/"));
 const title = page ? pick(lang, page.title_ar, page.title_en) : t(lang, "about");
 ---
 
@@ -28,6 +31,24 @@ const title = page ? pick(lang, page.title_ar, page.title_en) : t(lang, "about")
       )}
     </div>
     <aside class="space-y-4">
+      {more.length > 0 && (
+        <nav
+          aria-label={lang === "ar" ? "المزيد عن الكلية" : "More about the college"}
+          class="rounded-2xl border border-border-soft bg-surface p-2"
+        >
+          {more.map((p) => (
+            <a
+              href={href(lang, `${p.path}/`)}
+              class="flex items-center justify-between rounded-md px-3 py-2.5 text-sm font-semibold hover:bg-surface-alt"
+            >
+              {pick(lang, p.title_ar, p.title_en)}
+              <span aria-hidden="true" class="text-text-muted">
+                {arrow(lang)}
+              </span>
+            </a>
+          ))}
+        </nav>
+      )}
       <div class="grid grid-cols-2 gap-2">
         {[
           [st.students, t(lang, "students")],

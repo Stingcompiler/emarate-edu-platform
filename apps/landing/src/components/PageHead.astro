@@ -5,6 +5,7 @@ interface Props {
   lang: Lang;
   title: string;
   lead?: string;
+  /** [label, path]; an empty path is a section without its own page. */
   crumbs?: [string, string][];
 }
 const { lang, title, lead, crumbs = [] } = Astro.props;
@@ -19,9 +20,13 @@ const { lang, title, lead, crumbs = [] } = Astro.props;
       {crumbs.map(([label, path]) => (
         <>
           <span class="mx-1">/</span>
-          <a href={href(lang, path)} class="hover:text-text">
-            {label}
-          </a>
+          {path ? (
+            <a href={href(lang, path)} class="hover:text-text">
+              {label}
+            </a>
+          ) : (
+            <span>{label}</span>
+          )}
         </>
       ))}
     </nav>

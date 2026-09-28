@@ -17,21 +17,54 @@ export const PORTAL = (import.meta.env.PUBLIC_PORTAL_URL ?? "http://localhost:51
 
 const cache = new Map<string, Promise<unknown>>();
 
+// A build reads dozens of pages at once; the dev API (runserver) drops connections when
+// flooded, so at most a few requests run together and a transient failure is retried.
+const MAX_PARALLEL = 6;
+let running = 0;
+const waiting: (() => void)[] = [];
+async function limited<T>(task: () => Promise<T>): Promise<T> {
+  if (running >= MAX_PARALLEL) await new Promise<void>((go) => waiting.push(go));
+  running++;
+  try {
+    return await task();
+  } finally {
+    running--;
+    waiting.shift()?.();
+  }
+}
+
+class Transient extends Error {}
+async function fetchJson(path: string, attempts = 3): Promise<unknown> {
+  for (let attempt = 1; ; attempt++) {
+    try {
+      const r = await limited(() =>
+        fetch(`${API}/api/public/${path}`, {
+          headers: { "Accept-Language": "ar", ...BUILD_HEADERS },
+        }),
+      );
+      if (r.ok) return await r.json();
+      if (r.status === 404) return null;
+      throw r.status === 429 || r.status >= 500
+        ? new Transient(`HTTP ${r.status}`)
+        : new Error(`HTTP ${r.status}`);
+    } catch (error) {
+      const transient = error instanceof Transient || error instanceof TypeError; // network
+      if (!transient || attempt >= attempts) throw error;
+      await new Promise((wait) => setTimeout(wait, 300 * attempt));
+    }
+  }
+}
+
 export function get<T>(path: string, fallback: T): Promise<T> {
   if (!cache.has(path)) {
     cache.set(
       path,
-      fetch(`${API}/api/public/${path}`, { headers: { "Accept-Language": "ar", ...BUILD_HEADERS } })
-        .then((r) => {
-          if (r.ok) return r.json();
-          if (r.status === 404) return null;
-          throw new Error(`HTTP ${r.status}`);
-        })
-        .catch((error) => {
-          if (STRICT) throw new Error(`[landing] /api/public/${path} failed: ${error}`);
-          console.warn(`[landing] /api/public/${path} unavailable (${error}); building without it`);
-          return null;
-        }),
+      fetchJson(path).catch((error) => {
+        if (STRICT) throw new Error(`[landing] /api/public/${path} failed: ${error}`);
+        console.warn(`[landing] /api/public/${path} unavailable (${error}); building without it`);
+        cache.delete(path); // `astro dev` keeps running: try again on the next request
+        return null;
+      }),
     );
   }
   return cache.get(path)!.then((data) => (data ?? fallback) as T);
@@ -126,7 +159,7 @@ export type Announcement = {
   is_pinned?: boolean;
 };
 export type Block = {
-  type: "heading" | "paragraph" | "html" | "image" | "cta" | "list";
+  type: "heading" | "paragraph" | "note" | "html" | "image" | "cta" | "list";
   text?: string;
   html?: string;
   url?: string;
@@ -186,8 +219,19 @@ export type Calendar = {
   admission: { name: string; opens_at: string; closes_at: string } | null;
 };
 export const calendar = () => get<Calendar>("calendar", { terms: [], admission: null });
-export const pages = () =>
-  get<{ slug: string; title_ar: string; title_en: string; updated_at: string }[]>("pages", []);
+/** Published CMS pages. `path` is where the site serves each one: the college's official
+ *  pages at their own path (about/dean, privacy …), any other page under p/. */
+export type PageRef = {
+  slug: string;
+  path: string;
+  title_ar: string;
+  title_en: string;
+  updated_at: string;
+};
+export const pages = () => get<PageRef[]>("pages", []);
+/** One published page by slug (official slugs keep their "/"). */
+export const page = (slug: string) =>
+  get<Page | null>(`pages/${slug.split("/").map(encodeURIComponent).join("/")}`, null);
 export const stats = () =>
   get<Stats>("stats", { students: 0, teachers: 0, programs: 0, departments: 0 });
 export type MenuLink = { id: number; label_ar: string; label_en: string; url: string };

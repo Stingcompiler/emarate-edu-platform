@@ -1,0 +1,102 @@
+---
+import Blocks from "../../components/Blocks.astro";
+import PageHead from "../../components/PageHead.astro";
+import Base from "../../layouts/Base.astro";
+import { type Page, type PageRef, departments, page as loadPage, pages } from "../../lib/api";
+import { LANGS, type Lang, href, pick, t } from "../../lib/i18n";
+
+// The college's official pages (backend content/official.py) at their own path —
+// /about/dean/, /admissions/fees/, /privacy/ … — once the site manager publishes them.
+const SECTIONS: Record<string, [string, string, string]> = {
+  about: ["عن الكلية", "About", "about/"],
+  academics: ["الأكاديمية", "Academics", ""],
+  admissions: ["القبول", "Admissions", "admissions/"],
+  "student-life": ["الحياة الطلابية", "Student life", ""],
+};
+
+export async function getStaticPaths() {
+  const list = await pages();
+  // "about" has its own page (about.astro); other pages live under p/.
+  const official = list.filter((p) => !p.path.startsWith("p/") && p.path !== "about");
+  const full = await Promise.all(official.map((p) => loadPage(p.slug)));
+  return LANGS.flatMap((lang) =>
+    official.flatMap((ref, i) =>
+      full[i] ? [{ params: { lang, path: ref.path }, props: { page: full[i], all: list } }] : [],
+    ),
+  );
+}
+const lang = Astro.params.lang as Lang;
+const { page, all } = Astro.props as { page: Page; all: PageRef[] };
+const path = Astro.params.path as string;
+const title = pick(lang, page.title_ar, page.title_en);
+const section = path.includes("/") ? path.split("/")[0]! : "";
+const crumb = SECTIONS[section];
+// The other published pages of the same section, for the side list.
+// Heads of department come from the departments' own data, never retyped.
+const heads = path === "about/leadership" ? (await departments()).filter((d) => d.manager) : [];
+const siblings = section
+  ? all.filter((p) => p.path === section || p.path.startsWith(`${section}/`))
+  : [];
+---
+
+<Base lang={lang} title={title} path={`${path}/`} description={page.seo?.description}>
+  <PageHead
+    lang={lang}
+    title={title}
+    crumbs={crumb ? [[pick(lang, crumb[0], crumb[1]), crumb[2]]] : []}
+  />
+  <div
+    class:list={[
+      "mx-auto grid gap-10 px-4 py-10 lg:px-8",
+      siblings.length > 1 ? "max-w-6xl lg:grid-cols-[1fr_16rem]" : "max-w-3xl",
+    ]}
+  >
+    <article class="min-w-0">
+      <Blocks blocks={page.blocks} />
+      {heads.length > 0 && (
+        <section class="mt-8">
+          <h2 class="font-display text-xl font-bold">
+            {lang === "ar" ? "رؤساء الأقسام" : "Heads of department"}
+          </h2>
+          <ul class="mt-4 grid gap-3 sm:grid-cols-2">
+            {heads.map((d) => (
+              <li class="rounded-2xl border border-border-soft bg-surface p-4">
+                <b class="block">{d.manager}</b>
+                <a
+                  href={href(lang, `departments/${d.code}/`)}
+                  class="text-sm text-text-muted hover:text-primary"
+                >
+                  {t(lang, "manager")} · {pick(lang, d.name_ar, d.name_en)}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+    </article>
+    {siblings.length > 1 && (
+      <nav
+        aria-label={crumb ? pick(lang, crumb[0], crumb[1]) : title}
+        class="h-fit rounded-2xl border border-border-soft bg-surface p-2 lg:sticky lg:top-24"
+      >
+        {crumb && (
+          <p class="px-3 pb-1 pt-2 text-xs font-semibold text-text-muted">
+            {pick(lang, crumb[0], crumb[1])}
+          </p>
+        )}
+        {siblings.map((p) => (
+          <a
+            href={href(lang, `${p.path}/`)}
+            aria-current={p.path === path ? "page" : undefined}
+            class:list={[
+              "block rounded-md px-3 py-2.5 text-sm hover:bg-surface-alt",
+              p.path === path ? "bg-surface-alt font-semibold text-primary" : "text-text",
+            ]}
+          >
+            {pick(lang, p.title_ar, p.title_en)}
+          </a>
+        ))}
+      </nav>
+    )}
+  </div>
+</Base>

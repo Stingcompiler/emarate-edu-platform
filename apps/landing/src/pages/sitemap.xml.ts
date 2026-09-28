@@ -25,7 +25,9 @@ export const GET: APIRoute = async ({ site }) => {
     ...depts.map((d) => `departments/${d.code}/`),
     ...progs.map((p) => `programs/${p.code}/`),
     ...items.map((n) => `news/${encodeURIComponent(n.slug)}/`),
-    ...cms.map((p) => `p/${encodeURIComponent(p.slug)}/`),
+    ...cms
+      .filter((p) => p.path !== "about") // the about page is above
+      .map((p) => `${p.path.split("/").map(encodeURIComponent).join("/")}/`),
   ];
   const url = (lang: string, path: string) => new URL(`/${lang}/${path}`, site).toString();
   const body = paths

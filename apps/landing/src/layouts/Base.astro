@@ -21,8 +21,11 @@ interface Props {
 
 const { lang, title, description, path = "", jsonLd, image, bottomBar = false } = Astro.props;
 const s = await loadSite();
-// Linked only once the site manager has published it — never a link to a 404.
-const hasPrivacy = (await pages()).some((p) => p.slug === "privacy");
+// Legal pages sit in the footer's bottom bar, once published — never a link to a 404.
+const published = await pages();
+const legal = (["privacy", "terms", "accessibility"] as const)
+  .map((slug) => published.find((p) => p.slug === slug))
+  .filter((p) => p !== undefined);
 const siteName = pick(lang, s.name_ar, s.name_en);
 const shortName = siteName.split(" ").slice(0, 2).join(" ");
 const other: Lang = lang === "ar" ? "en" : "ar";
@@ -307,10 +310,17 @@ const ext = (external: boolean) => (external ? { rel: "noopener", target: "_blan
           <p>
             © {new Date().getFullYear()} {siteName}
           </p>
-          {hasPrivacy && (
-            <a href={href(lang, "p/privacy/")} class="hover:text-white">
-              {t(lang, "privacy")}
-            </a>
+          {legal.length > 0 && (
+            <nav
+              aria-label={lang === "ar" ? "السياسات" : "Policies"}
+              class="flex flex-wrap gap-x-4"
+            >
+              {legal.map((p) => (
+                <a href={href(lang, `${p.path}/`)} class="hover:text-white">
+                  {pick(lang, p.title_ar, p.title_en)}
+                </a>
+              ))}
+            </nav>
           )}
         </div>
       </div>

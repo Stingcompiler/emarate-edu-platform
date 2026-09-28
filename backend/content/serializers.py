@@ -13,6 +13,7 @@ from .models import (
     Redirect,
     SiteSettings,
 )
+from .official import BY_SLUG, public_path
 from .sanitize import clean_blocks, clean_html
 
 MAX_IMAGE_MB = 5
@@ -75,8 +76,25 @@ class PageSerializer(serializers.ModelSerializer):
             "status",
             "publish_at",
             "updated_at",
+            "path",
+            "official",
         ]
         read_only_fields = ["public_id", "updated_at"]
+
+    path = serializers.SerializerMethodField()
+    # One of the college's official pages (content/official.py): its slug is fixed.
+    official = serializers.SerializerMethodField()
+
+    def get_path(self, page) -> str:
+        return public_path(page.slug)
+
+    def get_official(self, page) -> bool:
+        return page.slug in BY_SLUG
+
+    def validate_slug(self, value):
+        if self.instance and self.instance.slug in BY_SLUG and value != self.instance.slug:
+            raise serializers.ValidationError(gettext("An official page keeps its address."))
+        return value
 
     def validate_blocks(self, value):
         if not isinstance(value, list):

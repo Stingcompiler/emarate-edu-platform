@@ -32,7 +32,7 @@ const FALLBACK: [string, string][] = [
 ];
 
 async function builtPath(): Promise<(path: string) => boolean> {
-  const published = new Set((await pages()).map((p) => `p/${p.slug}`));
+  const published = new Set((await pages()).map((p) => p.path));
   return (path) =>
     SECTIONS.has(path) || published.has(path) || COLLECTIONS.some((c) => path.startsWith(c));
 }
