@@ -66,7 +66,7 @@ class RegulationAcknowledgement(models.Model):
         ]
 
     def __str__(self) -> str:
-        return f"{self.regulation_id}:{self.student_record_id}"
+        return f"{self.regulation} — {self.student_record.full_name_ar}"
 
 
 class StudentCase(PublicIdModel, TimestampedModel):

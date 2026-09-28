@@ -172,7 +172,8 @@ class AcademicResult(TimestampedModel):
         ]
 
     def __str__(self) -> str:
-        return f"{self.student_record_id}:{self.offering_id} {self.letter}"
+        record, course = self.student_record.university_number, self.offering.course.code
+        return f"{record} · {course} {self.letter}"
 
 
 class ResultCorrection(PublicIdModel, TimestampedModel):
@@ -207,7 +208,7 @@ class ResultCorrection(PublicIdModel, TimestampedModel):
         ]
 
     def __str__(self) -> str:
-        return f"correction:{self.result_id}"
+        return f"تعديل: {self.result}"
 
 
 class ResultDisplaySettings(SingletonModel):
@@ -248,4 +249,4 @@ class TermResultRelease(TimestampedModel):
         ]
 
     def __str__(self) -> str:
-        return f"release:{self.term_id}:{self.program_id or 'all'}"
+        return f"{self.term.name_ar} · {self.program.name_ar if self.program_id else 'كل البرامج'}"
