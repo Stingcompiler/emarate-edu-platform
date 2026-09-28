@@ -1,4 +1,5 @@
 from django.utils.translation import gettext
+from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
 from .models import (
@@ -196,25 +197,65 @@ class EventSerializer(serializers.ModelSerializer):
         return attrs
 
 
-class MenuItemSerializer(serializers.ModelSerializer):
+def _menu_url(value: str) -> str:
+    # "//host" is protocol-relative, i.e. off-site: only real site paths or https links.
+    if value and (value.startswith("//") or not value.startswith(("/", "https://"))):
+        raise serializers.ValidationError(gettext("Use a site path (/...) or an https:// link."))
+    return value
+
+
+class MenuLinkSerializer(serializers.ModelSerializer):
+    """A link inside a group (the menus are two levels: groups and links)."""
+
     class Meta:
         model = MenuItem
-        fields = ["id", "parent", "label_ar", "label_en", "url", "order"]
+        fields = ["id", "label_ar", "label_en", "url"]
+        read_only_fields = ["id"]
+        extra_kwargs = {"url": {"allow_blank": False}}
 
     def validate_url(self, value):
-        if not value.startswith(("/", "https://")):
+        return _menu_url(value)
+
+
+class MenuItemSerializer(MenuLinkSerializer):
+    """A top-level entry: a link, or a group of links when it has children."""
+
+    children = MenuLinkSerializer(many=True, required=False)
+
+    class Meta(MenuLinkSerializer.Meta):
+        fields = [*MenuLinkSerializer.Meta.fields, "order", "children"]
+        extra_kwargs = {"url": {"allow_blank": True}}
+
+    def validate(self, attrs):
+        if not attrs.get("url") and not attrs.get("children"):
             raise serializers.ValidationError(
-                gettext("Use a site path (/...) or an https:// link.")
+                {"url": [gettext("A link needs a URL; a group needs links.")]}
             )
-        return value
+        return attrs
 
 
 class MenuSerializer(serializers.ModelSerializer):
-    items = MenuItemSerializer(many=True)
+    items = serializers.SerializerMethodField()
 
     class Meta:
         model = Menu
         fields = ["key", "items"]
+
+    @extend_schema_field(MenuItemSerializer(many=True))
+    def get_items(self, menu):
+        items = list(menu.items.all())
+        children: dict[int, list[MenuItem]] = {}
+        for item in items:
+            if item.parent_id:
+                children.setdefault(item.parent_id, []).append(item)
+        return [
+            {
+                **MenuItemSerializer(item).data,
+                "children": MenuLinkSerializer(children.get(item.pk, []), many=True).data,
+            }
+            for item in items
+            if not item.parent_id
+        ]
 
 
 class RedirectSerializer(serializers.ModelSerializer):

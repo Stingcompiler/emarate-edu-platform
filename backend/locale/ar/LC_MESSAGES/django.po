@@ -245,6 +245,9 @@ msgstr "يجب أن يكون بعد البداية."
 msgid "Use a site path (/...) or an https:// link."
 msgstr "استخدم مسارًا في الموقع (/...) أو رابط https://."
 
+msgid "A link needs a URL; a group needs links."
+msgstr "الرابط يحتاج عنوانًا، والمجموعة تحتاج روابط."
+
 msgid "Start with /."
 msgstr "ابدأ بـ /."
 

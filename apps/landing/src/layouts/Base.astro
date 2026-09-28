@@ -5,6 +5,7 @@ import "@fontsource/noto-kufi-arabic/700.css";
 import "../styles/global.css";
 import { PORTAL, site as loadSite, pages } from "../lib/api";
 import { type Lang, dir, href, pick, t } from "../lib/i18n";
+import { navigation } from "../lib/menus";
 
 interface Props {
   lang: Lang;
@@ -29,22 +30,22 @@ const canonical = new URL(href(lang, path), Astro.site);
 const alternate = (l: Lang) => new URL(href(l, path), Astro.site).toString();
 const desc = description || s.seo?.description || s.tagline || siteName;
 const fullTitle = title === siteName ? title : `${title} — ${siteName}`;
-const nav = [
-  ["about", "about/"],
-  ["departments", "departments/"],
-  ["programs", "programs/"],
-  ["admission", "admissions/"],
-  ["news", "news/"],
-  ["contact", "contact/"],
-] as const;
 const current = Astro.url.pathname;
-// Footer-only links until the editable menus (phase 2) take over the navigation.
-const more = [
-  [lang === "ar" ? "الإعلانات" : "Announcements", "announcements/"],
-  [lang === "ar" ? "الفعاليات" : "Events", "events/"],
-  [lang === "ar" ? "التقويم الأكاديمي" : "Academic calendar", "calendar/"],
-  [lang === "ar" ? "اللوائح" : "Regulations", "regulations/"],
-] as const;
+const header = await navigation(lang, "header", current);
+const footer = await navigation(lang, "footer", current);
+// Loose footer links (not in a group) share one column.
+const footerColumns = [
+  ...footer.filter((e) => e.children.length),
+  ...(footer.some((e) => !e.children.length)
+    ? [
+        {
+          label: lang === "ar" ? "روابط" : "Links",
+          children: footer.filter((e) => !e.children.length),
+        },
+      ]
+    : []),
+];
+const ext = (external: boolean) => (external ? { rel: "noopener", target: "_blank" } : {});
 ---
 
 <!doctype html>
@@ -92,20 +93,61 @@ const more = [
           <span class="hidden truncate sm:inline">{siteName}</span>
         </a>
         <nav
-          class="ms-auto hidden items-center gap-1 lg:flex"
+          class="ms-auto hidden items-center gap-0.5 lg:flex"
           aria-label={lang === "ar" ? "الرئيسية" : "Main"}
         >
-          {nav.map(([key, p]) => (
-            <a
-              href={href(lang, p)}
-              class:list={[
-                "rounded-md px-3 py-2 text-sm font-semibold hover:bg-surface-alt",
-                current.startsWith(href(lang, p)) ? "text-primary" : "text-text-muted",
-              ]}
-            >
-              {t(lang, key)}
-            </a>
-          ))}
+          {header.map((e) =>
+            e.children.length ? (
+              <details data-menu class="relative">
+                <summary
+                  class:list={[
+                    "flex cursor-pointer list-none items-center gap-1 rounded-md px-2.5 py-2 text-sm font-semibold whitespace-nowrap hover:bg-surface-alt",
+                    e.active ? "text-primary" : "text-text-muted",
+                  ]}
+                >
+                  {e.label}
+                  <svg
+                    width="12"
+                    height="12"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2.5"
+                    aria-hidden="true"
+                  >
+                    <path d="m6 9 6 6 6-6" />
+                  </svg>
+                </summary>
+                <div class="absolute start-0 top-11 z-30 w-64 rounded-xl border border-border-soft bg-surface p-2 shadow-lg">
+                  {e.children.map((c) => (
+                    <a
+                      href={c.href}
+                      {...ext(c.external)}
+                      aria-current={c.active ? "page" : undefined}
+                      class:list={[
+                        "block rounded-md px-3 py-2 text-sm hover:bg-surface-alt",
+                        c.active ? "font-semibold text-primary" : "text-text",
+                      ]}
+                    >
+                      {c.label}
+                    </a>
+                  ))}
+                </div>
+              </details>
+            ) : (
+              <a
+                href={e.href}
+                {...ext(e.external)}
+                aria-current={e.active ? "page" : undefined}
+                class:list={[
+                  "rounded-md px-2.5 py-2 text-sm font-semibold whitespace-nowrap hover:bg-surface-alt",
+                  e.active ? "text-primary" : "text-text-muted",
+                ]}
+              >
+                {e.label}
+              </a>
+            ),
+          )}
         </nav>
         <a
           href={href(other, path)}
@@ -120,7 +162,7 @@ const more = [
         >
           {t(lang, "portal")}
         </a>
-        <details class="relative lg:hidden">
+        <details data-menu class="lg:hidden">
           <summary
             class="grid size-10 cursor-pointer list-none place-items-center rounded-md hover:bg-surface-alt"
             aria-label={lang === "ar" ? "القائمة" : "Menu"}
@@ -137,28 +179,64 @@ const more = [
               <path d="M4 7h16M4 12h16M4 17h16" />
             </svg>
           </summary>
-          <div class="absolute end-0 top-12 w-56 rounded-xl border border-border-soft bg-surface p-2 shadow-lg">
-            {nav.map(([key, p]) => (
+          <div class="fixed inset-x-0 top-16 max-h-[calc(100dvh-4rem)] overflow-y-auto border-b border-border-soft bg-surface px-4 pb-6 pt-2 shadow-lg">
+            <div class="mx-auto max-w-2xl">
+              <div class="grid grid-cols-2 gap-2 py-2">
+                <a
+                  href={`${PORTAL}/apply`}
+                  class="rounded-lg bg-primary px-3 py-3 text-center text-sm font-bold text-white"
+                >
+                  {t(lang, "apply")}
+                </a>
+                <a
+                  href={`${PORTAL}/track`}
+                  class="rounded-lg border border-border px-3 py-3 text-center text-sm font-semibold text-text"
+                >
+                  {t(lang, "track")}
+                </a>
+              </div>
+              {header.map((e) =>
+                e.children.length ? (
+                  <section class="border-t border-border-soft py-2">
+                    <p class="px-3 pb-1 pt-2 text-xs font-semibold text-text-muted">{e.label}</p>
+                    <div class="grid sm:grid-cols-2">
+                      {e.children.map((c) => (
+                        <a
+                          href={c.href}
+                          {...ext(c.external)}
+                          aria-current={c.active ? "page" : undefined}
+                          class:list={[
+                            "block rounded-md px-3 py-2.5 text-sm hover:bg-surface-alt",
+                            c.active ? "font-semibold text-primary" : "font-semibold text-text",
+                          ]}
+                        >
+                          {c.label}
+                        </a>
+                      ))}
+                    </div>
+                  </section>
+                ) : (
+                  <a
+                    href={e.href}
+                    {...ext(e.external)}
+                    aria-current={e.active ? "page" : undefined}
+                    class:list={[
+                      "block border-t border-border-soft px-3 py-3 text-sm font-semibold hover:bg-surface-alt",
+                      e.active ? "text-primary" : "text-text",
+                    ]}
+                  >
+                    {e.label}
+                  </a>
+                ),
+              )}
               <a
-                href={href(lang, p)}
-                class="block rounded-md px-3 py-2.5 text-sm font-semibold hover:bg-surface-alt"
+                href={href(other, path)}
+                hreflang={other}
+                class="block border-t border-border-soft px-3 py-3 text-sm font-semibold text-text-muted hover:bg-surface-alt sm:hidden"
               >
-                {t(lang, key)}
+                {t(lang, "other")}
               </a>
-            ))}
-            <a
-              href={`${PORTAL}/track`}
-              class="block rounded-md px-3 py-2.5 text-sm font-semibold text-primary hover:bg-surface-alt"
-            >
-              {t(lang, "track")}
-            </a>
-            <a
-              href={href(other, path)}
-              hreflang={other}
-              class="block rounded-md px-3 py-2.5 text-sm font-semibold text-text-muted hover:bg-surface-alt sm:hidden"
-            >
-              {t(lang, "other")}
-            </a>
+            </div>
           </div>
         </details>
       </div>
@@ -169,65 +247,94 @@ const more = [
     </main>
 
     <footer class="mt-16 bg-header text-sm text-navy-100">
-      <div class="mx-auto grid max-w-6xl gap-8 px-4 py-10 sm:grid-cols-3 lg:px-8">
-        <div>
+      <div class="mx-auto grid max-w-6xl grid-cols-2 gap-8 px-4 py-10 lg:grid-cols-[1.4fr_repeat(4,1fr)] lg:px-8">
+        <div class="col-span-2 lg:col-span-1">
           <p class="font-bold text-white">{siteName}</p>
           {s.tagline && <p class="mt-2 leading-6">{s.tagline}</p>}
+          <address class="mt-4 space-y-1 not-italic leading-6">
+            {s.address && <p>{s.address}</p>}
+            {s.phone && (
+              <p>
+                <a href={`tel:${s.phone.replace(/\s/g, "")}`} dir="ltr" class="hover:text-white">
+                  {s.phone}
+                </a>
+              </p>
+            )}
+            {s.email && (
+              <p>
+                <a href={`mailto:${s.email}`} class="hover:text-white">
+                  {s.email}
+                </a>
+              </p>
+            )}
+            {s.whatsapp_e164 && (
+              <p>
+                <a
+                  href={`https://wa.me/${s.whatsapp_e164.replace("+", "")}`}
+                  class="hover:text-white"
+                >
+                  WhatsApp
+                </a>
+              </p>
+            )}
+          </address>
+          <p class="mt-4 flex flex-wrap gap-x-4 gap-y-2 font-semibold">
+            <a href={`${PORTAL}/apply`} class="text-white hover:underline">
+              {t(lang, "apply")}
+            </a>
+            <a href={`${PORTAL}/track`} class="hover:text-white">
+              {t(lang, "track")}
+            </a>
+          </p>
         </div>
-        <nav class="grid grid-cols-2 gap-2" aria-label={lang === "ar" ? "روابط" : "Links"}>
-          {nav.map(([key, p]) => (
-            <a href={href(lang, p)} class="hover:text-white">
-              {t(lang, key)}
-            </a>
-          ))}
-          <a href={`${PORTAL}/apply`} class="hover:text-white">
-            {t(lang, "apply")}
-          </a>
-          <a href={`${PORTAL}/track`} class="hover:text-white">
-            {t(lang, "track")}
-          </a>
-          {more.map(([label, p]) => (
-            <a href={href(lang, p)} class="hover:text-white">
-              {label}
-            </a>
-          ))}
+        {footerColumns.map((col) => (
+          <nav aria-label={col.label}>
+            <p class="font-semibold text-white">{col.label}</p>
+            <ul class="mt-3 space-y-2">
+              {col.children.map((c) => (
+                <li>
+                  <a href={c.href} {...ext(c.external)} class="hover:text-white">
+                    {c.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        ))}
+      </div>
+      <div class="border-t border-navy-700">
+        <div class="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-x-6 gap-y-2 px-4 py-4 text-xs text-navy-300 lg:px-8">
+          <p>
+            © {new Date().getFullYear()} {siteName}
+          </p>
           {hasPrivacy && (
             <a href={href(lang, "p/privacy/")} class="hover:text-white">
               {t(lang, "privacy")}
             </a>
           )}
-        </nav>
-        <address class="space-y-1 not-italic leading-6">
-          {s.address && <p>{s.address}</p>}
-          {s.phone && (
-            <p>
-              <a href={`tel:${s.phone.replace(/\s/g, "")}`} dir="ltr" class="hover:text-white">
-                {s.phone}
-              </a>
-            </p>
-          )}
-          {s.email && (
-            <p>
-              <a href={`mailto:${s.email}`} class="hover:text-white">
-                {s.email}
-              </a>
-            </p>
-          )}
-          {s.whatsapp_e164 && (
-            <p>
-              <a
-                href={`https://wa.me/${s.whatsapp_e164.replace("+", "")}`}
-                class="hover:text-white"
-              >
-                WhatsApp
-              </a>
-            </p>
-          )}
-        </address>
+        </div>
       </div>
-      <p class="border-t border-navy-700 py-4 text-center text-xs text-navy-300">
-        © {new Date().getFullYear()} {siteName}
-      </p>
     </footer>
+    <script>
+      // Menus are <details> (they work without JS); this makes them behave like menus:
+      // one open at a time, closed by a tap outside or by Esc.
+      const menus = () => document.querySelectorAll<HTMLDetailsElement>("details[data-menu]");
+      menus().forEach((d) =>
+        d.addEventListener("toggle", () => {
+          if (d.open) menus().forEach((o) => o !== d && (o.open = false));
+        }),
+      );
+      document.addEventListener("click", (e) =>
+        menus().forEach((d) => d.open && !d.contains(e.target as Node) && (d.open = false)),
+      );
+      document.addEventListener("keydown", (e) => {
+        if (e.key !== "Escape") return;
+        menus().forEach((d) => {
+          if (!d.open) return;
+          d.open = false;
+          d.querySelector("summary")?.focus();
+        });
+      });
+    </script>
   </body>
 </html>
