@@ -71,3 +71,28 @@ test("the programme page keeps «apply to this programme» in reach on the phone
   await expect(sticky).toBeInViewport();
   await expect(sticky).toHaveAttribute("href", /\/apply\?program=BIT$/);
 });
+
+test("the site menus come from the CMS and behave like menus", async ({ page, isMobile }) => {
+  await page.goto(`${SITE}/ar/`);
+  const header = page.locator("header");
+  // Default menus (content migration 0002): grouped, and never a link to an unbuilt page.
+  await expect(header.locator('a[href="/ar/about/history/"]')).toHaveCount(0);
+  const toggle = isMobile
+    ? header.getByLabel("القائمة")
+    : header.locator("nav summary", { hasText: "الأكاديمية" });
+  await toggle.click();
+  const calendar = header.getByRole("link", { name: "التقويم الأكاديمي" });
+  await expect(calendar).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(calendar).toBeHidden();
+  await toggle.click();
+  // A tap outside closes it (on the phone the panel fills the screen: tap the empty top bar).
+  if (isMobile) await page.mouse.click(200, 32);
+  else await page.mouse.click(8, page.viewportSize()!.height - 8);
+  await expect(calendar).toBeHidden();
+  if (isMobile) {
+    await toggle.click();
+    await expect(header.getByRole("link", { name: "قدّم الآن" })).toBeVisible();
+  }
+  await expect(page.locator("footer").getByRole("link", { name: "اللوائح" })).toBeVisible();
+});

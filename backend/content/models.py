@@ -192,7 +192,7 @@ class MenuItem(models.Model):
     )
     label_ar = models.CharField(max_length=100)
     label_en = models.CharField(max_length=100, blank=True)
-    url = models.CharField(max_length=300)
+    url = models.CharField(max_length=300, blank=True)  # blank for a group of links
     order = models.PositiveSmallIntegerField(default=1)
 
     class Meta:

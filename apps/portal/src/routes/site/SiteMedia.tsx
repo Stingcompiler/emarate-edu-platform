@@ -1,6 +1,5 @@
-import type { Schemas } from "@ecst/api";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Plus, Trash2, Upload } from "lucide-react";
+import { ArrowDown, ArrowUp, Plus, Trash2, Upload } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { PortalShell } from "../../components/PortalShell";
@@ -98,29 +97,63 @@ function Media() {
   );
 }
 
-type Item = Schemas["MenuItem"];
+type Link = { label_ar: string; label_en: string; url: string };
+type Entry = Link & { children: Link[] };
+
+const move = <T,>(xs: T[], i: number, by: -1 | 1): T[] => {
+  const j = i + by;
+  if (j < 0 || j >= xs.length) return xs;
+  const out = [...xs];
+  [out[i], out[j]] = [out[j]!, out[i]!];
+  return out;
+};
+
+/** Board: DesktopSiteMedia «قوائم الموقع». Two levels: a link, or a group of links. */
 function Menus() {
   const client = useQueryClient();
-  const [key, setKey] = useState("header");
+  const [key, setKey] = useState<"header" | "footer">("header");
   const menu = useQuery({
     queryKey: ["site", "menu", key],
     queryFn: async () =>
       (await api.GET("/api/v1/content/menus/{key}", { params: { path: { key } } })).data ?? null,
   });
-  const [items, setItems] = useState<Item[]>([]);
-  useEffect(() => setItems(menu.data?.items ?? []), [menu.data]);
+  const [items, setItems] = useState<Entry[]>([]);
+  useEffect(
+    () =>
+      setItems(
+        (menu.data?.items ?? []).map((it) => ({
+          label_ar: it.label_ar,
+          label_en: it.label_en ?? "",
+          url: it.url ?? "",
+          children: (it.children ?? []).map((c) => ({
+            label_ar: c.label_ar,
+            label_en: c.label_en ?? "",
+            url: c.url ?? "",
+          })),
+        })),
+      ),
+    [menu.data],
+  );
   const save = useMutation({
     mutationFn: async () => {
       const { data, error } = await api.PUT("/api/v1/content/menus/{key}", {
         params: { path: { key } },
-        body: items.map((it, i) => ({ ...it, order: i + 1 })) as never,
+        body: items.map((it, i) => ({ ...it, order: i + 1 })),
       });
       if (!data) throw error;
     },
     onSuccess: () => client.invalidateQueries({ queryKey: ["site", "menu"] }),
   });
+  const setEntry = (i: number, patch: Partial<Entry>) =>
+    setItems((xs) => xs.map((x, j) => (j === i ? { ...x, ...patch } : x)));
+  const setChild = (i: number, c: number, patch: Partial<Link>) =>
+    setEntry(i, {
+      children: items[i]!.children.map((x, j) => (j === c ? { ...x, ...patch } : x)),
+    });
+  const blank: Link = { label_ar: "", label_en: "", url: "/" };
+
   return (
-    <div className="max-w-2xl">
+    <div className="max-w-3xl">
       <div className="flex gap-2">
         <Chip active={key === "header"} onClick={() => setKey("header")}>
           القائمة العلوية
@@ -129,46 +162,59 @@ function Menus() {
           التذييل
         </Chip>
       </div>
-      <Card className="mt-3 divide-y divide-border-soft">
+      <p className="mt-3 text-xs leading-5 text-text-muted">
+        المسار بلا لغة (مثل <span dir="ltr">/admissions</span>) أو رابط https. الرابط لصفحة لم تُنشر
+        بعد لا يظهر في الموقع حتى تُنشر. المجموعة تُعرض قائمةً منسدلة، وتُترك بلا رابط.
+      </p>
+      <div className="mt-3 space-y-3">
         {items.map((it, i) => (
-          <div key={i} className="flex items-center gap-2 p-2">
-            <input
-              value={it.label_ar}
-              onChange={(e) =>
-                setItems((xs) =>
-                  xs.map((x, j) => (j === i ? { ...x, label_ar: e.target.value } : x)),
-                )
-              }
-              className="min-h-10 flex-1 rounded-lg border border-border bg-surface px-3 text-sm"
+          <Card key={i} className="p-3">
+            <MenuRow
+              link={it}
+              group={it.children.length > 0}
+              onChange={(patch) => setEntry(i, patch)}
+              onMove={(by) => setItems((xs) => move(xs, i, by))}
+              onRemove={() => setItems((xs) => xs.filter((_, j) => j !== i))}
             />
-            <input
-              dir="ltr"
-              value={it.url}
-              onChange={(e) =>
-                setItems((xs) => xs.map((x, j) => (j === i ? { ...x, url: e.target.value } : x)))
-              }
-              className="min-h-10 w-40 rounded-lg border border-border bg-surface px-3 text-sm"
-            />
+            {it.children.length > 0 && (
+              <div className="mt-2 space-y-2 border-s-2 border-border-soft ps-3">
+                {it.children.map((c, ci) => (
+                  <MenuRow
+                    key={ci}
+                    link={c}
+                    onChange={(patch) => setChild(i, ci, patch)}
+                    onMove={(by) => setEntry(i, { children: move(it.children, ci, by) })}
+                    onRemove={() =>
+                      setEntry(i, { children: it.children.filter((_, j) => j !== ci) })
+                    }
+                  />
+                ))}
+              </div>
+            )}
             <button
               type="button"
-              aria-label="حذف"
-              onClick={() => setItems((xs) => xs.filter((_, j) => j !== i))}
-              className="grid size-9 place-items-center text-danger-strong"
+              onClick={() =>
+                setEntry(i, {
+                  // Turning a link into a group moves its own link inside it.
+                  url: "",
+                  children: [
+                    ...it.children,
+                    it.children.length ? blank : { ...blank, url: it.url },
+                  ],
+                })
+              }
+              className="mt-2 inline-flex min-h-9 items-center gap-1 text-xs font-semibold text-primary"
             >
-              <Trash2 size={16} />
+              <Plus size={14} aria-hidden />
+              رابط فرعي
             </button>
-          </div>
+          </Card>
         ))}
-      </Card>
-      <div className="mt-3 flex gap-2">
+      </div>
+      <div className="mt-3 flex flex-wrap gap-2">
         <Button
           variant="secondary"
-          onClick={() =>
-            setItems((xs) => [
-              ...xs,
-              { id: 0, label_ar: "", url: "/", order: xs.length + 1 } as Item,
-            ])
-          }
+          onClick={() => setItems((xs) => [...xs, { ...blank, children: [] }])}
         >
           <Plus size={16} aria-hidden />
           رابط
@@ -182,6 +228,76 @@ function Menus() {
           <Notice>{problemMessage(save.error)}</Notice>
         </div>
       )}
+      {save.isSuccess && (
+        <p className="mt-3 text-sm text-success-strong" role="status">
+          حُفظت القائمة؛ تظهر في الموقع بعد إعادة بنائه.
+        </p>
+      )}
+    </div>
+  );
+}
+
+function MenuRow({
+  link,
+  group = false,
+  onChange,
+  onMove,
+  onRemove,
+}: {
+  link: Link;
+  group?: boolean;
+  onChange: (patch: Partial<Link>) => void;
+  onMove: (by: -1 | 1) => void;
+  onRemove: () => void;
+}) {
+  const input = "min-h-10 w-full rounded-lg border border-border bg-surface px-3 text-sm";
+  const icon = "grid size-9 shrink-0 place-items-center rounded-md hover:bg-surface-alt";
+  return (
+    <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+      <div className="flex min-w-0 flex-1 gap-2">
+        <input
+          aria-label="الاسم بالعربية"
+          placeholder="الاسم"
+          value={link.label_ar}
+          onChange={(e) => onChange({ label_ar: e.target.value })}
+          className={`${input} min-w-0 flex-1 ${group ? "font-semibold" : ""}`}
+        />
+        <input
+          dir="ltr"
+          aria-label="الاسم بالإنجليزية"
+          placeholder="English"
+          value={link.label_en}
+          onChange={(e) => onChange({ label_en: e.target.value })}
+          className={`${input} min-w-0 flex-1`}
+        />
+      </div>
+      <div className="flex items-center gap-1">
+        {group ? (
+          <span className="flex-1 px-1 text-xs text-text-muted sm:w-40 sm:flex-none">مجموعة</span>
+        ) : (
+          <input
+            dir="ltr"
+            aria-label="الرابط"
+            value={link.url}
+            onChange={(e) => onChange({ url: e.target.value })}
+            className={`${input} min-w-0 flex-1 sm:w-40 sm:flex-none`}
+          />
+        )}
+        <button type="button" aria-label="أعلى" onClick={() => onMove(-1)} className={icon}>
+          <ArrowUp size={16} />
+        </button>
+        <button type="button" aria-label="أسفل" onClick={() => onMove(1)} className={icon}>
+          <ArrowDown size={16} />
+        </button>
+        <button
+          type="button"
+          aria-label="حذف"
+          onClick={onRemove}
+          className={`${icon} text-danger-strong`}
+        >
+          <Trash2 size={16} />
+        </button>
+      </div>
     </div>
   );
 }

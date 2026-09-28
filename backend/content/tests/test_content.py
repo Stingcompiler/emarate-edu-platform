@@ -164,6 +164,30 @@ def test_events_media_menus_redirects_settings(api, site, make_user, settings):
         "الرئيسية",
         "القبول",
     ]
+    groups = [
+        {
+            "label_ar": "القبول",
+            "label_en": "Admissions",
+            "url": "",
+            "children": [
+                {"label_ar": "التقديم", "url": "/admissions"},
+                {"label_ar": "الرسوم", "url": "/admissions/fees"},
+            ],
+        },
+        {"label_ar": "تواصل", "url": "/contact"},
+    ]
+    assert api(site).put("/api/v1/content/menus/header", groups, format="json").status_code == 200
+    items = api().get("/api/public/menus/header").data["items"]
+    assert [(i["label_ar"], [c["url"] for c in i["children"]]) for i in items] == [
+        ("القبول", ["/admissions", "/admissions/fees"]),
+        ("تواصل", []),
+    ]
+    for bad in (
+        [{"label_ar": "x", "url": "//evil.example"}],  # protocol-relative: off-site
+        [{"label_ar": "مجموعة فارغة", "url": "", "children": []}],
+        [{"label_ar": "g", "url": "", "children": [{"label_ar": "x", "url": ""}]}],
+    ):
+        assert api(site).put("/api/v1/content/menus/header", bad, format="json").status_code == 400
     assert (
         api(site)
         .post("/api/v1/content/redirects", {"from_path": "/old", "to_path": "/new"})
@@ -224,3 +248,13 @@ def test_public_events_keep_past_ones_reachable(api, make_user):
         )
     assert [e["slug"] for e in api().get("/api/public/events").data] == ["soon"]
     assert [e["slug"] for e in api().get("/api/public/events?past=1").data] == ["done"]
+
+
+@pytest.mark.django_db
+def test_the_site_starts_with_default_menus(api):
+    """A fresh install has the official structure (docs/07 §1); the site hides unbuilt pages."""
+    header = api().get("/api/public/menus/header").data["items"]
+    assert [i["label_ar"] for i in header][:3] == ["عن الكلية", "الأكاديمية", "القبول"]
+    assert {c["url"] for i in header for c in i["children"]} >= {"/programs", "/about/dean"}
+    footer = api().get("/api/public/menus/footer").data["items"]
+    assert all(i["children"] for i in footer)

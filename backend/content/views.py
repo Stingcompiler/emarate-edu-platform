@@ -174,12 +174,12 @@ class MenuView(APIView):
         with transaction.atomic():
             menu, _ = Menu.objects.get_or_create(key=key)
             menu.items.all().delete()
-            MenuItem.objects.bulk_create(
-                [
-                    MenuItem(menu=menu, **{k: v for k, v in row.items() if k != "parent"})
-                    for row in data.validated_data
-                ]
-            )
+            for order, row in enumerate(data.validated_data, start=1):
+                links = row.pop("children", [])
+                row.pop("order", None)
+                group = MenuItem.objects.create(menu=menu, order=order, **row)
+                for sub, link in enumerate(links, start=1):
+                    MenuItem.objects.create(menu=menu, parent=group, order=sub, **link)
             record(_meta(request), "menu.update", menu, new={"items": len(data.validated_data)})
         services.request_site_rebuild()
         return Response(MenuSerializer(menu).data)

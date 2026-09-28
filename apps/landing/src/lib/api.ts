@@ -190,3 +190,8 @@ export const pages = () =>
   get<{ slug: string; title_ar: string; title_en: string; updated_at: string }[]>("pages", []);
 export const stats = () =>
   get<Stats>("stats", { students: 0, teachers: 0, programs: 0, departments: 0 });
+export type MenuLink = { id: number; label_ar: string; label_en: string; url: string };
+export type MenuItem = MenuLink & { order: number; children: MenuLink[] };
+/** The header and footer the site manager edits (portal → محتوى الموقع → القوائم). */
+export const menu = (key: "header" | "footer") =>
+  get<{ key: string; items: MenuItem[] } | null>(`menus/${key}`, null).then((m) => m?.items ?? []);
