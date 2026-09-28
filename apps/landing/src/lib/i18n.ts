@@ -86,6 +86,13 @@ export const N = {
     en: ["faculty member", "faculty"],
   },
   day: { one: "يوم", two: "يومين", few: "أيام", many: "يومًا", en: ["day", "days"] },
+  hour: {
+    one: "ساعة",
+    two: "ساعتان",
+    few: "ساعات",
+    many: "ساعة",
+    en: ["credit hour", "credit hours"],
+  },
 } satisfies Record<string, Noun>;
 
 export const years = (lang: Lang, terms: number) => {
