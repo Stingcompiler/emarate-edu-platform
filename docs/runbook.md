@@ -1,0 +1,121 @@
+# دليل التشغيل — منصة كلية الإمارات (Runbook)
+
+> للفريق التقني. كل الأوامر من جذر المستودع ما لم يُذكر غير ذلك. لا Docker: خدمات Render أصلية (Python وStatic).
+
+## 1. الخدمات (render.yaml)
+
+| الخدمة | النوع | الدور |
+|---|---|---|
+| `ecst-api` | Web (Python) | Django + DRF خلف gunicorn (`gthread 4×4`)، فحص الصحة `/api/public/health` |
+| `ecst-worker` | Worker | Celery: توزيع الإشعارات، طابور البريد، Push |
+| `ecst-beat` | Worker | Celery Beat: التذكيرات، إغلاق الاختبارات، انتهاء الطلبات، التحقق اليومي |
+| `ecst-backup` | Cron (الجمعة 01:00 UTC) | نسخة `pg_dump` مشفّرة إلى Bunny (`backups/`، آخر 8) |
+| `ecst-db` | Postgres 16 (مدفوع) | نسخ يومية + استعادة لنقطة زمنية من Render |
+| `ecst-redis` | Key Value | الذاكرة المؤقتة، حدود الطلبات، وسيط Celery |
+| `ecst-portal` | Static | البوابة (React). `/api/*` يُعاد توجيهه إلى الـ API (نفس الأصل للكوكيز وCSRF) |
+| `ecst-site` | Static | الموقع العام (Astro). يُعاد بناؤه عند النشر من لوحة الموقع |
+
+النطاقات: `api.ecst.edu.sd` و`portal.ecst.edu.sd` و`ecst.edu.sd` (+`www`) عبر Cloudflare (Proxy مفعّل، SSL: Full strict).
+
+## 2. أول نشر
+
+1. **Blueprint:** Render → New → Blueprint → اختر المستودع؛ يقرأ `render.yaml`.
+2. **الأسرار** (`sync: false`) — أنشئها وخزّن نسخة في مدير كلمات مرور الكلية **قبل** إدخالها:
+   ```bash
+   python3 -c "import secrets; print(secrets.token_urlsafe(48))"   # FIELD_ENCRYPTION_KEY, BACKUP_ENCRYPTION_KEY, SITE_BUILD_TOKEN
+   ```
+   ```bash
+   cd backend && uv run python manage.py vapid_keys                  # VAPID_PUBLIC_KEY / VAPID_PRIVATE_KEY
+   ```
+   - `SITE_BUILD_TOKEN`: القيمة نفسها في `ecst-api` و`ecst-site`.
+   - `SITE_REBUILD_HOOK_URL`: من `ecst-site` → Settings → Deploy Hook.
+   - مفاتيح Bunny (Storage + Pull Zone token + Stream) وBrevo من لوحاتهما.
+3. **النطاقات:** أضف النطاقات المخصصة في Render، ثم سجلات CNAME في Cloudflare.
+4. **أول مدير نظام** (Shell الخدمة `ecst-api`):
+   ```bash
+   uv run python manage.py create_system_admin --email it@ecst.edu.sd --name "اسم المدير"
+   ```
+   يطبع رابط تفعيل صالحًا 7 أيام لمرة واحدة؛ صاحب البريد يختار كلمة المرور. بعدها تُنشأ بقية الحسابات من `/system/users`.
+5. **الهيكل:** من `/system/structure` أضف الأقسام والبرامج والعام والفصل الحالي، ثم استورد سجل الطلاب من `/student-imports`.
+
+## 3. النشر والتراجع
+
+- كل دفع إلى `main` بعد نجاح CI يُنشر تلقائيًا. `preDeployCommand` يطبّق الترحيلات ثم `check --deploy`؛ إن فشل أيٌّ منهما لا يُستبدل الإصدار العامل.
+- **التراجع:** Render → الخدمة → Deploys → Rollback إلى الإصدار السابق. الترحيلات قابلة للعكس (مُختبرة على SQLite وPostgres)؛ لعكس ترحيل بعينه قبل التراجع:
+  ```bash
+  uv run python manage.py migrate <app> <previous_migration>
+  ```
+- الموقع العام: إن فشل بناؤه (`LANDING_STRICT=1` يوقفه عند تعطّل الـ API) تبقى النسخة المنشورة السابقة كما هي؛ أعد البناء من Deploy Hook بعد إصلاح الـ API.
+
+## 4. التحقق بعد النشر
+
+- `https://api.ecst.edu.sd/api/public/health` → `status: ok`.
+- ادخل إلى البوابة، ثم افتح `/audit`: يجب أن يكون عنوان IP في آخر عملية هو عنوانك العام الحقيقي. إن ظهر عنوان Cloudflare أو Render فعدّل `TRUSTED_PROXIES` (عدد الوكلاء الذين يضيفون إلى `X-Forwarded-For`) — القيمة الخاطئة تسمح بانتحال العنوان في التدقيق وحدود الطلبات.
+- أرسل إشعارًا تجريبيًا لنفسك (داخل التطبيق + Push + بريد).
+- انشر تعديلًا صغيرًا على صفحة من `/site` وتأكد من إعادة بناء الموقع خلال دقيقتين.
+
+## 5. النسخ الاحتياطي والاستعادة
+
+**خط الدفاع الأول:** نسخ Render اليومية واستعادة النقطة الزمنية (PITR) من لوحة `ecst-db`.
+
+**النسخة الخارجية الأسبوعية:** `ecst-backup` يحفظ `backups/ecst-<وقت>.dump.enc` في Bunny (مشفّرة بـ `BACKUP_ENCRYPTION_KEY`).
+
+```bash
+# سرد النسخ
+uv run python manage.py restore_database --list
+# فك تشفير نسخة إلى ملف محلي (لا يلمس قاعدة البيانات)
+uv run python manage.py restore_database --name backups/ecst-20261002T010000Z.dump.enc --out /tmp/ecst.dump
+```
+
+**تدريب الاستعادة (كل ربع سنة) — على قاعدة مؤقتة لا الإنتاج:**
+```bash
+createdb ecst_drill
+pg_restore --no-owner --no-privileges --dbname ecst_drill /tmp/ecst.dump
+psql -d ecst_drill -c "select count(*) from students_studentrecord"
+dropdb ecst_drill
+```
+دوّن التاريخ والمدة وعدد الصفوف في سجل التدريبات.
+
+**استعادة حقيقية:** أوقف `ecst-worker` و`ecst-beat` وضع `ecst-api` في وضع صيانة (Suspend)، ثم:
+```bash
+pg_restore --clean --if-exists --no-owner --no-privileges --dbname "$DATABASE_URL" /tmp/ecst.dump
+uv run python manage.py migrate --noinput
+```
+ثم أعد تشغيل الخدمات وتحقق كما في §4.
+
+> بلا `BACKUP_ENCRYPTION_KEY` لا تُقرأ أي نسخة. بلا `FIELD_ENCRYPTION_KEY` تُفقد روابط البث المشفّرة فقط (تُعاد إضافتها).
+
+## 6. تدوير المفاتيح
+
+| المفتاح | الأثر | الإجراء |
+|---|---|---|
+| `DJANGO_SECRET_KEY` | يُخرج كل المستخدمين (توقيع JWT) | غيّره في Render وأعد النشر؛ أبلغ المستخدمين |
+| `FIELD_ENCRYPTION_KEY` | القيم المشفّرة القديمة تصبح غير مقروءة | لا تدوّره إلا عند التسريب؛ بعده أعد إدخال روابط جلسات البث القادمة |
+| `BACKUP_ENCRYPTION_KEY` | النسخ الجديدة بالمفتاح الجديد | احتفظ بالقديم لقراءة النسخ السابقة حتى تُحذف (8 أسابيع) |
+| مفاتيح VAPID | تبطل اشتراكات Push الحالية | الطلاب يعيدون التفعيل من الإعدادات |
+| Bunny / Brevo | — | أنشئ المفتاح الجديد، حدّث Render، ثم ألغِ القديم |
+| `SITE_BUILD_TOKEN` | — | حدّثه في `ecst-api` و`ecst-site` معًا |
+
+## 7. المراقبة
+
+- **Sentry** (اختياري، `SENTRY_DSN`): أخطاء الـ API بلا بيانات شخصية (`send_default_pii=False`).
+- **فحص التوفر:** راقب `/api/public/health` كل دقيقة (Cloudflare Health Checks أو UptimeRobot).
+- **السجلات:** JSON في Render Logs؛ ابحث بـ `"level":"ERROR"`.
+- **البريد:** طابور `Outbox` في لوحة Django (`/admin/notifications/outbox/`): الحالة `failed` بعد إعادة المحاولات تعني مشكلة مزود.
+- **Beat:** إن توقفت التذكيرات فتحقق من أن `ecst-beat` يعمل (خدمة واحدة فقط).
+
+## 8. أيام الاختبارات
+
+- قبل الاختبار بيوم: رفع `ecst-api` إلى خطة أعلى أو عدد نسخ أكبر؛ اختبار الحمل (`scripts/loadtest`، k6) أثبت 500 طالب متزامنين بزمن حفظ p95 = 16ms.
+- لا تنشر إلى `main` أثناء اختبار جارٍ.
+- انقطاع أثناء الاختبار: الوقت من الخادم، والإجابات محفوظة سؤالًا بسؤال؛ يمكن للأستاذ تمديد المحاولة أو إعادة فتحها من صفحة المراقبة.
+
+## 9. حوادث شائعة
+
+| العرَض | السبب المرجّح | الإجراء |
+|---|---|---|
+| البوابة تعرض 403 عند الحفظ | CSRF/الأصل | تحقق من `DJANGO_CSRF_TRUSTED_ORIGINS` وقاعدة إعادة توجيه `/api/*` في `ecst-portal` |
+| الموقع العام لا يتحدث | Deploy Hook أو بناء صارم فشل | سجل بناء `ecst-site`؛ `SITE_REBUILD_HOOK_URL` و`SITE_BUILD_TOKEN` |
+| نموذج التواصل يفشل من الموقع | CORS | `PUBLIC_SITE_ORIGINS` يطابق أصل الموقع حرفيًا (https + www) |
+| 429 كثيرة | حدود الطلبات | `public_read` 120/د للزائر، المستخدم 240/د؛ تحقق من `TRUSTED_PROXIES` أولًا |
+| الفيديو لا يعمل | Bunny Stream | حالة الفيديو في Stream و`BUNNY_STREAM_TOKEN_KEY` |

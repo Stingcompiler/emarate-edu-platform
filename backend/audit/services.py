@@ -22,8 +22,9 @@ class RequestMeta:
     def from_request(cls, request) -> RequestMeta:
         user = getattr(request, "user", None)
         actor = user if user is not None and user.is_authenticated else None
-        forwarded = request.META.get("HTTP_X_FORWARDED_FOR", "")
-        ip = forwarded.split(",")[0].strip() if forwarded else request.META.get("REMOTE_ADDR")
+        from core.net import client_ip
+
+        ip = client_ip(request)
         return cls(
             actor=actor, ip=ip or None, user_agent=request.META.get("HTTP_USER_AGENT", "")[:255]
         )

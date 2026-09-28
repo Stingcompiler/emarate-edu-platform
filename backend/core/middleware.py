@@ -35,3 +35,17 @@ class PublicCorsMiddleware:
             response["Access-Control-Allow-Headers"] = "Content-Type"
             response["Access-Control-Max-Age"] = "86400"
         return response
+
+
+class PermissionsPolicyMiddleware:
+    """Deny browser features the platform never uses (docs/05 §9 "Headers")."""
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        response = self.get_response(request)
+        policy = getattr(settings, "PERMISSIONS_POLICY", "")
+        if policy:
+            response.headers.setdefault("Permissions-Policy", policy)
+        return response

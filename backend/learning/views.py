@@ -389,9 +389,15 @@ class GradingQueueView(APIView):
     )
     def get(self, request):
         wanted = request.query_params.get("status", "pending")
+        from academic.models import OfferingInstructor
+
+        # Only courses the user may grade: as teacher, or as a TA with delegated grading.
+        gradable = OfferingInstructor.objects.filter(user=request.user).filter(
+            Q(role=OfferingInstructor.Kind.TEACHER) | Q(offering__ta_can_grade=True)
+        )
         rows = list(
             Submission.objects.filter(
-                assignment__offering__instructors__user=request.user,
+                assignment__offering__in=gradable.values("offering"),
                 assignment__status__in=[Assignment.Status.PUBLISHED, Assignment.Status.CLOSED],
             )
             .select_related(
