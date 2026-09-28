@@ -1,4 +1,21 @@
-# Handoff — Role-by-role walkthrough in progress — 2026-09-28
+# Handoff — Public site: all official pages (phase 3 next) — 2026-09-28
+
+## Current work: «the public site carries every official page» (owner, 2026-09-28)
+Owner decisions: scope = **all pages including optional ones**; menus = **edited by the site manager**;
+content = **production gets drafts with structure + guidance text (published by the site manager),
+dev seed publishes demo texts clearly marked «تجريبي»**. Never invent official facts (names, fees, accreditation).
+- Done before: UX review `docs/qa/landing-ux-review-2026-09.md`; #28 sticky apply (item 1), #29 `/admissions` (item 2).
+- **Phase 1 — #30 merged:** `/regulations` (Regulation.is_public opt-in), `/calendar`, `/events` (+ past), `/announcements` (+ detail), news RSS.
+- **Phase 2 — #31 (`feat/landing-menus`):** two-level CMS menus; migration `content/0002_default_menus` holds the
+  full official URL structure; landing `lib/menus.ts` hides links whose page isn't built/published.
+  Merge when CI is green.
+- **Phase 3 — next (new branch from main after #31):** editorial official pages at the URLs already in the default menus:
+  `/about/{history,vision,dean,leadership,accreditation,partners,careers}`, `/academics/{student-guide,library}`,
+  `/admissions/{fees,equivalence}`, `/student-life/{affairs,activities,alumni}`, `/gallery`, legal `/privacy`
+  (now `/p/privacy`), `/terms`, `/accessibility`. Plan: CMS `Page` rows with those slugs (slug field may need `/`
+  or a separate `path`), created as drafts with guidance blocks in production; seed_demo publishes demo text marked
+  تجريبي; landing routes render them and `lib/menus.ts` `builtPath` learns the published ones; dean's word also on home.
+- **Phase 4:** remaining UX review items in order 4(b) → 6 → 5 → 7 → 8 → 9 → 12. Open owner decision: credit-hours source (item 3).
 
 ## Where things stand
 - **All phases 0–11 are merged** (PRs #2–#13); PR #14 (student walkthrough fixes) is merged too.
