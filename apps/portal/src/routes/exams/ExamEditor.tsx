@@ -270,6 +270,26 @@ export function ExamEditor() {
           </Button>
         </section>
 
+        {creating && (
+          // Desktop: the questions column is not empty while the exam is being created.
+          <section className="mt-6 lg:mt-0">
+            <SectionLabel>الأسئلة</SectionLabel>
+            <Card className="space-y-3 p-5 text-sm leading-6 text-text-muted">
+              <p>
+                بعد حفظ الإعدادات بزر «التالي: الأسئلة» تضيف الأسئلة هنا، ولكلٍّ درجته، ويظهر مجموع
+                الدرجات أولًا بأول.
+              </p>
+              <ul className="flex flex-wrap gap-2">
+                {(Object.keys(TYPE_LABEL) as QType[]).map((t) => (
+                  <li key={t} className="rounded-full bg-surface-alt px-3 py-1 text-xs text-text">
+                    {TYPE_LABEL[t]}
+                  </li>
+                ))}
+              </ul>
+              <p>يبقى الاختبار مسودة لا يراها الطلاب حتى تنشره.</p>
+            </Card>
+          </section>
+        )}
         {!creating && e && (
           <section className="mt-6 lg:mt-0">
             <div className="flex items-center justify-between">

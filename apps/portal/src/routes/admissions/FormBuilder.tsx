@@ -11,6 +11,7 @@ import {
   SectionLabel,
   StatusBadge,
   problemMessage,
+  SideNote,
 } from "../../components/ui";
 import { api } from "../../lib/api";
 import { useMe } from "../../lib/auth";
@@ -230,6 +231,15 @@ export function FormBuilder() {
                 </Chip>
               ))}
             </div>
+          </aside>
+        )}
+        {!(draft && editor) && (
+          <aside className="mt-4 lg:mt-0">
+            <SideNote title={draft ? "للاطلاع" : "إصدار منشور"}>
+              {draft
+                ? "يعدّل القوالب رئيس المسجلين."
+                : "الإصدار المنشور مجمَّد حتى لا تتغير الطلبات المقدَّمة به. «إصدار جديد للتعديل» ينسخه مسودة تعدّلها ثم تنشرها."}
+            </SideNote>
           </aside>
         )}
       </div>
