@@ -1,3 +1,4 @@
+from django.utils.translation import gettext
 from drf_spectacular.utils import extend_schema
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
@@ -61,7 +62,7 @@ class StudentImportViewSet(
         except importer.ImportFileError as error:
             raise ValidationError({"file": [str(error)]}) from None
         except UnicodeDecodeError:
-            raise ValidationError({"file": ["Save the CSV as UTF-8."]}) from None
+            raise ValidationError({"file": [gettext("Save the CSV as UTF-8.")]}) from None
         return Response(ImportBatchSerializer(batch).data, status=status.HTTP_201_CREATED)
 
     @extend_schema(responses=ImportRowSerializer(many=True))

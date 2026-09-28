@@ -90,7 +90,7 @@ def test_builder_permissions_and_publishing(
     bad = {"type": "single", "text": "بلا إجابة", "choices": [{"text": "أ"}, {"text": "ب"}]}
     assert ta.post(f"{URL}/{draft}/questions", bad, format="json").status_code == 201  # TA builds
     problems = teacher.get(f"{URL}/{draft}/problems").data["problems"]
-    assert any("exactly one correct" in p for p in problems)
+    assert any("خيارًا صحيحًا واحدًا بالضبط" in p for p in problems)
     blocked = teacher.post(f"{URL}/{draft}/publish")
     assert blocked.status_code == 400 and blocked.data["code"] == "not_ready"
     question = classroom.offering.exams.get().questions.get()

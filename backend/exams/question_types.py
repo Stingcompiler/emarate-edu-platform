@@ -11,6 +11,8 @@ import unicodedata
 from dataclasses import dataclass
 from decimal import ROUND_HALF_UP, Decimal
 
+from django.utils.translation import gettext
+
 
 @dataclass
 class Graded:
@@ -47,9 +49,9 @@ class Single(QuestionType):
     def validate(self, question, choices):
         errors = []
         if len(choices) < 2:
-            errors.append("Add at least two choices.")
+            errors.append(gettext("Add at least two choices."))
         if sum(1 for c in choices if c.is_correct) != 1:
-            errors.append("Mark exactly one correct choice.")
+            errors.append(gettext("Mark exactly one correct choice."))
         return errors
 
     def clean_answer(self, question, answer):
@@ -73,9 +75,9 @@ class Multiple(QuestionType):
     def validate(self, question, choices):
         errors = []
         if len(choices) < 2:
-            errors.append("Add at least two choices.")
+            errors.append(gettext("Add at least two choices."))
         if not any(c.is_correct for c in choices):
-            errors.append("Mark at least one correct choice.")
+            errors.append(gettext("Mark at least one correct choice."))
         return errors
 
     def clean_answer(self, question, answer):

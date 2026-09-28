@@ -1,3 +1,4 @@
+from django.utils.translation import gettext
 from rest_framework import serializers
 
 from .models import (
@@ -40,9 +41,12 @@ class MediaAssetSerializer(serializers.ModelSerializer):
 
     def validate_file(self, value):
         if value.size > MAX_IMAGE_MB * 1024 * 1024:
-            raise serializers.ValidationError(f"Images are limited to {MAX_IMAGE_MB} MB.")
+            raise serializers.ValidationError(
+                gettext("Images are limited to %(MAX_IMAGE_MB)s MB.")
+                % {"MAX_IMAGE_MB": MAX_IMAGE_MB}
+            )
         if value.name.lower().rsplit(".", 1)[-1] not in {"png", "jpg", "jpeg", "webp", "gif"}:
-            raise serializers.ValidationError("Upload a PNG, JPEG, WebP or GIF image.")
+            raise serializers.ValidationError(gettext("Upload a PNG, JPEG, WebP or GIF image."))
         return value
 
 
@@ -75,7 +79,7 @@ class PageSerializer(serializers.ModelSerializer):
 
     def validate_blocks(self, value):
         if not isinstance(value, list):
-            raise serializers.ValidationError("Blocks are a list.")
+            raise serializers.ValidationError(gettext("Blocks are a list."))
         return clean_blocks(value)
 
 
@@ -116,15 +120,15 @@ class AnnouncementSerializer(serializers.ModelSerializer):
         scope_id = attrs.get("scope_id", getattr(self.instance, "scope_id", None))
         if scope == "college" and scope_id is not None:
             raise serializers.ValidationError(
-                {"scope_id": ["College announcements have no scope id."]}
+                {"scope_id": [gettext("College announcements have no scope id.")]}
             )
         if scope != "college" and scope_id is None:
             raise serializers.ValidationError(
-                {"scope_id": ["Choose the department, program or course."]}
+                {"scope_id": [gettext("Choose the department, program or course.")]}
             )
         if attrs.get("audience") == "public" and scope != "college":
             raise serializers.ValidationError(
-                {"audience": ["Public announcements are college-wide."]}
+                {"audience": [gettext("Public announcements are college-wide.")]}
             )
         return attrs
 
@@ -188,7 +192,7 @@ class EventSerializer(serializers.ModelSerializer):
         starts = attrs.get("starts_at", getattr(self.instance, "starts_at", None))
         ends = attrs.get("ends_at", getattr(self.instance, "ends_at", None))
         if starts and ends and ends <= starts:
-            raise serializers.ValidationError({"ends_at": ["Must be after the start."]})
+            raise serializers.ValidationError({"ends_at": [gettext("Must be after the start.")]})
         return attrs
 
 
@@ -199,7 +203,9 @@ class MenuItemSerializer(serializers.ModelSerializer):
 
     def validate_url(self, value):
         if not value.startswith(("/", "https://")):
-            raise serializers.ValidationError("Use a site path (/...) or an https:// link.")
+            raise serializers.ValidationError(
+                gettext("Use a site path (/...) or an https:// link.")
+            )
         return value
 
 
@@ -219,7 +225,7 @@ class RedirectSerializer(serializers.ModelSerializer):
 
     def validate_from_path(self, value):
         if not value.startswith("/"):
-            raise serializers.ValidationError("Start with /.")
+            raise serializers.ValidationError(gettext("Start with /."))
         return value
 
 

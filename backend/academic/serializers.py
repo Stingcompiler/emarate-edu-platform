@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from django.utils.translation import gettext
 from rest_framework import serializers
 
 from organization.models import Program
@@ -66,11 +67,16 @@ class CourseSerializer(serializers.ModelSerializer):
         if program is not None:
             if program.department_id != department.pk:
                 raise serializers.ValidationError(
-                    {"program": ["The program belongs to another department."]}
+                    {"program": [gettext("The program belongs to another department.")]}
                 )
             if level > program.levels_count:
                 raise serializers.ValidationError(
-                    {"default_level": [f"This program has {program.levels_count} levels."]}
+                    {
+                        "default_level": [
+                            gettext("This program has %(levels_count)s levels.")
+                            % {"levels_count": program.levels_count}
+                        ]
+                    }
                 )
         return attrs
 

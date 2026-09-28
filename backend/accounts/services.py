@@ -16,6 +16,7 @@ from django.contrib.auth import authenticate, password_validation
 from django.core.cache import cache
 from django.db import IntegrityError, transaction
 from django.utils import timezone
+from django.utils.translation import gettext
 from rest_framework.exceptions import PermissionDenied, ValidationError
 
 from audit.services import SYSTEM, RequestMeta, record
@@ -74,12 +75,12 @@ def start_registration(university_number: str, full_name: str, email: str) -> Re
 def verify_registration(request: RegistrationRequest, code: str) -> None:
     """Step 2. Confirms the student owns the email."""
     if request.status != RegistrationRequest.Status.OTP_PENDING:
-        raise Invalid({"code": ["Invalid or expired code."]}, code="invalid_code")
+        raise Invalid({"code": [gettext("Invalid or expired code.")]}, code="invalid_code")
     result = otp.check(request.otp, code)
     if result is otp.OTPResult.TOO_MANY_ATTEMPTS:
-        raise Locked("Too many attempts. Start the registration again.")
+        raise Locked(gettext("Too many attempts. Start the registration again."))
     if result is not otp.OTPResult.OK or request.student_record_id is None:
-        raise Invalid({"code": ["Invalid or expired code."]}, code="invalid_code")
+        raise Invalid({"code": [gettext("Invalid or expired code.")]}, code="invalid_code")
     request.status = RegistrationRequest.Status.VERIFIED
     request.verified_at = timezone.now()
     request.save(update_fields=["status", "verified_at", "updated_at"])
@@ -88,7 +89,7 @@ def verify_registration(request: RegistrationRequest, code: str) -> None:
 def complete_registration(request: RegistrationRequest, password: str) -> User:
     """Step 3. Creates the account. Active immediately, or pending approval."""
     if request.status != RegistrationRequest.Status.VERIFIED:
-        raise Invalid({"request_id": ["Verify your email first."]}, code="not_verified")
+        raise Invalid({"request_id": [gettext("Verify your email first.")]}, code="not_verified")
     student = request.student_record
     password_validation.validate_password(password, User(email=request.email))
     config = SystemSettings.load()
@@ -100,7 +101,9 @@ def complete_registration(request: RegistrationRequest, password: str) -> User:
     with transaction.atomic():
         locked = StudentRecord.objects.select_for_update().get(pk=student.pk)
         if locked.user_id is not None:
-            raise Conflict("This student already has an account.", code="already_registered")
+            raise Conflict(
+                gettext("This student already has an account."), code="already_registered"
+            )
         try:
             user = User.objects.create_user(
                 email=request.email,
@@ -111,7 +114,7 @@ def complete_registration(request: RegistrationRequest, password: str) -> User:
             )
         except IntegrityError:
             raise Conflict(
-                "This email is already used by another account.", code="email_taken"
+                gettext("This email is already used by another account."), code="email_taken"
             ) from None
         locked.user = user
         locked.save(update_fields=["user", "updated_at"])
@@ -149,7 +152,7 @@ def decide_registration(
     if not rbac.can(meta.actor, "registration.approve", student.department_id):
         raise PermissionDenied()
     if request.status != RegistrationRequest.Status.PENDING_APPROVAL:
-        raise Conflict("This request was already decided.", code="already_decided")
+        raise Conflict(gettext("This request was already decided."), code="already_decided")
     with transaction.atomic():
         user = student.user
         request.decided_by = meta.actor
@@ -212,10 +215,12 @@ def login(identifier: str, password: str) -> User:
         # Pending accounts are inactive: explain instead of a generic error.
         pending = User.objects.filter(email=email, is_active=False).first() if email else None
         if pending is not None and pending.check_password(password):
-            raise PermissionDenied("Your account is waiting for approval.", code="pending_approval")
+            raise PermissionDenied(
+                gettext("Your account is waiting for approval."), code="pending_approval"
+            )
         cache.set(key, failures + 1, timeout=settings.LOGIN_LOCKOUT_SECONDS)
         raise Invalid(
-            {"non_field_errors": ["Incorrect email/university number or password."]},
+            {"non_field_errors": [gettext("Incorrect email/university number or password.")]},
             code="invalid_credentials",
         )
     cache.delete(key)
@@ -246,9 +251,9 @@ def reset_password(email: str, code: str, new_password: str) -> None:
     user = User.objects.filter(email=email, is_active=True).first()
     result = otp.check(latest, code)
     if result is otp.OTPResult.TOO_MANY_ATTEMPTS:
-        raise Locked("Too many attempts. Request a new code.")
+        raise Locked(gettext("Too many attempts. Request a new code."))
     if result is not otp.OTPResult.OK or user is None:
-        raise Invalid({"code": ["Invalid or expired code."]}, code="invalid_code")
+        raise Invalid({"code": [gettext("Invalid or expired code.")]}, code="invalid_code")
     password_validation.validate_password(new_password, user)
     with transaction.atomic():
         user.set_password(new_password)
@@ -288,11 +293,13 @@ def create_staff_account(
     The creator never sets a password; the owner of the email does.
     """
     if role not in rbac.creatable_accounts(meta.actor):
-        raise PermissionDenied("You cannot create accounts with this role.")
+        raise PermissionDenied(gettext("You cannot create accounts with this role."))
     email = _email(email)
     with transaction.atomic():
         if User.objects.filter(email=email).exists():
-            raise Conflict("An account with this email already exists.", code="email_taken")
+            raise Conflict(
+                gettext("An account with this email already exists."), code="email_taken"
+            )
         user = User.objects.create_user(
             email=email,
             password=None,
@@ -334,7 +341,9 @@ def activate(token: str, password: str) -> User:
         .first()
     )
     if row is None or row.used_at is not None or row.expires_at <= timezone.now():
-        raise Invalid({"token": ["This link is invalid or expired."]}, code="invalid_token")
+        raise Invalid(
+            {"token": [gettext("This link is invalid or expired.")]}, code="invalid_token"
+        )
     password_validation.validate_password(password, row.user)
     with transaction.atomic():
         user = row.user
@@ -352,18 +361,18 @@ def activate(token: str, password: str) -> User:
 
 def _check_department_rule(role: Role, department_id: int | None) -> None:
     if role in DEPARTMENT_SCOPED_ROLES and department_id is None:
-        raise ValidationError({"department": ["This role requires a department."]})
+        raise ValidationError({"department": [gettext("This role requires a department.")]})
     if role not in DEPARTMENT_SCOPED_ROLES and department_id is not None:
-        raise ValidationError({"department": ["This role is college-wide."]})
+        raise ValidationError({"department": [gettext("This role is college-wide.")]})
 
 
 def grant_role(
     meta: RequestMeta, user: User, role: Role, department_id: int | None = None
 ) -> RoleAssignment:
     if role not in rbac.grantable_roles(meta.actor):
-        raise PermissionDenied("You cannot grant this role.")
+        raise PermissionDenied(gettext("You cannot grant this role."))
     if role == Role.STUDENT:
-        raise ValidationError({"role": ["Students get their role by registering."]})
+        raise ValidationError({"role": [gettext("Students get their role by registering.")]})
     _check_department_rule(role, department_id)
     try:
         with transaction.atomic():
@@ -371,7 +380,7 @@ def grant_role(
                 user=user, role=role, department_id=department_id, created_by=meta.actor
             )
     except IntegrityError:
-        raise Conflict("The user already has this role.", code="role_exists") from None
+        raise Conflict(gettext("The user already has this role."), code="role_exists") from None
     record(
         meta,
         "role.grant",
@@ -386,9 +395,9 @@ def grant_role(
 def revoke_role(meta: RequestMeta, assignment: RoleAssignment) -> None:
     role = Role(assignment.role)
     if role not in rbac.grantable_roles(meta.actor):
-        raise PermissionDenied("You cannot revoke this role.")
+        raise PermissionDenied(gettext("You cannot revoke this role."))
     if assignment.user_id == getattr(meta.actor, "pk", None) and role == Role.SYSTEM_ADMIN:
-        raise ValidationError({"role": ["You cannot remove your own system admin role."]})
+        raise ValidationError({"role": [gettext("You cannot remove your own system admin role.")]})
     with transaction.atomic():
         user = assignment.user
         record(
@@ -410,7 +419,7 @@ def set_active(meta: RequestMeta, user: User, active: bool) -> User:
     user out everywhere; nothing is deleted.
     """
     if user.pk == meta.actor.pk:
-        raise PermissionDenied("You cannot disable your own account.")
+        raise PermissionDenied(gettext("You cannot disable your own account."))
     held = {Role(r) for r in rbac.roles_of(user)}
     if not rbac.has_role(meta.actor, Role.SYSTEM_ADMIN):
         allowed = rbac.creatable_accounts(meta.actor)

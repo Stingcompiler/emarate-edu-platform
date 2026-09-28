@@ -56,7 +56,7 @@ def test_import_preview_commit_publish(
         api(officer).get(f"{URL}/{batch['public_id']}/rows", {"action": "error"}).data["results"]
     )
     messages = " | ".join(" ".join(r["errors"]) for r in errors)
-    for text in ("duplicated", "no such student", "not enrolled", "no offering", "score: required"):
+    for text in ("مكرر", "لا يوجد طالب", "غير مسجل", "لا توجد شعبة", "الدرجة: مطلوبة"):
         assert text in messages
     assert not AcademicResult.objects.exists()
 

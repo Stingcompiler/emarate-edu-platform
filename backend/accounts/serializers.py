@@ -1,3 +1,4 @@
+from django.utils.translation import gettext
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
@@ -231,7 +232,9 @@ class RegistrationDecisionSerializer(serializers.Serializer):
 
     def validate(self, attrs):
         if not attrs["approve"] and not attrs.get("reason"):
-            raise serializers.ValidationError({"reason": ["Give a reason when rejecting."]})
+            raise serializers.ValidationError(
+                {"reason": [gettext("Give a reason when rejecting.")]}
+            )
         return attrs
 
 

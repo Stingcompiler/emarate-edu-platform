@@ -1,0 +1,811 @@
+# Arabic API messages — ECST platform (docs/05: Arabic by default, English with Accept-Language: en).
+# After changing messages in code:
+#   uv run python manage.py makemessages -l ar --ignore=.venv --ignore="*/tests/*" --no-location
+#   (translate every new msgstr) then: uv run python manage.py compilemessages -l ar --ignore=.venv
+msgid ""
+msgstr ""
+"Project-Id-Version: ecst-platform\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-09-28 07:29+0200\n"
+"Language: ar\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=6; plural=n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 "
+"&& n%100<=10 ? 3 : n%100>=11 && n%100<=99 ? 4 : 5;\n"
+
+msgid "The program belongs to another department."
+msgstr "البرنامج يتبع قسمًا آخر."
+
+#, python-format
+msgid "This program has %(levels_count)s levels."
+msgstr "عدد مستويات هذا البرنامج %(levels_count)s."
+
+msgid "Outside your department scope."
+msgstr "خارج نطاق قسمك."
+
+#, python-format
+msgid ""
+"This person does not have the %(kind)s role. Academic affairs creates it."
+msgstr "هذا الشخص لا يحمل دور %(kind)s؛ ينشئه أمين الشؤون العلمية."
+
+msgid "Already a member of this department."
+msgstr "عضو في هذا القسم بالفعل."
+
+#, python-format
+msgid "This person does not have the %(role)s role."
+msgstr "هذا الشخص لا يحمل دور %(role)s."
+
+msgid "Add this person to the department first."
+msgstr "أضف هذا الشخص إلى القسم أولًا."
+
+msgid "Already assigned to this course."
+msgstr "مُعيَّن على هذه المادة بالفعل."
+
+msgid "Only active students can be enrolled."
+msgstr "لا يُسجَّل في المواد إلا الطلاب المنتظمون."
+
+msgid "This offering is closed."
+msgstr "هذه الشعبة مغلقة."
+
+msgid "Already enrolled."
+msgstr "مسجَّل بالفعل."
+
+msgid "This enrollment is not active."
+msgstr "هذا التسجيل غير نشط."
+
+msgid "User is inactive."
+msgstr "الحساب معطَّل."
+
+#, python-format
+msgid "CSRF failed: %(reason)s"
+msgstr "فشل التحقق من CSRF: %(reason)s"
+
+msgid "Give a reason when rejecting."
+msgstr "اذكر سبب الرفض."
+
+msgid "Invalid or expired code."
+msgstr "الرمز غير صحيح أو منتهي الصلاحية."
+
+msgid "Too many attempts. Start the registration again."
+msgstr "محاولات كثيرة. ابدأ التسجيل من جديد."
+
+msgid "Verify your email first."
+msgstr "أكّد بريدك الإلكتروني أولًا."
+
+msgid "This student already has an account."
+msgstr "لهذا الطالب حساب بالفعل."
+
+msgid "This email is already used by another account."
+msgstr "هذا البريد مستخدم في حساب آخر."
+
+msgid "This request was already decided."
+msgstr "بُتّ في هذا الطلب من قبل."
+
+msgid "Your account is waiting for approval."
+msgstr "حسابك بانتظار الموافقة."
+
+msgid "Incorrect email/university number or password."
+msgstr "البريد أو الرقم الجامعي أو كلمة المرور غير صحيحة."
+
+msgid "Too many attempts. Request a new code."
+msgstr "محاولات كثيرة. اطلب رمزًا جديدًا."
+
+msgid "You cannot create accounts with this role."
+msgstr "لا يمكنك إنشاء حسابات بهذا الدور."
+
+msgid "An account with this email already exists."
+msgstr "يوجد حساب بهذا البريد بالفعل."
+
+msgid "This link is invalid or expired."
+msgstr "هذا الرابط غير صالح أو منتهي الصلاحية."
+
+msgid "This role requires a department."
+msgstr "هذا الدور يتطلب تحديد القسم."
+
+msgid "This role is college-wide."
+msgstr "هذا الدور على مستوى الكلية ولا يُحدَّد له قسم."
+
+msgid "You cannot grant this role."
+msgstr "لا يمكنك منح هذا الدور."
+
+msgid "Students get their role by registering."
+msgstr "يحصل الطلاب على دورهم عند التسجيل."
+
+msgid "The user already has this role."
+msgstr "المستخدم يحمل هذا الدور بالفعل."
+
+msgid "You cannot revoke this role."
+msgstr "لا يمكنك سحب هذا الدور."
+
+msgid "You cannot remove your own system admin role."
+msgstr "لا يمكنك سحب دور مدير النظام من نفسك."
+
+msgid "You cannot disable your own account."
+msgstr "لا يمكنك تعطيل حسابك."
+
+msgid "ok"
+msgstr "تم"
+
+msgid "No session."
+msgstr "لا توجد جلسة."
+
+msgid "Session expired."
+msgstr "انتهت الجلسة."
+
+msgid "If the details match the college records, a code was sent to the email."
+msgstr "إذا طابقت البيانات سجلات الكلية فقد أُرسل رمز إلى البريد."
+
+msgid "Email verified."
+msgstr "تم تأكيد البريد."
+
+msgid "If an account uses this email, a code was sent to it."
+msgstr "إذا كان هذا البريد مسجلًا فقد أُرسل إليه رمز."
+
+msgid "Password changed. Sign in with the new password."
+msgstr "تغيّرت كلمة المرور. سجّل الدخول بكلمة المرور الجديدة."
+
+msgid "Account activated. You can sign in now."
+msgstr "فُعِّل الحساب. يمكنك تسجيل الدخول الآن."
+
+msgid "Only a draft can be published."
+msgstr "لا تُنشر إلا المسودة."
+
+msgid "This program is not accepting applications now."
+msgstr "هذا البرنامج لا يستقبل طلبات الآن."
+
+msgid "You already have an application for this program."
+msgstr "لديك طلب لهذا البرنامج بالفعل."
+
+#, python-format
+msgid "At most %(limit)s applications per admission cycle."
+msgstr "الحد الأقصى %(limit)s طلبات في دورة القبول."
+
+msgid "Please try again."
+msgstr "أعد المحاولة."
+
+msgid ""
+"The application can only change while it is a draft or missing documents."
+msgstr "لا يتغير الطلب إلا وهو مسودة أو بمستندات ناقصة."
+
+msgid "Send an object of answers."
+msgstr "أرسل الإجابات في كائن."
+
+msgid "Documents can be added while the application is open."
+msgstr "تُضاف المستندات ما دام الطلب مفتوحًا."
+
+msgid "The admission window has closed."
+msgstr "انتهت فترة القبول."
+
+msgid "This application can no longer be withdrawn."
+msgstr "لم يعد ممكنًا سحب هذا الطلب."
+
+msgid "This application is closed."
+msgstr "هذا الطلب مغلق."
+
+msgid "This application belongs to another department."
+msgstr "هذا الطلب يتبع قسمًا آخر."
+
+msgid "This person does not register for this department."
+msgstr "هذا الشخص ليس مسجلًا لهذا القسم."
+
+#, python-format
+msgid "You cannot move this application from %(status)s to %(to)s."
+msgstr "لا يمكن نقل الطلب من %(status)s إلى %(to)s."
+
+msgid "Tell the applicant what is missing."
+msgstr "أخبر المتقدم بما ينقصه."
+
+msgid "Email the applicant or add an internal note."
+msgstr "راسل المتقدم بالبريد أو أضف ملاحظة داخلية."
+
+msgid "Only the head registrar registers applicants."
+msgstr "لا يسجّل المتقدمين طلابًا إلا مسؤول المسجلين."
+
+msgid "Only an accepted, not yet registered applicant can be registered."
+msgstr "لا يُسجَّل إلا متقدم مقبول لم يُسجَّل بعد."
+
+msgid "Applications exist; close the intake instead."
+msgstr "توجد طلبات؛ أغلق البرنامج في الدورة بدلًا من حذفه."
+
+msgid "A published template is frozen; create a new version."
+msgstr "القالب المنشور مجمَّد؛ أنشئ إصدارًا جديدًا."
+
+msgid "A code was sent to the email."
+msgstr "أُرسل رمز إلى البريد."
+
+msgid "This inquiry is closed."
+msgstr "هذا الاستفسار مغلق."
+
+msgid "Your session expired. Verify your email again."
+msgstr "انتهت جلستك. أكّد بريدك من جديد."
+
+#, python-format
+msgid "Images are limited to %(MAX_IMAGE_MB)s MB."
+msgstr "حجم الصورة لا يتجاوز %(MAX_IMAGE_MB)s ميغابايت."
+
+msgid "Upload a PNG, JPEG, WebP or GIF image."
+msgstr "ارفع صورة بصيغة PNG أو JPEG أو WebP أو GIF."
+
+msgid "Blocks are a list."
+msgstr "الكتل يجب أن تكون قائمة."
+
+msgid "College announcements have no scope id."
+msgstr "إعلانات الكلية بلا معرّف نطاق."
+
+msgid "Choose the department, program or course."
+msgstr "اختر القسم أو البرنامج أو المادة."
+
+msgid "Public announcements are college-wide."
+msgstr "الإعلانات العامة على مستوى الكلية."
+
+msgid "Must be after the start."
+msgstr "يجب أن يكون بعد البداية."
+
+msgid "Use a site path (/...) or an https:// link."
+msgstr "استخدم مسارًا في الموقع (/...) أو رابط https://."
+
+msgid "Start with /."
+msgstr "ابدأ بـ /."
+
+msgid "This scope or audience is outside what you may announce to."
+msgstr "هذا النطاق أو الجمهور خارج ما يحق لك الإعلان له."
+
+msgid "The request conflicts with the current state."
+msgstr "الطلب يتعارض مع الحالة الحالية."
+
+msgid "Too many failed attempts. Try again later."
+msgstr "محاولات فاشلة كثيرة. أعد المحاولة لاحقًا."
+
+msgid "Invalid request"
+msgstr "طلب غير صالح"
+
+msgid "Authentication required"
+msgstr "يلزم تسجيل الدخول"
+
+msgid "Not allowed"
+msgstr "غير مسموح"
+
+msgid "Not found"
+msgstr "غير موجود"
+
+msgid "Method not allowed"
+msgstr "الطريقة غير مسموحة"
+
+msgid "Too many requests"
+msgstr "طلبات كثيرة"
+
+msgid "Server error"
+msgstr "خطأ في الخادم"
+
+msgid "Error"
+msgstr "خطأ"
+
+msgid "One or more fields are invalid."
+msgstr "بعض الحقول غير صحيحة."
+
+msgid ""
+"This item is in use and cannot be deleted. Deactivate or archive it instead."
+msgstr "هذا العنصر مستخدم ولا يمكن حذفه. عطّله أو أرشفه بدلًا من ذلك."
+
+msgid "Add at least two choices."
+msgstr "أضف خيارين على الأقل."
+
+msgid "Mark exactly one correct choice."
+msgstr "حدّد خيارًا صحيحًا واحدًا بالضبط."
+
+msgid "Mark at least one correct choice."
+msgstr "حدّد خيارًا صحيحًا واحدًا على الأقل."
+
+msgid "Must be after the opening time."
+msgstr "يجب أن يكون بعد وقت الفتح."
+
+msgid "Add the choices."
+msgstr "أضف الخيارات."
+
+msgid "Students have started this exam; questions are locked."
+msgstr "بدأ طلاب هذا الاختبار؛ الأسئلة مقفلة."
+
+msgid "A closed exam cannot change."
+msgstr "لا يتغير الاختبار بعد إغلاقه."
+
+msgid "List every question exactly once."
+msgstr "اذكر كل سؤال مرة واحدة بالضبط."
+
+msgid "Only a published exam can be closed."
+msgstr "لا يُغلق إلا اختبار منشور."
+
+msgid "You cannot delete this exam."
+msgstr "لا يمكنك حذف هذا الاختبار."
+
+msgid "Students attempted this exam; archive it instead."
+msgstr "حاول طلاب هذا الاختبار؛ أرشفه بدلًا من حذفه."
+
+msgid "This exam is not open."
+msgstr "هذا الاختبار غير مفتوح."
+
+msgid "The exam has not opened yet."
+msgstr "لم يُفتح الاختبار بعد."
+
+msgid "The exam window has closed."
+msgstr "انتهت نافذة الاختبار."
+
+msgid "No attempts left."
+msgstr "لا محاولات متبقية."
+
+msgid "This attempt was already submitted."
+msgstr "أُرسلت هذه المحاولة من قبل."
+
+msgid "Time is up."
+msgstr "انتهى الوقت."
+
+msgid "Going back is not allowed in this exam."
+msgstr "الرجوع إلى الأسئلة السابقة غير مسموح في هذا الاختبار."
+
+msgid "Unknown signal."
+msgstr "إشارة غير معروفة."
+
+msgid "This attempt is closed."
+msgstr "هذه المحاولة مغلقة."
+
+msgid "Only a running attempt can be extended."
+msgstr "لا يُمدَّد إلا وقت محاولة جارية."
+
+msgid "A reason is required."
+msgstr "السبب مطلوب."
+
+msgid "Only a submitted attempt can be reopened."
+msgstr "لا يُعاد فتح إلا محاولة مُرسلة."
+
+msgid "The student has another attempt running."
+msgstr "لدى الطالب محاولة أخرى جارية."
+
+msgid "Grade after the attempt is submitted."
+msgstr "صحّح بعد إرسال المحاولة."
+
+#, python-format
+msgid "Between 0 and %(marks)s."
+msgstr "بين 0 و%(marks)s."
+
+msgid "The result is not visible yet."
+msgstr "النتيجة لم تُعلن بعد."
+
+msgid "Unknown purpose."
+msgstr "غرض غير معروف."
+
+msgid "Choose the course."
+msgstr "اختر المادة."
+
+msgid "You cannot upload files to this course."
+msgstr "لا يمكنك رفع ملفات لهذه المادة."
+
+msgid "You cannot upload videos to this course."
+msgstr "لا يمكنك رفع فيديوهات لهذه المادة."
+
+#, python-format
+msgid "Videos are limited to %(VIDEO_MAX_MB)s MB."
+msgstr "حجم الفيديو لا يتجاوز %(VIDEO_MAX_MB)s ميغابايت."
+
+msgid "This video uploads directly to the video service."
+msgstr "هذا الفيديو يُرفع مباشرة إلى خدمة الفيديو."
+
+msgid "This video was already uploaded."
+msgstr "رُفع هذا الفيديو من قبل."
+
+msgid "Upload an MP4, MOV, MKV or WebM video."
+msgstr "ارفع فيديو بصيغة MP4 أو MOV أو MKV أو WebM."
+
+msgid "The video is not ready yet."
+msgstr "الفيديو غير جاهز بعد."
+
+msgid "Invalid phone number."
+msgstr "رقم هاتف غير صالح."
+
+msgid "Give an email or a phone number."
+msgstr "أدخل بريدًا إلكترونيًا أو رقم هاتف."
+
+msgid "This inquiry is routed to someone else."
+msgstr "هذا الاستفسار محوَّل إلى شخص آخر."
+
+#, python-format
+msgid "Cannot move from %(status)s to %(to)s."
+msgstr "لا يمكن النقل من %(status)s إلى %(to)s."
+
+msgid "Reply by email or add an internal note."
+msgstr "ردّ بالبريد أو أضف ملاحظة داخلية."
+
+msgid "This visitor has no email; use WhatsApp."
+msgstr "لا بريد لهذا الزائر؛ استخدم واتساب."
+
+msgid "This visitor has no phone number."
+msgstr "لا رقم هاتف لهذا الزائر."
+
+msgid "This person does not handle this kind of inquiry."
+msgstr "هذا الشخص لا يتولى هذا النوع من الاستفسارات."
+
+msgid "Use {\"rules\": [...]}."
+msgstr "استخدم {\"rules\": [...]}."
+
+msgid "Must be after the due date."
+msgstr "يجب أن يكون بعد موعد التسليم."
+
+msgid "Must be before the due date."
+msgstr "يجب أن يكون قبل موعد التسليم."
+
+msgid "Pick a lecture of the same course."
+msgstr "اختر محاضرة من المادة نفسها."
+
+msgid "You cannot delete this lecture."
+msgstr "لا يمكنك حذف هذه المحاضرة."
+
+msgid "A file resource needs exactly one uploaded file."
+msgstr "مورد الملف يحتاج ملفًا مرفوعًا واحدًا بالضبط."
+
+msgid "Upload the file to this course first."
+msgstr "ارفع الملف إلى هذه المادة أولًا."
+
+msgid "A video resource needs exactly one video."
+msgstr "مورد الفيديو يحتاج فيديو واحدًا بالضبط."
+
+msgid "Upload the video to this course first."
+msgstr "ارفع الفيديو إلى هذه المادة أولًا."
+
+msgid "A link resource needs a URL."
+msgstr "مورد الرابط يحتاج عنوان URL."
+
+#, python-format
+msgid "Invalid pattern: %(pattern)s"
+msgstr "نمط غير صالح: %(pattern)s"
+
+msgid "Choose how students submit first."
+msgstr "اختر طريقة تسليم الطلاب أولًا."
+
+msgid "You cannot delete this assignment."
+msgstr "لا يمكنك حذف هذا الواجب."
+
+msgid "Students have submitted; close the assignment instead."
+msgstr "سلّم الطلاب؛ أغلق الواجب بدلًا من حذفه."
+
+msgid "Submissions have not opened yet."
+msgstr "لم يُفتح التسليم بعد."
+
+msgid "The deadline has passed."
+msgstr "انتهى موعد التسليم."
+
+msgid "The late window has closed."
+msgstr "انتهت مهلة التسليم المتأخر."
+
+#, python-format
+msgid "At most %(max_files)s files."
+msgstr "الحد الأقصى %(max_files)s ملفات."
+
+msgid "Upload each file to this course first."
+msgstr "ارفع كل ملف إلى هذه المادة أولًا."
+
+#, python-format
+msgid "%(name)s: type not accepted here."
+msgstr "%(name)s: نوع غير مقبول هنا."
+
+#, python-format
+msgid "%(name)s: larger than %(max_file_size_mb)s MB."
+msgstr "%(name)s: أكبر من %(max_file_size_mb)s ميغابايت."
+
+#, python-format
+msgid "%(label)s: required."
+msgstr "%(label)s: مطلوب."
+
+#, python-format
+msgid "%(label)s: must start with http:// or https://."
+msgstr "%(label)s: يجب أن يبدأ بـ http:// أو https://."
+
+#, python-format
+msgid "%(label)s: does not match the expected format."
+msgstr "%(label)s: لا يطابق الصيغة المطلوبة."
+
+#, python-format
+msgid "Unknown link: %(value)s"
+msgstr "رابط غير معروف: %(value)s"
+
+msgid "This assignment is not accepting submissions."
+msgstr "هذا الواجب لا يستقبل تسليمات."
+
+msgid "Text answers are not accepted here."
+msgstr "الإجابات النصية غير مقبولة هنا."
+
+msgid "Files are not accepted here."
+msgstr "الملفات غير مقبولة هنا."
+
+msgid "Links are not accepted here."
+msgstr "الروابط غير مقبولة هنا."
+
+msgid "The submission is empty."
+msgstr "التسليم فارغ."
+
+msgid "Submitted twice at once; try again."
+msgstr "أُرسل التسليم مرتين في اللحظة نفسها؛ أعد المحاولة."
+
+msgid "Resubmission is not allowed."
+msgstr "إعادة التسليم غير مسموحة."
+
+msgid "This submission is already graded."
+msgstr "صُحّح هذا التسليم بالفعل."
+
+#, python-format
+msgid "Between 0 and %(max_grade)s."
+msgstr "بين 0 و%(max_grade)s."
+
+msgid "There is no suggested grade to approve."
+msgstr "لا توجد درجة مقترحة لاعتمادها."
+
+msgid "Only the teacher approves AI-suggested grades."
+msgstr "لا يعتمد الدرجات المقترحة آليًا إلا الأستاذ."
+
+msgid "Choose the program and level."
+msgstr "اختر البرنامج والمستوى."
+
+msgid "You cannot schedule sessions for this course or cohort."
+msgstr "لا يمكنك جدولة جلسات لهذه المادة أو الدفعة."
+
+msgid "Use the https:// meeting link."
+msgstr "استخدم رابط الاجتماع https://."
+
+msgid "Add the meeting link."
+msgstr "أضف رابط الاجتماع."
+
+msgid "This session was cancelled."
+msgstr "أُلغيت هذه الجلسة."
+
+msgid "The link opens 15 minutes before the start."
+msgstr "يُفتح الرابط قبل البداية بـ 15 دقيقة."
+
+#, python-format
+msgid "type must be one of %(sorted)s."
+msgstr "النوع يجب أن يكون أحد: %(sorted)s."
+
+msgid "ids: a non-empty list of numbers."
+msgstr "ids: قائمة أرقام غير فارغة."
+
+msgid "ids: a non-empty list of user ids."
+msgstr "ids: قائمة غير فارغة بمعرّفات المستخدمين."
+
+#, python-format
+msgid "members must be one of %(sorted)s."
+msgstr "الأعضاء يجب أن يكونوا أحد: %(sorted)s."
+
+msgid "level must be between 1 and 10."
+msgstr "المستوى يجب أن يكون بين 1 و10."
+
+msgid "roles: a non-empty list of roles."
+msgstr "roles: قائمة أدوار غير فارغة."
+
+msgid "This audience is outside what you may notify."
+msgstr "هذا الجمهور خارج ما يحق لك إشعاره."
+
+msgid "Use a portal path (/...) or an https:// link."
+msgstr "استخدم مسارًا في البوابة (/...) أو رابط https://."
+
+msgid "Push endpoints are https URLs."
+msgstr "عناوين Push يجب أن تكون https."
+
+#, python-format
+msgid "Choose from %(values)s."
+msgstr "اختر من: %(values)s."
+
+msgid "Choose a teacher or TA."
+msgstr "اختر أستاذًا أو معيدًا."
+
+msgid "Already acknowledged."
+msgstr "أقررت بالفعل."
+
+msgid "Expected a number."
+msgstr "المتوقع رقم."
+
+msgid "No term."
+msgstr "لا يوجد فصل دراسي."
+
+msgid "teacher or ta."
+msgstr "أستاذ أو معيد."
+
+msgid "No admission cycle."
+msgstr "لا توجد دورة قبول."
+
+msgid "No academic year."
+msgstr "لا يوجد عام دراسي."
+
+msgid "Choose a department."
+msgstr "اختر قسمًا."
+
+#, python-format
+msgid "%(field)s: required"
+msgstr "%(field)s: مطلوب"
+
+msgid "university_number: no such student"
+msgstr "الرقم الجامعي: لا يوجد طالب بهذا الرقم"
+
+#, python-format
+msgid "course_code: no offering %(code)s-%(section)s in this term"
+msgstr "رمز المقرر: لا توجد شعبة %(code)s-%(section)s في هذا الفصل"
+
+msgid "course_code: outside your department"
+msgstr "رمز المقرر: خارج قسمك"
+
+msgid "university_number: not enrolled in this course"
+msgstr "الرقم الجامعي: الطالب غير مسجل في هذه المادة"
+
+msgid "status: use pass/fail/absent/withdrawn/incomplete"
+msgstr ""
+"الحالة: استخدم pass/fail/absent/withdrawn/incomplete (ناجح/راسب/غائب/منسحب/"
+"غير مكتمل)"
+
+msgid "score: must be a number"
+msgstr "الدرجة: يجب أن تكون رقمًا"
+
+msgid "score: must be between 0 and 100"
+msgstr "الدرجة: يجب أن تكون بين 0 و100"
+
+msgid "score: required"
+msgstr "الدرجة: مطلوبة"
+
+#, python-format
+msgid "letter: %(given)s does not match the scale (%(letter)s for %(score)s)"
+msgstr ""
+"التقدير: %(given)s لا يطابق سلّم التقديرات (%(letter)s للدرجة %(score)s)"
+
+msgid "duplicated in this file"
+msgstr "مكرر في هذا الملف"
+
+msgid "already has a result; request a correction instead"
+msgstr "له نتيجة بالفعل؛ اطلب تعديلًا بدلًا من ذلك"
+
+msgid "Give a new score or status."
+msgstr "أدخل درجة أو حالة جديدة."
+
+msgid "Include a band starting at 0."
+msgstr "أضف فئة تبدأ من 0."
+
+msgid "Outside your results scope."
+msgstr "خارج نطاق نتائجك."
+
+msgid "This batch was already committed or rejected."
+msgstr "اعتُمدت هذه الدفعة أو رُفضت من قبل."
+
+msgid ""
+"Some students got a result from another batch meanwhile. Upload the file "
+"again."
+msgstr "حصل بعض الطلاب على نتيجة من دفعة أخرى في الأثناء. ارفع الملف من جديد."
+
+msgid "A committed batch cannot be deleted; unpublish it instead."
+msgstr "لا تُحذف دفعة معتمدة؛ ألغِ نشرها بدلًا من ذلك."
+
+msgid "Nothing would change."
+msgstr "لن يتغير شيء."
+
+msgid "This result already has a pending correction."
+msgstr "لهذه النتيجة طلب تعديل معلّق بالفعل."
+
+msgid "Already decided."
+msgstr "بُتّ فيه من قبل."
+
+msgid "Choose your department."
+msgstr "اختر قسمك."
+
+msgid "Outside your department."
+msgstr "خارج قسمك."
+
+msgid "Save the CSV as UTF-8."
+msgstr "احفظ ملف CSV بترميز UTF-8."
+
+msgid "Choose a term."
+msgstr "اختر الفصل الدراسي."
+
+msgid "Upload the file for this purpose first."
+msgstr "ارفع الملف لهذا الغرض أولًا."
+
+msgid "Published regulations change through a new version."
+msgstr "اللوائح المنشورة تتغير بإصدار جديد."
+
+msgid "Only a published regulation gets a new version."
+msgstr "لا يُصدر إصدار جديد إلا للائحة منشورة."
+
+msgid "Already published."
+msgstr "منشورة بالفعل."
+
+msgid "Write the text or attach the PDF."
+msgstr "اكتب النص أو أرفق ملف PDF."
+
+msgid "This regulation needs no acknowledgement."
+msgstr "هذه اللائحة لا تتطلب إقرارًا."
+
+msgid "Upload each attachment first."
+msgstr "ارفع كل مرفق أولًا."
+
+msgid "Write the note."
+msgstr "اكتب الملاحظة."
+
+msgid "Reopen the case first."
+msgstr "أعد فتح الحالة أولًا."
+
+msgid "Must be after the start date."
+msgstr "يجب أن يكون بعد تاريخ البداية."
+
+msgid "Already visible to the student."
+msgstr "ظاهرة للطالب بالفعل."
+
+msgid "Nothing to change."
+msgstr "لا شيء لتغييره."
+
+msgid "You can report only in courses you teach or manage."
+msgstr "لا يمكنك الإبلاغ إلا في مواد تدرّسها أو تديرها."
+
+msgid "This student is not in the course."
+msgstr "هذا الطالب ليس في المادة."
+
+msgid "The attempt belongs to another student or course."
+msgstr "المحاولة تخص طالبًا أو مادة أخرى."
+
+msgid "Already handled."
+msgstr "عولج من قبل."
+
+msgid "Student affairs suspends or reinstates only."
+msgstr "شؤون الطلاب توقف الطالب أو ترفع إيقافه فقط."
+
+msgid "The student already has this status."
+msgstr "الطالب في هذه الحالة بالفعل."
+
+msgid "University number"
+msgstr "الرقم الجامعي"
+
+msgid "Name in Arabic"
+msgstr "الاسم بالعربية"
+
+msgid "Program code"
+msgstr "رمز البرنامج"
+
+msgid "Level"
+msgstr "المستوى"
+
+msgid "Course code"
+msgstr "رمز المقرر"
+
+msgid "The file is larger than 5 MB."
+msgstr "حجم الملف أكبر من 5 ميغابايت."
+
+msgid "Upload an Excel (.xlsx) or CSV file."
+msgstr "ارفع ملف Excel (.xlsx) أو CSV."
+
+msgid "The file is empty."
+msgstr "الملف فارغ."
+
+#, python-format
+msgid "Missing required columns: %(join)s."
+msgstr "أعمدة مطلوبة ناقصة: %(join)s."
+
+#, python-format
+msgid "The file has more than %(MAX_ROWS)s rows."
+msgstr "الملف يتجاوز %(MAX_ROWS)s صفًا."
+
+#, python-format
+msgid "program_code: unknown program %(get)s"
+msgstr "رمز البرنامج: برنامج غير معروف %(get)s"
+
+msgid "level: must be a number"
+msgstr "المستوى: يجب أن يكون رقمًا"
+
+#, python-format
+msgid "level: must be between 1 and %(levels_count)s"
+msgstr "المستوى: يجب أن يكون بين 1 و%(levels_count)s"
+
+msgid "email: invalid"
+msgstr "البريد: غير صالح"
+
+msgid "phone: invalid"
+msgstr "الهاتف: غير صالح"
+
+msgid "gender: use male/female (ذكر/أنثى)"
+msgstr "الجنس: استخدم male/female (ذكر/أنثى)"
+
+msgid "birth_date: use YYYY-MM-DD or DD/MM/YYYY"
+msgstr "تاريخ الميلاد: استخدم YYYY-MM-DD أو DD/MM/YYYY"
+
+msgid "university_number: duplicated in this file"
+msgstr "الرقم الجامعي: مكرر في هذا الملف"

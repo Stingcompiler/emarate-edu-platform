@@ -10,10 +10,11 @@ from __future__ import annotations
 from decimal import Decimal, InvalidOperation
 
 from django.db import transaction
+from django.utils.translation import gettext
 
 from academic.models import CourseOffering, Enrollment
 from audit.services import RequestMeta, record
-from students.importer import ImportFileError, read_table
+from students.importer import ImportFileError, column_label, read_table
 from students.models import StudentRecord
 
 from .models import AcademicResult, GradingScale, ResultImportBatch, ResultImportRow
@@ -63,38 +64,41 @@ def _normalize(raw: dict, term, allowed_departments, cache) -> tuple[dict, list[
     section = _norm(raw.get("section")) or "A"
     for field in REQUIRED:
         if not _norm(raw.get(field)):
-            errors.append(f"{field}: required")
+            errors.append(gettext("%(field)s: required") % {"field": column_label(field)})
 
     student = cache["students"].get(number)
     if number and student is None:
-        errors.append("university_number: no such student")
+        errors.append(gettext("university_number: no such student"))
     offering = cache["offerings"].get((code, section))
     if code and offering is None:
-        errors.append(f"course_code: no offering {code}-{section} in this term")
+        errors.append(
+            gettext("course_code: no offering %(code)s-%(section)s in this term")
+            % {"code": code, "section": section}
+        )
     if (
         offering is not None
         and allowed_departments is not None
         and offering.course.department_id not in allowed_departments
     ):
-        errors.append("course_code: outside your department")
+        errors.append(gettext("course_code: outside your department"))
     if student and offering and (student.pk, offering.pk) not in cache["enrolled"]:
-        errors.append("university_number: not enrolled in this course")
+        errors.append(gettext("university_number: not enrolled in this course"))
 
     status = STATUSES.get(_norm(raw.get("status")).lower()) if raw.get("status") else None
     if raw.get("status") and status is None:
-        errors.append("status: use pass/fail/absent/withdrawn/incomplete")
+        errors.append(gettext("status: use pass/fail/absent/withdrawn/incomplete"))
     score = None
     score_raw = _norm(raw.get("score"))
     if score_raw:
         try:
             score = Decimal(score_raw)
         except InvalidOperation:
-            errors.append("score: must be a number")
+            errors.append(gettext("score: must be a number"))
         else:
             if not 0 <= score <= 100:
-                errors.append("score: must be between 0 and 100")
+                errors.append(gettext("score: must be between 0 and 100"))
     elif status not in NO_SCORE:
-        errors.append("score: required")
+        errors.append(gettext("score: required"))
 
     letter, points = "", Decimal(0)
     if score is not None and not errors and student is not None:
@@ -104,7 +108,10 @@ def _normalize(raw: dict, term, allowed_departments, cache) -> tuple[dict, list[
         letter, points = GradingScale.grade(ranges, score)
         given = _norm(raw.get("letter")).upper()
         if given and given != letter.upper():
-            errors.append(f"letter: {given} does not match the scale ({letter} for {score})")
+            errors.append(
+                gettext("letter: %(given)s does not match the scale (%(letter)s for %(score)s)")
+                % {"given": given, "letter": letter, "score": score}
+            )
     if status is None and score is not None:
         status = "fail" if letter.upper() == "F" else "pass"
     key = (student.pk if student else None, offering.pk if offering else None)
@@ -149,9 +156,9 @@ def validate_file(meta: RequestMeta, *, term, department, allowed_departments, n
         normalized, errors, key = _normalize(raw, term, allowed_departments, cache)
         if None not in key:
             if key in seen:
-                errors.append("duplicated in this file")
+                errors.append(gettext("duplicated in this file"))
             elif key in existing:
-                errors.append("already has a result; request a correction instead")
+                errors.append(gettext("already has a result; request a correction instead"))
             seen.add(key)
         action = ResultImportRow.Action.ERROR if errors else ResultImportRow.Action.CREATE
         counts[action] += 1

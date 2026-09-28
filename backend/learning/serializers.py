@@ -1,3 +1,4 @@
+from django.utils.translation import gettext
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
@@ -152,7 +153,7 @@ class AssignmentSerializer(serializers.ModelSerializer):
     def validate_rubric(self, value):
         rules = value.get("rules", []) if isinstance(value, dict) else None
         if rules is None:
-            raise serializers.ValidationError('Use {"rules": [...]}.')
+            raise serializers.ValidationError(gettext('Use {"rules": [...]}.'))
         checked = RubricRuleSerializer(data=rules, many=True)
         checked.is_valid(raise_exception=True)
         return {"rules": [{**r, "points": str(r["points"])} for r in checked.validated_data]}
@@ -161,13 +162,19 @@ class AssignmentSerializer(serializers.ModelSerializer):
         get = lambda name: attrs.get(name, getattr(self.instance, name, None))  # noqa: E731
         due, late_until = get("due_at"), get("late_until")
         if late_until and due and late_until < due:
-            raise serializers.ValidationError({"late_until": ["Must be after the due date."]})
+            raise serializers.ValidationError(
+                {"late_until": [gettext("Must be after the due date.")]}
+            )
         opens = get("opens_at")
         if opens and due and opens >= due:
-            raise serializers.ValidationError({"opens_at": ["Must be before the due date."]})
+            raise serializers.ValidationError(
+                {"opens_at": [gettext("Must be before the due date.")]}
+            )
         lecture, offering = get("lecture"), get("offering")
         if lecture and offering and lecture.offering_id != offering.pk:
-            raise serializers.ValidationError({"lecture": ["Pick a lecture of the same course."]})
+            raise serializers.ValidationError(
+                {"lecture": [gettext("Pick a lecture of the same course.")]}
+            )
         if "submission_types" in attrs:
             attrs["submission_types"] = sorted(set(attrs["submission_types"]))
         if "allowed_extensions" in attrs:

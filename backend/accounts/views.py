@@ -8,6 +8,7 @@ from django.db.models import Count, Q
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.utils.decorators import method_decorator
+from django.utils.translation import gettext
 from django.views.decorators.csrf import ensure_csrf_cookie
 from drf_spectacular.utils import extend_schema, inline_serializer
 from rest_framework import mixins, serializers, status, viewsets
@@ -91,7 +92,7 @@ class CsrfView(APIView):
 
     @extend_schema(responses=DetailSerializer, tags=["auth"])
     def get(self, request):
-        return Response({"detail": "ok"})
+        return Response({"detail": gettext("ok")})
 
 
 class LoginView(APIView):
@@ -120,7 +121,7 @@ class RefreshView(APIView):
     def post(self, request):
         raw = request.COOKIES.get(settings.AUTH_COOKIE_REFRESH)
         if not raw:
-            raise NotAuthenticated("No session.")
+            raise NotAuthenticated(gettext("No session."))
         try:
             old = RefreshToken(raw)
             user = User.objects.get(pk=old["user_id"], is_active=True)
@@ -130,11 +131,11 @@ class RefreshView(APIView):
             user = _just_rotated(raw)
             if user is None:
                 response = Response(
-                    {"detail": "Session expired."}, status=status.HTTP_401_UNAUTHORIZED
+                    {"detail": gettext("Session expired.")}, status=status.HTTP_401_UNAUTHORIZED
                 )
                 _clear_auth_cookies(response)
                 return response
-        response = Response({"detail": "ok"})
+        response = Response({"detail": gettext("ok")})
         _set_auth_cookies(response, RefreshToken.for_user(user))
         return response
 
@@ -171,7 +172,7 @@ class LogoutView(APIView):
         if raw:
             with contextlib.suppress(TokenError):
                 RefreshToken(raw).blacklist()
-        response = Response({"detail": "ok"})
+        response = Response({"detail": gettext("ok")})
         _clear_auth_cookies(response)
         return response
 
@@ -205,7 +206,9 @@ class RegistrationStartView(APIView):
             {
                 "request_id": reg.public_id,
                 # Identical wording whether or not the details matched a record.
-                "detail": "If the details match the college records, a code was sent to the email.",
+                "detail": gettext(
+                    "If the details match the college records, a code was sent to the email."
+                ),
             }
         )
 
@@ -225,7 +228,7 @@ class RegistrationVerifyView(APIView):
         data.is_valid(raise_exception=True)
         reg = get_object_or_404(RegistrationRequest, public_id=data.validated_data["request_id"])
         services.verify_registration(reg, data.validated_data["code"])
-        return Response({"detail": "Email verified."})
+        return Response({"detail": gettext("Email verified.")})
 
 
 class RegistrationCompleteView(APIView):
@@ -261,7 +264,9 @@ class PasswordForgotView(APIView):
         data = PasswordForgotSerializer(data=request.data)
         data.is_valid(raise_exception=True)
         services.start_password_reset(data.validated_data["email"])
-        return Response({"detail": "If an account uses this email, a code was sent to it."})
+        return Response(
+            {"detail": gettext("If an account uses this email, a code was sent to it.")}
+        )
 
 
 class PasswordResetView(APIView):
@@ -276,7 +281,7 @@ class PasswordResetView(APIView):
         data = PasswordResetSerializer(data=request.data)
         data.is_valid(raise_exception=True)
         services.reset_password(**data.validated_data)
-        return Response({"detail": "Password changed. Sign in with the new password."})
+        return Response({"detail": gettext("Password changed. Sign in with the new password.")})
 
 
 class ActivateView(APIView):
@@ -289,7 +294,7 @@ class ActivateView(APIView):
         data = ActivateSerializer(data=request.data)
         data.is_valid(raise_exception=True)
         services.activate(data.validated_data["token"], data.validated_data["password"])
-        return Response({"detail": "Account activated. You can sign in now."})
+        return Response({"detail": gettext("Account activated. You can sign in now.")})
 
 
 # ─── Staff: users and roles ───────────────────────────────────────────────

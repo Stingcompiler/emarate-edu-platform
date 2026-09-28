@@ -6,6 +6,7 @@ from decimal import ROUND_HALF_UP, Decimal
 
 from django.db import IntegrityError, transaction
 from django.utils import timezone
+from django.utils.translation import gettext
 from rest_framework.exceptions import PermissionDenied, ValidationError
 
 from accounts import rbac
@@ -35,13 +36,15 @@ def require_batch_scope(user, batch: ResultImportBatch) -> None:
     scope = rbac.scope_for(user, "results.manage")
     allowed = scope.everything if batch.department_id is None else scope.allows(batch.department_id)
     if not allowed:
-        raise PermissionDenied("Outside your results scope.")
+        raise PermissionDenied(gettext("Outside your results scope."))
 
 
 def commit(meta: RequestMeta, batch: ResultImportBatch) -> ResultImportBatch:
     require_batch_scope(meta.actor, batch)
     if batch.status not in (B.VALIDATED, B.HAS_ERRORS):
-        raise Conflict("This batch was already committed or rejected.", code="batch_closed")
+        raise Conflict(
+            gettext("This batch was already committed or rejected."), code="batch_closed"
+        )
     rows = batch.rows.filter(action=ResultImportRow.Action.CREATE).select_related("offering")
     results = [
         AcademicResult(
@@ -66,7 +69,9 @@ def commit(meta: RequestMeta, batch: ResultImportBatch) -> ResultImportBatch:
             record(meta, "results.commit", batch, new=batch.summary, department_id=_dept(batch))
     except IntegrityError:
         raise Conflict(
-            "Some students got a result from another batch meanwhile. Upload the file again.",
+            gettext(
+                "Some students got a result from another batch meanwhile. Upload the file again."
+            ),
             code="conflict",
         ) from None
     return batch
@@ -121,7 +126,7 @@ def reject(meta: RequestMeta, batch: ResultImportBatch) -> None:
     require_batch_scope(meta.actor, batch)
     if batch.status not in (B.VALIDATED, B.HAS_ERRORS):
         raise Conflict(
-            "A committed batch cannot be deleted; unpublish it instead.", code="committed"
+            gettext("A committed batch cannot be deleted; unpublish it instead."), code="committed"
         )
     with transaction.atomic():
         record(meta, "results.import_delete", batch, old=batch.summary, department_id=_dept(batch))
@@ -146,7 +151,7 @@ def request_correction(
     if not rbac.can(meta.actor, "results.correct"):
         raise PermissionDenied()
     if not reason.strip():
-        raise ValidationError({"reason": ["A reason is required."]})
+        raise ValidationError({"reason": [gettext("A reason is required.")]})
     new = _values(result)
     if score is not None:
         ranges = GradingScale.for_program(result.student_record.program_id)
@@ -158,7 +163,7 @@ def request_correction(
         if status in ("absent", "withdrawn", "incomplete") and score is None:
             new.update(score=None, letter="", grade_points="0.00")
     if new == _values(result):
-        raise ValidationError({"detail": ["Nothing would change."]})
+        raise ValidationError({"detail": [gettext("Nothing would change.")]})
     try:
         with transaction.atomic():
             correction = ResultCorrection.objects.create(
@@ -173,7 +178,9 @@ def request_correction(
                 department_id=result.offering.course.department_id,
             )
     except IntegrityError:
-        raise Conflict("This result already has a pending correction.", code="pending") from None
+        raise Conflict(
+            gettext("This result already has a pending correction."), code="pending"
+        ) from None
     return correction
 
 
@@ -183,7 +190,7 @@ def decide_correction(
     if not rbac.can(meta.actor, "results.approve"):
         raise PermissionDenied()
     if correction.status != ResultCorrection.Status.PENDING:
-        raise Conflict("Already decided.", code="already_decided")
+        raise Conflict(gettext("Already decided."), code="already_decided")
     result = correction.result
     with transaction.atomic():
         correction.status = (

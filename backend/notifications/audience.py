@@ -13,6 +13,7 @@ from __future__ import annotations
 
 from django.contrib.auth import get_user_model
 from django.db.models import Q, QuerySet
+from django.utils.translation import gettext
 from rest_framework.exceptions import PermissionDenied, ValidationError
 
 from academic.models import CourseOffering, DepartmentMembership, OfferingInstructor
@@ -28,33 +29,41 @@ STAFF_ROLES = set(Role) - {Role.STUDENT}
 def normalize(audience: dict) -> dict:
     """Validate shape; return a clean copy (ids as sorted lists)."""
     if not isinstance(audience, dict) or audience.get("type") not in TYPES:
-        raise ValidationError({"audience": [f"type must be one of {sorted(TYPES)}."]})
+        raise ValidationError(
+            {"audience": [gettext("type must be one of %(sorted)s.") % {"sorted": sorted(TYPES)}]}
+        )
     kind = audience["type"]
     clean: dict = {"type": kind}
     if kind in {"offering", "department", "program"}:
         ids = audience.get("ids")
         if not ids or not all(isinstance(i, int) for i in ids):
-            raise ValidationError({"audience": ["ids: a non-empty list of numbers."]})
+            raise ValidationError({"audience": [gettext("ids: a non-empty list of numbers.")]})
         clean["ids"] = sorted(set(ids))
     if kind == "users":
         ids = audience.get("ids")
         if not ids or not all(isinstance(i, str) for i in ids):
-            raise ValidationError({"audience": ["ids: a non-empty list of user ids."]})
+            raise ValidationError({"audience": [gettext("ids: a non-empty list of user ids.")]})
         clean["ids"] = sorted(set(ids))
     if kind in {"department", "college"}:
         members = audience.get("members", "students")
         if members not in MEMBERS:
-            raise ValidationError({"audience": [f"members must be one of {sorted(MEMBERS)}."]})
+            raise ValidationError(
+                {
+                    "audience": [
+                        gettext("members must be one of %(sorted)s.") % {"sorted": sorted(MEMBERS)}
+                    ]
+                }
+            )
         clean["members"] = members
     if kind in {"department", "program"} and audience.get("level") is not None:
         level = audience["level"]
         if not isinstance(level, int) or not 1 <= level <= 10:
-            raise ValidationError({"audience": ["level must be between 1 and 10."]})
+            raise ValidationError({"audience": [gettext("level must be between 1 and 10.")]})
         clean["level"] = level
     if kind == "role":
         roles = audience.get("roles") or []
         if not roles or not set(roles) <= {r.value for r in Role}:
-            raise ValidationError({"audience": ["roles: a non-empty list of roles."]})
+            raise ValidationError({"audience": [gettext("roles: a non-empty list of roles.")]})
         clean["roles"] = sorted(set(roles))
         if audience.get("departments"):
             clean["departments"] = sorted(set(audience["departments"]))
@@ -151,7 +160,7 @@ def is_allowed(sender, audience: dict) -> bool:
 def authorize(sender, audience: dict) -> dict:
     clean = normalize(audience)
     if not is_allowed(sender, clean):
-        raise PermissionDenied("This audience is outside what you may notify.")
+        raise PermissionDenied(gettext("This audience is outside what you may notify."))
     return clean
 
 

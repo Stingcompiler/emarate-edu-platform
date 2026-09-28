@@ -7,6 +7,7 @@ from decimal import Decimal
 
 from django.db import IntegrityError, transaction
 from django.utils import timezone
+from django.utils.translation import gettext
 from rest_framework.exceptions import NotFound, PermissionDenied, ValidationError
 
 from audit.services import RequestMeta, record, snapshot
@@ -98,7 +99,7 @@ def set_lecture_published(meta: RequestMeta, lecture: Lecture, published: bool) 
 def delete_lecture(meta: RequestMeta, lecture: Lecture) -> None:
     found = require(meta.actor, lecture.offering, "view_all")
     if not found.can_delete(meta.actor, lecture):
-        raise PermissionDenied("You cannot delete this lecture.")
+        raise PermissionDenied(gettext("You cannot delete this lecture."))
     with transaction.atomic():
         record(
             meta,
@@ -124,17 +125,19 @@ def add_resource(
     require(meta.actor, lecture.offering, "edit")
     if kind == LectureResource.Kind.FILE:
         if not isinstance(file, StoredFile) or video or url:
-            raise ValidationError({"file": ["A file resource needs exactly one uploaded file."]})
+            raise ValidationError(
+                {"file": [gettext("A file resource needs exactly one uploaded file.")]}
+            )
         if file.purpose != Purpose.LECTURE or file.offering_id != lecture.offering_id:
-            raise ValidationError({"file": ["Upload the file to this course first."]})
+            raise ValidationError({"file": [gettext("Upload the file to this course first.")]})
     elif kind == LectureResource.Kind.VIDEO or (kind == LectureResource.Kind.RECORDING and video):
         if not isinstance(video, VideoAsset) or file or url:
-            raise ValidationError({"video": ["A video resource needs exactly one video."]})
+            raise ValidationError({"video": [gettext("A video resource needs exactly one video.")]})
         if video.offering_id != lecture.offering_id:
-            raise ValidationError({"video": ["Upload the video to this course first."]})
+            raise ValidationError({"video": [gettext("Upload the video to this course first.")]})
     else:
         if not url or file or video:
-            raise ValidationError({"url": ["A link resource needs a URL."]})
+            raise ValidationError({"url": [gettext("A link resource needs a URL.")]})
     with transaction.atomic():
         resource = LectureResource.objects.create(
             lecture=lecture, kind=kind, title=title, file=file, video=video, url=url, order=order
@@ -175,7 +178,13 @@ def _link_fields(assignment: Assignment, fields: list[dict] | None) -> None:
             try:
                 re.compile(pattern)
             except re.error:
-                raise ValidationError({"link_fields": [f"Invalid pattern: {pattern}"]}) from None
+                raise ValidationError(
+                    {
+                        "link_fields": [
+                            gettext("Invalid pattern: %(pattern)s") % {"pattern": pattern}
+                        ]
+                    }
+                ) from None
     assignment.link_fields.all().delete()
     assignment.link_fields.bulk_create(
         [assignment.link_fields.model(assignment=assignment, **item) for item in fields]
@@ -221,7 +230,7 @@ def update_assignment(
 def set_assignment_status(meta: RequestMeta, assignment: Assignment, status: str) -> Assignment:
     require(meta.actor, assignment.offering, "edit")
     if status == Assignment.Status.PUBLISHED and not assignment.submission_types:
-        raise ValidationError({"submission_types": ["Choose how students submit first."]})
+        raise ValidationError({"submission_types": [gettext("Choose how students submit first.")]})
     with transaction.atomic():
         old = assignment.status
         assignment.status = status
@@ -242,9 +251,11 @@ def set_assignment_status(meta: RequestMeta, assignment: Assignment, status: str
 def delete_assignment(meta: RequestMeta, assignment: Assignment) -> None:
     found = require(meta.actor, assignment.offering, "view_all")
     if not found.can_delete(meta.actor, assignment):
-        raise PermissionDenied("You cannot delete this assignment.")
+        raise PermissionDenied(gettext("You cannot delete this assignment."))
     if assignment.submissions.exists():
-        raise Conflict("Students have submitted; close the assignment instead.", code="in_use")
+        raise Conflict(
+            gettext("Students have submitted; close the assignment instead."), code="in_use"
+        )
     with transaction.atomic():
         record(
             meta,
@@ -261,19 +272,25 @@ def delete_assignment(meta: RequestMeta, assignment: Assignment) -> None:
 
 def _lateness(assignment: Assignment, now) -> bool:
     if assignment.opens_at and now < assignment.opens_at:
-        raise Invalid({"detail": ["Submissions have not opened yet."]}, code="not_open")
+        raise Invalid({"detail": [gettext("Submissions have not opened yet.")]}, code="not_open")
     if now <= assignment.due_at:
         return False
     if assignment.late_policy == Assignment.LatePolicy.NONE:
-        raise Invalid({"detail": ["The deadline has passed."]}, code="deadline_passed")
+        raise Invalid({"detail": [gettext("The deadline has passed.")]}, code="deadline_passed")
     if assignment.late_until and now > assignment.late_until:
-        raise Invalid({"detail": ["The late window has closed."]}, code="deadline_passed")
+        raise Invalid({"detail": [gettext("The late window has closed.")]}, code="deadline_passed")
     return True
 
 
 def _submission_files(user, assignment: Assignment, public_ids: list) -> list[StoredFile]:
     if len(public_ids) > assignment.max_files:
-        raise ValidationError({"files": [f"At most {assignment.max_files} files."]})
+        raise ValidationError(
+            {
+                "files": [
+                    gettext("At most %(max_files)s files.") % {"max_files": assignment.max_files}
+                ]
+            }
+        )
     files = list(
         StoredFile.objects.filter(
             public_id__in=public_ids,
@@ -283,14 +300,21 @@ def _submission_files(user, assignment: Assignment, public_ids: list) -> list[St
         )
     )
     if len(files) != len(set(public_ids)):
-        raise ValidationError({"files": ["Upload each file to this course first."]})
+        raise ValidationError({"files": [gettext("Upload each file to this course first.")]})
     allowed = {e.lower().lstrip(".") for e in assignment.allowed_extensions}
     for item in files:
         if allowed and extension_of(item.name) not in allowed:
-            raise ValidationError({"files": [f"{item.name}: type not accepted here."]})
+            raise ValidationError(
+                {"files": [gettext("%(name)s: type not accepted here.") % {"name": item.name}]}
+            )
         if item.size > assignment.max_file_size_mb * 1024 * 1024:
             raise ValidationError(
-                {"files": [f"{item.name}: larger than {assignment.max_file_size_mb} MB."]}
+                {
+                    "files": [
+                        gettext("%(name)s: larger than %(max_file_size_mb)s MB.")
+                        % {"name": item.name, "max_file_size_mb": assignment.max_file_size_mb}
+                    ]
+                }
             )
     return files
 
@@ -302,16 +326,33 @@ def _links(assignment: Assignment, links: dict) -> dict:
         value = str(links.get(label, "")).strip()
         if not value:
             if field.required:
-                raise ValidationError({"links": [f"{label}: required."]})
+                raise ValidationError(
+                    {"links": [gettext("%(label)s: required.") % {"label": label}]}
+                )
             continue
         if not re.match(r"^https?://", value):
-            raise ValidationError({"links": [f"{label}: must start with http:// or https://."]})
+            raise ValidationError(
+                {
+                    "links": [
+                        gettext("%(label)s: must start with http:// or https://.")
+                        % {"label": label}
+                    ]
+                }
+            )
         if field.url_pattern and not re.search(field.url_pattern, value):
-            raise ValidationError({"links": [f"{label}: does not match the expected format."]})
+            raise ValidationError(
+                {
+                    "links": [
+                        gettext("%(label)s: does not match the expected format.") % {"label": label}
+                    ]
+                }
+            )
         clean[label] = value
     unknown = set(links) - set(fields)
     if unknown:
-        raise ValidationError({"links": [f"Unknown link: {sorted(unknown)[0]}"]})
+        raise ValidationError(
+            {"links": [gettext("Unknown link: %(value)s") % {"value": sorted(unknown)[0]}]}
+        )
     return clean
 
 
@@ -321,22 +362,24 @@ def submit(
     user = meta.actor
     require(user, assignment.offering, "submit")
     if assignment.status != Assignment.Status.PUBLISHED:
-        raise Invalid({"detail": ["This assignment is not accepting submissions."]}, code="closed")
+        raise Invalid(
+            {"detail": [gettext("This assignment is not accepting submissions.")]}, code="closed"
+        )
     now = timezone.now()
     is_late = _lateness(assignment, now)
     types = set(assignment.submission_types)
     content = content.strip()
     links = links or {}
     if content and "text" not in types:
-        raise ValidationError({"content": ["Text answers are not accepted here."]})
+        raise ValidationError({"content": [gettext("Text answers are not accepted here.")]})
     if files and "file" not in types:
-        raise ValidationError({"files": ["Files are not accepted here."]})
+        raise ValidationError({"files": [gettext("Files are not accepted here.")]})
     if links and "link" not in types:
-        raise ValidationError({"links": ["Links are not accepted here."]})
+        raise ValidationError({"links": [gettext("Links are not accepted here.")]})
     stored = _submission_files(user, assignment, list(files))
     clean_links = _links(assignment, links) if "link" in types else {}
     if not (content or stored or clean_links):
-        raise Invalid({"detail": ["The submission is empty."]}, code="empty")
+        raise Invalid({"detail": [gettext("The submission is empty.")]}, code="empty")
 
     student = StudentRecord.objects.get(user=user)
     with transaction.atomic():
@@ -352,14 +395,16 @@ def submit(
                         assignment=assignment, student_record=student, first_submitted_at=now
                     )
             except IntegrityError:
-                raise Conflict("Submitted twice at once; try again.", code="conflict") from None
+                raise Conflict(
+                    gettext("Submitted twice at once; try again."), code="conflict"
+                ) from None
             number = 1
         else:
             if not assignment.allow_resubmission:
-                raise Conflict("Resubmission is not allowed.", code="no_resubmission")
+                raise Conflict(gettext("Resubmission is not allowed."), code="no_resubmission")
             grade = getattr(submission, "grade", None)
             if grade is not None and grade.status == SubmissionGrade.Status.APPROVED:
-                raise Conflict("This submission is already graded.", code="graded")
+                raise Conflict(gettext("This submission is already graded."), code="graded")
             number = submission.versions.count() + 1
         version = SubmissionVersion.objects.create(
             submission=submission,
@@ -429,7 +474,13 @@ def grade(
     assignment = submission.assignment
     require(meta.actor, assignment.offering, "grade")
     if not 0 <= score <= assignment.max_grade:
-        raise ValidationError({"score": [f"Between 0 and {assignment.max_grade}."]})
+        raise ValidationError(
+            {
+                "score": [
+                    gettext("Between 0 and %(max_grade)s.") % {"max_grade": assignment.max_grade}
+                ]
+            }
+        )
     with transaction.atomic():
         existing = SubmissionGrade.objects.filter(submission=submission).first()
         old = {"score": str(existing.score), "status": existing.status} if existing else None
@@ -462,12 +513,14 @@ def approve_grade(meta: RequestMeta, submission: Submission) -> SubmissionGrade:
     require(meta.actor, assignment.offering, "grade")
     result = SubmissionGrade.objects.filter(submission=submission).first()
     if result is None or result.status != SubmissionGrade.Status.SUGGESTED:
-        raise Conflict("There is no suggested grade to approve.", code="nothing_to_approve")
+        raise Conflict(
+            gettext("There is no suggested grade to approve."), code="nothing_to_approve"
+        )
     # docs/03 §3.9: a TA never gives final approval to an AI-suggested grade.
     if result.source == SubmissionGrade.Source.AI_SUGGESTED and _is_ta(
         meta.actor, assignment.offering
     ):
-        raise PermissionDenied("Only the teacher approves AI-suggested grades.")
+        raise PermissionDenied(gettext("Only the teacher approves AI-suggested grades."))
     with transaction.atomic():
         result.status = SubmissionGrade.Status.APPROVED
         result.graded_by = meta.actor

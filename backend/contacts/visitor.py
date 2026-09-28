@@ -12,6 +12,7 @@ from datetime import timedelta
 
 from django.db import transaction
 from django.utils import timezone
+from django.utils.translation import gettext
 from rest_framework import authentication, exceptions, permissions
 
 from accounts import otp
@@ -56,9 +57,9 @@ def verify(
     )
     result = otp.check(latest, code)
     if result is otp.OTPResult.TOO_MANY_ATTEMPTS:
-        raise Locked("Too many attempts. Request a new code.")
+        raise Locked(gettext("Too many attempts. Request a new code."))
     if result is not otp.OTPResult.OK:
-        raise exceptions.ValidationError({"code": ["Invalid or expired code."]})
+        raise exceptions.ValidationError({"code": [gettext("Invalid or expired code.")]})
     now = timezone.now()
     with transaction.atomic():
         contact = Contact.objects.filter(email=email).first()
@@ -93,7 +94,9 @@ class VisitorAuthentication(authentication.BaseAuthentication):
             .first()
         )
         if session is None:
-            raise exceptions.AuthenticationFailed("Your session expired. Verify your email again.")
+            raise exceptions.AuthenticationFailed(
+                gettext("Your session expired. Verify your email again.")
+            )
         request.contact = session.contact
         return (None, session)
 

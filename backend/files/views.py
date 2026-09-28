@@ -3,6 +3,7 @@ import hmac
 from django.conf import settings
 from django.http import FileResponse, Http404
 from django.shortcuts import get_object_or_404
+from django.utils.translation import gettext
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
 from rest_framework.parsers import MultiPartParser
@@ -139,4 +140,4 @@ class BunnyStreamWebhookView(APIView):
         if not secret or not hmac.compare_digest(request.query_params.get("secret", ""), secret):
             raise Http404
         services.bunny_webhook(request.data)
-        return Response({"detail": "ok"})
+        return Response({"detail": gettext("ok")})

@@ -10,6 +10,7 @@ from decimal import Decimal
 from django.db import IntegrityError, transaction
 from django.db.models import Max
 from django.utils import timezone
+from django.utils.translation import gettext
 from rest_framework.exceptions import NotFound, PermissionDenied, ValidationError
 
 from audit.services import RequestMeta, record, snapshot
@@ -33,7 +34,9 @@ def _dept(exam: Exam) -> int:
 
 def _editable(exam: Exam) -> None:
     if exam.status != Exam.Status.DRAFT and exam.attempts.exists():
-        raise Conflict("Students have started this exam; questions are locked.", code="locked")
+        raise Conflict(
+            gettext("Students have started this exam; questions are locked."), code="locked"
+        )
 
 
 # ─── Building ─────────────────────────────────────────────────────────────
@@ -48,7 +51,7 @@ def save_exam(meta: RequestMeta, exam: Exam | None, **data) -> Exam:
             record(meta, "exam.create", exam, new=snapshot(exam), department_id=_dept(exam))
             return exam
         if exam.status in (Exam.Status.CLOSED, Exam.Status.ARCHIVED):
-            raise Conflict("A closed exam cannot change.", code="closed")
+            raise Conflict(gettext("A closed exam cannot change."), code="closed")
         old = snapshot(exam)
         for field, value in data.items():
             setattr(exam, field, value)
@@ -105,7 +108,7 @@ def reorder(meta: RequestMeta, exam: Exam, ids: list[int]) -> None:
     _editable(exam)
     existing = set(exam.questions.values_list("pk", flat=True))
     if set(ids) != existing or len(ids) != len(existing):
-        raise ValidationError({"order": ["List every question exactly once."]})
+        raise ValidationError({"order": [gettext("List every question exactly once.")]})
     with transaction.atomic():
         for position, pk in enumerate(ids, start=1):
             Question.objects.filter(pk=pk).update(order=position)
@@ -131,7 +134,7 @@ def problems(exam: Exam) -> list[str]:
 def publish(meta: RequestMeta, exam: Exam) -> Exam:
     require(meta.actor, exam.offering, "publish")
     if exam.status != Exam.Status.DRAFT:
-        raise Conflict("Only a draft can be published.", code="not_draft")
+        raise Conflict(gettext("Only a draft can be published."), code="not_draft")
     found = problems(exam)
     if found:
         raise Invalid({"detail": found}, code="not_ready")
@@ -153,7 +156,7 @@ def publish(meta: RequestMeta, exam: Exam) -> Exam:
 def close(meta: RequestMeta, exam: Exam) -> Exam:
     require(meta.actor, exam.offering, "publish")
     if exam.status != Exam.Status.PUBLISHED:
-        raise Conflict("Only a published exam can be closed.", code="not_published")
+        raise Conflict(gettext("Only a published exam can be closed."), code="not_published")
     with transaction.atomic():
         for attempt in exam.attempts.filter(status=A.IN_PROGRESS):
             _finish(attempt, A.AUTO_SUBMITTED)
@@ -174,9 +177,9 @@ def release_results(meta: RequestMeta, exam: Exam, released: bool) -> Exam:
 def delete_exam(meta: RequestMeta, exam: Exam) -> None:
     found = require(meta.actor, exam.offering, "view_all")
     if not found.can_delete(meta.actor, exam):
-        raise PermissionDenied("You cannot delete this exam.")
+        raise PermissionDenied(gettext("You cannot delete this exam."))
     if exam.attempts.exists():
-        raise Conflict("Students attempted this exam; archive it instead.", code="in_use")
+        raise Conflict(gettext("Students attempted this exam; archive it instead."), code="in_use")
     with transaction.atomic():
         record(meta, "exam.delete", exam, old=snapshot(exam), department_id=_dept(exam))
         exam.delete()
@@ -202,14 +205,14 @@ def start(meta: RequestMeta, exam: Exam) -> ExamAttempt:
     if current is not None:
         return current  # resume after a closed tab or a lost connection
     if exam.status != Exam.Status.PUBLISHED:
-        raise Invalid({"detail": ["This exam is not open."]}, code="not_open")
+        raise Invalid({"detail": [gettext("This exam is not open.")]}, code="not_open")
     if now < exam.opens_at:
-        raise Invalid({"detail": ["The exam has not opened yet."]}, code="not_open")
+        raise Invalid({"detail": [gettext("The exam has not opened yet.")]}, code="not_open")
     if now >= exam.closes_at:
-        raise Invalid({"detail": ["The exam window has closed."]}, code="closed")
+        raise Invalid({"detail": [gettext("The exam window has closed.")]}, code="closed")
     used = ExamAttempt.objects.filter(exam=exam, student_record=student).count()
     if used >= exam.max_attempts:
-        raise Conflict("No attempts left.", code="no_attempts")
+        raise Conflict(gettext("No attempts left."), code="no_attempts")
     questions = list(exam.questions.prefetch_related("choices"))
     order = [q.pk for q in questions]
     rng = random.SystemRandom()
@@ -252,9 +255,9 @@ def own_attempt(user, public_id) -> ExamAttempt:
 
 def _open_for_writing(attempt: ExamAttempt, now) -> None:
     if attempt.status != A.IN_PROGRESS:
-        raise Conflict("This attempt was already submitted.", code="submitted")
+        raise Conflict(gettext("This attempt was already submitted."), code="submitted")
     if now > attempt.deadline_at + timedelta(seconds=attempt.exam.grace_seconds):
-        raise Invalid({"detail": ["Time is up."]}, code="time_up")
+        raise Invalid({"detail": [gettext("Time is up.")]}, code="time_up")
 
 
 def save_answer(meta: RequestMeta, attempt: ExamAttempt, question_id: int, answer) -> StudentAnswer:
@@ -269,7 +272,8 @@ def save_answer(meta: RequestMeta, attempt: ExamAttempt, question_id: int, answe
         furthest = max((attempt.question_order.index(q) for q in answered), default=-1)
         if position < furthest:
             raise Invalid(
-                {"detail": ["Going back is not allowed in this exam."]}, code="no_backtrack"
+                {"detail": [gettext("Going back is not allowed in this exam.")]},
+                code="no_backtrack",
             )
     try:
         clean = None if answer is None else REGISTRY[question.type].clean_answer(question, answer)
@@ -284,7 +288,7 @@ def save_answer(meta: RequestMeta, attempt: ExamAttempt, question_id: int, answe
 
 def record_signal(attempt: ExamAttempt, kind: str) -> ExamAttempt:
     if kind not in ("blur", "offline"):
-        raise ValidationError({"kind": ["Unknown signal."]})
+        raise ValidationError({"kind": [gettext("Unknown signal.")]})
     if attempt.status == A.IN_PROGRESS:
         meta = dict(attempt.client_meta)
         meta[kind] = int(meta.get(kind, 0)) + 1
@@ -336,7 +340,7 @@ def submit(meta: RequestMeta, attempt: ExamAttempt) -> ExamAttempt:
     if attempt.status in DONE_STATES:
         return attempt
     if attempt.status != A.IN_PROGRESS:
-        raise Conflict("This attempt is closed.", code="closed")
+        raise Conflict(gettext("This attempt is closed."), code="closed")
     with transaction.atomic():
         locked = ExamAttempt.objects.select_for_update().get(pk=attempt.pk)
         if locked.status != A.IN_PROGRESS:
@@ -374,7 +378,7 @@ def close_expired() -> int:
 def extend(meta: RequestMeta, attempt: ExamAttempt, minutes: int) -> ExamAttempt:
     require(meta.actor, attempt.exam.offering, "edit")
     if attempt.status != A.IN_PROGRESS:
-        raise Conflict("Only a running attempt can be extended.", code="not_running")
+        raise Conflict(gettext("Only a running attempt can be extended."), code="not_running")
     attempt.deadline_at += timedelta(minutes=minutes)
     attempt.save(update_fields=["deadline_at", "updated_at"])
     record(
@@ -390,13 +394,13 @@ def extend(meta: RequestMeta, attempt: ExamAttempt, minutes: int) -> ExamAttempt
 def reopen(meta: RequestMeta, attempt: ExamAttempt, minutes: int, reason: str) -> ExamAttempt:
     require(meta.actor, attempt.exam.offering, "publish")
     if not reason.strip():
-        raise ValidationError({"reason": ["A reason is required."]})
+        raise ValidationError({"reason": [gettext("A reason is required.")]})
     if attempt.status not in DONE_STATES:
-        raise Conflict("Only a submitted attempt can be reopened.", code="not_submitted")
+        raise Conflict(gettext("Only a submitted attempt can be reopened."), code="not_submitted")
     if ExamAttempt.objects.filter(
         exam=attempt.exam, student_record=attempt.student_record, status=A.IN_PROGRESS
     ).exists():
-        raise Conflict("The student has another attempt running.", code="running")
+        raise Conflict(gettext("The student has another attempt running."), code="running")
     with transaction.atomic():
         attempt.status = A.IN_PROGRESS
         attempt.submitted_at = None
@@ -415,7 +419,7 @@ def reopen(meta: RequestMeta, attempt: ExamAttempt, minutes: int, reason: str) -
 def invalidate(meta: RequestMeta, attempt: ExamAttempt, reason: str) -> ExamAttempt:
     require(meta.actor, attempt.exam.offering, "publish")
     if not reason.strip():
-        raise ValidationError({"reason": ["A reason is required."]})
+        raise ValidationError({"reason": [gettext("A reason is required.")]})
     with transaction.atomic():
         attempt.status = A.INVALIDATED
         attempt.invalidation_reason = reason
@@ -435,9 +439,11 @@ def grade_answer(meta: RequestMeta, answer: StudentAnswer, marks: Decimal) -> St
     attempt = answer.attempt
     require(meta.actor, attempt.exam.offering, "grade")
     if attempt.status not in DONE_STATES:
-        raise Conflict("Grade after the attempt is submitted.", code="not_submitted")
+        raise Conflict(gettext("Grade after the attempt is submitted."), code="not_submitted")
     if not 0 <= marks <= answer.question.marks:
-        raise ValidationError({"marks": [f"Between 0 and {answer.question.marks}."]})
+        raise ValidationError(
+            {"marks": [gettext("Between 0 and %(marks)s.") % {"marks": answer.question.marks}]}
+        )
     with transaction.atomic():
         answer.marks_awarded = marks
         answer.is_correct = marks == answer.question.marks
