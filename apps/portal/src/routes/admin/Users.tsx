@@ -151,7 +151,9 @@ function NewUser() {
   // Only the roles the server accepts from this user (rbac.CREATABLE_ACCOUNTS).
   const allowed = useMe().data?.creatable_roles ?? [];
   const [f, setF] = useState({ full_name_ar: "", email: "", role: "", department: "" });
-  const role = f.role || Object.keys(ROLE_LABEL).find((k) => allowed.includes(k)) || "";
+  // Never default to the most powerful role; the admin picks it deliberately.
+  const offered = Object.keys(ROLE_LABEL).filter((k) => allowed.includes(k));
+  const role = f.role || offered.find((k) => k !== "system_admin") || offered[0] || "";
   const create = useMutation({
     mutationFn: async () => {
       const { data, error } = await api.POST("/api/v1/users", {

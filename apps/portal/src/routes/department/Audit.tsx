@@ -107,7 +107,8 @@ const ACTIONS: Record<string, string> = {
   "students.import_commit": "استورد سجل طلاب",
   "students.import_reject": "رفض ملف طلاب",
   "term.set_current": "غيّر الفصل الحالي",
-  "admissions.register": "بدأ طلب قبول",
+  "admissions.start": "بدأ طلب قبول",
+  "admissions.register": "حوّل متقدمًا إلى طالب",
   "admissions.submit": "قدّم طلب قبول",
   "admissions.withdraw": "سحب طلب قبول",
   "admissions.assign": "وزّع طلب قبول",
@@ -130,6 +131,18 @@ const ACTIONS: Record<string, string> = {
   "settings.update": "عدّل إعدادات النظام",
   "reports.snapshot": "حفظ لقطة تقرير",
   "backup.create": "أنشأ نسخة احتياطية",
+  "page.create": "أنشأ صفحة",
+  "page.update": "عدّل صفحة",
+  "page.delete": "حذف صفحة",
+  "news.create": "أنشأ خبرًا",
+  "news.update": "عدّل خبرًا",
+  "news.delete": "حذف خبرًا",
+  "event.create": "أنشأ فعالية",
+  "event.update": "عدّل فعالية",
+  "event.delete": "حذف فعالية",
+  "inquiry.email": "ردّ على استفسار بالبريد",
+  "inquiry.whatsapp": "ردّ على استفسار عبر واتساب",
+  "inquiry.note": "أضاف ملاحظة على استفسار",
 };
 
 /** Fallback for codes without a label above: "<verb> <object>" so no raw code reaches the page. */
@@ -156,7 +169,7 @@ const NOUNS: Record<string, string> = {
   academic_year: "عام دراسي",
   term: "فصل دراسي",
 };
-function actionLabel(code: string): string {
+export function actionLabel(code: string): string {
   if (ACTIONS[code]) return ACTIONS[code];
   const [noun = "", rest = ""] = code.split(".");
   const verb = rest.split("_").pop() ?? rest;

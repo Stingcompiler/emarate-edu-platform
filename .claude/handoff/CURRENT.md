@@ -1,22 +1,25 @@
 # Handoff — Role-by-role walkthrough in progress — 2026-09-28
 
 ## Where things stand
-- **All phases 0–11 are merged** to `main` (PRs #2–#13). PR #14 (student walkthrough fixes) is also merged.
-- **Current work:** the owner asked to sign in as every demo role one after another, try it,
-  write a report after each role and move on **without waiting** («سجل بكل المستخدمين وجرب مستخدم بعد الاخر…»).
-  - Branch `fix/role-walkthrough` (pushed, **no PR yet**): fixes found while testing, one commit per role.
-  - Report: `docs/qa/role-walkthrough-2026-09.md` (Arabic). Done: student, teacher, TA, dept manager,
-    dept supervisor, results officer, academic affairs.
-  - **Remaining roles, in order:** student_affairs, hr, head_registrar, registrar, site_manager,
-    events_manager, system_admin. After the last role: open the PR, merge when CI is green.
-- **Next PR after that:** Arabic API messages (docs/05 requires Arabic by `Accept-Language`).
-  About 180 service messages plus importer row errors are English and reach users. Plan: wrap them in
-  `gettext`, add `locale/ar/LC_MESSAGES/django.po`, enable `LocaleMiddleware`, and make sure stored
-  import row errors are Arabic.
-- **Dev login:** the demo accounts are `<handle>@demo.ecst.test`. `ta@` and `dept.supervisor@` have a different
-  password from the rest (seed_demo does not reset existing passwords). Look it up in the transcript, not here.
-- **Browser pane tip:** coordinate clicks don't land while a phone size is emulated. Use refs or JS clicks,
-  or the pane's natural width.
+- **All phases 0–11 are merged** (PRs #2–#13); PR #14 (student walkthrough fixes) is merged too.
+- **The role-by-role walkthrough is complete** (the owner asked to sign in as every role, write a report after each, and not wait).
+  - Report: `docs/qa/role-walkthrough-2026-09.md` (Arabic, 14 roles plus a summary table).
+  - Fixes are on branch `fix/role-walkthrough` → one PR, which Claude merges once CI is green.
+  - **Main fixes:**
+    - Teacher/TA account creation failed (the UI sent a department for a college-wide role).
+    - News and events couldn't be published without typing a slug by hand (now auto-filled from the title).
+    - A 429 on `/me` sent users to the login page. The admin home made 13 separate count calls, and every window focus refetched everything; fixed with a single `/role-assignments/counts` endpoint, a global `staleTime` of 30 s, and a retry screen in `RequireAuth`.
+    - Audit labels are in Arabic, with readable object names.
+    - Role forms now offer only the roles the user may create or grant (`/me.creatable_roles` and `/me.grantable_roles`).
+    - TA announcements depend on `ta_can_notify`, and TA grading metrics count only where `ta_can_grade` is on.
+- **Next PR: Arabic API messages** (docs/05 requires Arabic via `Accept-Language`).
+  - About 180 service or validation messages, plus stored importer row errors, are English and reach users.
+  - Plan: wrap them in `gettext`, add `locale/ar/LC_MESSAGES/django.po`, enable `LocaleMiddleware`, and write importer errors in Arabic.
+  - Also add one Arabic counting helper for number–noun agreement ("3 صفًا", "1 مقبولًا", "2 مواد").
+- **Dev login:** demo accounts are `<handle>@demo.ecst.test`. `ta@` and `dept.supervisor@` have a different password from the rest (seed_demo doesn't reset existing passwords); see the transcript.
+- **Browser pane tips:**
+  - Coordinate clicks don't land while a phone size is emulated; use refs or JS clicks.
+  - The pane fires focus events during tool actions.
 
 ## What Phase 11 delivered
 - **`render.yaml`:**

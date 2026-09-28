@@ -46,3 +46,13 @@ def test_create_system_admin_command(db, api):
     )
     with pytest.raises(CommandError):
         call_command("create_system_admin", email="root@ecst.test", name="x", stdout=StringIO())
+
+
+def test_role_counts_follow_what_the_caller_may_grant(api, users):
+    from accounts.rbac import Role
+
+    everything = api(users[Role.SYSTEM_ADMIN]).get("/api/v1/role-assignments/counts").data
+    assert everything["counts"][Role.TEACHER] == 1  # one user per role in the fixture
+    assert set(everything["counts"]) == {r.value for r in Role}
+    head = api(users[Role.HEAD_REGISTRAR]).get("/api/v1/role-assignments/counts").data
+    assert head["counts"] == {Role.REGISTRAR: 1}

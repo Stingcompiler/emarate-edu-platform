@@ -153,6 +153,11 @@ READS: dict[str, tuple[str, frozenset, frozenset]] = {
         frozenset({R.SYSTEM_ADMIN, R.HEAD_REGISTRAR, R.ACADEMIC_AFFAIRS, R.SITE_MANAGER}),
         frozenset(),
     ),
+    "role-assignment-counts": (
+        "/api/v1/role-assignments/counts",
+        frozenset({R.SYSTEM_ADMIN, R.HEAD_REGISTRAR, R.ACADEMIC_AFFAIRS, R.SITE_MANAGER}),
+        frozenset(),
+    ),
     "registration-request-list": ("/api/v1/registration-requests", ENROLLMENT, frozenset()),
     "registration-request-detail": (
         "/api/v1/registration-requests/{registration}",
