@@ -45,6 +45,11 @@ import { ResultImportDetail } from "./routes/results/ImportDetail";
 import { ResultImports } from "./routes/results/Imports";
 import { MyResults } from "./routes/results/MyResults";
 import { Home } from "./routes/Home";
+import { RegistrarHome } from "./routes/registrar/Home";
+import { StudentImportDetail, StudentImports } from "./routes/registrar/Imports";
+import { Registrars } from "./routes/registrar/Registrars";
+import { StudentRecord } from "./routes/registrar/StudentRecord";
+import { StudentRecords } from "./routes/registrar/StudentRecords";
 import { Approvals } from "./routes/department/Approvals";
 import { Audit } from "./routes/department/Audit";
 import { DepartmentDashboard } from "./routes/department/Dashboard";
@@ -153,6 +158,12 @@ const router = createBrowserRouter([
   { path: "/applications/:id", element: signedIn(<ApplicationDetail />) },
   { path: "/admissions/cycles", element: signedIn(<Cycles />) },
   { path: "/admissions/forms", element: signedIn(<FormBuilder />) },
+  { path: "/registrar", element: signedIn(<RegistrarHome />) },
+  { path: "/students", element: signedIn(<StudentRecords />) },
+  { path: "/students/:id", element: signedIn(<StudentRecord />) },
+  { path: "/student-imports", element: signedIn(<StudentImports />) },
+  { path: "/student-imports/:id", element: signedIn(<StudentImportDetail />) },
+  { path: "/registrars", element: signedIn(<Registrars />) },
   { path: "/department", element: signedIn(<DepartmentDashboard />) },
   { path: "/department/courses", element: signedIn(<Offerings />) },
   { path: "/department/lectures", element: signedIn(<DepartmentLectures />) },

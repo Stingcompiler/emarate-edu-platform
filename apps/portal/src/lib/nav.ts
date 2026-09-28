@@ -125,8 +125,16 @@ export function navFor(me: Me | null | undefined, unread: number): NavItem[] {
     items.push({ label: "النتائج", to: "/results", icon: Award });
     items.push({ label: "اللوائح", to: "/regulations", icon: ScrollText });
   }
+  if (can(me, "admissions.review"))
+    items.push({ label: "القبول", to: "/registrar", icon: LayoutDashboard });
   if (can(me, "admissions.view"))
     items.push({ label: "الطلبات", to: "/applications", icon: FileText, end: false });
+  if (can(me, "students.import")) {
+    items.push({ label: "سجل الطلاب", to: "/students", icon: Users, end: false });
+    items.push({ label: "استيراد الطلاب", to: "/student-imports", icon: FileUp, end: false });
+  }
+  if (can(me, "admissions.manage") && hasRole(me, "head_registrar", "system_admin"))
+    items.push({ label: "المسجلون", to: "/registrars", icon: UserCheck });
   if (can(me, "admissions.manage")) {
     items.push({ label: "دورات القبول", to: "/admissions/cycles", icon: CalendarRange });
     items.push({ label: "قوالب التقديم", to: "/admissions/forms", icon: LayoutTemplate });

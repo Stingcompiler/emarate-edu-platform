@@ -16,7 +16,7 @@ export function Home() {
   const rules: [boolean, string][] = [
     [hasRole(m, "department_manager", "department_supervisor"), "/department"],
     [hasRole(m, "hr"), "/hr"],
-    [can(m, "admissions.view"), "/applications"],
+    [can(m, "admissions.view"), "/registrar"],
     [can(m, "results.manage"), "/result-imports"],
     [hasRole(m, "student_affairs"), "/cases"],
     [can(m, "content.manage"), "/site"],

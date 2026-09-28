@@ -5,8 +5,8 @@ from .models import StudentImportBatch, StudentImportRow, StudentRecord
 
 class StudentRecordSerializer(serializers.ModelSerializer):
     program_code = serializers.CharField(source="program.code", read_only=True)
-    program_name = serializers.CharField(source="program.name", read_only=True)
-    department_name = serializers.CharField(source="department.name", read_only=True)
+    program_name = serializers.CharField(source="program.name_ar", read_only=True)
+    department_name = serializers.CharField(source="department.name_ar", read_only=True)
     has_account = serializers.SerializerMethodField()
 
     class Meta:

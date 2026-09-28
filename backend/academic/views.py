@@ -197,7 +197,13 @@ class EnrollmentViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewse
 
     serializer_class = EnrollmentSerializer
     permission_classes = [IsAuthenticated, capability("enrollment.manage")]
-    filterset_fields = ["offering", "status", "offering__term", "student_record__level"]
+    filterset_fields = [
+        "offering",
+        "status",
+        "offering__term",
+        "student_record__level",
+        "student_record__public_id",
+    ]
     search_fields = ["student_record__university_number", "student_record__full_name_ar"]
 
     def get_queryset(self):

@@ -14,7 +14,9 @@ class LoginSerializer(serializers.Serializer):
 
 
 class RoleAssignmentSerializer(serializers.ModelSerializer):
-    department_name = serializers.CharField(source="department.name", read_only=True, default=None)
+    department_name = serializers.CharField(
+        source="department.name_ar", read_only=True, default=None
+    )
     role_label = serializers.CharField(source="get_role_display", read_only=True)
 
     class Meta:
@@ -170,7 +172,7 @@ class RoleAssignmentDetailSerializer(RoleAssignmentSerializer):
 class RegistrationRequestSerializer(serializers.ModelSerializer):
     university_number = serializers.CharField(source="student_record.university_number")
     full_name_ar = serializers.CharField(source="student_record.full_name_ar")
-    program = serializers.CharField(source="student_record.program.name")
+    program = serializers.CharField(source="student_record.program.name_ar")
     level = serializers.IntegerField(source="student_record.level")
     official_email = serializers.CharField(source="student_record.email")
     email_matches_record = serializers.SerializerMethodField()
