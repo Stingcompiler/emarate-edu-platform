@@ -148,7 +148,7 @@ class ExamAttempt(PublicIdModel, TimestampedModel):
         ]
 
     def __str__(self) -> str:
-        return f"{self.exam_id}:{self.student_record_id}#{self.attempt_no}"
+        return f"{self.exam.title} — {self.student_record.full_name_ar} #{self.attempt_no}"
 
 
 class StudentAnswer(models.Model):

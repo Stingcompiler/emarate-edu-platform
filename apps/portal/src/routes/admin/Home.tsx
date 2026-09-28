@@ -1,10 +1,11 @@
-import { useMutation, useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Activity, Building2, Mail, Settings2, Users } from "lucide-react";
 import { Link } from "react-router";
 
 import { PortalShell } from "../../components/PortalShell";
 import { Card, SectionLabel } from "../../components/ui";
 import { api } from "../../lib/api";
+import { actionLabel } from "../department/Audit";
 import { useMe } from "../../lib/auth";
 import { useCurrentTerm } from "../../lib/department";
 import { when } from "../../lib/format";
@@ -52,18 +53,13 @@ export function AdminHome() {
       (await api.GET("/api/v1/programs", { params: { query: { page_size: 100 } as never } })).data
         ?.results ?? [],
   });
-  const counts = useQueries({
-    queries: GROUPS.flatMap((g) => g.roles).map((role) => ({
-      queryKey: ["role-count", role],
-      queryFn: async () =>
-        (
-          await api.GET("/api/v1/role-assignments", {
-            params: { query: { role: role as never, page_size: 1 } },
-          })
-        ).data?.count ?? 0,
-    })),
+  const counts = useQuery({
+    queryKey: ["role-counts"],
+    queryFn: async () => (await api.GET("/api/v1/role-assignments/counts")).data?.counts ?? {},
   });
-  const byRole = new Map(GROUPS.flatMap((g) => g.roles).map((r, i) => [r, counts[i]?.data ?? 0]));
+  const byRole = new Map(
+    GROUPS.flatMap((g) => g.roles).map((r) => [r, counts.data?.[r] ?? 0] as const),
+  );
   const audit = useQuery({
     queryKey: ["audit", "recent"],
     queryFn: async () =>
@@ -195,7 +191,7 @@ export function AdminHome() {
               <div key={a.id} className="px-4 py-2.5">
                 <b>{a.actor || "النظام"}</b>{" "}
                 <span className="text-text-muted">
-                  · {a.action} · {a.target_repr}
+                  · {actionLabel(a.action)} · {a.target_repr}
                 </span>
                 <span className="block text-xs text-text-muted">{when(a.at)}</span>
               </div>

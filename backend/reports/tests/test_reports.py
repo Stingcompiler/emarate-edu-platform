@@ -71,7 +71,15 @@ def test_teacher_indicators(staffed, term):
     assert teacher["status"] == "below"
     ta = next(r for r in rows if r["id"] == staffed.ta.id)
     assert ta["kind"] == "ta" and ta["lectures"] is None and ta["upload_percent"] is None
+    # Without ta_can_grade the TA is not held to the course's grading delays.
+    assert (ta["grading_days"], ta["ungraded"]) == (None, 0)
     assert rows[0]["status"] == "below"  # worst first
+
+    staffed.offering.ta_can_grade = True
+    staffed.offering.save()
+    rows = metrics.teacher_rows(term, Scope(everything=True), now=NOW)
+    ta = next(r for r in rows if r["id"] == staffed.ta.id)
+    assert (ta["grading_days"], ta["ungraded"]) == (6.0, 1)
 
 
 def test_status_thresholds():

@@ -93,7 +93,7 @@ export function AffairsReport() {
             <Kpi
               value={pct(r.acknowledged_percent)}
               label="نسبة الإقرار باللوائح"
-              note={`عبر ${num(r.acknowledgements.length)} لوائح منشورة`}
+              note={`اللوائح التي تتطلب إقرارًا: ${num(r.acknowledgements.length)}`}
             />
             <Kpi value="0" label="بيانات شخصية في التصدير" note="مجهّل افتراضيًا" />
           </div>

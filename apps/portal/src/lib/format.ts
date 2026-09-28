@@ -38,3 +38,14 @@ export function dayGroup(iso: string, now = new Date()): DayGroup {
 export function count(n: number, one: string, many: string): string {
   return `${n.toLocaleString("ar")} ${n === 1 ? one : many}`;
 }
+
+/** URL slug from a title — Arabic letters are kept (the server's SlugField allows Unicode). */
+export function slugify(title: string, max = 100): string {
+  return title
+    .trim()
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}\s-]/gu, "")
+    .replace(/[\s_-]+/g, "-")
+    .replace(/^-|-$/g, "")
+    .slice(0, max);
+}

@@ -185,4 +185,7 @@ class MyCourseSerializer(serializers.Serializer):
     section = serializers.CharField()
     term = serializers.CharField(source="term.name_ar")
     my_role = serializers.CharField()
+    # What a TA may do in this offering (docs/03 §3.9); ignored for other roles.
+    ta_can_grade = serializers.BooleanField()
+    ta_can_notify = serializers.BooleanField()
     instructors = InstructorSerializer(many=True)

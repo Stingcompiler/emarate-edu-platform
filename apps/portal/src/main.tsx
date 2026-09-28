@@ -102,7 +102,8 @@ import { Settings } from "./routes/Settings";
 
 // TanStack Query holds all server state (docs/04, D-no-Zustand).
 const queryClient = new QueryClient({
-  defaultOptions: { queries: { retry: 1, refetchOnWindowFocus: true } },
+  // Focus refetches at most every 30 s, so switching windows doesn't re-request every page's data.
+  defaultOptions: { queries: { retry: 1, refetchOnWindowFocus: true, staleTime: 30_000 } },
 });
 
 const signedIn = (element: React.ReactNode) => <RequireAuth>{element}</RequireAuth>;

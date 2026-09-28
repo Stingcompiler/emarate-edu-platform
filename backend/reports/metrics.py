@@ -227,6 +227,8 @@ def teacher_rows(
         "course__department_id",
     )
     offering_dept = dict(offerings.values_list("id", "course__department_id"))
+    # A TA answers for grading only where the teacher allowed it (docs/03 §3.9).
+    ta_grades = set(offerings.filter(ta_can_grade=True).values_list("id", flat=True))
     teaching = OfferingInstructor.objects.filter(offering_id__in=list(offering_dept))
     members = scope.filter(DepartmentMembership.objects.all(), "department_id")
     if user_ids is not None:
@@ -276,9 +278,14 @@ def teacher_rows(
             continue
         taught = [stats[oid] for oid, _ in assigned]
         lead = [stats[oid] for oid, role in assigned if role == OfferingInstructor.Kind.TEACHER]
-        delays = [d for s in taught for d in s["delays"]]
-        submissions = sum(s["submissions"] for s in taught)
-        ungraded = sum(s["ungraded"] for s in taught)
+        grading = [
+            stats[oid]
+            for oid, role in assigned
+            if role == OfferingInstructor.Kind.TEACHER or oid in ta_grades
+        ]
+        delays = [d for s in grading for d in s["delays"]]
+        submissions = sum(s["submissions"] for s in grading)
+        ungraded = sum(s["ungraded"] for s in grading)
         lectures = sum(s["lectures"] for s in lead)
         planned = planned_each * len(lead)
         held, scheduled = live_host.get(user_id, (0, 0))

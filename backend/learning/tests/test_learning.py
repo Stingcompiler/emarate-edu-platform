@@ -217,7 +217,10 @@ def test_submit_resubmit_and_grade(api, classroom):
         f"/api/v1/assignments/{assignment}/submit", {"content": "تعديل"}, format="json"
     )
     assert again.status_code == 409
-    assert AuditLog.objects.filter(action="submission.grade").exists()
+    entry = AuditLog.objects.get(action="submission.grade")
+    # The log names the work and the student, not database ids.
+    assert classroom.record.full_name_ar in entry.target_repr
+    assert ":" not in entry.target_repr
 
 
 def test_ta_grades_only_when_allowed(api, classroom):

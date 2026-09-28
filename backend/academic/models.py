@@ -118,7 +118,7 @@ class CourseOffering(PublicIdModel, TimestampedModel):
         ]
 
     def __str__(self) -> str:
-        return f"{self.course.code}-{self.section} ({self.term_id})"
+        return f"{self.course.code}-{self.section} · {self.term.name_ar}"
 
     @property
     def department_id(self) -> int:

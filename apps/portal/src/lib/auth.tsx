@@ -39,11 +39,31 @@ export function RequireAuth({ children }: { children: ReactNode }) {
   const me = useMe();
   const location = useLocation();
   if (me.isPending) return <Splash />;
+  // A failed check (rate limit, server down) is not a sign-out: keep the session and offer a retry.
+  if (me.isError && me.data === undefined) return <Unavailable onRetry={() => void me.refetch()} />;
   if (!me.data) {
     const next = encodeURIComponent(location.pathname + location.search);
     return <Navigate to={`/login?next=${next}`} replace />;
   }
   return children;
+}
+
+function Unavailable({ onRetry }: { onRetry: () => void }) {
+  return (
+    <div className="grid min-h-dvh place-items-center bg-bg-subtle p-6 text-center" role="alert">
+      <div className="space-y-3">
+        <p className="font-semibold text-text">تعذّر الاتصال بالخادم مؤقتًا.</p>
+        <p className="text-sm text-text-muted">جلستك ما زالت قائمة. أعد المحاولة بعد لحظات.</p>
+        <button
+          type="button"
+          onClick={onRetry}
+          className="min-h-11 rounded-xl bg-primary px-5 text-sm font-semibold text-white hover:bg-primary-hover"
+        >
+          إعادة المحاولة
+        </button>
+      </div>
+    </div>
+  );
 }
 
 export function Splash() {

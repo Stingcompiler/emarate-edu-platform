@@ -180,7 +180,7 @@ export function AssignmentEditor() {
               </select>
             </label>
           </Card>
-          <SectionLabel>3 · المواعيد والدرجة</SectionLabel>
+          <SectionLabel>2 · المواعيد والدرجة</SectionLabel>
           <Card className="grid gap-3 p-4 sm:grid-cols-2">
             <label className="block text-sm font-semibold">
               يفتح (اختياري)
@@ -212,7 +212,7 @@ export function AssignmentEditor() {
           </Card>
         </section>
         <section className="space-y-3">
-          <SectionLabel>2 · ماذا يسلّم الطالب؟</SectionLabel>
+          <SectionLabel>3 · ماذا يسلّم الطالب؟</SectionLabel>
           <Card className="space-y-4 p-4 text-sm">
             <div className="flex flex-wrap gap-2">
               {(

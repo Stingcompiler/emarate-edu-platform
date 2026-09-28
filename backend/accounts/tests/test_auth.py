@@ -34,6 +34,7 @@ def test_login_sets_httponly_cookies(staff):
     assert response.data["capabilities"]["courses.manage"]["departments"] == [
         staff.role_assignments.get().department_id
     ]
+    assert response.data["creatable_roles"] == []  # a manager creates no accounts
     access, refresh = response.cookies[ACCESS], response.cookies[REFRESH_COOKIE]
     assert access["httponly"] and refresh["httponly"]
     assert access["path"] == "/"
@@ -168,3 +169,12 @@ def test_academic_affairs_cannot_create_admins(make_user, api):
     )
     assert response.status_code == 403
     assert not User.objects.filter(email="x@ecst.test").exists()
+    # The portal offers only the roles the server will accept.
+    me = api(affairs).get("/api/v1/me").data
+    assert me["creatable_roles"] == ["ta", "teacher"]
+    assert me["grantable_roles"] == [
+        "department_manager",
+        "department_supervisor",
+        "ta",
+        "teacher",
+    ]

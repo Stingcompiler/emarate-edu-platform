@@ -3,13 +3,13 @@
 import contextlib
 
 from django.conf import settings
-from django.db.models import Q
+from django.db.models import Count, Q
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import ensure_csrf_cookie
-from drf_spectacular.utils import extend_schema
-from rest_framework import mixins, status, viewsets
+from drf_spectacular.utils import extend_schema, inline_serializer
+from rest_framework import mixins, serializers, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import NotAuthenticated, PermissionDenied
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -339,6 +339,19 @@ class RoleAssignmentViewSet(
         if not rbac.grantable_roles(request.user):
             raise PermissionDenied()
         return super().list(request, *args, **kwargs)
+
+    @extend_schema(
+        responses=inline_serializer(
+            "RoleCounts", {"counts": serializers.DictField(child=serializers.IntegerField())}
+        )
+    )
+    @action(detail=False, methods=["get"])
+    def counts(self, request):
+        """How many assignments each grantable role has — one query for the admin home."""
+        if not rbac.grantable_roles(request.user):
+            raise PermissionDenied()
+        rows = self.get_queryset().order_by().values("role").annotate(n=Count("id"))
+        return Response({"counts": {row["role"]: row["n"] for row in rows}})
 
     @extend_schema(request=RoleGrantSerializer, responses={201: RoleAssignmentDetailSerializer})
     def create(self, request):

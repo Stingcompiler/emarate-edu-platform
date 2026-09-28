@@ -17,6 +17,16 @@ import { api } from "../../lib/api";
 
 type Summary = { rows?: number; create?: number; error?: number; committed?: number };
 
+/** The importer's column keys, as the file's own Arabic headers name them. */
+const COLUMNS: Record<string, string> = {
+  university_number: "الرقم الجامعي",
+  course_code: "رمز المقرر",
+  section: "الشعبة",
+  score: "الدرجة",
+  letter: "التقدير",
+  status: "الحالة",
+};
+
 /** Board: DesktopResultsImport (steps 3–4). Phone: derived — the same steps as stacked cards. */
 export function ResultImportDetail() {
   const { id = "" } = useParams();
@@ -98,7 +108,7 @@ export function ResultImportDetail() {
               أخطاء: <b>{summary.error ?? 0}</b>
             </span>
             <span className="text-text-muted">
-              الأعمدة: {(b.detected_columns as string[]).join("، ")}
+              الأعمدة: {(b.detected_columns as string[]).map((c) => COLUMNS[c] ?? c).join("، ")}
             </span>
           </Card>
 
@@ -109,7 +119,8 @@ export function ResultImportDetail() {
                   onClick={() => act.mutate("commit")}
                   disabled={act.isPending || !summary.create}
                 >
-                  اعتماد {summary.create ?? 0} نتيجة{summary.error ? " (تُتخطّى الأخطاء)" : ""}
+                  اعتماد النتائج الصالحة ({summary.create ?? 0})
+                  {summary.error ? " — تُتخطّى الأخطاء" : ""}
                 </Button>
                 <Button
                   variant="secondary"

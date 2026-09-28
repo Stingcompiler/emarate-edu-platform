@@ -14,11 +14,10 @@ export const ROLE_LABEL: Record<string, string> = {
   events_manager: "مدير الفعاليات",
   student: "طالب",
 };
-/** Roles whose assignment names a department (docs/03 §2). */
+/** Roles whose assignment names a department (docs/03 §2) — mirrors rbac.DEPARTMENT_SCOPED_ROLES.
+ * Teachers and TAs are college-wide accounts; a department manager adds them as members. */
 export const DEPARTMENT_ROLES = new Set([
   "registrar",
   "department_manager",
   "department_supervisor",
-  "teacher",
-  "ta",
 ]);

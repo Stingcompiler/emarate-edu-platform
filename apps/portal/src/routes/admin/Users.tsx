@@ -13,11 +13,14 @@ import {
   problemMessage,
 } from "../../components/ui";
 import { api } from "../../lib/api";
+import { hasRole, useMe } from "../../lib/auth";
 import { initials, num, useDepartments } from "../../lib/reports";
 import { DEPARTMENT_ROLES, ROLE_LABEL } from "./roles";
 
 /** Board: SystemAdminUsers (phone); desktop derived — list beside "new staff account". */
 export function AdminUsers() {
+  const me = useMe();
+  const admin = hasRole(me.data, "system_admin");
   const [search, setSearch] = useState("");
   const [active, setActive] = useState<boolean | undefined>(true);
   const [page, setPage] = useState(1);
@@ -34,8 +37,12 @@ export function AdminUsers() {
   return (
     <PortalShell
       title={`المستخدمون · ${num(list.data?.count ?? 0)}`}
-      subtitle="الأدوار الإدارية تُنشأ هنا · الطلاب من القبول · الأساتذة من الشؤون العلمية"
-      back={{ label: "إدارة النظام", to: "/system" }}
+      subtitle={
+        admin
+          ? "الأدوار الإدارية تُنشأ هنا · الطلاب من القبول · الأساتذة من الشؤون العلمية"
+          : "حسابات الأساتذة والمعيدين"
+      }
+      back={admin ? { label: "إدارة النظام", to: "/system" } : { label: "الرئيسية", to: "/" }}
     >
       <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start lg:gap-6">
         <div>
@@ -141,15 +148,20 @@ export function AdminUsers() {
 function NewUser() {
   const client = useQueryClient();
   const departments = useDepartments();
-  const [f, setF] = useState({ full_name_ar: "", email: "", role: "registrar", department: "" });
+  // Only the roles the server accepts from this user (rbac.CREATABLE_ACCOUNTS).
+  const allowed = useMe().data?.creatable_roles ?? [];
+  const [f, setF] = useState({ full_name_ar: "", email: "", role: "", department: "" });
+  // Never default to the most powerful role; the admin picks it deliberately.
+  const offered = Object.keys(ROLE_LABEL).filter((k) => allowed.includes(k));
+  const role = f.role || offered.find((k) => k !== "system_admin") || offered[0] || "";
   const create = useMutation({
     mutationFn: async () => {
       const { data, error } = await api.POST("/api/v1/users", {
         body: {
           full_name_ar: f.full_name_ar,
           email: f.email,
-          role: f.role as never,
-          department: DEPARTMENT_ROLES.has(f.role) && f.department ? Number(f.department) : null,
+          role: role as never,
+          department: DEPARTMENT_ROLES.has(role) && f.department ? Number(f.department) : null,
         },
       });
       if (!data) throw error;
@@ -162,7 +174,9 @@ function NewUser() {
   const input = "block min-h-10 w-full rounded-lg border border-border bg-surface px-3 text-sm";
   return (
     <>
-      <SectionLabel>مستخدم إداري جديد</SectionLabel>
+      <SectionLabel>
+        {allowed.includes("system_admin") ? "مستخدم إداري جديد" : "حساب أستاذ / معيد جديد"}
+      </SectionLabel>
       <Card className="space-y-2 p-4">
         <input
           value={f.full_name_ar}
@@ -179,20 +193,20 @@ function NewUser() {
           className={input}
         />
         <select
-          value={f.role}
+          value={role}
           onChange={(e) => setF({ ...f, role: e.target.value })}
           className={input}
           aria-label="الدور"
         >
           {Object.entries(ROLE_LABEL)
-            .filter(([k]) => k !== "student")
+            .filter(([k]) => allowed.includes(k))
             .map(([k, l]) => (
               <option key={k} value={k}>
                 {l}
               </option>
             ))}
         </select>
-        {DEPARTMENT_ROLES.has(f.role) && (
+        {DEPARTMENT_ROLES.has(role) && (
           <select
             value={f.department}
             onChange={(e) => setF({ ...f, department: e.target.value })}
@@ -216,7 +230,7 @@ function NewUser() {
           disabled={
             !f.full_name_ar.trim() ||
             !f.email.includes("@") ||
-            (DEPARTMENT_ROLES.has(f.role) && !f.department) ||
+            (DEPARTMENT_ROLES.has(role) && !f.department) ||
             create.isPending
           }
           onClick={() => create.mutate()}

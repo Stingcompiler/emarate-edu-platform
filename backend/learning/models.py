@@ -188,7 +188,7 @@ class Submission(PublicIdModel, TimestampedModel):
         ]
 
     def __str__(self) -> str:
-        return f"{self.assignment_id}:{self.student_record_id}"
+        return f"{self.assignment.title} — {self.student_record.full_name_ar}"
 
 
 class SubmissionVersion(models.Model):
@@ -209,7 +209,7 @@ class SubmissionVersion(models.Model):
         ]
 
     def __str__(self) -> str:
-        return f"{self.submission_id} v{self.version_no}"
+        return f"{self.submission} · v{self.version_no}"
 
 
 class SubmissionGrade(TimestampedModel):
@@ -239,7 +239,7 @@ class SubmissionGrade(TimestampedModel):
         ]
 
     def __str__(self) -> str:
-        return f"{self.submission_id}: {self.score}"
+        return f"{self.submission} · {self.score}"
 
     @property
     def final_score(self) -> Decimal:

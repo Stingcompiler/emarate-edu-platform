@@ -5,11 +5,13 @@ import { useNavigate, useParams } from "react-router";
 import { PortalShell } from "../../components/PortalShell";
 import { Button, Card, Field, Notice, TextArea, problemMessage } from "../../components/ui";
 import { api } from "../../lib/api";
+import { slugify } from "../../lib/format";
 
 /** Board: SiteManagerAnnouncementNew (news variant, phone); desktop derived. */
 export function NewsEditor() {
   const { id } = useParams();
   const creating = !id || id === "new";
+  const [slugEdited, setSlugEdited] = useState(false);
   const navigate = useNavigate();
   const client = useQueryClient();
   const item = useQuery({
@@ -55,19 +57,39 @@ export function NewsEditor() {
   });
   const set = (patch: Partial<typeof form>) => setForm((f) => ({ ...f, ...patch }));
   return (
-    <PortalShell title={form.title || "خبر جديد"} back={{ label: "محتوى الموقع", to: "/site" }}>
+    <PortalShell
+      title={form.title || "خبر جديد"}
+      subtitle={
+        item.data
+          ? item.data.status === "published"
+            ? "منشور على الموقع — «نشر» يحفظ التعديلات ويعيد بناء الموقع"
+            : "مسودة — لا تظهر على الموقع"
+          : undefined
+      }
+      back={{ label: "محتوى الموقع", to: "/site" }}
+    >
       <div className="max-w-2xl">
         <Card>
           <Field
             label="العنوان"
             value={form.title}
-            onChange={(e) => set({ title: e.target.value })}
+            onChange={(e) =>
+              set({
+                title: e.target.value,
+                // New items take their link from the title until the link is edited by hand.
+                ...(creating && !slugEdited ? { slug: slugify(e.target.value, 120) } : {}),
+              })
+            }
           />
           <Field
             label="الرابط"
             dir="ltr"
             value={form.slug}
-            onChange={(e) => set({ slug: e.target.value })}
+            onChange={(e) => {
+              setSlugEdited(true);
+              set({ slug: e.target.value });
+            }}
+            hint="يُملأ من العنوان تلقائيًا؛ يمكن تعديله (حروف وأرقام وشرطات)"
           />
           <Field
             label="المقتطف (يظهر في القوائم ونتائج البحث)"
