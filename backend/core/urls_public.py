@@ -6,6 +6,7 @@ from content import views as content
 from files import views as files
 from inquiries import views as inquiries
 from organization import public as catalogue
+from student_affairs import public as regulations
 
 from . import views
 
@@ -52,6 +53,13 @@ urlpatterns = [
     path("events", content.PublicEventList.as_view(), name="public-events"),
     path("events/<str:slug>", content.PublicEventDetail.as_view(), name="public-event-detail"),
     path("announcements", content.PublicAnnouncementList.as_view(), name="public-announcements"),
+    path("regulations", regulations.PublicRegulationsView.as_view(), name="public-regulations"),
+    path(
+        "regulations/<uuid:public_id>/file",
+        regulations.PublicRegulationFileView.as_view(),
+        name="public-regulation-file",
+    ),
+    path("calendar", catalogue.PublicCalendarView.as_view(), name="public-calendar"),
     path("menus/<slug:key>", content.PublicMenuView.as_view(), name="public-menu"),
     path("redirects", content.PublicRedirectView.as_view(), name="public-redirect"),
     path(

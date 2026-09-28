@@ -200,3 +200,27 @@ def test_archive_announcement(api, site):
     created = api(site).post(A, body, format="json").data
     api(site).post(f"{A}/{created['public_id']}/publish")
     assert api(site).post(f"{A}/{created['public_id']}/archive").data["status"] == "archived"
+
+
+def test_public_events_keep_past_ones_reachable(api, make_user):
+    """Upcoming by default; ?past=1 lists ended events so their pages survive (docs/07 §1)."""
+    from datetime import timedelta
+
+    from django.utils import timezone
+
+    from content.models import Event
+
+    host = make_user(Role.EVENTS_MANAGER)
+    now = timezone.now()
+    for slug, days in (("soon", 5), ("done", -5)):
+        Event.objects.create(
+            slug=slug,
+            title=slug,
+            description="<p>x</p>",
+            starts_at=now + timedelta(days=days),
+            ends_at=now + timedelta(days=days, hours=2),
+            status=Event.EventStatus.PUBLISHED,
+            created_by=host,
+        )
+    assert [e["slug"] for e in api().get("/api/public/events").data] == ["soon"]
+    assert [e["slug"] for e in api().get("/api/public/events?past=1").data] == ["done"]

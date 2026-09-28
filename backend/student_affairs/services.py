@@ -78,6 +78,7 @@ def new_version(meta: RequestMeta, regulation: Regulation) -> Regulation:
             category=regulation.category,
             version=number,
             requires_acknowledgement=regulation.requires_acknowledgement,
+            is_public=regulation.is_public,
             replaces=regulation,
             created_by=meta.actor,
         )

@@ -31,6 +31,7 @@ export function RegulationNew() {
   const [body, setBody] = useState("");
   const [category, setCategory] = useState<(typeof CATEGORIES)[number]["key"]>("exams");
   const [ack, setAck] = useState(true);
+  const [isPublic, setPublic] = useState(false);
   const [effective, setEffective] = useState("");
   const [file, setFile] = useState<File | null>(null);
 
@@ -51,6 +52,7 @@ export function RegulationNew() {
           body,
           category,
           requires_acknowledgement: ack,
+          is_public: isPublic,
           effective_from: effective || null,
           file: fileId,
         },
@@ -118,6 +120,20 @@ export function RegulationNew() {
               className="size-5 accent-[var(--color-primary)]"
               checked={ack}
               onChange={(e) => setAck(e.target.checked)}
+            />
+          </label>
+          <label className="flex min-h-14 items-center justify-between gap-3 px-4 text-sm text-text">
+            <span>
+              تُنشر على موقع الكلية
+              <span className="block text-xs text-text-muted">
+                يراها الزوار في «اللوائح» بعد نشرها، مع ملف PDF إن وُجد
+              </span>
+            </span>
+            <input
+              type="checkbox"
+              className="size-5 accent-[var(--color-primary)]"
+              checked={isPublic}
+              onChange={(e) => setPublic(e.target.checked)}
             />
           </label>
           <Field

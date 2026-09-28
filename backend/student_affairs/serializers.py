@@ -28,6 +28,7 @@ class RegulationSerializer(serializers.ModelSerializer):
             "category",
             "version",
             "effective_from",
+            "is_public",
             "requires_acknowledgement",
             "status",
             "published_at",

@@ -88,3 +88,18 @@ def test_pages_list_only_published(api, make_user):
         publish_at=timezone.now() + timedelta(days=1),
     )
     assert [p["slug"] for p in api().get("/api/public/pages").data] == ["about"]
+
+
+def test_calendar_lists_this_years_terms_and_the_admission_window(api, term):
+    from admissions.models import AdmissionCycle
+
+    now = timezone.now()
+    AdmissionCycle.objects.create(
+        academic_year=term.academic_year,
+        name="قبول الخريف",
+        opens_at=now - timedelta(days=3),
+        closes_at=now + timedelta(days=30),
+    )
+    data = api().get("/api/public/calendar").data
+    assert term.name_ar in [t["name_ar"] for t in data["terms"]]
+    assert data["admission"]["name"] == "قبول الخريف"

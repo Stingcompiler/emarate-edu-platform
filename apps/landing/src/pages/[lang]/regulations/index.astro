@@ -1,0 +1,67 @@
+---
+import PageHead from "../../../components/PageHead.astro";
+import Base from "../../../layouts/Base.astro";
+import { API, regulations } from "../../../lib/api";
+import { type Lang, fmtDate, langPaths } from "../../../lib/i18n";
+
+// docs/07 §1 `/regulations`: what student affairs publishes for everyone, by category.
+export const getStaticPaths = langPaths;
+const lang = Astro.params.lang as Lang;
+const L = (a: string, e: string) => (lang === "ar" ? a : e);
+const items = await regulations();
+const groups = [...new Map(items.map((r) => [r.category, r.category_label])).entries()];
+---
+
+<Base lang={lang} title={L("اللوائح والأنظمة", "Regulations")} path="regulations/">
+  <PageHead
+    lang={lang}
+    title={L("اللوائح والأنظمة", "Regulations")}
+    lead={L(
+      "اللوائح المعتمدة المنشورة للعموم — الإصدار الساري لكل لائحة.",
+      "The college's published regulations — the version in force.",
+    )}
+    crumbs={[[L("اللوائح", "Regulations"), "regulations/"]]}
+  />
+  <div class="mx-auto max-w-3xl space-y-8 px-4 py-10 lg:px-8">
+    {groups.map(([key, label]) => (
+      <section>
+        <h2 class="font-display text-xl font-bold">{label}</h2>
+        <ul class="mt-3 space-y-3">
+          {items
+            .filter((r) => r.category === key)
+            .map((r) => (
+              <li class="rounded-2xl border border-border-soft bg-surface p-4">
+                <b class="block text-text">{r.title}</b>
+                <span class="text-xs text-text-muted">
+                  {L("الإصدار", "Version")} {r.version}
+                  {r.effective_from &&
+                    ` · ${L("يسري من", "In force from")} ${fmtDate(lang, r.effective_from)}`}
+                </span>
+                {r.body && (
+                  <details class="mt-2">
+                    <summary class="min-h-11 cursor-pointer py-2 text-sm font-semibold text-primary">
+                      {L("اقرأ النص", "Read the text")}
+                    </summary>
+                    <p class="whitespace-pre-line text-sm leading-7">{r.body}</p>
+                  </details>
+                )}
+                {r.has_file && (
+                  <a
+                    href={`${API}/api/public/regulations/${r.public_id}/file`}
+                    class="mt-2 inline-block text-sm font-semibold text-primary"
+                  >
+                    {L("تنزيل ملف PDF", "Download the PDF")}
+                  </a>
+                )}
+              </li>
+            ))}
+        </ul>
+      </section>
+    ))}
+    {!items.length && (
+      <p class="text-sm text-text-muted">
+        {L("لا لوائح منشورة للعموم بعد.", "No public regulations yet.")}
+      </p>
+    )}
+  </div>
+</Base>

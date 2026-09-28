@@ -1,0 +1,29 @@
+---
+import type { Event } from "../lib/api";
+import { type Lang, fmtDate, href } from "../lib/i18n";
+
+interface Props {
+  lang: Lang;
+  event: Event;
+}
+const { lang, event: e } = Astro.props;
+---
+
+<li>
+  <a
+    href={href(lang, `events/${e.slug}/`)}
+    class="flex gap-3 rounded-2xl border border-border-soft bg-surface p-3 hover:shadow-sm"
+  >
+    <span class="grid w-14 shrink-0 place-items-center rounded-xl bg-primary-soft py-1.5 text-center text-primary-700">
+      <b class="block text-xl">{fmtDate(lang, e.starts_at, { day: "numeric" })}</b>
+      <span class="text-[11px]">{fmtDate(lang, e.starts_at, { month: "short" })}</span>
+    </span>
+    <span class="min-w-0">
+      <b class="block text-sm text-text">{e.title}</b>
+      <span class="text-xs text-text-muted">
+        {fmtDate(lang, e.starts_at, { year: "numeric", hour: "numeric", minute: "2-digit" })}
+        {e.location ? ` · ${e.location}` : ""}
+      </span>
+    </span>
+  </a>
+</li>

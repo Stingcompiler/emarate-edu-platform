@@ -123,6 +123,7 @@ export type Announcement = {
   body: string;
   publish_at: string | null;
   is_featured: boolean;
+  is_pinned?: boolean;
 };
 export type Block = {
   type: "heading" | "paragraph" | "html" | "image" | "cta" | "list";
@@ -159,7 +160,32 @@ export const intakes = () => get<PublicIntake[]>("intakes", []);
 export const departments = () => get<Department[]>("departments", []);
 export const news = () => get<News[]>("news", []);
 export const events = () => get<Event[]>("events", []);
+/** Ended events, newest first: their pages stay online (docs/07 §1). */
+export const pastEvents = () => get<Event[]>("events?past=1", []);
 export const announcements = () => get<Announcement[]>("announcements", []);
+export type Regulation = {
+  public_id: string;
+  title: string;
+  body: string;
+  category: string;
+  category_label: string;
+  version: string;
+  effective_from: string | null;
+  published_at: string | null;
+  has_file: boolean;
+};
+export const regulations = () => get<Regulation[]>("regulations", []);
+export type Calendar = {
+  terms: {
+    name_ar: string;
+    name_en: string;
+    starts_on: string;
+    ends_on: string;
+    is_current: boolean;
+  }[];
+  admission: { name: string; opens_at: string; closes_at: string } | null;
+};
+export const calendar = () => get<Calendar>("calendar", { terms: [], admission: null });
 export const pages = () =>
   get<{ slug: string; title_ar: string; title_en: string; updated_at: string }[]>("pages", []);
 export const stats = () =>

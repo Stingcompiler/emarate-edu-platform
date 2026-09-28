@@ -1,0 +1,58 @@
+---
+import PageHead from "../../../components/PageHead.astro";
+import Base from "../../../layouts/Base.astro";
+import { announcements } from "../../../lib/api";
+import { type Lang, fmtDate, href, langPaths, t } from "../../../lib/i18n";
+
+// docs/07 §1 `/announcements`: the college's public notices, pinned ones first.
+export const getStaticPaths = langPaths;
+const lang = Astro.params.lang as Lang;
+const items = (await announcements()).sort(
+  (a, b) =>
+    Number(!!b.is_pinned) - Number(!!a.is_pinned) ||
+    (b.publish_at ?? "").localeCompare(a.publish_at ?? ""),
+);
+const text = (html: string) =>
+  html
+    .replace(/<[^>]+>/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+---
+
+<Base lang={lang} title={t(lang, "announcements")} path="announcements/">
+  <PageHead
+    lang={lang}
+    title={t(lang, "announcements")}
+    crumbs={[[t(lang, "announcements"), "announcements/"]]}
+  />
+  <div class="mx-auto max-w-3xl px-4 py-10 lg:px-8">
+    <ul class="divide-y divide-border-soft rounded-2xl border border-border-soft bg-surface">
+      {items.map((a) => (
+        <li>
+          <a
+            href={href(lang, `announcements/${a.public_id}/`)}
+            class="block px-4 py-4 hover:bg-surface-alt"
+          >
+            <span class="flex items-center gap-2 text-xs text-text-muted">
+              {a.is_pinned && (
+                <span class="rounded-full bg-accent-soft px-2 py-0.5 font-semibold text-accent-hover">
+                  {lang === "ar" ? "مثبّت" : "Pinned"}
+                </span>
+              )}
+              {a.publish_at && fmtDate(lang, a.publish_at)}
+            </span>
+            <b class="mt-1 block text-text">{a.title}</b>
+            <span class="mt-1 line-clamp-2 block text-sm leading-6 text-text-muted">
+              {text(a.body)}
+            </span>
+          </a>
+        </li>
+      ))}
+      {!items.length && (
+        <li class="px-4 py-6 text-sm text-text-muted">
+          {lang === "ar" ? "لا إعلانات الآن." : "No announcements."}
+        </li>
+      )}
+    </ul>
+  </div>
+</Base>

@@ -58,7 +58,9 @@ export function RegulationDetail() {
     <PortalShell
       title={r?.title ?? "لائحة"}
       back={{ label: "اللوائح", to: "/regulations" }}
-      subtitle={r ? `الإصدار ${r.version}` : undefined}
+      subtitle={
+        r ? `الإصدار ${r.version}${staff && r.is_public ? " · على موقع الكلية" : ""}` : undefined
+      }
     >
       {r && (
         <div className="max-w-3xl space-y-4">

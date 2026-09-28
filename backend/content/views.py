@@ -350,11 +350,19 @@ class PublicNewsDetail(_PublicRead):
 @PUBLIC_CACHE
 @extend_schema(tags=["public"])
 class PublicEventList(_PublicRead):
-    @extend_schema(responses=EventSerializer(many=True))
+    """Upcoming events; ``?past=1`` lists ended ones, newest first (they keep their pages)."""
+
+    @extend_schema(
+        parameters=[OpenApiParameter("past", bool, required=False)],
+        responses=EventSerializer(many=True),
+    )
     def get(self, request):
-        rows = Event.objects.filter(
-            status=Event.EventStatus.PUBLISHED, ends_at__gte=timezone.now()
-        ).select_related("cover")
+        published = Event.objects.filter(status=Event.EventStatus.PUBLISHED).select_related("cover")
+        now = timezone.now()
+        if request.query_params.get("past") in ("1", "true"):
+            rows = published.filter(ends_at__lt=now).order_by("-starts_at")
+        else:
+            rows = published.filter(ends_at__gte=now)
         return Response(EventSerializer(rows[:50], many=True).data)
 
 
