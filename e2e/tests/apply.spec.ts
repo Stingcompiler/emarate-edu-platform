@@ -8,7 +8,8 @@ test("a visitor verifies the email, fills the application, uploads documents and
   page,
 }, testInfo) => {
   const email = `applicant-${testInfo.project.name}-${Date.now()}@example.test`;
-  await page.goto("/apply");
+  // Arrives from «قدّم لهذا البرنامج» on the public programme page.
+  await page.goto("/apply?program=BIT");
 
   // 1. Verify the email with a one-time code.
   await page.getByLabel("الاسم الكامل").fill("سلمى عثمان الأمين");
@@ -18,7 +19,12 @@ test("a visitor verifies the email, fills the application, uploads documents and
   await page.getByRole("button", { name: "متابعة", exact: true }).click();
 
   // 2. Choose a programme.
-  await page.getByRole("button", { name: /بكالوريوس تقنية المعلومات/ }).click();
+  const chosen = page.getByRole("button", { name: /البرنامج الذي اخترته من الموقع/ });
+  await expect(chosen).toContainText("بكالوريوس تقنية المعلومات");
+  await expect(page.getByRole("button", { name: /بكالوريوس/ }).first()).toContainText(
+    "البرنامج الذي اخترته",
+  ); // listed first
+  await chosen.click();
 
   // 3. The application form (default template).
   await expect(page.getByLabel("الاسم الكامل *")).toHaveValue("سلمى عثمان الأمين");

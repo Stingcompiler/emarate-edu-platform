@@ -56,3 +56,18 @@ test("every public page loads, fits, is accessible and has its SEO basics", asyn
   expect(seen.size).toBeGreaterThan(20);
   expect(problems, problems.join("\n")).toEqual([]);
 });
+
+test("the programme page keeps «apply to this programme» in reach on the phone", async ({
+  page,
+  isMobile,
+}) => {
+  await page.goto(`${SITE}/ar/programs/BIT/`);
+  const sticky = page.getByRole("link", { name: "قدّم لهذا البرنامج" });
+  if (!isMobile) {
+    await expect(sticky).toBeHidden(); // desktop keeps the button in the page header
+    return;
+  }
+  await page.mouse.wheel(0, 3000); // scrolled past the header's button
+  await expect(sticky).toBeInViewport();
+  await expect(sticky).toHaveAttribute("href", /\/apply\?program=BIT$/);
+});

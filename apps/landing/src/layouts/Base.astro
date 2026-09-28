@@ -14,9 +14,11 @@ interface Props {
   path?: string;
   jsonLd?: object | object[];
   image?: string | null;
+  /** The page shows a fixed bar at the bottom on phones; keep the footer clear of it. */
+  bottomBar?: boolean;
 }
 
-const { lang, title, description, path = "", jsonLd, image } = Astro.props;
+const { lang, title, description, path = "", jsonLd, image, bottomBar = false } = Astro.props;
 const s = await loadSite();
 // Linked only once the site manager has published it — never a link to a 404.
 const hasPrivacy = (await pages()).some((p) => p.slug === "privacy");
@@ -61,7 +63,7 @@ const current = Astro.url.pathname;
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     {jsonLd && <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />}
   </head>
-  <body class="flex min-h-dvh flex-col bg-bg text-text">
+  <body class:list={["flex min-h-dvh flex-col bg-bg text-text", bottomBar && "pb-20 lg:pb-0"]}>
     <a
       href="#main"
       class="sr-only focus:not-sr-only focus:absolute focus:m-2 focus:rounded focus:bg-surface focus:px-3 focus:py-2"

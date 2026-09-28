@@ -51,7 +51,10 @@ const open = !!p.intake?.accepting;
       </span>
     )}
     {open && (
-      <a href={`${PORTAL}/apply`} class="text-xs font-semibold text-primary">
+      <a
+        href={`${PORTAL}/apply?program=${encodeURIComponent(p.code)}`}
+        class="text-xs font-semibold text-primary"
+      >
         {t(lang, "apply")} {arrow(lang)}
       </a>
     )}

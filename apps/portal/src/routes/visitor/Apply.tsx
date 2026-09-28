@@ -114,6 +114,7 @@ export function Apply() {
       )}
       {step === 2 && (
         <ChooseProgram
+          preferred={params.get("program")}
           onStarted={(id) => {
             setParams({ app: id });
             setStep(3);
@@ -144,7 +145,15 @@ export function Apply() {
   );
 }
 
-function ChooseProgram({ onStarted }: { onStarted: (id: string) => void }) {
+/** `preferred`: the programme code the visitor chose on the public site («قدّم لهذا البرنامج»);
+ *  it is listed first and marked, and the visitor still confirms it with one tap. */
+function ChooseProgram({
+  onStarted,
+  preferred,
+}: {
+  onStarted: (id: string) => void;
+  preferred?: string | null;
+}) {
   const [query, setQuery] = useState("");
   const intakes = useQuery({
     queryKey: ["public", "intakes"],
@@ -160,9 +169,9 @@ function ChooseProgram({ onStarted }: { onStarted: (id: string) => void }) {
     },
     onSuccess: onStarted,
   });
-  const rows = (intakes.data ?? []).filter(
-    (i) => !query || `${i.program_name} ${i.department_name}`.includes(query),
-  );
+  const rows = (intakes.data ?? [])
+    .filter((i) => !query || `${i.program_name} ${i.department_name}`.includes(query))
+    .sort((a, b) => Number(b.program_code === preferred) - Number(a.program_code === preferred));
   return (
     <div className="space-y-3">
       <p className="text-sm text-text-muted">
@@ -182,13 +191,20 @@ function ChooseProgram({ onStarted }: { onStarted: (id: string) => void }) {
             type="button"
             onClick={() => start.mutate(i.id)}
             disabled={start.isPending}
-            className="flex w-full items-center gap-3 px-4 py-3 text-start hover:bg-surface-alt"
+            className={`flex w-full items-center gap-3 px-4 py-3 text-start hover:bg-surface-alt ${
+              i.program_code === preferred ? "bg-primary-soft/50" : ""
+            }`}
           >
             <span className="grid size-11 shrink-0 place-items-center rounded-lg bg-primary-soft text-[11px] font-bold leading-tight text-primary-700">
               {i.program_code}
             </span>
             <span className="min-w-0 flex-1">
               <span className="block text-sm font-semibold text-text">{i.program_name}</span>
+              {i.program_code === preferred && (
+                <span className="block text-xs font-semibold text-primary">
+                  البرنامج الذي اخترته من الموقع — اضغط للمتابعة
+                </span>
+              )}
               <span className="text-xs text-text-muted">
                 {i.department_name} · {i.degree} · يُغلق{" "}
                 {new Date(i.closes_at).toLocaleDateString("ar")}
