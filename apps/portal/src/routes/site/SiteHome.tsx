@@ -96,6 +96,12 @@ export function SiteHome() {
                 />
               </Link>
             ))}
+        {(tab === "pages" ? pages : news).isSuccess &&
+          !(tab === "pages" ? pages : news).data?.length && (
+            <p className="px-4 py-5 text-sm text-text-muted">
+              {tab === "pages" ? "لا صفحات بعد." : "لا أخبار بعد. أضف أول خبر من زر «خبر»."}
+            </p>
+          )}
       </Card>
     </PortalShell>
   );

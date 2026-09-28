@@ -16,6 +16,7 @@ import {
   problemMessage,
 } from "../../components/ui";
 import { api } from "../../lib/api";
+import { slugify } from "../../lib/format";
 
 const day = new Intl.DateTimeFormat("ar", { day: "numeric" });
 const month = new Intl.DateTimeFormat("ar", { month: "long" });
@@ -88,6 +89,7 @@ const local = (iso: string) =>
 export function EventEditor() {
   const { id } = useParams();
   const creating = !id || id === "new";
+  const [slugEdited, setSlugEdited] = useState(false);
   const navigate = useNavigate();
   const client = useQueryClient();
   const event = useQuery({
@@ -161,13 +163,23 @@ export function EventEditor() {
             <Field
               label="العنوان"
               value={form.title}
-              onChange={(e) => set({ title: e.target.value })}
+              onChange={(e) =>
+                set({
+                  title: e.target.value,
+                  // New items take their link from the title until the link is edited by hand.
+                  ...(creating && !slugEdited ? { slug: slugify(e.target.value, 120) } : {}),
+                })
+              }
             />
             <Field
               label="الرابط"
               dir="ltr"
               value={form.slug}
-              onChange={(e) => set({ slug: e.target.value })}
+              onChange={(e) => {
+                setSlugEdited(true);
+                set({ slug: e.target.value });
+              }}
+              hint="يُملأ من العنوان تلقائيًا؛ يمكن تعديله (حروف وأرقام وشرطات)"
             />
             <Field
               label="يبدأ"
