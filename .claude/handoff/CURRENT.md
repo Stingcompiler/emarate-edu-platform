@@ -14,6 +14,11 @@
     - TA announcements depend on `ta_can_notify`, and TA grading metrics count only where `ta_can_grade` is on.
 - **Arabic API messages** (PR `feat/arabic-api-messages`): every service, validation and importer message is wrapped in `gettext` and translated in `backend/locale/ar/LC_MESSAGES/django.po`. The compiled `.mo` is committed because Render has no `msgfmt`. The portal always sends `Accept-Language: ar`. `core/tests/test_i18n.py` fails on any untranslated or uncompiled message; the workflow is in the `.po` header.
 - **Arabic counting:** `count(n, N.<noun>)` in `apps/portal/src/lib/format.ts` uses `Intl.PluralRules("ar")`. 1 and 100+ take the singular, 2 the dual without the number, 3–10 the plural, 11–99 the accusative singular. Add new nouns to `N`; don't write number + noun by hand. Phrases with an adjective are written as "label N" (e.g. «غير المصحح 3»).
+- **Test layers (docs/05 §11), all in CI:**
+  - Backend pytest, 655 tests including `core/tests/test_contract.py` (Schemathesis over all 330 operations: no 5xx).
+  - Portal Vitest, 50 tests (`pnpm test`).
+  - Playwright `pnpm e2e`: its own API on :8001 and portal on :5174 with fresh demo data; phone and desktop; sign-in, exam, application, no-overflow on 27 pages, and axe AA on 21 pages plus dark mode.
+  - Locally the e2e tests use the installed Google Chrome.
 - **Nothing is pending from the walkthrough.** Remaining work needs the owner (see "Owner actions").
 - **Dev login:** demo accounts are `<handle>@demo.ecst.test`. `ta@` and `dept.supervisor@` have a different password from the rest (seed_demo doesn't reset existing passwords); see the transcript.
 - **Browser pane tips:**
