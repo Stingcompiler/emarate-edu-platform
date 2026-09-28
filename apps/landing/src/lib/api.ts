@@ -52,8 +52,16 @@ export type Intake = {
   id: number;
   accepting: boolean;
   cycle: string;
+  opens_at: string;
   closes_at: string;
   seats_left: number | null;
+};
+/** An open intake as the application wizard sees it (documents per programme). */
+export type PublicIntake = {
+  id: number;
+  program_code: string;
+  program_name: string;
+  required_documents: { key: string; label: string; required: boolean }[];
 };
 export type Program = {
   code: string;
@@ -147,6 +155,7 @@ export const site = () =>
     seo: {},
   });
 export const programs = () => get<Program[]>("programs", []);
+export const intakes = () => get<PublicIntake[]>("intakes", []);
 export const departments = () => get<Department[]>("departments", []);
 export const news = () => get<News[]>("news", []);
 export const events = () => get<Event[]>("events", []);

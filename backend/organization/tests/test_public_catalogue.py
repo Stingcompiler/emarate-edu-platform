@@ -68,6 +68,8 @@ def test_program_intake_state_and_seats(api, it_program, term):
         )
     data = api().get(f"/api/public/programs/{it_program.code}").data
     assert data["intake"]["accepting"] is True and data["intake"]["seats_left"] == 8
+    # The admissions page shows the window: when the cycle opened and when it closes.
+    assert data["intake"]["opens_at"].startswith(cycle.opens_at.date().isoformat())
     assert data["requirements_ar"] == "الشهادة الثانوية"
     assert data["required_documents"][0]["label"] == "الشهادة"
     listed = api().get("/api/public/programs").data
