@@ -293,3 +293,26 @@ export function Switch({
     </button>
   );
 }
+
+/** A sideways-scrolling area (wide tables on phones). Focusable and named, so keyboard users
+ *  can scroll it too (WCAG 2.1.1; axe "scrollable-region-focusable"). */
+export function ScrollRegion({
+  label,
+  className = "",
+  children,
+}: {
+  label: string;
+  className?: string;
+  children: ReactNode;
+}) {
+  return (
+    <div
+      role="region"
+      aria-label={label}
+      tabIndex={0}
+      className={`overflow-x-auto rounded-[inherit] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${className}`}
+    >
+      {children}
+    </div>
+  );
+}

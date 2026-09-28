@@ -1,7 +1,7 @@
 import { useState } from "react";
 
 import { PortalShell } from "../../components/PortalShell";
-import { Card, SectionLabel } from "../../components/ui";
+import { Card, SectionLabel, ScrollRegion } from "../../components/ui";
 import { ExportBar, PastReports, Picker, days, num, pct, useTerms } from "../../lib/reports";
 import { useTeachersReport } from "./Teachers";
 
@@ -47,7 +47,7 @@ export function HRReport() {
                 ))}
               </div>
               <SectionLabel>حسب القسم</SectionLabel>
-              <div className="overflow-x-auto">
+              <ScrollRegion label="حسب القسم">
                 <table className="w-full min-w-[520px] text-sm">
                   <thead className="text-xs text-text-muted">
                     <tr className="text-start">
@@ -82,7 +82,7 @@ export function HRReport() {
                     ))}
                   </tbody>
                 </table>
-              </div>
+              </ScrollRegion>
               <p className="mt-4 text-xs text-text-muted">سري — للإدارة العليا والشؤون العلمية</p>
             </>
           )}
