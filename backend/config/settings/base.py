@@ -53,6 +53,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "core.middleware.PublicCorsMiddleware",
     "django.middleware.csp.ContentSecurityPolicyMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.locale.LocaleMiddleware",
@@ -297,6 +298,8 @@ SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SAMESITE = "Lax"
 CSRF_COOKIE_SAMESITE = "Lax"
 CSRF_TRUSTED_ORIGINS = env_list("DJANGO_CSRF_TRUSTED_ORIGINS")
+# The public website (apps/landing) may call /api/public/* from these origins.
+PUBLIC_SITE_ORIGINS = env_list("PUBLIC_SITE_ORIGINS")
 
 # ─── Logging ──────────────────────────────────────────────────────────────
 LOG_LEVEL = env("DJANGO_LOG_LEVEL", "INFO")

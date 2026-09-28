@@ -67,3 +67,20 @@ def test_deploy_check_flags_local_private_storage(settings):
     ids = {message.id for message in run_checks(include_deployment_checks=True)}
 
     assert "core.W001" in ids
+
+
+def test_public_cors_only_for_site_origins(client, settings, db):
+    settings.PUBLIC_SITE_ORIGINS = ["https://ecst.edu.sd"]
+    site = {"HTTP_ORIGIN": "https://ecst.edu.sd"}
+    preflight = client.options(
+        "/api/public/inquiries", HTTP_ACCESS_CONTROL_REQUEST_METHOD="POST", **site
+    )
+    assert preflight.status_code == 204
+    assert preflight["Access-Control-Allow-Origin"] == "https://ecst.edu.sd"
+    assert "Access-Control-Allow-Credentials" not in preflight
+    got = client.get("/api/public/health", **site)
+    assert got["Access-Control-Allow-Origin"] == "https://ecst.edu.sd"
+    other = client.get("/api/public/health", HTTP_ORIGIN="https://evil.test")
+    assert "Access-Control-Allow-Origin" not in other
+    private = client.get("/api/v1/me", **site)
+    assert "Access-Control-Allow-Origin" not in private
