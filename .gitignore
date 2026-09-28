@@ -12,6 +12,11 @@ backend/staticfiles/
 backend/db.sqlite3
 backend/db.sqlite3-*
 backend/sent-emails/
+# End-to-end test runs (e2e/)
+backend/e2e.sqlite3*
+backend/sent-emails-e2e/
+e2e/test-results/
+playwright-report/
 .pytest_cache/
 .ruff_cache/
 .mypy_cache/
