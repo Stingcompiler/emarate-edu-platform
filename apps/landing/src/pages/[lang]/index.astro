@@ -70,20 +70,16 @@ const jsonLd = {
             {lang === "ar" ? `القبول مفتوح · ${cycle}` : `Admission open · ${cycle}`}
           </p>
         )}
-        <h1 class="mt-4 font-display text-4xl font-bold leading-snug text-text lg:text-5xl">
-          {lang === "ar" ? (
-            <>
-              تعليم تقني
-              <br />
-              يبدأ من هنا.
-            </>
-          ) : (
-            <>
-              Technical education
-              <br />
-              starts here.
-            </>
-          )}
+        {/* The two lines rise from behind a mask — line by line, never per letter (Arabic). */}
+        <h1 class="motion-lines mt-4 font-display text-4xl font-bold leading-snug text-text lg:text-5xl">
+          {(lang === "ar"
+            ? ["تعليم تقني", "يبدأ من هنا."]
+            : ["Technical education", "starts here."]
+          ).map((line) => (
+            <span>
+              <span>{line}</span>
+            </span>
+          ))}
         </h1>
         <p class="mt-4 max-w-xl text-base leading-7 text-text-muted">
           {lang === "ar"
@@ -152,7 +148,9 @@ const jsonLd = {
         [st.programs, t(lang, "programsCount")],
       ].map(([n, l]) => (
         <div class="rounded-2xl bg-surface p-4 text-center shadow-sm">
-          <p class="font-display text-2xl font-bold text-primary">{num(lang, Number(n))}</p>
+          <p class="font-display text-2xl font-bold text-primary" data-count={Number(n)}>
+            {num(lang, Number(n))}
+          </p>
           <p class="text-xs text-text-muted">{l}</p>
         </div>
       ))}
@@ -219,6 +217,7 @@ const jsonLd = {
       <div class="flex flex-col gap-5 rounded-2xl bg-bg-subtle p-5 sm:flex-row sm:items-start lg:p-8">
         {deanPhoto && (
           <img
+            data-reveal="image"
             src={deanPhoto.url}
             alt={deanPhoto.alt ?? ""}
             loading="lazy"
@@ -285,6 +284,7 @@ const jsonLd = {
             >
               {n.cover_url && (
                 <img
+                  data-reveal="image"
                   src={n.cover_url}
                   alt=""
                   loading="lazy"

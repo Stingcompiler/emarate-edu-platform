@@ -81,7 +81,9 @@ const jsonLd = {
   </PageHead>
   <WithAside>
     <article class="max-w-3xl">
-      {e.cover_url && <img src={e.cover_url} alt="" class="mb-8 w-full rounded-2xl" />}
+      {e.cover_url && (
+        <img data-reveal="image" src={e.cover_url} alt="" class="mb-8 w-full rounded-2xl" />
+      )}
       <div class="space-y-4 text-base leading-8" set:html={e.description} />
     </article>
     <Fragment slot="aside">

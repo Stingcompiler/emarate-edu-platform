@@ -157,7 +157,25 @@ const answers = await related(lang, ["admissions", "fees", "programs", "calendar
         role="status"
         class="hidden rounded-2xl bg-success-soft p-5 text-success-strong"
       >
-        <p class="font-bold">{L("وصل استفسارك.", "We received your message.")}</p>
+        <p class="flex items-center gap-3 font-bold">
+          {/* Draws itself when the box appears (motion.css .motion-check). */}
+          <span
+            class="motion-check grid size-10 shrink-0 place-items-center rounded-full bg-surface"
+            aria-hidden="true"
+          >
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+              <path
+                d="M5 12.5l4.2 4.2L19 7"
+                stroke="currentColor"
+                stroke-width="2.6"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                style="--len: 22"
+              ></path>
+            </svg>
+          </span>
+          {L("وصل استفسارك.", "We received your message.")}
+        </p>
         <p class="mt-1 text-sm">
           {L("الرقم المرجعي — احتفظ به:", "Your reference number — keep it:")}{" "}
           <b id="contact-ref" dir="ltr" class="font-mono text-lg"></b>

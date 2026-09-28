@@ -18,7 +18,7 @@ import {
 import { api } from "../../lib/api";
 import { asForm, formData } from "../../lib/upload";
 
-const CATEGORIES = [
+export const CATEGORIES = [
   { key: "exams", label: "الامتحانات" },
   { key: "academic", label: "أكاديمية" },
   { key: "conduct", label: "السلوك" },

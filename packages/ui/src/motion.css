@@ -1,0 +1,188 @@
+/*
+ * Motion for the portal and the public site (owner, 2026-09-28: selected from the
+ * motion-effects catalogue). Rules:
+ * - motion explains something (a number arrived, a step is done, a tab moved) — no decoration;
+ * - short: 150–400 ms, one ease-out curve;
+ * - content never depends on it: without JS everything is simply visible (scroll-triggered
+ *   effects are armed by script, only for what is still below the fold);
+ * - `prefers-reduced-motion: reduce` turns all of it off;
+ * - never on the exam screen, and never letter by letter (Arabic letters join).
+ */
+
+:root {
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-spring: cubic-bezier(0.34, 1.4, 0.64, 1);
+  --dur-1: 150ms;
+  --dur-2: 250ms;
+  --dur-3: 400ms;
+  --dur-4: 700ms;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes grow-y {
+  from {
+    transform: scaleY(0);
+  }
+}
+@keyframes grow-x {
+  from {
+    transform: scaleX(0);
+  }
+}
+@keyframes line-up {
+  from {
+    transform: translateY(105%);
+  }
+}
+@keyframes draw {
+  from {
+    stroke-dashoffset: var(--len, 100);
+  }
+}
+@keyframes pop {
+  0% {
+    transform: scale(0.6);
+    opacity: 0;
+  }
+  70% {
+    transform: scale(1.08);
+    opacity: 1;
+  }
+}
+@keyframes reveal {
+  from {
+    clip-path: inset(12% 30% 12% 30% round 16px);
+    transform: scale(1.04);
+  }
+}
+@keyframes confetti {
+  0% {
+    transform: translate(0, 0) rotate(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(var(--x), var(--y)) rotate(var(--r));
+    opacity: 0;
+  }
+}
+
+/* Lists that arrive: each item rises in turn (first 8; the rest with the 8th). */
+.motion-stagger > * {
+  animation: rise var(--dur-3) var(--ease-out) both;
+}
+.motion-stagger > :nth-child(2) {
+  animation-delay: 40ms;
+}
+.motion-stagger > :nth-child(3) {
+  animation-delay: 80ms;
+}
+.motion-stagger > :nth-child(4) {
+  animation-delay: 120ms;
+}
+.motion-stagger > :nth-child(5) {
+  animation-delay: 160ms;
+}
+.motion-stagger > :nth-child(6) {
+  animation-delay: 200ms;
+}
+.motion-stagger > :nth-child(7) {
+  animation-delay: 240ms;
+}
+.motion-stagger > :nth-child(n + 8) {
+  animation-delay: 280ms;
+}
+
+/* Bars of a chart rise from their base, one after another. */
+.motion-bars > * > .motion-bar {
+  transform-origin: bottom;
+  animation: grow-y var(--dur-4) var(--ease-out) both;
+}
+.motion-bars > :nth-child(n) > .motion-bar {
+  animation-delay: calc(var(--i, 0) * 45ms);
+}
+
+/* A headline whose lines rise from behind a mask — line by line, never per letter. */
+.motion-lines > span {
+  display: block;
+  overflow: clip;
+  padding-block: 0.08em; /* room for Arabic ascenders/descenders inside the clip */
+}
+.motion-lines > span > span {
+  display: block;
+  animation: line-up var(--dur-4) var(--ease-out) both;
+}
+.motion-lines > span:nth-child(2) > span {
+  animation-delay: 90ms;
+}
+.motion-lines > span:nth-child(3) > span {
+  animation-delay: 180ms;
+}
+
+/* A check mark that draws itself (success). */
+.motion-check {
+  animation: pop var(--dur-3) var(--ease-spring) both;
+}
+.motion-check path {
+  stroke-dasharray: var(--len, 100);
+  animation: draw var(--dur-3) var(--ease-out) 150ms both;
+}
+
+/* A little confetti around a success mark: decorative, hidden from assistive tech. */
+.motion-confetti {
+  position: absolute;
+  inset: 50% auto auto 50%;
+  pointer-events: none;
+}
+.motion-confetti > i {
+  position: absolute;
+  width: 6px;
+  height: 10px;
+  border-radius: 2px;
+  animation: confetti 900ms var(--ease-out) 200ms both;
+}
+
+/* Scroll-triggered (public site): the page script marks only elements still below the fold
+   as pending, then reveals them as they scroll in — so nothing is hidden without JS, and
+   nothing already on screen disappears. */
+[data-reveal].is-pending {
+  opacity: 0;
+}
+[data-reveal].is-revealed {
+  animation: rise var(--dur-3) var(--ease-out) both;
+  animation-delay: calc(var(--i, 0) * 90ms);
+}
+[data-reveal="image"].is-revealed {
+  animation-name: reveal;
+  animation-duration: var(--dur-4);
+}
+[data-reveal="line"].is-revealed {
+  transform-origin: var(--origin, right);
+  animation-name: grow-x;
+  animation-duration: var(--dur-4);
+}
+
+/* Everyone who asked for less motion gets none — including transitions. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .motion-confetti {
+    display: none;
+  }
+}

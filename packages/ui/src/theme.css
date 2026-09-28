@@ -15,6 +15,7 @@
  *      utilities: bg-bg, text-text, bg-primary, border-border, …
  */
 @import "./tokens.css";
+@import "./motion.css";
 
 @theme static {
   /* Brand scales (§2.1) */

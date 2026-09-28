@@ -61,7 +61,14 @@ export function Lecture() {
       back={l ? { label: "المادة", to: `/courses/${l.offering}` } : undefined}
     >
       {l && (
-        <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start lg:gap-6">
+        <div
+          className={
+            video?.video || l.description
+              ? "lg:grid lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start lg:gap-6"
+              : // Nothing to watch or read: the resources are the page (full width, first).
+                "flex flex-col gap-4 [&>aside]:order-first [&>aside]:mt-0"
+          }
+        >
           <div className="space-y-4">
             {video?.video && (
               <Player

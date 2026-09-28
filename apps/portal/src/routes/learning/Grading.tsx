@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Link } from "react-router";
 
 import { PortalShell } from "../../components/PortalShell";
+import { ProgressRing } from "../../components/motion";
 import { Card, Chip, EmptyState, SectionLabel } from "../../components/ui";
 import { api } from "../../lib/api";
 import { when } from "../../lib/format";
@@ -29,6 +30,17 @@ export function Grading() {
     <PortalShell
       title="التصحيح"
       subtitle={`${counts.pending.toLocaleString("ar")} بانتظارك · ${counts.suggested.toLocaleString("ar")} باقتراح آلي جاهز للاعتماد`}
+      titleAction={
+        counts.done + counts.pending > 0 ? (
+          <ProgressRing
+            value={counts.done}
+            max={counts.done + counts.pending}
+            label={`صُحّح ${counts.done.toLocaleString("ar")} من ${(counts.done + counts.pending).toLocaleString("ar")}`}
+          >
+            {`${Math.round((counts.done / (counts.done + counts.pending)) * 100).toLocaleString("ar")}٪`}
+          </ProgressRing>
+        ) : undefined
+      }
     >
       <div className="flex flex-wrap gap-2">
         {(
@@ -50,7 +62,7 @@ export function Grading() {
             <SectionLabel>
               <bdi>{a.course_code}</bdi> · {a.title} · {submissions.length.toLocaleString("ar")}
             </SectionLabel>
-            <Card className="divide-y divide-border-soft">
+            <Card className="motion-stagger divide-y divide-border-soft">
               {submissions.map((r) => (
                 <Link
                   key={r.public_id}

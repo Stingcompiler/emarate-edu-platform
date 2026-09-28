@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Check, Copy, FileUp } from "lucide-react";
+import { Copy, FileUp } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router";
 
@@ -12,6 +12,7 @@ import {
   SectionLabel,
   problemMessage,
 } from "../../components/ui";
+import { SuccessMark } from "../../components/motion";
 import { asForm, formData } from "../../lib/upload";
 import {
   type Field as FormField,
@@ -79,7 +80,11 @@ export function Apply() {
     return <Success app={app} />;
 
   return (
-    <VisitorLayout title={STEPS[step - 1]!} step={`الخطوة ${step} من 5`}>
+    <VisitorLayout
+      title={STEPS[step - 1]!}
+      step={`الخطوة ${step} من 5`}
+      progress={{ value: step, max: 5 }}
+    >
       <ol className="mb-5 flex flex-wrap gap-x-3 gap-y-1 text-xs text-text-muted">
         {STEPS.map((label, i) => (
           <li
@@ -552,9 +557,8 @@ function Success({ app }: { app: Application }) {
   return (
     <VisitorLayout title={`وصل طلبك، ${app.full_name.split(" ")[0]}`}>
       <Card className="p-5 text-center">
-        <span className="mx-auto grid size-14 place-items-center rounded-full bg-success-soft text-success-strong">
-          <Check size={28} aria-hidden />
-        </span>
+        {/* The applicant's big moment: the check draws itself, with a little confetti. */}
+        <SuccessMark confetti />
         <p className="mt-3 text-sm text-text-muted">
           {app.program_name} · أرسلنا نسخة من الطلب إلى بريدك.
         </p>

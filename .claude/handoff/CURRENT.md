@@ -1,4 +1,32 @@
-# Handoff — Public site UX review done (phase 4); credit hours are a manual field — 2026-09-28
+# Handoff — Motion added (feat/motion); large-screen review complete — 2026-09-28
+
+## Latest (2026-09-28, evening)
+- **#36 merged:** `Program.total_credit_hours` is a manual field (owner decision on UX review item 3).
+- **#37 merged (contact form):**
+  - status checks have their own throttle scope, `contact_status` 60/hour;
+  - «سبق أن راسلتنا؟» checks a reference in place, which also works for phone-only inquirers.
+- **#38 (large screens, second pass):**
+  - crawled 87 page types × 14 roles at 1440 and 1920;
+  - fixed the 8 pages with empty side columns (regulation for students, lecture, new exam, teacher profile,
+    form templates, case, HR notice, media).
+  - Recipe: a temporary Playwright spec follows in-page links one level below the menus.
+- **Motion (`feat/motion`):** chosen from `~/Downloads/motion-effects`, a catalogue of videos only.
+  - `packages/ui/src/motion.css`: tokens, keyframes, and `prefers-reduced-motion` turns everything off.
+  - Portal, `components/motion.tsx`:
+    - `CountUp`, used in `SideFigures` and in `Kpi` when given a number;
+    - `ProgressRing`: the apply wizard, grading and the student's tasks;
+    - `SuccessMark`: the apply success screen, with confetti;
+    - `Segmented`: the theme toggle and the install platform toggle;
+    - `.motion-stagger` on lists; `.motion-bars` on charts.
+  - Site:
+    - `[data-reveal]` / `[data-count]` handled by a script in `Base.astro` (only below-the-fold items are hidden before
+      they scroll in);
+    - `.motion-lines` on the hero headline, line by line and never per letter;
+    - the admissions steps line;
+    - image reveal;
+    - the contact success check.
+  - An e2e guard in `landing.spec.ts` ("motion never leaves content hidden…") also covers reduced motion.
+  - The exam screen gets no motion.
 
 ## Owner rule, said twice: large screens are designed, not only phones
 On 2026-09-28 the owner said «قم بمراجعه الصفحات لعرض الشاشات الكبري لا يجب ان يختصر عملك فقط علي شاشات الموبايل».

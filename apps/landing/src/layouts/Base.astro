@@ -329,6 +329,43 @@ const ext = (external: boolean) => (external ? { rel: "noopener", target: "_blan
       </div>
     </footer>
     <script>
+      // Motion (packages/ui/src/motion.css): reveal what scrolls into view and count figures
+      // up once. Nothing is hidden before this runs, and «reduce motion» turns it off.
+      const calm = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      if (!calm && "IntersectionObserver" in window) {
+        const fmt = (n: number, lang: string) =>
+          Math.round(n).toLocaleString(lang === "ar" ? "ar" : "en");
+        const countUp = (el: HTMLElement) => {
+          const target = Number(el.dataset.count);
+          const lang = document.documentElement.lang;
+          const start = performance.now();
+          const tick = (now: number) => {
+            const t = Math.min(1, (now - start) / 800);
+            el.textContent = fmt(target * (1 - (1 - t) ** 3), lang);
+            if (t < 1) requestAnimationFrame(tick);
+          };
+          requestAnimationFrame(tick);
+        };
+        const seen = new IntersectionObserver(
+          (entries) => {
+            for (const entry of entries) {
+              if (!entry.isIntersecting) continue;
+              const el = entry.target as HTMLElement;
+              el.classList.remove("is-pending");
+              if (el.dataset.reveal !== undefined) el.classList.add("is-revealed");
+              if (el.dataset.count) countUp(el);
+              seen.unobserve(el);
+            }
+          },
+          { rootMargin: "0px 0px -8% 0px" },
+        );
+        document.querySelectorAll<HTMLElement>("[data-reveal], [data-count]").forEach((el) => {
+          // Only what is still below the fold waits for its entrance.
+          if (el.getBoundingClientRect().top > window.innerHeight) el.classList.add("is-pending");
+          seen.observe(el);
+        });
+      }
+
       // Menus are <details> (they work without JS); this makes them behave like menus:
       // one open at a time, closed by a tap outside or by Esc.
       const menus = () => document.querySelectorAll<HTMLDetailsElement>("details[data-menu]");

@@ -16,6 +16,7 @@ import {
 import { api } from "../../lib/api";
 import { useMe } from "../../lib/auth";
 import { can } from "../../lib/nav";
+import { CATEGORIES } from "./RegulationNew";
 
 /** Board: StudentRegulations (reading + acknowledgement sheet). Desktop: derived. */
 export function RegulationDetail() {
@@ -71,6 +72,27 @@ export function RegulationDetail() {
               {staff && (
                 <StatusBadge status={r.status} label={STATUS_LABELS[r.status] ?? r.status} />
               )}
+              {/* Everyone gets the regulation's facts beside its text. */}
+              <Card className="divide-y divide-border-soft text-sm">
+                {(
+                  [
+                    ["التصنيف", CATEGORIES.find((c) => c.key === r.category)?.label ?? "—"],
+                    ["الإصدار", r.version],
+                    [
+                      "تسري من",
+                      r.effective_from
+                        ? new Date(r.effective_from).toLocaleDateString("ar", { dateStyle: "long" })
+                        : "—",
+                    ],
+                    ["الإقرار", r.requires_acknowledgement ? "مطلوب" : "للاطلاع فقط"],
+                  ] as [string, string][]
+                ).map(([k, v]) => (
+                  <div key={k} className="flex justify-between gap-3 px-4 py-3">
+                    <span className="text-text-muted">{k}</span>
+                    <span className="font-medium text-text">{v}</span>
+                  </div>
+                ))}
+              </Card>
               {r.file_detail && (
                 <Button
                   variant="secondary"

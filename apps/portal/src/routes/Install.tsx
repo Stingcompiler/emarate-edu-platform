@@ -2,6 +2,7 @@ import { BellRing, CloudDownload, Share, Zap } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { PortalShell } from "../components/PortalShell";
+import { Segmented } from "../components/motion";
 import { Button, Card, Notice } from "../components/ui";
 import { isStandalone } from "../lib/push";
 
@@ -97,24 +98,16 @@ export function Install() {
             </div>
           ) : (
             <>
-              <div
-                role="tablist"
-                aria-label="نوع الهاتف"
-                className="mt-6 grid grid-cols-2 rounded-lg bg-surface-alt p-0.5 lg:mt-0"
-              >
-                {(["ios", "android"] as const).map((key) => (
-                  <button
-                    key={key}
-                    role="tab"
-                    type="button"
-                    aria-selected={platform === key}
-                    onClick={() => setPlatform(key)}
-                    className={`min-h-10 rounded-md text-sm ${platform === key ? "bg-surface font-semibold text-text shadow-xs" : "text-text-muted"}`}
-                  >
-                    {key === "ios" ? "iPhone" : "Android"}
-                  </button>
-                ))}
-              </div>
+              <Segmented
+                label="نوع الهاتف"
+                className="mt-6 lg:mt-0"
+                options={[
+                  { key: "ios", label: "iPhone" },
+                  { key: "android", label: "Android" },
+                ]}
+                value={platform}
+                onChange={setPlatform}
+              />
               <ol className="mt-4 divide-y divide-border-soft">
                 {STEPS[platform].map((step, index) => (
                   <li key={step.title} className="flex gap-3 py-3">

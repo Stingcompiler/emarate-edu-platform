@@ -91,7 +91,7 @@ export function ResultSearch() {
                 {student.university_number}
               </p>
             </Card>
-            <Card className="mt-3 divide-y divide-border-soft">
+            <Card className="motion-stagger mt-3 divide-y divide-border-soft">
               {rows.map((r) => {
                 const [top, bottom] = splitCode(r.course_code);
                 return (

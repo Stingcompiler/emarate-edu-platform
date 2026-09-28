@@ -13,6 +13,7 @@ import {
   STATUS_LABELS,
   TextArea,
   problemMessage,
+  SideNote,
 } from "../../components/ui";
 import { api } from "../../lib/api";
 import { useMe } from "../../lib/auth";
@@ -103,6 +104,14 @@ export function CaseDetail() {
               </ol>
             </Card>
           </div>
+          {!manager && (
+            <aside className="mt-6 lg:mt-0">
+              <SideNote title="للاطلاع">
+                يضيف أمين شؤون الطلاب الملاحظات ويتخذ القرار. يرى الطالب الحالة وقرارها فقط عند
+                نشرها له.
+              </SideNote>
+            </aside>
+          )}
           {manager && (
             <aside className="mt-6 space-y-4 lg:mt-0">
               <Card>

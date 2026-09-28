@@ -57,7 +57,9 @@ const title = page ? pick(lang, page.title_ar, page.title_en) : t(lang, "about")
           [st.departments, t(lang, "departmentsCount")],
         ].map(([n, l]) => (
           <div class="rounded-2xl bg-bg-subtle p-4 text-center">
-            <p class="font-display text-xl font-bold text-primary">{num(lang, Number(n))}</p>
+            <p class="font-display text-xl font-bold text-primary" data-count={Number(n)}>
+              {num(lang, Number(n))}
+            </p>
             <p class="text-xs text-text-muted">{l}</p>
           </div>
         ))}
