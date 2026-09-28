@@ -57,6 +57,12 @@ export function AppShell({
 
   return (
     <div className="min-h-dvh bg-bg-subtle lg:flex lg:flex-col">
+      <a
+        href="#main"
+        className="sr-only z-50 rounded-lg bg-surface px-4 py-2 font-semibold text-primary shadow focus:not-sr-only focus:fixed focus:start-3 focus:top-3"
+      >
+        تخطَّ إلى المحتوى
+      </a>
       {/* Desktop top bar */}
       <header className="hidden h-14 shrink-0 items-center gap-4 bg-header px-6 text-text-inverse lg:flex">
         <Brand />
@@ -103,7 +109,9 @@ export function AppShell({
         </aside>
 
         <main
-          className={`min-w-0 flex-1 px-4 pb-5 pt-3 lg:px-8 lg:py-6 ${showTabs ? "pb-28 lg:pb-6" : ""}`}
+          id="main"
+          tabIndex={-1}
+          className={`min-w-0 flex-1 focus:outline-none px-4 pb-5 pt-3 lg:px-8 lg:py-6 ${showTabs ? "pb-28 lg:pb-6" : ""}`}
         >
           <div className="mx-auto max-w-[1280px]">
             <div className="mb-5 hidden items-end justify-between gap-4 lg:flex">
