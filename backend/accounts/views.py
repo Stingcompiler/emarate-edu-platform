@@ -3,6 +3,7 @@
 import contextlib
 
 from django.conf import settings
+from django.core.cache import cache
 from django.db.models import Count, Q
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
@@ -15,7 +16,8 @@ from rest_framework.exceptions import NotAuthenticated, PermissionDenied
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework_simplejwt.exceptions import TokenError
+from rest_framework_simplejwt.exceptions import TokenBackendError, TokenError
+from rest_framework_simplejwt.state import token_backend
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from audit.services import RequestMeta
@@ -123,13 +125,40 @@ class RefreshView(APIView):
             old = RefreshToken(raw)
             user = User.objects.get(pk=old["user_id"], is_active=True)
             old.blacklist()
+            cache.set(_ROTATED.format(old["jti"]), user.pk, REFRESH_REUSE_GRACE)
         except (TokenError, User.DoesNotExist):
-            response = Response({"detail": "Session expired."}, status=status.HTTP_401_UNAUTHORIZED)
-            _clear_auth_cookies(response)
-            return response
+            user = _just_rotated(raw)
+            if user is None:
+                response = Response(
+                    {"detail": "Session expired."}, status=status.HTTP_401_UNAUTHORIZED
+                )
+                _clear_auth_cookies(response)
+                return response
         response = Response({"detail": "ok"})
         _set_auth_cookies(response, RefreshToken.for_user(user))
         return response
+
+
+# Two tabs (or the browser and the installed app) share the cookies and can refresh at the
+# same moment with the same token: the first rotates it, the second arrives with a token that
+# was just blacklisted. Accept a token *rotated* (not logged out) in the last few seconds
+# instead of signing every tab out. Logout never marks tokens, so it stays final.
+REFRESH_REUSE_GRACE = 30  # seconds
+_ROTATED = "auth:rotated:{}"
+
+
+def _just_rotated(raw: str) -> User | None:
+    """The user of a genuine, unexpired refresh token rotated within the grace period."""
+    try:
+        payload = token_backend.decode(raw, verify=True)  # signature and expiry, not blacklist
+    except TokenBackendError:
+        return None
+    if payload.get("token_type") != "refresh":
+        return None
+    user_id = cache.get(_ROTATED.format(payload.get("jti")))
+    if user_id is None or str(user_id) != str(payload.get("user_id")):
+        return None
+    return User.objects.filter(pk=user_id, is_active=True).first()
 
 
 class LogoutView(APIView):

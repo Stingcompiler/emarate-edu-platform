@@ -2,6 +2,7 @@
 
 import pytest
 from django.conf import settings
+from django.core.cache import cache
 from django.core import mail
 from rest_framework.test import APIClient
 
@@ -68,9 +69,17 @@ def test_refresh_rotates_and_old_token_dies(staff):
     response = client.post(REFRESH)
     assert response.status_code == 200
     assert client.cookies[REFRESH_COOKIE].value != old
+    # A second tab refreshing with the same token a moment later is not signed out…
+    concurrent = APIClient()
+    concurrent.cookies[REFRESH_COOKIE] = old
+    assert concurrent.post(REFRESH).status_code == 200
+    # …but once the grace period is over the old token is dead and cookies are cleared.
+    cache.clear()
     replay = APIClient()
     replay.cookies[REFRESH_COOKIE] = old
-    assert replay.post(REFRESH).status_code == 401
+    response = replay.post(REFRESH)
+    assert response.status_code == 401
+    assert response.cookies[REFRESH_COOKIE].value == ""
 
 
 def test_logout_revokes_refresh(staff):
