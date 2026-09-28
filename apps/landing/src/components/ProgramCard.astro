@@ -1,6 +1,18 @@
 ---
 import { PORTAL, type Program } from "../lib/api";
-import { arrow, degree, fmtDate, href, type Lang, num, pick, t, years } from "../lib/i18n";
+import {
+  arrow,
+  degree,
+  fmtDate,
+  href,
+  type Lang,
+  num,
+  pick,
+  t,
+  years,
+  count,
+  N,
+} from "../lib/i18n";
 
 interface Props {
   lang: Lang;
@@ -25,7 +37,7 @@ const open = !!p.intake?.accepting;
   </h3>
   <p class="mt-1 text-xs text-text-muted">
     {years(lang, p.duration_terms)}
-    {p.credit_hours ? ` · ${num(lang, p.credit_hours)} ${t(lang, "hours")}` : ""} ·{" "}
+    {p.credit_hours ? ` · ${count(lang, p.credit_hours, N.hour)}` : ""} ·{" "}
     {degree(lang, p.degree, p.degree_label)}
   </p>
   <div class="mt-auto flex items-center justify-between gap-2 pt-4">
