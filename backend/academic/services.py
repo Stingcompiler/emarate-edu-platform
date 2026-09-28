@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from django.db import IntegrityError, transaction
 from django.db.models import Q
+from django.utils.translation import gettext
 from rest_framework.exceptions import PermissionDenied, ValidationError
 
 from accounts import rbac
@@ -21,7 +22,7 @@ _KIND_ROLE = {"teacher": Role.TEACHER, "ta": Role.TA}
 
 def _require(meta: RequestMeta, capability: str, department_id: int) -> None:
     if not rbac.can(meta.actor, capability, department_id):
-        raise PermissionDenied("Outside your department scope.")
+        raise PermissionDenied(gettext("Outside your department scope."))
 
 
 # ─── Department membership ────────────────────────────────────────────────
@@ -31,7 +32,14 @@ def add_member(meta: RequestMeta, department: Department, user, kind: str) -> De
     _require(meta, "membership.manage", department.pk)
     if _KIND_ROLE[kind] not in rbac.roles_of(user):
         raise ValidationError(
-            {"user": [f"This person does not have the {kind} role. Academic affairs creates it."]}
+            {
+                "user": [
+                    gettext(
+                        "This person does not have the %(kind)s role. Academic affairs creates it."
+                    )
+                    % {"kind": kind}
+                ]
+            }
         )
     try:
         with transaction.atomic():
@@ -46,7 +54,9 @@ def add_member(meta: RequestMeta, department: Department, user, kind: str) -> De
                 department_id=department.pk,
             )
     except IntegrityError:
-        raise Conflict("Already a member of this department.", code="already_member") from None
+        raise Conflict(
+            gettext("Already a member of this department."), code="already_member"
+        ) from None
     return membership
 
 
@@ -78,14 +88,16 @@ def add_instructor(
     department_id = offering.course.department_id
     _require(meta, "courses.manage", department_id)
     if _KIND_ROLE[role] not in rbac.roles_of(user):
-        raise ValidationError({"user": [f"This person does not have the {role} role."]})
+        raise ValidationError(
+            {"user": [gettext("This person does not have the %(role)s role.") % {"role": role}]}
+        )
     # Department roles assign their own members; academic affairs / admin assign anyone.
     college_wide = rbac.scope_for(meta.actor, "courses.manage").everything
     if (
         not college_wide
         and not DepartmentMembership.objects.filter(department_id=department_id, user=user).exists()
     ):
-        raise ValidationError({"user": ["Add this person to the department first."]})
+        raise ValidationError({"user": [gettext("Add this person to the department first.")]})
     try:
         with transaction.atomic():
             instructor = OfferingInstructor.objects.create(offering=offering, user=user, role=role)
@@ -98,7 +110,9 @@ def add_instructor(
                 department_id=department_id,
             )
     except IntegrityError:
-        raise Conflict("Already assigned to this course.", code="already_assigned") from None
+        raise Conflict(
+            gettext("Already assigned to this course."), code="already_assigned"
+        ) from None
     return instructor
 
 
@@ -123,16 +137,18 @@ def enroll(meta: RequestMeta, offering: CourseOffering, student: StudentRecord) 
     department_id = offering.course.department_id
     _require(meta, "enrollment.manage", department_id)
     if student.status != StudentRecord.Status.ACTIVE:
-        raise ValidationError({"student_record": ["Only active students can be enrolled."]})
+        raise ValidationError(
+            {"student_record": [gettext("Only active students can be enrolled.")]}
+        )
     if offering.status == CourseOffering.Status.CLOSED:
-        raise ValidationError({"offering": ["This offering is closed."]})
+        raise ValidationError({"offering": [gettext("This offering is closed.")]})
     with transaction.atomic():
         enrollment, created = Enrollment.objects.get_or_create(
             offering=offering, student_record=student, defaults={"source": Enrollment.Source.MANUAL}
         )
         if not created:
             if enrollment.status == Enrollment.Status.ACTIVE:
-                raise Conflict("Already enrolled.", code="already_enrolled")
+                raise Conflict(gettext("Already enrolled."), code="already_enrolled")
             enrollment.status = Enrollment.Status.ACTIVE
             enrollment.save(update_fields=["status", "updated_at"])
         record(
@@ -149,7 +165,7 @@ def drop(meta: RequestMeta, enrollment: Enrollment) -> Enrollment:
     department_id = enrollment.offering.course.department_id
     _require(meta, "enrollment.manage", department_id)
     if enrollment.status != Enrollment.Status.ACTIVE:
-        raise Conflict("This enrollment is not active.", code="not_active")
+        raise Conflict(gettext("This enrollment is not active."), code="not_active")
     with transaction.atomic():
         enrollment.status = Enrollment.Status.DROPPED
         enrollment.save(update_fields=["status", "updated_at"])

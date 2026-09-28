@@ -6,6 +6,7 @@ from __future__ import annotations
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
+from django.utils.translation import gettext
 from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework import mixins, viewsets
 from rest_framework.exceptions import NotFound, PermissionDenied, ValidationError
@@ -43,14 +44,14 @@ def _int(value, name: str) -> int | None:
     try:
         return int(value)
     except (TypeError, ValueError):
-        raise ValidationError({name: ["Expected a number."]}) from None
+        raise ValidationError({name: [gettext("Expected a number.")]}) from None
 
 
 def _term(value) -> Term:
     term_id = _int(value, "term")
     term = Term.objects.filter(pk=term_id).first() if term_id else metrics.current_term()
     if term is None:
-        raise NotFound("No term.")
+        raise NotFound(gettext("No term."))
     return term
 
 
@@ -101,7 +102,7 @@ def build_teachers(user, term_value, department_value, kind) -> tuple[dict, Term
     if department_id is not None and not scope.allows(department_id):
         raise PermissionDenied()
     if kind not in (None, "", "teacher", "ta"):
-        raise ValidationError({"kind": ["teacher or ta."]})
+        raise ValidationError({"kind": [gettext("teacher or ta.")]})
     data = metrics.teachers_report(term, scope, department_id=department_id, kind=kind or None)
     return data, term
 
@@ -193,7 +194,7 @@ def build_admissions(user, cycle_value, department_value):
     cycles = AdmissionCycle.objects.order_by("-opens_at")
     cycle = cycles.filter(pk=cycle_id).first() if cycle_id else cycles.first()
     if cycle is None:
-        raise NotFound("No admission cycle.")
+        raise NotFound(gettext("No admission cycle."))
     department_id = _int(department_value, "department")
     return metrics.admissions_report(cycle, department_id=department_id), cycle
 
@@ -221,7 +222,7 @@ def build_affairs(user, year_value, department_value):
         else years.filter(is_current=True).first() or years.first()
     )
     if year is None:
-        raise NotFound("No academic year.")
+        raise NotFound(gettext("No academic year."))
     department_id = _int(department_value, "department")
     return metrics.affairs_report(year, department_id=department_id), year
 
@@ -300,12 +301,12 @@ class ReportSnapshotViewSet(
             if len(dept_ids) == 1:
                 links["department"] = Department.objects.get(pk=dept_ids[0])
             elif not rbac.scope_for(user, "reports.department").everything:
-                raise ValidationError({"department": ["Choose a department."]})
+                raise ValidationError({"department": [gettext("Choose a department.")]})
             title = f"تقرير القسم — {'، '.join(data['departments'][:3])} — {term.name_ar}"
         elif kind == K.TEACHERS:
             scope = rbac.scope_for(user, "reports.teachers")
             if not scope.everything and v.get("department") is None:
-                raise ValidationError({"department": ["Choose a department."]})
+                raise ValidationError({"department": [gettext("Choose a department.")]})
             data, term = build_teachers(user, v.get("term"), v.get("department"), None)
             links["term"] = term
             if v.get("department") is not None:

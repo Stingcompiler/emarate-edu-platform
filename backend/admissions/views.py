@@ -2,6 +2,7 @@ from django.core.cache import cache
 from django.db.models import Count
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
+from django.utils.translation import gettext
 from drf_spectacular.utils import extend_schema
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
@@ -78,7 +79,7 @@ class _Audited(viewsets.ModelViewSet):
         if hasattr(instance, "applications") and instance.applications.exists():
             from core.errors import Conflict
 
-            raise Conflict("Applications exist; close the intake instead.", code="in_use")
+            raise Conflict(gettext("Applications exist; close the intake instead."), code="in_use")
         record(_meta(self.request), f"admissions.{self.audit_name}_delete", instance)
         instance.delete()
 
@@ -125,7 +126,9 @@ class TemplateViewSet(_Audited):
         if serializer.instance.status != ApplicationFormTemplate.Status.DRAFT:
             from core.errors import Conflict
 
-            raise Conflict("A published template is frozen; create a new version.", code="frozen")
+            raise Conflict(
+                gettext("A published template is frozen; create a new version."), code="frozen"
+            )
         super().perform_update(serializer)
 
     @extend_schema(request=None, responses=TemplateSerializer)
@@ -310,7 +313,7 @@ class VisitorOTPView(_Public):
         data = OTPStartSerializer(data=request.data)
         data.is_valid(raise_exception=True)
         visitor.start(data.validated_data["email"])
-        return Response({"detail": "A code was sent to the email."})
+        return Response({"detail": gettext("A code was sent to the email.")})
 
 
 @extend_schema(tags=["public"])
@@ -524,7 +527,7 @@ class VisitorInquiryReplyView(_Visitor):
         data.is_valid(raise_exception=True)
         inquiry = get_object_or_404(Inquiry, public_id=public_id, contact=request.contact)
         if inquiry.status == Inquiry.Status.CLOSED:
-            raise PermissionDenied("This inquiry is closed.")
+            raise PermissionDenied(gettext("This inquiry is closed."))
         InquiryMessage.objects.create(
             inquiry=inquiry, channel=InquiryMessage.Channel.PORTAL, body=data.validated_data["body"]
         )

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from django.db import transaction
 from django.db.models import ProtectedError
+from django.utils.translation import gettext
 from rest_framework import viewsets
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import IsAuthenticated
@@ -66,7 +67,7 @@ class ScopedModelViewSet(viewsets.ModelViewSet):
         if self.department_lookup is None:
             return
         if not self.scope().allows(department_id):
-            raise PermissionDenied("Outside your department scope.")
+            raise PermissionDenied(gettext("Outside your department scope."))
 
     @property
     def meta(self) -> RequestMeta:
@@ -119,6 +120,8 @@ class ScopedModelViewSet(viewsets.ModelViewSet):
                 instance.delete()
         except ProtectedError:
             raise Conflict(
-                "This item is in use and cannot be deleted. Deactivate or archive it instead.",
+                gettext(
+                    "This item is in use and cannot be deleted. Deactivate or archive it instead."
+                ),
                 code="in_use",
             ) from None

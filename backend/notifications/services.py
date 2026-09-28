@@ -5,6 +5,7 @@ from __future__ import annotations
 from django.conf import settings
 from django.db import transaction
 from django.utils import timezone
+from django.utils.translation import gettext
 from rest_framework.exceptions import ValidationError
 
 from audit.services import RequestMeta, record
@@ -28,7 +29,9 @@ BATCH = 1000
 def _channels(channels) -> list[str]:
     clean = sorted(set(channels or [Channel.INAPP, Channel.PUSH]))
     if not set(clean) <= set(Channel.values):
-        raise ValidationError({"channels": [f"Choose from {Channel.values}."]})
+        raise ValidationError(
+            {"channels": [gettext("Choose from %(values)s.") % {"values": Channel.values}]}
+        )
     if Channel.INAPP not in clean:
         clean.insert(0, Channel.INAPP)  # every notification lands in the inbox
     return clean
@@ -209,7 +212,7 @@ def create_hr_notice(
     if not rbac.can(meta.actor, "hr.notify"):
         raise PermissionDenied()
     if not rbac.has_role(teacher, Role.TEACHER, Role.TA) or not teacher.is_active:
-        raise ValidationError({"teacher": ["Choose a teacher or TA."]})
+        raise ValidationError({"teacher": [gettext("Choose a teacher or TA.")]})
     from reports.services import teacher_evidence
 
     evidence, term = teacher_evidence(teacher)
@@ -245,7 +248,7 @@ def acknowledge_hr_notice(meta: RequestMeta, notice):
     from core.errors import Conflict
 
     if notice.acknowledged_at is not None:
-        raise Conflict("Already acknowledged.", code="already_acknowledged")
+        raise Conflict(gettext("Already acknowledged."), code="already_acknowledged")
     with transaction.atomic():
         notice.acknowledged_at = timezone.now()
         notice.opened_at = notice.opened_at or notice.acknowledged_at

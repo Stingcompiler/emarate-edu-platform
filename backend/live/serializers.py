@@ -1,3 +1,4 @@
+from django.utils.translation import gettext
 from rest_framework import serializers
 
 from academic.models import CourseOffering
@@ -47,13 +48,15 @@ class LiveSessionSerializer(serializers.ModelSerializer):
         scope = attrs.get("scope", getattr(self.instance, "scope", None))
         if self.instance is None:
             if scope == "offering" and not attrs.get("offering"):
-                raise serializers.ValidationError({"offering": ["Choose the course."]})
+                raise serializers.ValidationError({"offering": [gettext("Choose the course.")]})
             if scope == "cohort" and not (attrs.get("program") and attrs.get("level")):
-                raise serializers.ValidationError({"program": ["Choose the program and level."]})
+                raise serializers.ValidationError(
+                    {"program": [gettext("Choose the program and level.")]}
+                )
         starts = attrs.get("starts_at", getattr(self.instance, "starts_at", None))
         ends = attrs.get("ends_at", getattr(self.instance, "ends_at", None))
         if starts and ends and ends <= starts:
-            raise serializers.ValidationError({"ends_at": ["Must be after the start."]})
+            raise serializers.ValidationError({"ends_at": [gettext("Must be after the start.")]})
         return attrs
 
 

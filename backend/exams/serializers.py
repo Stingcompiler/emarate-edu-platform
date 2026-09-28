@@ -1,4 +1,5 @@
 from django.utils import timezone
+from django.utils.translation import gettext
 from rest_framework import serializers
 
 from academic.models import CourseOffering
@@ -47,7 +48,9 @@ class ExamSerializer(serializers.ModelSerializer):
         opens = attrs.get("opens_at", getattr(self.instance, "opens_at", None))
         closes = attrs.get("closes_at", getattr(self.instance, "closes_at", None))
         if opens and closes and closes <= opens:
-            raise serializers.ValidationError({"closes_at": ["Must be after the opening time."]})
+            raise serializers.ValidationError(
+                {"closes_at": [gettext("Must be after the opening time.")]}
+            )
         return attrs
 
     def get_questions_count(self, obj) -> int:
@@ -98,7 +101,7 @@ class QuestionSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         kind = attrs.get("type", getattr(self.instance, "type", None))
         if REGISTRY[kind].uses_choices and "choices" not in attrs and self.instance is None:
-            raise serializers.ValidationError({"choices": ["Add the choices."]})
+            raise serializers.ValidationError({"choices": [gettext("Add the choices.")]})
         return attrs
 
 

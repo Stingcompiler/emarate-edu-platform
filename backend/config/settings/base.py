@@ -101,6 +101,9 @@ AUTH_PASSWORD_VALIDATORS = [
 LANGUAGE_CODE = "ar"
 LANGUAGES = [("ar", "العربية"), ("en", "English")]
 USE_I18N = True
+# API messages are written in English in code and translated here (docs/05: Arabic by default,
+# English with Accept-Language: en). Edit locale/ar/LC_MESSAGES/django.po, then compilemessages.
+LOCALE_PATHS = [BASE_DIR / "locale"]
 USE_TZ = True  # stored in UTC
 TIME_ZONE = "Africa/Khartoum"  # displayed in Khartoum time
 

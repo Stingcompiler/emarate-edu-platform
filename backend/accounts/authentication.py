@@ -7,6 +7,7 @@ also carry the CSRF header (``X-CSRFToken``), the same way Django sessions work.
 
 from django.conf import settings
 from django.middleware.csrf import CsrfViewMiddleware
+from django.utils.translation import gettext
 from rest_framework import exceptions
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
@@ -24,7 +25,9 @@ class CookieJWTAuthentication(JWTAuthentication):
         validated = self.get_validated_token(raw_token)
         user = self.get_user(validated)
         if not user.is_active:
-            raise exceptions.AuthenticationFailed("User is inactive.", code="user_inactive")
+            raise exceptions.AuthenticationFailed(
+                gettext("User is inactive."), code="user_inactive"
+            )
         self._enforce_csrf(request)
         return user, validated
 
@@ -39,4 +42,6 @@ class CookieJWTAuthentication(JWTAuthentication):
         check.process_request(request)
         reason = check.process_view(request, None, (), {})
         if reason:
-            raise exceptions.PermissionDenied(f"CSRF failed: {reason}")
+            raise exceptions.PermissionDenied(
+                gettext("CSRF failed: %(reason)s") % {"reason": reason}
+            )

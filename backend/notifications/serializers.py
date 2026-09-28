@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from django.utils.translation import gettext
 from rest_framework import serializers
 
 from .models import Category, Channel, HRNotice, Notification, NotificationRecipient
@@ -62,7 +63,9 @@ class SendSerializer(serializers.Serializer):
             and not (value.startswith("/") and not value.startswith("//"))
             and not value.startswith("https://")
         ):
-            raise serializers.ValidationError("Use a portal path (/...) or an https:// link.")
+            raise serializers.ValidationError(
+                gettext("Use a portal path (/...) or an https:// link.")
+            )
         return value
 
 
@@ -125,7 +128,7 @@ class PushSubscribeSerializer(serializers.Serializer):
 
     def validate_endpoint(self, value):
         if not value.startswith("https://"):
-            raise serializers.ValidationError("Push endpoints are https URLs.")
+            raise serializers.ValidationError(gettext("Push endpoints are https URLs."))
         return value
 
 

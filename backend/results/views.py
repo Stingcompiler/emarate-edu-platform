@@ -2,6 +2,7 @@ import csv
 
 from django.db.models import Q
 from django.http import HttpResponse
+from django.utils.translation import gettext
 from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
@@ -80,9 +81,9 @@ class ResultImportViewSet(
         department = data.validated_data.get("department")
         scope = rbac.scope_for(request.user, "results.manage")
         if department is None and not scope.everything:
-            raise ValidationError({"department": ["Choose your department."]})
+            raise ValidationError({"department": [gettext("Choose your department.")]})
         if department is not None and not scope.allows(department.pk):
-            raise PermissionDenied("Outside your department.")
+            raise PermissionDenied(gettext("Outside your department."))
         allowed = None if scope.everything else set(scope.departments)
         file = data.validated_data["file"]
         try:
@@ -97,7 +98,7 @@ class ResultImportViewSet(
         except ImportFileError as error:
             raise ValidationError({"file": [str(error)]}) from None
         except UnicodeDecodeError:
-            raise ValidationError({"file": ["Save the CSV as UTF-8."]}) from None
+            raise ValidationError({"file": [gettext("Save the CSV as UTF-8.")]}) from None
         return Response(ResultBatchSerializer(batch).data, status=status.HTTP_201_CREATED)
 
     @extend_schema(
@@ -186,7 +187,7 @@ class ResultViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.G
             raise PermissionDenied()
         term = request.query_params.get("term")
         if not term or not term.isdigit():
-            raise ValidationError({"term": ["Choose a term."]})
+            raise ValidationError({"term": [gettext("Choose a term.")]})
         rows = self.filter_queryset(self.get_queryset()).filter(term_id=int(term))
         response = HttpResponse(content_type="text/csv; charset=utf-8")
         response["Content-Disposition"] = f'attachment; filename="results-term-{term}.csv"'

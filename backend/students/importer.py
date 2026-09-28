@@ -23,6 +23,7 @@ from django.core.exceptions import ValidationError as DjangoValidationError
 from django.core.validators import validate_email
 from django.db import transaction
 from django.utils import timezone
+from django.utils.translation import gettext, gettext_lazy
 from openpyxl import load_workbook
 
 from audit.services import RequestMeta, record
@@ -32,6 +33,20 @@ from .models import StudentImportBatch, StudentImportRow, StudentRecord
 
 MAX_ROWS = 10_000
 MAX_BYTES = 5 * 1024 * 1024
+
+# How a column is named in messages (translated; the file may use either language).
+COLUMN_LABELS = {
+    "university_number": gettext_lazy("University number"),
+    "full_name_ar": gettext_lazy("Name in Arabic"),
+    "program_code": gettext_lazy("Program code"),
+    "level": gettext_lazy("Level"),
+    "course_code": gettext_lazy("Course code"),
+}
+
+
+def column_label(field: str) -> str:
+    return str(COLUMN_LABELS.get(field, field))
+
 
 # Accepted headers (Arabic or English) → field name.
 HEADERS = {
@@ -106,7 +121,7 @@ def read_table(
     Returns the rows and the detected field columns. Blank lines are skipped.
     """
     if len(content) > MAX_BYTES:
-        raise ImportFileError("The file is larger than 5 MB.")
+        raise ImportFileError(gettext("The file is larger than 5 MB."))
     lower = name.lower()
     if lower.endswith(".csv"):
         text = content.decode("utf-8-sig")
@@ -116,13 +131,16 @@ def read_table(
         sheet = workbook.worksheets[0]
         table = [["" if c is None else c for c in row] for row in sheet.iter_rows(values_only=True)]
     else:
-        raise ImportFileError("Upload an Excel (.xlsx) or CSV file.")
+        raise ImportFileError(gettext("Upload an Excel (.xlsx) or CSV file."))
     if not table:
-        raise ImportFileError("The file is empty.")
+        raise ImportFileError(gettext("The file is empty."))
     header = [headers.get(str(h).strip().lower(), headers.get(str(h).strip())) for h in table[0]]
     missing = [f for f in required if f not in header]
     if missing:
-        raise ImportFileError(f"Missing required columns: {', '.join(missing)}.")
+        raise ImportFileError(
+            gettext("Missing required columns: %(join)s.")
+            % {"join": "، ".join(column_label(f) for f in missing)}
+        )
     rows = []
     for values in table[1:]:
         if not any(str(v).strip() for v in values):
@@ -133,7 +151,9 @@ def read_table(
                 row[field] = value if isinstance(value, (date, datetime)) else str(value).strip()
         rows.append(row)
     if len(rows) > MAX_ROWS:
-        raise ImportFileError(f"The file has more than {MAX_ROWS} rows.")
+        raise ImportFileError(
+            gettext("The file has more than %(MAX_ROWS)s rows.") % {"MAX_ROWS": MAX_ROWS}
+        )
     return rows, [h for h in header if h]
 
 
@@ -155,7 +175,7 @@ def _normalize(raw: dict, programs: dict[str, Program]) -> tuple[dict, list[str]
     out: dict = {}
     for field in REQUIRED:
         if not str(raw.get(field, "")).strip():
-            errors.append(f"{field}: required")
+            errors.append(gettext("%(field)s: required") % {"field": column_label(field)})
     number = str(raw.get("university_number", "")).strip()
     out["university_number"] = number
     out["full_name_ar"] = " ".join(str(raw.get("full_name_ar", "")).split())
@@ -163,7 +183,10 @@ def _normalize(raw: dict, programs: dict[str, Program]) -> tuple[dict, list[str]
 
     program = programs.get(str(raw.get("program_code", "")).strip().upper())
     if raw.get("program_code") and program is None:
-        errors.append(f"program_code: unknown program {raw.get('program_code')!r}")
+        errors.append(
+            gettext("program_code: unknown program %(get)s")
+            % {"get": repr(raw.get("program_code"))}
+        )
     out["program_id"] = program.pk if program else None
 
     level_raw = str(raw.get("level", "")).strip()
@@ -171,9 +194,12 @@ def _normalize(raw: dict, programs: dict[str, Program]) -> tuple[dict, list[str]
         level = int(float(level_raw)) if level_raw else None
     except ValueError:
         level = None
-        errors.append("level: must be a number")
+        errors.append(gettext("level: must be a number"))
     if level is not None and program is not None and not 1 <= level <= program.levels_count:
-        errors.append(f"level: must be between 1 and {program.levels_count}")
+        errors.append(
+            gettext("level: must be between 1 and %(levels_count)s")
+            % {"levels_count": program.levels_count}
+        )
     out["level"] = level
 
     email = str(raw.get("email", "")).strip().lower()
@@ -181,7 +207,7 @@ def _normalize(raw: dict, programs: dict[str, Program]) -> tuple[dict, list[str]
         try:
             validate_email(email)
         except DjangoValidationError:
-            errors.append("email: invalid")
+            errors.append(gettext("email: invalid"))
     out["email"] = email
 
     phone = str(raw.get("phone", "")).strip()
@@ -195,12 +221,12 @@ def _normalize(raw: dict, programs: dict[str, Program]) -> tuple[dict, list[str]
                 parsed, phonenumbers.PhoneNumberFormat.E164
             )
         except phonenumbers.NumberParseException:
-            errors.append("phone: invalid")
+            errors.append(gettext("phone: invalid"))
 
     gender = str(raw.get("gender", "")).strip().lower()
     out["gender"] = GENDERS.get(gender, "") if gender else ""
     if gender and not out["gender"]:
-        errors.append("gender: use male/female (ذكر/أنثى)")
+        errors.append(gettext("gender: use male/female (ذكر/أنثى)"))
 
     birth = raw.get("birth_date", "")
     out["birth_date"] = None
@@ -208,7 +234,7 @@ def _normalize(raw: dict, programs: dict[str, Program]) -> tuple[dict, list[str]
         try:
             out["birth_date"] = _parse_date(birth)
         except ValueError:
-            errors.append("birth_date: use YYYY-MM-DD or DD/MM/YYYY")
+            errors.append(gettext("birth_date: use YYYY-MM-DD or DD/MM/YYYY"))
 
     national_id = str(raw.get("national_id", "")).strip()
     out["national_id_hash"] = _hash_national_id(national_id) if national_id else ""
@@ -249,7 +275,7 @@ def validate_file(meta: RequestMeta, name: str, uploaded) -> StudentImportBatch:
         normalized, errors = _normalize(raw, programs)
         number = normalized["university_number"]
         if number and number in seen:
-            errors.append("university_number: duplicated in this file")
+            errors.append(gettext("university_number: duplicated in this file"))
         seen.add(number)
         changes = {}
         if errors:

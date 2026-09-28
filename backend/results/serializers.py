@@ -1,3 +1,4 @@
+from django.utils.translation import gettext
 from rest_framework import serializers
 
 from academic.models import Term
@@ -99,7 +100,7 @@ class CorrectionRequestSerializer(serializers.Serializer):
 
     def validate(self, attrs):
         if attrs.get("score") is None and attrs.get("status") is None:
-            raise serializers.ValidationError({"score": ["Give a new score or status."]})
+            raise serializers.ValidationError({"score": [gettext("Give a new score or status.")]})
         return attrs
 
 
@@ -165,7 +166,7 @@ class GradingScaleSerializer(serializers.ModelSerializer):
 
     def validate_ranges(self, value):
         if not any(band["min"] == 0 for band in value):
-            raise serializers.ValidationError("Include a band starting at 0.")
+            raise serializers.ValidationError(gettext("Include a band starting at 0."))
         return [
             {"min": str(b["min"]), "letter": b["letter"].upper(), "points": str(b["points"])}
             for b in sorted(value, key=lambda b: -b["min"])

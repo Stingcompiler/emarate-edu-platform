@@ -15,6 +15,7 @@ from django.contrib.auth import get_user_model
 from django.db import IntegrityError, transaction
 from django.db.models import Q
 from django.utils import timezone
+from django.utils.translation import gettext
 from rest_framework.exceptions import PermissionDenied, ValidationError
 
 from accounts import rbac
@@ -43,9 +44,9 @@ def normalize_phone(raw: str) -> str | None:
     try:
         parsed = phonenumbers.parse(raw, "SD")
     except phonenumbers.NumberParseException:
-        raise ValidationError({"phone": ["Invalid phone number."]}) from None
+        raise ValidationError({"phone": [gettext("Invalid phone number.")]}) from None
     if not phonenumbers.is_valid_number(parsed):
-        raise ValidationError({"phone": ["Invalid phone number."]})
+        raise ValidationError({"phone": [gettext("Invalid phone number.")]})
     return phonenumbers.format_number(parsed, phonenumbers.PhoneNumberFormat.E164)
 
 
@@ -100,7 +101,7 @@ def can_reply(user, inquiry: Inquiry) -> bool:
 def submit(*, name, email, phone, type, department, subject, message, source="web") -> Inquiry:
     phone_e164 = normalize_phone(phone)
     if not email and not phone_e164:
-        raise ValidationError({"email": ["Give an email or a phone number."]})
+        raise ValidationError({"email": [gettext("Give an email or a phone number.")]})
     if type not in ADMISSION_TYPES:
         department = None  # only admission/program questions are department-routed
     with transaction.atomic():
@@ -145,14 +146,18 @@ def submit(*, name, email, phone, type, department, subject, message, source="we
 
 def _require(user, inquiry: Inquiry) -> None:
     if not can_reply(user, inquiry):
-        raise PermissionDenied("This inquiry is routed to someone else.")
+        raise PermissionDenied(gettext("This inquiry is routed to someone else."))
 
 
 def _set_status(meta, inquiry: Inquiry, to: str, note: str = "") -> None:
     if to == inquiry.status:
         return
     if to not in TRANSITIONS[inquiry.status]:
-        raise Conflict(f"Cannot move from {inquiry.status} to {to}.", code="bad_transition")
+        raise Conflict(
+            gettext("Cannot move from %(status)s to %(to)s.")
+            % {"status": inquiry.status, "to": to},
+            code="bad_transition",
+        )
     InquiryStatusHistory.objects.create(
         inquiry=inquiry, from_status=inquiry.status, to_status=to, by=meta.actor, note=note
     )
@@ -167,9 +172,9 @@ def reply(
     """An email reply (queued in the outbox) or an internal note."""
     _require(meta.actor, inquiry)
     if channel not in ("email", "internal"):
-        raise ValidationError({"channel": ["Reply by email or add an internal note."]})
+        raise ValidationError({"channel": [gettext("Reply by email or add an internal note.")]})
     if channel == "email" and not inquiry.contact.email:
-        raise ValidationError({"channel": ["This visitor has no email; use WhatsApp."]})
+        raise ValidationError({"channel": [gettext("This visitor has no email; use WhatsApp.")]})
     with transaction.atomic():
         message = InquiryMessage.objects.create(
             inquiry=inquiry, author=meta.actor, channel=channel, body=body
@@ -197,7 +202,7 @@ def whatsapp(meta: RequestMeta, inquiry: Inquiry, *, body: str) -> str:
     _require(meta.actor, inquiry)
     phone = inquiry.contact.phone_e164
     if not phone:
-        raise ValidationError({"detail": ["This visitor has no phone number."]})
+        raise ValidationError({"detail": [gettext("This visitor has no phone number.")]})
     with transaction.atomic():
         InquiryMessage.objects.create(
             inquiry=inquiry, author=meta.actor, channel="whatsapp_note", body=body
@@ -229,7 +234,9 @@ def assign(meta: RequestMeta, inquiry: Inquiry, user) -> Inquiry:
         .exists()
         and not rbac.has_role(user, Role.SYSTEM_ADMIN)
     ):
-        raise ValidationError({"user": ["This person does not handle this kind of inquiry."]})
+        raise ValidationError(
+            {"user": [gettext("This person does not handle this kind of inquiry.")]}
+        )
     inquiry.assigned_to = user
     inquiry.save(update_fields=["assigned_to", "updated_at"])
     record(

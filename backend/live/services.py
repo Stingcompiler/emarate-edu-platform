@@ -7,6 +7,7 @@ from datetime import timedelta
 from django.db import transaction
 from django.db.models import Q
 from django.utils import timezone
+from django.utils.translation import gettext
 from rest_framework.exceptions import NotFound, PermissionDenied, ValidationError
 
 from academic.models import Enrollment, OfferingInstructor
@@ -54,13 +55,13 @@ def save(
 ) -> LiveSession:
     target = session or data
     if not can_manage(meta.actor, target if session else data):
-        raise PermissionDenied("You cannot schedule sessions for this course or cohort.")
+        raise PermissionDenied(gettext("You cannot schedule sessions for this course or cohort."))
     if join_url is not None and not join_url.startswith("https://"):
-        raise ValidationError({"join_url": ["Use the https:// meeting link."]})
+        raise ValidationError({"join_url": [gettext("Use the https:// meeting link.")]})
     with transaction.atomic():
         if session is None:
             if not join_url:
-                raise ValidationError({"join_url": ["Add the meeting link."]})
+                raise ValidationError({"join_url": [gettext("Add the meeting link.")]})
             session = LiveSession(host=meta.actor, **data)
             session.join_url = join_url
             session.full_clean(exclude=["join_url_encrypted"])
@@ -116,7 +117,7 @@ def join_link(user, session: LiveSession) -> str:
     if not LiveSession.objects.filter(visible_q(user), pk=session.pk).exists():
         raise NotFound()
     if session.status == LiveSession.Status.CANCELLED:
-        raise ValidationError({"detail": ["This session was cancelled."]})
+        raise ValidationError({"detail": [gettext("This session was cancelled.")]})
     now = timezone.now()
     staff = (
         can_manage(user, session)
@@ -124,7 +125,7 @@ def join_link(user, session: LiveSession) -> str:
     )
     if not staff and not (session.starts_at - JOIN_EARLY <= now <= session.ends_at):
         raise ValidationError(
-            {"detail": ["The link opens 15 minutes before the start."]}, code="not_yet"
+            {"detail": [gettext("The link opens 15 minutes before the start.")]}, code="not_yet"
         )
     return session.join_url
 

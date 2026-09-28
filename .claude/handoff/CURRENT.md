@@ -12,10 +12,8 @@
     - Audit labels are in Arabic, with readable object names.
     - Role forms now offer only the roles the user may create or grant (`/me.creatable_roles` and `/me.grantable_roles`).
     - TA announcements depend on `ta_can_notify`, and TA grading metrics count only where `ta_can_grade` is on.
-- **Next PR: Arabic API messages** (docs/05 requires Arabic via `Accept-Language`).
-  - About 180 service or validation messages, plus stored importer row errors, are English and reach users.
-  - Plan: wrap them in `gettext`, add `locale/ar/LC_MESSAGES/django.po`, enable `LocaleMiddleware`, and write importer errors in Arabic.
-  - Also add one Arabic counting helper for number–noun agreement ("3 صفًا", "1 مقبولًا", "2 مواد").
+- **Arabic API messages** (PR `feat/arabic-api-messages`): every service, validation and importer message is wrapped in `gettext` and translated in `backend/locale/ar/LC_MESSAGES/django.po`. The compiled `.mo` is committed because Render has no `msgfmt`. The portal always sends `Accept-Language: ar`. `core/tests/test_i18n.py` fails on any untranslated or uncompiled message; the workflow is in the `.po` header.
+- **Next:** one Arabic counting helper (`Intl.PluralRules("ar")`) to fix number–noun agreement across the portal ("3 صفًا", "1 مقبولًا", "2 مواد", "0 تسليمًا").
 - **Dev login:** demo accounts are `<handle>@demo.ecst.test`. `ta@` and `dept.supervisor@` have a different password from the rest (seed_demo doesn't reset existing passwords); see the transcript.
 - **Browser pane tips:**
   - Coordinate clicks don't land while a phone size is emulated; use refs or JS clicks.

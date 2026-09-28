@@ -10,6 +10,7 @@ from django.core import signing
 from django.db import transaction
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.translation import gettext
 from rest_framework.exceptions import NotFound, PermissionDenied, ValidationError
 
 from audit.services import RequestMeta, record
@@ -36,11 +37,11 @@ def _expiry(timestamp: int) -> datetime:
 def upload(meta: RequestMeta, *, purpose: str, offering, uploaded) -> StoredFile:
     found = access.policy(purpose)
     if found is None:
-        raise ValidationError({"purpose": ["Unknown purpose."]})
+        raise ValidationError({"purpose": [gettext("Unknown purpose.")]})
     if found.needs_offering and offering is None:
-        raise ValidationError({"offering": ["Choose the course."]})
+        raise ValidationError({"offering": [gettext("Choose the course.")]})
     if not found.can_upload(meta.actor, offering):
-        raise PermissionDenied("You cannot upload files to this course.")
+        raise PermissionDenied(gettext("You cannot upload files to this course."))
     try:
         kind = validation.check(uploaded, allowed=found.allowed_extensions, max_mb=found.max_mb)
     except validation.UploadError as error:
@@ -128,9 +129,16 @@ def resolve_download(token: str):
 
 def video_ticket(meta: RequestMeta, *, offering, title: str, size: int) -> tuple[VideoAsset, dict]:
     if access.video_can_upload is None or not access.video_can_upload(meta.actor, offering):
-        raise PermissionDenied("You cannot upload videos to this course.")
+        raise PermissionDenied(gettext("You cannot upload videos to this course."))
     if size > settings.VIDEO_MAX_MB * 1024 * 1024:
-        raise ValidationError({"size": [f"Videos are limited to {settings.VIDEO_MAX_MB} MB."]})
+        raise ValidationError(
+            {
+                "size": [
+                    gettext("Videos are limited to %(VIDEO_MAX_MB)s MB.")
+                    % {"VIDEO_MAX_MB": settings.VIDEO_MAX_MB}
+                ]
+            }
+        )
     with transaction.atomic():
         video = VideoAsset.objects.create(
             offering=offering,
@@ -160,13 +168,15 @@ def video_ticket(meta: RequestMeta, *, offering, title: str, size: int) -> tuple
 
 def local_video_upload(meta: RequestMeta, video: VideoAsset, uploaded) -> VideoAsset:
     if video.provider != VideoAsset.Provider.LOCAL:
-        raise ValidationError({"detail": ["This video uploads directly to the video service."]})
+        raise ValidationError(
+            {"detail": [gettext("This video uploads directly to the video service.")]}
+        )
     if video.uploaded_by_id != getattr(meta.actor, "pk", None):
         raise NotFound()
     if video.status != VideoAsset.Status.UPLOADING:
-        raise ValidationError({"detail": ["This video was already uploaded."]})
+        raise ValidationError({"detail": [gettext("This video was already uploaded.")]})
     if validation.extension_of(uploaded.name) not in validation.VIDEO_EXTENSIONS:
-        raise ValidationError({"file": ["Upload an MP4, MOV, MKV or WebM video."]})
+        raise ValidationError({"file": [gettext("Upload an MP4, MOV, MKV or WebM video.")]})
     video.file = uploaded
     video.size = uploaded.size
     video.status = VideoAsset.Status.READY
@@ -180,7 +190,7 @@ def video_playback(user, video: VideoAsset) -> tuple[str, datetime]:
     ):
         raise NotFound()
     if video.status != VideoAsset.Status.READY:
-        raise Invalid({"detail": ["The video is not ready yet."]}, code="not_ready")
+        raise Invalid({"detail": [gettext("The video is not ready yet.")]}, code="not_ready")
     if video.provider == VideoAsset.Provider.BUNNY:
         url, expires = bunny.stream_embed_url(video.provider_id, LINK_TTL)
         return url, _expiry(expires)

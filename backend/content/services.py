@@ -9,6 +9,7 @@ from django.conf import settings
 from django.core.cache import cache
 from django.db.models import Q
 from django.utils import timezone
+from django.utils.translation import gettext
 from rest_framework.exceptions import PermissionDenied
 
 from academic.models import CourseOffering, DepartmentMembership, Enrollment, OfferingInstructor
@@ -83,7 +84,9 @@ def may_announce(user, scope: str, scope_id: int | None, audience: str) -> bool:
 
 def require_announce(user, scope, scope_id, audience) -> None:
     if not may_announce(user, scope, scope_id, audience):
-        raise PermissionDenied("This scope or audience is outside what you may announce to.")
+        raise PermissionDenied(
+            gettext("This scope or audience is outside what you may announce to.")
+        )
 
 
 def live_q(now=None) -> Q:

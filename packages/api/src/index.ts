@@ -79,8 +79,14 @@ function sessionRefresh(baseUrl: string): Middleware {
   };
 }
 
-export function createApiClient(baseUrl = "") {
-  const client = createClient<paths>({ baseUrl, credentials: "include" });
+/** `language` picks the API's message language (docs/05 §7); the portal is Arabic-only, so a
+ *  browser set to English still gets Arabic errors. */
+export function createApiClient(baseUrl = "", language = "ar") {
+  const client = createClient<paths>({
+    baseUrl,
+    credentials: "include",
+    headers: { "Accept-Language": language },
+  });
   client.use(csrf);
   client.use(sessionRefresh(baseUrl));
   return client;

@@ -5,6 +5,7 @@ from __future__ import annotations
 from django.contrib.auth import get_user_model
 from django.db import IntegrityError, transaction
 from django.utils import timezone
+from django.utils.translation import gettext
 from rest_framework.exceptions import NotFound, PermissionDenied, ValidationError
 
 from academic.models import Enrollment, OfferingInstructor
@@ -33,7 +34,7 @@ def _require(user, capability: str, department_id=None) -> None:
 
 def _check_file(stored: StoredFile | None, purpose: str) -> None:
     if stored is not None and stored.purpose != purpose:
-        raise ValidationError({"file": ["Upload the file for this purpose first."]})
+        raise ValidationError({"file": [gettext("Upload the file for this purpose first.")]})
 
 
 # ─── Regulations ──────────────────────────────────────────────────────────
@@ -48,7 +49,9 @@ def save_regulation(meta: RequestMeta, regulation: Regulation | None, **data) ->
             record(meta, "regulation.create", regulation, new=snapshot(regulation))
             return regulation
         if regulation.status != Regulation.Status.DRAFT:
-            raise Conflict("Published regulations change through a new version.", code="published")
+            raise Conflict(
+                gettext("Published regulations change through a new version."), code="published"
+            )
         old = snapshot(regulation)
         for field, value in data.items():
             setattr(regulation, field, value)
@@ -60,7 +63,9 @@ def save_regulation(meta: RequestMeta, regulation: Regulation | None, **data) ->
 def new_version(meta: RequestMeta, regulation: Regulation) -> Regulation:
     _require(meta.actor, "regulations.manage")
     if regulation.status != Regulation.Status.PUBLISHED:
-        raise Conflict("Only a published regulation gets a new version.", code="not_published")
+        raise Conflict(
+            gettext("Only a published regulation gets a new version."), code="not_published"
+        )
     try:
         number = str(int(regulation.version) + 1)
     except ValueError:
@@ -83,9 +88,9 @@ def new_version(meta: RequestMeta, regulation: Regulation) -> Regulation:
 def publish_regulation(meta: RequestMeta, regulation: Regulation) -> Regulation:
     _require(meta.actor, "regulations.manage")
     if regulation.status != Regulation.Status.DRAFT:
-        raise Conflict("Already published.", code="published")
+        raise Conflict(gettext("Already published."), code="published")
     if not regulation.body.strip() and regulation.file_id is None:
-        raise ValidationError({"body": ["Write the text or attach the PDF."]})
+        raise ValidationError({"body": [gettext("Write the text or attach the PDF.")]})
     with transaction.atomic():
         regulation.status = Regulation.Status.PUBLISHED
         regulation.published_at = timezone.now()
@@ -114,7 +119,7 @@ def acknowledge(meta: RequestMeta, regulation: Regulation) -> RegulationAcknowle
     if record_ is None or regulation.status != Regulation.Status.PUBLISHED:
         raise NotFound()
     if not regulation.requires_acknowledgement:
-        raise ValidationError({"detail": ["This regulation needs no acknowledgement."]})
+        raise ValidationError({"detail": [gettext("This regulation needs no acknowledgement.")]})
     try:
         with transaction.atomic():
             ack = RegulationAcknowledgement.objects.create(
@@ -122,7 +127,7 @@ def acknowledge(meta: RequestMeta, regulation: Regulation) -> RegulationAcknowle
             )
             record(meta, "regulation.acknowledge", regulation, department_id=record_.department_id)
     except IntegrityError:
-        raise Conflict("Already acknowledged.", code="already_acknowledged") from None
+        raise Conflict(gettext("Already acknowledged."), code="already_acknowledged") from None
     return ack
 
 
@@ -137,7 +142,7 @@ def _attachments(ids: list) -> list[str]:
     ids = [str(i) for i in ids or []]
     found = StoredFile.objects.filter(public_id__in=ids, purpose=Purpose.CASE).count()
     if found != len(set(ids)):
-        raise ValidationError({"attachments": ["Upload each attachment first."]})
+        raise ValidationError({"attachments": [gettext("Upload each attachment first.")]})
     return ids
 
 
@@ -164,7 +169,7 @@ def open_case(
 def add_note(meta: RequestMeta, case: StudentCase, note: str) -> StudentCase:
     _require(meta.actor, "cases.manage")
     if not note.strip():
-        raise ValidationError({"note": ["Write the note."]})
+        raise ValidationError({"note": [gettext("Write the note.")]})
     _event(case, StudentCaseEvent.Kind.NOTE, meta.actor, note)
     return case
 
@@ -180,9 +185,9 @@ def decide(
 ) -> StudentCase:
     _require(meta.actor, "cases.manage")
     if case.status == StudentCase.Status.CLOSED:
-        raise Conflict("Reopen the case first.", code="closed")
+        raise Conflict(gettext("Reopen the case first."), code="closed")
     if effective_from and effective_to and effective_to < effective_from:
-        raise ValidationError({"effective_to": ["Must be after the start date."]})
+        raise ValidationError({"effective_to": [gettext("Must be after the start date.")]})
     with transaction.atomic():
         old = snapshot(case)
         case.decision, case.sanction = decision, sanction
@@ -204,7 +209,7 @@ def decide(
 def publish_case(meta: RequestMeta, case: StudentCase) -> StudentCase:
     _require(meta.actor, "cases.manage")
     if case.published_to_student:
-        raise Conflict("Already visible to the student.", code="published")
+        raise Conflict(gettext("Already visible to the student."), code="published")
     with transaction.atomic():
         case.published_to_student = True
         case.save(update_fields=["published_to_student", "updated_at"])
@@ -230,7 +235,7 @@ def set_closed(meta: RequestMeta, case: StudentCase, closed: bool) -> StudentCas
         else (StudentCase.Status.DECIDED if case.decision else StudentCase.Status.OPEN)
     )
     if (case.status == StudentCase.Status.CLOSED) == closed:
-        raise Conflict("Nothing to change.", code="no_change")
+        raise Conflict(gettext("Nothing to change."), code="no_change")
     with transaction.atomic():
         case.status = target
         case.save(update_fields=["status", "updated_at"])
@@ -257,13 +262,15 @@ def report_misconduct(
     user = meta.actor
     teaches = OfferingInstructor.objects.filter(offering=offering, user=user).exists()
     if not (teaches or rbac.can(user, "learning.manage", offering.course.department_id)):
-        raise PermissionDenied("You can report only in courses you teach or manage.")
+        raise PermissionDenied(gettext("You can report only in courses you teach or manage."))
     if not Enrollment.objects.filter(offering=offering, student_record=student_record).exists():
-        raise ValidationError({"student_record": ["This student is not in the course."]})
+        raise ValidationError({"student_record": [gettext("This student is not in the course.")]})
     if attempt is not None and (
         attempt.student_record_id != student_record.pk or attempt.exam.offering_id != offering.pk
     ):
-        raise ValidationError({"attempt": ["The attempt belongs to another student or course."]})
+        raise ValidationError(
+            {"attempt": [gettext("The attempt belongs to another student or course.")]}
+        )
     with transaction.atomic():
         report = MisconductReport.objects.create(
             offering=offering,
@@ -291,7 +298,7 @@ def resolve_report(
 ) -> MisconductReport:
     _require(meta.actor, "cases.manage")
     if report.status != MisconductReport.Status.NEW:
-        raise Conflict("Already handled.", code="handled")
+        raise Conflict(gettext("Already handled."), code="handled")
     with transaction.atomic():
         if convert:
             case = open_case(
@@ -324,11 +331,11 @@ def set_student_status(
 ) -> StudentRecord:
     _require(meta.actor, "students.status")
     if status not in (StudentRecord.Status.ACTIVE, StudentRecord.Status.SUSPENDED):
-        raise ValidationError({"status": ["Student affairs suspends or reinstates only."]})
+        raise ValidationError({"status": [gettext("Student affairs suspends or reinstates only.")]})
     if not reason.strip():
-        raise ValidationError({"reason": ["A reason is required."]})
+        raise ValidationError({"reason": [gettext("A reason is required.")]})
     if student.status == status:
-        raise Conflict("The student already has this status.", code="no_change")
+        raise Conflict(gettext("The student already has this status."), code="no_change")
     with transaction.atomic():
         old = student.status
         student.status = status

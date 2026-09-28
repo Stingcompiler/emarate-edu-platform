@@ -1,5 +1,6 @@
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
+from django.utils.translation import gettext
 from drf_spectacular.utils import extend_schema
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
@@ -250,7 +251,7 @@ class AttemptViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
     def result(self, request, public_id=None):
         attempt = self._own()
         if not services.result_visible(attempt):
-            raise NotFound("The result is not visible yet.")
+            raise NotFound(gettext("The result is not visible yet."))
         exam = attempt.exam
         answers = {a.question_id: a for a in attempt.answers.all()}
         questions = {q.pk: q for q in exam.questions.prefetch_related("choices")}

@@ -44,10 +44,10 @@ def test_preview_then_commit(api, head, it_program):
 
     rows = api(head).get(f"{URL}/{batch['public_id']}/rows", {"action": "error"}).data["results"]
     errors = {row["row_no"]: " ".join(row["errors"]) for row in rows}
-    assert "level" in errors[3]
-    assert "full_name_ar" in errors[4]
-    assert "program_code" in errors[5] and "email" in errors[5]
-    assert "duplicated" in errors[6]
+    assert "المستوى" in errors[3]
+    assert "الاسم بالعربية" in errors[4]
+    assert "رمز البرنامج" in errors[5] and "البريد" in errors[5]
+    assert "مكرر" in errors[6]
 
     committed = api(head).post(f"{URL}/{batch['public_id']}/commit")
     assert committed.status_code == 200
@@ -113,7 +113,7 @@ def test_xlsx_upload(api, head, it_program):
     ("file", "message"),
     [
         (SimpleUploadedFile("x.pdf", b"%PDF"), "Excel"),
-        (SimpleUploadedFile("x.csv", b"name,level\nx,1\n"), "Missing required columns"),
+        (SimpleUploadedFile("x.csv", b"name,level\nx,1\n"), "أعمدة مطلوبة ناقصة"),
         (SimpleUploadedFile("x.csv", "university_number\n".encode("utf-16")), "UTF-8"),
     ],
 )

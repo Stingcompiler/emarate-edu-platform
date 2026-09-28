@@ -16,6 +16,7 @@ from django.core.validators import validate_email
 from django.db import IntegrityError, transaction
 from django.db.models import Q
 from django.utils import timezone
+from django.utils.translation import gettext
 from rest_framework.exceptions import NotFound, PermissionDenied, ValidationError
 
 from academic.models import Term
@@ -246,7 +247,7 @@ def publish_template(
     meta: RequestMeta, template: ApplicationFormTemplate
 ) -> ApplicationFormTemplate:
     if template.status != ApplicationFormTemplate.Status.DRAFT:
-        raise Conflict("Only a draft can be published.", code="not_draft")
+        raise Conflict(gettext("Only a draft can be published."), code="not_draft")
     problems = check_schema(template.schema)
     if problems:
         raise Invalid({"schema": problems}, code="bad_schema")
@@ -284,16 +285,21 @@ def _reference() -> str:
 def start(contact, intake: ProgramIntake) -> Application:
     if not intake.accepting():
         raise Invalid(
-            {"intake": ["This program is not accepting applications now."]}, code="closed"
+            {"intake": [gettext("This program is not accepting applications now.")]}, code="closed"
         )
     mine = Application.objects.filter(contact=contact, intake__cycle=intake.cycle).exclude(
         status__in=FINISHED
     )
     if mine.filter(intake__program=intake.program_id).exists():
-        raise Conflict("You already have an application for this program.", code="duplicate")
+        raise Conflict(
+            gettext("You already have an application for this program."), code="duplicate"
+        )
     limit = SystemSettings.load().max_applications_per_cycle
     if mine.count() >= limit:
-        raise Conflict(f"At most {limit} applications per admission cycle.", code="limit")
+        raise Conflict(
+            gettext("At most %(limit)s applications per admission cycle.") % {"limit": limit},
+            code="limit",
+        )
     template = template_for(intake)
     for _ in range(5):
         try:
@@ -314,7 +320,7 @@ def start(contact, intake: ProgramIntake) -> Application:
             return application
         except IntegrityError:
             continue
-    raise Conflict("Please try again.", code="retry")
+    raise Conflict(gettext("Please try again."), code="retry")
 
 
 def own(contact, public_id) -> Application:
@@ -335,7 +341,7 @@ def update(
 ) -> Application:
     if application.status not in OPEN_FOR_APPLICANT:
         raise Conflict(
-            "The application can only change while it is a draft or missing documents.",
+            gettext("The application can only change while it is a draft or missing documents."),
             code="locked",
         )
     if full_name is not None:
@@ -346,7 +352,7 @@ def update(
         application.phone_e164 = normalize_phone(phone_e164) or ""
     if answers is not None:
         if not isinstance(answers, dict):
-            raise ValidationError({"answers": ["Send an object of answers."]})
+            raise ValidationError({"answers": [gettext("Send an object of answers.")]})
         application.answers = {**application.answers, **answers}
     application.save()
     return application
@@ -354,7 +360,9 @@ def update(
 
 def add_document(contact, application: Application, doc_type: str, upload) -> ApplicationDocument:
     if application.status not in OPEN_FOR_APPLICANT:
-        raise Conflict("Documents can be added while the application is open.", code="locked")
+        raise Conflict(
+            gettext("Documents can be added while the application is open."), code="locked"
+        )
     try:
         kind = validation.check(upload, allowed={"pdf", "jpg", "jpeg", "png"}, max_mb=10)
     except validation.UploadError as error:
@@ -394,7 +402,7 @@ def submit(contact, application: Application) -> Application:
     if errors:
         raise Invalid({k: [v] for k, v in errors.items()}, code="incomplete")
     if application.status == S.DRAFT and not application.intake.accepting():
-        raise Invalid({"intake": ["The admission window has closed."]}, code="closed")
+        raise Invalid({"intake": [gettext("The admission window has closed.")]}, code="closed")
     with transaction.atomic():
         source = application.status
         target = S.SUBMITTED if source == S.DRAFT else S.UNDER_REVIEW
@@ -436,7 +444,7 @@ def submit(contact, application: Application) -> Application:
 
 def withdraw(contact, application: Application) -> Application:
     if (application.status, S.WITHDRAWN) not in TRANSITIONS:
-        raise Conflict("This application can no longer be withdrawn.", code="locked")
+        raise Conflict(gettext("This application can no longer be withdrawn."), code="locked")
     with transaction.atomic():
         source = application.status
         application.status = S.WITHDRAWN
@@ -448,7 +456,7 @@ def withdraw(contact, application: Application) -> Application:
 
 def applicant_message(contact, application: Application, body: str) -> ApplicationMessage:
     if application.status in FINISHED:
-        raise Conflict("This application is closed.", code="closed")
+        raise Conflict(gettext("This application is closed."), code="closed")
     message = ApplicationMessage.objects.create(
         application=application, channel=ApplicationMessage.Channel.PORTAL, body=body
     )
@@ -467,7 +475,7 @@ def applicant_message(contact, application: Application, body: str) -> Applicati
 
 def require_review(user, application: Application) -> None:
     if not can_review(user, application):
-        raise PermissionDenied("This application belongs to another department.")
+        raise PermissionDenied(gettext("This application belongs to another department."))
 
 
 def claim(meta: RequestMeta, application: Application) -> Application:
@@ -481,7 +489,9 @@ def assign(meta: RequestMeta, application: Application, registrar) -> Applicatio
     if registrar is not None and not rbac.can(
         registrar, "admissions.review", application.department_id
     ):
-        raise ValidationError({"registrar": ["This person does not register for this department."]})
+        raise ValidationError(
+            {"registrar": [gettext("This person does not register for this department.")]}
+        )
     return _assign(meta, application, registrar)
 
 
@@ -516,11 +526,12 @@ def transition(
     require_review(meta.actor, application)
     if to not in allowed_transitions(meta.actor, application):
         raise Conflict(
-            f"You cannot move this application from {application.status} to {to}.",
+            gettext("You cannot move this application from %(status)s to %(to)s.")
+            % {"status": application.status, "to": to},
             code="bad_transition",
         )
     if to == S.MISSING_DOCUMENTS and not note.strip():
-        raise ValidationError({"note": ["Tell the applicant what is missing."]})
+        raise ValidationError({"note": [gettext("Tell the applicant what is missing.")]})
     with transaction.atomic():
         source = application.status
         application.status = to
@@ -564,7 +575,9 @@ def staff_message(
 ) -> ApplicationMessage:
     require_review(meta.actor, application)
     if channel not in ("email", "internal"):
-        raise ValidationError({"channel": ["Email the applicant or add an internal note."]})
+        raise ValidationError(
+            {"channel": [gettext("Email the applicant or add an internal note.")]}
+        )
     with transaction.atomic():
         message = ApplicationMessage.objects.create(
             application=application, author=meta.actor, channel=channel, body=body
@@ -609,12 +622,12 @@ def _university_number(program) -> str:
 def register_applicant(meta: RequestMeta, application: Application) -> StudentRecord:
     """Accepted applicant → StudentRecord with a university number (docs/01 K.5). Atomic."""
     if not rbac.can(meta.actor, "admissions.manage"):
-        raise PermissionDenied("Only the head registrar registers applicants.")
+        raise PermissionDenied(gettext("Only the head registrar registers applicants."))
     with transaction.atomic():
         locked = Application.objects.select_for_update().get(pk=application.pk)
         if locked.status != S.ACCEPTED or locked.student_record_id:
             raise Conflict(
-                "Only an accepted, not yet registered applicant can be registered.",
+                gettext("Only an accepted, not yet registered applicant can be registered."),
                 code="bad_state",
             )
         program = locked.intake.program
