@@ -3,7 +3,15 @@ import { useState } from "react";
 import { Link } from "react-router";
 
 import { PortalShell } from "../../components/PortalShell";
-import { Button, Card, Chip, Notice, SectionLabel, problemMessage } from "../../components/ui";
+import {
+  FilterBar,
+  Button,
+  Card,
+  Chip,
+  Notice,
+  SectionLabel,
+  problemMessage,
+} from "../../components/ui";
 import { api } from "../../lib/api";
 import { useMe } from "../../lib/auth";
 import { useCurrentTerm, useDepartment, useOfferings } from "../../lib/department";
@@ -68,20 +76,22 @@ export function Members() {
       subtitle={department?.name_ar}
       back={{ label: "لوحة القسم", to: "/department" }}
     >
-      <div className="flex flex-wrap gap-2">
-        {(
-          [
-            ["all", `الكل ${num(all.length)}`],
-            ["teacher", `أساتذة ${num(all.filter((m) => m.kind === "teacher").length)}`],
-            ["ta", `معيدون ${num(all.filter((m) => m.kind === "ta").length)}`],
-            ["idle", "بلا مواد"],
-          ] as const
-        ).map(([k, l]) => (
-          <Chip key={k} active={filter === k} onClick={() => setFilter(k)}>
-            {l}
-          </Chip>
-        ))}
-      </div>
+      <FilterBar>
+        <div className="flex flex-wrap gap-2">
+          {(
+            [
+              ["all", `الكل ${num(all.length)}`],
+              ["teacher", `أساتذة ${num(all.filter((m) => m.kind === "teacher").length)}`],
+              ["ta", `معيدون ${num(all.filter((m) => m.kind === "ta").length)}`],
+              ["idle", "بلا مواد"],
+            ] as const
+          ).map(([k, l]) => (
+            <Chip key={k} active={filter === k} onClick={() => setFilter(k)}>
+              {l}
+            </Chip>
+          ))}
+        </div>
+      </FilterBar>
       <div className="mt-4 lg:grid lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start lg:gap-6">
         <Card className="divide-y divide-border-soft">
           {rows.map((m) => {

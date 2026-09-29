@@ -6,6 +6,7 @@ import { Link } from "react-router";
 
 import { PortalShell } from "../../components/PortalShell";
 import {
+  FilterBar,
   Button,
   Card,
   Chip,
@@ -72,13 +73,15 @@ export function Announcements() {
           </>
         }
       >
-        <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 lg:mx-0 lg:px-0">
-          {SCOPES.map((s) => (
-            <Chip key={s.key} active={scope === s.key} onClick={() => setScope(s.key)}>
-              {s.label}
-            </Chip>
-          ))}
-        </div>
+        <FilterBar>
+          <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 lg:mx-0 lg:px-0">
+            {SCOPES.map((s) => (
+              <Chip key={s.key} active={scope === s.key} onClick={() => setScope(s.key)}>
+                {s.label}
+              </Chip>
+            ))}
+          </div>
+        </FilterBar>
         {!items.length ? (
           <Card className="mt-4">
             <EmptyState icon={<Megaphone size={24} aria-hidden />} title="لا إعلانات" />

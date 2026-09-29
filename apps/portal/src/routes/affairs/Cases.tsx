@@ -5,6 +5,7 @@ import { Link } from "react-router";
 
 import { PortalShell } from "../../components/PortalShell";
 import {
+  FilterBar,
   Button,
   Card,
   Chip,
@@ -79,32 +80,34 @@ export function Cases() {
         ) : undefined
       }
     >
-      <div className="flex flex-wrap gap-2">
-        <Chip active={tab === "open"} onClick={() => setTab("open")}>
-          مفتوحة {open.length}
-        </Chip>
-        <Chip active={tab === "reports"} onClick={() => setTab("reports")}>
-          بلاغات جديدة {reports.data?.length ?? 0}
-        </Chip>
-        <Chip active={tab === "closed"} onClick={() => setTab("closed")}>
-          مقفلة {all.length - open.length}
-        </Chip>
-        {tab !== "reports" && (
-          <select
-            aria-label="النوع"
-            value={kind}
-            onChange={(e) => setKind(e.target.value)}
-            className="min-h-9 rounded-full border border-border-soft bg-surface px-3 text-sm"
-          >
-            <option value="">كل الأنواع</option>
-            {Object.entries(KIND).map(([key, k]) => (
-              <option key={key} value={key}>
-                {k.label}
-              </option>
-            ))}
-          </select>
-        )}
-      </div>
+      <FilterBar>
+        <div className="flex flex-wrap gap-2">
+          <Chip active={tab === "open"} onClick={() => setTab("open")}>
+            مفتوحة {open.length}
+          </Chip>
+          <Chip active={tab === "reports"} onClick={() => setTab("reports")}>
+            بلاغات جديدة {reports.data?.length ?? 0}
+          </Chip>
+          <Chip active={tab === "closed"} onClick={() => setTab("closed")}>
+            مقفلة {all.length - open.length}
+          </Chip>
+          {tab !== "reports" && (
+            <select
+              aria-label="النوع"
+              value={kind}
+              onChange={(e) => setKind(e.target.value)}
+              className="min-h-9 rounded-full border border-border-soft bg-surface px-3 text-sm"
+            >
+              <option value="">كل الأنواع</option>
+              {Object.entries(KIND).map(([key, k]) => (
+                <option key={key} value={key}>
+                  {k.label}
+                </option>
+              ))}
+            </select>
+          )}
+        </div>
+      </FilterBar>
 
       {tab === "reports" ? (
         <>

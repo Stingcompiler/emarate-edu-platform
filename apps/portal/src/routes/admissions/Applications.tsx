@@ -5,7 +5,7 @@ import { Link } from "react-router";
 
 import { Pager, useServerPages } from "../../components/Pager";
 import { PortalShell } from "../../components/PortalShell";
-import { Card, Chip, EmptyState, StatusBadge } from "../../components/ui";
+import { FilterBar, Card, Chip, EmptyState, StatusBadge } from "../../components/ui";
 import { api } from "../../lib/api";
 import { when, count, N } from "../../lib/format";
 import { STATUS_LABEL, STATUS_TONE } from "../../lib/visitor";
@@ -76,19 +76,21 @@ export function Applications() {
           </Card>
         ))}
       </div>
-      <div className="mt-4 flex flex-wrap items-center gap-2">
-        {FILTERS.map((f) => (
-          <Chip key={f.key} active={status === f.key} onClick={() => setStatus(f.key)}>
-            {f.label}
-          </Chip>
-        ))}
-        <input
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="الرقم المرجعي أو الاسم أو البريد"
-          className="min-h-9 flex-1 rounded-full border border-border-soft bg-surface px-3 text-sm sm:max-w-xs"
-        />
-      </div>
+      <FilterBar>
+        <div className="mt-4 flex flex-wrap items-center gap-2">
+          {FILTERS.map((f) => (
+            <Chip key={f.key} active={status === f.key} onClick={() => setStatus(f.key)}>
+              {f.label}
+            </Chip>
+          ))}
+          <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="الرقم المرجعي أو الاسم أو البريد"
+            className="min-h-9 flex-1 rounded-full border border-border-soft bg-surface px-3 text-sm sm:max-w-xs"
+          />
+        </div>
+      </FilterBar>
       {!list.items.length ? (
         <Card className="mt-4">
           <EmptyState icon={<FileText size={24} aria-hidden />} title="لا طلبات هنا" />

@@ -6,6 +6,7 @@ import { Link, useNavigate, useParams } from "react-router";
 
 import { PortalShell } from "../../components/PortalShell";
 import {
+  FilterBar,
   Button,
   Card,
   Chip,
@@ -76,13 +77,15 @@ export function Inquiries() {
     >
       <div className="lg:grid lg:grid-cols-[minmax(0,420px)_minmax(0,1fr)] lg:items-start lg:gap-6">
         <div className={id ? "hidden lg:block" : ""}>
-          <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 lg:mx-0 lg:px-0">
-            {TABS.map((t) => (
-              <Chip key={t.key} active={tab === t.key} onClick={() => setTab(t.key)}>
-                {t.label}
-              </Chip>
-            ))}
-          </div>
+          <FilterBar>
+            <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 lg:mx-0 lg:px-0">
+              {TABS.map((t) => (
+                <Chip key={t.key} active={tab === t.key} onClick={() => setTab(t.key)}>
+                  {t.label}
+                </Chip>
+              ))}
+            </div>
+          </FilterBar>
           {!shown.length ? (
             <Card className="mt-4">
               <EmptyState icon={<Inbox size={24} aria-hidden />} title="لا استفسارات هنا" />

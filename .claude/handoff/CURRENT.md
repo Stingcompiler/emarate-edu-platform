@@ -1,6 +1,26 @@
-# Handoff — Motion added (feat/motion); large-screen review complete — 2026-09-28
+# Handoff — sticky filters on desktop (feat/sticky-filters) — 2026-09-29
 
-## Latest (2026-09-28, evening)
+## Latest (2026-09-29)
+- **#39 motion, #40 sign-in redesign, #41 shell + pagination: merged.**
+  - #41: the desktop top bar and sidebar are sticky; the API pages 10 items at a time (`core/pagination.py`);
+    the portal uses `components/Pager.tsx` (`useServerPages`, `useLocalPages`, `ALL` for whole-set reads);
+    `ThemeToggle` sits in the top bar and the phone headers.
+- **`feat/sticky-filters`** (owner: «make filter and search always at the top on desktop layout»):
+  - `FilterBar` in `components/ui.tsx`: `lg:sticky lg:top-[68px]`. Once pinned (IntersectionObserver
+    sets `data-stuck`), shadows in the page colour hide the rows beneath, so the layout never moves.
+    It sticks within its parent: place it in the list's own column.
+  - Used on 17 list pages. `/department/courses` gained search, the filters بلا أستاذ / بلا معيد /
+    محاضرات متأخرة, and a «مادة جديدة» button that jumps to the add form.
+  - `WithSide`'s side column now sticks at `top-20`; it was hidden under the sticky top bar at `top-6`.
+  - Department dashboard tiles: the note goes under the label.
+  - Verified: a temporary e2e spec, 7 roles × 19 pages. The bar pins at 68px on desktop, stays in the
+    page flow on phones, with no overflow; dark mode checked.
+- **Local full e2e:** the 2026-09-29 run was stopped because edits changed files mid-run (the e2e portal
+  serves the working tree). Don't edit while `pnpm e2e` runs.
+- **Local dev sign-in:** the demo password is the owner's; don't read it from transcripts. Use the e2e
+  stack (its own data, password in `e2e/tests/helpers.ts`) for scripted checks.
+
+## Earlier (2026-09-28, evening)
 - **#36 merged:** `Program.total_credit_hours` is a manual field (owner decision on UX review item 3).
 - **#37 merged (contact form):**
   - status checks have their own throttle scope, `contact_status` 60/hour;

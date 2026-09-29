@@ -5,6 +5,7 @@ import { Link } from "react-router";
 
 import { PortalShell } from "../../components/PortalShell";
 import {
+  FilterBar,
   Button,
   Card,
   Chip,
@@ -86,20 +87,22 @@ export function SiteHome() {
             </>
           }
         >
-          <div className="flex items-center gap-2">
-            <Chip active={tab === "pages"} onClick={() => setTab("pages")}>
-              الصفحات
-            </Chip>
-            <Chip active={tab === "news"} onClick={() => setTab("news")}>
-              الأخبار
-            </Chip>
-            <Link to={tab === "pages" ? "/site/pages/new" : "/site/news/new"} className="ms-auto">
-              <Button className="min-h-9 px-3">
-                <Plus size={16} aria-hidden />
-                {tab === "pages" ? "صفحة" : "خبر"}
-              </Button>
-            </Link>
-          </div>
+          <FilterBar>
+            <div className="flex items-center gap-2">
+              <Chip active={tab === "pages"} onClick={() => setTab("pages")}>
+                الصفحات
+              </Chip>
+              <Chip active={tab === "news"} onClick={() => setTab("news")}>
+                الأخبار
+              </Chip>
+              <Link to={tab === "pages" ? "/site/pages/new" : "/site/news/new"} className="ms-auto">
+                <Button className="min-h-9 px-3">
+                  <Plus size={16} aria-hidden />
+                  {tab === "pages" ? "صفحة" : "خبر"}
+                </Button>
+              </Link>
+            </div>
+          </FilterBar>
           <SectionLabel>{tab === "pages" ? "صفحات الموقع" : "الأخبار"}</SectionLabel>
           <Card className="divide-y divide-border-soft">
             {tab === "pages"

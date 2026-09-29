@@ -4,6 +4,7 @@ import { Link } from "react-router";
 
 import { PortalShell } from "../../components/PortalShell";
 import {
+  FilterBar,
   Button,
   Card,
   Chip,
@@ -48,47 +49,49 @@ export function AdminUsers() {
     >
       <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start lg:gap-6">
         <div>
-          {/* Phone: search on its own line, filters scroll sideways (board SystemAdminUsers). */}
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-            <input
-              value={search}
-              onChange={(e) => {
-                setSearch(e.target.value);
-                setPage(1);
-              }}
-              placeholder="بحث بالاسم أو البريد"
-              className="min-h-11 rounded-full border border-border-soft bg-surface px-4 text-sm sm:max-w-sm sm:flex-1"
-            />
-            <div className="-mx-4 flex gap-2 overflow-x-auto px-4 sm:mx-0 sm:px-0">
-              <Chip
-                active={active === true}
-                onClick={() => {
-                  setActive(true);
+          <FilterBar>
+            {/* Phone: search on its own line, filters scroll sideways (board SystemAdminUsers). */}
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+              <input
+                value={search}
+                onChange={(e) => {
+                  setSearch(e.target.value);
                   setPage(1);
                 }}
-              >
-                نشط
-              </Chip>
-              <Chip
-                active={active === false}
-                onClick={() => {
-                  setActive(false);
-                  setPage(1);
-                }}
-              >
-                معطّل
-              </Chip>
-              <Chip
-                active={active === undefined}
-                onClick={() => {
-                  setActive(undefined);
-                  setPage(1);
-                }}
-              >
-                الكل
-              </Chip>
+                placeholder="بحث بالاسم أو البريد"
+                className="min-h-11 rounded-full border border-border-soft bg-surface px-4 text-sm sm:max-w-sm sm:flex-1"
+              />
+              <div className="-mx-4 flex gap-2 overflow-x-auto px-4 sm:mx-0 sm:px-0">
+                <Chip
+                  active={active === true}
+                  onClick={() => {
+                    setActive(true);
+                    setPage(1);
+                  }}
+                >
+                  نشط
+                </Chip>
+                <Chip
+                  active={active === false}
+                  onClick={() => {
+                    setActive(false);
+                    setPage(1);
+                  }}
+                >
+                  معطّل
+                </Chip>
+                <Chip
+                  active={active === undefined}
+                  onClick={() => {
+                    setActive(undefined);
+                    setPage(1);
+                  }}
+                >
+                  الكل
+                </Chip>
+              </div>
             </div>
-          </div>
+          </FilterBar>
           <Card className="mt-3 divide-y divide-border-soft">
             {rows.map((u) => (
               <Link

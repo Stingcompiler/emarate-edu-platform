@@ -6,7 +6,7 @@ import type {
 } from "react";
 
 import { Eye, EyeOff } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { SITE_URL } from "../lib/site";
 import { CountUp } from "./motion";
@@ -420,7 +420,7 @@ export function WithSide({ side, children }: { side: ReactNode; children: ReactN
   return (
     <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_18rem] lg:items-start lg:gap-6 xl:grid-cols-[minmax(0,1fr)_20rem]">
       <div className="min-w-0">{children}</div>
-      <aside className="mt-6 space-y-4 lg:sticky lg:top-6 lg:mt-0">{side}</aside>
+      <aside className="mt-6 space-y-4 lg:sticky lg:top-20 lg:mt-0">{side}</aside>
     </div>
   );
 }
@@ -451,5 +451,46 @@ export function SideNote({ title, children }: { title: string; children: ReactNo
       <h2 className="font-semibold text-text">{title}</h2>
       <div className="mt-1 text-text-muted">{children}</div>
     </Card>
+  );
+}
+
+/**
+ * A list's filters and search. On large screens they stay under the top bar while the
+ * list scrolls (owner 2026-09-29); phones keep them in the page flow. Once pinned, a band
+ * of the page colour (drawn as shadows, so the layout never moves) hides the rows passing
+ * beneath, with a line under it. Sticks within its parent: place it directly above the
+ * list, in the same column.
+ */
+export function FilterBar({
+  children,
+  className = "",
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
+  const marker = useRef<HTMLDivElement>(null);
+  const [stuck, setStuck] = useState(false);
+  useEffect(() => {
+    const el = marker.current;
+    if (!el || typeof IntersectionObserver === "undefined") return;
+    // The marker sits just above the bar; once it scrolls past the bar's pinned position
+    // (56px top bar + 12px), the bar is pinned.
+    const observer = new IntersectionObserver(
+      ([entry]) => setStuck(!entry!.isIntersecting && entry!.boundingClientRect.top < 80),
+      { rootMargin: "-68px 0px 0px 0px" },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+  return (
+    <>
+      <div ref={marker} aria-hidden="true" className="h-0" />
+      <div
+        data-stuck={stuck || undefined}
+        className={`lg:sticky lg:top-[68px] lg:z-20 lg:data-stuck:bg-bg-subtle lg:data-stuck:shadow-[0_-12px_0_var(--color-bg-subtle),0_12px_0_var(--color-bg-subtle),0_13px_0_var(--color-border-soft)] ${className}`}
+      >
+        {children}
+      </div>
+    </>
   );
 }

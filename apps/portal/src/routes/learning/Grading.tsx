@@ -5,7 +5,7 @@ import { Link } from "react-router";
 
 import { PortalShell } from "../../components/PortalShell";
 import { ProgressRing } from "../../components/motion";
-import { Card, Chip, EmptyState, SectionLabel } from "../../components/ui";
+import { FilterBar, Card, Chip, EmptyState, SectionLabel } from "../../components/ui";
 import { api } from "../../lib/api";
 import { when } from "../../lib/format";
 import { initials } from "../../lib/reports";
@@ -42,20 +42,22 @@ export function Grading() {
         ) : undefined
       }
     >
-      <div className="flex flex-wrap gap-2">
-        {(
-          [
-            ["pending", "بانتظار"],
-            ["suggested", "باقتراح آلي"],
-            ["late", "متأخر"],
-            ["done", "مصحح"],
-          ] as const
-        ).map(([k, l]) => (
-          <Chip key={k} active={filter === k} onClick={() => setFilter(k)}>
-            {l} {counts[k].toLocaleString("ar")}
-          </Chip>
-        ))}
-      </div>
+      <FilterBar>
+        <div className="flex flex-wrap gap-2">
+          {(
+            [
+              ["pending", "بانتظار"],
+              ["suggested", "باقتراح آلي"],
+              ["late", "متأخر"],
+              ["done", "مصحح"],
+            ] as const
+          ).map(([k, l]) => (
+            <Chip key={k} active={filter === k} onClick={() => setFilter(k)}>
+              {l} {counts[k].toLocaleString("ar")}
+            </Chip>
+          ))}
+        </div>
+      </FilterBar>
       <div className="mt-4 grid gap-6 lg:grid-cols-2">
         {(q?.groups ?? []).map(({ assignment: a, submissions }) => (
           <section key={a.public_id}>

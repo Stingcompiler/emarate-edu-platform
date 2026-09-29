@@ -5,6 +5,7 @@ import { useState } from "react";
 
 import { PortalShell } from "../../components/PortalShell";
 import {
+  FilterBar,
   Button,
   Card,
   Chip,
@@ -58,17 +59,19 @@ export function Corrections() {
           </SideNote>
         }
       >
-        <div className="flex gap-2">
-          <Chip active={tab === "pending"} onClick={() => setTab("pending")}>
-            معلّقة {count("pending")}
-          </Chip>
-          <Chip active={tab === "approved"} onClick={() => setTab("approved")}>
-            مقبولة {count("approved")}
-          </Chip>
-          <Chip active={tab === "rejected"} onClick={() => setTab("rejected")}>
-            مرفوضة {count("rejected")}
-          </Chip>
-        </div>
+        <FilterBar>
+          <div className="flex gap-2">
+            <Chip active={tab === "pending"} onClick={() => setTab("pending")}>
+              معلّقة {count("pending")}
+            </Chip>
+            <Chip active={tab === "approved"} onClick={() => setTab("approved")}>
+              مقبولة {count("approved")}
+            </Chip>
+            <Chip active={tab === "rejected"} onClick={() => setTab("rejected")}>
+              مرفوضة {count("rejected")}
+            </Chip>
+          </div>
+        </FilterBar>
         {!shown.length ? (
           <Card className="mt-4">
             <EmptyState icon={<ClipboardCheck size={24} aria-hidden />} title="لا طلبات هنا" />

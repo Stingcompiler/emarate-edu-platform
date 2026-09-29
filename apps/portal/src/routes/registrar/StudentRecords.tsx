@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Link } from "react-router";
 
 import { PortalShell } from "../../components/PortalShell";
-import { Card, Chip, StatusBadge } from "../../components/ui";
+import { FilterBar, Card, Chip, StatusBadge } from "../../components/ui";
 import { api } from "../../lib/api";
 import { Picker, initials, num, useDepartments } from "../../lib/reports";
 import { Pager } from "../../components/Pager";
@@ -41,42 +41,44 @@ export function StudentRecords() {
         </Link>
       }
     >
-      <div className="flex flex-wrap items-center gap-2">
-        <input
-          value={search}
-          onChange={(e) => {
-            setSearch(e.target.value);
-            setPage(1);
-          }}
-          placeholder="بحث بالاسم أو الرقم الجامعي"
-          className="min-h-10 flex-1 rounded-full border border-border-soft bg-surface px-4 text-sm sm:max-w-sm"
-        />
-        <Picker
-          label="القسم"
-          value={department}
-          items={departments.data ?? []}
-          name={(d) => d.name_ar}
-          onChange={(v) => {
-            setDepartment(v);
-            setPage(1);
-          }}
-          all="الكل"
-        />
-      </div>
-      <div className="mt-2 flex flex-wrap gap-2">
-        {[undefined, 1, 2, 3, 4, 5].map((l) => (
-          <Chip
-            key={l ?? 0}
-            active={level === l}
-            onClick={() => {
-              setLevel(l);
+      <FilterBar>
+        <div className="flex flex-wrap items-center gap-2">
+          <input
+            value={search}
+            onChange={(e) => {
+              setSearch(e.target.value);
               setPage(1);
             }}
-          >
-            {l ? `المستوى ${num(l)}` : "كل المستويات"}
-          </Chip>
-        ))}
-      </div>
+            placeholder="بحث بالاسم أو الرقم الجامعي"
+            className="min-h-10 flex-1 rounded-full border border-border-soft bg-surface px-4 text-sm sm:max-w-sm"
+          />
+          <Picker
+            label="القسم"
+            value={department}
+            items={departments.data ?? []}
+            name={(d) => d.name_ar}
+            onChange={(v) => {
+              setDepartment(v);
+              setPage(1);
+            }}
+            all="الكل"
+          />
+        </div>
+        <div className="mt-2 flex flex-wrap gap-2">
+          {[undefined, 1, 2, 3, 4, 5].map((l) => (
+            <Chip
+              key={l ?? 0}
+              active={level === l}
+              onClick={() => {
+                setLevel(l);
+                setPage(1);
+              }}
+            >
+              {l ? `المستوى ${num(l)}` : "كل المستويات"}
+            </Chip>
+          ))}
+        </div>
+      </FilterBar>
       <Card className="mt-4 divide-y divide-border-soft">
         {rows.map((r) => (
           <Link
