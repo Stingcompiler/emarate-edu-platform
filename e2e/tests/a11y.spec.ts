@@ -37,6 +37,9 @@ const PAGES: Record<string, string[]> = {
 
 for (const [account, paths] of Object.entries(PAGES)) {
   test(`signed-in pages — ${account}`, async ({ page }) => {
+    // Six axe audits on a phone profile take ~25s alone; under a loaded machine 30s is too
+    // tight and the run fails on time, not on a finding.
+    test.setTimeout(60_000);
     await signIn(page, account);
     for (const path of paths) await audit(page, path);
   });
