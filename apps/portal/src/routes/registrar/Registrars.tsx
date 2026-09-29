@@ -6,9 +6,11 @@ import { Card, Notice, SectionLabel, problemMessage } from "../../components/ui"
 import { api, ok } from "../../lib/api";
 import { initials, num, useDepartments } from "../../lib/reports";
 import { count, N } from "../../lib/format";
+import { useConfirm } from "../../components/Confirm";
 
 /** Board: HeadRegistrarRegistrars — link registrars to departments (what they see and are routed). */
 export function Registrars() {
+  const confirm = useConfirm();
   const client = useQueryClient();
   const departments = useDepartments();
   const users = useQuery({
@@ -108,7 +110,13 @@ export function Registrars() {
                     <button
                       type="button"
                       aria-label={`فك الربط بـ${r.department_name}`}
-                      onClick={() => unlink.mutate(r.id)}
+                      onClick={async () =>
+                        (await confirm({
+                          title: `فك ربط ${u.full_name_ar} بـ${r.department_name}؟`,
+                          body: "لن تصله طلبات هذا القسم؛ يبقى ما تولّاه عنده.",
+                          confirm: "فك الربط",
+                        })) && unlink.mutate(r.id)
+                      }
                     >
                       <X size={12} aria-hidden />
                     </button>

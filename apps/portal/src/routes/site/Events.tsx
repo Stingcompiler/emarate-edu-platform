@@ -23,6 +23,7 @@ import { htmlToText, textToHtml } from "../../lib/richText";
 import { useUnsavedChanges } from "../../lib/useUnsavedChanges";
 import { slugify } from "../../lib/format";
 import { ALL, Pager, useLocalPages } from "../../components/Pager";
+import { useConfirm } from "../../components/Confirm";
 
 const day = new Intl.DateTimeFormat("ar-u-nu-latn", { day: "numeric" });
 const month = new Intl.DateTimeFormat("ar-u-nu-latn", { month: "long" });
@@ -115,6 +116,7 @@ const local = (iso: string) =>
 
 /** Board: EventsManagerEventNew (phone): details + live preview card; desktop derived side by side. */
 export function EventEditor() {
+  const confirm = useConfirm();
   const unsaved = useUnsavedChanges();
   const { id } = useParams();
   const creating = !id || id === "new";
@@ -291,9 +293,13 @@ export function EventEditor() {
                   variant="secondary"
                   className="text-danger-strong"
                   disabled={save.isPending || status === "cancelled"}
-                  onClick={() =>
-                    window.confirm("إلغاء الفعالية يظهر للزوار أنها أُلغيت. متابعة؟") &&
-                    save.mutate("cancelled")
+                  onClick={async () =>
+                    (await confirm({
+                      title: "إلغاء الفعالية؟",
+                      body: "تظهر للزوار والطلاب أنها أُلغيت.",
+                      confirm: "إلغاء الفعالية",
+                      cancel: "تراجع",
+                    })) && save.mutate("cancelled")
                   }
                 >
                   إلغاء الفعالية

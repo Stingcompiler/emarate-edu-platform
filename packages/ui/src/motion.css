@@ -128,6 +128,14 @@
   animation-delay: 180ms;
 }
 
+/* A sheet or dialog arriving (the confirmation), over a fading backdrop. */
+.motion-sheet {
+  animation: rise var(--dur-2) var(--ease-out) both;
+}
+.motion-backdrop {
+  animation: fade var(--dur-1) ease-out both;
+}
+
 /* A check mark that draws itself (success). */
 .motion-check {
   animation: pop var(--dur-3) var(--ease-spring) both;

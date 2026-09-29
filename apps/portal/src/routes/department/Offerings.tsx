@@ -24,9 +24,11 @@ import { can } from "../../lib/nav";
 import { num } from "../../lib/reports";
 import { ALL } from "../../components/Pager";
 import { count, N } from "../../lib/format";
+import { useConfirm } from "../../components/Confirm";
 
 /** Board: DesktopDeptDashboard «المواد والتعيينات» — assign teachers from the same screen (docs/02 §4.15). */
 export function Offerings() {
+  const confirm = useConfirm();
   const me = useMe();
   const client = useQueryClient();
   const { id, department } = useDepartment();
@@ -296,10 +298,12 @@ export function Offerings() {
                   <button
                     type="button"
                     aria-label={`حذف ${o.course_detail.name_ar}`}
-                    onClick={() =>
-                      window.confirm(
-                        `حذف «${o.course_detail.name_ar}» (شعبة ${o.section}) من هذا الفصل؟`,
-                      ) && removeOffering.mutate({ id: o.id, course: o.course_detail.id })
+                    onClick={async () =>
+                      (await confirm({
+                        title: `حذف «${o.course_detail.name_ar}» من هذا الفصل؟`,
+                        body: `شعبة ${o.section}. لا تُحذف مادة عليها تسجيل طلاب — يرفضها النظام.`,
+                        confirm: "حذف المادة",
+                      })) && removeOffering.mutate({ id: o.id, course: o.course_detail.id })
                     }
                     className="grid size-9 place-items-center rounded-full text-text-muted hover:bg-surface-alt hover:text-danger-strong"
                   >

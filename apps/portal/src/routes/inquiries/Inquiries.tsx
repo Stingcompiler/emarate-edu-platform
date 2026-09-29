@@ -266,17 +266,29 @@ function InquiryDetail({ inquiry: i }: { inquiry: Inquiry }) {
       </Card>
       <div className="flex flex-wrap gap-2">
         {i.status !== "waiting_for_user" && i.status !== "closed" && (
-          <Button variant="secondary" onClick={() => move.mutate("waiting_for_user")}>
+          <Button
+            variant="secondary"
+            disabled={move.isPending}
+            onClick={() => move.mutate("waiting_for_user")}
+          >
             بانتظار الزائر
           </Button>
         )}
         {i.status !== "resolved" && i.status !== "closed" && (
-          <Button variant="secondary" onClick={() => move.mutate("resolved")}>
+          <Button
+            variant="secondary"
+            disabled={move.isPending}
+            onClick={() => move.mutate("resolved")}
+          >
             تم الحل
           </Button>
         )}
         {(i.status === "resolved" || i.status === "closed") && (
-          <Button variant="secondary" onClick={() => move.mutate("in_progress")}>
+          <Button
+            variant="secondary"
+            disabled={move.isPending}
+            onClick={() => move.mutate("in_progress")}
+          >
             إعادة فتح
           </Button>
         )}

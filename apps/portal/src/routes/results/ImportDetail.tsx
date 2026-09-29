@@ -15,6 +15,7 @@ import {
 } from "../../components/ui";
 import { api, ok } from "../../lib/api";
 import { Pager, useServerPages } from "../../components/Pager";
+import { useConfirm } from "../../components/Confirm";
 
 type Summary = { rows?: number; create?: number; error?: number; committed?: number };
 
@@ -30,6 +31,7 @@ const COLUMNS: Record<string, string> = {
 
 /** Board: DesktopResultsImport (steps 3–4). Phone: derived — the same steps as stacked cards. */
 export function ResultImportDetail() {
+  const confirm = useConfirm();
   const { id = "" } = useParams();
   const client = useQueryClient();
   const navigate = useNavigate();
@@ -132,7 +134,14 @@ export function ResultImportDetail() {
                 </Button>
                 <Button
                   variant="secondary"
-                  onClick={() => act.mutate("delete")}
+                  onClick={async () =>
+                    (await confirm({
+                      title: "إلغاء الدفعة؟",
+                      body: "يُحذف الملف ومعاينته؛ لا تتأثر أي نتيجة معتمدة.",
+                      confirm: "إلغاء الدفعة",
+                      cancel: "تراجع",
+                    })) && act.mutate("delete")
+                  }
                   disabled={act.isPending}
                 >
                   إلغاء الدفعة
@@ -147,7 +156,14 @@ export function ResultImportDetail() {
             {b.status === "published" && (
               <Button
                 variant="secondary"
-                onClick={() => act.mutate("unpublish")}
+                onClick={async () =>
+                  (await confirm({
+                    title: "إلغاء نشر نتائج الدفعة؟",
+                    body: "تختفي هذه النتائج من «نتائجي» عند الطلاب حتى تنشرها مجددًا.",
+                    confirm: "إلغاء النشر",
+                    cancel: "تراجع",
+                  })) && act.mutate("unpublish")
+                }
                 disabled={act.isPending}
               >
                 إلغاء النشر

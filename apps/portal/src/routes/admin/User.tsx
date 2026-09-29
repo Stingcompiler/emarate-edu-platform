@@ -16,9 +16,11 @@ import { api, ok } from "../../lib/api";
 import { useMe } from "../../lib/auth";
 import { initials, useDepartments } from "../../lib/reports";
 import { DEPARTMENT_ROLES, ROLE_LABEL, ROLE_ORDER } from "./roles";
+import { useConfirm } from "../../components/Confirm";
 
 /** Board: SystemAdminUser (phone); desktop derived — account beside roles and scopes. */
 export function AdminUser() {
+  const confirm = useConfirm();
   const { id = "" } = useParams();
   const client = useQueryClient();
   const departments = useDepartments();
@@ -114,7 +116,15 @@ export function AdminUser() {
             <Button
               variant="secondary"
               className={u.is_active ? "text-danger-strong" : ""}
-              onClick={() => active.mutate(!u.is_active)}
+              onClick={async () =>
+                (!u.is_active ||
+                  (await confirm({
+                    title: `تعطيل حساب ${u.full_name_ar}؟`,
+                    body: "يخرج من كل أجهزته ولا يستطيع الدخول حتى يُعاد تفعيله. لا يُحذف شيء.",
+                    confirm: "تعطيل الحساب",
+                  }))) &&
+                active.mutate(!u.is_active)
+              }
               disabled={active.isPending}
             >
               {u.is_active ? "تعطيل الحساب" : "إعادة تفعيل الحساب"}
@@ -138,7 +148,15 @@ export function AdminUser() {
                     <button
                       type="button"
                       aria-label="سحب الدور"
-                      onClick={() => revoke.mutate(r.id)}
+                      onClick={async () =>
+                        (await confirm({
+                          title: `سحب دور «${r.role_label}»؟`,
+                          body: r.department_name
+                            ? `من ${u.full_name_ar} في ${r.department_name}.`
+                            : `من ${u.full_name_ar}.`,
+                          confirm: "سحب الدور",
+                        })) && revoke.mutate(r.id)
+                      }
                       className="grid size-8 place-items-center rounded-full text-text-muted hover:bg-surface-alt hover:text-danger-strong"
                     >
                       <X size={15} aria-hidden />

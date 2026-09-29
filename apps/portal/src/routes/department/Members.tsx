@@ -19,9 +19,11 @@ import { useCurrentTerm, useDepartment, useOfferings } from "../../lib/departmen
 import { can } from "../../lib/nav";
 import { TeacherStatus, days, initials, num } from "../../lib/reports";
 import { count, N } from "../../lib/format";
+import { useConfirm } from "../../components/Confirm";
 
 /** Board: DesktopDeptProfessors (desktop, list + detail); phone derived — list then detail. */
 export function Members() {
+  const confirm = useConfirm();
   const me = useMe();
   const client = useQueryClient();
   const { id, department } = useDepartment();
@@ -183,7 +185,13 @@ export function Members() {
                   <Button
                     variant="secondary"
                     className="min-h-9 px-3 text-danger-strong"
-                    onClick={() => remove.mutate(selected.id)}
+                    onClick={async () =>
+                      (await confirm({
+                        title: `إزالة ${selected.user.full_name_ar} من القسم؟`,
+                        body: "تُفك عضويته في القسم فقط؛ لا يُحذف حسابه.",
+                        confirm: "إزالة من القسم",
+                      })) && remove.mutate(selected.id)
+                    }
                   >
                     إزالة من القسم
                   </Button>

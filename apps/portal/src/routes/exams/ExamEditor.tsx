@@ -20,6 +20,7 @@ import { api, ok } from "../../lib/api";
 import { useUnsavedChanges } from "../../lib/useUnsavedChanges";
 import { type QType, TYPE_LABEL } from "../../lib/exam";
 import { count, N } from "../../lib/format";
+import { useConfirm } from "../../components/Confirm";
 
 type Question = Omit<Schemas["Question"], "choices"> & {
   choices?: { id?: number; text: string; is_correct?: boolean }[];
@@ -364,6 +365,7 @@ function QuestionCard({
   onChanged: () => void;
   locked: boolean;
 }) {
+  const confirm = useConfirm();
   const remove = useMutation({
     mutationFn: async () => {
       await api.DELETE("/api/v1/exams/{public_id}/questions/{question_id}", {
@@ -409,7 +411,9 @@ function QuestionCard({
         {!locked && (
           <button
             type="button"
-            onClick={() => remove.mutate()}
+            onClick={async () =>
+              (await confirm({ title: "حذف السؤال؟", confirm: "حذف السؤال" })) && remove.mutate()
+            }
             aria-label="حذف السؤال"
             className="grid size-9 place-items-center rounded-lg text-danger-strong hover:bg-danger-soft"
           >

@@ -16,6 +16,7 @@ import {
 } from "../../components/ui";
 import { api, ok } from "../../lib/api";
 import { useUnsavedChanges } from "../../lib/useUnsavedChanges";
+import { useConfirm } from "../../components/Confirm";
 
 type Block = {
   type: "heading" | "paragraph" | "note" | "html" | "image" | "cta";
@@ -35,6 +36,7 @@ const TYPES: { key: Block["type"]; label: string }[] = [
 
 /** Board: DesktopSiteCMS (desktop): blocks editor + live preview. Phone derived: stacked. */
 export function PageEditor() {
+  const confirm = useConfirm();
   const unsaved = useUnsavedChanges();
   const { id } = useParams();
   const creating = !id || id === "new";
@@ -231,10 +233,12 @@ export function PageEditor() {
                   <Button
                     variant="secondary"
                     className="min-h-11"
-                    onClick={() =>
-                      window.confirm(
-                        "إلغاء نشر الصفحة يزيلها من موقع الكلية حتى تنشرها مجددًا. متابعة؟",
-                      ) && save.mutate("draft")
+                    onClick={async () =>
+                      (await confirm({
+                        title: "إلغاء نشر الصفحة؟",
+                        body: "تختفي من موقع الكلية وقوائمه حتى تنشرها مجددًا.",
+                        confirm: "إلغاء النشر",
+                      })) && save.mutate("draft")
                     }
                     disabled={save.isPending}
                   >

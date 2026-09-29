@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useBlocker } from "react-router";
 
-const MESSAGE = "لديك تعديلات لم تُحفظ. مغادرة الصفحة وتجاهلها؟";
+import { useConfirm } from "../components/Confirm";
+
+const MESSAGE = "لديك تعديلات لم تُحفظ بعد، وستضيع إن غادرت الصفحة.";
 
 /**
  * Guards an editor's unsaved work (review 2026-09-29, S7): leaving inside the portal asks
@@ -20,11 +22,16 @@ export function useUnsavedChanges(computed?: boolean) {
     ({ currentLocation, nextLocation }) =>
       dirtyRef.current && currentLocation.pathname !== nextLocation.pathname,
   );
+  const confirm = useConfirm();
   useEffect(() => {
     if (blocker.state !== "blocked") return;
-    if (window.confirm(MESSAGE)) blocker.proceed();
-    else blocker.reset();
-  }, [blocker]);
+    void confirm({
+      title: "مغادرة دون حفظ؟",
+      body: MESSAGE,
+      confirm: "مغادرة وتجاهل التعديلات",
+      cancel: "البقاء",
+    }).then((leave) => (leave ? blocker.proceed() : blocker.reset()));
+  }, [blocker, confirm]);
   useEffect(() => {
     if (!dirty) return;
     const warn = (event: BeforeUnloadEvent) => event.preventDefault();
