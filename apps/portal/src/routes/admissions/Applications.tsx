@@ -168,6 +168,7 @@ export function Applications() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="الرقم المرجعي أو الاسم أو البريد"
+            aria-label="الرقم المرجعي أو الاسم أو البريد"
             className="min-h-9 flex-1 rounded-full border border-border-soft bg-surface px-3 text-sm sm:max-w-xs"
           />
         </div>

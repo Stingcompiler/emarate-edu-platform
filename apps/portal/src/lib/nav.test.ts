@@ -16,7 +16,11 @@ const me = (roles: string[], extra: Partial<Me> = {}): Me =>
     ...extra,
   }) as unknown as Me;
 
-const labels = (m: Me) => navFor(m, 0).map((i) => i.label);
+// What the phone shows (desktop-only items live in the sidebar alone).
+const labels = (m: Me) =>
+  navFor(m, 0)
+    .filter((i) => !i.desktopOnly)
+    .map((i) => i.label);
 
 describe("navFor", () => {
   it("keeps the department manager's sections in their original order (docs/02 D20)", () => {

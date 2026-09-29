@@ -240,6 +240,7 @@ function ApplicationCard({ app }: { app: App }) {
             value={reply}
             onChange={(e) => setReply(e.target.value)}
             placeholder="الرد على المسجل"
+            aria-label="الرد على المسجل"
             className="min-h-10 flex-1 rounded-lg border border-border bg-surface px-3 text-sm"
           />
           <Button
@@ -302,6 +303,7 @@ function InquiryCard({ inquiry: i }: { inquiry: Inq }) {
             value={reply}
             onChange={(e) => setReply(e.target.value)}
             placeholder="ردك"
+            aria-label="ردك"
             className="min-h-10 flex-1 rounded-lg border border-border bg-surface px-3 text-sm"
           />
           <Button

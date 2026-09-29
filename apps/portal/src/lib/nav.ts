@@ -1,5 +1,6 @@
 import {
   Award,
+  Briefcase,
   Bell,
   CalendarDays,
   BarChart3,
@@ -112,12 +113,28 @@ export function navFor(me: Me | null | undefined, unread: number): NavItem[] {
     items.push({ label: "التدقيق", to: "/audit", icon: History });
   }
   if (me?.student) {
+    // The phone keeps exactly five tabs; large screens also list what «أنا» leads to
+    // (desktop board: a secondary group).
+    const more = (label: string, to: string, icon: NavItem["icon"]): NavItem => ({
+      label,
+      to,
+      icon,
+      end: false,
+      desktopOnly: true,
+      group: "المزيد",
+    });
     return [
       { label: "اليوم", to: "/", icon: Sun },
       { label: "موادي", to: "/courses", icon: BookOpen, end: false },
       { label: "المهام", to: "/tasks", icon: ListChecks },
       { label: "الإشعارات", to: "/notifications", icon: Bell, badge: unread },
       { label: "أنا", to: "/me", icon: UserRound, end: false },
+      more("النتائج", "/results", Award),
+      more("الاختبارات", "/exams", ClipboardList),
+      more("البث المباشر", "/live", Radio),
+      more("الإعلانات", "/announcements", Megaphone),
+      more("اللوائح", "/regulations", ScrollText),
+      more("الإعدادات", "/settings", Settings),
     ];
   }
   if (hasRole(me, "results_officer"))
@@ -126,6 +143,9 @@ export function navFor(me: Me | null | undefined, unread: number): NavItem[] {
     items.push({ label: "الرئيسية", to: "/academic", icon: LayoutDashboard });
   if (hasRole(me, "student_affairs"))
     items.push({ label: "الرئيسية", to: "/affairs", icon: LayoutDashboard });
+  // HR starts on its own home (review 2026-09-29), not after the shared items.
+  const hrHome = can(me, "hr.view") && !hasRole(me, "system_admin", "academic_affairs");
+  if (hrHome) items.push({ label: "الرئيسية", to: "/hr", icon: LayoutDashboard });
   // Admissions staff start on admissions: home, then applications, before notifications —
   // so «الطلبات» is a tab on the phone (review 2026-09-29).
   const admissions = can(me, "admissions.review");
@@ -189,13 +209,27 @@ export function navFor(me: Me | null | undefined, unread: number): NavItem[] {
   }
   if (can(me, "reports.department"))
     items.push({ label: "التقارير", to: "/reports", icon: BarChart3 });
-  if (can(me, "hr.view")) items.push({ label: "الموارد البشرية", to: "/hr", icon: UserCheck });
+  if (can(me, "hr.view") && !hrHome)
+    items.push({ label: "الموارد البشرية", to: "/hr", icon: Briefcase });
   if (can(me, "reports.teachers"))
-    items.push({ label: "مؤشرات الأساتذة", to: "/hr/teachers", icon: UserCheck, end: false });
+    items.push({
+      label: "مؤشرات الأساتذة",
+      short: "المؤشرات",
+      to: "/hr/teachers",
+      icon: BarChart3,
+      end: false,
+    });
+  if (can(me, "hr.view"))
+    items.push({ label: "تقرير الأداء", short: "التقرير", to: "/hr/report", icon: FileText });
   if (can(me, "reports.admissions"))
     items.push({ label: "تقارير القبول", to: "/reports/admissions", icon: BarChart3 });
   if (can(me, "reports.affairs"))
-    items.push({ label: "تقارير شؤون الطلاب", to: "/reports/affairs", icon: BarChart3 });
+    items.push({
+      label: "تقارير شؤون الطلاب",
+      short: "التقارير",
+      to: "/reports/affairs",
+      icon: BarChart3,
+    });
   if (can(me, "results.view"))
     items.push({ label: "السجل الأكاديمي", to: "/transcripts", icon: GraduationCap });
   if (can(me, "cases.view"))
@@ -205,5 +239,32 @@ export function navFor(me: Me | null | undefined, unread: number): NavItem[] {
   if (canCompose(me)) items.push({ label: "إشعار جديد", to: "/notifications/new", icon: Send });
   items.push({ label: "الإعدادات", to: "/settings", icon: Settings });
   items.push({ label: "تثبيت التطبيق", to: "/install", icon: Download });
-  return items;
+  return hasRole(me, "system_admin") ? grouped(items) : items;
+}
+
+/** The system admin sees nearly every page: the sidebar groups them under headings
+ *  (review 2026-09-29), in this order; the phone's first tabs stay the system ones. */
+const GROUPS: [string, RegExp][] = [
+  ["النظام", /^\/(system|audit)/],
+  [
+    "القبول والطلاب",
+    /^\/(registrar|applications|admissions|students|student-imports|registrars|inquiries)/,
+  ],
+  [
+    "الأكاديمي",
+    /^\/(courses|exams|live|department|reports|hr|transcripts|cases|regulations|grading)/,
+  ],
+  ["النتائج", /^\/(result-imports|result-corrections|results)/],
+  ["المحتوى والتواصل", /^\/(site|events|announcements|notifications\/new)/],
+];
+
+function grouped(items: NavItem[]): NavItem[] {
+  const rank = (item: NavItem) => {
+    const i = GROUPS.findIndex(([, pattern]) => pattern.test(item.to));
+    return i < 0 ? GROUPS.length : i;
+  };
+  return items
+    .map((item, order) => ({ item, order, rank: rank(item) }))
+    .sort((a, b) => a.rank - b.rank || a.order - b.order)
+    .map(({ item, rank: r }) => ({ ...item, group: GROUPS[r]?.[0] ?? "عام" }));
 }

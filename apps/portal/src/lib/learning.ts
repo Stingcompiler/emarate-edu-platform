@@ -122,5 +122,5 @@ export const splitCourse = (code: string): [string, string] => {
 
 export const fmtSize = (bytes: number) =>
   bytes > 1_048_576
-    ? `${(bytes / 1_048_576).toFixed(1)} MB`
-    : `${Math.max(1, Math.round(bytes / 1024))} KB`;
+    ? `${(bytes / 1_048_576).toLocaleString("ar-u-nu-latn", { maximumFractionDigits: 1 })} م.ب`
+    : `${Math.max(1, Math.round(bytes / 1024)).toLocaleString("ar-u-nu-latn")} ك.ب`;

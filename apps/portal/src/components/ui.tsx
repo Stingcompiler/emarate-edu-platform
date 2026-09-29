@@ -23,8 +23,8 @@ export function Button({
   ref?: Ref<HTMLButtonElement>;
 }) {
   const styles = {
-    primary: "bg-primary text-white hover:bg-primary-hover disabled:opacity-60",
-    danger: "bg-danger-strong text-white hover:opacity-90 disabled:opacity-60",
+    primary: "bg-primary text-on-primary hover:bg-primary-hover disabled:opacity-60",
+    danger: "bg-danger-strong text-on-primary hover:opacity-90 disabled:opacity-60",
     secondary: "border border-border bg-surface text-text hover:bg-surface-alt disabled:opacity-60",
     ghost: "text-primary hover:bg-primary-soft disabled:opacity-60",
   }[variant];
@@ -47,7 +47,8 @@ export function Card({ children, className = "" }: { children: ReactNode; classN
 
 export function SectionLabel({ children }: { children: ReactNode }) {
   return (
-    <h2 className="mb-2 mt-5 px-1 text-xs font-semibold text-text-muted first:mt-0">{children}</h2>
+    // Section headings read as headings (boards: bold, dark), not as captions.
+    <h2 className="mb-2 mt-6 px-1 text-sm font-bold text-text first:mt-0">{children}</h2>
   );
 }
 
@@ -100,7 +101,7 @@ export function Chip({
       // A chip used as a tab states aria-selected itself; aria-pressed is for toggles only.
       aria-pressed={props.role ? undefined : active}
       {...props}
-      className={`inline-flex min-h-9 shrink-0 items-center gap-1.5 rounded-full px-3.5 text-sm transition-colors ${
+      className={`inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-full px-3.5 text-sm transition-colors lg:min-h-9 ${
         active
           ? "bg-text font-semibold text-bg"
           : "border border-border-soft bg-surface text-text hover:bg-surface-alt"
@@ -387,7 +388,8 @@ export function Switch({
         className={`relative block h-7 w-12 rounded-full transition-colors ${checked ? "bg-success" : "bg-n300"}`}
       >
         <span
-          className={`absolute top-0.5 size-6 rounded-full bg-white shadow transition-all ${checked ? "left-[22px]" : "left-0.5"}`}
+          // Logical sides: in Arabic the switch mirrors, «on» moves toward the left.
+          className={`absolute top-0.5 size-6 rounded-full bg-white shadow transition-all ${checked ? "start-[22px]" : "start-0.5"}`}
         />
       </span>
     </button>

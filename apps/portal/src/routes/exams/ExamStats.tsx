@@ -166,6 +166,7 @@ function ManualRow({
           onChange={(e) => setMarks(e.target.value)}
           inputMode="decimal"
           placeholder={`من ${Number(row.marks).toLocaleString("ar-u-nu-latn")}`}
+          aria-label="الدرجة"
           className="min-h-10 w-28 rounded-lg border border-border bg-surface px-3"
         />
         <Button onClick={() => grade.mutate()} disabled={!marks || grade.isPending}>

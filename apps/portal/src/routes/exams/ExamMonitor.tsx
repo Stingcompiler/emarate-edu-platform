@@ -129,6 +129,7 @@ export function ExamMonitor() {
                     value={reason}
                     onChange={(e) => setReason(e.target.value)}
                     placeholder="السبب (إلزامي لإعادة الفتح والإلغاء)"
+                    aria-label="السبب"
                     className="min-h-10 w-full rounded-lg border border-border bg-surface px-3 text-sm"
                   />
                   <div className="flex flex-wrap gap-2">

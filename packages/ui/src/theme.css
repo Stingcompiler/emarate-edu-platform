@@ -110,6 +110,7 @@
   --color-text-muted: var(--text-muted);
   --color-text-inverse: var(--text-inverse);
   --color-primary: var(--primary);
+  --color-on-primary: var(--on-primary);
   --color-primary-hover: var(--primary-hover);
   --color-primary-soft: var(--primary-soft);
   --color-accent: var(--accent);

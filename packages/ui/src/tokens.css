@@ -17,6 +17,9 @@
   --primary: var(--color-primary-500);
   --primary-hover: var(--color-primary-600);
   --primary-soft: var(--color-primary-100);
+  /* Text on a filled primary or danger button (review 2026-09-29): white here; dark in dark
+   * mode, where those fills are light (white on #96b1d3 was about 2:1). */
+  --on-primary: #ffffff;
   --accent: var(--color-accent-500);
   --accent-hover: var(--color-accent-600);
   --accent-soft: var(--color-accent-100);
@@ -45,6 +48,7 @@
   --primary: #96b1d3;
   --primary-hover: #c4d3e6;
   --primary-soft: #18375b;
+  --on-primary: #0c111c;
   --accent: #d792a1;
   --accent-hover: #e8c1ca;
   --accent-soft: #460e1b;
@@ -78,6 +82,7 @@
     --primary: #96b1d3;
     --primary-hover: #c4d3e6;
     --primary-soft: #18375b;
+    --on-primary: #0c111c;
     --accent: #d792a1;
     --accent-hover: #e8c1ca;
     --accent-soft: #460e1b;

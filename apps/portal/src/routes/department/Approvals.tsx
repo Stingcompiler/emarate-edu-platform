@@ -110,6 +110,7 @@ export function Approvals() {
                 value={reasons[r.public_id] ?? ""}
                 onChange={(e) => setReasons({ ...reasons, [r.public_id]: e.target.value })}
                 placeholder="سبب الرفض"
+                aria-label="سبب الرفض"
                 className="min-h-9 flex-1 rounded-lg border border-border px-2 text-sm"
               />
               <Button

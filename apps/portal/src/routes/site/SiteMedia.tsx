@@ -74,7 +74,7 @@ function Media() {
   });
   return (
     <>
-      <label className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-lg bg-primary px-4 text-sm font-semibold text-white">
+      <label className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-lg bg-primary px-4 text-sm font-semibold text-on-primary">
         <Upload size={16} aria-hidden /> رفع صورة
         <input
           type="file"
@@ -115,7 +115,7 @@ function Media() {
                     confirm: "حذف",
                   })) && remove.mutate(m.public_id)
                 }
-                className="text-danger-strong"
+                className="grid size-11 place-items-center rounded-lg text-danger-strong hover:bg-danger-soft"
               >
                 <Trash2 size={14} />
               </button>

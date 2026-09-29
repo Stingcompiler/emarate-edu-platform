@@ -290,6 +290,7 @@ export function AssignmentEditor() {
                           )
                         }
                         placeholder="مثال: GitHub Repository"
+                        aria-label="عنوان حقل الرابط"
                         className="min-h-9 flex-1 rounded-lg border border-border px-2"
                       />
                       <Chip

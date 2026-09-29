@@ -536,7 +536,7 @@ function AnswerInput({
               }
             >
               <span
-                className={`grid size-8 shrink-0 place-items-center rounded-lg text-sm font-bold ${on ? "bg-primary text-white" : "bg-surface-alt text-text-muted"}`}
+                className={`grid size-8 shrink-0 place-items-center rounded-lg text-sm font-bold ${on ? "bg-primary text-on-primary" : "bg-surface-alt text-text-muted"}`}
               >
                 {LETTERS[i]}
               </span>
@@ -578,6 +578,7 @@ function AnswerInput({
         value={(value as string) ?? ""}
         onChange={(e) => onChange(e.target.value)}
         placeholder="اكتب الكلمة الناقصة"
+        aria-label="اكتب الكلمة الناقصة"
         className="mt-5 block min-h-12 w-full rounded-xl border border-border bg-surface px-4 text-base text-text"
       />
     );
@@ -588,6 +589,7 @@ function AnswerInput({
       value={(value as string) ?? ""}
       onChange={(e) => onChange(e.target.value)}
       placeholder="اكتب إجابتك"
+      aria-label="اكتب إجابتك"
       maxLength={question.type === "essay" ? 10000 : 1000}
       className="mt-5 block min-h-44 w-full resize-y rounded-xl border border-border bg-surface p-4 text-base leading-relaxed text-text"
     />

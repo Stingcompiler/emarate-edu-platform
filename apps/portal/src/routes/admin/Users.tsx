@@ -59,6 +59,7 @@ export function AdminUsers() {
                   setPage(1);
                 }}
                 placeholder="بحث بالاسم أو البريد"
+                aria-label="بحث بالاسم أو البريد"
                 className="min-h-11 rounded-full border border-border-soft bg-surface px-4 text-sm sm:max-w-sm sm:flex-1"
               />
               <div className="-mx-4 flex gap-2 overflow-x-auto px-4 sm:mx-0 sm:px-0">
@@ -169,6 +170,7 @@ function NewUser() {
           value={f.full_name_ar}
           onChange={(e) => setF({ ...f, full_name_ar: e.target.value })}
           placeholder="الاسم الكامل"
+          aria-label="الاسم الكامل"
           className={input}
         />
         <input
@@ -177,6 +179,7 @@ function NewUser() {
           value={f.email}
           onChange={(e) => setF({ ...f, email: e.target.value })}
           placeholder="name@ecst.edu.sd"
+          aria-label="البريد الإلكتروني"
           className={input}
         />
         <select

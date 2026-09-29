@@ -89,6 +89,7 @@ export function Students() {
               value={q}
               onChange={(e) => setQ(e.target.value)}
               placeholder="بحث بالاسم أو الرقم الجامعي"
+              aria-label="بحث بالاسم أو الرقم الجامعي"
               className="mt-3 block min-h-10 w-full rounded-full border border-border-soft bg-surface px-4 text-sm sm:max-w-sm"
             />
             <div className="mt-3 flex flex-wrap gap-2">
