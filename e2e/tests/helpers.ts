@@ -8,7 +8,7 @@ export const PASSWORD = process.env.DEMO_PASSWORD ?? "e2e-pass-2026";
 export async function signIn(page: Page, identifier: string) {
   await page.goto("/login");
   await page.getByLabel("الرقم الجامعي أو البريد").fill(identifier);
-  await page.getByLabel("كلمة المرور").fill(PASSWORD);
+  await page.getByLabel("كلمة المرور", { exact: true }).fill(PASSWORD);
   await page.getByRole("button", { name: "تسجيل الدخول" }).click();
   await expect(page).not.toHaveURL(/\/login/);
 }
