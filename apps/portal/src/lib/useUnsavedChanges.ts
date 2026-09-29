@@ -10,9 +10,12 @@ const MESSAGE = "لديك تعديلات لم تُحفظ. مغادرة الصف�
  * accepted it (before navigating away). Mark parts that save on their own with
  * `data-saves-itself`.
  */
-export function useUnsavedChanges() {
+export function useUnsavedChanges(computed?: boolean) {
   const dirtyRef = useRef(false);
-  const [dirty, setDirty] = useState(false);
+  const [edited, setDirty] = useState(false);
+  // A form that knows its own changes (e.g. settings compared with the server) passes them in.
+  const dirty = computed ?? edited;
+  dirtyRef.current = computed ?? dirtyRef.current;
   const blocker = useBlocker(
     ({ currentLocation, nextLocation }) =>
       dirtyRef.current && currentLocation.pathname !== nextLocation.pathname,

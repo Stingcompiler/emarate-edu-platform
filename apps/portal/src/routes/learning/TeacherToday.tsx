@@ -119,9 +119,13 @@ export function TeacherToday() {
               {pending ? "بانتظار تصحيحك" : "لا شيء بانتظار تصحيحك ✓"}
             </b>
             <span className="text-xs text-text-muted">
-              {byCourse
+              {/* The busiest three, then «+ N»: never a five-line sentence on a phone. */}
+              {[...byCourse]
+                .sort((x, y) => y.n - x.n)
+                .slice(0, 3)
                 .map((c) => `${c.n.toLocaleString("ar-u-nu-latn")} في ${c.name}`)
                 .join(" · ") || "كل التسليمات مصححة"}
+              {byCourse.length > 3 && ` · + ${count(byCourse.length - 3, N.course)}`}
             </span>
           </span>
           <span className="text-sm font-semibold text-primary">ابدأ</span>
