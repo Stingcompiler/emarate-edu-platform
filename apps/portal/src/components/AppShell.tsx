@@ -119,7 +119,9 @@ export function AppShell({
             {nav.map((item, i) => (
               <div key={item.to} className="contents">
                 {item.group && item.group !== nav[i - 1]?.group && (
-                  <p className="mt-3 px-3 pb-1 text-[11px] font-semibold text-text-muted first:mt-0">
+                  <p
+                    className={`px-3 pb-1 text-[11px] font-semibold text-text-muted ${i ? "mt-4 border-t border-border-soft pt-3" : ""}`}
+                  >
                     {item.group}
                   </p>
                 )}
