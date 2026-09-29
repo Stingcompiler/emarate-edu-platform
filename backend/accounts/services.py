@@ -9,10 +9,12 @@ from __future__ import annotations
 
 import hashlib
 import secrets
+import time
 from datetime import timedelta
 
 from django.conf import settings
 from django.contrib.auth import authenticate, password_validation
+from django.contrib.auth.hashers import make_password
 from django.core.cache import cache
 from django.db import IntegrityError, transaction
 from django.utils import timezone
@@ -194,12 +196,14 @@ def _lock_key(identifier: str) -> str:
 
 
 def login(identifier: str, password: str) -> User:
-    """Email or university number + password. Locks after repeated failures."""
+    """Email or university number + password. Locks after repeated failures.
+
+    The lock counts per account (the email the identifier resolves to), so a student's
+    email and university number share one budget, and the count is incremented
+    atomically. An identifier with no account still spends one password hash, so the
+    response time doesn't tell which university numbers have an account.
+    """
     identifier = identifier.strip().lower()
-    key = _lock_key(identifier)
-    failures = cache.get(key, 0)
-    if failures >= settings.LOGIN_MAX_FAILURES:
-        raise Locked()
 
     email = identifier
     if "@" not in identifier:
@@ -208,9 +212,17 @@ def login(identifier: str, password: str) -> User:
             .select_related("user")
             .first()
         )
-        email = record_.user.email if record_ and record_.user_id else ""
+        email = record_.user.email.lower() if record_ and record_.user_id else ""
 
-    user = authenticate(email=email, password=password) if email else None
+    key = _lock_key(email or identifier)
+    if cache.get(key, 0) >= settings.LOGIN_MAX_FAILURES:
+        raise Locked()
+
+    if email:
+        user = authenticate(email=email, password=password)
+    else:
+        make_password(password)  # same cost as a real check
+        user = None
     if user is None:
         # Pending accounts are inactive: explain instead of a generic error.
         pending = User.objects.filter(email=email, is_active=False).first() if email else None
@@ -218,7 +230,11 @@ def login(identifier: str, password: str) -> User:
             raise PermissionDenied(
                 gettext("Your account is waiting for approval."), code="pending_approval"
             )
-        cache.set(key, failures + 1, timeout=settings.LOGIN_LOCKOUT_SECONDS)
+        cache.add(key, 0, timeout=settings.LOGIN_LOCKOUT_SECONDS)
+        try:
+            cache.incr(key)
+        except ValueError:  # expired between add and incr
+            cache.set(key, 1, timeout=settings.LOGIN_LOCKOUT_SECONDS)
         raise Invalid(
             {"non_field_errors": [gettext("Incorrect email/university number or password.")]},
             code="invalid_credentials",
@@ -263,12 +279,23 @@ def reset_password(email: str, code: str, new_password: str) -> None:
         record(SYSTEM, "account.password_reset", user, actor=user)
 
 
+# A refresh token rotated in the last seconds is accepted once more (two tabs refreshing
+# together, accounts/views.py). Signing out or a password change ends that grace for
+# every token rotated before it.
+REFRESH_CUT = "auth:cut:{}"
+
+
+def end_refresh_grace(user_id) -> None:
+    cache.set(REFRESH_CUT.format(user_id), time.time(), timeout=120)
+
+
 def _revoke_refresh_tokens(user: User) -> None:
     """Sign the user out everywhere (after a password change)."""
     from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken, OutstandingToken
 
     for token in OutstandingToken.objects.filter(user=user):
         BlacklistedToken.objects.get_or_create(token=token)
+    end_refresh_grace(user.pk)
 
 
 # ─── Staff accounts and activation ────────────────────────────────────────
@@ -373,6 +400,10 @@ def grant_role(
         raise PermissionDenied(gettext("You cannot grant this role."))
     if role == Role.STUDENT:
         raise ValidationError({"role": [gettext("Students get their role by registering.")]})
+    if user.pk == meta.actor.pk and not rbac.has_role(meta.actor, Role.SYSTEM_ADMIN):
+        raise PermissionDenied(gettext("You cannot grant a role to yourself."))
+    if rbac.has_role(user, Role.STUDENT):
+        raise ValidationError({"role": [gettext("A student account cannot hold a staff role.")]})
     _check_department_rule(role, department_id)
     try:
         with transaction.atomic():
@@ -432,6 +463,17 @@ def set_active(meta: RequestMeta, user: User, active: bool) -> User:
         user.save(update_fields=["is_active"])
         if not active:
             _revoke_refresh_tokens(user)
+            # An unused invitation must not switch a disabled account back on.
+            ActivationToken.objects.filter(user=user, used_at__isnull=True).update(
+                used_at=timezone.now(), updated_at=timezone.now()
+            )
+        elif not user.has_usable_password():
+            # Re-enabled before it was ever activated: a fresh invitation replaces the void one.
+            token = issue_activation(user)
+            email, name = user.email, user.full_name_ar
+            transaction.on_commit(
+                lambda: emails.account_invitation(email, name, token, ACTIVATION_DAYS)
+            )
         record(
             meta,
             "account.activate" if active else "account.deactivate",

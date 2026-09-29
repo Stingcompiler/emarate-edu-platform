@@ -1,6 +1,7 @@
 """Account endpoints: auth (cookies), /me, public registration, users and roles."""
 
 import contextlib
+import time
 
 from django.conf import settings
 from django.core.cache import cache
@@ -126,7 +127,7 @@ class RefreshView(APIView):
             old = RefreshToken(raw)
             user = User.objects.get(pk=old["user_id"], is_active=True)
             old.blacklist()
-            cache.set(_ROTATED.format(old["jti"]), user.pk, REFRESH_REUSE_GRACE)
+            cache.set(_ROTATED.format(old["jti"]), (user.pk, time.time()), REFRESH_REUSE_GRACE)
         except (TokenError, User.DoesNotExist):
             user = _just_rotated(raw)
             if user is None:
@@ -156,8 +157,15 @@ def _just_rotated(raw: str) -> User | None:
         return None
     if payload.get("token_type") != "refresh":
         return None
-    user_id = cache.get(_ROTATED.format(payload.get("jti")))
-    if user_id is None or str(user_id) != str(payload.get("user_id")):
+    rotated = cache.get(_ROTATED.format(payload.get("jti")))
+    if rotated is None:
+        return None
+    user_id, rotated_at = rotated if isinstance(rotated, tuple) else (rotated, 0.0)
+    if str(user_id) != str(payload.get("user_id")):
+        return None
+    # Signed out or password changed after this rotation: the grace is over.
+    cut = cache.get(services.REFRESH_CUT.format(user_id))
+    if cut is not None and cut >= rotated_at:
         return None
     return User.objects.filter(pk=user_id, is_active=True).first()
 
@@ -172,6 +180,10 @@ class LogoutView(APIView):
         if raw:
             with contextlib.suppress(TokenError):
                 RefreshToken(raw).blacklist()
+            with contextlib.suppress(TokenBackendError):
+                user_id = token_backend.decode(raw, verify=True).get("user_id")
+                if user_id is not None:
+                    services.end_refresh_grace(user_id)
         response = Response({"detail": gettext("ok")})
         _clear_auth_cookies(response)
         return response

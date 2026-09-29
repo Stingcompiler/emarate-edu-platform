@@ -136,6 +136,11 @@ def remove_instructor(meta: RequestMeta, instructor: OfferingInstructor) -> None
 def enroll(meta: RequestMeta, offering: CourseOffering, student: StudentRecord) -> Enrollment:
     department_id = offering.course.department_id
     _require(meta, "enrollment.manage", department_id)
+    # A department role enrolls its own department's students; another department's
+    # student (a service course) goes through the head registrar (owner 2026-09-29: a
+    # department sees nothing of the others).
+    if not rbac.can(meta.actor, "students.view", student.department_id):
+        raise PermissionDenied(gettext("This student belongs to another department."))
     if student.status != StudentRecord.Status.ACTIVE:
         raise ValidationError(
             {"student_record": [gettext("Only active students can be enrolled.")]}

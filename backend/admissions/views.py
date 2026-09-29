@@ -13,6 +13,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from accounts import rbac
+from accounts.throttles import OTPIPThrottle, OTPTargetThrottle
 from audit.services import RequestMeta, record, snapshot
 from contacts import visitor
 from contacts.visitor import IsVisitor, VisitorAuthentication
@@ -309,7 +310,9 @@ class PublicIntakeView(_Public):
 
 @extend_schema(tags=["public"])
 class VisitorOTPView(_Public):
-    throttle_classes = [ContactThrottle]
+    # Per IP and per email: many IPs can't request (and then guess) endless codes for one
+    # applicant's inbox.
+    throttle_classes = [ContactThrottle, OTPIPThrottle, OTPTargetThrottle]
 
     @extend_schema(
         operation_id="public_visitor_otp_post", request=OTPStartSerializer, responses={200: dict}

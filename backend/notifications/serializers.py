@@ -1,3 +1,5 @@
+from urllib.parse import urlsplit
+
 from django.contrib.auth import get_user_model
 from django.utils.translation import gettext
 from rest_framework import serializers
@@ -60,7 +62,7 @@ class SendSerializer(serializers.Serializer):
         # Only links inside the portal or to https sites.
         if (
             value
-            and not (value.startswith("/") and not value.startswith("//"))
+            and not (value.startswith("/") and not value.startswith(("//", "/\\")))
             and not value.startswith("https://")
         ):
             raise serializers.ValidationError(
@@ -117,6 +119,15 @@ class PushConfigSerializer(serializers.Serializer):
     public_key = serializers.CharField(allow_null=True)
 
 
+# Web Push services of Chrome/Edge (FCM), Firefox, Safari and Windows.
+PUSH_SERVICE_HOSTS = (
+    "fcm.googleapis.com",
+    "push.services.mozilla.com",
+    "push.apple.com",
+    "notify.windows.com",
+)
+
+
 class PushKeysSerializer(serializers.Serializer):
     p256dh = serializers.CharField(max_length=200)
     auth = serializers.CharField(max_length=100)
@@ -129,6 +140,11 @@ class PushSubscribeSerializer(serializers.Serializer):
     def validate_endpoint(self, value):
         if not value.startswith("https://"):
             raise serializers.ValidationError(gettext("Push endpoints are https URLs."))
+        # Only the browsers' push services: the server POSTs to this address on every
+        # notification, so an arbitrary host would let a user aim it at internal addresses.
+        host = (urlsplit(value).hostname or "").lower()
+        if not any(host == h or host.endswith("." + h) for h in PUSH_SERVICE_HOSTS):
+            raise serializers.ValidationError(gettext("Not a browser push service."))
         return value
 
 

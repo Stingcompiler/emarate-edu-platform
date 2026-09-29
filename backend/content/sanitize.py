@@ -55,6 +55,16 @@ def clean_html(value: str) -> str:
 BLOCK_TYPES = {"heading", "paragraph", "note", "html", "image", "cta", "list"}
 
 
+def _safe_url(url) -> bool:
+    """https links, or paths on the site itself — not ``//host`` or ``/\\host``, which
+    browsers read as another site."""
+    if not isinstance(url, str):
+        return False
+    if url.startswith("https://"):
+        return True
+    return url.startswith("/") and not url.startswith(("//", "/\\"))
+
+
 def clean_blocks(blocks: list) -> list:
     """Page blocks: known types only; any HTML inside is sanitized."""
     clean = []
@@ -65,11 +75,7 @@ def clean_blocks(blocks: list) -> list:
         for key in ("html", "text"):
             if isinstance(item.get(key), str):
                 item[key] = clean_html(item[key]) if key == "html" else item[key][:5000]
-        if (
-            "url" in item
-            and isinstance(item["url"], str)
-            and not item["url"].startswith(("https://", "/"))
-        ):
+        if "url" in item and not _safe_url(item["url"]):
             item.pop("url")
         clean.append(item)
     return clean
