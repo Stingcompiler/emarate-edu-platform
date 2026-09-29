@@ -1,13 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
-import { CheckCircle2 } from "lucide-react";
+import { CheckCircle2, ChevronLeft } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router";
 
 import { PortalShell } from "../../components/PortalShell";
 import { ProgressRing } from "../../components/motion";
-import { FilterBar, Card, Chip, EmptyState, SectionLabel } from "../../components/ui";
+import { FilterBar, Card, Chip, EmptyState, SectionLabel, StatusBadge } from "../../components/ui";
 import { api, ok } from "../../lib/api";
-import { when } from "../../lib/format";
+import { score, when } from "../../lib/format";
 import { initials } from "../../lib/reports";
 
 type Status = "pending" | "suggested" | "late" | "done";
@@ -26,6 +26,18 @@ export function Grading() {
   const queue = useGradingQueue(filter);
   const q = queue.data;
   const counts = q?.counts ?? { pending: 0, suggested: 0, late: 0, done: 0 };
+  // «تصحيح متسلسل — ابدأ من الأقدم» (board TeacherGrading): the oldest waiting submission;
+  // «اعتماد وحفظ ثم التالي» then walks the queue.
+  const oldest =
+    filter === "done"
+      ? undefined
+      : (q?.groups ?? [])
+          .flatMap((g) => g.submissions)
+          .sort((x, y) =>
+            (x.current_version?.submitted_at ?? x.first_submitted_at ?? "").localeCompare(
+              y.current_version?.submitted_at ?? y.first_submitted_at ?? "",
+            ),
+          )[0];
   return (
     <PortalShell
       title="التصحيح"
@@ -58,6 +70,20 @@ export function Grading() {
           ))}
         </div>
       </FilterBar>
+      {oldest && (
+        <Link
+          to={`/submissions/${oldest.public_id}`}
+          className="mt-4 flex items-center gap-3 rounded-2xl bg-header p-4 text-white shadow-sm hover:opacity-95"
+        >
+          <span className="min-w-0 flex-1">
+            <b className="block">تصحيح متسلسل — ابدأ من الأقدم</b>
+            <span className="text-xs text-navy-100">
+              {oldest.student.full_name_ar} · احفظ وانتقل للتالي دون العودة إلى القائمة
+            </span>
+          </span>
+          <ChevronLeft size={20} aria-hidden className="ltr:rotate-180" />
+        </Link>
+      )}
       <div className="mt-4 grid gap-6 lg:grid-cols-2">
         {(q?.groups ?? []).map(({ assignment: a, submissions }) => (
           <section key={a.public_id}>
@@ -88,15 +114,14 @@ export function Grading() {
                   <span className="shrink-0 text-xs font-semibold">
                     {r.grade?.status === "approved" ? (
                       <span className="text-success-strong">
-                        {Number(r.grade.final_score).toLocaleString("ar-u-nu-latn")}/
-                        {Number(a.max_grade).toLocaleString("ar-u-nu-latn")}
+                        {score(r.grade.final_score, a.max_grade ?? 0)}
                       </span>
                     ) : r.grade ? (
                       <span className="text-warning-strong">
                         {Number(r.grade.score).toLocaleString("ar-u-nu-latn")} مقترح
                       </span>
                     ) : (
-                      <span className="text-primary">جديد</span>
+                      <StatusBadge status="new" label="جديد" />
                     )}
                   </span>
                 </Link>

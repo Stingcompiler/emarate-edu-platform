@@ -19,6 +19,7 @@ import {
   WithSide,
 } from "../../components/ui";
 import { api, ok } from "../../lib/api";
+import { htmlToText, textToHtml } from "../../lib/richText";
 import { useUnsavedChanges } from "../../lib/useUnsavedChanges";
 import { slugify } from "../../lib/format";
 import { ALL, Pager, useLocalPages } from "../../components/Pager";
@@ -146,7 +147,7 @@ export function EventEditor() {
       setForm({
         slug: e.slug,
         title: e.title,
-        description: e.description.replace(/<[^>]+>/g, ""),
+        description: htmlToText(e.description),
         location: e.location ?? "",
         registration_url: e.registration_url ?? "",
         starts_at: local(e.starts_at),
@@ -157,7 +158,7 @@ export function EventEditor() {
     mutationFn: async (status: "draft" | "published" | "cancelled") => {
       const body = {
         ...form,
-        description: `<p>${form.description.replace(/[<>&]/g, (c) => ({ "<": "&lt;", ">": "&gt;", "&": "&amp;" })[c]!)}</p>`,
+        description: textToHtml(form.description),
         starts_at: new Date(form.starts_at).toISOString(),
         ends_at: new Date(form.ends_at).toISOString(),
         status,
@@ -179,10 +180,27 @@ export function EventEditor() {
   });
   const set = (patch: Partial<typeof form>) => setForm((f) => ({ ...f, ...patch }));
   const s = new Date(form.starts_at);
+  // What's missing before publishing, said instead of a silently disabled button.
+  const endsBeforeStart =
+    !!form.starts_at && !!form.ends_at && new Date(form.ends_at) <= new Date(form.starts_at);
+  const missing = [
+    !form.title && "العنوان",
+    !form.slug && "الرابط",
+    !form.description.trim() && "الوصف",
+  ].filter(Boolean) as string[];
+  const status = event.data?.status;
+  const statusLine =
+    status === "published"
+      ? new Date(event.data!.ends_at) < new Date()
+        ? "انتهت · ما زالت ظاهرة في الأرشيف"
+        : "منشورة على الموقع وتقويم الطلاب"
+      : status === "cancelled"
+        ? "أُلغيت · تظهر للزوار ملغاة"
+        : "مسودة · لا يراها أحد بعد";
   return (
     <PortalShell
       title={form.title || "فعالية جديدة"}
-      subtitle="تُنشر على الموقع وتقويم الطلاب"
+      subtitle={creating ? "تُنشر على الموقع وتقويم الطلاب" : statusLine}
       back={{ label: "الفعاليات", to: "/events" }}
     >
       <div className="contents" onInput={unsaved.onInput}>
@@ -245,18 +263,26 @@ export function EventEditor() {
                 <Notice>{problemMessage(save.error)}</Notice>
               </div>
             )}
+            {endsBeforeStart && (
+              <div className="mt-3">
+                <Notice tone="warning">النهاية يجب أن تكون بعد البداية.</Notice>
+              </div>
+            )}
+            {missing.length > 0 && (
+              <p className="mt-3 text-xs text-text-muted">للنشر أكمل: {missing.join("، ")}.</p>
+            )}
             <div className="mt-4 flex flex-wrap gap-2">
               <Button
                 variant="secondary"
                 onClick={() => save.mutate("draft")}
-                disabled={!form.slug || !form.title || save.isPending}
+                disabled={!form.slug || !form.title || endsBeforeStart || save.isPending}
               >
                 حفظ مسودة
               </Button>
               <Button
                 className="flex-1"
                 onClick={() => save.mutate("published")}
-                disabled={!form.slug || !form.title || !form.description || save.isPending}
+                disabled={missing.length > 0 || endsBeforeStart || save.isPending}
               >
                 نشر الفعالية
               </Button>
@@ -264,14 +290,18 @@ export function EventEditor() {
                 <Button
                   variant="secondary"
                   className="text-danger-strong"
-                  onClick={() => save.mutate("cancelled")}
+                  disabled={save.isPending || status === "cancelled"}
+                  onClick={() =>
+                    window.confirm("إلغاء الفعالية يظهر للزوار أنها أُلغيت. متابعة؟") &&
+                    save.mutate("cancelled")
+                  }
                 >
                   إلغاء الفعالية
                 </Button>
               )}
             </div>
           </div>
-          <aside className="mt-6 lg:sticky lg:top-6 lg:mt-0">
+          <aside className="mt-6 lg:sticky lg:top-20 lg:mt-0">
             <SectionLabel>المعاينة</SectionLabel>
             <Card className="flex gap-3 p-4">
               <span className="grid w-14 shrink-0 place-items-center rounded-lg bg-accent-soft py-1 text-accent">

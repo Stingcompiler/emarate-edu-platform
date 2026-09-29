@@ -12,6 +12,7 @@ import {
   Notice,
   SectionLabel,
   problemMessage,
+  StatusBadge,
 } from "../../components/ui";
 import { api, ok } from "../../lib/api";
 import { useUnsavedChanges } from "../../lib/useUnsavedChanges";
@@ -77,6 +78,16 @@ export function PageEditor() {
       if (creating) navigate(`/site/pages/${data.public_id}`, { replace: true });
     },
   });
+  // On a live page, saving keeps it live; taking it down is its own, confirmed action
+  // (review 2026-09-29: «حفظ مسودة» used to unpublish a published page silently).
+  const published = page.data?.status === "published";
+  const state = unsaved.dirty
+    ? { tone: "pending", label: "تغييرات غير محفوظة" }
+    : save.isSuccess
+      ? { tone: "approved", label: "حُفظ ✓" }
+      : published
+        ? { tone: "published", label: "منشورة" }
+        : { tone: "draft", label: "مسودة" };
   const update = (i: number, patch: Partial<Block>) =>
     setBlocks((bs) => bs.map((b, j) => (j === i ? { ...b, ...patch } : b)));
   const moveBlock = (i: number, d: number) =>
@@ -212,24 +223,53 @@ export function PageEditor() {
                 <Notice>{problemMessage(save.error)}</Notice>
               </div>
             )}
-            <div className="mt-4 flex gap-2">
-              <Button
-                variant="secondary"
-                onClick={() => save.mutate("draft")}
-                disabled={!slug || !title || save.isPending}
-              >
-                حفظ مسودة
-              </Button>
-              <Button
-                className="flex-1"
-                onClick={() => save.mutate("published")}
-                disabled={!slug || !title || save.isPending}
-              >
-                نشر الصفحة
-              </Button>
+            {/* Above the phone's tab bar while editing; in the flow on large screens. */}
+            <div className="sticky bottom-24 z-10 mt-4 flex flex-wrap items-center gap-2 rounded-2xl bg-surface p-2 shadow-md lg:static lg:bg-transparent lg:p-0 lg:shadow-none">
+              <StatusBadge status={state.tone} label={state.label} />
+              {published ? (
+                <>
+                  <Button
+                    variant="secondary"
+                    className="min-h-11"
+                    onClick={() =>
+                      window.confirm(
+                        "إلغاء نشر الصفحة يزيلها من موقع الكلية حتى تنشرها مجددًا. متابعة؟",
+                      ) && save.mutate("draft")
+                    }
+                    disabled={save.isPending}
+                  >
+                    إلغاء النشر
+                  </Button>
+                  <Button
+                    className="min-h-11 flex-1"
+                    onClick={() => save.mutate("published")}
+                    disabled={!slug || !title || save.isPending}
+                  >
+                    حفظ التعديلات ونشرها
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button
+                    variant="secondary"
+                    className="min-h-11"
+                    onClick={() => save.mutate("draft")}
+                    disabled={!slug || !title || save.isPending}
+                  >
+                    حفظ مسودة
+                  </Button>
+                  <Button
+                    className="min-h-11 flex-1"
+                    onClick={() => save.mutate("published")}
+                    disabled={!slug || !title || save.isPending}
+                  >
+                    نشر الصفحة
+                  </Button>
+                </>
+              )}
             </div>
           </div>
-          <aside className="mt-6 lg:sticky lg:top-6 lg:mt-0">
+          <aside className="mt-6 lg:sticky lg:top-20 lg:mt-0">
             <SectionLabel>معاينة</SectionLabel>
             <Card className="space-y-3 p-5">
               <h2 className="font-display text-2xl font-bold text-text">{title}</h2>

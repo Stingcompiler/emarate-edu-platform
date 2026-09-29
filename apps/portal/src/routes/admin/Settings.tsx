@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { PortalShell } from "../../components/PortalShell";
 import { Button, Card, Notice, SectionLabel, Switch, problemMessage } from "../../components/ui";
 import { api, ok } from "../../lib/api";
+import { count, N } from "../../lib/format";
+import { useUnsavedChanges } from "../../lib/useUnsavedChanges";
 
 type S = {
   student_registration_requires_approval: boolean;
@@ -26,7 +28,11 @@ export function AdminSettings() {
   });
   const health = useQuery({
     queryKey: ["health"],
-    queryFn: async () => ok(await api.GET("/api/public/health")) ?? null,
+    // 503 still carries the checks (a degraded service).
+    queryFn: async () => {
+      const { data, error } = await api.GET("/api/public/health");
+      return data ?? error ?? null;
+    },
   });
   const [f, setF] = useState<S | null>(null);
   useEffect(() => {
@@ -39,6 +45,12 @@ export function AdminSettings() {
     },
     onSuccess: () => client.invalidateQueries({ queryKey: ["system-settings"] }),
   });
+  // What differs from the server: shown in one save bar across the page, and guarded when
+  // leaving (review 2026-09-29).
+  const saved = settings.data as S | undefined;
+  const changes =
+    f && saved ? (Object.keys(f) as (keyof S)[]).filter((k) => f[k] !== saved[k]).length : 0;
+  useUnsavedChanges(changes > 0);
   if (!f) return <PortalShell title="الإعدادات">{null}</PortalShell>;
   const toggle = (k: keyof S, label: string, hint: string) => (
     <div className="flex min-h-14 items-center justify-between gap-3 px-4 py-2">
@@ -137,14 +149,32 @@ export function AdminSettings() {
           <Notice>{problemMessage(save.error)}</Notice>
         </div>
       )}
-      {save.isSuccess && (
+      {save.isSuccess && !changes && (
         <div className="mt-4">
           <Notice tone="success">حُفظت الإعدادات.</Notice>
         </div>
       )}
-      <Button className="mt-4" onClick={() => save.mutate()} disabled={save.isPending}>
-        حفظ الإعدادات
-      </Button>
+      {changes > 0 && (
+        <div
+          role="region"
+          aria-label="تغييرات غير محفوظة"
+          className="sticky bottom-24 z-20 mt-4 flex flex-wrap items-center gap-2 rounded-2xl bg-text px-4 py-3 text-bg shadow-lg lg:bottom-6"
+        >
+          <p className="min-w-0 flex-1 text-sm font-semibold">
+            {changes === 1 ? "تغيير واحد غير محفوظ" : `${count(changes, N.change)} غير محفوظة`}
+          </p>
+          <Button
+            variant="ghost"
+            className="min-h-11 px-4 text-bg hover:bg-white/10"
+            onClick={() => saved && setF(saved)}
+          >
+            تراجع
+          </Button>
+          <Button className="min-h-11 px-5" onClick={() => save.mutate()} disabled={save.isPending}>
+            {save.isPending ? "جارٍ الحفظ…" : "حفظ الإعدادات"}
+          </Button>
+        </div>
+      )}
     </PortalShell>
   );
 }

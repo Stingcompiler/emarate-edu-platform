@@ -6,7 +6,7 @@ import { useNavigate, useParams } from "react-router";
 import { PortalShell } from "../../components/PortalShell";
 import { Button, Card, Notice, SectionLabel, problemMessage } from "../../components/ui";
 import { api, ok } from "../../lib/api";
-import { when } from "../../lib/format";
+import { when, score as markOf } from "../../lib/format";
 import { initials } from "../../lib/reports";
 import { openFile } from "../../lib/learning";
 import { ALL } from "../../components/Pager";
@@ -46,7 +46,9 @@ export function Grade() {
   const max = Number(a?.max_grade ?? 0);
   const queue = (siblings.data ?? []).filter((x) => x.grade?.status !== "approved");
   const position = queue.findIndex((x) => x.public_id === id);
-  const next = queue.find((x) => x.public_id !== id);
+  // Walk the queue in order; previous for a second look.
+  const next = position >= 0 ? queue[position + 1] : queue.find((x) => x.public_id !== id);
+  const previous = position > 0 ? queue[position - 1] : undefined;
   const [score, setScore] = useState("");
   const [feedback, setFeedback] = useState("");
   useEffect(() => {
@@ -158,10 +160,7 @@ export function Grade() {
           <aside className="mt-6 space-y-3 lg:mt-0">
             {s.grade?.status === "suggested" && (
               <Card className="space-y-2 bg-warning-soft p-4 text-sm text-warning-strong">
-                <b>
-                  اقتراح آلي — {Number(s.grade.score).toLocaleString("ar-u-nu-latn")} /{" "}
-                  {max.toLocaleString("ar-u-nu-latn")} · يتطلب اعتمادك
-                </b>
+                <b>اقتراح آلي — {markOf(s.grade.score, max)} · يتطلب اعتمادك</b>
                 {s.grade.feedback && <p>{s.grade.feedback}</p>}
                 <Button
                   className="w-full"
@@ -183,18 +182,21 @@ export function Grade() {
                 dir="ltr"
               />
               <div className="flex flex-wrap justify-center gap-1.5">
-                {[max, max * 0.9, max * 0.8, max * 0.7, max * 0.5]
-                  .map((n) => Math.round(n * 2) / 2)
-                  .map((n) => (
-                    <button
-                      key={n}
-                      type="button"
-                      onClick={() => setScore(String(n))}
-                      className="rounded-full border border-border-soft px-2.5 py-1 text-xs hover:bg-surface-alt"
-                    >
-                      {n.toLocaleString("ar-u-nu-latn")}
-                    </button>
-                  ))}
+                {[
+                  ...new Set(
+                    [1, 0.9, 0.8, 0.7, 0.6, 0.5, 0].map((f) => Math.round(max * f * 2) / 2),
+                  ),
+                ].map((n) => (
+                  <button
+                    key={n}
+                    type="button"
+                    aria-pressed={score === String(n)}
+                    onClick={() => setScore(String(n))}
+                    className={`min-h-11 min-w-11 rounded-full border px-3 text-sm lg:min-h-9 lg:min-w-9 ${score === String(n) ? "border-text bg-text text-bg" : "border-border-soft hover:bg-surface-alt"}`}
+                  >
+                    {n.toLocaleString("ar-u-nu-latn")}
+                  </button>
+                ))}
               </div>
               <textarea
                 value={feedback}
@@ -205,22 +207,41 @@ export function Grade() {
               {(save.isError || approve.isError) && (
                 <Notice>{problemMessage(save.error ?? approve.error)}</Notice>
               )}
-              <Button
-                className="w-full"
-                disabled={!valid || save.isPending}
-                onClick={() => save.mutate(true)}
-              >
-                {next ? "اعتماد وحفظ ثم التالي" : "اعتماد وحفظ"}
-              </Button>
-              {next && (
-                <Button
-                  variant="ghost"
-                  className="w-full"
-                  onClick={() => navigate(`/submissions/${next.public_id}`)}
-                >
-                  تخطٍّ
-                </Button>
+              {save.isSuccess && !next && (
+                <Notice tone="success">حُفظت الدرجة ✓ — لا تسليمات أخرى بانتظارك هنا.</Notice>
               )}
+              {/* Pinned above the phone's tab bar: grading is done one after another. */}
+              <div className="sticky bottom-24 z-10 -mx-4 space-y-2 bg-surface px-4 py-2 lg:static lg:mx-0 lg:p-0">
+                <Button
+                  className="min-h-11 w-full"
+                  disabled={!valid || save.isPending}
+                  onClick={() => save.mutate(true)}
+                >
+                  {save.isPending ? "جارٍ الحفظ…" : next ? "اعتماد وحفظ ثم التالي" : "اعتماد وحفظ"}
+                </Button>
+                {(previous || next) && (
+                  <div className="flex gap-2">
+                    {previous && (
+                      <Button
+                        variant="ghost"
+                        className="min-h-11 flex-1"
+                        onClick={() => navigate(`/submissions/${previous.public_id}`)}
+                      >
+                        السابق
+                      </Button>
+                    )}
+                    {next && (
+                      <Button
+                        variant="ghost"
+                        className="min-h-11 flex-1"
+                        onClick={() => navigate(`/submissions/${next.public_id}`)}
+                      >
+                        تخطَّ
+                      </Button>
+                    )}
+                  </div>
+                )}
+              </div>
             </Card>
           </aside>
         </div>

@@ -13,6 +13,7 @@ import {
   WithSide,
 } from "../../components/ui";
 import { api, ok } from "../../lib/api";
+import { htmlToText, textToHtml } from "../../lib/richText";
 import { useUnsavedChanges } from "../../lib/useUnsavedChanges";
 import { slugify } from "../../lib/format";
 
@@ -39,18 +40,12 @@ export function NewsEditor() {
         slug: item.data.slug,
         title: item.data.title,
         summary: item.data.summary ?? "",
-        body: item.data.body.replace(/<\/p><p>/g, "\n\n").replace(/<[^>]+>/g, ""),
+        body: htmlToText(item.data.body),
       });
   }, [item.data]);
   const save = useMutation({
     mutationFn: async (status: "draft" | "published") => {
-      const html = form.body
-        .split(/\n{2,}/)
-        .map(
-          (p) =>
-            `<p>${p.replace(/[<>&]/g, (c) => ({ "<": "&lt;", ">": "&gt;", "&": "&amp;" })[c]!)}</p>`,
-        )
-        .join("");
+      const html = textToHtml(form.body);
       const body = { ...form, body: html, status } as never;
       const res = creating
         ? await api.POST("/api/v1/content/news", { body })
