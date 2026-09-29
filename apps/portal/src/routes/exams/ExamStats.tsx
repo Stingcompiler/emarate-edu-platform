@@ -22,8 +22,9 @@ export function ExamStats() {
   const stats = useQuery({
     queryKey: ["exams", id, "stats"],
     queryFn: async () =>
-      (await api.GET("/api/v1/exams/{public_id}/stats", { params: { path: { public_id: id } } }))
-        .data ?? null,
+      ok(
+        await api.GET("/api/v1/exams/{public_id}/stats", { params: { path: { public_id: id } } }),
+      ) ?? null,
   });
   const release = useMutation({
     mutationFn: async (released: boolean) => {
@@ -42,16 +43,19 @@ export function ExamStats() {
       title={e?.title ?? "النتائج"}
       subtitle={
         s
-          ? `${s.attempts.toLocaleString("ar")} من ${s.students.toLocaleString("ar")} أدّوا`
+          ? `${s.attempts.toLocaleString("ar-u-nu-latn")} من ${s.students.toLocaleString("ar-u-nu-latn")} أدّوا`
           : undefined
       }
       back={{ label: "الاختبار", to: `/exams/${id}` }}
     >
       {s && e && (
         <div>
-          <Card className="grid grid-cols-2 divide-border-soft text-center sm:grid-cols-4 sm:divide-x sm:divide-x-reverse">
+          <Card className="grid grid-cols-2 divide-border-soft text-center sm:grid-cols-4 sm:divide-x">
             {[
-              { v: s.average ?? "—", l: `المتوسط /${Number(e.total_marks).toLocaleString("ar")}` },
+              {
+                v: s.average ?? "—",
+                l: `المتوسط /${Number(e.total_marks).toLocaleString("ar-u-nu-latn")}`,
+              },
               { v: s.median ?? "—", l: "الوسيط" },
               { v: s.pass_rate !== null ? `${Math.round(s.pass_rate * 100)}%` : "—", l: "ناجحون" },
               {
@@ -88,7 +92,7 @@ export function ExamStats() {
           {s.pending.length > 0 && (
             <>
               <SectionLabel>
-                تحتاج تصحيحًا يدويًا · {s.needs_manual.toLocaleString("ar")}
+                تحتاج تصحيحًا يدويًا · {s.needs_manual.toLocaleString("ar-u-nu-latn")}
               </SectionLabel>
               <Card className="divide-y divide-border-soft">
                 {s.pending.map((p) => (
@@ -161,7 +165,7 @@ function ManualRow({
           value={marks}
           onChange={(e) => setMarks(e.target.value)}
           inputMode="decimal"
-          placeholder={`من ${Number(row.marks).toLocaleString("ar")}`}
+          placeholder={`من ${Number(row.marks).toLocaleString("ar-u-nu-latn")}`}
           className="min-h-10 w-28 rounded-lg border border-border bg-surface px-3"
         />
         <Button onClick={() => grade.mutate()} disabled={!marks || grade.isPending}>

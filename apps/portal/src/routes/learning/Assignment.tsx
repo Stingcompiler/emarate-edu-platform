@@ -13,13 +13,13 @@ import {
   problemMessage,
 } from "../../components/ui";
 import { api, ok } from "../../lib/api";
-import { when, count, N } from "../../lib/format";
+import { when, count, N, score } from "../../lib/format";
 import { dueLabel, fmtSize, openFile, useCourse, isCourseStaff } from "../../lib/learning";
 import { asForm, formData } from "../../lib/upload";
 import { ALL } from "../../components/Pager";
 
 const absolute = (iso: string) =>
-  new Date(iso).toLocaleString("ar", {
+  new Date(iso).toLocaleString("ar-u-nu-latn", {
     weekday: "long",
     day: "numeric",
     month: "long",
@@ -65,8 +65,9 @@ export function Assignment() {
 
 type A = NonNullable<Awaited<ReturnType<typeof loadAssignment>>>;
 async function loadAssignment(id: string) {
-  return (await api.GET("/api/v1/assignments/{public_id}", { params: { path: { public_id: id } } }))
-    .data;
+  return ok(
+    await api.GET("/api/v1/assignments/{public_id}", { params: { path: { public_id: id } } }),
+  );
 }
 
 function StudentView({ a }: { a: A }) {
@@ -89,60 +90,77 @@ function StudentView({ a }: { a: A }) {
   return (
     <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_380px] lg:items-start lg:gap-6">
       <div className="space-y-4">
-        <div className="flex items-center gap-4 rounded-2xl bg-header p-4 text-white shadow-sm">
-          <div className="text-center">
-            <p className="text-2xl font-bold">
-              {Math.floor(left / 86_400_000).toLocaleString("ar")}
+        {closed ? (
+          // Closed: no zero countdown and no talk of resubmitting (review 2026-09-29).
+          <div className="rounded-2xl bg-surface-alt p-4 text-sm">
+            <p className="font-semibold text-text">أُغلق التسليم</p>
+            <p className="mt-1 text-text-muted">
+              كان الموعد {absolute(a.due_at)}
+              {s ? " · تسليمك محفوظ أدناه" : " · لم يُسلَّم شيء"}
             </p>
-            <p className="text-[11px] text-navy-200">يوم</p>
           </div>
-          <div className="text-center">
-            <p className="text-2xl font-bold">
-              {Math.floor((left % 86_400_000) / 3_600_000).toLocaleString("ar")}
-            </p>
-            <p className="text-[11px] text-navy-200">ساعة</p>
-          </div>
-          <p className="flex-1 text-sm text-navy-100">
-            {closed
-              ? "انتهى موعد التسليم"
-              : due < now
+        ) : (
+          <div className="flex items-center gap-4 rounded-2xl bg-header p-4 text-white shadow-sm">
+            <div className="text-center">
+              <p className="text-2xl font-bold">
+                {Math.floor(left / 86_400_000).toLocaleString("ar-u-nu-latn")}
+              </p>
+              <p className="text-[11px] text-navy-200">يوم</p>
+            </div>
+            <div className="text-center">
+              <p className="text-2xl font-bold">
+                {Math.floor((left % 86_400_000) / 3_600_000).toLocaleString("ar-u-nu-latn")}
+              </p>
+              <p className="text-[11px] text-navy-200">ساعة</p>
+            </div>
+            <p className="flex-1 text-sm text-navy-100">
+              {due < now
                 ? `بعد الموعد — ${a.late_policy === "penalty" ? `يُقبل بخصم ${a.late_penalty_percent}٪` : "يُقبل ويُعلَّم متأخرًا"}`
                 : `متبقٍ على التسليم · ${dueLabel(a.due_at)}`}
-            {a.allow_resubmission ? " · يُسمح بإعادة التسليم حتى الموعد" : ""}
-          </p>
-        </div>
+              {a.allow_resubmission ? " · يُسمح بإعادة التسليم حتى الموعد" : ""}
+            </p>
+          </div>
+        )}
         {a.description && (
           <Card className="whitespace-pre-line p-4 text-sm leading-7 text-text">
             {a.description}
           </Card>
         )}
-        <SectionLabel>ما يجب تسليمه</SectionLabel>
-        <Card className="divide-y divide-border-soft text-sm">
-          {types.includes("file") && (
-            <p className="px-4 py-3">
-              ملف{" "}
-              {a.allowed_extensions?.length ? <bdi>({a.allowed_extensions.join(", ")})</bdi> : ""} ·
-              حتى <bdi>{a.max_file_size_mb} MB</bdi> · {count(a.max_files, N.file)} كحد أقصى
-            </p>
-          )}
-          {(a.link_fields ?? []).map((f) => (
-            <p key={f.label} className="px-4 py-3">
-              رابط: {f.label}
-              {f.required ? "" : " · اختياري"}
-            </p>
-          ))}
-          {types.includes("text") && <p className="px-4 py-3">نص / ملاحظة</p>}
-        </Card>
+        {(types.length > 0 || (a.link_fields ?? []).length > 0) && (
+          <>
+            <SectionLabel>ما يجب تسليمه</SectionLabel>
+            <Card className="divide-y divide-border-soft text-sm">
+              {types.includes("file") && (
+                <p className="px-4 py-3">
+                  ملف{" "}
+                  {a.allowed_extensions?.length ? (
+                    <bdi>({a.allowed_extensions.join(", ")})</bdi>
+                  ) : (
+                    ""
+                  )}{" "}
+                  · حتى <bdi>{a.max_file_size_mb} MB</bdi> · {count(a.max_files, N.file)} كحد أقصى
+                </p>
+              )}
+              {(a.link_fields ?? []).map((f) => (
+                <p key={f.label} className="px-4 py-3">
+                  رابط: {f.label}
+                  {f.required ? "" : " · اختياري"}
+                </p>
+              ))}
+              {types.includes("text") && <p className="px-4 py-3">نص / ملاحظة</p>}
+            </Card>
+          </>
+        )}
         <SectionLabel>تسليمي</SectionLabel>
         {s ? (
           <Card className="space-y-2 p-4 text-sm">
             <p className="font-semibold text-text">
-              الإصدار {s.current_version.version_no.toLocaleString("ar")} —{" "}
+              الإصدار {s.current_version.version_no.toLocaleString("ar-u-nu-latn")} —{" "}
               {s.current_version.is_late ? "متأخر" : "في الوقت"}
             </p>
             <p className="text-xs text-text-muted">
               {when(s.current_version.submitted_at)} · الإصدارات المحفوظة:{" "}
-              {s.versions_count.toLocaleString("ar")}
+              {s.versions_count.toLocaleString("ar-u-nu-latn")}
             </p>
             {s.current_version.content && (
               <p dir="auto" className="whitespace-pre-line rounded-lg bg-surface-alt p-3">
@@ -175,10 +193,7 @@ function StudentView({ a }: { a: A }) {
             )}
             {s.grade && s.grade.status === "approved" && (
               <div className="mt-2 rounded-lg bg-success-soft p-3 text-success-strong">
-                <b className="text-lg">
-                  {Number(s.grade.final_score).toLocaleString("ar")} /{" "}
-                  {Number(a.max_grade).toLocaleString("ar")}
-                </b>
+                <b className="text-lg">{score(s.grade.final_score, a.max_grade ?? 0)}</b>
                 {s.grade.feedback && <p className="mt-1 text-sm">«{s.grade.feedback}»</p>}
               </div>
             )}
@@ -336,7 +351,8 @@ function Submissions({ id, max }: { id: string; max: string }) {
   return (
     <>
       <p className="mb-3 text-sm text-text-muted">
-        {count(rows.length, N.submission)} · {waiting.toLocaleString("ar")} بانتظار التصحيح
+        {count(rows.length, N.submission)} · {waiting.toLocaleString("ar-u-nu-latn")} بانتظار
+        التصحيح
       </p>
       <Card className="divide-y divide-border-soft">
         {rows.map((r) => (
@@ -352,13 +368,14 @@ function Submissions({ id, max }: { id: string; max: string }) {
               <span className="text-xs text-text-muted">
                 <bdi>{r.student.university_number}</bdi> ·{" "}
                 {when(r.current_version?.submitted_at ?? r.first_submitted_at)}
-                {r.is_late ? " · متأخر" : ""} · إصدار {r.versions_count.toLocaleString("ar")}
+                {r.is_late ? " · متأخر" : ""} · إصدار{" "}
+                {r.versions_count.toLocaleString("ar-u-nu-latn")}
               </span>
             </span>
             {r.grade?.status === "approved" ? (
               <b className="text-sm text-success-strong">
-                {Number(r.grade.final_score).toLocaleString("ar")}/
-                {Number(max).toLocaleString("ar")}
+                {Number(r.grade.final_score).toLocaleString("ar-u-nu-latn")}/
+                {Number(max).toLocaleString("ar-u-nu-latn")}
               </b>
             ) : r.grade ? (
               <StatusBadge status="suggested" label="مقترح" />

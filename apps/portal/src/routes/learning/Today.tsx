@@ -6,7 +6,7 @@ import { PortalShell } from "../../components/PortalShell";
 import { Card, CodeTile, SectionLabel } from "../../components/ui";
 import { api, ok } from "../../lib/api";
 import { useMe } from "../../lib/auth";
-import { when, count, N } from "../../lib/format";
+import { when, count, N, score } from "../../lib/format";
 import { dueLabel, splitCourse, taskState, useAssignments, useLectures } from "../../lib/learning";
 import { examPhase } from "../exams/Exams";
 import { ALL } from "../../components/Pager";
@@ -22,7 +22,7 @@ function greeting(now = new Date()) {
 export function Today() {
   const me = useMe();
   const assignments = useAssignments();
-  const lectures = useLectures();
+  const lectures = useLectures("all");
   const live = useQuery({
     queryKey: ["live"],
     queryFn: async () =>
@@ -98,7 +98,7 @@ export function Today() {
     .sort((a, b) => (b.published_at ?? "").localeCompare(a.published_at ?? ""))
     .slice(0, 4);
   const graded = (assignments.data ?? []).filter((a) => a.mine?.graded).slice(0, 3);
-  const dateLine = new Date().toLocaleDateString("ar", {
+  const dateLine = new Date().toLocaleDateString("ar-u-nu-latn", {
     weekday: "long",
     day: "numeric",
     month: "long",
@@ -139,7 +139,7 @@ export function Today() {
                 className="flex items-center gap-3 px-4 py-3 hover:bg-surface-alt"
               >
                 <span className="w-14 shrink-0 text-center text-xs text-text-muted">
-                  {new Date(item.at).toLocaleTimeString("ar", {
+                  {new Date(item.at).toLocaleTimeString("ar-u-nu-latn", {
                     hour: "numeric",
                     minute: "2-digit",
                   })}
@@ -209,8 +209,7 @@ export function Today() {
                   <span className="text-xs text-text-muted">{a.course_name}</span>
                 </span>
                 <b className="text-sm text-success-strong">
-                  {Number(a.mine!.score).toLocaleString("ar")}/
-                  {Number(a.max_grade).toLocaleString("ar")}
+                  {score(a.mine!.score, a.max_grade ?? 0)}
                 </b>
               </Link>
             ))}

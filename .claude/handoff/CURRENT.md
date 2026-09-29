@@ -5,22 +5,18 @@
   - §1 the method;
   - §2 the findings (S = security, P = portal logic, W = public site, then per role);
   - §3 the ordered PRs.
-- **PR 1** `fix/auth-hardening` (#45): S2–S5 and S8–S12. Tests are in `accounts/tests/test_hardening.py`.
-  Merge when CI is green.
-- **PR 2** `fix/portal-foundations`, in progress:
-  - `ok()` + `ApiError` in `lib/api.ts`. 139 calls in 70 files were converted by a script: failed reads
-    throw, and `QueryErrorBanner` (`lib/queryClient.ts`) explains them. A 401 re-checks `me`.
-    `meta: { silent: true }` skips the banner.
-  - `lib/access.ts` `ROUTE_ACCESS`: every `signedIn(el, path)` in `main.tsx` has an audience; outside it the
-    user sees `<NoAccess/>`. `access.test.ts` fails if a route lacks a rule. The e2e sweep fails if a role's
-    own navigation link shows «غير مسموح».
-  - S1: `client.clear()` on sign-out and sign-in.
-  - S6: `safeNext` does a same-origin URL check.
-  - S7: `useUnsavedChanges()` in 7 editors. `data-saves-itself` marks parts that save on their own.
-  - P5: `TakeExam` error state.
-  - P6: `useDepartment` reads the router, and `DepartmentSwitch` appears on department pages when there is a
-    choice.
-- **Next:** PR 3 (data correctness), then PR 4 (workflows), then PR 5 (shared UI), then PR 6 (public site),
+- **Merged:** PR 1 #45 (auth hardening, S2–S12) and PR 2 #46 (portal foundations).
+  - PR 2 added `ok()`/`ApiError`, `QueryErrorBanner`, `ROUTE_ACCESS` with `NoAccess`, clearing the cache on
+    sign-out and sign-in, `safeNext`, `useUnsavedChanges`, the `TakeExam` error state, and `DepartmentSwitch`.
+- **PR 3** `fix/data-correctness`:
+  - Import detail uses server paging.
+  - Monitor: `?state=` counts plus paging. Users: `?role=`. `summary.by_registrar`. Announcements: `?scope_id=`.
+  - `lib/format`: `fmtDate`, `when()` future/yesterday, `score()` («6 من 10»), `ltr()` isolation, the
+    `ar-u-nu-latn` locale everywhere, and nouns `member` and `regulation`.
+  - `divide-x-reverse` removed; `openAfter()` for links fetched after a click.
+  - Closed assignment state; no drafts shown to students; Tasks «خلال 7 أيام».
+  - The sweep now guards against hand-written plurals and flipped dividers.
+- **Next:** PR 4 (workflows), then PR 5 (shared UI), then PR 6 (public site),
   then PR 7+ (large screens), then motion and polish. Details per PR are in §3 of the review doc.
 - **Review evidence** (screenshots, notes) was in the session scratchpad, so it is not in the repo. The doc
   carries everything needed.

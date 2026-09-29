@@ -213,7 +213,7 @@ export function ExamEditor() {
                 value={form.pass_marks}
                 onChange={(ev) => set({ pass_marks: ev.target.value })}
                 disabled={!editable}
-                hint={creating ? undefined : `المجموع ${total.toLocaleString("ar")}`}
+                hint={creating ? undefined : `المجموع ${total.toLocaleString("ar-u-nu-latn")}`}
               />
               <Field
                 label="المحاولات"
@@ -303,7 +303,7 @@ export function ExamEditor() {
             <section data-saves-itself className="mt-6 lg:mt-0">
               <div className="flex items-center justify-between">
                 <SectionLabel>
-                  الأسئلة · {(questions.data?.length ?? 0).toLocaleString("ar")} ·{" "}
+                  الأسئلة · {(questions.data?.length ?? 0).toLocaleString("ar-u-nu-latn")} ·{" "}
                   {count(total, N.mark)}
                 </SectionLabel>
                 <StatusBadge
@@ -377,7 +377,7 @@ function QuestionCard({
     <Card className="p-4">
       <div className="flex items-start gap-3">
         <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-surface-alt text-sm font-bold text-text">
-          {position.toLocaleString("ar")}
+          {position.toLocaleString("ar-u-nu-latn")}
         </span>
         <div className="min-w-0 flex-1">
           <p className="text-xs text-text-muted">

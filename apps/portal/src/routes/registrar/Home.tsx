@@ -188,7 +188,7 @@ export function RegistrarHome() {
         <aside className="mt-6 space-y-4 lg:mt-0">
           <Card className="p-4">
             <p className="text-3xl font-bold text-primary">{num(mine.data?.count ?? 0)}</p>
-            <p className="text-sm text-text-muted">طلبًا أتولاه</p>
+            <p className="text-sm text-text-muted">طلبات أتولاها</p>
           </Card>
           {head && (
             <>

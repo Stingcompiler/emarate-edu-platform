@@ -8,7 +8,7 @@ import { api, ok } from "../../lib/api";
 import { useMe } from "../../lib/auth";
 import { examPhase } from "./Exams";
 
-const at = new Intl.DateTimeFormat("ar", {
+const at = new Intl.DateTimeFormat("ar-u-nu-latn", {
   weekday: "long",
   day: "numeric",
   month: "long",
@@ -80,7 +80,7 @@ export function ExamDetail() {
                       to={`/exam-attempts/${a.public_id}/result`}
                       className="block text-sm font-semibold text-primary"
                     >
-                      نتيجة المحاولة {a.attempt_no.toLocaleString("ar")} ←
+                      نتيجة المحاولة {a.attempt_no.toLocaleString("ar-u-nu-latn")} ←
                     </Link>
                   ))}
                   {start.isError && <Notice>{problemMessage(start.error)}</Notice>}
@@ -127,7 +127,7 @@ export function ExamDetail() {
           }
         >
           <div className="space-y-4">
-            <Card className="grid grid-cols-4 divide-x divide-x-reverse divide-border-soft text-center">
+            <Card className="grid grid-cols-4 divide-x divide-border-soft text-center">
               {[
                 { n: e.duration_minutes, l: "دقيقة" },
                 { n: e.questions_count, l: "سؤالًا" },
@@ -135,7 +135,9 @@ export function ExamDetail() {
                 { n: e.max_attempts ?? 1, l: "محاولة" },
               ].map((s) => (
                 <div key={s.l} className="py-3">
-                  <p className="text-xl font-bold text-text">{(s.n ?? 0).toLocaleString("ar")}</p>
+                  <p className="text-xl font-bold text-text">
+                    {(s.n ?? 0).toLocaleString("ar-u-nu-latn")}
+                  </p>
                   <p className="text-xs text-text-muted">{s.l}</p>
                 </div>
               ))}
@@ -147,7 +149,7 @@ export function ExamDetail() {
                 ["يُغلق", at.format(new Date(e.closes_at))],
                 [
                   "درجة النجاح",
-                  `${Number(e.pass_marks ?? 0).toLocaleString("ar")} من ${Number(e.total_marks).toLocaleString("ar")}`,
+                  `${Number(e.pass_marks ?? 0).toLocaleString("ar-u-nu-latn")} من ${Number(e.total_marks).toLocaleString("ar-u-nu-latn")}`,
                 ],
                 ["الرجوع للسؤال السابق", e.allow_backtrack ? "مسموح" : "غير مسموح"],
                 ["ظهور النتيجة", VISIBILITY[e.result_visibility ?? "immediate"] ?? ""],

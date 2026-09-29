@@ -1,16 +1,46 @@
-const relative = new Intl.RelativeTimeFormat("ar", { numeric: "auto" });
-const clock = new Intl.DateTimeFormat("ar", { hour: "numeric", minute: "2-digit" });
-const weekday = new Intl.DateTimeFormat("ar", { weekday: "long" });
-const date = new Intl.DateTimeFormat("ar", { day: "numeric", month: "long" });
+const relative = new Intl.RelativeTimeFormat("ar-u-nu-latn", { numeric: "auto" });
+const clock = new Intl.DateTimeFormat("ar-u-nu-latn", { hour: "numeric", minute: "2-digit" });
+const weekday = new Intl.DateTimeFormat("ar-u-nu-latn", { weekday: "long" });
+const date = new Intl.DateTimeFormat("ar-u-nu-latn", { day: "numeric", month: "long" });
+const fullDate = new Intl.DateTimeFormat("ar-u-nu-latn", {
+  day: "numeric",
+  month: "long",
+  year: "numeric",
+});
 
-/** "قبل 12 دقيقة" today, the time yesterday, the weekday this week, else the date. */
+/**
+ * One date format for the portal (docs/06: «29 سبتمبر 2026», Western digits). A date-only
+ * value ("2026-09-01") is that calendar day here, not midnight UTC shifted a day.
+ */
+export function fmtDate(value: string | null | undefined): string {
+  if (!value) return "—";
+  const plain = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+  const d = plain ? new Date(+plain[1]!, +plain[2]! - 1, +plain[3]!) : new Date(value);
+  return Number.isNaN(d.getTime()) ? "—" : fullDate.format(d);
+}
+
+/**
+ * Past: "قبل 12 دقيقة", "قبل 3 ساعات" today, "أمس 3:05 م", the weekday this week, else the
+ * date. Future (a due or opening time): "بعد 20 دقيقة", "بعد 3 ساعات" today, "غدًا 10:00 ص",
+ * the weekday within a week, else the date — never "بعد 120 ساعة" (review 2026-09-29, P12).
+ */
 export function when(iso: string, now = new Date()): string {
   const then = new Date(iso);
   const minutes = Math.round((then.getTime() - now.getTime()) / 60_000);
   if (Math.abs(minutes) < 60) return relative.format(minutes, "minute");
+  const today = new Date(now);
+  today.setHours(0, 0, 0, 0);
+  const day = 86_400_000;
+  if (minutes > 0) {
+    const days = Math.floor((then.getTime() - today.getTime()) / day);
+    if (days === 0) return relative.format(Math.round(minutes / 60), "hour");
+    if (days === 1) return `غدًا ${clock.format(then)}`;
+    if (days < 7) return `${weekday.format(then)} ${clock.format(then)}`;
+    return date.format(then);
+  }
   const group = dayGroup(iso, now);
   if (group === "today") return relative.format(Math.round(minutes / 60), "hour");
-  if (group === "yesterday") return clock.format(then);
+  if (group === "yesterday") return `أمس ${clock.format(then)}`;
   if (group === "week") return weekday.format(then);
   return date.format(then);
 }
@@ -39,7 +69,7 @@ export function dayGroup(iso: string, now = new Date()): DayGroup {
  *  3–10 the plural, 11–99 the accusative singular (e.g. سؤال، سؤالان، أسئلة، سؤالًا). */
 export type Noun = { one: string; two: string; few: string; many: string };
 
-const pluralRule = new Intl.PluralRules("ar");
+const pluralRule = new Intl.PluralRules("ar-u-nu-latn");
 
 /** "٥ أسئلة", "سؤالان", "١٥ سؤالًا", "١٠٠ سؤال" — "—" when the number is unknown. */
 export function count(n: number | null | undefined, noun: Noun): string {
@@ -47,7 +77,7 @@ export function count(n: number | null | undefined, noun: Noun): string {
   const form = pluralRule.select(n);
   if (form === "two") return noun.two;
   const word = form === "few" ? noun.few : form === "many" ? noun.many : noun.one;
-  return `${n.toLocaleString("ar", { maximumFractionDigits: 1 })} ${word}`;
+  return `${n.toLocaleString("ar-u-nu-latn", { maximumFractionDigits: 1 })} ${word}`;
 }
 
 const noun = (one: string, two: string, few: string, many: string): Noun => ({
@@ -71,10 +101,12 @@ export const N = {
   hour: noun("ساعة", "ساعتان", "ساعات", "ساعة"),
   lecture: noun("محاضرة", "محاضرتان", "محاضرات", "محاضرة"),
   mark: noun("درجة", "درجتان", "درجات", "درجة"),
+  member: noun("عضو", "عضوان", "أعضاء", "عضوًا"),
   minute: noun("دقيقة", "دقيقتان", "دقائق", "دقيقة"),
   operation: noun("عملية", "عمليتان", "عمليات", "عملية"),
   program: noun("برنامج", "برنامجان", "برامج", "برنامجًا"),
   question: noun("سؤال", "سؤالان", "أسئلة", "سؤالًا"),
+  regulation: noun("لائحة", "لائحتان", "لوائح", "لائحة"),
   report: noun("بلاغ", "بلاغان", "بلاغات", "بلاغًا"),
   resource: noun("مورد", "موردان", "موارد", "موردًا"),
   row: noun("صف", "صفان", "صفوف", "صفًا"),
@@ -84,6 +116,22 @@ export const N = {
   term: noun("فصل", "فصلان", "فصول", "فصلًا"),
   time: noun("مرة", "مرتان", "مرات", "مرة"),
 } satisfies Record<string, Noun>;
+
+/** A mark out of a maximum: "6 من 10", "8.5 من 10" — never "6/10", which RTL shows as "10/6". */
+export function score(got: number | string | null | undefined, of: number | string): string {
+  const n = (v: number | string) =>
+    Number(v).toLocaleString("ar-u-nu-latn", { maximumFractionDigits: 2 });
+  return got == null || got === "" ? "—" : `${n(got)} من ${n(of)}`;
+}
+
+/**
+ * A left-to-right token (university number, course code, email) inside an Arabic string:
+ * isolated so it isn't reordered — "26-IT-0001", never "IT-0001-26". For JSX use
+ * `<bdi dir="ltr">`; this is for plain-text props such as a page subtitle.
+ */
+export function ltr(text: string | null | undefined): string {
+  return text ? `\u2066${text}\u2069` : "";
+}
 
 /** URL slug from a title — Arabic letters are kept (the server's SlugField allows Unicode). */
 export function slugify(title: string, max = 100): string {

@@ -6,12 +6,12 @@ import { Link, useNavigate } from "react-router";
 import { Button, Card, Notice, problemMessage } from "../components/ui";
 import { CountUp } from "../components/motion";
 import { api, ok } from "./api";
-import { count, N } from "./format";
+import { count, N, fmtDate } from "./format";
 import { ALL } from "../components/Pager";
 
 /** Numbers: Arabic digits in prose, "—" when there is no data. */
 export const num = (n: number | null | undefined, digits = 0) =>
-  n == null ? "—" : n.toLocaleString("ar", { maximumFractionDigits: digits });
+  n == null ? "—" : n.toLocaleString("ar-u-nu-latn", { maximumFractionDigits: digits });
 export const pct = (n: number | null | undefined) => (n == null ? "—" : `${num(n)}٪`);
 export const days = (n: number | null | undefined) => count(n, N.day);
 
@@ -201,9 +201,7 @@ export function PastReports({ kind }: { kind: SnapshotBody["kind"] }) {
           className="flex items-center justify-between gap-3 px-4 py-2.5 text-sm hover:bg-surface-alt"
         >
           <span className="min-w-0 truncate">{s.title}</span>
-          <span className="shrink-0 text-xs text-text-muted">
-            {new Date(s.created_at).toLocaleDateString("ar")} · PDF
-          </span>
+          <span className="shrink-0 text-xs text-text-muted">{fmtDate(s.created_at)} · PDF</span>
         </Link>
       ))}
     </Card>

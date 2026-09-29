@@ -19,7 +19,7 @@ export function Courses() {
   const me = useMe();
   const courses = useMyCourses();
   const assignments = useAssignments();
-  const lectures = useLectures();
+  const lectures = useLectures("all");
   const list = courses.data ?? [];
   const hours = list.reduce((n, c) => n + c.credit_hours, 0);
   const student = !!me.data?.student;
@@ -72,12 +72,12 @@ export function Courses() {
                   )}
                   <div className="mt-auto flex items-center justify-between pt-3 text-xs">
                     <span className="text-text-muted">
-                      المحاضرات المنشورة: {published.toLocaleString("ar")}
+                      المحاضرات المنشورة: {published.toLocaleString("ar-u-nu-latn")}
                     </span>
                     {student &&
                       (late ? (
                         <span className="rounded-full bg-danger-soft px-2 py-0.5 font-semibold text-danger-strong">
-                          متأخر {late.toLocaleString("ar")}
+                          متأخر {late.toLocaleString("ar-u-nu-latn")}
                         </span>
                       ) : next ? (
                         <span className="rounded-full bg-warning-soft px-2 py-0.5 font-semibold text-warning-strong">

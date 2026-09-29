@@ -23,6 +23,7 @@ import { useCurrentTerm, useDepartment, useOfferings } from "../../lib/departmen
 import { can } from "../../lib/nav";
 import { num } from "../../lib/reports";
 import { ALL } from "../../components/Pager";
+import { count, N } from "../../lib/format";
 
 /** Board: DesktopDeptDashboard «المواد والتعيينات» — assign teachers from the same screen (docs/02 §4.15). */
 export function Offerings() {
@@ -45,8 +46,8 @@ export function Offerings() {
     queryKey: ["reports", "department", "dash", id],
     enabled: !!id,
     queryFn: async () =>
-      (await api.GET("/api/v1/reports/department", { params: { query: { department: id } } }))
-        .data ?? null,
+      ok(await api.GET("/api/v1/reports/department", { params: { query: { department: id } } })) ??
+      null,
   });
   const canRemove = can(me.data, "membership.remove");
   const [error, setError] = useState<unknown>(null);
@@ -259,8 +260,8 @@ export function Offerings() {
                 )}
               </div>
               <span className="text-xs text-text-muted xl:text-sm xl:text-text">
-                {num(o.enrolled_count)}
-                <span className="xl:hidden"> طالبًا</span>
+                <span className="hidden xl:inline">{num(o.enrolled_count)}</span>
+                <span className="xl:hidden">{count(o.enrolled_count, N.student)}</span>
               </span>
               <span
                 className={`text-xs xl:text-sm ${s && s.lectures < s.planned / 2 ? "font-semibold text-danger-strong" : "text-text-muted xl:text-text"}`}
@@ -484,8 +485,8 @@ function NewOffering({
   const programs = useQuery({
     queryKey: ["programs", department],
     queryFn: async () =>
-      (await api.GET("/api/v1/programs", { params: { query: { ...ALL, department } as never } }))
-        .data?.results ?? [],
+      ok(await api.GET("/api/v1/programs", { params: { query: { ...ALL, department } as never } }))
+        ?.results ?? [],
   });
   const [f, setF] = useState({
     code: "",

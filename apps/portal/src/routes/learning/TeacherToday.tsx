@@ -107,16 +107,21 @@ export function TeacherToday() {
   return (
     <PortalShell
       title={`${hour < 12 ? "صباح الخير" : "مساء الخير"}، ${first}`}
-      subtitle={`${new Date().toLocaleDateString("ar", { weekday: "long", day: "numeric", month: "long" })} · ${count(students, N.course)}`}
+      subtitle={`${new Date().toLocaleDateString("ar-u-nu-latn", { weekday: "long", day: "numeric", month: "long" })} · ${count(students, N.course)}`}
     >
       <Link to="/grading" className="block">
         <Card className="flex items-center gap-4 p-4 transition-shadow hover:shadow-md">
-          <span className="text-4xl font-bold text-primary">{pending.toLocaleString("ar")}</span>
+          <span className="text-4xl font-bold text-primary">
+            {pending.toLocaleString("ar-u-nu-latn")}
+          </span>
           <span className="min-w-0 flex-1">
-            <b className="block text-text">تسليمًا بانتظار تصحيحك</b>
+            <b className="block text-text">
+              {pending ? "بانتظار تصحيحك" : "لا شيء بانتظار تصحيحك ✓"}
+            </b>
             <span className="text-xs text-text-muted">
-              {byCourse.map((c) => `${c.n.toLocaleString("ar")} في ${c.name}`).join(" · ") ||
-                "لا شيء متأخر"}
+              {byCourse
+                .map((c) => `${c.n.toLocaleString("ar-u-nu-latn")} في ${c.name}`)
+                .join(" · ") || "كل التسليمات مصححة"}
             </span>
           </span>
           <span className="text-sm font-semibold text-primary">ابدأ</span>
@@ -135,7 +140,7 @@ export function TeacherToday() {
                 <span className="w-14 shrink-0 text-center text-xs text-text-muted">
                   {i.now
                     ? "الآن"
-                    : new Date(i.at).toLocaleTimeString("ar", {
+                    : new Date(i.at).toLocaleTimeString("ar-u-nu-latn", {
                         hour: "numeric",
                         minute: "2-digit",
                       })}

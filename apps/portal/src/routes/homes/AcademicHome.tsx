@@ -7,7 +7,7 @@ import { Card, SectionLabel } from "../../components/ui";
 import { api, ok } from "../../lib/api";
 import { useMe } from "../../lib/auth";
 import { useCurrentTerm } from "../../lib/department";
-import { initials, num, useDepartments } from "../../lib/reports";
+import { initials, useDepartments } from "../../lib/reports";
 import { Inbox } from "./Inbox";
 import { count, N } from "../../lib/format";
 import { ALL } from "../../components/Pager";
@@ -30,8 +30,11 @@ export function AcademicHome() {
     queryKey: ["role-assignments", "leaders"],
     queryFn: async () => {
       const get = async (role: "department_manager" | "department_supervisor") =>
-        (await api.GET("/api/v1/role-assignments", { params: { query: { role, page_size: 100 } } }))
-          .data?.results ?? [];
+        ok(
+          await api.GET("/api/v1/role-assignments", {
+            params: { query: { role, page_size: 100 } },
+          }),
+        )?.results ?? [];
       return [...(await get("department_manager")), ...(await get("department_supervisor"))];
     },
   });
@@ -64,7 +67,7 @@ export function AcademicHome() {
   return (
     <PortalShell
       title="الشؤون العلمية"
-      subtitle={`${me.data?.full_name_ar ?? ""} · ${count(departments.data?.length ?? 0, N.department)} · الأساتذة والمعيدون ${num(teachers.data?.summary.members ?? 0)}${term.data ? ` · ${term.data.name_ar}` : ""}`}
+      subtitle={`${me.data?.full_name_ar ?? ""} · ${count(departments.data?.length ?? 0, N.department)} · هيئة التدريس: ${count(teachers.data?.summary.members ?? 0, N.member)}${term.data ? ` · ${term.data.name_ar}` : ""}`}
     >
       <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_380px] lg:items-start lg:gap-6">
         <div className="space-y-4">

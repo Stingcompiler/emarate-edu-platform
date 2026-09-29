@@ -44,7 +44,8 @@ export function VisitorLayout({
               max={progress.max}
               label={step ?? `${progress.value} / ${progress.max}`}
             >
-              {progress.value.toLocaleString("ar")}/{progress.max.toLocaleString("ar")}
+              {progress.value.toLocaleString("ar-u-nu-latn")}/
+              {progress.max.toLocaleString("ar-u-nu-latn")}
             </ProgressRing>
           )}
           <div>

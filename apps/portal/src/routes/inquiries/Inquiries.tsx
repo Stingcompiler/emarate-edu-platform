@@ -186,8 +186,15 @@ function InquiryDetail({ inquiry: i }: { inquiry: Inquiry }) {
         <div className="flex items-start justify-between gap-3">
           <div>
             <p className="font-semibold text-text">{contact.name}</p>
-            <p className="text-xs text-text-muted" dir="ltr">
-              {[contact.phone_e164, contact.email, i.reference_no].filter(Boolean).join(" · ")}
+            <p className="text-xs text-text-muted">
+              {[contact.phone_e164, contact.email, i.reference_no]
+                .filter(Boolean)
+                .map((part, n) => (
+                  <span key={n}>
+                    {n > 0 && " · "}
+                    <bdi dir="ltr">{part}</bdi>
+                  </span>
+                ))}
             </p>
             <p className="mt-1 text-xs text-text-muted">
               {TYPE[i.type]}

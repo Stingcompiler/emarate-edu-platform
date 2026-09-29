@@ -226,7 +226,7 @@ class AnnouncementViewSet(viewsets.ModelViewSet):
     serializer_class = AnnouncementSerializer
     permission_classes = [IsAuthenticated]
     lookup_field = "public_id"
-    filterset_fields = ["scope", "audience", "status"]
+    filterset_fields = ["scope", "scope_id", "audience", "status"]
     search_fields = ["title"]
     http_method_names = ["get", "post", "patch", "delete", "head", "options"]
 

@@ -100,7 +100,7 @@ export function AdminUser() {
                 [
                   "آخر دخول",
                   u.last_login
-                    ? new Date(u.last_login).toLocaleString("ar")
+                    ? new Date(u.last_login).toLocaleString("ar-u-nu-latn")
                     : "لم يفعّل الحساب بعد",
                 ],
               ].map(([k, v]) => (

@@ -12,7 +12,7 @@ import {
   problemMessage,
   WithSide,
 } from "../../components/ui";
-import { api } from "../../lib/api";
+import { api, ok } from "../../lib/api";
 import { useUnsavedChanges } from "../../lib/useUnsavedChanges";
 import { slugify } from "../../lib/format";
 
@@ -28,8 +28,9 @@ export function NewsEditor() {
     queryKey: ["site", "news", id],
     enabled: !creating,
     queryFn: async () =>
-      (await api.GET("/api/v1/content/news/{public_id}", { params: { path: { public_id: id! } } }))
-        .data ?? null,
+      ok(
+        await api.GET("/api/v1/content/news/{public_id}", { params: { path: { public_id: id! } } }),
+      ) ?? null,
   });
   const [form, setForm] = useState({ slug: "", title: "", summary: "", body: "" });
   useEffect(() => {

@@ -16,14 +16,14 @@ import {
   WithSide,
   problemMessage,
 } from "../../components/ui";
-import { api, ok } from "../../lib/api";
+import { api, ok, openAfter } from "../../lib/api";
 import { useMe } from "../../lib/auth";
 import { DAY_LABELS } from "../../lib/format";
 import { ALL } from "../../components/Pager";
 
 type Session = Schemas["LiveSession"];
-const time = new Intl.DateTimeFormat("ar", { hour: "numeric", minute: "2-digit" });
-const day = new Intl.DateTimeFormat("ar", { weekday: "long" });
+const time = new Intl.DateTimeFormat("ar-u-nu-latn", { hour: "numeric", minute: "2-digit" });
+const day = new Intl.DateTimeFormat("ar-u-nu-latn", { weekday: "long" });
 const PROVIDER: Record<string, string> = {
   teams: "Teams",
   meet: "Meet",
@@ -41,13 +41,14 @@ export function LiveList() {
       ok(await api.GET("/api/v1/live-sessions", { params: { query: ALL } }))?.results ?? [],
   });
   const join = useMutation({
-    mutationFn: async (id: string) => {
-      const { data, error } = await api.GET("/api/v1/live-sessions/{public_id}/join", {
-        params: { path: { public_id: id } },
-      });
-      if (!data) throw error;
-      window.open(data.url, "_blank", "noopener");
-    },
+    mutationFn: (id: string) =>
+      openAfter(async () => {
+        const { data, error } = await api.GET("/api/v1/live-sessions/{public_id}/join", {
+          params: { path: { public_id: id } },
+        });
+        if (!data) throw error;
+        return data.url;
+      }),
   });
   const now = Date.now();
   const rows = (sessions.data ?? []).filter((s) => new Date(s.ends_at).getTime() > now - 3_600_000);

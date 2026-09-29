@@ -81,7 +81,9 @@ export function RegulationDetail() {
                     [
                       "تسري من",
                       r.effective_from
-                        ? new Date(r.effective_from).toLocaleDateString("ar", { dateStyle: "long" })
+                        ? new Date(r.effective_from).toLocaleDateString("ar-u-nu-latn", {
+                            dateStyle: "long",
+                          })
                         : "—",
                     ],
                     ["الإقرار", r.requires_acknowledgement ? "مطلوب" : "للاطلاع فقط"],

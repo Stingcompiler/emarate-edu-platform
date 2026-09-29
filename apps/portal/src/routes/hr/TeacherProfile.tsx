@@ -8,7 +8,7 @@ import { useMe } from "../../lib/auth";
 import { can } from "../../lib/nav";
 import { TOPIC_LABEL, TeacherStatus, days, initials, num, pct } from "../../lib/reports";
 import { ROLE_LINE } from "./Teachers";
-import { count, N } from "../../lib/format";
+import { count, N, fmtDate } from "../../lib/format";
 
 /** Board: AcademicAffairsTeacher (phone); desktop derived — indicators beside courses and notices. */
 export function TeacherProfile() {
@@ -152,7 +152,7 @@ export function TeacherProfile() {
                         {n.term_name ? ` — ${n.term_name}` : ""}
                       </p>
                       <p className="text-xs text-text-muted">
-                        {n.sent_by} · {new Date(n.created_at).toLocaleDateString("ar")} ·{" "}
+                        {n.sent_by} · {fmtDate(n.created_at)} ·{" "}
                         {n.acknowledged_at ? "أقرّ بالاطلاع" : n.opened_at ? "فُتح" : "لم يُفتح"}
                       </p>
                     </div>

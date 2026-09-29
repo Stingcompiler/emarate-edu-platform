@@ -20,7 +20,11 @@ import { can } from "../../lib/nav";
 import { count, N } from "../../lib/format";
 import { ALL, Pager, useLocalPages } from "../../components/Pager";
 
-const date = new Intl.DateTimeFormat("ar", { day: "numeric", month: "long", year: "numeric" });
+const date = new Intl.DateTimeFormat("ar-u-nu-latn", {
+  day: "numeric",
+  month: "long",
+  year: "numeric",
+});
 
 /** Board: StudentRegulations (phone). Staff see drafts and acknowledgement counts. Desktop: derived. */
 export function Regulations() {
@@ -58,7 +62,7 @@ export function Regulations() {
               rows={
                 staff
                   ? [
-                      ["لائحة", items.length],
+                      ["كل اللوائح", items.length],
                       ["منشورة", items.filter((r) => r.status === "published").length],
                     ]
                   : [

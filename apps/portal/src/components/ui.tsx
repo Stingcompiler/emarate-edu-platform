@@ -92,7 +92,8 @@ export function Chip({
   return (
     <button
       type="button"
-      aria-pressed={active}
+      // A chip used as a tab states aria-selected itself; aria-pressed is for toggles only.
+      aria-pressed={props.role ? undefined : active}
       {...props}
       className={`inline-flex min-h-9 shrink-0 items-center gap-1.5 rounded-full px-3.5 text-sm transition-colors ${
         active

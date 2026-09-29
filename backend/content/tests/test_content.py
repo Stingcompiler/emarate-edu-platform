@@ -75,6 +75,15 @@ def test_announcement_scopes_and_feed(api, classroom, make_user, it_dept, ba_dep
     assert api(classroom.student).get(A).data["count"] == 0  # still a draft
     api(classroom.teacher).post(f"{A}/{created.data['public_id']}/publish")
     assert api(classroom.student).get(A).data["count"] == 1
+    # One course's announcements, filtered by the server (review 2026-09-29, P3).
+    one = {"scope": "offering", "scope_id": classroom.offering.pk}
+    assert api(classroom.student).get(A, one).data["count"] == 1
+    assert (
+        api(classroom.student)
+        .get(A, {**one, "scope_id": classroom.offering.pk + 1000})
+        .data["count"]
+        == 0
+    )
     other = make_user(Role.STUDENT)
     assert api(other).get(A).data["count"] == 0
 

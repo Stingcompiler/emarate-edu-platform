@@ -281,8 +281,8 @@ function StudentForm({
   const programs = useQuery({
     queryKey: ["programs", department],
     queryFn: async () =>
-      (await api.GET("/api/v1/programs", { params: { query: { ...ALL, department } as never } }))
-        .data?.results ?? [],
+      ok(await api.GET("/api/v1/programs", { params: { query: { ...ALL, department } as never } }))
+        ?.results ?? [],
   });
   const [f, setF] = useState({
     university_number: student?.university_number ?? "",

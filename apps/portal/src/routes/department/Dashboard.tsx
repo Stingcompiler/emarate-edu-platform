@@ -20,6 +20,7 @@ import { useMe } from "../../lib/auth";
 import { useCurrentTerm, useDepartment, useOfferings } from "../../lib/department";
 import { days, initials, num } from "../../lib/reports";
 import { ALL } from "../../components/Pager";
+import { count, N } from "../../lib/format";
 
 /** Boards: DesktopDeptDashboard (desktop), AdminHome (phone). The section list is fixed (docs/02 §4.15). */
 export function DepartmentDashboard() {
@@ -31,8 +32,8 @@ export function DepartmentDashboard() {
     queryKey: ["reports", "department", "dash", id],
     enabled: !!id,
     queryFn: async () =>
-      (await api.GET("/api/v1/reports/department", { params: { query: { department: id } } }))
-        .data ?? null,
+      ok(await api.GET("/api/v1/reports/department", { params: { query: { department: id } } })) ??
+      null,
   });
   const teachers = useQuery({
     queryKey: ["reports", "teachers", "dash", id],
@@ -148,7 +149,7 @@ export function DepartmentDashboard() {
         {[
           [
             num(k?.students ?? 0),
-            "طالبًا منتظمًا",
+            "طلاب منتظمون",
             k ? `${num(k.enrolled_percent ?? 0)}٪ مسجلون في مواد` : "",
           ],
           [
@@ -158,7 +159,7 @@ export function DepartmentDashboard() {
           ],
           [
             num(teachers.data?.summary.members ?? 0),
-            "أستاذًا ومعيدًا",
+            "الأساتذة والمعيدون",
             slow.length ? `${num(slow.length)} تحت الحد` : "ضمن الحدود",
           ],
           [
@@ -197,8 +198,8 @@ export function DepartmentDashboard() {
                       ) : (
                         <span className="font-semibold text-danger-strong">بلا أستاذ</span>
                       )}
-                      {ta ? ` · معيد: ${ta.user.full_name_ar}` : ""} · {num(o.enrolled_count)}{" "}
-                      طالبًا
+                      {ta ? ` · معيد: ${ta.user.full_name_ar}` : ""} ·{" "}
+                      {count(o.enrolled_count, N.student)}
                     </span>
                   </span>
                 </Link>

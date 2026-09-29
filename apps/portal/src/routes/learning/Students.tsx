@@ -61,12 +61,12 @@ export function Students() {
     <PortalShell
       title={
         view === "list"
-          ? `الطلاب · ${(b?.students.length ?? 0).toLocaleString("ar")}`
+          ? `الطلاب · ${(b?.students.length ?? 0).toLocaleString("ar-u-nu-latn")}`
           : "دفتر الدرجات"
       }
       subtitle={
         course
-          ? `${course.name_ar} · شعبة ⁨${course.section}⁩ · متوسط أعمال الفصل ${avg.toLocaleString("ar")}٪ من ${max.toLocaleString("ar")}`
+          ? `${course.name_ar} · شعبة ⁨${course.section}⁩ · متوسط أعمال الفصل ${avg.toLocaleString("ar-u-nu-latn")}٪ من ${max.toLocaleString("ar-u-nu-latn")}`
           : undefined
       }
       back={{ label: course?.name_ar ?? "المادة", to: `/courses/${offering}` }}
@@ -121,7 +121,7 @@ export function Students() {
                 <span
                   className={`text-sm font-bold ${max && pct(s.total) < 50 ? "text-danger-strong" : "text-text"}`}
                 >
-                  {max ? `${pct(s.total).toLocaleString("ar")}٪` : "—"}
+                  {max ? `${pct(s.total).toLocaleString("ar-u-nu-latn")}٪` : "—"}
                 </span>
               </div>
             ))}
@@ -139,11 +139,11 @@ export function Students() {
                   </th>
                   {b?.assignments.map((a) => (
                     <th key={a.public_id} className="px-3 py-2 text-start font-normal">
-                      {a.title} /{Number(a.max_grade).toLocaleString("ar")}
+                      {a.title} /{Number(a.max_grade).toLocaleString("ar-u-nu-latn")}
                     </th>
                   ))}
                   <th className="px-3 py-2 text-start font-normal">
-                    المجموع /{max.toLocaleString("ar")}
+                    المجموع /{max.toLocaleString("ar-u-nu-latn")}
                   </th>
                 </tr>
               </thead>
@@ -162,7 +162,9 @@ export function Students() {
                         >
                           {c ? (
                             <Link to={`/submissions/${c.submission}`} className="hover:underline">
-                              {c.score != null ? Number(c.score).toLocaleString("ar") : "✓"}
+                              {c.score != null
+                                ? Number(c.score).toLocaleString("ar-u-nu-latn")
+                                : "✓"}
                               {c.status === "suggested" ? "*" : ""}
                             </Link>
                           ) : (
@@ -171,7 +173,9 @@ export function Students() {
                         </td>
                       );
                     })}
-                    <td className="px-3 py-2 font-bold">{Number(s.total).toLocaleString("ar")}</td>
+                    <td className="px-3 py-2 font-bold">
+                      {Number(s.total).toLocaleString("ar-u-nu-latn")}
+                    </td>
                   </tr>
                 ))}
               </tbody>

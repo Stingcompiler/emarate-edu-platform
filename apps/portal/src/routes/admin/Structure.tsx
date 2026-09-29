@@ -13,7 +13,7 @@ import {
 } from "../../components/ui";
 import { api, ok } from "../../lib/api";
 import { num } from "../../lib/reports";
-import { count, N } from "../../lib/format";
+import { count, N, fmtDate } from "../../lib/format";
 import { ALL } from "../../components/Pager";
 
 const DEGREE: Record<string, string> = {
@@ -202,8 +202,7 @@ export function Structure() {
                 <span className="min-w-0 flex-1">
                   <b className="block">{t.name_ar}</b>
                   <span className="text-xs text-text-muted">
-                    {new Date(t.starts_on).toLocaleDateString("ar")} –{" "}
-                    {new Date(t.ends_on).toLocaleDateString("ar")}
+                    {fmtDate(t.starts_on)} – {fmtDate(t.ends_on)}
                   </span>
                 </span>
                 {t.is_current ? (

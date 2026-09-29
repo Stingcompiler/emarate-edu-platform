@@ -1,7 +1,7 @@
 import type { Schemas } from "@ecst/api";
 import { useQuery } from "@tanstack/react-query";
 
-import { api, ok } from "./api";
+import { api, ok, openAfter } from "./api";
 
 export type Assignment = Schemas["Assignment"];
 export type Lecture = Schemas["Lecture"];
@@ -27,9 +27,12 @@ export function dueLabel(iso: string, now = Date.now()): string {
   }
   if (diff < H) return `بعد ${minutes(Math.max(1, Math.round(diff / 60_000)))}`;
   if (diff < D) return `بعد ${hours(Math.round(diff / H))}`;
-  const time = new Date(iso).toLocaleTimeString("ar", { hour: "numeric", minute: "2-digit" });
+  const time = new Date(iso).toLocaleTimeString("ar-u-nu-latn", {
+    hour: "numeric",
+    minute: "2-digit",
+  });
   if (diff < 2 * D) return `غدًا ${time}`;
-  return new Date(iso).toLocaleDateString("ar", {
+  return new Date(iso).toLocaleDateString("ar-u-nu-latn", {
     weekday: "long",
     day: "numeric",
     month: "short",
@@ -52,11 +55,13 @@ export function taskState(a: Assignment, now = Date.now()): TaskState {
 }
 
 /** Signed, short-lived link to a private file (docs/05 §8.2), opened in a new tab. */
-export async function openFile(publicId: string) {
-  const { data } = await api.GET("/api/v1/files/{public_id}/url", {
-    params: { path: { public_id: publicId } },
+export function openFile(publicId: string) {
+  return openAfter(async () => {
+    const { data } = await api.GET("/api/v1/files/{public_id}/url", {
+      params: { path: { public_id: publicId } },
+    });
+    return data?.url;
   });
-  if (data?.url) window.open(data.url, "_blank", "noopener");
 }
 
 export function useMyCourses() {
@@ -89,17 +94,24 @@ export function useAssignments(offering?: number) {
   return useQuery({
     queryKey: ["assignments", offering ?? "all"],
     queryFn: async () =>
-      (await api.GET("/api/v1/assignments", { params: { query: { offering, page_size: 100 } } }))
-        .data?.results ?? [],
+      ok(await api.GET("/api/v1/assignments", { params: { query: { offering, page_size: 100 } } }))
+        ?.results ?? [],
   });
 }
 
-export function useLectures(offering?: number) {
+/** Lectures of one course, or every visible lecture with `"all"`. A course not known yet
+ *  (0 / undefined while a page loads) asks nothing — never `?offering=0`. */
+export function useLectures(offering?: number | "all") {
+  const all = offering === "all";
   return useQuery({
-    queryKey: ["lectures", offering ?? "all"],
+    queryKey: ["lectures", all ? "all" : offering],
+    enabled: all || !!offering,
     queryFn: async () =>
-      ok(await api.GET("/api/v1/lectures", { params: { query: { offering, page_size: 100 } } }))
-        ?.results ?? [],
+      ok(
+        await api.GET("/api/v1/lectures", {
+          params: { query: { offering: all ? undefined : offering, page_size: 100 } },
+        }),
+      )?.results ?? [],
   });
 }
 

@@ -29,7 +29,7 @@ import {
 import { count, N } from "../../lib/format";
 
 const LETTERS = ["A", "B", "C", "D", "E", "F", "G", "H"];
-const clock = new Intl.DateTimeFormat("ar", {
+const clock = new Intl.DateTimeFormat("ar-u-nu-latn", {
   hour: "numeric",
   minute: "2-digit",
   second: "2-digit",
@@ -324,8 +324,9 @@ function ExamRunner({ attempt }: { attempt: AttemptPayload }) {
         <main className="px-4 pb-40 pt-4 lg:p-0">
           <div className="flex items-center justify-between gap-3 text-sm text-text-muted">
             <span>
-              السؤال {(index + 1).toLocaleString("ar")} من {questions.length.toLocaleString("ar")} ·{" "}
-              {TYPE_LABEL[question.type]} · {count(Number(question.marks), N.mark)}
+              السؤال {(index + 1).toLocaleString("ar-u-nu-latn")} من{" "}
+              {questions.length.toLocaleString("ar-u-nu-latn")} · {TYPE_LABEL[question.type]} ·{" "}
+              {count(Number(question.marks), N.mark)}
             </span>
             <button
               type="button"
@@ -432,7 +433,7 @@ function ExamRunner({ attempt }: { attempt: AttemptPayload }) {
             >
               إرسال الاختبار
               {questions.length - answeredCount
-                ? ` — ${(questions.length - answeredCount).toLocaleString("ar")} بلا إجابة`
+                ? ` — ${(questions.length - answeredCount).toLocaleString("ar-u-nu-latn")} بلا إجابة`
                 : ""}
             </Button>
           </div>
@@ -452,10 +453,10 @@ function ExamRunner({ attempt }: { attempt: AttemptPayload }) {
               تسليم الاختبار؟
             </p>
             <p className="mt-2 text-sm leading-relaxed text-text-muted">
-              أجبت عن {answeredCount.toLocaleString("ar")} من{" "}
-              {questions.length.toLocaleString("ar")}.
+              أجبت عن {answeredCount.toLocaleString("ar-u-nu-latn")} من{" "}
+              {questions.length.toLocaleString("ar-u-nu-latn")}.
               {questions.length - answeredCount > 0 &&
-                ` بقي ${(questions.length - answeredCount).toLocaleString("ar")} بلا إجابة.`}{" "}
+                ` بقي ${(questions.length - answeredCount).toLocaleString("ar-u-nu-latn")} بلا إجابة.`}{" "}
               لا يمكن التعديل بعد التسليم.
             </p>
             <div className="mt-5 flex gap-2">
@@ -634,15 +635,15 @@ function Navigator({
                     : "border border-border-soft bg-surface text-text"
               } ${i === index ? "ring-2 ring-primary ring-offset-2 ring-offset-surface" : ""}`}
             >
-              {(i + 1).toLocaleString("ar")}
+              {(i + 1).toLocaleString("ar-u-nu-latn")}
             </button>
           );
         })}
       </div>
       <p className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-text-muted">
-        <span>مُجاب {done.toLocaleString("ar")}</span>
-        <span>معلَّم {flags.length.toLocaleString("ar")}</span>
-        <span>متبقٍ {(questions.length - done).toLocaleString("ar")}</span>
+        <span>مُجاب {done.toLocaleString("ar-u-nu-latn")}</span>
+        <span>معلَّم {flags.length.toLocaleString("ar-u-nu-latn")}</span>
+        <span>متبقٍ {(questions.length - done).toLocaleString("ar-u-nu-latn")}</span>
       </p>
     </>
   );

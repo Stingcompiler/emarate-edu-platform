@@ -91,8 +91,8 @@ export function ResultSearch() {
           <div>
             <Card className="px-4 py-3">
               <p className="font-semibold text-text">{student.student_name}</p>
-              <p className="text-xs text-text-muted" dir="ltr">
-                {student.university_number}
+              <p className="text-xs text-text-muted">
+                <bdi dir="ltr">{student.university_number}</bdi>
               </p>
             </Card>
             <Card className="motion-stagger mt-3 divide-y divide-border-soft">

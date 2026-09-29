@@ -1,7 +1,7 @@
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.utils.translation import gettext
-from drf_spectacular.utils import extend_schema
+from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import NotFound, PermissionDenied
@@ -36,6 +36,14 @@ from .serializers import (
 
 def _meta(request):
     return RequestMeta.from_request(request)
+
+
+# The monitor's figures (review 2026-09-29, P3): counted by the server, not from one page.
+_ATTEMPT_STATES = {
+    "in_progress": [ExamAttempt.Status.IN_PROGRESS],
+    "done": [ExamAttempt.Status.SUBMITTED, ExamAttempt.Status.AUTO_SUBMITTED],
+    "invalidated": [ExamAttempt.Status.INVALIDATED],
+}
 
 
 @extend_schema(tags=["exams"])
@@ -164,12 +172,26 @@ class ExamViewSet(viewsets.ModelViewSet):
         attempt = services.start(_meta(request), self.get_object())
         return Response(AttemptSerializer(attempt).data, status=status.HTTP_201_CREATED)
 
-    @extend_schema(responses=AttemptSummarySerializer(many=True))
+    @extend_schema(
+        responses=AttemptSummarySerializer(many=True),
+        parameters=[
+            OpenApiParameter(
+                "state",
+                str,
+                required=False,
+                enum=["in_progress", "done", "invalidated"],
+                description="Only attempts in this state (the monitor counts each).",
+            )
+        ],
+    )
     @action(detail=True, methods=["get"])
     def attempts(self, request, public_id=None):
         exam = self.get_object()
         self._staff(exam)
         rows = exam.attempts.select_related("student_record").order_by("deadline_at", "id")
+        state = request.query_params.get("state")
+        if state in _ATTEMPT_STATES:
+            rows = rows.filter(status__in=_ATTEMPT_STATES[state])
         page = self.paginate_queryset(rows)
         return self.get_paginated_response(AttemptSummarySerializer(page, many=True).data)
 

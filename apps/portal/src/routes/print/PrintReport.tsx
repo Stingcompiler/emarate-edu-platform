@@ -29,7 +29,7 @@ export function PrintReport() {
     );
   const meta = (
     <>
-      <p>أُصدر {new Date(s.created_at).toLocaleString("ar")}</p>
+      <p>أُصدر {new Date(s.created_at).toLocaleString("ar-u-nu-latn")}</p>
       <p>بواسطة {s.created_by_name}</p>
       <p dir="ltr" className="font-mono">
         #{s.digest.slice(0, 12)}
@@ -109,7 +109,7 @@ function Teachers({ d }: { d: Schemas["TeachersReport"] }) {
       </p>
       <PrintStats
         items={[
-          [num(s.members), "عضوًا"],
+          [num(s.members), "الأعضاء"],
           [days(s.grading_days), "زمن التصحيح"],
           [pct(s.upload_percent), "انتظام الرفع"],
           [num(s.counts.below), "تحت الحد"],
@@ -150,7 +150,7 @@ function Admissions({ d }: { d: Schemas["AdmissionsReport"] }) {
     <>
       <PrintStats
         items={[
-          [num(d.total), "طلبًا"],
+          [num(d.total), "الطلبات"],
           [num(d.accepted), "مقبولًا"],
           [num(d.converted), "حُوِّلوا إلى طلاب"],
           [days(d.first_reply_days), "متوسط أول رد"],

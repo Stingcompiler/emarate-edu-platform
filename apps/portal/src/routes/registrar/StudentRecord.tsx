@@ -8,7 +8,7 @@ import { useMe } from "../../lib/auth";
 import { can } from "../../lib/nav";
 import { initials, num } from "../../lib/reports";
 import { STUDENT_STATUS } from "./StudentRecords";
-import { count, N } from "../../lib/format";
+import { count, N, ltr } from "../../lib/format";
 import { ALL } from "../../components/Pager";
 
 /** Board: HeadRegistrarStudent (phone); desktop derived — data beside enrolment. */
@@ -18,8 +18,8 @@ export function StudentRecord() {
   const student = useQuery({
     queryKey: ["student", id],
     queryFn: async () =>
-      (await api.GET("/api/v1/students/{public_id}", { params: { path: { public_id: id } } }))
-        .data ?? null,
+      ok(await api.GET("/api/v1/students/{public_id}", { params: { path: { public_id: id } } })) ??
+      null,
   });
   const enrollments = useQuery({
     queryKey: ["enrollments", "student", id],
@@ -51,7 +51,7 @@ export function StudentRecord() {
     <PortalShell
       title={s?.full_name_ar ?? "ملف طالب"}
       subtitle={
-        s ? `${s.university_number} · ${s.program_name} · المستوى ${num(s.level)}` : undefined
+        s ? `${ltr(s.university_number)} · ${s.program_name} · المستوى ${num(s.level)}` : undefined
       }
       back={{ label: "سجل الطلاب", to: "/students" }}
     >
@@ -83,7 +83,7 @@ export function StudentRecord() {
                 [
                   "تاريخ الميلاد",
                   s.birth_date
-                    ? new Date(s.birth_date).toLocaleDateString("ar", {
+                    ? new Date(s.birth_date).toLocaleDateString("ar-u-nu-latn", {
                         day: "numeric",
                         month: "long",
                         year: "numeric",

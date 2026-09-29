@@ -5,6 +5,7 @@ import { PortalShell } from "../../components/PortalShell";
 import { Button, Card, Notice, SectionLabel, problemMessage, WithSide } from "../../components/ui";
 import { api, ok } from "../../lib/api";
 import { TOPIC_LABEL, days, num, pct } from "../../lib/reports";
+import { fmtDate } from "../../lib/format";
 
 /** A teacher reads an HR notice (notification action URL) and acknowledges it. */
 export function MyNotice() {
@@ -29,7 +30,7 @@ export function MyNotice() {
       title={n?.subject ?? "تنبيه"}
       subtitle={
         n
-          ? `${n.sent_by} · ${new Date(n.created_at).toLocaleDateString("ar")} · ${TOPIC_LABEL[n.topic ?? "other"]}`
+          ? `${n.sent_by} · ${fmtDate(n.created_at)} · ${TOPIC_LABEL[n.topic ?? "other"]}`
           : undefined
       }
       back={{ label: "الإشعارات", to: "/notifications" }}
@@ -40,7 +41,7 @@ export function MyNotice() {
             <div className="space-y-4">
               {n.acknowledged_at ? (
                 <Notice tone="success">
-                  أقررت بالاطلاع في {new Date(n.acknowledged_at).toLocaleString("ar")}.
+                  أقررت بالاطلاع في {new Date(n.acknowledged_at).toLocaleString("ar-u-nu-latn")}.
                 </Notice>
               ) : n.requires_ack ? (
                 <Button onClick={() => ack.mutate()} disabled={ack.isPending}>

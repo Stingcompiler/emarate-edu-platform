@@ -17,16 +17,20 @@ import {
 } from "../../components/ui";
 import { api, ok } from "../../lib/api";
 import { useMe } from "../../lib/auth";
-import { count, N } from "../../lib/format";
+import { count, N, ltr } from "../../lib/format";
 
 type Term = Schemas["MyTerm"];
-const date = new Intl.DateTimeFormat("ar", { day: "numeric", month: "long" });
+const date = new Intl.DateTimeFormat("ar-u-nu-latn", { day: "numeric", month: "long" });
 
 /**
  * Boards: StudentResults (phone) and DesktopStudentResults (desktop).
  * Not built yet: coursework/final split (the file carries totals) and the PDF
  * transcript (Phase 8 reports).
  */
+/** "91", "67.5" — not "91.00". */
+const mark = (v: string | number) =>
+  Number(v).toLocaleString("ar-u-nu-latn", { maximumFractionDigits: 2 });
+
 export function MyResults() {
   const me = useMe();
   const results = useQuery({
@@ -44,7 +48,7 @@ export function MyResults() {
       title="النتائج"
       subtitle={
         student
-          ? `${student.university_number} · ${student.program} · المستوى ${student.level}`
+          ? `${ltr(student.university_number)} · ${student.program} · المستوى ${student.level}`
           : undefined
       }
       titleAction={
@@ -117,11 +121,11 @@ function TermSummary({ term, cumulative }: { term: Term; cumulative: string | nu
   const stats = [
     { label: "المعدل الفصلي", value: term.gpa ?? "—" },
     { label: "التراكمي", value: cumulative ?? "—" },
-    { label: "ساعة", value: term.credit_hours.toLocaleString("ar") },
+    { label: "ساعة", value: term.credit_hours.toLocaleString("ar-u-nu-latn") },
     { label: "ناجح", value: `${passed}/${term.results.length}` },
   ];
   return (
-    <Card className="mt-4 grid grid-cols-4 divide-x divide-x-reverse divide-border-soft">
+    <Card className="mt-4 grid grid-cols-4 divide-x divide-border-soft">
       {stats.map((s) => (
         <div key={s.label} className="px-2 py-3 text-center">
           <p className="text-lg font-bold text-text">{s.value}</p>
@@ -164,7 +168,9 @@ function TermRows({ term, show }: { term: Term; show: Record<string, boolean> })
                   </p>
                 )}
                 {show.score && (
-                  <p className="text-xs text-text-muted">{r.score ?? STATUS_LABELS[r.status]}</p>
+                  <p className="text-xs text-text-muted">
+                    {r.score != null ? mark(r.score) : STATUS_LABELS[r.status]}
+                  </p>
                 )}
               </div>
             </div>
@@ -189,10 +195,14 @@ function TermRows({ term, show }: { term: Term; show: Record<string, boolean> })
               <tr key={r.course_code}>
                 <td className="px-4 py-3">
                   <span className="font-semibold text-text">{r.course_name}</span>
-                  <span className="ms-2 text-xs text-text-muted">{r.course_code}</span>
+                  <bdi dir="ltr" className="ms-2 text-xs text-text-muted">
+                    {r.course_code}
+                  </bdi>
                 </td>
                 <td className="px-3 text-center">{r.credit_hours}</td>
-                {show.score && <td className="px-3 text-center">{r.score ?? "—"}</td>}
+                {show.score && (
+                  <td className="px-3 text-center">{r.score != null ? mark(r.score) : "—"}</td>
+                )}
                 {show.letter && (
                   <td className="px-3 text-center font-bold" dir="ltr">
                     {r.letter || "—"}

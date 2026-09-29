@@ -9,6 +9,7 @@ import { can } from "../../lib/nav";
 import { TeacherStatus, days, initials, num, pct } from "../../lib/reports";
 import { useTeachersReport } from "./Teachers";
 import { ALL } from "../../components/Pager";
+import { fmtDate, count, N } from "../../lib/format";
 
 /** Board: HRHome (phone); desktop derived — distribution + lists in two columns. */
 export function HRHome() {
@@ -32,7 +33,7 @@ export function HRHome() {
           <Card className="p-4">
             <div className="flex items-center justify-between">
               <p className="text-sm font-semibold text-text">
-                التوزيع · الأساتذة والمعيدون {num(r.summary.members)} · {r.term.name}
+                التوزيع · هيئة التدريس: {count(r.summary.members, N.member)} · {r.term.name}
               </p>
               <Link to="/hr/report" className="text-xs font-semibold text-primary">
                 التقرير
@@ -154,9 +155,9 @@ export function NoticeList({
               {n.subject} — {n.teacher_name}
             </span>
             <span className="block text-xs text-text-muted">
-              أُرسل {new Date(n.created_at).toLocaleDateString("ar")} ·{" "}
+              أُرسل {fmtDate(n.created_at)} ·{" "}
               {n.acknowledged_at
-                ? `أقرّ ${new Date(n.acknowledged_at).toLocaleDateString("ar")}`
+                ? `أقرّ ${fmtDate(n.acknowledged_at)}`
                 : n.opened_at
                   ? "فُتح · لم يُقرّ"
                   : "لم يُفتح"}

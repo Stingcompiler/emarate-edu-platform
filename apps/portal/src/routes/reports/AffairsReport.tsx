@@ -38,8 +38,8 @@ export function AffairsReport() {
   const report = useQuery({
     queryKey: ["reports", "affairs", year, department],
     queryFn: async () =>
-      (await api.GET("/api/v1/reports/affairs", { params: { query: { year, department } } }))
-        .data ?? null,
+      ok(await api.GET("/api/v1/reports/affairs", { params: { query: { year, department } } })) ??
+      null,
   });
   const r = report.data;
   const kinds = r?.kinds ?? [];

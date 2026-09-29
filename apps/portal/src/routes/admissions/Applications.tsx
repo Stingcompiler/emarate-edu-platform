@@ -55,7 +55,7 @@ export function Applications() {
       title="الطلبات"
       subtitle={
         s
-          ? `${count(total, N.application)} · غير موزعة ${s.unassigned.toLocaleString("ar")}`
+          ? `${count(total, N.application)} · غير موزعة ${s.unassigned.toLocaleString("ar-u-nu-latn")}`
           : undefined
       }
     >
@@ -68,7 +68,7 @@ export function Applications() {
         ].map(([k, l]) => (
           <Card key={k} className="px-4 py-3">
             <p className="text-2xl font-bold text-text">
-              {(s?.by_status[k!] ?? 0).toLocaleString("ar")}
+              {(s?.by_status[k!] ?? 0).toLocaleString("ar-u-nu-latn")}
             </p>
             <p className="text-xs text-text-muted">{l}</p>
           </Card>

@@ -23,9 +23,9 @@ import { useUnsavedChanges } from "../../lib/useUnsavedChanges";
 import { slugify } from "../../lib/format";
 import { ALL, Pager, useLocalPages } from "../../components/Pager";
 
-const day = new Intl.DateTimeFormat("ar", { day: "numeric" });
-const month = new Intl.DateTimeFormat("ar", { month: "long" });
-const time = new Intl.DateTimeFormat("ar", { hour: "numeric", minute: "2-digit" });
+const day = new Intl.DateTimeFormat("ar-u-nu-latn", { day: "numeric" });
+const month = new Intl.DateTimeFormat("ar-u-nu-latn", { month: "long" });
+const time = new Intl.DateTimeFormat("ar-u-nu-latn", { hour: "numeric", minute: "2-digit" });
 const LABEL: Record<string, string> = { draft: "مسودة", published: "منشورة", cancelled: "ملغاة" };
 
 /** Board: EventsManagerHome (phone); desktop derived. */
