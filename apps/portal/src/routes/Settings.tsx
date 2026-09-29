@@ -10,7 +10,7 @@ import { Button, Card, SectionLabel, WithSide } from "../components/ui";
 import { api } from "../lib/api";
 import { hasRole, useMe, useSignOut } from "../lib/auth";
 import { disablePush, enablePush, pushState, type PushState } from "../lib/push";
-import { applyTheme, storedTheme, type Theme } from "../lib/theme";
+import { type Theme, useTheme } from "../lib/theme";
 
 type Preference = Schemas["Preference"];
 
@@ -153,23 +153,13 @@ function Dot({ on, label, onClick }: { on: boolean; label: string; onClick: () =
 }
 
 function ThemeSwitch() {
-  const [theme, setTheme] = useState<Theme>(storedTheme);
+  const { theme, set } = useTheme();
   const options: { key: Theme; label: string }[] = [
     { key: "light", label: "فاتح" },
     { key: "dark", label: "داكن" },
     { key: "system", label: "النظام" },
   ];
-  return (
-    <Segmented
-      label="المظهر"
-      options={options}
-      value={theme}
-      onChange={(key) => {
-        applyTheme(key);
-        setTheme(key);
-      }}
-    />
-  );
+  return <Segmented label="المظهر" options={options} value={theme} onChange={set} />;
 }
 
 const PUSH_TEXT: Record<PushState, string> = {

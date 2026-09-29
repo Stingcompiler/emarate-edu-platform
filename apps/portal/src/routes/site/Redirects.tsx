@@ -5,13 +5,15 @@ import { useState } from "react";
 import { PortalShell } from "../../components/PortalShell";
 import { Button, Card, Notice, SideNote, WithSide, problemMessage } from "../../components/ui";
 import { api } from "../../lib/api";
+import { ALL, Pager, useLocalPages } from "../../components/Pager";
 
 /** Board: DesktopSiteRedirects (desktop). Phone derived as a card list. 404 suggestions arrive with the public site (Phase 9). */
 export function Redirects() {
   const client = useQueryClient();
   const list = useQuery({
     queryKey: ["site", "redirects"],
-    queryFn: async () => (await api.GET("/api/v1/content/redirects")).data?.results ?? [],
+    queryFn: async () =>
+      (await api.GET("/api/v1/content/redirects", { params: { query: ALL } })).data?.results ?? [],
   });
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
@@ -35,6 +37,7 @@ export function Redirects() {
     },
     onSuccess: refresh,
   });
+  const paged = useLocalPages(list.data ?? []);
   return (
     <PortalShell
       title="التحويلات"
@@ -77,7 +80,7 @@ export function Redirects() {
           </div>
         )}
         <Card className="mt-4 divide-y divide-border-soft">
-          {(list.data ?? []).map((r) => (
+          {paged.shown.map((r) => (
             <div key={r.id} className="flex items-center gap-3 px-4 py-3 text-sm" dir="ltr">
               <span className="min-w-0 flex-1 truncate font-mono text-text">
                 {r.from_path} → {r.to_path}
@@ -94,6 +97,7 @@ export function Redirects() {
             </div>
           ))}
         </Card>
+        <Pager page={paged.page} count={paged.count} onPage={paged.setPage} />
       </WithSide>
     </PortalShell>
   );

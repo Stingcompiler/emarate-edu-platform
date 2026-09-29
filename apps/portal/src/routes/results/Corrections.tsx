@@ -22,6 +22,7 @@ import { api } from "../../lib/api";
 import { useMe } from "../../lib/auth";
 import { when } from "../../lib/format";
 import { can } from "../../lib/nav";
+import { ALL, Pager, useLocalPages } from "../../components/Pager";
 
 type Correction = Schemas["Correction"];
 type Tab = "pending" | "approved" | "rejected";
@@ -33,10 +34,12 @@ export function Corrections() {
   const [tab, setTab] = useState<Tab>("pending");
   const list = useQuery({
     queryKey: ["result-corrections"],
-    queryFn: async () => (await api.GET("/api/v1/result-corrections")).data?.results ?? [],
+    queryFn: async () =>
+      (await api.GET("/api/v1/result-corrections", { params: { query: ALL } })).data?.results ?? [],
   });
   const all = list.data ?? [];
   const shown = all.filter((c) => c.status === tab);
+  const paged = useLocalPages(shown, tab);
   const count = (status: Tab) => all.filter((c) => c.status === status).length;
 
   return (
@@ -72,11 +75,12 @@ export function Corrections() {
           </Card>
         ) : (
           <Card className="mt-4 divide-y divide-border-soft">
-            {shown.map((c) => (
+            {paged.shown.map((c) => (
               <CorrectionRow key={c.public_id} correction={c} approver={approver} />
             ))}
           </Card>
         )}
+        <Pager page={paged.page} count={paged.count} onPage={paged.setPage} />
       </WithSide>
     </PortalShell>
   );

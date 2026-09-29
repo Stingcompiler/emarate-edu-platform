@@ -9,6 +9,7 @@ import { useMe } from "../../lib/auth";
 import { when, count, N } from "../../lib/format";
 import { dueLabel, splitCourse, taskState, useAssignments, useLectures } from "../../lib/learning";
 import { examPhase } from "../exams/Exams";
+import { ALL } from "../../components/Pager";
 
 const DAY = 86_400_000;
 
@@ -24,15 +25,18 @@ export function Today() {
   const lectures = useLectures();
   const live = useQuery({
     queryKey: ["live"],
-    queryFn: async () => (await api.GET("/api/v1/live-sessions")).data?.results ?? [],
+    queryFn: async () =>
+      (await api.GET("/api/v1/live-sessions", { params: { query: ALL } })).data?.results ?? [],
   });
   const exams = useQuery({
     queryKey: ["exams"],
-    queryFn: async () => (await api.GET("/api/v1/exams")).data?.results ?? [],
+    queryFn: async () =>
+      (await api.GET("/api/v1/exams", { params: { query: ALL } })).data?.results ?? [],
   });
   const regulations = useQuery({
     queryKey: ["regulations"],
-    queryFn: async () => (await api.GET("/api/v1/regulations")).data?.results ?? [],
+    queryFn: async () =>
+      (await api.GET("/api/v1/regulations", { params: { query: ALL } })).data?.results ?? [],
   });
   const now = Date.now();
   const first = me.data?.full_name_ar?.split(" ")[0] ?? "";

@@ -10,6 +10,7 @@ import { useCurrentTerm } from "../../lib/department";
 import { initials, num, useDepartments } from "../../lib/reports";
 import { Inbox } from "./Inbox";
 import { count, N } from "../../lib/format";
+import { ALL } from "../../components/Pager";
 
 /** Board: AcademicAffairsHome (phone); desktop derived — decisions beside department leadership. */
 export function AcademicHome() {
@@ -19,8 +20,11 @@ export function AcademicHome() {
   const corrections = useQuery({
     queryKey: ["result-corrections", "pending"],
     queryFn: async () =>
-      (await api.GET("/api/v1/result-corrections", { params: { query: { status: "pending" } } }))
-        .data?.count ?? 0,
+      (
+        await api.GET("/api/v1/result-corrections", {
+          params: { query: { ...ALL, status: "pending" } },
+        })
+      ).data?.count ?? 0,
   });
   const leaders = useQuery({
     queryKey: ["role-assignments", "leaders"],

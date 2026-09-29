@@ -15,6 +15,7 @@ import {
 } from "../../lib/learning";
 import { examPhase } from "../exams/Exams";
 import { type Noun, count, N } from "../../lib/format";
+import { ALL } from "../../components/Pager";
 
 const GROUPS: { key: TaskState[]; label: string }[] = [
   { key: ["late"], label: "متأخر" },
@@ -36,7 +37,8 @@ export function Tasks() {
   const assignments = useAssignments();
   const exams = useQuery({
     queryKey: ["exams"],
-    queryFn: async () => (await api.GET("/api/v1/exams")).data?.results ?? [],
+    queryFn: async () =>
+      (await api.GET("/api/v1/exams", { params: { query: ALL } })).data?.results ?? [],
   });
   const now = Date.now();
   const list = (assignments.data ?? [])

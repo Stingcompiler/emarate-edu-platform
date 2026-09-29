@@ -2,10 +2,11 @@ import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 
 import { PortalShell } from "../../components/PortalShell";
-import { Button, Card, Chip, StatusBadge } from "../../components/ui";
+import { Card, Chip, StatusBadge } from "../../components/ui";
 import { api } from "../../lib/api";
 import { useDepartment } from "../../lib/department";
 import { initials, num } from "../../lib/reports";
+import { Pager } from "../../components/Pager";
 
 const STATUS: Record<string, string> = {
   active: "منتظم",
@@ -118,25 +119,7 @@ export function DepartmentStudents() {
             ))}
             {!rows.length && <p className="px-4 py-4 text-sm text-text-muted">لا طلاب مطابقون.</p>}
           </Card>
-          <div className="mt-3 flex items-center justify-center gap-3 text-sm">
-            <Button
-              variant="secondary"
-              className="min-h-9 px-3"
-              disabled={!list.data?.previous}
-              onClick={() => setPage((p) => p - 1)}
-            >
-              السابق
-            </Button>
-            <span className="text-text-muted">صفحة {num(page)}</span>
-            <Button
-              variant="secondary"
-              className="min-h-9 px-3"
-              disabled={!list.data?.next}
-              onClick={() => setPage((p) => p + 1)}
-            >
-              التالي
-            </Button>
-          </div>
+          <Pager page={page} count={list.data?.count ?? 0} onPage={setPage} />
         </div>
         <aside className="mt-6 lg:mt-0">
           {s ? (

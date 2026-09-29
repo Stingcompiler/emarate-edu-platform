@@ -8,6 +8,7 @@ import { useMe } from "../../lib/auth";
 import { can } from "../../lib/nav";
 import { TeacherStatus, days, initials, num, pct } from "../../lib/reports";
 import { useTeachersReport } from "./Teachers";
+import { ALL } from "../../components/Pager";
 
 /** Board: HRHome (phone); desktop derived — distribution + lists in two columns. */
 export function HRHome() {
@@ -15,7 +16,8 @@ export function HRHome() {
   const report = useTeachersReport();
   const notices = useQuery({
     queryKey: ["hr-notices"],
-    queryFn: async () => (await api.GET("/api/v1/hr-notices")).data?.results ?? [],
+    queryFn: async () =>
+      (await api.GET("/api/v1/hr-notices", { params: { query: ALL } })).data?.results ?? [],
   });
   const r = report.data;
   const below = (r?.rows ?? []).filter((t) => t.status === "below");

@@ -18,6 +18,7 @@ import { api } from "../../lib/api";
 import { useMe } from "../../lib/auth";
 import { can } from "../../lib/nav";
 import { count, N } from "../../lib/format";
+import { ALL, Pager, useLocalPages } from "../../components/Pager";
 
 const date = new Intl.DateTimeFormat("ar", { day: "numeric", month: "long", year: "numeric" });
 
@@ -27,11 +28,13 @@ export function Regulations() {
   const staff = can(me.data, "regulations.manage");
   const list = useQuery({
     queryKey: ["regulations"],
-    queryFn: async () => (await api.GET("/api/v1/regulations")).data?.results ?? [],
+    queryFn: async () =>
+      (await api.GET("/api/v1/regulations", { params: { query: ALL } })).data?.results ?? [],
   });
   const items = list.data ?? [];
   const needed = items.filter((r) => r.requires_acknowledgement && r.acknowledged === false);
   const rest = items.filter((r) => !needed.includes(r));
+  const paged = useLocalPages(rest);
 
   return (
     <PortalShell
@@ -106,7 +109,7 @@ export function Regulations() {
           <>
             <SectionLabel>{staff ? "كل اللوائح" : "للاطلاع"}</SectionLabel>
             <Card className="divide-y divide-border-soft">
-              {rest.map((r) => (
+              {paged.shown.map((r) => (
                 <Link
                   key={r.public_id}
                   to={`/regulations/${r.public_id}`}
@@ -135,6 +138,7 @@ export function Regulations() {
             </Card>
           </>
         )}
+        <Pager page={paged.page} count={paged.count} onPage={paged.setPage} />
       </WithSide>
     </PortalShell>
   );

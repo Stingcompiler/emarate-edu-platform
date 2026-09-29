@@ -9,6 +9,7 @@ import { api } from "../../lib/api";
 import { when } from "../../lib/format";
 import { initials } from "../../lib/reports";
 import { openFile } from "../../lib/learning";
+import { ALL } from "../../components/Pager";
 
 /** Board: TeacherGradeSubmission (phone); desktop derived — work on the right, grade panel on the left. */
 export function Grade() {
@@ -37,7 +38,7 @@ export function Grade() {
     queryFn: async () =>
       (
         await api.GET("/api/v1/assignments/{public_id}/submissions", {
-          params: { path: { public_id: s!.assignment } },
+          params: { path: { public_id: s!.assignment }, query: ALL },
         })
       ).data?.results ?? [],
   });

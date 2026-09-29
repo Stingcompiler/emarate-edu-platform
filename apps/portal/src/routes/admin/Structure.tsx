@@ -14,6 +14,7 @@ import {
 import { api } from "../../lib/api";
 import { num } from "../../lib/reports";
 import { count, N } from "../../lib/format";
+import { ALL } from "../../components/Pager";
 
 const DEGREE: Record<string, string> = {
   diploma: "دبلوم",
@@ -27,11 +28,13 @@ export function Structure() {
   const client = useQueryClient();
   const colleges = useQuery({
     queryKey: ["colleges"],
-    queryFn: async () => (await api.GET("/api/v1/colleges")).data?.results ?? [],
+    queryFn: async () =>
+      (await api.GET("/api/v1/colleges", { params: { query: ALL } })).data?.results ?? [],
   });
   const departments = useQuery({
     queryKey: ["departments"],
-    queryFn: async () => (await api.GET("/api/v1/departments")).data?.results ?? [],
+    queryFn: async () =>
+      (await api.GET("/api/v1/departments", { params: { query: ALL } })).data?.results ?? [],
   });
   const programs = useQuery({
     queryKey: ["programs", "all"],
@@ -41,11 +44,13 @@ export function Structure() {
   });
   const terms = useQuery({
     queryKey: ["terms"],
-    queryFn: async () => (await api.GET("/api/v1/terms")).data?.results ?? [],
+    queryFn: async () =>
+      (await api.GET("/api/v1/terms", { params: { query: ALL } })).data?.results ?? [],
   });
   const years = useQuery({
     queryKey: ["academic-years"],
-    queryFn: async () => (await api.GET("/api/v1/academic-years")).data?.results ?? [],
+    queryFn: async () =>
+      (await api.GET("/api/v1/academic-years", { params: { query: ALL } })).data?.results ?? [],
   });
   const [picked, setPicked] = useState<number | null>(null);
   const dept = departments.data?.find((d) => d.id === picked) ?? departments.data?.[0];

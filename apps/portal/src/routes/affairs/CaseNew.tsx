@@ -17,6 +17,7 @@ import {
 } from "../../components/ui";
 import { api } from "../../lib/api";
 import { KIND } from "./Cases";
+import { ALL } from "../../components/Pager";
 
 /** Board: StudentAffairsCaseNew (phone). Opening from a misconduct report converts it. Desktop: derived. */
 export function CaseNew() {
@@ -42,8 +43,8 @@ export function CaseNew() {
     queryKey: ["students", "lookup", number],
     enabled: number.trim().length >= 4 && !reportId,
     queryFn: async () =>
-      (await api.GET("/api/v1/students", { params: { query: { search: number.trim() } } })).data
-        ?.results ?? [],
+      (await api.GET("/api/v1/students", { params: { query: { ...ALL, search: number.trim() } } }))
+        .data?.results ?? [],
   });
   const student = students.data?.[0];
 

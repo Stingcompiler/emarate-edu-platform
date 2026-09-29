@@ -19,6 +19,7 @@ import {
 } from "../../lib/reports";
 import { STATUS_LABEL } from "../../lib/visitor";
 import { count, N } from "../../lib/format";
+import { ALL } from "../../components/Pager";
 
 const STAGES = ["submitted", "under_review", "missing_documents", "accepted", "rejected"] as const;
 const STAGE_TONE: Record<string, string> = {
@@ -34,7 +35,8 @@ export function AdmissionsReport() {
   const departments = useDepartments();
   const cycles = useQuery({
     queryKey: ["admissions", "cycles"],
-    queryFn: async () => (await api.GET("/api/v1/admission-cycles")).data?.results ?? [],
+    queryFn: async () =>
+      (await api.GET("/api/v1/admission-cycles", { params: { query: ALL } })).data?.results ?? [],
   });
   const [cycle, setCycle] = useState<number>();
   const [department, setDepartment] = useState<number>();

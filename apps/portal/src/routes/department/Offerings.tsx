@@ -17,6 +17,7 @@ import { useMe } from "../../lib/auth";
 import { useCurrentTerm, useDepartment, useOfferings } from "../../lib/department";
 import { can } from "../../lib/nav";
 import { num } from "../../lib/reports";
+import { ALL } from "../../components/Pager";
 
 /** Board: DesktopDeptDashboard «المواد والتعيينات» — assign teachers from the same screen (docs/02 §4.15). */
 export function Offerings() {
@@ -253,8 +254,8 @@ function NewOffering({
   const programs = useQuery({
     queryKey: ["programs", department],
     queryFn: async () =>
-      (await api.GET("/api/v1/programs", { params: { query: { department } as never } })).data
-        ?.results ?? [],
+      (await api.GET("/api/v1/programs", { params: { query: { ...ALL, department } as never } }))
+        .data?.results ?? [],
   });
   const [f, setF] = useState({
     code: "",

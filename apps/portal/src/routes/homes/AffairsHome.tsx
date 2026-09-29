@@ -9,6 +9,7 @@ import { useMe } from "../../lib/auth";
 import { when, count, N } from "../../lib/format";
 import { num } from "../../lib/reports";
 import { Inbox } from "./Inbox";
+import { ALL } from "../../components/Pager";
 
 const KIND: Record<string, string> = {
   academic: "أك",
@@ -23,8 +24,11 @@ export function AffairsHome() {
   const reports = useQuery({
     queryKey: ["misconduct-reports", "new"],
     queryFn: async () =>
-      (await api.GET("/api/v1/misconduct-reports", { params: { query: { status: "new" } } })).data
-        ?.results ?? [],
+      (
+        await api.GET("/api/v1/misconduct-reports", {
+          params: { query: { ...ALL, status: "new" } },
+        })
+      ).data?.results ?? [],
   });
   const open = useQuery({
     queryKey: ["cases", "open"],
@@ -35,15 +39,15 @@ export function AffairsHome() {
   const drafts = useQuery({
     queryKey: ["regulations", "draft"],
     queryFn: async () =>
-      (await api.GET("/api/v1/regulations", { params: { query: { status: "draft" } } })).data
-        ?.results ?? [],
+      (await api.GET("/api/v1/regulations", { params: { query: { ...ALL, status: "draft" } } }))
+        .data?.results ?? [],
   });
   const required = useQuery({
     queryKey: ["regulations", "required"],
     queryFn: async () =>
       (
         await api.GET("/api/v1/regulations", {
-          params: { query: { status: "published", requires_acknowledgement: true } },
+          params: { query: { ...ALL, status: "published", requires_acknowledgement: true } },
         })
       ).data?.results ?? [],
   });

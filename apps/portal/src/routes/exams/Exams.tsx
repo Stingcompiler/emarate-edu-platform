@@ -16,6 +16,7 @@ import {
 import { api } from "../../lib/api";
 import { useMe } from "../../lib/auth";
 import { count, N } from "../../lib/format";
+import { ALL, Pager, useLocalPages } from "../../components/Pager";
 
 type Exam = Schemas["Exam"];
 const when = new Intl.DateTimeFormat("ar", {
@@ -52,7 +53,8 @@ export function Exams() {
   const staff = !me.data?.student;
   const exams = useQuery({
     queryKey: ["exams"],
-    queryFn: async () => (await api.GET("/api/v1/exams")).data?.results ?? [],
+    queryFn: async () =>
+      (await api.GET("/api/v1/exams", { params: { query: ALL } })).data?.results ?? [],
   });
   const list = exams.data ?? [];
   const now = Date.now();
@@ -62,6 +64,9 @@ export function Exams() {
     { key: "draft", label: "مسودات" },
     { key: "closed", label: "منتهية" },
   ];
+  // 10 at a time, in the order the groups appear (live, upcoming, drafts, ended).
+  const ordered = groups.flatMap((g) => list.filter((e) => examPhase(e, now).key === g.key));
+  const paged = useLocalPages(ordered);
   return (
     <PortalShell
       title="الاختبارات"
@@ -95,7 +100,7 @@ export function Exams() {
           </Card>
         )}
         {groups.map((g) => {
-          const rows = list.filter((e) => examPhase(e, now).key === g.key);
+          const rows = paged.shown.filter((e) => examPhase(e, now).key === g.key);
           if (!rows.length) return null;
           return (
             <section key={g.key}>
@@ -146,6 +151,7 @@ export function Exams() {
           );
         })}
       </div>
+      <Pager page={paged.page} count={paged.count} onPage={paged.setPage} />
     </PortalShell>
   );
 }

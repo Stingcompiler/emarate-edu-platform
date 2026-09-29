@@ -133,3 +133,21 @@ def test_security_headers(client, db):
     response = client.get("/api/public/health")
     assert "camera=()" in response["Permissions-Policy"]
     assert response["X-Content-Type-Options"] == "nosniff"
+
+
+def test_lists_page_ten_at_a_time(api, make_user):
+    """Owner, 2026-09-29: the API returns 10 per page; a screen may ask for up to 100."""
+    from accounts.rbac import Role
+
+    admin = make_user(Role.SYSTEM_ADMIN)
+    for _ in range(14):
+        make_user(Role.TEACHER)
+    client = api(admin)
+    first = client.get("/api/v1/users").data
+    assert len(first["results"]) == 10 and first["count"] >= 15 and first["next"]
+    second = client.get("/api/v1/users?page=2").data
+    assert {u["public_id"] for u in second["results"]}.isdisjoint(
+        {u["public_id"] for u in first["results"]}
+    )
+    assert len(client.get("/api/v1/users?page_size=100").data["results"]) == first["count"]
+    assert len(client.get("/api/v1/users?page_size=500").data["results"]) <= 100

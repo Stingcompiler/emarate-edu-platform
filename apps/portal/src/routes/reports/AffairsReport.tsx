@@ -16,6 +16,7 @@ import {
   useDepartments,
 } from "../../lib/reports";
 import { count, N } from "../../lib/format";
+import { ALL } from "../../components/Pager";
 
 const KIND: Record<string, string> = {
   exam_misconduct: "غش",
@@ -29,7 +30,8 @@ export function AffairsReport() {
   const departments = useDepartments();
   const years = useQuery({
     queryKey: ["academic-years"],
-    queryFn: async () => (await api.GET("/api/v1/academic-years")).data?.results ?? [],
+    queryFn: async () =>
+      (await api.GET("/api/v1/academic-years", { params: { query: ALL } })).data?.results ?? [],
   });
   const [year, setYear] = useState<number>();
   const [department, setDepartment] = useState<number>();

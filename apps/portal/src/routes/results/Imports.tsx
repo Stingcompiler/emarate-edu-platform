@@ -19,6 +19,7 @@ import { api } from "../../lib/api";
 import { useMe } from "../../lib/auth";
 import { when, count, N } from "../../lib/format";
 import { asForm, formData } from "../../lib/upload";
+import { ALL, Pager, useServerPages } from "../../components/Pager";
 
 /** Boards: ResultsOfficerHome (phone), DesktopResultsImport step 1 (desktop). */
 export function ResultImports() {
@@ -29,16 +30,19 @@ export function ResultImports() {
 
   const terms = useQuery({
     queryKey: ["terms"],
-    queryFn: async () => (await api.GET("/api/v1/terms")).data?.results ?? [],
+    queryFn: async () =>
+      (await api.GET("/api/v1/terms", { params: { query: ALL } })).data?.results ?? [],
   });
   const departments = useQuery({
     queryKey: ["departments"],
-    queryFn: async () => (await api.GET("/api/v1/departments")).data?.results ?? [],
+    queryFn: async () =>
+      (await api.GET("/api/v1/departments", { params: { query: ALL } })).data?.results ?? [],
   });
-  const batches = useQuery({
-    queryKey: ["result-imports"],
-    queryFn: async () => (await api.GET("/api/v1/result-imports")).data?.results ?? [],
-  });
+  // 10 per page from the server (docs: owner 2026-09-29).
+  const batches = useServerPages(
+    ["result-imports"],
+    async (page) => (await api.GET("/api/v1/result-imports", { params: { query: { page } } })).data,
+  );
 
   const [term, setTerm] = useState("");
   const [department, setDepartment] = useState("");
@@ -133,32 +137,35 @@ export function ResultImports() {
 
         <section className="mt-6 lg:mt-0">
           <SectionLabel>الدفعات</SectionLabel>
-          {!batches.data?.length ? (
+          {!batches.items.length ? (
             <Card>
               <EmptyState icon={<FileUp size={24} aria-hidden />} title="لا دفعات بعد">
                 ارفع أول ملف نتائج.
               </EmptyState>
             </Card>
           ) : (
-            <Card className="divide-y divide-border-soft">
-              {batches.data.map((b) => (
-                <Link
-                  key={b.public_id}
-                  to={`/result-imports/${b.public_id}`}
-                  className="flex items-center gap-3 px-4 py-3 hover:bg-surface-alt"
-                >
-                  <CodeTile top={b.department_name?.slice(0, 3) ?? "كل"} />
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-semibold text-text">{b.file_name}</p>
-                    <p className="text-xs text-text-muted">
-                      {b.term_name} · {count((b.summary as { rows?: number }).rows ?? 0, N.row)} ·{" "}
-                      {b.uploaded_by} · {when(b.created_at)}
-                    </p>
-                  </div>
-                  <StatusBadge status={b.status} label={STATUS_LABELS[b.status] ?? b.status} />
-                </Link>
-              ))}
-            </Card>
+            <>
+              <Card className="divide-y divide-border-soft">
+                {batches.items.map((b) => (
+                  <Link
+                    key={b.public_id}
+                    to={`/result-imports/${b.public_id}`}
+                    className="flex items-center gap-3 px-4 py-3 hover:bg-surface-alt"
+                  >
+                    <CodeTile top={b.department_name?.slice(0, 3) ?? "كل"} />
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-semibold text-text">{b.file_name}</p>
+                      <p className="text-xs text-text-muted">
+                        {b.term_name} · {count((b.summary as { rows?: number }).rows ?? 0, N.row)} ·{" "}
+                        {b.uploaded_by} · {when(b.created_at)}
+                      </p>
+                    </div>
+                    <StatusBadge status={b.status} label={STATUS_LABELS[b.status] ?? b.status} />
+                  </Link>
+                ))}
+              </Card>
+              <Pager page={batches.page} count={batches.count} onPage={batches.setPage} />
+            </>
           )}
         </section>
       </div>

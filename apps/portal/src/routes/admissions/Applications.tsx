@@ -3,6 +3,7 @@ import { FileText } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router";
 
+import { Pager, useServerPages } from "../../components/Pager";
 import { PortalShell } from "../../components/PortalShell";
 import { Card, Chip, EmptyState, StatusBadge } from "../../components/ui";
 import { api } from "../../lib/api";
@@ -33,20 +34,22 @@ export function Applications() {
           }
         | undefined,
   });
-  const list = useQuery({
-    queryKey: ["applications", status, search],
-    queryFn: async () =>
+  // 10 per page from the server; the filters go with the request.
+  const list = useServerPages(
+    ["applications", status, search],
+    async (page) =>
       (
         await api.GET("/api/v1/applications", {
           params: {
             query: {
               ...(status ? { status: status as never } : {}),
               ...(search ? { search } : {}),
+              page,
             },
           },
         })
-      ).data?.results ?? [],
-  });
+      ).data,
+  );
   const s = summary.data;
   const total = s ? Object.values(s.by_status).reduce((a, b) => a + b, 0) : 0;
   return (
@@ -86,7 +89,7 @@ export function Applications() {
           className="min-h-9 flex-1 rounded-full border border-border-soft bg-surface px-3 text-sm sm:max-w-xs"
         />
       </div>
-      {!list.data?.length ? (
+      {!list.items.length ? (
         <Card className="mt-4">
           <EmptyState icon={<FileText size={24} aria-hidden />} title="لا طلبات هنا" />
         </Card>
@@ -99,7 +102,7 @@ export function Applications() {
             <span>المسجل</span>
             <span>الحالة</span>
           </div>
-          {list.data.map((a) => (
+          {list.items.map((a) => (
             <Link
               key={a.public_id}
               to={`/applications/${a.public_id}`}
@@ -124,6 +127,7 @@ export function Applications() {
           ))}
         </Card>
       )}
+      <Pager page={list.page} count={list.count} onPage={list.setPage} label="صفحات الطلبات" />
     </PortalShell>
   );
 }

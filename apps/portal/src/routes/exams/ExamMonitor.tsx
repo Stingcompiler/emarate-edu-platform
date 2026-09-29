@@ -16,6 +16,7 @@ import {
 import { api } from "../../lib/api";
 import { formatClock } from "../../lib/exam";
 import { count, N } from "../../lib/format";
+import { ALL } from "../../components/Pager";
 
 type Row = Schemas["AttemptSummary"];
 const LABEL: Record<string, string> = {
@@ -44,8 +45,11 @@ export function ExamMonitor() {
   const rows = useQuery({
     queryKey: ["exams", id, "attempts"],
     queryFn: async () =>
-      (await api.GET("/api/v1/exams/{public_id}/attempts", { params: { path: { public_id: id } } }))
-        .data?.results ?? [],
+      (
+        await api.GET("/api/v1/exams/{public_id}/attempts", {
+          params: { path: { public_id: id }, query: ALL },
+        })
+      ).data?.results ?? [],
     refetchInterval: 30_000,
   });
   const [picked, setPicked] = useState<Row | null>(null);

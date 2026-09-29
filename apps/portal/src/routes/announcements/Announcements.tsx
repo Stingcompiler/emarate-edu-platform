@@ -18,6 +18,7 @@ import {
 import { api } from "../../lib/api";
 import { useMe } from "../../lib/auth";
 import { when } from "../../lib/format";
+import { ALL, Pager, useLocalPages } from "../../components/Pager";
 
 type Item = Schemas["Announcement"];
 const SCOPES = [
@@ -33,9 +34,11 @@ export function Announcements() {
   const [scope, setScope] = useState("");
   const feed = useQuery({
     queryKey: ["announcements"],
-    queryFn: async () => (await api.GET("/api/v1/announcements")).data?.results ?? [],
+    queryFn: async () =>
+      (await api.GET("/api/v1/announcements", { params: { query: ALL } })).data?.results ?? [],
   });
   const items = (feed.data ?? []).filter((a) => !scope || a.scope === scope);
+  const paged = useLocalPages(items, scope);
   const author = !me.data?.student;
   return (
     <PortalShell
@@ -82,11 +85,12 @@ export function Announcements() {
           </Card>
         ) : (
           <div className="motion-stagger mt-4 grid items-start gap-3 xl:grid-cols-2">
-            {items.map((a) => (
+            {paged.shown.map((a) => (
               <AnnouncementCard key={a.public_id} item={a} />
             ))}
           </div>
         )}
+        <Pager page={paged.page} count={paged.count} onPage={paged.setPage} />
       </WithSide>
     </PortalShell>
   );

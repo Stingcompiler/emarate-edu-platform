@@ -13,13 +13,15 @@ import {
 } from "../../components/ui";
 import { api } from "../../lib/api";
 import { count, N } from "../../lib/format";
+import { ALL } from "../../components/Pager";
 
 /** Board: HeadRegistrarCycles (phone); desktop derived — cycles + a table of intakes. */
 export function Cycles() {
   const client = useQueryClient();
   const cycles = useQuery({
     queryKey: ["admissions", "cycles"],
-    queryFn: async () => (await api.GET("/api/v1/admission-cycles")).data?.results ?? [],
+    queryFn: async () =>
+      (await api.GET("/api/v1/admission-cycles", { params: { query: ALL } })).data?.results ?? [],
   });
   const [picked, setPicked] = useState<number | null>(null);
   const cycle = cycles.data?.find((c) => c.id === picked) ?? cycles.data?.[0];
@@ -27,12 +29,13 @@ export function Cycles() {
     queryKey: ["admissions", "intakes", cycle?.id],
     enabled: !!cycle,
     queryFn: async () =>
-      (await api.GET("/api/v1/intakes", { params: { query: { cycle: cycle!.id } } })).data
+      (await api.GET("/api/v1/intakes", { params: { query: { ...ALL, cycle: cycle!.id } } })).data
         ?.results ?? [],
   });
   const programs = useQuery({
     queryKey: ["programs"],
-    queryFn: async () => (await api.GET("/api/v1/programs")).data?.results ?? [],
+    queryFn: async () =>
+      (await api.GET("/api/v1/programs", { params: { query: ALL } })).data?.results ?? [],
   });
   const toggle = useMutation({
     mutationFn: async ({ id, is_open }: { id: number; is_open: boolean }) => {
@@ -62,7 +65,8 @@ export function Cycles() {
   });
   const years = useQuery({
     queryKey: ["academic-years"],
-    queryFn: async () => (await api.GET("/api/v1/academic-years")).data?.results ?? [],
+    queryFn: async () =>
+      (await api.GET("/api/v1/academic-years", { params: { query: ALL } })).data?.results ?? [],
   });
   const [draft, setDraft] = useState({ name: "", opens: "", closes: "" });
   const create = useMutation({

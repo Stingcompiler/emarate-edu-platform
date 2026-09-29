@@ -20,6 +20,7 @@ import {
 } from "../../components/ui";
 import { api } from "../../lib/api";
 import { slugify } from "../../lib/format";
+import { ALL, Pager, useLocalPages } from "../../components/Pager";
 
 const day = new Intl.DateTimeFormat("ar", { day: "numeric" });
 const month = new Intl.DateTimeFormat("ar", { month: "long" });
@@ -30,8 +31,10 @@ const LABEL: Record<string, string> = { draft: "مسودة", published: "منش�
 export function Events() {
   const events = useQuery({
     queryKey: ["site", "events"],
-    queryFn: async () => (await api.GET("/api/v1/content/events")).data?.results ?? [],
+    queryFn: async () =>
+      (await api.GET("/api/v1/content/events", { params: { query: ALL } })).data?.results ?? [],
   });
+  const paged = useLocalPages(events.data ?? []);
   return (
     <PortalShell
       title="الفعاليات"
@@ -70,7 +73,7 @@ export function Events() {
           </Card>
         ) : (
           <Card className="divide-y divide-border-soft">
-            {events.data.map((e) => (
+            {paged.shown.map((e) => (
               <Link
                 key={e.public_id}
                 to={`/events/${e.public_id}`}
@@ -97,6 +100,7 @@ export function Events() {
             ))}
           </Card>
         )}
+        <Pager page={paged.page} count={paged.count} onPage={paged.setPage} />
       </WithSide>
     </PortalShell>
   );

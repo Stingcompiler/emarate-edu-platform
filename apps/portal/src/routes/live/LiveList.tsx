@@ -19,6 +19,7 @@ import {
 import { api } from "../../lib/api";
 import { useMe } from "../../lib/auth";
 import { DAY_LABELS } from "../../lib/format";
+import { ALL } from "../../components/Pager";
 
 type Session = Schemas["LiveSession"];
 const time = new Intl.DateTimeFormat("ar", { hour: "numeric", minute: "2-digit" });
@@ -36,7 +37,8 @@ export function LiveList() {
   const staff = !me.data?.student;
   const sessions = useQuery({
     queryKey: ["live"],
-    queryFn: async () => (await api.GET("/api/v1/live-sessions")).data?.results ?? [],
+    queryFn: async () =>
+      (await api.GET("/api/v1/live-sessions", { params: { query: ALL } })).data?.results ?? [],
   });
   const join = useMutation({
     mutationFn: async (id: string) => {
