@@ -18,6 +18,7 @@ import { useUnsavedChanges } from "../../lib/useUnsavedChanges";
 import { fmtSize, useLectures, useCourse } from "../../lib/learning";
 import { tusUpload } from "../../lib/tus";
 import { asForm, formData } from "../../lib/upload";
+import { useConfirm } from "../../components/Confirm";
 
 /** Board: TeacherLectureNew (phone); desktop derived — form beside resources. `/lectures/new?offering=` or `/lectures/:id/edit`. */
 export function LectureEditor() {
@@ -192,6 +193,7 @@ function Resources({
   offering: number;
   onChange: () => void;
 }) {
+  const confirm = useConfirm();
   const fileInput = useRef<HTMLInputElement>(null);
   const videoInput = useRef<HTMLInputElement>(null);
   const [link, setLink] = useState({ title: "", url: "" });
@@ -307,7 +309,10 @@ function Resources({
             <button
               type="button"
               aria-label="حذف"
-              onClick={() => remove(r.id)}
+              onClick={async () =>
+                (await confirm({ title: `حذف «${r.title}»؟`, confirm: "حذف المورد" })) &&
+                remove(r.id)
+              }
               className="grid size-8 place-items-center text-danger-strong"
             >
               <Trash2 size={15} aria-hidden />

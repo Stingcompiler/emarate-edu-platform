@@ -12,6 +12,7 @@ import { when, count, N } from "../../lib/format";
 import { useLectures } from "../../lib/learning";
 import { can } from "../../lib/nav";
 import { num } from "../../lib/reports";
+import { useConfirm } from "../../components/Confirm";
 
 /**
  * «المحاضرات»: the department's lectures by course with publish state. The manager and
@@ -19,6 +20,7 @@ import { num } from "../../lib/reports";
  * manager-only (owner 2026-09-29: full control of the department).
  */
 export function DepartmentLectures() {
+  const confirm = useConfirm();
   const me = useMe();
   const client = useQueryClient();
   const { id, department } = useDepartment();
@@ -133,8 +135,12 @@ export function DepartmentLectures() {
                       <button
                         type="button"
                         aria-label="حذف المحاضرة"
-                        onClick={() =>
-                          window.confirm(`حذف «${l.title_ar}»؟`) && remove.mutate(l.public_id)
+                        onClick={async () =>
+                          (await confirm({
+                            title: `حذف «${l.title_ar}»؟`,
+                            body: "تختفي المحاضرة وموادها من صفحة المادة عند الطلاب.",
+                            confirm: "حذف المحاضرة",
+                          })) && remove.mutate(l.public_id)
                         }
                         className="grid size-8 place-items-center text-danger-strong"
                       >

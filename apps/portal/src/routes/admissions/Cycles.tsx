@@ -172,6 +172,7 @@ export function Cycles() {
                 <Button
                   variant={i.is_open ? "secondary" : "primary"}
                   className="min-h-9 px-3"
+                  disabled={toggle.isPending}
                   onClick={() => toggle.mutate({ id: i.id, is_open: !i.is_open })}
                 >
                   {i.is_open ? "إغلاق" : "فتح"}
@@ -184,7 +185,7 @@ export function Cycles() {
             {(programs.data ?? [])
               .filter((p) => !used.has(p.id))
               .map((p) => (
-                <Chip key={p.id} onClick={() => add.mutate(p.id)}>
+                <Chip key={p.id} disabled={add.isPending} onClick={() => add.mutate(p.id)}>
                   + {p.name_ar}
                 </Chip>
               ))}

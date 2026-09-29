@@ -17,6 +17,7 @@ import { useMe } from "../../lib/auth";
 import { when } from "../../lib/format";
 import { can } from "../../lib/nav";
 import { STATUS_LABEL, STATUS_TONE } from "../../lib/visitor";
+import { useConfirm } from "../../components/Confirm";
 
 const ACTION: Record<string, string> = {
   under_review: "بدء المراجعة",
@@ -29,6 +30,7 @@ const ACTION: Record<string, string> = {
 
 /** Board: DesktopApplicationDetail (desktop); phone derived (AdminApplication). */
 export function ApplicationDetail() {
+  const confirm = useConfirm();
   const { id = "" } = useParams();
   const me = useMe();
   const client = useQueryClient();
@@ -312,7 +314,17 @@ export function ApplicationDetail() {
                         key={t}
                         variant={t === "rejected" ? "secondary" : "primary"}
                         className={t === "rejected" ? "text-danger-strong" : ""}
-                        onClick={() => act.mutate(t)}
+                        onClick={async () =>
+                          // A final decision reaches the applicant: ask first.
+                          (!["accepted", "rejected"].includes(t) ||
+                            (await confirm({
+                              title: t === "accepted" ? "قبول الطلب؟" : "رفض الطلب؟",
+                              body: `يصل القرار إلى ${a.full_name} بالبريد فورًا.`,
+                              confirm: ACTION[t] ?? t,
+                              tone: t === "accepted" ? "primary" : "danger",
+                            }))) &&
+                          act.mutate(t)
+                        }
                         disabled={act.isPending || !canAct}
                       >
                         {ACTION[t] ?? t}

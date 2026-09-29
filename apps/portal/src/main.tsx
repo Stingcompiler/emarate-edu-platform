@@ -96,6 +96,7 @@ import { ForgotPassword } from "./routes/ForgotPassword";
 import { Install } from "./routes/Install";
 import { Login } from "./routes/Login";
 import { NotFound } from "./routes/NotFound";
+import { ConfirmProvider } from "./components/Confirm";
 import { NoAccess } from "./components/NoAccess";
 import { QueryErrorBanner } from "./components/QueryErrorBanner";
 import { ROUTE_ACCESS } from "./lib/access";
@@ -238,7 +239,9 @@ if (!root) throw new Error("#root element missing from index.html");
 createRoot(root).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router} />
+      <ConfirmProvider>
+        <RouterProvider router={router} />
+      </ConfirmProvider>
       <QueryErrorBanner />
     </QueryClientProvider>
   </StrictMode>,

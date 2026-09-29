@@ -18,6 +18,7 @@ import {
 import { api, ok } from "../../lib/api";
 import { asForm, formData } from "../../lib/upload";
 import { Pager, useServerPages } from "../../components/Pager";
+import { useConfirm } from "../../components/Confirm";
 
 type Tab = "media" | "menus" | "settings";
 
@@ -47,6 +48,7 @@ export function SiteMedia() {
 }
 
 function Media() {
+  const confirm = useConfirm();
   const client = useQueryClient();
   // 10 per page from the server (docs: owner 2026-09-29).
   const media = useServerPages(["site", "media"], async (page) =>
@@ -106,7 +108,13 @@ function Media() {
               <button
                 type="button"
                 aria-label="حذف"
-                onClick={() => remove.mutate(m.public_id)}
+                onClick={async () =>
+                  (await confirm({
+                    title: "حذف الصورة؟",
+                    body: "تختفي من كل صفحة أو خبر يستخدمها.",
+                    confirm: "حذف",
+                  })) && remove.mutate(m.public_id)
+                }
                 className="text-danger-strong"
               >
                 <Trash2 size={14} />

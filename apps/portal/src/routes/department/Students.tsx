@@ -21,6 +21,7 @@ import { useDepartment } from "../../lib/department";
 import { can } from "../../lib/nav";
 import { initials, num } from "../../lib/reports";
 import { ALL, Pager } from "../../components/Pager";
+import { useConfirm } from "../../components/Confirm";
 
 type Student = Schemas["StudentRecord"];
 
@@ -37,6 +38,7 @@ const STATUS: Record<string, string> = {
  * the manager deletes one added by mistake (owner 2026-09-29).
  */
 export function DepartmentStudents() {
+  const confirm = useConfirm();
   const me = useMe();
   const client = useQueryClient();
   const { id, department } = useDepartment();
@@ -242,9 +244,12 @@ export function DepartmentStudents() {
                       variant="secondary"
                       className="min-h-9 px-3 text-danger-strong"
                       disabled={remove.isPending}
-                      onClick={() =>
-                        window.confirm(`حذف سجل «${s.full_name_ar}» نهائيًا؟`) &&
-                        remove.mutate(s.public_id)
+                      onClick={async () =>
+                        (await confirm({
+                          title: `حذف سجل «${s.full_name_ar}»؟`,
+                          body: "يُحذف السجل نهائيًا. يصلح لسجل أُضيف خطأً فقط.",
+                          confirm: "حذف السجل",
+                        })) && remove.mutate(s.public_id)
                       }
                     >
                       <Trash2 size={15} aria-hidden />

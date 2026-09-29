@@ -15,6 +15,7 @@ import { api, ok } from "../../lib/api";
 import { num } from "../../lib/reports";
 import { count, N, fmtDate } from "../../lib/format";
 import { ALL } from "../../components/Pager";
+import { useConfirm } from "../../components/Confirm";
 
 const DEGREE: Record<string, string> = {
   diploma: "دبلوم",
@@ -25,6 +26,7 @@ const DEGREE: Record<string, string> = {
 
 /** Board: DesktopSystemStructure — college tree, years and terms, department programs. */
 export function Structure() {
+  const confirm = useConfirm();
   const client = useQueryClient();
   const colleges = useQuery({
     queryKey: ["colleges"],
@@ -211,7 +213,15 @@ export function Structure() {
                   <Button
                     variant="ghost"
                     className="min-h-8 px-2 text-xs"
-                    onClick={() => setCurrent.mutate(t.id)}
+                    disabled={setCurrent.isPending}
+                    onClick={async () =>
+                      (await confirm({
+                        title: `جعل «${t.name_ar}» الفصل الحالي؟`,
+                        body: "يتغير الفصل الذي تعرضه كل لوحات الكلية وموادها وتقاريرها.",
+                        confirm: "تعيينه الفصل الحالي",
+                        tone: "primary",
+                      })) && setCurrent.mutate(t.id)
+                    }
                   >
                     تعيين كحالي
                   </Button>

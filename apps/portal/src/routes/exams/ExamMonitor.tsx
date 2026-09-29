@@ -17,6 +17,7 @@ import { api, ok } from "../../lib/api";
 import { formatClock } from "../../lib/exam";
 import { count, N } from "../../lib/format";
 import { Pager, useServerPages } from "../../components/Pager";
+import { useConfirm } from "../../components/Confirm";
 
 type Row = Schemas["AttemptSummary"];
 const LABEL: Record<string, string> = {
@@ -34,6 +35,7 @@ const TONE: Record<string, string> = {
 
 /** Board: TeacherExamMonitor (phone); desktop derived. Refreshes every 30 seconds. */
 export function ExamMonitor() {
+  const confirm = useConfirm();
   const { id = "" } = useParams();
   const client = useQueryClient();
   const exam = useQuery({
@@ -131,7 +133,11 @@ export function ExamMonitor() {
                   />
                   <div className="flex flex-wrap gap-2">
                     {picked.status === "in_progress" && (
-                      <Button variant="secondary" onClick={() => act.mutate("extend")}>
+                      <Button
+                        variant="secondary"
+                        disabled={act.isPending}
+                        onClick={() => act.mutate("extend")}
+                      >
                         تمديد 5 دقائق
                       </Button>
                     )}
@@ -149,7 +155,14 @@ export function ExamMonitor() {
                         variant="secondary"
                         className="text-danger-strong"
                         disabled={!reason.trim()}
-                        onClick={() => act.mutate("invalidate")}
+                        onClick={async () =>
+                          (await confirm({
+                            title: "إلغاء المحاولة؟",
+                            body: "تُلغى محاولة الطالب ولا تُحتسب درجتها. يُسجَّل السبب في السجل.",
+                            confirm: "إلغاء المحاولة",
+                            cancel: "تراجع",
+                          })) && act.mutate("invalidate")
+                        }
                       >
                         إلغاء المحاولة
                       </Button>

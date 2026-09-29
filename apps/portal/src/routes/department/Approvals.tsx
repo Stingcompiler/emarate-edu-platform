@@ -101,6 +101,7 @@ export function Approvals() {
             <div className="flex flex-wrap gap-2">
               <Button
                 className="min-h-9 px-4"
+                disabled={decide.isPending}
                 onClick={() => decide.mutate({ id: r.public_id, approve: true })}
               >
                 اعتماد

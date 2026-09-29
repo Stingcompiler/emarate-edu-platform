@@ -1,4 +1,5 @@
 import type {
+  Ref,
   ButtonHTMLAttributes,
   InputHTMLAttributes,
   ReactNode,
@@ -17,9 +18,13 @@ export function Button({
   variant = "primary",
   className = "",
   ...props
-}: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: "primary" | "secondary" | "ghost" }) {
+}: ButtonHTMLAttributes<HTMLButtonElement> & {
+  variant?: "primary" | "secondary" | "ghost" | "danger";
+  ref?: Ref<HTMLButtonElement>;
+}) {
   const styles = {
     primary: "bg-primary text-white hover:bg-primary-hover disabled:opacity-60",
+    danger: "bg-danger-strong text-white hover:opacity-90 disabled:opacity-60",
     secondary: "border border-border bg-surface text-text hover:bg-surface-alt disabled:opacity-60",
     ghost: "text-primary hover:bg-primary-soft disabled:opacity-60",
   }[variant];

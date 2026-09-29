@@ -6,9 +6,11 @@ import { PortalShell } from "../../components/PortalShell";
 import { Button, Card, Notice, SideNote, WithSide, problemMessage } from "../../components/ui";
 import { api, ok } from "../../lib/api";
 import { ALL, Pager, useLocalPages } from "../../components/Pager";
+import { useConfirm } from "../../components/Confirm";
 
 /** Board: DesktopSiteRedirects (desktop). Phone derived as a card list. 404 suggestions arrive with the public site (Phase 9). */
 export function Redirects() {
+  const confirm = useConfirm();
   const client = useQueryClient();
   const list = useQuery({
     queryKey: ["site", "redirects"],
@@ -89,7 +91,13 @@ export function Redirects() {
               <button
                 type="button"
                 aria-label="حذف"
-                onClick={() => remove.mutate(r.id)}
+                onClick={async () =>
+                  (await confirm({
+                    title: "حذف التحويل؟",
+                    body: `${r.from_path} ← ${r.to_path}`,
+                    confirm: "حذف",
+                  })) && remove.mutate(r.id)
+                }
                 className="text-danger-strong"
               >
                 <Trash2 size={16} />
