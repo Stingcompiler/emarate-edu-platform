@@ -38,8 +38,10 @@ export function ExamEditor() {
   const client = useQueryClient();
   const creating = !id;
   const courses = useQuery({
-    queryKey: ["me", "courses"],
-    queryFn: async () => (await api.GET("/api/v1/me/courses")).data ?? [],
+    // Courses taught plus, for a department manager/supervisor, the department's courses.
+    queryKey: ["me", "courses", "managed"],
+    queryFn: async () =>
+      (await api.GET("/api/v1/me/courses", { params: { query: { managed: true } } })).data ?? [],
     enabled: creating,
   });
   const exam = useQuery({

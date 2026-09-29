@@ -14,7 +14,7 @@ import {
 } from "../../components/ui";
 import { api } from "../../lib/api";
 import { when, count, N } from "../../lib/format";
-import { dueLabel, fmtSize, openFile, useMyCourses } from "../../lib/learning";
+import { dueLabel, fmtSize, openFile, useCourse, isCourseStaff } from "../../lib/learning";
 import { asForm, formData } from "../../lib/upload";
 import { ALL } from "../../components/Pager";
 
@@ -35,10 +35,9 @@ export function Assignment() {
     queryKey: ["assignment", id],
     queryFn: async () => (await api.GET("/api/v1/assignments/{public_id}", path)).data ?? null,
   });
-  const courses = useMyCourses();
   const a = assignment.data;
-  const course = courses.data?.find((c) => c.offering_id === a?.offering);
-  const staff = !!course && course.my_role !== "student";
+  const course = useCourse(a?.offering).data;
+  const staff = isCourseStaff(course);
   return (
     <PortalShell
       title={a?.title ?? "واجب"}

@@ -28,7 +28,8 @@ from files import validation
 from notifications.models import Category, Outbox
 from notifications.services import notify
 from organization.models import SystemSettings
-from students.models import StudentRecord, UniversityNumberSequence
+from students.models import StudentRecord
+from students.services import issue_university_number
 
 from .models import (
     Application,
@@ -606,17 +607,7 @@ def review_document(
 
 
 def _university_number(program) -> str:
-    department = program.department
-    year = timezone.now().year % 100
-    sequence, _ = UniversityNumberSequence.objects.select_for_update().get_or_create(
-        college=department.college, year=year, prefix=department.code
-    )
-    while True:
-        sequence.last_value += 1
-        number = f"{year:02d}-{department.code}-{sequence.last_value:04d}"
-        if not StudentRecord.objects.filter(university_number=number).exists():
-            sequence.save(update_fields=["last_value"])
-            return number
+    return issue_university_number(program)
 
 
 def register_applicant(meta: RequestMeta, application: Application) -> StudentRecord:

@@ -98,6 +98,13 @@ CAPABILITIES: dict[str, frozenset[Role]] = {
         }
     ),
     "students.import": frozenset({R.SYSTEM_ADMIN, R.HEAD_REGISTRAR}),
+    # Add and correct records by hand; a department role in its departments only
+    # (owner 2026-09-29: the department manager runs their department's students).
+    "students.manage": frozenset(
+        {R.SYSTEM_ADMIN, R.HEAD_REGISTRAR, R.DEPARTMENT_MANAGER, R.DEPARTMENT_SUPERVISOR}
+    ),
+    # A record added by mistake; never one with an account or history (students/services).
+    "students.delete": frozenset({R.SYSTEM_ADMIN, R.DEPARTMENT_MANAGER}),
     "registration.approve": frozenset(
         {R.SYSTEM_ADMIN, R.HEAD_REGISTRAR, R.DEPARTMENT_MANAGER, R.DEPARTMENT_SUPERVISOR}
     ),

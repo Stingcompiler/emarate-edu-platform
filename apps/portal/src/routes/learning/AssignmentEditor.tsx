@@ -14,7 +14,7 @@ import {
   problemMessage,
 } from "../../components/ui";
 import { api } from "../../lib/api";
-import { useLectures, useMyCourses } from "../../lib/learning";
+import { useLectures, useCourse } from "../../lib/learning";
 
 const EXTENSIONS = ["pdf", "docx", "xlsx", "pptx", "sql", "zip", "jpg", "png", "txt"];
 type Types = "file" | "link" | "text";
@@ -44,7 +44,7 @@ export function AssignmentEditor() {
   });
   const a = existing.data;
   const offering = a?.offering ?? Number(params.get("offering"));
-  const course = useMyCourses().data?.find((c) => c.offering_id === offering);
+  const course = useCourse(offering).data;
   const lectures = useLectures(offering);
   const [f, setF] = useState({
     title: "",

@@ -12,7 +12,8 @@ import {
   openFile,
   useAssignments,
   useLectures,
-  useMyCourses,
+  useCourse,
+  isCourseStaff,
 } from "../../lib/learning";
 
 type Resource = NonNullable<ReturnType<typeof useLectures>["data"]>[number]["resources"][number];
@@ -37,9 +38,8 @@ export function Lecture() {
   const next = index >= 0 && index < list.length - 1 ? list[index + 1] : undefined;
   const related = (assignments.data ?? []).filter((a) => a.lecture === id);
   const video = l?.resources.find((r) => r.kind === "video" && r.video);
-  const courses = useMyCourses();
-  const course = courses.data?.find((c) => c.offering_id === l?.offering);
-  const staff = !!course && course.my_role !== "student";
+  const course = useCourse(l?.offering).data;
+  const staff = isCourseStaff(course);
   return (
     <PortalShell
       title={l?.title_ar ?? "المحاضرة"}

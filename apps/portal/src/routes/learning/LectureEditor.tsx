@@ -14,7 +14,7 @@ import {
   problemMessage,
 } from "../../components/ui";
 import { api } from "../../lib/api";
-import { fmtSize, useLectures, useMyCourses } from "../../lib/learning";
+import { fmtSize, useLectures, useCourse } from "../../lib/learning";
 import { tusUpload } from "../../lib/tus";
 import { asForm, formData } from "../../lib/upload";
 
@@ -33,8 +33,7 @@ export function LectureEditor() {
   });
   const l = existing.data;
   const offering = l?.offering ?? Number(params.get("offering"));
-  const courses = useMyCourses();
-  const course = courses.data?.find((c) => c.offering_id === offering);
+  const course = useCourse(offering).data;
   const siblings = useLectures(offering);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");

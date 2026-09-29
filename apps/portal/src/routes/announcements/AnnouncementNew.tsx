@@ -32,8 +32,10 @@ export function AnnouncementNew() {
   const me = useMe();
   const navigate = useNavigate();
   const courses = useQuery({
-    queryKey: ["me", "courses"],
-    queryFn: async () => (await api.GET("/api/v1/me/courses")).data ?? [],
+    // Courses taught plus, for a department manager/supervisor, the department's courses.
+    queryKey: ["me", "courses", "managed"],
+    queryFn: async () =>
+      (await api.GET("/api/v1/me/courses", { params: { query: { managed: true } } })).data ?? [],
   });
   const departments = useQuery({
     queryKey: ["departments"],
@@ -87,8 +89,13 @@ export function AnnouncementNew() {
         });
     }
     for (const c of courses.data ?? []) {
-      // A TA announces to a course only when the teacher allowed it (docs/03 §3.9).
-      if (c.my_role === "teacher" || (c.my_role === "ta" && c.ta_can_notify))
+      // A TA announces to a course only when the teacher allowed it (docs/03 §3.9); a
+      // department manager/supervisor to every course of the department.
+      if (
+        c.my_role === "teacher" ||
+        c.my_role === "manager" ||
+        (c.my_role === "ta" && c.ta_can_notify)
+      )
         list.push({
           key: `o${c.offering_id}`,
           label: `طلاب ${c.code} — ${c.name_ar}`,

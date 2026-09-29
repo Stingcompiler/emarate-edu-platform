@@ -12,6 +12,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from accounts import rbac
 from audit.services import RequestMeta, record, snapshot
 from contacts import visitor
 from contacts.visitor import IsVisitor, VisitorAuthentication
@@ -98,10 +99,14 @@ class IntakeViewSet(_Audited):
     filterset_fields = ["cycle", "program", "is_open"]
 
     def get_queryset(self):
-        return (
+        # Department roles read their departments' intakes only (owner 2026-09-29).
+        queryset = (
             ProgramIntake.objects.select_related("program__department", "cycle")
             .annotate(applications_count=Count("applications"))
             .order_by("cycle", "program__name_ar", "id")
+        )
+        return rbac.scope_for(self.request.user, "admissions.view").filter(
+            queryset, "program__department"
         )
 
 
