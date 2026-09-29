@@ -84,6 +84,34 @@ export function ApplicationDetail() {
     });
   const a = app.data;
   const reviewer = !!a?.documents;
+  // Distributing is the head registrar's (docs/03 §3.2): its registrars, from the server.
+  const head = can(me.data, "admissions.manage");
+  const registrars = useQuery({
+    queryKey: ["users", "registrars"],
+    enabled: head,
+    queryFn: async () =>
+      ok(
+        await api.GET("/api/v1/users", {
+          params: { query: { is_active: true, role: "registrar", page_size: 100 } },
+        }),
+      )?.results ?? [],
+  });
+  const forDepartment = (registrars.data ?? []).filter((u) =>
+    u.roles.some((r) => r.role === "registrar" && r.department === a?.department_id),
+  );
+  const assign = useMutation({
+    mutationFn: async (registrar: string | null) => {
+      const { data, error } = await api.POST("/api/v1/applications/{public_id}/assign", {
+        ...path,
+        body: { registrar },
+      });
+      if (!data) throw error;
+    },
+    onSuccess: done,
+  });
+  // A registrar claims first, then reviews (review 2026-09-29); the head registrar may act anyway.
+  const mine = !!a && a.assigned_registrar_id === me.data?.public_id;
+  const canAct = head || mine;
   const open = !!a && (a.allowed_transitions.length > 0 || a.status === "accepted");
   return (
     <PortalShell
@@ -169,6 +197,7 @@ export function ApplicationDetail() {
                           variant="secondary"
                           className="min-h-8 px-3 text-xs"
                           onClick={() => review.mutate({ doc: d.public_id, status: "accepted" })}
+                          disabled={!canAct || review.isPending}
                         >
                           قبول
                         </Button>
@@ -178,6 +207,7 @@ export function ApplicationDetail() {
                           variant="secondary"
                           className="min-h-8 px-3 text-xs text-danger-strong"
                           onClick={() => review.mutate({ doc: d.public_id, status: "rejected" })}
+                          disabled={!canAct || review.isPending}
                         >
                           رفض
                         </Button>
@@ -228,16 +258,47 @@ export function ApplicationDetail() {
           </div>
           {reviewer && (
             <aside className="mt-6 space-y-4 lg:mt-0">
+              {head && (
+                <Card className="space-y-2 p-4">
+                  <label className="block text-sm">
+                    <span className="text-xs text-text-muted">المسجل المسؤول</span>
+                    <select
+                      value={a.assigned_registrar_id ?? ""}
+                      onChange={(e) => assign.mutate(e.target.value || null)}
+                      disabled={assign.isPending}
+                      className="mt-1 block min-h-11 w-full rounded-lg border border-border bg-surface px-3"
+                    >
+                      <option value="">غير موزّع</option>
+                      {forDepartment.map((u) => (
+                        <option key={u.public_id} value={u.public_id}>
+                          {u.full_name_ar}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  {!forDepartment.length && registrars.isSuccess && (
+                    <p className="text-xs text-text-muted">
+                      لا مسجل مرتبط بقسم {a.department_name} — يبقى الطلب لك.
+                    </p>
+                  )}
+                  {assign.isError && <Notice>{problemMessage(assign.error)}</Notice>}
+                </Card>
+              )}
               {open && (
                 <Card className="space-y-3 p-4">
-                  {!a.assigned_registrar_name && (
-                    <Button
-                      variant="secondary"
-                      className="w-full"
-                      onClick={() => act.mutate("claim")}
-                    >
-                      تولّي الطلب
-                    </Button>
+                  {!a.assigned_registrar_name && !head && (
+                    <>
+                      <Button
+                        className="w-full"
+                        onClick={() => act.mutate("claim")}
+                        disabled={act.isPending}
+                      >
+                        تولّي الطلب
+                      </Button>
+                      <p className="text-xs text-text-muted">
+                        تولَّ الطلب أولًا لتراجعه وتقرّر فيه.
+                      </p>
+                    </>
                   )}
                   <textarea
                     value={note}
@@ -252,14 +313,18 @@ export function ApplicationDetail() {
                         variant={t === "rejected" ? "secondary" : "primary"}
                         className={t === "rejected" ? "text-danger-strong" : ""}
                         onClick={() => act.mutate(t)}
-                        disabled={act.isPending}
+                        disabled={act.isPending || !canAct}
                       >
                         {ACTION[t] ?? t}
                       </Button>
                     ))}
                   </div>
                   {a.status === "accepted" && can(me.data, "admissions.manage") && (
-                    <Button className="w-full" onClick={() => act.mutate("register")}>
+                    <Button
+                      className="w-full"
+                      onClick={() => act.mutate("register")}
+                      disabled={act.isPending}
+                    >
                       تحويل إلى طالب وإصدار الرقم الجامعي
                     </Button>
                   )}
@@ -273,13 +338,16 @@ export function ApplicationDetail() {
                   className="block min-h-20 w-full rounded-lg border border-border bg-surface p-2 text-sm"
                 />
                 <div className="flex gap-2">
-                  <Button onClick={() => act.mutate("msg:email")} disabled={!message.trim()}>
+                  <Button
+                    onClick={() => act.mutate("msg:email")}
+                    disabled={!message.trim() || act.isPending}
+                  >
                     إرسال بالبريد
                   </Button>
                   <Button
                     variant="secondary"
                     onClick={() => act.mutate("msg:internal")}
-                    disabled={!message.trim()}
+                    disabled={!message.trim() || act.isPending}
                   >
                     ملاحظة داخلية
                   </Button>

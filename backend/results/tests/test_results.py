@@ -147,6 +147,8 @@ def test_corrections_need_academic_affairs(
     decide = f"/api/v1/result-corrections/{created.data['public_id']}/decide"
     assert api(officer).post(decide, {"approve": True}).status_code == 403
     affairs = make_user(Role.ACADEMIC_AFFAIRS)
+    # Rejecting needs a reason (review 2026-09-29); nothing changes without one.
+    assert api(affairs).post(decide, {"approve": False, "note": " "}).status_code == 400
     with django_capture_on_commit_callbacks(execute=True):
         assert api(affairs).post(decide, {"approve": True, "note": "موافق"}).status_code == 200
     result.refresh_from_db()

@@ -17,7 +17,6 @@ import {
 } from "../../components/ui";
 import { api, ok } from "../../lib/api";
 import { KIND } from "./Cases";
-import { ALL } from "../../components/Pager";
 
 /** Board: StudentAffairsCaseNew (phone). Opening from a misconduct report converts it. Desktop: derived. */
 export function CaseNew() {
@@ -39,15 +38,24 @@ export function CaseNew() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
 
+  // A confidential case must name the right student (review 2026-09-29): an exact university
+  // number is taken at once; otherwise the staff member picks from the matches.
+  const [pickedId, setPickedId] = useState<string | null>(null);
   const students = useQuery({
     queryKey: ["students", "lookup", number],
-    enabled: number.trim().length >= 4 && !reportId,
+    enabled: number.trim().length >= 3 && !reportId && !pickedId,
     queryFn: async () =>
       ok(
-        await api.GET("/api/v1/students", { params: { query: { ...ALL, search: number.trim() } } }),
+        await api.GET("/api/v1/students", {
+          params: { query: { search: number.trim(), page_size: 8 } },
+        }),
       )?.results ?? [],
   });
-  const student = students.data?.[0];
+  const exact = (students.data ?? []).find(
+    (s) => s.university_number.toLowerCase() === number.trim().toLowerCase(),
+  );
+  const [chosen, setChosen] = useState<NonNullable<typeof students.data>[number] | null>(null);
+  const student = chosen ?? exact ?? null;
 
   const open = useMutation({
     mutationFn: async () => {
@@ -127,17 +135,61 @@ export function CaseNew() {
               </div>
               <SectionLabel>الطالب</SectionLabel>
               <Card>
-                <Field
-                  label="الرقم الجامعي"
-                  dir="ltr"
-                  className="text-end"
-                  value={number}
-                  onChange={(e) => setNumber(e.target.value)}
-                />
-                {student && (
-                  <p className="px-4 pb-3 text-sm text-text">
-                    {student.full_name_ar} · {student.program_name} · المستوى {student.level}
-                  </p>
+                {student ? (
+                  <div className="flex items-center gap-3 px-4 py-3 text-sm">
+                    <span className="min-w-0 flex-1">
+                      <b className="block text-text">{student.full_name_ar}</b>
+                      <span className="text-xs text-text-muted">
+                        <bdi dir="ltr">{student.university_number}</bdi> · {student.program_name} ·
+                        المستوى {student.level}
+                      </span>
+                    </span>
+                    <Button
+                      variant="secondary"
+                      className="min-h-11 px-3"
+                      onClick={() => {
+                        setChosen(null);
+                        setPickedId(null);
+                        setNumber("");
+                      }}
+                    >
+                      تغيير
+                    </Button>
+                  </div>
+                ) : (
+                  <>
+                    <Field
+                      label="الرقم الجامعي أو الاسم"
+                      value={number}
+                      onChange={(e) => setNumber(e.target.value)}
+                      hint="اكتب الرقم كاملًا أو اختر من النتائج."
+                    />
+                    {(students.data ?? []).length > 0 && (
+                      <div className="divide-y divide-border-soft border-t border-border-soft">
+                        {(students.data ?? []).map((s) => (
+                          <button
+                            key={s.public_id}
+                            type="button"
+                            onClick={() => {
+                              setChosen(s);
+                              setPickedId(s.public_id);
+                            }}
+                            className="flex min-h-11 w-full items-center gap-3 px-4 py-2 text-start text-sm hover:bg-surface-alt"
+                          >
+                            <span className="min-w-0 flex-1 truncate">{s.full_name_ar}</span>
+                            <bdi dir="ltr" className="text-xs text-text-muted">
+                              {s.university_number}
+                            </bdi>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                    {number.trim().length >= 3 && students.isSuccess && !students.data?.length && (
+                      <p className="px-4 pb-3 text-xs text-text-muted">
+                        لا طالب بهذا الرقم أو الاسم.
+                      </p>
+                    )}
+                  </>
                 )}
               </Card>
               <SectionLabel>التفاصيل</SectionLabel>

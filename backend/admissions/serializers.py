@@ -136,6 +136,11 @@ class StaffApplicationSerializer(serializers.ModelSerializer):
     assigned_registrar_name = serializers.CharField(
         source="assigned_registrar.full_name_ar", read_only=True, default=None
     )
+    # For distributing: the department (to offer its registrars) and who holds it now.
+    department_id = serializers.IntegerField(source="intake.program.department_id", read_only=True)
+    assigned_registrar_id = serializers.UUIDField(
+        source="assigned_registrar.public_id", read_only=True, default=None
+    )
     university_number = serializers.CharField(
         source="student_record.university_number", read_only=True, default=None
     )
@@ -155,10 +160,12 @@ class StaffApplicationSerializer(serializers.ModelSerializer):
             "phone_e164",
             "program_name",
             "department_name",
+            "department_id",
             "cycle_name",
             "status",
             "answers",
             "assigned_registrar_name",
+            "assigned_registrar_id",
             "submitted_at",
             "decided_at",
             "decision_note",

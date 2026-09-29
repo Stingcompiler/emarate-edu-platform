@@ -849,3 +849,6 @@ msgstr "حساب الطالب لا يحمل دورًا إداريًا."
 
 msgid "This student belongs to another department."
 msgstr "هذا الطالب من قسم آخر؛ يسجّله مسؤول المسجلين."
+
+msgid "Give the reason for rejecting."
+msgstr "اكتب سبب الرفض."

@@ -21,3 +21,21 @@ export const DEPARTMENT_ROLES = new Set([
   "department_manager",
   "department_supervisor",
 ]);
+
+/** Grantable roles from the least to the most privileged — «مدير النظام» last, never
+ *  preselected (review 2026-09-29). */
+export const ROLE_ORDER = [
+  "ta",
+  "teacher",
+  "events_manager",
+  "site_manager",
+  "hr",
+  "registrar",
+  "department_supervisor",
+  "department_manager",
+  "student_affairs",
+  "results_officer",
+  "academic_affairs",
+  "head_registrar",
+  "system_admin",
+];

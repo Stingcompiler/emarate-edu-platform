@@ -69,3 +69,15 @@ describe("navFor", () => {
     }
   });
 });
+
+describe("admissions staff (review 2026-09-29)", () => {
+  it("start on admissions, with applications before notifications", () => {
+    const registrar = me(["registrar"], {
+      capabilities: { "admissions.review": {}, "admissions.view": {} } as never,
+    });
+    const tabs = labels(registrar);
+    expect(tabs.slice(0, 2)).toEqual(["القبول", "الطلبات"]);
+    expect(tabs.indexOf("الطلبات")).toBeLessThan(tabs.indexOf("الإشعارات"));
+    expect(tabs.filter((l) => l === "الطلبات")).toHaveLength(1);
+  });
+});

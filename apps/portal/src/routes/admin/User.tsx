@@ -15,7 +15,7 @@ import {
 import { api, ok } from "../../lib/api";
 import { useMe } from "../../lib/auth";
 import { initials, useDepartments } from "../../lib/reports";
-import { DEPARTMENT_ROLES, ROLE_LABEL } from "./roles";
+import { DEPARTMENT_ROLES, ROLE_LABEL, ROLE_ORDER } from "./roles";
 
 /** Board: SystemAdminUser (phone); desktop derived — account beside roles and scopes. */
 export function AdminUser() {
@@ -35,7 +35,7 @@ export function AdminUser() {
   // Only roles the server lets this user grant (rbac.GRANTS).
   const grantable = useMe().data?.grantable_roles ?? [];
   const [picked, setRole] = useState("");
-  const role = picked || Object.keys(ROLE_LABEL).find((k) => grantable.includes(k)) || "";
+  const role = picked; // nothing preselected: the admin chooses (review 2026-09-29)
   const [department, setDepartment] = useState("");
   const grant = useMutation({
     mutationFn: async () => {
@@ -160,13 +160,17 @@ export function AdminUser() {
                   className="block min-h-10 w-full rounded-lg border border-border bg-surface px-3 text-sm"
                   aria-label="الدور"
                 >
-                  {Object.entries(ROLE_LABEL)
-                    .filter(([k]) => grantable.includes(k))
-                    .map(([k, l]) => (
-                      <option key={k} value={k}>
-                        {l}
-                      </option>
-                    ))}
+                  <option value="">اختر الدور…</option>
+                  {ROLE_ORDER.filter(
+                    (k) =>
+                      grantable.includes(k) &&
+                      // A department role can be held for several departments; others only once.
+                      (DEPARTMENT_ROLES.has(k) || !u.roles.some((r) => r.role === k)),
+                  ).map((k) => (
+                    <option key={k} value={k}>
+                      {ROLE_LABEL[k]}
+                    </option>
+                  ))}
                 </select>
                 {DEPARTMENT_ROLES.has(role) && (
                   <select
@@ -185,7 +189,7 @@ export function AdminUser() {
                 )}
                 <Button
                   className="w-full"
-                  disabled={(DEPARTMENT_ROLES.has(role) && !department) || grant.isPending}
+                  disabled={!role || (DEPARTMENT_ROLES.has(role) && !department) || grant.isPending}
                   onClick={() => grant.mutate()}
                 >
                   إضافة

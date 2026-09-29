@@ -156,12 +156,14 @@ class ApplicationViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, views
     serializer_class = StaffApplicationSerializer
     permission_classes = [IsAuthenticated, capability("admissions.view")]
     lookup_field = "public_id"
-    filterset_fields = [
-        "status",
-        "intake",
-        "intake__program__department",
-        "assigned_registrar__public_id",
-    ]
+    # ?assigned_registrar__isnull=true: the «غير موزعة» list (review 2026-09-29).
+    filterset_fields = {
+        "status": ["exact"],
+        "intake": ["exact"],
+        "intake__program__department": ["exact"],
+        "assigned_registrar__public_id": ["exact"],
+        "assigned_registrar": ["isnull"],
+    }
     search_fields = ["reference_no", "full_name", "email", "phone_e164"]
 
     def get_queryset(self):
