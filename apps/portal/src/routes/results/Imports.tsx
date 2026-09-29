@@ -15,7 +15,7 @@ import {
   STATUS_LABELS,
   problemMessage,
 } from "../../components/ui";
-import { api } from "../../lib/api";
+import { api, ok } from "../../lib/api";
 import { useMe } from "../../lib/auth";
 import { when, count, N } from "../../lib/format";
 import { asForm, formData } from "../../lib/upload";
@@ -31,17 +31,16 @@ export function ResultImports() {
   const terms = useQuery({
     queryKey: ["terms"],
     queryFn: async () =>
-      (await api.GET("/api/v1/terms", { params: { query: ALL } })).data?.results ?? [],
+      ok(await api.GET("/api/v1/terms", { params: { query: ALL } }))?.results ?? [],
   });
   const departments = useQuery({
     queryKey: ["departments"],
     queryFn: async () =>
-      (await api.GET("/api/v1/departments", { params: { query: ALL } })).data?.results ?? [],
+      ok(await api.GET("/api/v1/departments", { params: { query: ALL } }))?.results ?? [],
   });
   // 10 per page from the server (docs: owner 2026-09-29).
-  const batches = useServerPages(
-    ["result-imports"],
-    async (page) => (await api.GET("/api/v1/result-imports", { params: { query: { page } } })).data,
+  const batches = useServerPages(["result-imports"], async (page) =>
+    ok(await api.GET("/api/v1/result-imports", { params: { query: { page } } })),
   );
 
   const [term, setTerm] = useState("");

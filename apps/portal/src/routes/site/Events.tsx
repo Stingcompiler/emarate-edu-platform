@@ -18,7 +18,8 @@ import {
   TextArea,
   WithSide,
 } from "../../components/ui";
-import { api } from "../../lib/api";
+import { api, ok } from "../../lib/api";
+import { useUnsavedChanges } from "../../lib/useUnsavedChanges";
 import { slugify } from "../../lib/format";
 import { ALL, Pager, useLocalPages } from "../../components/Pager";
 
@@ -32,7 +33,7 @@ export function Events() {
   const events = useQuery({
     queryKey: ["site", "events"],
     queryFn: async () =>
-      (await api.GET("/api/v1/content/events", { params: { query: ALL } })).data?.results ?? [],
+      ok(await api.GET("/api/v1/content/events", { params: { query: ALL } }))?.results ?? [],
   });
   const paged = useLocalPages(events.data ?? []);
   return (
@@ -113,6 +114,7 @@ const local = (iso: string) =>
 
 /** Board: EventsManagerEventNew (phone): details + live preview card; desktop derived side by side. */
 export function EventEditor() {
+  const unsaved = useUnsavedChanges();
   const { id } = useParams();
   const creating = !id || id === "new";
   const [slugEdited, setSlugEdited] = useState(false);
@@ -122,11 +124,11 @@ export function EventEditor() {
     queryKey: ["site", "events", id],
     enabled: !creating,
     queryFn: async () =>
-      (
+      ok(
         await api.GET("/api/v1/content/events/{public_id}", {
           params: { path: { public_id: id! } },
-        })
-      ).data ?? null,
+        }),
+      ) ?? null,
   });
   const start = new Date(Date.now() + 7 * 86_400_000);
   const [form, setForm] = useState({
@@ -170,6 +172,7 @@ export function EventEditor() {
       return res.data;
     },
     onSuccess: (data) => {
+      unsaved.saved();
       void client.invalidateQueries({ queryKey: ["site", "events"] });
       if (creating) navigate(`/events/${data.public_id}`, { replace: true });
     },
@@ -182,109 +185,111 @@ export function EventEditor() {
       subtitle="تُنشر على الموقع وتقويم الطلاب"
       back={{ label: "الفعاليات", to: "/events" }}
     >
-      <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start lg:gap-6">
-        <div>
-          <SectionLabel>التفاصيل</SectionLabel>
-          <Card>
-            <Field
-              label="العنوان"
-              value={form.title}
-              onChange={(e) =>
-                set({
-                  title: e.target.value,
-                  // New items take their link from the title until the link is edited by hand.
-                  ...(creating && !slugEdited ? { slug: slugify(e.target.value, 120) } : {}),
-                })
-              }
-            />
-            <Field
-              label="الرابط"
-              dir="ltr"
-              value={form.slug}
-              onChange={(e) => {
-                setSlugEdited(true);
-                set({ slug: e.target.value });
-              }}
-              hint="يُملأ من العنوان تلقائيًا؛ يمكن تعديله (حروف وأرقام وشرطات)"
-            />
-            <Field
-              label="يبدأ"
-              type="datetime-local"
-              value={form.starts_at}
-              onChange={(e) => set({ starts_at: e.target.value })}
-            />
-            <Field
-              label="ينتهي"
-              type="datetime-local"
-              value={form.ends_at}
-              onChange={(e) => set({ ends_at: e.target.value })}
-            />
-            <Field
-              label="المكان"
-              value={form.location}
-              onChange={(e) => set({ location: e.target.value })}
-            />
-            <TextArea
-              label="الوصف"
-              value={form.description}
-              onChange={(e) => set({ description: e.target.value })}
-            />
-            <Field
-              label="رابط التسجيل (اختياري)"
-              dir="ltr"
-              value={form.registration_url}
-              onChange={(e) => set({ registration_url: e.target.value })}
-            />
-          </Card>
-          {save.isError && (
-            <div className="mt-3">
-              <Notice>{problemMessage(save.error)}</Notice>
-            </div>
-          )}
-          <div className="mt-4 flex flex-wrap gap-2">
-            <Button
-              variant="secondary"
-              onClick={() => save.mutate("draft")}
-              disabled={!form.slug || !form.title || save.isPending}
-            >
-              حفظ مسودة
-            </Button>
-            <Button
-              className="flex-1"
-              onClick={() => save.mutate("published")}
-              disabled={!form.slug || !form.title || !form.description || save.isPending}
-            >
-              نشر الفعالية
-            </Button>
-            {!creating && (
+      <div className="contents" onInput={unsaved.onInput}>
+        <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start lg:gap-6">
+          <div>
+            <SectionLabel>التفاصيل</SectionLabel>
+            <Card>
+              <Field
+                label="العنوان"
+                value={form.title}
+                onChange={(e) =>
+                  set({
+                    title: e.target.value,
+                    // New items take their link from the title until the link is edited by hand.
+                    ...(creating && !slugEdited ? { slug: slugify(e.target.value, 120) } : {}),
+                  })
+                }
+              />
+              <Field
+                label="الرابط"
+                dir="ltr"
+                value={form.slug}
+                onChange={(e) => {
+                  setSlugEdited(true);
+                  set({ slug: e.target.value });
+                }}
+                hint="يُملأ من العنوان تلقائيًا؛ يمكن تعديله (حروف وأرقام وشرطات)"
+              />
+              <Field
+                label="يبدأ"
+                type="datetime-local"
+                value={form.starts_at}
+                onChange={(e) => set({ starts_at: e.target.value })}
+              />
+              <Field
+                label="ينتهي"
+                type="datetime-local"
+                value={form.ends_at}
+                onChange={(e) => set({ ends_at: e.target.value })}
+              />
+              <Field
+                label="المكان"
+                value={form.location}
+                onChange={(e) => set({ location: e.target.value })}
+              />
+              <TextArea
+                label="الوصف"
+                value={form.description}
+                onChange={(e) => set({ description: e.target.value })}
+              />
+              <Field
+                label="رابط التسجيل (اختياري)"
+                dir="ltr"
+                value={form.registration_url}
+                onChange={(e) => set({ registration_url: e.target.value })}
+              />
+            </Card>
+            {save.isError && (
+              <div className="mt-3">
+                <Notice>{problemMessage(save.error)}</Notice>
+              </div>
+            )}
+            <div className="mt-4 flex flex-wrap gap-2">
               <Button
                 variant="secondary"
-                className="text-danger-strong"
-                onClick={() => save.mutate("cancelled")}
+                onClick={() => save.mutate("draft")}
+                disabled={!form.slug || !form.title || save.isPending}
               >
-                إلغاء الفعالية
+                حفظ مسودة
               </Button>
-            )}
+              <Button
+                className="flex-1"
+                onClick={() => save.mutate("published")}
+                disabled={!form.slug || !form.title || !form.description || save.isPending}
+              >
+                نشر الفعالية
+              </Button>
+              {!creating && (
+                <Button
+                  variant="secondary"
+                  className="text-danger-strong"
+                  onClick={() => save.mutate("cancelled")}
+                >
+                  إلغاء الفعالية
+                </Button>
+              )}
+            </div>
           </div>
+          <aside className="mt-6 lg:sticky lg:top-6 lg:mt-0">
+            <SectionLabel>المعاينة</SectionLabel>
+            <Card className="flex gap-3 p-4">
+              <span className="grid w-14 shrink-0 place-items-center rounded-lg bg-accent-soft py-1 text-accent">
+                <span className="text-lg font-bold">{day.format(s)}</span>
+                <span className="text-[11px]">{month.format(s)}</span>
+              </span>
+              <span>
+                <span className="block font-semibold text-text">
+                  {form.title || "عنوان الفعالية"}
+                </span>
+                <span className="text-xs text-text-muted">
+                  {time.format(s)}
+                  {form.location ? ` · ${form.location}` : ""}
+                </span>
+              </span>
+            </Card>
+          </aside>
         </div>
-        <aside className="mt-6 lg:sticky lg:top-6 lg:mt-0">
-          <SectionLabel>المعاينة</SectionLabel>
-          <Card className="flex gap-3 p-4">
-            <span className="grid w-14 shrink-0 place-items-center rounded-lg bg-accent-soft py-1 text-accent">
-              <span className="text-lg font-bold">{day.format(s)}</span>
-              <span className="text-[11px]">{month.format(s)}</span>
-            </span>
-            <span>
-              <span className="block font-semibold text-text">
-                {form.title || "عنوان الفعالية"}
-              </span>
-              <span className="text-xs text-text-muted">
-                {time.format(s)}
-                {form.location ? ` · ${form.location}` : ""}
-              </span>
-            </span>
-          </Card>
-        </aside>
       </div>
     </PortalShell>
   );

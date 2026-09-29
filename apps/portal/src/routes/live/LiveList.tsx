@@ -16,7 +16,7 @@ import {
   WithSide,
   problemMessage,
 } from "../../components/ui";
-import { api } from "../../lib/api";
+import { api, ok } from "../../lib/api";
 import { useMe } from "../../lib/auth";
 import { DAY_LABELS } from "../../lib/format";
 import { ALL } from "../../components/Pager";
@@ -38,7 +38,7 @@ export function LiveList() {
   const sessions = useQuery({
     queryKey: ["live"],
     queryFn: async () =>
-      (await api.GET("/api/v1/live-sessions", { params: { query: ALL } })).data?.results ?? [],
+      ok(await api.GET("/api/v1/live-sessions", { params: { query: ALL } }))?.results ?? [],
   });
   const join = useMutation({
     mutationFn: async (id: string) => {

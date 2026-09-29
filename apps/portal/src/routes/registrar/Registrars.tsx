@@ -3,7 +3,7 @@ import { X } from "lucide-react";
 
 import { PortalShell } from "../../components/PortalShell";
 import { Card, Notice, SectionLabel, problemMessage } from "../../components/ui";
-import { api } from "../../lib/api";
+import { api, ok } from "../../lib/api";
 import { initials, num, useDepartments } from "../../lib/reports";
 import { count, N } from "../../lib/format";
 
@@ -21,7 +21,7 @@ export function Registrars() {
     queryKey: ["applications", "load"],
     queryFn: async () =>
       (
-        (await api.GET("/api/v1/applications", { params: { query: { page_size: 100 } } })).data
+        ok(await api.GET("/api/v1/applications", { params: { query: { page_size: 100 } } }))
           ?.results ?? []
       ).reduce<Record<string, number>>((acc, a) => {
         if (a.assigned_registrar_name)

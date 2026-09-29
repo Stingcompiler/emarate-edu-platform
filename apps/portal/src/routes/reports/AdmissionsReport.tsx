@@ -3,7 +3,7 @@ import { useState } from "react";
 
 import { PortalShell } from "../../components/PortalShell";
 import { Card, SectionLabel } from "../../components/ui";
-import { api } from "../../lib/api";
+import { api, ok } from "../../lib/api";
 import {
   Bars,
   ExportBar,
@@ -36,7 +36,7 @@ export function AdmissionsReport() {
   const cycles = useQuery({
     queryKey: ["admissions", "cycles"],
     queryFn: async () =>
-      (await api.GET("/api/v1/admission-cycles", { params: { query: ALL } })).data?.results ?? [],
+      ok(await api.GET("/api/v1/admission-cycles", { params: { query: ALL } }))?.results ?? [],
   });
   const [cycle, setCycle] = useState<number>();
   const [department, setDepartment] = useState<number>();

@@ -14,7 +14,7 @@ import {
   STATUS_LABELS,
   WithSide,
 } from "../../components/ui";
-import { api } from "../../lib/api";
+import { api, ok } from "../../lib/api";
 import { useMe } from "../../lib/auth";
 import { can } from "../../lib/nav";
 import { count, N } from "../../lib/format";
@@ -29,7 +29,7 @@ export function Regulations() {
   const list = useQuery({
     queryKey: ["regulations"],
     queryFn: async () =>
-      (await api.GET("/api/v1/regulations", { params: { query: ALL } })).data?.results ?? [],
+      ok(await api.GET("/api/v1/regulations", { params: { query: ALL } }))?.results ?? [],
   });
   const items = list.data ?? [];
   const needed = items.filter((r) => r.requires_acknowledgement && r.acknowledged === false);

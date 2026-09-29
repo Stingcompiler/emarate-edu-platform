@@ -5,7 +5,7 @@ import { Link, useParams } from "react-router";
 
 import { PortalShell } from "../../components/PortalShell";
 import { FilterBar, Button, Card, Chip, ScrollRegion } from "../../components/ui";
-import { api } from "../../lib/api";
+import { api, ok } from "../../lib/api";
 import { useCourse } from "../../lib/learning";
 import { downloadCsv, initials } from "../../lib/reports";
 
@@ -17,11 +17,11 @@ export function Students() {
   const book = useQuery({
     queryKey: ["gradebook", offering],
     queryFn: async () =>
-      (
+      ok(
         await api.GET("/api/v1/gradebooks/{offering_id}", {
           params: { path: { offering_id: offering } },
-        })
-      ).data ?? null,
+        }),
+      ) ?? null,
   });
   const [view, setView] = useState<"list" | "book">("list");
   const [filter, setFilter] = useState<"all" | "missing" | "low" | "idle">("all");

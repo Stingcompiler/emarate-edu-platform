@@ -13,10 +13,12 @@ import {
   WithSide,
 } from "../../components/ui";
 import { api } from "../../lib/api";
+import { useUnsavedChanges } from "../../lib/useUnsavedChanges";
 import { slugify } from "../../lib/format";
 
 /** Board: SiteManagerAnnouncementNew (news variant, phone); desktop derived. */
 export function NewsEditor() {
+  const unsaved = useUnsavedChanges();
   const { id } = useParams();
   const creating = !id || id === "new";
   const [slugEdited, setSlugEdited] = useState(false);
@@ -59,6 +61,7 @@ export function NewsEditor() {
       return res.data;
     },
     onSuccess: (data) => {
+      unsaved.saved();
       void client.invalidateQueries({ queryKey: ["site"] });
       if (creating) navigate(`/site/news/${data.public_id}`, { replace: true });
     },
@@ -76,78 +79,80 @@ export function NewsEditor() {
       }
       back={{ label: "محتوى الموقع", to: "/site" }}
     >
-      {/* Desktop: the article; its search preview and publishing beside. */}
-      <WithSide
-        side={
-          <div>
-            <Card className="mt-3 p-4 text-sm lg:mt-0">
-              <p className="text-xs text-text-muted">معاينة نتيجة البحث</p>
-              <p className="mt-1 text-xs text-success-strong" dir="ltr">
-                ecst.edu.sd › news › {form.slug || "…"}
-              </p>
-              <p className="font-semibold text-info-strong">{form.title || "العنوان"}</p>
-              <p className="text-text-muted">{form.summary || "المقتطف"}</p>
-            </Card>
-            {save.isError && (
-              <div className="mt-3">
-                <Notice>{problemMessage(save.error)}</Notice>
+      <div className="contents" onInput={unsaved.onInput}>
+        {/* Desktop: the article; its search preview and publishing beside. */}
+        <WithSide
+          side={
+            <div>
+              <Card className="mt-3 p-4 text-sm lg:mt-0">
+                <p className="text-xs text-text-muted">معاينة نتيجة البحث</p>
+                <p className="mt-1 text-xs text-success-strong" dir="ltr">
+                  ecst.edu.sd › news › {form.slug || "…"}
+                </p>
+                <p className="font-semibold text-info-strong">{form.title || "العنوان"}</p>
+                <p className="text-text-muted">{form.summary || "المقتطف"}</p>
+              </Card>
+              {save.isError && (
+                <div className="mt-3">
+                  <Notice>{problemMessage(save.error)}</Notice>
+                </div>
+              )}
+              <div className="mt-4 flex gap-2">
+                <Button
+                  variant="secondary"
+                  onClick={() => save.mutate("draft")}
+                  disabled={!form.slug || !form.title || save.isPending}
+                >
+                  حفظ مسودة
+                </Button>
+                <Button
+                  className="flex-1"
+                  onClick={() => save.mutate("published")}
+                  disabled={!form.slug || !form.title || !form.body || save.isPending}
+                >
+                  نشر
+                </Button>
               </div>
-            )}
-            <div className="mt-4 flex gap-2">
-              <Button
-                variant="secondary"
-                onClick={() => save.mutate("draft")}
-                disabled={!form.slug || !form.title || save.isPending}
-              >
-                حفظ مسودة
-              </Button>
-              <Button
-                className="flex-1"
-                onClick={() => save.mutate("published")}
-                disabled={!form.slug || !form.title || !form.body || save.isPending}
-              >
-                نشر
-              </Button>
             </div>
-          </div>
-        }
-      >
-        <Card>
-          <Field
-            label="العنوان"
-            value={form.title}
-            onChange={(e) =>
-              set({
-                title: e.target.value,
-                // New items take their link from the title until the link is edited by hand.
-                ...(creating && !slugEdited ? { slug: slugify(e.target.value, 120) } : {}),
-              })
-            }
-          />
-          <Field
-            label="الرابط"
-            dir="ltr"
-            value={form.slug}
-            onChange={(e) => {
-              setSlugEdited(true);
-              set({ slug: e.target.value });
-            }}
-            hint="يُملأ من العنوان تلقائيًا؛ يمكن تعديله (حروف وأرقام وشرطات)"
-          />
-          <Field
-            label="المقتطف (يظهر في القوائم ونتائج البحث)"
-            value={form.summary}
-            maxLength={300}
-            onChange={(e) => set({ summary: e.target.value })}
-            hint={`${form.summary.length} / 160`}
-          />
-          <TextArea
-            label="المحتوى"
-            value={form.body}
-            onChange={(e) => set({ body: e.target.value })}
-          />
-        </Card>
-      </WithSide>
+          }
+        >
+          <Card>
+            <Field
+              label="العنوان"
+              value={form.title}
+              onChange={(e) =>
+                set({
+                  title: e.target.value,
+                  // New items take their link from the title until the link is edited by hand.
+                  ...(creating && !slugEdited ? { slug: slugify(e.target.value, 120) } : {}),
+                })
+              }
+            />
+            <Field
+              label="الرابط"
+              dir="ltr"
+              value={form.slug}
+              onChange={(e) => {
+                setSlugEdited(true);
+                set({ slug: e.target.value });
+              }}
+              hint="يُملأ من العنوان تلقائيًا؛ يمكن تعديله (حروف وأرقام وشرطات)"
+            />
+            <Field
+              label="المقتطف (يظهر في القوائم ونتائج البحث)"
+              value={form.summary}
+              maxLength={300}
+              onChange={(e) => set({ summary: e.target.value })}
+              hint={`${form.summary.length} / 160`}
+            />
+            <TextArea
+              label="المحتوى"
+              value={form.body}
+              onChange={(e) => set({ body: e.target.value })}
+            />
+          </Card>
+        </WithSide>
+      </div>
     </PortalShell>
   );
 }

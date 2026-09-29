@@ -49,6 +49,9 @@ for (const account of ACCOUNTS) {
       current = href;
       await page.goto(href);
       await page.waitForLoadState("networkidle");
+      // Every destination a role's navigation offers is within its audience (lib/access.ts).
+      if (await page.getByText("هذه الصفحة ليست ضمن صلاحياتك").count())
+        problems.push(`${href}: shows «غير مسموح» to a role whose navigation links to it`);
       const overflow = await page.evaluate(
         () => document.documentElement.scrollWidth - window.innerWidth,
       );

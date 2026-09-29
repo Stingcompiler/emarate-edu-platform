@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "react-router";
 
-import { api } from "../../lib/api";
+import { api, ok } from "../../lib/api";
 import { num } from "../../lib/reports";
 import { PrintLayout, PrintTable } from "./PrintLayout";
 import { count, N } from "../../lib/format";
@@ -12,11 +12,11 @@ export function PrintTranscript() {
   const t = useQuery({
     queryKey: ["transcript", number],
     queryFn: async () =>
-      (
+      ok(
         await api.GET("/api/v1/transcripts/{university_number}", {
           params: { path: { university_number: number } },
-        })
-      ).data ?? null,
+        }),
+      ) ?? null,
   });
   const d = t.data;
   if (!d)
@@ -103,7 +103,7 @@ export function PrintTranscript() {
 export function PrintMyResults() {
   const r = useQuery({
     queryKey: ["me", "results"],
-    queryFn: async () => (await api.GET("/api/v1/me/results")).data ?? null,
+    queryFn: async () => ok(await api.GET("/api/v1/me/results")) ?? null,
   });
   const d = r.data;
   if (!d)

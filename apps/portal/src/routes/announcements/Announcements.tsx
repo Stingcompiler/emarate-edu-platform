@@ -16,7 +16,7 @@ import {
   StatusBadge,
   WithSide,
 } from "../../components/ui";
-import { api } from "../../lib/api";
+import { api, ok } from "../../lib/api";
 import { useMe } from "../../lib/auth";
 import { when } from "../../lib/format";
 import { ALL, Pager, useLocalPages } from "../../components/Pager";
@@ -36,7 +36,7 @@ export function Announcements() {
   const feed = useQuery({
     queryKey: ["announcements"],
     queryFn: async () =>
-      (await api.GET("/api/v1/announcements", { params: { query: ALL } })).data?.results ?? [],
+      ok(await api.GET("/api/v1/announcements", { params: { query: ALL } }))?.results ?? [],
   });
   const items = (feed.data ?? []).filter((a) => !scope || a.scope === scope);
   const paged = useLocalPages(items, scope);

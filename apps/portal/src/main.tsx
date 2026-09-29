@@ -4,7 +4,7 @@ import "@fontsource/ibm-plex-sans-arabic/600.css";
 import "@fontsource/ibm-plex-sans-arabic/700.css";
 import "./app.css";
 
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClientProvider } from "@tanstack/react-query";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { createBrowserRouter, RouterProvider } from "react-router";
@@ -96,17 +96,19 @@ import { ForgotPassword } from "./routes/ForgotPassword";
 import { Install } from "./routes/Install";
 import { Login } from "./routes/Login";
 import { NotFound } from "./routes/NotFound";
+import { NoAccess } from "./components/NoAccess";
+import { QueryErrorBanner } from "./components/QueryErrorBanner";
+import { ROUTE_ACCESS } from "./lib/access";
+import { queryClient } from "./lib/queryClient";
 import { Notifications } from "./routes/Notifications";
 import { Register } from "./routes/Register";
 import { Settings } from "./routes/Settings";
 
-// TanStack Query holds all server state (docs/04, D-no-Zustand).
-const queryClient = new QueryClient({
-  // Focus refetches at most every 30 s, so switching windows doesn't re-request every page's data.
-  defaultOptions: { queries: { retry: 1, refetchOnWindowFocus: true, staleTime: 30_000 } },
-});
-
-const signedIn = (element: React.ReactNode) => <RequireAuth>{element}</RequireAuth>;
+const signedIn = (element: React.ReactNode, path: string) => (
+  <RequireAuth allow={ROUTE_ACCESS[path]} denied={<NoAccess />}>
+    {element}
+  </RequireAuth>
+);
 
 const router = createBrowserRouter([
   { path: "/login", element: <Login /> },
@@ -117,98 +119,116 @@ const router = createBrowserRouter([
   { path: "/apply", element: <Apply /> },
   { path: "/track", element: <Track /> },
   // Role dashboards arrive with Phase 10; until then home is the notification centre.
-  { path: "/", element: signedIn(<Home />) },
-  { path: "/courses", element: signedIn(<Courses />) },
-  { path: "/courses/:id", element: signedIn(<Course />) },
-  { path: "/courses/:id/students", element: signedIn(<Students />) },
-  { path: "/lectures/new", element: signedIn(<LectureEditor />) },
-  { path: "/lectures/:id", element: signedIn(<Lecture />) },
-  { path: "/lectures/:id/edit", element: signedIn(<LectureEditor />) },
-  { path: "/assignments/new", element: signedIn(<AssignmentEditor />) },
-  { path: "/assignments/:id", element: signedIn(<Assignment />) },
-  { path: "/assignments/:id/edit", element: signedIn(<AssignmentEditor />) },
-  { path: "/submissions/:id", element: signedIn(<Grade />) },
-  { path: "/grading", element: signedIn(<Grading />) },
-  { path: "/tasks", element: signedIn(<Tasks />) },
-  { path: "/me", element: signedIn(<Me />) },
-  { path: "/me/status", element: signedIn(<MyStatus />) },
-  { path: "/results-office", element: signedIn(<ResultsHome />) },
-  { path: "/academic", element: signedIn(<AcademicHome />) },
-  { path: "/affairs", element: signedIn(<AffairsHome />) },
-  { path: "/notifications", element: signedIn(<Notifications />) },
-  { path: "/notifications/new", element: signedIn(<Compose />) },
-  { path: "/settings", element: signedIn(<Settings />) },
-  { path: "/install", element: signedIn(<Install />) },
-  { path: "/results", element: signedIn(<MyResults />) },
-  { path: "/results/search", element: signedIn(<ResultSearch />) },
-  { path: "/results/settings", element: signedIn(<ResultSettings />) },
-  { path: "/result-imports", element: signedIn(<ResultImports />) },
-  { path: "/result-imports/:id", element: signedIn(<ResultImportDetail />) },
-  { path: "/result-corrections", element: signedIn(<Corrections />) },
-  { path: "/regulations", element: signedIn(<Regulations />) },
-  { path: "/regulations/new", element: signedIn(<RegulationNew />) },
-  { path: "/regulations/:id", element: signedIn(<RegulationDetail />) },
-  { path: "/exams", element: signedIn(<Exams />) },
-  { path: "/exams/new", element: signedIn(<ExamEditor />) },
-  { path: "/exams/:id", element: signedIn(<ExamDetail />) },
-  { path: "/exams/:id/edit", element: signedIn(<ExamEditor />) },
-  { path: "/exams/:id/monitor", element: signedIn(<ExamMonitor />) },
-  { path: "/exams/:id/stats", element: signedIn(<ExamStats />) },
+  { path: "/", element: signedIn(<Home />, "/") },
+  { path: "/courses", element: signedIn(<Courses />, "/courses") },
+  { path: "/courses/:id", element: signedIn(<Course />, "/courses/:id") },
+  { path: "/courses/:id/students", element: signedIn(<Students />, "/courses/:id/students") },
+  { path: "/lectures/new", element: signedIn(<LectureEditor />, "/lectures/new") },
+  { path: "/lectures/:id", element: signedIn(<Lecture />, "/lectures/:id") },
+  { path: "/lectures/:id/edit", element: signedIn(<LectureEditor />, "/lectures/:id/edit") },
+  { path: "/assignments/new", element: signedIn(<AssignmentEditor />, "/assignments/new") },
+  { path: "/assignments/:id", element: signedIn(<Assignment />, "/assignments/:id") },
+  {
+    path: "/assignments/:id/edit",
+    element: signedIn(<AssignmentEditor />, "/assignments/:id/edit"),
+  },
+  { path: "/submissions/:id", element: signedIn(<Grade />, "/submissions/:id") },
+  { path: "/grading", element: signedIn(<Grading />, "/grading") },
+  { path: "/tasks", element: signedIn(<Tasks />, "/tasks") },
+  { path: "/me", element: signedIn(<Me />, "/me") },
+  { path: "/me/status", element: signedIn(<MyStatus />, "/me/status") },
+  { path: "/results-office", element: signedIn(<ResultsHome />, "/results-office") },
+  { path: "/academic", element: signedIn(<AcademicHome />, "/academic") },
+  { path: "/affairs", element: signedIn(<AffairsHome />, "/affairs") },
+  { path: "/notifications", element: signedIn(<Notifications />, "/notifications") },
+  { path: "/notifications/new", element: signedIn(<Compose />, "/notifications/new") },
+  { path: "/settings", element: signedIn(<Settings />, "/settings") },
+  { path: "/install", element: signedIn(<Install />, "/install") },
+  { path: "/results", element: signedIn(<MyResults />, "/results") },
+  { path: "/results/search", element: signedIn(<ResultSearch />, "/results/search") },
+  { path: "/results/settings", element: signedIn(<ResultSettings />, "/results/settings") },
+  { path: "/result-imports", element: signedIn(<ResultImports />, "/result-imports") },
+  { path: "/result-imports/:id", element: signedIn(<ResultImportDetail />, "/result-imports/:id") },
+  { path: "/result-corrections", element: signedIn(<Corrections />, "/result-corrections") },
+  { path: "/regulations", element: signedIn(<Regulations />, "/regulations") },
+  { path: "/regulations/new", element: signedIn(<RegulationNew />, "/regulations/new") },
+  { path: "/regulations/:id", element: signedIn(<RegulationDetail />, "/regulations/:id") },
+  { path: "/exams", element: signedIn(<Exams />, "/exams") },
+  { path: "/exams/new", element: signedIn(<ExamEditor />, "/exams/new") },
+  { path: "/exams/:id", element: signedIn(<ExamDetail />, "/exams/:id") },
+  { path: "/exams/:id/edit", element: signedIn(<ExamEditor />, "/exams/:id/edit") },
+  { path: "/exams/:id/monitor", element: signedIn(<ExamMonitor />, "/exams/:id/monitor") },
+  { path: "/exams/:id/stats", element: signedIn(<ExamStats />, "/exams/:id/stats") },
   // Focused exam shell: no sidebar or tabs at any size (docs/06 §9).
-  { path: "/exam-attempts/:id", element: signedIn(<TakeExam />) },
-  { path: "/exam-attempts/:id/result", element: signedIn(<ExamResult />) },
-  { path: "/live", element: signedIn(<LiveList />) },
-  { path: "/live/new", element: signedIn(<LiveNew />) },
-  { path: "/announcements", element: signedIn(<Announcements />) },
-  { path: "/announcements/new", element: signedIn(<AnnouncementNew />) },
-  { path: "/inquiries", element: signedIn(<Inquiries />) },
-  { path: "/inquiries/:id", element: signedIn(<Inquiries />) },
-  { path: "/site", element: signedIn(<SiteHome />) },
-  { path: "/site/pages/:id", element: signedIn(<PageEditor />) },
-  { path: "/site/news/:id", element: signedIn(<NewsEditor />) },
-  { path: "/site/media", element: signedIn(<SiteMedia />) },
-  { path: "/site/redirects", element: signedIn(<Redirects />) },
-  { path: "/events", element: signedIn(<Events />) },
-  { path: "/events/:id", element: signedIn(<EventEditor />) },
-  { path: "/applications", element: signedIn(<Applications />) },
-  { path: "/applications/:id", element: signedIn(<ApplicationDetail />) },
-  { path: "/admissions/cycles", element: signedIn(<Cycles />) },
-  { path: "/admissions/forms", element: signedIn(<FormBuilder />) },
-  { path: "/registrar", element: signedIn(<RegistrarHome />) },
-  { path: "/students", element: signedIn(<StudentRecords />) },
-  { path: "/students/:id", element: signedIn(<StudentRecord />) },
-  { path: "/student-imports", element: signedIn(<StudentImports />) },
-  { path: "/student-imports/:id", element: signedIn(<StudentImportDetail />) },
-  { path: "/registrars", element: signedIn(<Registrars />) },
-  { path: "/department", element: signedIn(<DepartmentDashboard />) },
-  { path: "/department/courses", element: signedIn(<Offerings />) },
-  { path: "/department/lectures", element: signedIn(<DepartmentLectures />) },
-  { path: "/department/teachers", element: signedIn(<Members />) },
-  { path: "/department/students", element: signedIn(<DepartmentStudents />) },
-  { path: "/department/approvals", element: signedIn(<Approvals />) },
-  { path: "/department/audit", element: signedIn(<Audit />) },
-  { path: "/reports", element: signedIn(<DepartmentReport />) },
-  { path: "/reports/admissions", element: signedIn(<AdmissionsReport />) },
-  { path: "/reports/affairs", element: signedIn(<AffairsReport />) },
-  { path: "/hr", element: signedIn(<HRHome />) },
-  { path: "/hr/teachers", element: signedIn(<Teachers />) },
-  { path: "/hr/teachers/:id", element: signedIn(<TeacherProfile />) },
-  { path: "/hr/notices/new", element: signedIn(<NoticeNew />) },
-  { path: "/hr/report", element: signedIn(<HRReport />) },
-  { path: "/hr-notices/:id", element: signedIn(<MyNotice />) },
-  { path: "/transcripts", element: signedIn(<TranscriptLookup />) },
-  { path: "/print/report/:id", element: signedIn(<PrintReport />) },
-  { path: "/print/transcript/:number", element: signedIn(<PrintTranscript />) },
-  { path: "/print/my-results", element: signedIn(<PrintMyResults />) },
-  { path: "/cases", element: signedIn(<Cases />) },
-  { path: "/cases/new", element: signedIn(<CaseNew />) },
-  { path: "/cases/:id", element: signedIn(<CaseDetail />) },
-  { path: "/system", element: signedIn(<AdminHome />) },
-  { path: "/system/users", element: signedIn(<AdminUsers />) },
-  { path: "/system/users/:id", element: signedIn(<AdminUser />) },
-  { path: "/system/structure", element: signedIn(<Structure />) },
-  { path: "/system/settings", element: signedIn(<AdminSettings />) },
-  { path: "/audit", element: signedIn(<Audit />) },
+  { path: "/exam-attempts/:id", element: signedIn(<TakeExam />, "/exam-attempts/:id") },
+  {
+    path: "/exam-attempts/:id/result",
+    element: signedIn(<ExamResult />, "/exam-attempts/:id/result"),
+  },
+  { path: "/live", element: signedIn(<LiveList />, "/live") },
+  { path: "/live/new", element: signedIn(<LiveNew />, "/live/new") },
+  { path: "/announcements", element: signedIn(<Announcements />, "/announcements") },
+  { path: "/announcements/new", element: signedIn(<AnnouncementNew />, "/announcements/new") },
+  { path: "/inquiries", element: signedIn(<Inquiries />, "/inquiries") },
+  { path: "/inquiries/:id", element: signedIn(<Inquiries />, "/inquiries/:id") },
+  { path: "/site", element: signedIn(<SiteHome />, "/site") },
+  { path: "/site/pages/:id", element: signedIn(<PageEditor />, "/site/pages/:id") },
+  { path: "/site/news/:id", element: signedIn(<NewsEditor />, "/site/news/:id") },
+  { path: "/site/media", element: signedIn(<SiteMedia />, "/site/media") },
+  { path: "/site/redirects", element: signedIn(<Redirects />, "/site/redirects") },
+  { path: "/events", element: signedIn(<Events />, "/events") },
+  { path: "/events/:id", element: signedIn(<EventEditor />, "/events/:id") },
+  { path: "/applications", element: signedIn(<Applications />, "/applications") },
+  { path: "/applications/:id", element: signedIn(<ApplicationDetail />, "/applications/:id") },
+  { path: "/admissions/cycles", element: signedIn(<Cycles />, "/admissions/cycles") },
+  { path: "/admissions/forms", element: signedIn(<FormBuilder />, "/admissions/forms") },
+  { path: "/registrar", element: signedIn(<RegistrarHome />, "/registrar") },
+  { path: "/students", element: signedIn(<StudentRecords />, "/students") },
+  { path: "/students/:id", element: signedIn(<StudentRecord />, "/students/:id") },
+  { path: "/student-imports", element: signedIn(<StudentImports />, "/student-imports") },
+  {
+    path: "/student-imports/:id",
+    element: signedIn(<StudentImportDetail />, "/student-imports/:id"),
+  },
+  { path: "/registrars", element: signedIn(<Registrars />, "/registrars") },
+  { path: "/department", element: signedIn(<DepartmentDashboard />, "/department") },
+  { path: "/department/courses", element: signedIn(<Offerings />, "/department/courses") },
+  {
+    path: "/department/lectures",
+    element: signedIn(<DepartmentLectures />, "/department/lectures"),
+  },
+  { path: "/department/teachers", element: signedIn(<Members />, "/department/teachers") },
+  {
+    path: "/department/students",
+    element: signedIn(<DepartmentStudents />, "/department/students"),
+  },
+  { path: "/department/approvals", element: signedIn(<Approvals />, "/department/approvals") },
+  { path: "/department/audit", element: signedIn(<Audit />, "/department/audit") },
+  { path: "/reports", element: signedIn(<DepartmentReport />, "/reports") },
+  { path: "/reports/admissions", element: signedIn(<AdmissionsReport />, "/reports/admissions") },
+  { path: "/reports/affairs", element: signedIn(<AffairsReport />, "/reports/affairs") },
+  { path: "/hr", element: signedIn(<HRHome />, "/hr") },
+  { path: "/hr/teachers", element: signedIn(<Teachers />, "/hr/teachers") },
+  { path: "/hr/teachers/:id", element: signedIn(<TeacherProfile />, "/hr/teachers/:id") },
+  { path: "/hr/notices/new", element: signedIn(<NoticeNew />, "/hr/notices/new") },
+  { path: "/hr/report", element: signedIn(<HRReport />, "/hr/report") },
+  { path: "/hr-notices/:id", element: signedIn(<MyNotice />, "/hr-notices/:id") },
+  { path: "/transcripts", element: signedIn(<TranscriptLookup />, "/transcripts") },
+  { path: "/print/report/:id", element: signedIn(<PrintReport />, "/print/report/:id") },
+  {
+    path: "/print/transcript/:number",
+    element: signedIn(<PrintTranscript />, "/print/transcript/:number"),
+  },
+  { path: "/print/my-results", element: signedIn(<PrintMyResults />, "/print/my-results") },
+  { path: "/cases", element: signedIn(<Cases />, "/cases") },
+  { path: "/cases/new", element: signedIn(<CaseNew />, "/cases/new") },
+  { path: "/cases/:id", element: signedIn(<CaseDetail />, "/cases/:id") },
+  { path: "/system", element: signedIn(<AdminHome />, "/system") },
+  { path: "/system/users", element: signedIn(<AdminUsers />, "/system/users") },
+  { path: "/system/users/:id", element: signedIn(<AdminUser />, "/system/users/:id") },
+  { path: "/system/structure", element: signedIn(<Structure />, "/system/structure") },
+  { path: "/system/settings", element: signedIn(<AdminSettings />, "/system/settings") },
+  { path: "/audit", element: signedIn(<Audit />, "/audit") },
   { path: "*", element: <NotFound /> },
 ]);
 
@@ -219,6 +239,7 @@ createRoot(root).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
       <RouterProvider router={router} />
+      <QueryErrorBanner />
     </QueryClientProvider>
   </StrictMode>,
 );

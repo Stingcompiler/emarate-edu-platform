@@ -15,7 +15,7 @@ import {
   StatusBadge,
   problemMessage,
 } from "../../components/ui";
-import { api } from "../../lib/api";
+import { api, ok } from "../../lib/api";
 import { when } from "../../lib/format";
 import { ALL, Pager, useLocalPages } from "../../components/Pager";
 
@@ -53,7 +53,7 @@ export function Inquiries() {
   const list = useQuery({
     queryKey: ["inquiries"],
     queryFn: async () =>
-      (await api.GET("/api/v1/inquiries", { params: { query: ALL } })).data?.results ?? [],
+      ok(await api.GET("/api/v1/inquiries", { params: { query: ALL } }))?.results ?? [],
   });
   const all = list.data ?? [];
   const shown = all.filter((i) =>

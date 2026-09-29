@@ -3,7 +3,7 @@ import { Link, useParams } from "react-router";
 
 import { PortalShell } from "../../components/PortalShell";
 import { Button, Card, SectionLabel } from "../../components/ui";
-import { api } from "../../lib/api";
+import { api, ok } from "../../lib/api";
 import { useMe } from "../../lib/auth";
 import { can } from "../../lib/nav";
 import { TOPIC_LABEL, TeacherStatus, days, initials, num, pct } from "../../lib/reports";
@@ -17,11 +17,11 @@ export function TeacherProfile() {
   const profile = useQuery({
     queryKey: ["reports", "teacher", id],
     queryFn: async () =>
-      (
+      ok(
         await api.GET("/api/v1/reports/teachers/{public_id}", {
           params: { path: { public_id: id } },
-        })
-      ).data ?? null,
+        }),
+      ) ?? null,
   });
   const p = profile.data;
   const t = p?.row;

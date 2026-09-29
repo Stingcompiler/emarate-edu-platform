@@ -15,7 +15,7 @@ import {
   TextArea,
   problemMessage,
 } from "../components/ui";
-import { api } from "../lib/api";
+import { api, ok } from "../lib/api";
 
 type Option = Schemas["AudienceOption"];
 type Category = Schemas["SendCategoryEnum"];
@@ -34,7 +34,7 @@ export function Compose() {
   const client = useQueryClient();
   const options = useQuery({
     queryKey: ["notifications", "audiences"],
-    queryFn: async () => (await api.GET("/api/v1/notifications/sent/audiences")).data ?? [],
+    queryFn: async () => ok(await api.GET("/api/v1/notifications/sent/audiences")) ?? [],
   });
   const [picked, setPicked] = useState<number | null>(null);
   const [title, setTitle] = useState("");

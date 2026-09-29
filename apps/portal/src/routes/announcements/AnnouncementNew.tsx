@@ -13,7 +13,8 @@ import {
   problemMessage,
   WithSide,
 } from "../../components/ui";
-import { api } from "../../lib/api";
+import { api, ok } from "../../lib/api";
+import { useUnsavedChanges } from "../../lib/useUnsavedChanges";
 import { hasRole, useMe } from "../../lib/auth";
 import { can } from "../../lib/nav";
 import { ALL } from "../../components/Pager";
@@ -29,18 +30,19 @@ type Option = {
 /** Boards: TeacherAnnouncement, SiteManagerAnnouncementNew (phone); desktop derived.
  *  The server re-checks every scope/audience (docs/03 §7 «إعلانات»). */
 export function AnnouncementNew() {
+  const unsaved = useUnsavedChanges();
   const me = useMe();
   const navigate = useNavigate();
   const courses = useQuery({
     // Courses taught plus, for a department manager/supervisor, the department's courses.
     queryKey: ["me", "courses", "managed"],
     queryFn: async () =>
-      (await api.GET("/api/v1/me/courses", { params: { query: { managed: true } } })).data ?? [],
+      ok(await api.GET("/api/v1/me/courses", { params: { query: { managed: true } } })) ?? [],
   });
   const departments = useQuery({
     queryKey: ["departments"],
     queryFn: async () =>
-      (await api.GET("/api/v1/departments", { params: { query: ALL } })).data?.results ?? [],
+      ok(await api.GET("/api/v1/departments", { params: { query: ALL } }))?.results ?? [],
     enabled: can(me.data, "learning.manage"),
   });
   const options = useMemo<Option[]>(() => {
@@ -134,77 +136,82 @@ export function AnnouncementNew() {
           params: { path: { public_id: data.public_id } },
         });
     },
-    onSuccess: () => navigate("/announcements"),
+    onSuccess: () => {
+      unsaved.saved();
+      navigate("/announcements");
+    },
   });
   return (
     <PortalShell title="إعلان جديد" back={{ label: "الإعلانات", to: "/announcements" }}>
-      <WithSide
-        side={
-          // Desktop: how the announcement will read, as it is typed.
-          <div>
-            <SectionLabel>معاينة</SectionLabel>
-            <Card className="p-4">
-              <p className="text-xs text-text-muted">{option?.label ?? "—"}</p>
-              <h2 className="mt-1 text-[17px] font-bold text-text">{title || "عنوان الإعلان"}</h2>
-              <div className="mt-2 space-y-2 text-sm leading-relaxed text-text">
-                {(body || "نص الإعلان يظهر هنا.").split(/\n{2,}/).map((para, i) => (
-                  <p key={i} className="whitespace-pre-line">
-                    {para}
-                  </p>
-                ))}
-              </div>
-            </Card>
-          </div>
-        }
-      >
-        <SectionLabel>إلى</SectionLabel>
-        {courses.isSuccess && !options.length && (
-          <Notice>لا يمكنك نشر إعلانات الآن. اطلب من أستاذ المادة السماح للمعيد بالإعلان.</Notice>
-        )}
-        <Card className="divide-y divide-border-soft">
-          {options.map((o) => (
-            <label
-              key={o.key}
-              className="flex min-h-12 cursor-pointer items-center gap-3 px-4 text-sm text-text"
+      <div className="contents" onInput={unsaved.onInput}>
+        <WithSide
+          side={
+            // Desktop: how the announcement will read, as it is typed.
+            <div>
+              <SectionLabel>معاينة</SectionLabel>
+              <Card className="p-4">
+                <p className="text-xs text-text-muted">{option?.label ?? "—"}</p>
+                <h2 className="mt-1 text-[17px] font-bold text-text">{title || "عنوان الإعلان"}</h2>
+                <div className="mt-2 space-y-2 text-sm leading-relaxed text-text">
+                  {(body || "نص الإعلان يظهر هنا.").split(/\n{2,}/).map((para, i) => (
+                    <p key={i} className="whitespace-pre-line">
+                      {para}
+                    </p>
+                  ))}
+                </div>
+              </Card>
+            </div>
+          }
+        >
+          <SectionLabel>إلى</SectionLabel>
+          {courses.isSuccess && !options.length && (
+            <Notice>لا يمكنك نشر إعلانات الآن. اطلب من أستاذ المادة السماح للمعيد بالإعلان.</Notice>
+          )}
+          <Card className="divide-y divide-border-soft">
+            {options.map((o) => (
+              <label
+                key={o.key}
+                className="flex min-h-12 cursor-pointer items-center gap-3 px-4 text-sm text-text"
+              >
+                <input
+                  type="radio"
+                  name="scope"
+                  className="size-5 accent-[var(--color-primary)]"
+                  checked={(option?.key ?? "") === o.key}
+                  onChange={() => setPicked(o.key)}
+                />
+                {o.label}
+              </label>
+            ))}
+          </Card>
+          <SectionLabel>الإعلان</SectionLabel>
+          <Card>
+            <Field label="العنوان" value={title} onChange={(e) => setTitle(e.target.value)} />
+            <TextArea label="النص" value={body} onChange={(e) => setBody(e.target.value)} />
+          </Card>
+          {save.isError && (
+            <div className="mt-3">
+              <Notice>{problemMessage(save.error)}</Notice>
+            </div>
+          )}
+          <div className="mt-4 flex gap-2">
+            <Button
+              variant="secondary"
+              disabled={!option || !title || save.isPending}
+              onClick={() => save.mutate(false)}
             >
-              <input
-                type="radio"
-                name="scope"
-                className="size-5 accent-[var(--color-primary)]"
-                checked={(option?.key ?? "") === o.key}
-                onChange={() => setPicked(o.key)}
-              />
-              {o.label}
-            </label>
-          ))}
-        </Card>
-        <SectionLabel>الإعلان</SectionLabel>
-        <Card>
-          <Field label="العنوان" value={title} onChange={(e) => setTitle(e.target.value)} />
-          <TextArea label="النص" value={body} onChange={(e) => setBody(e.target.value)} />
-        </Card>
-        {save.isError && (
-          <div className="mt-3">
-            <Notice>{problemMessage(save.error)}</Notice>
+              حفظ مسودة
+            </Button>
+            <Button
+              className="flex-1"
+              disabled={!option || !title || !body || save.isPending}
+              onClick={() => save.mutate(true)}
+            >
+              نشر الإعلان
+            </Button>
           </div>
-        )}
-        <div className="mt-4 flex gap-2">
-          <Button
-            variant="secondary"
-            disabled={!option || !title || save.isPending}
-            onClick={() => save.mutate(false)}
-          >
-            حفظ مسودة
-          </Button>
-          <Button
-            className="flex-1"
-            disabled={!option || !title || !body || save.isPending}
-            onClick={() => save.mutate(true)}
-          >
-            نشر الإعلان
-          </Button>
-        </div>
-      </WithSide>
+        </WithSide>
+      </div>
     </PortalShell>
   );
 }

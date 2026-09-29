@@ -3,7 +3,7 @@ import { useState } from "react";
 
 import { PortalShell } from "../../components/PortalShell";
 import { FilterBar, Button, Card } from "../../components/ui";
-import { api } from "../../lib/api";
+import { api, ok } from "../../lib/api";
 import { useMe } from "../../lib/auth";
 import { useDepartment } from "../../lib/department";
 import { downloadCsv } from "../../lib/reports";
@@ -196,11 +196,11 @@ export function Audit() {
   const list = useQuery({
     queryKey: ["audit", id, search, page],
     queryFn: async () =>
-      (
+      ok(
         await api.GET("/api/v1/audit-logs", {
           params: { query: { department: id, search: search || undefined, page } },
-        })
-      ).data ?? null,
+        }),
+      ) ?? null,
   });
   const rows = list.data?.results ?? [];
   const groups: [string, typeof rows][] = [];

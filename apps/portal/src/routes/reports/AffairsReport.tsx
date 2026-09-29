@@ -3,7 +3,7 @@ import { useState } from "react";
 
 import { PortalShell } from "../../components/PortalShell";
 import { Card, Notice, SectionLabel, ScrollRegion } from "../../components/ui";
-import { api } from "../../lib/api";
+import { api, ok } from "../../lib/api";
 import {
   ExportBar,
   Kpi,
@@ -31,7 +31,7 @@ export function AffairsReport() {
   const years = useQuery({
     queryKey: ["academic-years"],
     queryFn: async () =>
-      (await api.GET("/api/v1/academic-years", { params: { query: ALL } })).data?.results ?? [],
+      ok(await api.GET("/api/v1/academic-years", { params: { query: ALL } }))?.results ?? [],
   });
   const [year, setYear] = useState<number>();
   const [department, setDepartment] = useState<number>();

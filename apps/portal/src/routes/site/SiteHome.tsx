@@ -15,7 +15,7 @@ import {
   StatusBadge,
   WithSide,
 } from "../../components/ui";
-import { api } from "../../lib/api";
+import { api, ok } from "../../lib/api";
 import { when } from "../../lib/format";
 import { ALL, Pager, useLocalPages } from "../../components/Pager";
 
@@ -27,12 +27,12 @@ export function SiteHome() {
   const pages = useQuery({
     queryKey: ["site", "pages"],
     queryFn: async () =>
-      (await api.GET("/api/v1/content/pages", { params: { query: ALL } })).data?.results ?? [],
+      ok(await api.GET("/api/v1/content/pages", { params: { query: ALL } }))?.results ?? [],
   });
   const news = useQuery({
     queryKey: ["site", "news"],
     queryFn: async () =>
-      (await api.GET("/api/v1/content/news", { params: { query: ALL } })).data?.results ?? [],
+      ok(await api.GET("/api/v1/content/news", { params: { query: ALL } }))?.results ?? [],
   });
   const drafts = [...(pages.data ?? []), ...(news.data ?? [])].filter(
     (x) => x.status !== "published",

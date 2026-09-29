@@ -13,7 +13,7 @@ import {
   StatusBadge,
   splitCode,
 } from "../../components/ui";
-import { api } from "../../lib/api";
+import { api, ok } from "../../lib/api";
 import { useMe } from "../../lib/auth";
 import { count, N } from "../../lib/format";
 import { ALL, Pager, useLocalPages } from "../../components/Pager";
@@ -54,7 +54,7 @@ export function Exams() {
   const exams = useQuery({
     queryKey: ["exams"],
     queryFn: async () =>
-      (await api.GET("/api/v1/exams", { params: { query: ALL } })).data?.results ?? [],
+      ok(await api.GET("/api/v1/exams", { params: { query: ALL } }))?.results ?? [],
   });
   const list = exams.data ?? [];
   const now = Date.now();

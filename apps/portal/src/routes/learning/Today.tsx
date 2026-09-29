@@ -4,7 +4,7 @@ import { Link } from "react-router";
 
 import { PortalShell } from "../../components/PortalShell";
 import { Card, CodeTile, SectionLabel } from "../../components/ui";
-import { api } from "../../lib/api";
+import { api, ok } from "../../lib/api";
 import { useMe } from "../../lib/auth";
 import { when, count, N } from "../../lib/format";
 import { dueLabel, splitCourse, taskState, useAssignments, useLectures } from "../../lib/learning";
@@ -26,17 +26,17 @@ export function Today() {
   const live = useQuery({
     queryKey: ["live"],
     queryFn: async () =>
-      (await api.GET("/api/v1/live-sessions", { params: { query: ALL } })).data?.results ?? [],
+      ok(await api.GET("/api/v1/live-sessions", { params: { query: ALL } }))?.results ?? [],
   });
   const exams = useQuery({
     queryKey: ["exams"],
     queryFn: async () =>
-      (await api.GET("/api/v1/exams", { params: { query: ALL } })).data?.results ?? [],
+      ok(await api.GET("/api/v1/exams", { params: { query: ALL } }))?.results ?? [],
   });
   const regulations = useQuery({
     queryKey: ["regulations"],
     queryFn: async () =>
-      (await api.GET("/api/v1/regulations", { params: { query: ALL } })).data?.results ?? [],
+      ok(await api.GET("/api/v1/regulations", { params: { query: ALL } }))?.results ?? [],
   });
   const now = Date.now();
   const first = me.data?.full_name_ar?.split(" ")[0] ?? "";

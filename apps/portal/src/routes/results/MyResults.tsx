@@ -15,7 +15,7 @@ import {
   STATUS_LABELS,
   splitCode,
 } from "../../components/ui";
-import { api } from "../../lib/api";
+import { api, ok } from "../../lib/api";
 import { useMe } from "../../lib/auth";
 import { count, N } from "../../lib/format";
 
@@ -31,7 +31,7 @@ export function MyResults() {
   const me = useMe();
   const results = useQuery({
     queryKey: ["me", "results"],
-    queryFn: async () => (await api.GET("/api/v1/me/results")).data ?? null,
+    queryFn: async () => ok(await api.GET("/api/v1/me/results")) ?? null,
   });
   const [picked, setPicked] = useState<number | null>(null);
   const data = results.data;

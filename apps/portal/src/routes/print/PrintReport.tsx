@@ -2,7 +2,7 @@ import type { Schemas } from "@ecst/api";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "react-router";
 
-import { api } from "../../lib/api";
+import { api, ok } from "../../lib/api";
 import { TEACHER_STATUS, days, num, pct } from "../../lib/reports";
 import { STATUS_LABEL } from "../../lib/visitor";
 import { PrintLayout, PrintStats, PrintTable } from "./PrintLayout";
@@ -14,11 +14,11 @@ export function PrintReport() {
   const snap = useQuery({
     queryKey: ["report-snapshots", "one", id],
     queryFn: async () =>
-      (
+      ok(
         await api.GET("/api/v1/report-snapshots/{public_id}", {
           params: { path: { public_id: id } },
-        })
-      ).data ?? null,
+        }),
+      ) ?? null,
   });
   const s = snap.data;
   if (!s)

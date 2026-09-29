@@ -12,7 +12,7 @@ import {
   StatusBadge,
   problemMessage,
 } from "../../components/ui";
-import { api } from "../../lib/api";
+import { api, ok } from "../../lib/api";
 import { useMe } from "../../lib/auth";
 import { initials, useDepartments } from "../../lib/reports";
 import { DEPARTMENT_ROLES, ROLE_LABEL } from "./roles";
@@ -25,7 +25,7 @@ export function AdminUser() {
   const user = useQuery({
     queryKey: ["user", id],
     queryFn: async () =>
-      (await api.GET("/api/v1/users/{public_id}", { params: { path: { public_id: id } } })).data ??
+      ok(await api.GET("/api/v1/users/{public_id}", { params: { path: { public_id: id } } })) ??
       null,
   });
   const refresh = () => {

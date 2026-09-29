@@ -7,7 +7,7 @@ import { Link, useNavigate } from "react-router";
 import { PortalShell } from "../components/PortalShell";
 import { Segmented } from "../components/motion";
 import { Button, Card, SectionLabel, WithSide } from "../components/ui";
-import { api } from "../lib/api";
+import { api, ok } from "../lib/api";
 import { hasRole, useMe, useSignOut } from "../lib/auth";
 import { disablePush, enablePush, pushState, type PushState } from "../lib/push";
 import { type Theme, useTheme } from "../lib/theme";
@@ -37,7 +37,7 @@ export function Settings() {
 
   const prefs = useQuery({
     queryKey: ["notifications", "preferences"],
-    queryFn: async () => (await api.GET("/api/v1/notifications/preferences")).data ?? [],
+    queryFn: async () => ok(await api.GET("/api/v1/notifications/preferences")) ?? [],
   });
   const save = useMutation({
     mutationFn: async (rows: Preference[]) => {

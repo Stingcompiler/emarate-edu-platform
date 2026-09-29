@@ -4,7 +4,7 @@ import { Link } from "react-router";
 
 import { PortalShell } from "../../components/PortalShell";
 import { Card, SectionLabel, Switch } from "../../components/ui";
-import { api } from "../../lib/api";
+import { api, ok } from "../../lib/api";
 import { actionLabel } from "../department/Audit";
 import { useMe } from "../../lib/auth";
 import { useCurrentTerm } from "../../lib/department";
@@ -37,27 +37,31 @@ export function AdminHome() {
   const client = useQueryClient();
   const health = useQuery({
     queryKey: ["health"],
-    queryFn: async () => (await api.GET("/api/public/health")).data ?? null,
+    // 503 still carries the checks (a degraded service), so no ok() here.
+    queryFn: async () => {
+      const { data, error } = await api.GET("/api/public/health");
+      return data ?? error ?? null;
+    },
   });
   const settings = useQuery({
     queryKey: ["system-settings"],
-    queryFn: async () => (await api.GET("/api/v1/system-settings")).data ?? null,
+    queryFn: async () => ok(await api.GET("/api/v1/system-settings")) ?? null,
   });
   const term = useCurrentTerm();
   const departments = useQuery({
     queryKey: ["departments"],
     queryFn: async () =>
-      (await api.GET("/api/v1/departments", { params: { query: ALL } })).data?.results ?? [],
+      ok(await api.GET("/api/v1/departments", { params: { query: ALL } }))?.results ?? [],
   });
   const programs = useQuery({
     queryKey: ["programs", "all"],
     queryFn: async () =>
-      (await api.GET("/api/v1/programs", { params: { query: { page_size: 100 } as never } })).data
+      ok(await api.GET("/api/v1/programs", { params: { query: { page_size: 100 } as never } }))
         ?.results ?? [],
   });
   const counts = useQuery({
     queryKey: ["role-counts"],
-    queryFn: async () => (await api.GET("/api/v1/role-assignments/counts")).data?.counts ?? {},
+    queryFn: async () => ok(await api.GET("/api/v1/role-assignments/counts"))?.counts ?? {},
   });
   const byRole = new Map(
     GROUPS.flatMap((g) => g.roles).map((r) => [r, counts.data?.[r] ?? 0] as const),
@@ -65,8 +69,8 @@ export function AdminHome() {
   const audit = useQuery({
     queryKey: ["audit", "recent"],
     queryFn: async () =>
-      (await api.GET("/api/v1/audit-logs", { params: { query: { page_size: 6 } } })).data
-        ?.results ?? [],
+      ok(await api.GET("/api/v1/audit-logs", { params: { query: { page_size: 6 } } }))?.results ??
+      [],
   });
   const toggle = useMutation({
     mutationFn: async (value: boolean) => {
@@ -81,7 +85,7 @@ export function AdminHome() {
     database: health.data?.database ?? "",
     cache: health.data?.cache ?? "",
   };
-  const ok = health.data?.status === "ok";
+  const healthy = health.data?.status === "ok";
   const total = [...byRole.values()].reduce((a, b) => a + b, 0);
   return (
     <PortalShell
@@ -90,7 +94,7 @@ export function AdminHome() {
     >
       <div className="grid grid-cols-3 gap-2">
         {[
-          ["الخدمة", ok ? "سليمة" : "تحقق", ok],
+          ["الخدمة", healthy ? "سليمة" : "تحقق", healthy],
           [
             "قاعدة البيانات",
             checks.database === "ok" ? "متصلة" : (checks.database ?? "—"),

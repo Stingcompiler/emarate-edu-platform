@@ -4,6 +4,7 @@ import { Pencil, Plus, Trash2, X } from "lucide-react";
 import { Link } from "react-router";
 import { useState } from "react";
 
+import { DepartmentSwitch } from "../../components/DepartmentSwitch";
 import { PortalShell } from "../../components/PortalShell";
 import {
   Button,
@@ -16,7 +17,7 @@ import {
   problemMessage,
   splitCode,
 } from "../../components/ui";
-import { api } from "../../lib/api";
+import { api, ok } from "../../lib/api";
 import { useMe } from "../../lib/auth";
 import { useCurrentTerm, useDepartment, useOfferings } from "../../lib/department";
 import { can } from "../../lib/nav";
@@ -34,11 +35,11 @@ export function Offerings() {
     queryKey: ["members", id],
     enabled: !!id,
     queryFn: async () =>
-      (
+      ok(
         await api.GET("/api/v1/departments/{department_id}/members", {
           params: { path: { department_id: id! } },
-        })
-      ).data ?? [],
+        }),
+      ) ?? [],
   });
   const report = useQuery({
     queryKey: ["reports", "department", "dash", id],
@@ -145,6 +146,7 @@ export function Offerings() {
       subtitle={`${department?.name_ar ?? ""}${term.data ? ` · ${term.data.name_ar}` : ""}`}
       back={{ label: "لوحة القسم", to: "/department" }}
     >
+      <DepartmentSwitch />
       {error ? (
         <div className="mb-3">
           <Notice>{problemMessage(error)}</Notice>

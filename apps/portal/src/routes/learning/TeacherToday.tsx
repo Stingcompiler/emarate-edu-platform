@@ -4,7 +4,7 @@ import { Link } from "react-router";
 
 import { PortalShell } from "../../components/PortalShell";
 import { Card, SectionLabel } from "../../components/ui";
-import { api } from "../../lib/api";
+import { api, ok } from "../../lib/api";
 import { useMe } from "../../lib/auth";
 import { dueLabel, useAssignments, useMyCourses } from "../../lib/learning";
 import { useGradingQueue } from "./Grading";
@@ -39,17 +39,17 @@ export function TeacherToday() {
   const live = useQuery({
     queryKey: ["live"],
     queryFn: async () =>
-      (await api.GET("/api/v1/live-sessions", { params: { query: ALL } })).data?.results ?? [],
+      ok(await api.GET("/api/v1/live-sessions", { params: { query: ALL } }))?.results ?? [],
   });
   const exams = useQuery({
     queryKey: ["exams"],
     queryFn: async () =>
-      (await api.GET("/api/v1/exams", { params: { query: ALL } })).data?.results ?? [],
+      ok(await api.GET("/api/v1/exams", { params: { query: ALL } }))?.results ?? [],
   });
   const notices = useQuery({
     queryKey: ["hr-notices", "mine"],
     queryFn: async () =>
-      (await api.GET("/api/v1/hr-notices", { params: { query: ALL } })).data?.results ?? [],
+      ok(await api.GET("/api/v1/hr-notices", { params: { query: ALL } }))?.results ?? [],
   });
   const now = Date.now();
   const horizon = now + DAY;

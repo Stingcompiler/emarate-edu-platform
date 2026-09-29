@@ -4,7 +4,7 @@ import { Link } from "react-router";
 
 import { PortalShell } from "../../components/PortalShell";
 import { Button, Card, SectionLabel } from "../../components/ui";
-import { api } from "../../lib/api";
+import { api, ok } from "../../lib/api";
 import { useMe } from "../../lib/auth";
 import { when } from "../../lib/format";
 import { can } from "../../lib/nav";
@@ -20,7 +20,7 @@ export function RegistrarHome() {
   const summary = useQuery({
     queryKey: ["applications", "summary"],
     queryFn: async () =>
-      (await api.GET("/api/v1/applications/summary")).data as
+      ok(await api.GET("/api/v1/applications/summary")) as
         | {
             by_status: Record<string, number>;
             by_department: Record<string, number>;
@@ -32,38 +32,38 @@ export function RegistrarHome() {
     queryKey: ["applications", "unassigned"],
     queryFn: async () =>
       (
-        (
+        ok(
           await api.GET("/api/v1/applications", {
             params: { query: { ...ALL, status: "submitted" as never } },
-          })
-        ).data?.results ?? []
+          }),
+        )?.results ?? []
       ).filter((a) => !a.assigned_registrar_name),
   });
   const mine = useQuery({
     queryKey: ["applications", "mine", me.data?.public_id],
     enabled: !!me.data,
     queryFn: async () =>
-      (
+      ok(
         await api.GET("/api/v1/applications", {
           params: { query: { ...ALL, assigned_registrar__public_id: me.data!.public_id } },
-        })
-      ).data ?? null,
+        }),
+      ) ?? null,
   });
   const inquiries = useQuery({
     queryKey: ["inquiries", "open"],
     queryFn: async () =>
-      (await api.GET("/api/v1/inquiries", { params: { query: { ...ALL, status: "new" } } })).data
+      ok(await api.GET("/api/v1/inquiries", { params: { query: { ...ALL, status: "new" } } }))
         ?.count ?? 0,
   });
   const registrations = useQuery({
     queryKey: ["registration-requests", "pending"],
     enabled: head,
     queryFn: async () =>
-      (
+      ok(
         await api.GET("/api/v1/registration-requests", {
           params: { query: { ...ALL, status: "pending_approval" } },
-        })
-      ).data ?? null,
+        }),
+      ) ?? null,
   });
   const claim = useMutation({
     mutationFn: async (id: string) => {

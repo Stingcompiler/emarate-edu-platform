@@ -14,7 +14,7 @@ import {
   StatusBadge,
   STATUS_LABELS,
 } from "../../components/ui";
-import { api } from "../../lib/api";
+import { api, ok } from "../../lib/api";
 import { useMe } from "../../lib/auth";
 import { when, count, N } from "../../lib/format";
 import { can } from "../../lib/nav";
@@ -46,16 +46,16 @@ export function Cases() {
   const cases = useQuery({
     queryKey: ["cases"],
     queryFn: async () =>
-      (await api.GET("/api/v1/cases", { params: { query: ALL } })).data?.results ?? [],
+      ok(await api.GET("/api/v1/cases", { params: { query: ALL } }))?.results ?? [],
   });
   const reports = useQuery({
     queryKey: ["misconduct-reports"],
     queryFn: async () =>
-      (
+      ok(
         await api.GET("/api/v1/misconduct-reports", {
           params: { query: { ...ALL, status: "new" } },
-        })
-      ).data?.results ?? [],
+        }),
+      )?.results ?? [],
   });
   const all = cases.data ?? [];
   const open = all.filter((c) => c.status !== "closed");

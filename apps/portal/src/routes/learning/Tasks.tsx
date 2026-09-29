@@ -5,7 +5,7 @@ import { Link } from "react-router";
 import { PortalShell } from "../../components/PortalShell";
 import { ProgressRing } from "../../components/motion";
 import { Card, CodeTile, EmptyState, SectionLabel } from "../../components/ui";
-import { api } from "../../lib/api";
+import { api, ok } from "../../lib/api";
 import {
   type TaskState,
   dueLabel,
@@ -38,7 +38,7 @@ export function Tasks() {
   const exams = useQuery({
     queryKey: ["exams"],
     queryFn: async () =>
-      (await api.GET("/api/v1/exams", { params: { query: ALL } })).data?.results ?? [],
+      ok(await api.GET("/api/v1/exams", { params: { query: ALL } }))?.results ?? [],
   });
   const now = Date.now();
   const list = (assignments.data ?? [])

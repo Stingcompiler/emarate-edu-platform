@@ -13,7 +13,7 @@ import {
   SectionLabel,
   StatusBadge,
 } from "../../components/ui";
-import { api } from "../../lib/api";
+import { api, ok } from "../../lib/api";
 import { when, count, N } from "../../lib/format";
 import {
   dueLabel,
@@ -44,24 +44,24 @@ export function Course() {
   const exams = useQuery({
     queryKey: ["exams", offering],
     queryFn: async () =>
-      (await api.GET("/api/v1/exams", { params: { query: { ...ALL, offering } } })).data?.results ??
+      ok(await api.GET("/api/v1/exams", { params: { query: { ...ALL, offering } } }))?.results ??
       [],
   });
   const live = useQuery({
     queryKey: ["live", offering],
     queryFn: async () =>
-      (await api.GET("/api/v1/live-sessions", { params: { query: { ...ALL, offering } } })).data
+      ok(await api.GET("/api/v1/live-sessions", { params: { query: { ...ALL, offering } } }))
         ?.results ?? [],
   });
   const news = useQuery({
     queryKey: ["announcements", "offering", offering],
     queryFn: async () =>
       (
-        (
+        ok(
           await api.GET("/api/v1/announcements", {
             params: { query: { ...ALL, scope: "offering" } },
-          })
-        ).data?.results ?? []
+          }),
+        )?.results ?? []
       ).filter((a) => a.scope_id === offering),
   });
   const [tab, setTab] = useState<(typeof TABS)[number]["key"]>("lectures");

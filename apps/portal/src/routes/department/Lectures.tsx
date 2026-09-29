@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Eye, EyeOff, Pencil, Plus, Trash2 } from "lucide-react";
 import { Link } from "react-router";
 
+import { DepartmentSwitch } from "../../components/DepartmentSwitch";
 import { PortalShell } from "../../components/PortalShell";
 import { Card, CodeTile, SectionLabel, StatusBadge, splitCode } from "../../components/ui";
 import { api } from "../../lib/api";
@@ -54,6 +55,7 @@ export function DepartmentLectures() {
       subtitle={`${department?.name_ar ?? ""} · ${num(total.filter((l) => l.is_published).length)} منشورة`}
       back={{ label: "لوحة القسم", to: "/department" }}
     >
+      <DepartmentSwitch />
       <div className="grid gap-4 lg:grid-cols-2">
         {(offerings.data ?? []).map((o) => {
           const mine = (lectures.data ?? [])

@@ -14,12 +14,14 @@ import {
   problemMessage,
 } from "../../components/ui";
 import { api } from "../../lib/api";
+import { useUnsavedChanges } from "../../lib/useUnsavedChanges";
 import { fmtSize, useLectures, useCourse } from "../../lib/learning";
 import { tusUpload } from "../../lib/tus";
 import { asForm, formData } from "../../lib/upload";
 
 /** Board: TeacherLectureNew (phone); desktop derived — form beside resources. `/lectures/new?offering=` or `/lectures/:id/edit`. */
 export function LectureEditor() {
+  const unsaved = useUnsavedChanges();
   const { id } = useParams();
   const [params] = useSearchParams();
   const navigate = useNavigate();
@@ -75,6 +77,7 @@ export function LectureEditor() {
       return publicId;
     },
     onSuccess: (publicId) => {
+      unsaved.saved();
       refresh();
       navigate(`/lectures/${publicId}/edit`, { replace: true });
     },
@@ -94,75 +97,82 @@ export function LectureEditor() {
       subtitle={`${course?.name_ar ?? ""} · المحاضرة ${String(l?.order ?? nextOrder).padStart(2, "0")} · الفيديو يُرفع مباشرة إلى شبكة البث`}
       back={{ label: course?.name_ar ?? "المادة", to: `/courses/${offering}` }}
     >
-      <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_380px] lg:items-start lg:gap-6">
-        <div className="space-y-4">
-          <SectionLabel>الأساسيات</SectionLabel>
-          <Card className="space-y-3 p-4">
-            <label className="block text-sm font-semibold">
-              العنوان
-              <input
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                className="mt-1 block min-h-11 w-full rounded-lg border border-border bg-surface px-3 font-normal"
-              />
-            </label>
-            <label className="block text-sm font-semibold">
-              الوصف
-              <textarea
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                className="mt-1 block min-h-28 w-full rounded-lg border border-border bg-surface p-3 font-normal"
-              />
-            </label>
-            <div className="flex gap-2">
-              <Chip active={type === "theory"} onClick={() => setType("theory")}>
-                نظري
-              </Chip>
-              <Chip active={type === "lab"} onClick={() => setType("lab")}>
-                عملي
-              </Chip>
-            </div>
-          </Card>
-          {save.isError && <Notice>{problemMessage(save.error)}</Notice>}
-          <div className="flex flex-wrap items-center gap-2">
-            {l && (
-              <StatusBadge
-                status={l.is_published ? "published" : "draft"}
-                label={l.is_published ? "منشورة" : "مسودة"}
-              />
-            )}
-            <Button
-              variant="secondary"
-              disabled={!title.trim() || save.isPending}
-              onClick={() => save.mutate(false)}
-            >
-              حفظ كمسودة
-            </Button>
-            {!l?.is_published && (
-              <Button disabled={!title.trim() || save.isPending} onClick={() => save.mutate(true)}>
-                نشر المحاضرة
-              </Button>
-            )}
-            {l?.is_published && (
-              <Button variant="secondary" onClick={() => unpublish.mutate()}>
-                إلغاء النشر
-              </Button>
-            )}
-          </div>
-          <p className="text-xs text-text-muted">
-            النشر يرسل إشعارًا لطلاب المادة داخل التطبيق وPush.
-          </p>
-        </div>
-        <aside className="mt-6 lg:mt-0">
-          <SectionLabel>الموارد</SectionLabel>
-          {l ? (
-            <Resources lecture={l} offering={offering} onChange={refresh} />
-          ) : (
-            <Card className="p-4 text-sm text-text-muted">
-              احفظ المسودة أولًا ثم أضف الفيديو والملفات والروابط.
+      <div className="contents" onInput={unsaved.onInput}>
+        <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_380px] lg:items-start lg:gap-6">
+          <div className="space-y-4">
+            <SectionLabel>الأساسيات</SectionLabel>
+            <Card className="space-y-3 p-4">
+              <label className="block text-sm font-semibold">
+                العنوان
+                <input
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  className="mt-1 block min-h-11 w-full rounded-lg border border-border bg-surface px-3 font-normal"
+                />
+              </label>
+              <label className="block text-sm font-semibold">
+                الوصف
+                <textarea
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  className="mt-1 block min-h-28 w-full rounded-lg border border-border bg-surface p-3 font-normal"
+                />
+              </label>
+              <div className="flex gap-2">
+                <Chip active={type === "theory"} onClick={() => setType("theory")}>
+                  نظري
+                </Chip>
+                <Chip active={type === "lab"} onClick={() => setType("lab")}>
+                  عملي
+                </Chip>
+              </div>
             </Card>
-          )}
-        </aside>
+            {save.isError && <Notice>{problemMessage(save.error)}</Notice>}
+            <div className="flex flex-wrap items-center gap-2">
+              {l && (
+                <StatusBadge
+                  status={l.is_published ? "published" : "draft"}
+                  label={l.is_published ? "منشورة" : "مسودة"}
+                />
+              )}
+              <Button
+                variant="secondary"
+                disabled={!title.trim() || save.isPending}
+                onClick={() => save.mutate(false)}
+              >
+                حفظ كمسودة
+              </Button>
+              {!l?.is_published && (
+                <Button
+                  disabled={!title.trim() || save.isPending}
+                  onClick={() => save.mutate(true)}
+                >
+                  نشر المحاضرة
+                </Button>
+              )}
+              {l?.is_published && (
+                <Button variant="secondary" onClick={() => unpublish.mutate()}>
+                  إلغاء النشر
+                </Button>
+              )}
+            </div>
+            <p className="text-xs text-text-muted">
+              النشر يرسل إشعارًا لطلاب المادة داخل التطبيق وPush.
+            </p>
+          </div>
+          <aside className="mt-6 lg:mt-0">
+            <SectionLabel>الموارد</SectionLabel>
+            {l ? (
+              <div data-saves-itself>
+                <Resources lecture={l} offering={offering} onChange={refresh} />
+              </div>
+            ) : (
+              <Card className="p-4 text-sm text-text-muted">
+                احفظ المسودة أولًا ثم أضف الفيديو والملفات والروابط.
+              </Card>
+            )}
+          </aside>
+        </div>
       </div>
     </PortalShell>
   );

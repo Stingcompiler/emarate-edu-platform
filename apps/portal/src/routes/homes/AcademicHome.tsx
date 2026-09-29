@@ -4,7 +4,7 @@ import { Link } from "react-router";
 
 import { PortalShell } from "../../components/PortalShell";
 import { Card, SectionLabel } from "../../components/ui";
-import { api } from "../../lib/api";
+import { api, ok } from "../../lib/api";
 import { useMe } from "../../lib/auth";
 import { useCurrentTerm } from "../../lib/department";
 import { initials, num, useDepartments } from "../../lib/reports";
@@ -20,11 +20,11 @@ export function AcademicHome() {
   const corrections = useQuery({
     queryKey: ["result-corrections", "pending"],
     queryFn: async () =>
-      (
+      ok(
         await api.GET("/api/v1/result-corrections", {
           params: { query: { ...ALL, status: "pending" } },
-        })
-      ).data?.count ?? 0,
+        }),
+      )?.count ?? 0,
   });
   const leaders = useQuery({
     queryKey: ["role-assignments", "leaders"],
@@ -37,17 +37,17 @@ export function AcademicHome() {
   });
   const teachers = useQuery({
     queryKey: ["reports", "teachers", "college"],
-    queryFn: async () => (await api.GET("/api/v1/reports/teachers")).data ?? null,
+    queryFn: async () => ok(await api.GET("/api/v1/reports/teachers")) ?? null,
   });
   const offerings = useQuery({
     queryKey: ["offerings", "college", term.data?.id],
     enabled: !!term.data,
     queryFn: async () =>
-      (
+      ok(
         await api.GET("/api/v1/offerings", {
           params: { query: { term: term.data!.id, page_size: 100 } },
-        })
-      ).data?.results ?? [],
+        }),
+      )?.results ?? [],
   });
   const has = (id: number, role: string) =>
     (leaders.data ?? []).some((r) => r.role === role && r.department === id);

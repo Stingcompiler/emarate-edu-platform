@@ -5,7 +5,7 @@ import { useNavigate, useParams } from "react-router";
 
 import { PortalShell } from "../../components/PortalShell";
 import { Button, Card, Notice, SectionLabel, problemMessage } from "../../components/ui";
-import { api } from "../../lib/api";
+import { api, ok } from "../../lib/api";
 import { when } from "../../lib/format";
 import { initials } from "../../lib/reports";
 import { openFile } from "../../lib/learning";
@@ -19,28 +19,28 @@ export function Grade() {
   const path = { params: { path: { public_id: id } } };
   const submission = useQuery({
     queryKey: ["submission", id],
-    queryFn: async () => (await api.GET("/api/v1/submissions/{public_id}", path)).data ?? null,
+    queryFn: async () => ok(await api.GET("/api/v1/submissions/{public_id}", path)) ?? null,
   });
   const s = submission.data;
   const assignment = useQuery({
     queryKey: ["assignment", s?.assignment],
     enabled: !!s,
     queryFn: async () =>
-      (
+      ok(
         await api.GET("/api/v1/assignments/{public_id}", {
           params: { path: { public_id: s!.assignment } },
-        })
-      ).data ?? null,
+        }),
+      ) ?? null,
   });
   const siblings = useQuery({
     queryKey: ["assignment", s?.assignment, "submissions"],
     enabled: !!s,
     queryFn: async () =>
-      (
+      ok(
         await api.GET("/api/v1/assignments/{public_id}/submissions", {
           params: { path: { public_id: s!.assignment }, query: ALL },
-        })
-      ).data?.results ?? [],
+        }),
+      )?.results ?? [],
   });
   const a = assignment.data;
   const max = Number(a?.max_grade ?? 0);

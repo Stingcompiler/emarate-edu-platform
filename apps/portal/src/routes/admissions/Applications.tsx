@@ -6,7 +6,7 @@ import { Link } from "react-router";
 import { Pager, useServerPages } from "../../components/Pager";
 import { PortalShell } from "../../components/PortalShell";
 import { FilterBar, Card, Chip, EmptyState, StatusBadge } from "../../components/ui";
-import { api } from "../../lib/api";
+import { api, ok } from "../../lib/api";
 import { when, count, N } from "../../lib/format";
 import { STATUS_LABEL, STATUS_TONE } from "../../lib/visitor";
 
@@ -26,7 +26,7 @@ export function Applications() {
   const summary = useQuery({
     queryKey: ["applications", "summary"],
     queryFn: async () =>
-      (await api.GET("/api/v1/applications/summary")).data as
+      ok(await api.GET("/api/v1/applications/summary")) as
         | {
             by_status: Record<string, number>;
             by_department: Record<string, number>;
@@ -35,20 +35,18 @@ export function Applications() {
         | undefined,
   });
   // 10 per page from the server; the filters go with the request.
-  const list = useServerPages(
-    ["applications", status, search],
-    async (page) =>
-      (
-        await api.GET("/api/v1/applications", {
-          params: {
-            query: {
-              ...(status ? { status: status as never } : {}),
-              ...(search ? { search } : {}),
-              page,
-            },
+  const list = useServerPages(["applications", status, search], async (page) =>
+    ok(
+      await api.GET("/api/v1/applications", {
+        params: {
+          query: {
+            ...(status ? { status: status as never } : {}),
+            ...(search ? { search } : {}),
+            page,
           },
-        })
-      ).data,
+        },
+      }),
+    ),
   );
   const s = summary.data;
   const total = s ? Object.values(s.by_status).reduce((a, b) => a + b, 0) : 0;
