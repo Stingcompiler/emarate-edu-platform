@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 
 import { PortalShell } from "../../components/PortalShell";
 import {
+  FilterBar,
   Button,
   Card,
   Chip,
@@ -25,17 +26,19 @@ export function SiteMedia() {
   const [tab, setTab] = useState<Tab>("media");
   return (
     <PortalShell title="الوسائط والقوائم والإعدادات" back={{ label: "محتوى الموقع", to: "/site" }}>
-      <div className="flex gap-2">
-        <Chip active={tab === "media"} onClick={() => setTab("media")}>
-          الوسائط
-        </Chip>
-        <Chip active={tab === "menus"} onClick={() => setTab("menus")}>
-          القوائم
-        </Chip>
-        <Chip active={tab === "settings"} onClick={() => setTab("settings")}>
-          إعدادات الموقع
-        </Chip>
-      </div>
+      <FilterBar>
+        <div className="flex gap-2">
+          <Chip active={tab === "media"} onClick={() => setTab("media")}>
+            الوسائط
+          </Chip>
+          <Chip active={tab === "menus"} onClick={() => setTab("menus")}>
+            القوائم
+          </Chip>
+          <Chip active={tab === "settings"} onClick={() => setTab("settings")}>
+            إعدادات الموقع
+          </Chip>
+        </div>
+      </FilterBar>
       <div className="mt-4">
         {tab === "media" ? <Media /> : tab === "menus" ? <Menus /> : <SiteSettingsForm />}
       </div>

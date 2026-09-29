@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Link, useParams } from "react-router";
 
 import { PortalShell } from "../../components/PortalShell";
-import { Button, Card, Chip, ScrollRegion } from "../../components/ui";
+import { FilterBar, Button, Card, Chip, ScrollRegion } from "../../components/ui";
 import { api } from "../../lib/api";
 import { useMyCourses } from "../../lib/learning";
 import { downloadCsv, initials } from "../../lib/reports";
@@ -84,28 +84,30 @@ export function Students() {
       </div>
       {view === "list" ? (
         <>
-          <input
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            placeholder="بحث بالاسم أو الرقم الجامعي"
-            className="mt-3 block min-h-10 w-full rounded-full border border-border-soft bg-surface px-4 text-sm sm:max-w-sm"
-          />
-          <div className="mt-3 flex flex-wrap gap-2">
-            <Chip active={filter === "all"} onClick={() => setFilter("all")}>
-              الكل
-            </Chip>
-            {last && (
-              <Chip active={filter === "missing"} onClick={() => setFilter("missing")}>
-                لم يسلّموا {last.title}
+          <FilterBar>
+            <input
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              placeholder="بحث بالاسم أو الرقم الجامعي"
+              className="mt-3 block min-h-10 w-full rounded-full border border-border-soft bg-surface px-4 text-sm sm:max-w-sm"
+            />
+            <div className="mt-3 flex flex-wrap gap-2">
+              <Chip active={filter === "all"} onClick={() => setFilter("all")}>
+                الكل
               </Chip>
-            )}
-            <Chip active={filter === "low"} onClick={() => setFilter("low")}>
-              تحت 50٪
-            </Chip>
-            <Chip active={filter === "idle"} onClick={() => setFilter("idle")}>
-              بلا أي نشاط
-            </Chip>
-          </div>
+              {last && (
+                <Chip active={filter === "missing"} onClick={() => setFilter("missing")}>
+                  لم يسلّموا {last.title}
+                </Chip>
+              )}
+              <Chip active={filter === "low"} onClick={() => setFilter("low")}>
+                تحت 50٪
+              </Chip>
+              <Chip active={filter === "idle"} onClick={() => setFilter("idle")}>
+                بلا أي نشاط
+              </Chip>
+            </div>
+          </FilterBar>
           <Card className="mt-3 divide-y divide-border-soft">
             {rows.map((s) => (
               <div key={s.public_id} className="flex items-center gap-3 px-4 py-3">

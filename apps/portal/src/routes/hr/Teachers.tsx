@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Link } from "react-router";
 
 import { PortalShell } from "../../components/PortalShell";
-import { Card, Chip, EmptyState } from "../../components/ui";
+import { FilterBar, Card, Chip, EmptyState } from "../../components/ui";
 import { api } from "../../lib/api";
 import { useMe } from "../../lib/auth";
 import { can } from "../../lib/nav";
@@ -133,57 +133,59 @@ export function Teachers() {
       }
       back={can(me.data, "hr.view") ? { label: "الموارد البشرية", to: "/hr" } : undefined}
     >
-      <div className="flex flex-wrap items-center gap-2">
-        {FILTERS.map((f) => (
-          <Chip key={f.key} active={status === f.key} onClick={() => setStatus(f.key)}>
-            {f.label}{" "}
-            {counts && num(f.key ? counts[f.key as keyof typeof counts] : r!.summary.members)}
-          </Chip>
-        ))}
-        <div className="ms-auto">
-          <ExportBar
-            onCsv={csv}
-            snapshot={{ kind: "teachers", term: term ?? r?.term.id, department }}
-          />
+      <FilterBar>
+        <div className="flex flex-wrap items-center gap-2">
+          {FILTERS.map((f) => (
+            <Chip key={f.key} active={status === f.key} onClick={() => setStatus(f.key)}>
+              {f.label}{" "}
+              {counts && num(f.key ? counts[f.key as keyof typeof counts] : r!.summary.members)}
+            </Chip>
+          ))}
+          <div className="ms-auto">
+            <ExportBar
+              onCsv={csv}
+              snapshot={{ kind: "teachers", term: term ?? r?.term.id, department }}
+            />
+          </div>
         </div>
-      </div>
-      <div className="mt-3 flex flex-wrap items-center gap-3">
-        <Picker
-          label="الفصل"
-          value={term ?? r?.term.id}
-          items={terms.data ?? []}
-          name={(t) => t.name_ar}
-          onChange={setTerm}
-        />
-        {collegeWide && (
+        <div className="mt-3 flex flex-wrap items-center gap-3">
           <Picker
-            label="القسم"
-            value={department}
-            items={departments.data ?? []}
-            name={(d) => d.name_ar}
-            onChange={setDepartment}
-            all="الكل"
+            label="الفصل"
+            value={term ?? r?.term.id}
+            items={terms.data ?? []}
+            name={(t) => t.name_ar}
+            onChange={setTerm}
           />
-        )}
-        <label className="flex items-center gap-2 text-xs text-text-muted">
-          الدور
-          <select
-            value={kind}
-            onChange={(e) => setKind(e.target.value)}
-            className="min-h-9 rounded-lg border border-border bg-surface px-2 text-sm text-text"
-          >
-            <option value="">أساتذة + معيدون</option>
-            <option value="teacher">أساتذة</option>
-            <option value="ta">معيدون</option>
-          </select>
-        </label>
-        {r && (
-          <span className="text-xs text-text-muted">
-            الحدود: تصحيح ≤ {count(r.thresholds.grading_days, N.day)} · رفع ≥{" "}
-            {num(r.thresholds.upload_percent)}٪
-          </span>
-        )}
-      </div>
+          {collegeWide && (
+            <Picker
+              label="القسم"
+              value={department}
+              items={departments.data ?? []}
+              name={(d) => d.name_ar}
+              onChange={setDepartment}
+              all="الكل"
+            />
+          )}
+          <label className="flex items-center gap-2 text-xs text-text-muted">
+            الدور
+            <select
+              value={kind}
+              onChange={(e) => setKind(e.target.value)}
+              className="min-h-9 rounded-lg border border-border bg-surface px-2 text-sm text-text"
+            >
+              <option value="">أساتذة + معيدون</option>
+              <option value="teacher">أساتذة</option>
+              <option value="ta">معيدون</option>
+            </select>
+          </label>
+          {r && (
+            <span className="text-xs text-text-muted">
+              الحدود: تصحيح ≤ {count(r.thresholds.grading_days, N.day)} · رفع ≥{" "}
+              {num(r.thresholds.upload_percent)}٪
+            </span>
+          )}
+        </div>
+      </FilterBar>
 
       {!rows.length ? (
         <Card className="mt-4">

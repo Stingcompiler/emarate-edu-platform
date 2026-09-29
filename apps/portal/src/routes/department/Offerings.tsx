@@ -6,7 +6,9 @@ import { PortalShell } from "../../components/PortalShell";
 import {
   Button,
   Card,
+  Chip,
   CodeTile,
+  FilterBar,
   Notice,
   SectionLabel,
   problemMessage,
@@ -91,6 +93,35 @@ export function Offerings() {
   const stats = new Map((report.data?.rows ?? []).map((r) => [r.public_id, r]));
   const teachersList = (members.data ?? []).filter((m) => m.kind === "teacher");
   const tasList = (members.data ?? []).filter((m) => m.kind === "ta");
+  // Search and filters above the table; on large screens they stay under the top bar.
+  const [q, setQ] = useState("");
+  const [filter, setFilter] = useState<keyof typeof FILTERS>("all");
+  const behind = (o: (typeof rows)[number]) => {
+    const s = stats.get(o.public_id);
+    return !!s && s.lectures < s.planned / 2;
+  };
+  const FILTERS = {
+    all: { label: "الكل", test: () => true },
+    teacher: {
+      label: "بلا أستاذ",
+      test: (o: (typeof rows)[number]) => !o.instructors.some((i) => i.role === "teacher"),
+    },
+    ta: {
+      label: "بلا معيد",
+      test: (o: (typeof rows)[number]) => !o.instructors.some((i) => i.role === "ta"),
+    },
+    behind: { label: "محاضرات متأخرة", test: behind },
+  };
+  const needle = q.trim().toLowerCase();
+  const shown = rows.filter(
+    (o) =>
+      FILTERS[filter].test(o) &&
+      (!needle ||
+        o.course_detail.code.toLowerCase().includes(needle) ||
+        o.course_detail.name_ar.includes(q.trim()) ||
+        o.instructors.some((i) => i.user.full_name_ar.includes(q.trim()))),
+  );
+  const manage = can(me.data, "courses.manage") && id && term.data;
   return (
     <PortalShell
       title={`المواد والتعيينات · ${num(rows.length)}`}
@@ -102,6 +133,37 @@ export function Offerings() {
           <Notice>{problemMessage(error)}</Notice>
         </div>
       ) : null}
+      <FilterBar className="mb-3 flex flex-wrap items-center gap-2">
+        <input
+          type="search"
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          placeholder="بحث برمز المادة أو اسمها أو الأستاذ"
+          aria-label="بحث في المواد"
+          className="min-h-10 w-full rounded-full border border-border-soft bg-surface px-4 text-sm sm:max-w-sm sm:flex-1"
+        />
+        <div className="-mx-4 flex gap-2 overflow-x-auto px-4 sm:mx-0 sm:px-0">
+          {(Object.keys(FILTERS) as (keyof typeof FILTERS)[]).map((k) => (
+            <Chip key={k} active={filter === k} onClick={() => setFilter(k)}>
+              {FILTERS[k].label} {num(rows.filter(FILTERS[k].test).length)}
+            </Chip>
+          ))}
+        </div>
+        {manage && (
+          <Button
+            variant="secondary"
+            className="min-h-9 px-3 sm:ms-auto"
+            onClick={() => {
+              const form = document.getElementById("new-offering");
+              form?.scrollIntoView({ block: "center" });
+              form?.querySelector<HTMLInputElement>("input")?.focus({ preventScroll: true });
+            }}
+          >
+            <Plus size={16} aria-hidden />
+            مادة جديدة
+          </Button>
+        )}
+      </FilterBar>
       <Card className="divide-y divide-border-soft">
         <div className="hidden grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)_minmax(0,1fr)_70px_80px] gap-3 bg-surface-alt px-4 py-2 text-xs text-text-muted xl:grid">
           <span>المادة</span>
@@ -110,7 +172,7 @@ export function Offerings() {
           <span>الطلاب</span>
           <span>المحاضرات</span>
         </div>
-        {rows.map((o) => {
+        {shown.map((o) => {
           const teacher = o.instructors.find((i) => i.role === "teacher");
           const ta = o.instructors.find((i) => i.role === "ta");
           const s = stats.get(o.public_id);
@@ -184,11 +246,15 @@ export function Offerings() {
             </div>
           );
         })}
-        {!rows.length && <p className="px-4 py-5 text-sm text-text-muted">لا مواد في هذا الفصل.</p>}
+        {!rows.length ? (
+          <p className="px-4 py-5 text-sm text-text-muted">لا مواد في هذا الفصل.</p>
+        ) : (
+          !shown.length && (
+            <p className="px-4 py-5 text-sm text-text-muted">لا مواد تطابق البحث أو التصفية.</p>
+          )
+        )}
       </Card>
-      {can(me.data, "courses.manage") && id && term.data && (
-        <NewOffering department={id} term={term.data.id} onDone={refresh} />
-      )}
+      {manage && <NewOffering department={id} term={term.data!.id} onDone={refresh} />}
     </PortalShell>
   );
 }
@@ -290,7 +356,7 @@ function NewOffering({
   });
   const input = "min-h-10 rounded-lg border border-border bg-surface px-3 text-sm";
   return (
-    <>
+    <section id="new-offering">
       <SectionLabel>مادة جديدة هذا الفصل</SectionLabel>
       <Card className="grid gap-2 p-4 sm:grid-cols-[110px_minmax(0,1fr)_minmax(0,1fr)_90px_90px_70px_auto]">
         <input
@@ -362,6 +428,6 @@ function NewOffering({
           <Notice>{problemMessage(create.error)}</Notice>
         </div>
       )}
-    </>
+    </section>
   );
 }

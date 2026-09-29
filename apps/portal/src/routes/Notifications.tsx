@@ -5,7 +5,16 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router";
 
 import { PortalShell, useUnreadCount } from "../components/PortalShell";
-import { Button, Card, Chip, EmptyState, SideFigures, SideNote, WithSide } from "../components/ui";
+import {
+  FilterBar,
+  Button,
+  Card,
+  Chip,
+  EmptyState,
+  SideFigures,
+  SideNote,
+  WithSide,
+} from "../components/ui";
 import { api } from "../lib/api";
 import { DAY_LABELS, type DayGroup, dayGroup, when } from "../lib/format";
 import { isBuiltPath } from "../lib/links";
@@ -105,20 +114,22 @@ export function Notifications() {
           </>
         }
       >
-        <div
-          className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 lg:mx-0 lg:px-0"
-          role="toolbar"
-          aria-label="تصفية"
-        >
-          {FILTERS.map(({ key, label }) => (
-            <Chip key={key} active={filter === key} onClick={() => setFilter(key)}>
-              {label}
-              {key === "unread" && unreadCount > 0 && (
-                <span>{unreadCount.toLocaleString("ar")}</span>
-              )}
-            </Chip>
-          ))}
-        </div>
+        <FilterBar>
+          <div
+            className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 lg:mx-0 lg:px-0"
+            role="toolbar"
+            aria-label="تصفية"
+          >
+            {FILTERS.map(({ key, label }) => (
+              <Chip key={key} active={filter === key} onClick={() => setFilter(key)}>
+                {label}
+                {key === "unread" && unreadCount > 0 && (
+                  <span>{unreadCount.toLocaleString("ar")}</span>
+                )}
+              </Chip>
+            ))}
+          </div>
+        </FilterBar>
 
         {list.isPending ? (
           <ListSkeleton />

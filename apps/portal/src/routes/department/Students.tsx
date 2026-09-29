@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 
 import { PortalShell } from "../../components/PortalShell";
-import { Card, Chip, StatusBadge } from "../../components/ui";
+import { FilterBar, Card, Chip, StatusBadge } from "../../components/ui";
 import { api } from "../../lib/api";
 import { useDepartment } from "../../lib/department";
 import { initials, num } from "../../lib/reports";
@@ -49,43 +49,45 @@ export function DepartmentStudents() {
       subtitle={department?.name_ar}
       back={{ label: "لوحة القسم", to: "/department" }}
     >
-      <div className="flex flex-wrap items-center gap-2">
-        <input
-          value={search}
-          onChange={(e) => {
-            setSearch(e.target.value);
-            setPage(1);
-          }}
-          placeholder="بحث بالاسم أو الرقم الجامعي"
-          className="min-h-10 flex-1 rounded-full border border-border-soft bg-surface px-4 text-sm sm:max-w-sm"
-        />
-        {[undefined, 1, 2, 3, 4].map((l) => (
-          <Chip
-            key={l ?? 0}
-            active={level === l}
-            onClick={() => {
-              setLevel(l);
+      <FilterBar>
+        <div className="flex flex-wrap items-center gap-2">
+          <input
+            value={search}
+            onChange={(e) => {
+              setSearch(e.target.value);
               setPage(1);
             }}
-          >
-            {l ? `م${num(l)}` : "كل المستويات"}
-          </Chip>
-        ))}
-      </div>
-      <div className="mt-2 flex flex-wrap gap-2">
-        {["active", "suspended", "graduated", "withdrawn", ""].map((k) => (
-          <Chip
-            key={k || "all"}
-            active={status === k}
-            onClick={() => {
-              setStatus(k);
-              setPage(1);
-            }}
-          >
-            {k ? STATUS[k] : "كل الحالات"}
-          </Chip>
-        ))}
-      </div>
+            placeholder="بحث بالاسم أو الرقم الجامعي"
+            className="min-h-10 flex-1 rounded-full border border-border-soft bg-surface px-4 text-sm sm:max-w-sm"
+          />
+          {[undefined, 1, 2, 3, 4].map((l) => (
+            <Chip
+              key={l ?? 0}
+              active={level === l}
+              onClick={() => {
+                setLevel(l);
+                setPage(1);
+              }}
+            >
+              {l ? `م${num(l)}` : "كل المستويات"}
+            </Chip>
+          ))}
+        </div>
+        <div className="mt-2 flex flex-wrap gap-2">
+          {["active", "suspended", "graduated", "withdrawn", ""].map((k) => (
+            <Chip
+              key={k || "all"}
+              active={status === k}
+              onClick={() => {
+                setStatus(k);
+                setPage(1);
+              }}
+            >
+              {k ? STATUS[k] : "كل الحالات"}
+            </Chip>
+          ))}
+        </div>
+      </FilterBar>
       <div className="mt-4 lg:grid lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start lg:gap-6">
         <div>
           <Card className="divide-y divide-border-soft">

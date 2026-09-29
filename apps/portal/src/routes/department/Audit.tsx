@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 
 import { PortalShell } from "../../components/PortalShell";
-import { Button, Card } from "../../components/ui";
+import { FilterBar, Button, Card } from "../../components/ui";
 import { api } from "../../lib/api";
 import { useMe } from "../../lib/auth";
 import { useDepartment } from "../../lib/department";
@@ -233,20 +233,22 @@ export function Audit() {
           : { label: "لوحة القسم", to: "/department" }
       }
     >
-      <div className="flex flex-wrap items-center gap-2">
-        <input
-          value={search}
-          onChange={(e) => {
-            setSearch(e.target.value);
-            setPage(1);
-          }}
-          placeholder="بحث في السجل (اسم، مادة، طالب…)"
-          className="min-h-10 flex-1 rounded-full border border-border-soft bg-surface px-4 text-sm sm:max-w-md"
-        />
-        <Button variant="secondary" className="min-h-9 px-3" onClick={csv}>
-          تصدير CSV
-        </Button>
-      </div>
+      <FilterBar>
+        <div className="flex flex-wrap items-center gap-2">
+          <input
+            value={search}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setPage(1);
+            }}
+            placeholder="بحث في السجل (اسم، مادة، طالب…)"
+            className="min-h-10 flex-1 rounded-full border border-border-soft bg-surface px-4 text-sm sm:max-w-md"
+          />
+          <Button variant="secondary" className="min-h-9 px-3" onClick={csv}>
+            تصدير CSV
+          </Button>
+        </div>
+      </FilterBar>
       <div className="mt-4 space-y-4">
         {groups.map(([day, items]) => (
           <section key={day}>

@@ -6,6 +6,7 @@ import { type FormEvent, useState } from "react";
 import { PortalShell } from "../../components/PortalShell";
 import {
   Button,
+  FilterBar,
   Card,
   CodeTile,
   EmptyState,
@@ -50,19 +51,21 @@ export function ResultSearch() {
       title="بحث في النتائج"
       subtitle="التعديل لا يُنفَّذ مباشرة — يُرسل طلبًا لأمين الشؤون العلمية."
     >
-      <form onSubmit={search} className="flex gap-2 lg:max-w-[calc(100%-380px-1.5rem)]">
-        <input
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="الرقم الجامعي أو الاسم"
-          dir="auto"
-          className="min-h-11 flex-1 rounded-lg border border-border bg-surface px-3 text-sm"
-        />
-        <Button type="submit" disabled={!query.trim()}>
-          <SearchIcon size={18} aria-hidden />
-          بحث
-        </Button>
-      </form>
+      <FilterBar>
+        <form onSubmit={search} className="flex gap-2 lg:max-w-[calc(100%-380px-1.5rem)]">
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="الرقم الجامعي أو الاسم"
+            dir="auto"
+            className="min-h-11 flex-1 rounded-lg border border-border bg-surface px-3 text-sm"
+          />
+          <Button type="submit" disabled={!query.trim()}>
+            <SearchIcon size={18} aria-hidden />
+            بحث
+          </Button>
+        </form>
+      </FilterBar>
 
       {submitted && !results.isPending && !rows.length && (
         <Card className="mt-4">
