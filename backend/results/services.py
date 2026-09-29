@@ -191,6 +191,9 @@ def decide_correction(
         raise PermissionDenied()
     if correction.status != ResultCorrection.Status.PENDING:
         raise Conflict(gettext("Already decided."), code="already_decided")
+    if not approve and not note.strip():
+        # The results officer must learn why (review 2026-09-29).
+        raise ValidationError({"note": [gettext("Give the reason for rejecting.")]})
     result = correction.result
     with transaction.atomic():
         correction.status = (

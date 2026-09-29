@@ -126,6 +126,13 @@ export function navFor(me: Me | null | undefined, unread: number): NavItem[] {
     items.push({ label: "الرئيسية", to: "/academic", icon: LayoutDashboard });
   if (hasRole(me, "student_affairs"))
     items.push({ label: "الرئيسية", to: "/affairs", icon: LayoutDashboard });
+  // Admissions staff start on admissions: home, then applications, before notifications —
+  // so «الطلبات» is a tab on the phone (review 2026-09-29).
+  const admissions = can(me, "admissions.review");
+  if (admissions) {
+    items.push({ label: "القبول", short: "الرئيسية", to: "/registrar", icon: LayoutDashboard });
+    items.push({ label: "الطلبات", to: "/applications", icon: FileText, end: false });
+  }
   if (me?.student || hasRole(me, "teacher", "ta"))
     items.push({ label: "موادي", to: "/courses", icon: BookOpen, end: false });
   if (me?.student) items.push({ label: "المهام", to: "/tasks", icon: ListChecks });
@@ -158,9 +165,7 @@ export function navFor(me: Me | null | undefined, unread: number): NavItem[] {
     items.push({ label: "النتائج", to: "/results", icon: Award });
     items.push({ label: "اللوائح", to: "/regulations", icon: ScrollText });
   }
-  if (can(me, "admissions.review"))
-    items.push({ label: "القبول", to: "/registrar", icon: LayoutDashboard });
-  if (can(me, "admissions.view"))
+  if (!admissions && can(me, "admissions.view"))
     items.push({ label: "الطلبات", to: "/applications", icon: FileText, end: false });
   if (can(me, "students.import")) {
     items.push({ label: "سجل الطلاب", to: "/students", icon: Users, end: false });

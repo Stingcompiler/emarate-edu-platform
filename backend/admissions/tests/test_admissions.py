@@ -407,6 +407,14 @@ def test_claim_and_assign(
     summary = api(head).get("/api/v1/applications/summary").data
     assert summary["by_status"] == {"submitted": 1}
     assert summary["by_registrar"] == {str(registrar.public_id): 1}
+    # The «غير موزعة» filter and what the distribute control needs (review 2026-09-29).
+    staff = api(head)
+    assert (
+        staff.get("/api/v1/applications", {"assigned_registrar__isnull": "true"}).data["count"] == 0
+    )
+    detail = staff.get(url).data
+    assert detail["assigned_registrar_id"] == str(registrar.public_id)
+    assert detail["department_id"] == intake.program.department_id
     # The users list filters by role on the server (review 2026-09-29, P3).
     listed = api(head).get("/api/v1/users", {"role": "registrar"}).data["results"]
     assert str(registrar.public_id) in {u["public_id"] for u in listed}

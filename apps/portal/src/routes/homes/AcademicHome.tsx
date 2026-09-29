@@ -113,7 +113,8 @@ export function AcademicHome() {
                   .slice(0, 5)
                   .map((o) => o.course_detail.code)
                   .join(" · "),
-                to: "/department/courses",
+                // Filtered; the department switch on that page moves between departments.
+                to: "/department/courses?filter=teacher",
                 tone: "info",
               },
             ]}

@@ -28,16 +28,17 @@ export function RegistrarHome() {
           }
         | undefined,
   });
+  // Unassigned and «mine», filtered and counted by the server; a few shown here.
   const unassigned = useQuery({
     queryKey: ["applications", "unassigned"],
     queryFn: async () =>
-      (
-        ok(
-          await api.GET("/api/v1/applications", {
-            params: { query: { ...ALL, status: "submitted" as never } },
-          }),
-        )?.results ?? []
-      ).filter((a) => !a.assigned_registrar_name),
+      ok(
+        await api.GET("/api/v1/applications", {
+          params: {
+            query: { status: "submitted" as never, assigned_registrar__isnull: true, page_size: 6 },
+          },
+        }),
+      ) ?? null,
   });
   const mine = useQuery({
     queryKey: ["applications", "mine", me.data?.public_id],
@@ -45,7 +46,7 @@ export function RegistrarHome() {
     queryFn: async () =>
       ok(
         await api.GET("/api/v1/applications", {
-          params: { query: { ...ALL, assigned_registrar__public_id: me.data!.public_id } },
+          params: { query: { assigned_registrar__public_id: me.data!.public_id, page_size: 5 } },
         }),
       ) ?? null,
   });
@@ -80,20 +81,20 @@ export function RegistrarHome() {
     {
       n: summary.data?.unassigned ?? 0,
       title: "طلبات غير موزعة",
-      meta: "تولَّها أو وزّعها على مسجلي الأقسام",
-      to: "/applications",
+      meta: head ? "تولَّها أو وزّعها على مسجلي الأقسام" : "تولَّ ما يخص أقسامك لتراجعه",
+      to: "/applications?who=unassigned",
     },
     {
       n: s.eligible ?? 0,
       title: "مؤهلة بانتظار القرار النهائي",
       meta: head ? "القرار لك أو للمسجلين إن فُوّض" : "يقررها مسؤول المسجلين",
-      to: "/applications",
+      to: "/applications?status=eligible",
     },
     {
       n: accepted,
       title: "مقبولون لم يُحوَّلوا إلى طلاب",
       meta: "تحويل + رقم جامعي + رابط تفعيل",
-      to: "/applications",
+      to: "/applications?status=accepted",
     },
     ...(head
       ? [
@@ -128,7 +129,7 @@ export function RegistrarHome() {
         ].map((k) => (
           <Link
             key={k}
-            to="/applications"
+            to={`/applications?status=${k}`}
             className="rounded-2xl bg-surface p-3 text-center shadow-sm hover:bg-surface-alt"
           >
             <p className="text-xl font-bold text-text">{num(s[k] ?? 0)}</p>
@@ -157,9 +158,9 @@ export function RegistrarHome() {
             ))}
             {!inbox.length && <p className="px-4 py-4 text-sm text-text-muted">لا شيء بانتظارك.</p>}
           </Card>
-          <SectionLabel>غير مُتولّى · {num(unassigned.data?.length ?? 0)}</SectionLabel>
+          <SectionLabel>غير مُتولّى · {num(unassigned.data?.count ?? 0)}</SectionLabel>
           <Card className="divide-y divide-border-soft">
-            {(unassigned.data ?? []).slice(0, 6).map((a) => (
+            {(unassigned.data?.results ?? []).map((a) => (
               <div key={a.public_id} className="flex items-center gap-3 px-4 py-3">
                 <span className="grid size-9 shrink-0 place-items-center rounded-full bg-primary-soft text-xs font-semibold text-primary-700">
                   {initials(a.full_name)}
@@ -173,22 +174,41 @@ export function RegistrarHome() {
                 </Link>
                 <Button
                   variant="secondary"
-                  className="min-h-8 px-3 text-xs"
+                  className="min-h-9 px-3 text-xs"
                   onClick={() => claim.mutate(a.public_id)}
+                  disabled={claim.isPending}
                 >
                   تولّي
                 </Button>
               </div>
             ))}
-            {!unassigned.data?.length && (
+            {!unassigned.data?.count && (
               <p className="px-4 py-4 text-sm text-text-muted">كل الطلبات موزعة.</p>
             )}
           </Card>
         </div>
         <aside className="mt-6 space-y-4 lg:mt-0">
-          <Card className="p-4">
-            <p className="text-3xl font-bold text-primary">{num(mine.data?.count ?? 0)}</p>
-            <p className="text-sm text-text-muted">طلبات أتولاها</p>
+          {/* «طلباتي — تحتاج إجراء» (board RegistrarHome). */}
+          <Card className="divide-y divide-border-soft">
+            <Link
+              to="/applications?who=mine"
+              className="flex items-baseline gap-2 p-4 hover:bg-surface-alt"
+            >
+              <span className="text-3xl font-bold text-primary">{num(mine.data?.count ?? 0)}</span>
+              <span className="text-sm text-text-muted">طلبات أتولاها</span>
+            </Link>
+            {(mine.data?.results ?? []).map((a) => (
+              <Link
+                key={a.public_id}
+                to={`/applications/${a.public_id}`}
+                className="block px-4 py-3 text-sm hover:bg-surface-alt"
+              >
+                <b className="block truncate text-text">{a.full_name}</b>
+                <span className="text-xs text-text-muted">
+                  <bdi>{a.reference_no}</bdi> · {STATUS_LABEL[a.status] ?? a.status}
+                </span>
+              </Link>
+            ))}
           </Card>
           {head && (
             <>

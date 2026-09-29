@@ -1,7 +1,7 @@
 import type { Schemas } from "@ecst/api";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Pencil, Plus, Trash2, X } from "lucide-react";
-import { Link } from "react-router";
+import { Link, useSearchParams } from "react-router";
 import { useState } from "react";
 
 import { DepartmentSwitch } from "../../components/DepartmentSwitch";
@@ -114,7 +114,18 @@ export function Offerings() {
   const tasList = (members.data ?? []).filter((m) => m.kind === "ta");
   // Search and filters above the table; on large screens they stay under the top bar.
   const [q, setQ] = useState("");
-  const [filter, setFilter] = useState<keyof typeof FILTERS>("all");
+  // ?filter= (teacher | ta | behind), so the dashboard's «بلا أستاذ» row opens this list filtered.
+  const [params, setParams] = useSearchParams();
+  const fromUrl = params.get("filter");
+  const filter = (
+    fromUrl === "teacher" || fromUrl === "ta" || fromUrl === "behind" ? fromUrl : "all"
+  ) as keyof typeof FILTERS;
+  const setFilter = (key: keyof typeof FILTERS) => {
+    const next = new URLSearchParams(params);
+    if (key === "all") next.delete("filter");
+    else next.set("filter", key);
+    setParams(next, { replace: true });
+  };
   const behind = (o: (typeof rows)[number]) => {
     const s = stats.get(o.public_id);
     return !!s && s.lectures < s.planned / 2;

@@ -88,7 +88,7 @@ export function DepartmentDashboard() {
         .map((o) => o.course_detail.code)
         .slice(0, 4)
         .join(" · "),
-      to: "/department/courses",
+      to: "/department/courses?filter=teacher",
     },
     k?.grading_days != null &&
       slow.length && {

@@ -125,8 +125,13 @@ function CorrectionRow({ correction: c, approver }: { correction: Correction; ap
               c.status === "pending" ? "بانتظار الموافقة" : (STATUS_LABELS[c.status] ?? c.status)
             }
           />
-          <p className="mt-1 text-sm font-semibold text-text" dir="ltr">
-            {oldScore} → {newScore}
+          <p className="mt-1 text-sm font-semibold">
+            <s className="text-text-muted">{oldScore}</s>
+            <span aria-hidden> ← </span>
+            <span className="text-primary">{newScore}</span>
+            <span className="sr-only">
+              من {oldScore} إلى {newScore}
+            </span>
           </p>
         </div>
       </div>
@@ -135,7 +140,8 @@ function CorrectionRow({ correction: c, approver }: { correction: Correction; ap
           <input
             value={note}
             onChange={(e) => setNote(e.target.value)}
-            placeholder="ملاحظة القرار (اختيارية)"
+            placeholder="ملاحظة القرار (إلزامية عند الرفض)"
+            aria-label="ملاحظة القرار"
             className="min-h-10 flex-1 rounded-lg border border-border bg-surface px-3 text-sm"
           />
           <Button onClick={() => decide.mutate(true)} disabled={decide.isPending}>
@@ -144,7 +150,8 @@ function CorrectionRow({ correction: c, approver }: { correction: Correction; ap
           <Button
             variant="secondary"
             onClick={() => decide.mutate(false)}
-            disabled={decide.isPending}
+            disabled={decide.isPending || !note.trim()}
+            title={note.trim() ? undefined : "اكتب سبب الرفض أولًا"}
           >
             رفض
           </Button>
