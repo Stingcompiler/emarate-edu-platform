@@ -824,3 +824,16 @@ msgstr "تاريخ الميلاد: استخدم YYYY-MM-DD أو DD/MM/YYYY"
 
 msgid "university_number: duplicated in this file"
 msgstr "الرقم الجامعي: مكرر في هذا الملف"
+
+msgid "This number is already in use."
+msgstr "هذا الرقم الجامعي مستخدم لطالب آخر."
+
+msgid "The student has activated an account with it."
+msgstr "فعّل الطالب حسابه بهذا الرقم؛ لا يتغير بعد التفعيل."
+
+msgid ""
+"This student has an account or academic history; it cannot be deleted. "
+"Ask student affairs to change the status instead."
+msgstr ""
+"لهذا الطالب حساب أو سجل أكاديمي فلا يُحذف. اطلب من شؤون الطلاب تغيير حالته "
+"بدلًا من ذلك."

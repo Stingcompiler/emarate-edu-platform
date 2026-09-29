@@ -1,6 +1,40 @@
-# Handoff — sticky filters on desktop (feat/sticky-filters) — 2026-09-29
+# Handoff — department manager runs only their department (feat/department-scope) — 2026-09-29
 
 ## Latest (2026-09-29)
+- **#42 sticky filters: merged.**
+- **`feat/department-scope`** (owner: «department manager only manage his department, he shouldn't see
+  anything about other departments, full control… crud, lectures, courses, students»). docs/03 is now v2.2.
+  - **Audit recipe:** a scratch probe (Django test client, `force_login` the IT manager on a copy of
+    `e2e.sqlite3`) called every `/api/v1` GET and searched each response for other departments' names,
+    course codes, programs, students and staff. It also tried `?department=<other>` and other departments'
+    object ids.
+    - Leaks found: `/departments`, `/programs` (list and detail) and `/intakes`.
+    - Every other endpoint was already scoped.
+  - **Fix:** structure viewsets are scoped for department roles (registrar, manager, supervisor);
+    intakes by `admissions.view` scope. The teachers directory (search to add a teacher to the department)
+    stays college-wide by design.
+  - **Students:** new capabilities `students.manage` (admin, head registrar, manager, supervisor) and
+    `students.delete` (admin, manager).
+    - `POST` / `PATCH` / `DELETE /api/v1/students` go through `students/services.py`, which audits
+      every write. A blank number is issued with `issue_university_number` (moved there from admissions).
+    - The number is locked once the student has an account.
+    - Delete is refused (409) when the record has an account, enrolments, results or exam attempts.
+    - Status changes stay with student affairs.
+  - **Course space:** `/me/courses?offering=<id>` returns one course with `my_role`:
+    - `manager` for department managers and supervisors (with `learning.manage`);
+    - `viewer` for academic affairs.
+
+    `?managed=1` adds the department's current-term courses to the pickers for new exams, live sessions
+    and announcements. The portal hooks are `useCourse` and `isCourseStaff` in `lib/learning.ts`.
+  - **Portal:**
+    - `/department/courses`: course link, in-place edit (code, name, hours, level, section), delete
+      (the offering, then the course if unused).
+    - `/department/lectures`: + lecture per course, edit, publish/unpublish.
+    - `/department/students`: add, edit and delete in the side panel.
+  - **Verified:**
+    - e2e scan of the manager's pages found none of the other departments' names;
+    - add, edit and delete flows at 1280 and 390;
+    - backend tests pass on SQLite (691) and Postgres (690, 1 SQLite-only skip).
 - **#39 motion, #40 sign-in redesign, #41 shell + pagination: merged.**
   - #41: the desktop top bar and sidebar are sticky; the API pages 10 items at a time (`core/pagination.py`);
     the portal uses `components/Pager.tsx` (`useServerPages`, `useLocalPages`, `ALL` for whole-set reads);

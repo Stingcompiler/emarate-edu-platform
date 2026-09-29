@@ -19,8 +19,10 @@ import { api } from "../../lib/api";
 export function LiveNew() {
   const navigate = useNavigate();
   const courses = useQuery({
-    queryKey: ["me", "courses"],
-    queryFn: async () => (await api.GET("/api/v1/me/courses")).data ?? [],
+    // Courses taught plus, for a department manager/supervisor, the department's courses.
+    queryKey: ["me", "courses", "managed"],
+    queryFn: async () =>
+      (await api.GET("/api/v1/me/courses", { params: { query: { managed: true } } })).data ?? [],
   });
   const teaching = (courses.data ?? []).filter((c) => c.my_role !== "student");
   const [offering, setOffering] = useState("");

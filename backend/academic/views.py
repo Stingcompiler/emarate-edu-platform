@@ -273,12 +273,29 @@ class EnrollmentViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewse
 
 
 class MyCoursesView(APIView):
-    """Current-term courses for the signed-in student (enrolled) or teacher/TA (teaching)."""
+    """Current-term courses for the signed-in student (enrolled) or teacher/TA (teaching).
+
+    ``?managed=1`` adds every current-term course of the departments the caller runs.
+    ``?offering=<id>`` returns that one course (any term) as the caller sees it. A
+    department manager or supervisor gets every course of their department with
+    ``my_role = "manager"``, so the course space opens for them with full control
+    (owner 2026-09-29); read-only department roles get ``"viewer"``. Anything else
+    outside the caller's courses is an empty list.
+    """
 
     permission_classes = [IsAuthenticated]
 
-    @extend_schema(responses=MyCourseSerializer(many=True), tags=["me"])
+    @extend_schema(
+        responses=MyCourseSerializer(many=True),
+        tags=["me"],
+        parameters=[
+            OpenApiParameter("offering", int, required=False),
+            OpenApiParameter("managed", bool, required=False),
+        ],
+    )
     def get(self, request):
+        if request.query_params.get("offering"):
+            return self._one(request, request.query_params["offering"])
         term = Term.current()
         if term is None:
             return Response([])
@@ -299,7 +316,51 @@ class MyCoursesView(APIView):
         for offering in base.filter(pk__in=teaching):
             offering.my_role = teaching[offering.pk]
             courses.append(offering)
+        if request.query_params.get("managed") in ("1", "true"):
+            # Course pickers (new exam, live session, announcement): add every course of
+            # the departments the user runs, as "manager".
+            scope = rbac.scope_for(request.user, "learning.manage")
+            managed = scope.filter(base, "course__department").exclude(pk__in=teaching)
+            for offering in managed.order_by("course__code", "section"):
+                offering.my_role = "manager"
+                courses.append(offering)
         return Response(MyCourseSerializer(courses, many=True).data)
+
+    def _one(self, request, offering_id: str):
+        try:
+            pk = int(offering_id)
+        except ValueError:
+            return Response([])
+        offering = (
+            CourseOffering.objects.filter(pk=pk)
+            .select_related("course", "term")
+            .prefetch_related(_INSTRUCTORS)
+            .first()
+        )
+        if offering is None:
+            return Response([])
+        user = request.user
+        role = (
+            OfferingInstructor.objects.filter(offering=offering, user=user)
+            .values_list("role", flat=True)
+            .first()
+        )
+        department = offering.course.department_id
+        if role is None and rbac.can(user, "learning.manage", department):
+            role = "manager"
+        if (
+            role is None
+            and Enrollment.objects.filter(
+                offering=offering, student_record__user=user, status=Enrollment.Status.ACTIVE
+            ).exists()
+        ):
+            role = "student"
+        if role is None and rbac.can(user, "learning.view", department):
+            role = "viewer"
+        if role is None:
+            return Response([])
+        offering.my_role = role
+        return Response(MyCourseSerializer([offering], many=True).data)
 
 
 @extend_schema(tags=["academic"])

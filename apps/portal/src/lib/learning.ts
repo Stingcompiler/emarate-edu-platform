@@ -66,6 +66,25 @@ export function useMyCourses() {
   });
 }
 
+/**
+ * One course as the signed-in user sees it: a course they teach or study, or — for a
+ * department manager/supervisor — any course of their department (`my_role: "manager"`,
+ * owner 2026-09-29). `null` when the course is outside the user's reach.
+ */
+export function useCourse(offering?: number) {
+  return useQuery({
+    queryKey: ["me", "courses", offering],
+    enabled: !!offering,
+    queryFn: async () =>
+      (await api.GET("/api/v1/me/courses", { params: { query: { offering } } })).data?.[0] ?? null,
+  });
+}
+
+/** Teaching the course or running its department — not a student, not read-only. */
+export function isCourseStaff(course?: { my_role: string } | null): boolean {
+  return !!course && course.my_role !== "student" && course.my_role !== "viewer";
+}
+
 export function useAssignments(offering?: number) {
   return useQuery({
     queryKey: ["assignments", offering ?? "all"],

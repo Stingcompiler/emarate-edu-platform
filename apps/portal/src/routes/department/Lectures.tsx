@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Trash2 } from "lucide-react";
+import { Eye, EyeOff, Pencil, Plus, Trash2 } from "lucide-react";
 import { Link } from "react-router";
 
 import { PortalShell } from "../../components/PortalShell";
@@ -12,7 +12,11 @@ import { useLectures } from "../../lib/learning";
 import { can } from "../../lib/nav";
 import { num } from "../../lib/reports";
 
-/** «المحاضرات»: the department's lectures by course with publish state; delete is manager-only. */
+/**
+ * «المحاضرات»: the department's lectures by course with publish state. The manager and
+ * supervisor add, edit and publish lectures in every course of the department; delete is
+ * manager-only (owner 2026-09-29: full control of the department).
+ */
 export function DepartmentLectures() {
   const me = useMe();
   const client = useQueryClient();
@@ -30,6 +34,17 @@ export function DepartmentLectures() {
     onSuccess: () => client.invalidateQueries({ queryKey: ["lectures"] }),
   });
   const canDelete = can(me.data, "learning.delete");
+  const canManage = can(me.data, "learning.manage");
+  const publish = useMutation({
+    mutationFn: async ({ publicId, on }: { publicId: string; on: boolean }) => {
+      const path = { params: { path: { public_id: publicId } } };
+      const { error, response } = on
+        ? await api.POST("/api/v1/lectures/{public_id}/publish", path)
+        : await api.POST("/api/v1/lectures/{public_id}/unpublish", path);
+      if (!response.ok) throw error;
+    },
+    onSuccess: () => client.invalidateQueries({ queryKey: ["lectures"] }),
+  });
   const total = (lectures.data ?? []).filter((l) =>
     (offerings.data ?? []).some((o) => o.id === l.offering),
   );
@@ -47,12 +62,26 @@ export function DepartmentLectures() {
           const [top, bottom] = splitCode(o.course_detail.code);
           return (
             <section key={o.id}>
-              <SectionLabel>
-                <span className="inline-flex items-center gap-2">
-                  <CodeTile top={top} bottom={bottom} /> {o.course_detail.name_ar} ·{" "}
-                  {num(mine.filter((l) => l.is_published).length)}/{num(mine.length)}
-                </span>
-              </SectionLabel>
+              <div className="flex items-center gap-2">
+                <SectionLabel>
+                  <Link
+                    to={`/courses/${o.id}`}
+                    className="inline-flex items-center gap-2 hover:text-primary"
+                  >
+                    <CodeTile top={top} bottom={bottom} /> {o.course_detail.name_ar} ·{" "}
+                    {num(mine.filter((l) => l.is_published).length)}/{num(mine.length)}
+                  </Link>
+                </SectionLabel>
+                {canManage && (
+                  <Link
+                    to={`/lectures/new?offering=${o.id}`}
+                    className="ms-auto inline-flex min-h-9 items-center gap-1 rounded-full px-3 text-sm font-semibold text-primary hover:bg-surface-alt"
+                  >
+                    <Plus size={15} aria-hidden />
+                    محاضرة
+                  </Link>
+                )}
+              </div>
               <Card className="divide-y divide-border-soft">
                 {mine.map((l) => (
                   <div key={l.public_id} className="flex items-center gap-3 px-4 py-2.5 text-sm">
@@ -72,6 +101,32 @@ export function DepartmentLectures() {
                       status={l.is_published ? "published" : "draft"}
                       label={l.is_published ? "منشورة" : "مسودة"}
                     />
+                    {canManage && (
+                      <>
+                        <button
+                          type="button"
+                          aria-label={l.is_published ? "إلغاء نشر المحاضرة" : "نشر المحاضرة"}
+                          title={l.is_published ? "إلغاء النشر" : "نشر"}
+                          onClick={() =>
+                            publish.mutate({ publicId: l.public_id, on: !l.is_published })
+                          }
+                          className="grid size-8 place-items-center rounded-full text-text-muted hover:bg-surface-alt hover:text-primary"
+                        >
+                          {l.is_published ? (
+                            <EyeOff size={15} aria-hidden />
+                          ) : (
+                            <Eye size={15} aria-hidden />
+                          )}
+                        </button>
+                        <Link
+                          to={`/lectures/${l.public_id}/edit`}
+                          aria-label="تعديل المحاضرة"
+                          className="grid size-8 place-items-center rounded-full text-text-muted hover:bg-surface-alt hover:text-primary"
+                        >
+                          <Pencil size={15} aria-hidden />
+                        </Link>
+                      </>
+                    )}
                     {canDelete && (
                       <button
                         type="button"

@@ -35,7 +35,11 @@ class CollegeViewSet(_StructureViewSet):
 
 
 class DepartmentViewSet(_StructureViewSet):
+    """Department roles (registrar, manager, supervisor) see only their departments;
+    college-wide roles see all (owner 2026-09-29: nothing about other departments)."""
+
     queryset = Department.objects.select_related("college")
+    department_lookup = "pk"
     serializer_class = DepartmentSerializer
     audit_name = "department"
     filterset_fields = ["college", "is_active"]
@@ -43,7 +47,10 @@ class DepartmentViewSet(_StructureViewSet):
 
 
 class ProgramViewSet(_StructureViewSet):
+    """Scoped like departments: a department role sees its departments' programs."""
+
     queryset = Program.objects.select_related("department")
+    department_lookup = "department"
     serializer_class = ProgramSerializer
     audit_name = "program"
     filterset_fields = ["department", "degree", "is_active"]

@@ -6,14 +6,14 @@ import { Link, useParams } from "react-router";
 import { PortalShell } from "../../components/PortalShell";
 import { FilterBar, Button, Card, Chip, ScrollRegion } from "../../components/ui";
 import { api } from "../../lib/api";
-import { useMyCourses } from "../../lib/learning";
+import { useCourse } from "../../lib/learning";
 import { downloadCsv, initials } from "../../lib/reports";
 
 /** Boards: TeacherStudents + TeacherGradebook (phone); desktop derived — the gradebook as a table. */
 export function Students() {
   const { id = "" } = useParams();
   const offering = Number(id);
-  const course = useMyCourses().data?.find((c) => c.offering_id === offering);
+  const course = useCourse(offering).data;
   const book = useQuery({
     queryKey: ["gradebook", offering],
     queryFn: async () =>

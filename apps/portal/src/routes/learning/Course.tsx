@@ -21,7 +21,8 @@ import {
   taskState,
   useAssignments,
   useLectures,
-  useMyCourses,
+  useCourse,
+  isCourseStaff,
 } from "../../lib/learning";
 import { ALL } from "../../components/Pager";
 
@@ -36,9 +37,8 @@ const TABS = [
 export function Course() {
   const { id = "" } = useParams();
   const offering = Number(id);
-  const courses = useMyCourses();
-  const course = courses.data?.find((c) => c.offering_id === offering);
-  const staff = !!course && course.my_role !== "student";
+  const course = useCourse(offering).data;
+  const staff = isCourseStaff(course);
   const lectures = useLectures(offering);
   const assignments = useAssignments(offering);
   const exams = useQuery({

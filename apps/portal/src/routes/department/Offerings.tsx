@@ -1,5 +1,7 @@
+import type { Schemas } from "@ecst/api";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Plus, X } from "lucide-react";
+import { Pencil, Plus, Trash2, X } from "lucide-react";
+import { Link } from "react-router";
 import { useState } from "react";
 
 import { PortalShell } from "../../components/PortalShell";
@@ -48,6 +50,21 @@ export function Offerings() {
   const canRemove = can(me.data, "membership.remove");
   const [error, setError] = useState<unknown>(null);
   const refresh = () => client.invalidateQueries({ queryKey: ["offerings"] });
+  const canDelete = can(me.data, "courses.delete");
+  const [editing, setEditing] = useState<number | null>(null);
+  const removeOffering = useMutation({
+    mutationFn: async (o: { id: number; course: number }) => {
+      const { error, response } = await api.DELETE("/api/v1/offerings/{id}", {
+        params: { path: { id: o.id } },
+      });
+      if (!response.ok) throw error;
+      // The catalogue course goes too when no other term or section uses it; otherwise the
+      // server refuses (in use) and it stays.
+      await api.DELETE("/api/v1/courses/{id}", { params: { path: { id: o.course } } });
+    },
+    onSuccess: refresh,
+    onError: setError,
+  });
   const assign = useMutation({
     mutationFn: async ({
       offering,
@@ -165,12 +182,13 @@ export function Offerings() {
         )}
       </FilterBar>
       <Card className="divide-y divide-border-soft">
-        <div className="hidden grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)_minmax(0,1fr)_70px_80px] gap-3 bg-surface-alt px-4 py-2 text-xs text-text-muted xl:grid">
+        <div className="hidden grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)_minmax(0,1fr)_70px_80px_72px] gap-3 bg-surface-alt px-4 py-2 text-xs text-text-muted xl:grid">
           <span>المادة</span>
           <span>الأستاذ</span>
           <span>المعيد</span>
           <span>الطلاب</span>
           <span>المحاضرات</span>
+          <span className="sr-only">إجراءات</span>
         </div>
         {shown.map((o) => {
           const teacher = o.instructors.find((i) => i.role === "teacher");
@@ -180,12 +198,17 @@ export function Offerings() {
           return (
             <div
               key={o.id}
-              className="grid gap-3 px-4 py-3 text-sm xl:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)_minmax(0,1fr)_70px_80px] xl:items-center"
+              className="grid gap-3 px-4 py-3 text-sm xl:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)_minmax(0,1fr)_70px_80px_72px] xl:items-center"
             >
               <span className="flex items-center gap-3">
                 <CodeTile top={top} bottom={bottom} />
                 <span className="min-w-0">
-                  <b className="block truncate text-text">{o.course_detail.name_ar}</b>
+                  <Link
+                    to={`/courses/${o.id}`}
+                    className="block truncate font-bold text-text hover:text-primary"
+                  >
+                    {o.course_detail.name_ar}
+                  </Link>
                   <span className="text-xs text-text-muted">
                     شعبة <bdi>{o.section}</bdi> · المستوى {num(o.course_detail.default_level ?? 1)}
                   </span>
@@ -243,6 +266,42 @@ export function Offerings() {
                 {s ? `${num(s.lectures)}/${num(s.planned)}` : "—"}
                 <span className="xl:hidden"> محاضرات</span>
               </span>
+              <span className="flex items-center gap-1 xl:justify-end">
+                {manage && (
+                  <button
+                    type="button"
+                    aria-label={`تعديل ${o.course_detail.name_ar}`}
+                    aria-expanded={editing === o.id}
+                    onClick={() => setEditing(editing === o.id ? null : o.id)}
+                    className="grid size-9 place-items-center rounded-full text-text-muted hover:bg-surface-alt hover:text-primary"
+                  >
+                    <Pencil size={15} aria-hidden />
+                  </button>
+                )}
+                {canDelete && (
+                  <button
+                    type="button"
+                    aria-label={`حذف ${o.course_detail.name_ar}`}
+                    onClick={() =>
+                      window.confirm(
+                        `حذف «${o.course_detail.name_ar}» (شعبة ${o.section}) من هذا الفصل؟`,
+                      ) && removeOffering.mutate({ id: o.id, course: o.course_detail.id })
+                    }
+                    className="grid size-9 place-items-center rounded-full text-text-muted hover:bg-surface-alt hover:text-danger-strong"
+                  >
+                    <Trash2 size={15} aria-hidden />
+                  </button>
+                )}
+              </span>
+              {editing === o.id && (
+                <EditOffering
+                  offering={o}
+                  onDone={() => {
+                    setEditing(null);
+                    refresh();
+                  }}
+                />
+              )}
             </div>
           );
         })}
@@ -305,6 +364,109 @@ function Slot({
         </option>
       ))}
     </select>
+  );
+}
+
+type CourseSummary = Schemas["CourseSummary"];
+
+/** Correct a course's details and its section in place (courses.manage, owner 2026-09-29). */
+function EditOffering({
+  offering,
+  onDone,
+}: {
+  offering: { id: number; section: string; course_detail: CourseSummary };
+  onDone: () => void;
+}) {
+  const c = offering.course_detail;
+  const [f, setF] = useState({
+    code: c.code,
+    name_ar: c.name_ar,
+    credit_hours: c.credit_hours ?? 3,
+    default_level: c.default_level ?? 1,
+    section: offering.section,
+  });
+  const save = useMutation({
+    mutationFn: async () => {
+      const course = await api.PATCH("/api/v1/courses/{id}", {
+        params: { path: { id: c.id } },
+        body: {
+          code: f.code.trim().toUpperCase(),
+          name_ar: f.name_ar.trim(),
+          credit_hours: f.credit_hours,
+          default_level: f.default_level,
+        } as never,
+      });
+      if (!course.data) throw course.error;
+      if (f.section.trim() !== offering.section) {
+        const section = await api.PATCH("/api/v1/offerings/{id}", {
+          params: { path: { id: offering.id } },
+          body: { section: f.section.trim() } as never,
+        });
+        if (!section.data) throw section.error;
+      }
+    },
+    onSuccess: onDone,
+  });
+  const input = "min-h-10 rounded-lg border border-border bg-surface px-3 text-sm";
+  return (
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        save.mutate();
+      }}
+      className="col-span-full grid gap-2 rounded-xl bg-surface-alt p-3 sm:grid-cols-[110px_minmax(0,1fr)_90px_90px_70px_auto]"
+    >
+      <input
+        dir="ltr"
+        value={f.code}
+        onChange={(e) => setF({ ...f, code: e.target.value })}
+        aria-label="رمز المادة"
+        className={input}
+      />
+      <input
+        value={f.name_ar}
+        onChange={(e) => setF({ ...f, name_ar: e.target.value })}
+        aria-label="اسم المادة"
+        className={input}
+      />
+      <label className="flex items-center gap-1 text-xs text-text-muted">
+        ساعات
+        <input
+          type="number"
+          min={1}
+          max={12}
+          value={f.credit_hours}
+          onChange={(e) => setF({ ...f, credit_hours: Number(e.target.value) })}
+          className="w-12 rounded border border-border bg-surface px-1 py-1"
+        />
+      </label>
+      <label className="flex items-center gap-1 text-xs text-text-muted">
+        مستوى
+        <input
+          type="number"
+          min={1}
+          max={10}
+          value={f.default_level}
+          onChange={(e) => setF({ ...f, default_level: Number(e.target.value) })}
+          className="w-12 rounded border border-border bg-surface px-1 py-1"
+        />
+      </label>
+      <input
+        dir="ltr"
+        value={f.section}
+        onChange={(e) => setF({ ...f, section: e.target.value })}
+        aria-label="الشعبة"
+        className={input}
+      />
+      <Button type="submit" disabled={!f.code.trim() || !f.name_ar.trim() || save.isPending}>
+        حفظ
+      </Button>
+      {save.isError && (
+        <div className="col-span-full">
+          <Notice>{problemMessage(save.error)}</Notice>
+        </div>
+      )}
+    </form>
   );
 }
 
