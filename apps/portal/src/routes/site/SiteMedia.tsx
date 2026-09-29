@@ -16,6 +16,7 @@ import {
 } from "../../components/ui";
 import { api } from "../../lib/api";
 import { asForm, formData } from "../../lib/upload";
+import { Pager, useServerPages } from "../../components/Pager";
 
 type Tab = "media" | "menus" | "settings";
 
@@ -44,10 +45,11 @@ export function SiteMedia() {
 
 function Media() {
   const client = useQueryClient();
-  const media = useQuery({
-    queryKey: ["site", "media"],
-    queryFn: async () => (await api.GET("/api/v1/content/media")).data?.results ?? [],
-  });
+  // 10 per page from the server (docs: owner 2026-09-29).
+  const media = useServerPages(
+    ["site", "media"],
+    async (page) => (await api.GET("/api/v1/content/media", { params: { query: { page } } })).data,
+  );
   const upload = useMutation({
     mutationFn: async (file: File) => {
       const { data, error } = await api.POST("/api/v1/content/media", {
@@ -82,7 +84,7 @@ function Media() {
           <Notice>{problemMessage(upload.error)}</Notice>
         </div>
       )}
-      {media.isSuccess && !media.data.length && (
+      {media.query.isSuccess && !media.count && (
         <Card className="mt-4">
           <EmptyState icon={<ImageIcon size={24} aria-hidden />} title="لا صور بعد">
             الصور المرفوعة هنا تُستخدم أغلفةً للأخبار والفعاليات وفي صفحات الموقع. اكتب لكل صورة
@@ -91,7 +93,7 @@ function Media() {
         </Card>
       )}
       <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-        {(media.data ?? []).map((m) => (
+        {media.items.map((m) => (
           <Card key={m.public_id} className="overflow-hidden">
             <img src={m.url} alt={m.alt_ar ?? ""} className="aspect-video w-full object-cover" />
             <div className="flex items-center gap-2 p-2 text-xs">
@@ -111,6 +113,7 @@ function Media() {
           </Card>
         ))}
       </div>
+      <Pager page={media.page} count={media.count} onPage={media.setPage} label="صفحات الوسائط" />
     </>
   );
 }

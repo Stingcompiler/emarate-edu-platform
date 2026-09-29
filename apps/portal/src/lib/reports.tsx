@@ -7,6 +7,7 @@ import { Button, Card, Notice, problemMessage } from "../components/ui";
 import { CountUp } from "../components/motion";
 import { api } from "./api";
 import { count, N } from "./format";
+import { ALL } from "../components/Pager";
 
 /** Numbers: Arabic digits in prose, "—" when there is no data. */
 export const num = (n: number | null | undefined, digits = 0) =>
@@ -186,8 +187,8 @@ export function PastReports({ kind }: { kind: SnapshotBody["kind"] }) {
   const list = useQuery({
     queryKey: ["report-snapshots", kind],
     queryFn: async () =>
-      (await api.GET("/api/v1/report-snapshots", { params: { query: { kind } } })).data?.results ??
-      [],
+      (await api.GET("/api/v1/report-snapshots", { params: { query: { ...ALL, kind } } })).data
+        ?.results ?? [],
   });
   if (!list.data?.length) return null;
   return (
@@ -247,13 +248,15 @@ export function Picker<T extends { id: number }>({
 export function useTerms() {
   return useQuery({
     queryKey: ["terms"],
-    queryFn: async () => (await api.GET("/api/v1/terms")).data?.results ?? [],
+    queryFn: async () =>
+      (await api.GET("/api/v1/terms", { params: { query: ALL } })).data?.results ?? [],
   });
 }
 
 export function useDepartments() {
   return useQuery({
     queryKey: ["departments"],
-    queryFn: async () => (await api.GET("/api/v1/departments")).data?.results ?? [],
+    queryFn: async () =>
+      (await api.GET("/api/v1/departments", { params: { query: ALL } })).data?.results ?? [],
   });
 }

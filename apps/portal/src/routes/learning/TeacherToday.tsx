@@ -9,6 +9,7 @@ import { useMe } from "../../lib/auth";
 import { dueLabel, useAssignments, useMyCourses } from "../../lib/learning";
 import { useGradingQueue } from "./Grading";
 import { count, N } from "../../lib/format";
+import { ALL } from "../../components/Pager";
 
 const DAY = 86_400_000;
 
@@ -37,15 +38,18 @@ export function TeacherToday() {
   ].map(([name, n]) => ({ name, n }));
   const live = useQuery({
     queryKey: ["live"],
-    queryFn: async () => (await api.GET("/api/v1/live-sessions")).data?.results ?? [],
+    queryFn: async () =>
+      (await api.GET("/api/v1/live-sessions", { params: { query: ALL } })).data?.results ?? [],
   });
   const exams = useQuery({
     queryKey: ["exams"],
-    queryFn: async () => (await api.GET("/api/v1/exams")).data?.results ?? [],
+    queryFn: async () =>
+      (await api.GET("/api/v1/exams", { params: { query: ALL } })).data?.results ?? [],
   });
   const notices = useQuery({
     queryKey: ["hr-notices", "mine"],
-    queryFn: async () => (await api.GET("/api/v1/hr-notices")).data?.results ?? [],
+    queryFn: async () =>
+      (await api.GET("/api/v1/hr-notices", { params: { query: ALL } })).data?.results ?? [],
   });
   const now = Date.now();
   const horizon = now + DAY;

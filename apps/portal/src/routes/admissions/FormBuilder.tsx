@@ -17,6 +17,7 @@ import { api } from "../../lib/api";
 import { useMe } from "../../lib/auth";
 import { can } from "../../lib/nav";
 import type { Field, FormSchema } from "../../lib/visitor";
+import { ALL } from "../../components/Pager";
 
 const TYPES: { key: Field["type"]; label: string }[] = [
   { key: "text", label: "نص قصير" },
@@ -37,7 +38,8 @@ export function FormBuilder() {
   const client = useQueryClient();
   const templates = useQuery({
     queryKey: ["admissions", "templates"],
-    queryFn: async () => (await api.GET("/api/v1/form-templates")).data?.results ?? [],
+    queryFn: async () =>
+      (await api.GET("/api/v1/form-templates", { params: { query: ALL } })).data?.results ?? [],
   });
   const [picked, setPicked] = useState<number | null>(null);
   const template = templates.data?.find((t) => t.id === picked) ?? templates.data?.[0];

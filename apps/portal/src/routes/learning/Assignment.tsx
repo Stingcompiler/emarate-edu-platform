@@ -16,6 +16,7 @@ import { api } from "../../lib/api";
 import { when, count, N } from "../../lib/format";
 import { dueLabel, fmtSize, openFile, useMyCourses } from "../../lib/learning";
 import { asForm, formData } from "../../lib/upload";
+import { ALL } from "../../components/Pager";
 
 const absolute = (iso: string) =>
   new Date(iso).toLocaleString("ar", {
@@ -327,7 +328,7 @@ function Submissions({ id, max }: { id: string; max: string }) {
     queryFn: async () =>
       (
         await api.GET("/api/v1/assignments/{public_id}/submissions", {
-          params: { path: { public_id: id } },
+          params: { path: { public_id: id }, query: ALL },
         })
       ).data?.results ?? [],
   });

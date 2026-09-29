@@ -10,6 +10,7 @@ import { when } from "../../lib/format";
 import { can } from "../../lib/nav";
 import { initials, num } from "../../lib/reports";
 import { STATUS_LABEL } from "../../lib/visitor";
+import { ALL } from "../../components/Pager";
 
 /** Boards: HeadRegistrarHome and RegistrarHome (phone); desktop derived — counters, action inbox, lists. */
 export function RegistrarHome() {
@@ -33,7 +34,7 @@ export function RegistrarHome() {
       (
         (
           await api.GET("/api/v1/applications", {
-            params: { query: { status: "submitted" as never } },
+            params: { query: { ...ALL, status: "submitted" as never } },
           })
         ).data?.results ?? []
       ).filter((a) => !a.assigned_registrar_name),
@@ -44,15 +45,15 @@ export function RegistrarHome() {
     queryFn: async () =>
       (
         await api.GET("/api/v1/applications", {
-          params: { query: { assigned_registrar__public_id: me.data!.public_id } },
+          params: { query: { ...ALL, assigned_registrar__public_id: me.data!.public_id } },
         })
       ).data ?? null,
   });
   const inquiries = useQuery({
     queryKey: ["inquiries", "open"],
     queryFn: async () =>
-      (await api.GET("/api/v1/inquiries", { params: { query: { status: "new" } } })).data?.count ??
-      0,
+      (await api.GET("/api/v1/inquiries", { params: { query: { ...ALL, status: "new" } } })).data
+        ?.count ?? 0,
   });
   const registrations = useQuery({
     queryKey: ["registration-requests", "pending"],
@@ -60,7 +61,7 @@ export function RegistrarHome() {
     queryFn: async () =>
       (
         await api.GET("/api/v1/registration-requests", {
-          params: { query: { status: "pending_approval" } },
+          params: { query: { ...ALL, status: "pending_approval" } },
         })
       ).data ?? null,
   });

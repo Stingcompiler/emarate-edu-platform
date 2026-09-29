@@ -1,6 +1,7 @@
 import { ChevronRight, type LucideIcon, Menu } from "lucide-react";
 import { type ReactNode, useEffect, useState } from "react";
 import { NavLink } from "react-router";
+import { ThemeToggle } from "./ThemeToggle";
 
 export type NavItem = {
   label: string;
@@ -66,7 +67,8 @@ export function AppShell({
         تخطَّ إلى المحتوى
       </a>
       {/* Desktop top bar */}
-      <header className="hidden h-14 shrink-0 items-center gap-4 bg-header px-6 text-text-inverse lg:flex">
+      {/* Stays in place while the page scrolls (owner, 2026-09-29): the bar and the sidebar. */}
+      <header className="sticky top-0 z-30 hidden h-14 shrink-0 items-center gap-4 bg-header px-6 text-text-inverse lg:flex">
         <Brand />
         <span className="text-xs text-navy-200">{eyebrow}</span>
         <div className="ms-auto flex items-center gap-2">{actions}</div>
@@ -75,24 +77,30 @@ export function AppShell({
       {/* Phone NavigationBar (docs/09): large title that collapses into a glass bar */}
       <div
         aria-hidden={!compact}
+        // Hidden until scrolled: its toggle must not be reachable by keyboard meanwhile.
+        inert={!compact}
         className={`fixed inset-x-0 top-0 z-20 flex h-[calc(2.75rem+env(safe-area-inset-top))] items-end justify-center border-b border-border-soft bg-surface/80 pb-2.5 backdrop-blur transition-opacity duration-150 lg:hidden ${
           compact ? "opacity-100" : "pointer-events-none opacity-0"
         }`}
       >
         <span className="text-[17px] font-semibold text-text">{title}</span>
+        <ThemeToggle className="absolute bottom-0.5 end-2 text-text-muted hover:bg-surface-alt" />
       </div>
       <header className="px-4 pb-2 pt-[max(1rem,env(safe-area-inset-top))] lg:hidden">
-        {back ? (
-          <NavLink
-            to={back.to}
-            className="inline-flex min-h-8 items-center gap-1 text-[15px] text-primary"
-          >
-            <ChevronRight size={20} aria-hidden className="ltr:rotate-180" />
-            {back.label}
-          </NavLink>
-        ) : (
-          eyebrow && <p className="text-xs font-semibold text-text-muted">{eyebrow}</p>
-        )}
+        <div className="flex min-h-10 items-center justify-between gap-3">
+          {back ? (
+            <NavLink
+              to={back.to}
+              className="inline-flex min-h-8 items-center gap-1 text-[15px] text-primary"
+            >
+              <ChevronRight size={20} aria-hidden className="ltr:rotate-180" />
+              {back.label}
+            </NavLink>
+          ) : (
+            <p className="text-xs font-semibold text-text-muted">{eyebrow}</p>
+          )}
+          <ThemeToggle className="-me-2 text-text-muted hover:bg-surface-alt" />
+        </div>
         <div className="mt-1 flex items-end justify-between gap-3">
           <h1 className="text-[28px] font-bold leading-tight text-text">{title}</h1>
           {titleAction}
@@ -102,7 +110,7 @@ export function AppShell({
 
       <div className="lg:flex lg:min-h-0 lg:flex-1">
         {/* Desktop sidebar — first in DOM, so it sits on the right in RTL */}
-        <aside className="hidden w-66 shrink-0 border-e border-border-soft bg-surface px-3 py-4 lg:block">
+        <aside className="hidden w-66 shrink-0 border-e border-border-soft bg-surface px-3 py-4 lg:sticky lg:top-14 lg:block lg:h-[calc(100dvh-3.5rem)] lg:self-start lg:overflow-y-auto">
           <nav aria-label="التنقل الرئيسي" className="flex flex-col gap-0.5">
             {nav.map((item) => (
               <SidebarLink key={item.to} item={item} />

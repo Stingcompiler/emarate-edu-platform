@@ -16,6 +16,7 @@ import {
 import { api } from "../../lib/api";
 import { hasRole, useMe } from "../../lib/auth";
 import { can } from "../../lib/nav";
+import { ALL } from "../../components/Pager";
 
 type Option = {
   key: string;
@@ -36,7 +37,8 @@ export function AnnouncementNew() {
   });
   const departments = useQuery({
     queryKey: ["departments"],
-    queryFn: async () => (await api.GET("/api/v1/departments")).data?.results ?? [],
+    queryFn: async () =>
+      (await api.GET("/api/v1/departments", { params: { query: ALL } })).data?.results ?? [],
     enabled: can(me.data, "learning.manage"),
   });
   const options = useMemo<Option[]>(() => {

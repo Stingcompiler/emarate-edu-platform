@@ -16,6 +16,7 @@ import {
 } from "../../components/ui";
 import { api } from "../../lib/api";
 import { when } from "../../lib/format";
+import { ALL, Pager, useLocalPages } from "../../components/Pager";
 
 type Inquiry = Schemas["Inquiry"];
 const STATUS: Record<string, { label: string; tone: string }> = {
@@ -50,7 +51,8 @@ export function Inquiries() {
   const [tab, setTab] = useState("open");
   const list = useQuery({
     queryKey: ["inquiries"],
-    queryFn: async () => (await api.GET("/api/v1/inquiries")).data?.results ?? [],
+    queryFn: async () =>
+      (await api.GET("/api/v1/inquiries", { params: { query: ALL } })).data?.results ?? [],
   });
   const all = list.data ?? [];
   const shown = all.filter((i) =>
@@ -63,6 +65,8 @@ export function Inquiries() {
           : i.status === tab,
   );
   const current = all.find((i) => i.public_id === id);
+  // Tabs are computed here («late» is time-based), so paging is on screen: 10 at a time.
+  const paged = useLocalPages(shown, tab);
 
   return (
     <PortalShell
@@ -85,7 +89,7 @@ export function Inquiries() {
             </Card>
           ) : (
             <Card className="mt-4 divide-y divide-border-soft">
-              {shown.map((i) => (
+              {paged.shown.map((i) => (
                 <button
                   key={i.public_id}
                   type="button"
@@ -115,6 +119,7 @@ export function Inquiries() {
               ))}
             </Card>
           )}
+          <Pager page={paged.page} count={paged.count} onPage={paged.setPage} />
         </div>
         <div className={id ? "" : "hidden lg:block"}>
           {current ? (

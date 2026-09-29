@@ -17,6 +17,7 @@ import { api } from "../../lib/api";
 import { useMe } from "../../lib/auth";
 import { when, count, N } from "../../lib/format";
 import { can } from "../../lib/nav";
+import { ALL, Pager, useLocalPages } from "../../components/Pager";
 
 export const KIND = {
   exam_misconduct: { short: "غش", label: "غش امتحان" },
@@ -43,19 +44,24 @@ export function Cases() {
   const [kind, setKind] = useState<string>("");
   const cases = useQuery({
     queryKey: ["cases"],
-    queryFn: async () => (await api.GET("/api/v1/cases")).data?.results ?? [],
+    queryFn: async () =>
+      (await api.GET("/api/v1/cases", { params: { query: ALL } })).data?.results ?? [],
   });
   const reports = useQuery({
     queryKey: ["misconduct-reports"],
     queryFn: async () =>
-      (await api.GET("/api/v1/misconduct-reports", { params: { query: { status: "new" } } })).data
-        ?.results ?? [],
+      (
+        await api.GET("/api/v1/misconduct-reports", {
+          params: { query: { ...ALL, status: "new" } },
+        })
+      ).data?.results ?? [],
   });
   const all = cases.data ?? [];
   const open = all.filter((c) => c.status !== "closed");
   const shown = (tab === "closed" ? all.filter((c) => c.status === "closed") : open).filter(
     (c) => !kind || c.kind === kind,
   );
+  const paged = useLocalPages(shown, [tab, kind]);
   const age = (iso: string) => Math.floor((Date.now() - new Date(iso).getTime()) / 86_400_000);
 
   return (
@@ -139,7 +145,7 @@ export function Cases() {
         <>
           {/* Phone: cards */}
           <Card className="mt-4 divide-y divide-border-soft lg:hidden">
-            {shown.map((c) => (
+            {paged.shown.map((c) => (
               <Link
                 key={c.public_id}
                 to={`/cases/${c.public_id}`}
@@ -173,7 +179,7 @@ export function Cases() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border-soft">
-                {shown.map((c) => {
+                {paged.shown.map((c) => {
                   const last = c.events[c.events.length - 1];
                   return (
                     <tr key={c.public_id} className="hover:bg-surface-alt">
@@ -216,6 +222,7 @@ export function Cases() {
           </Card>
         </>
       )}
+      <Pager page={paged.page} count={paged.count} onPage={paged.setPage} />
     </PortalShell>
   );
 }

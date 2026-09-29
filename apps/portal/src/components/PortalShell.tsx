@@ -8,6 +8,7 @@ import { hasRole, useMe, useSignOut } from "../lib/auth";
 import { navFor } from "../lib/nav";
 import { AppShell, Badge } from "./AppShell";
 import { InstallHint } from "./InstallHint";
+import { ThemeToggle } from "./ThemeToggle";
 
 type Props = Omit<ComponentProps<typeof AppShell>, "nav" | "actions" | "eyebrow">;
 
@@ -59,6 +60,7 @@ export function PortalShell(props: Props) {
       nav={navFor(me.data, count)}
       actions={
         <>
+          <ThemeToggle className="hover:bg-white/10" />
           <Link
             to="/notifications"
             className="relative grid size-10 place-items-center rounded-full hover:bg-white/10"

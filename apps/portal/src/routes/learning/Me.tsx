@@ -21,6 +21,7 @@ import { api } from "../../lib/api";
 import { useMe, useSignOut } from "../../lib/auth";
 import { initials, num } from "../../lib/reports";
 import { count, N } from "../../lib/format";
+import { ALL } from "../../components/Pager";
 
 function Row({
   to,
@@ -54,11 +55,13 @@ export function Me() {
   });
   const regulations = useQuery({
     queryKey: ["regulations"],
-    queryFn: async () => (await api.GET("/api/v1/regulations")).data?.results ?? [],
+    queryFn: async () =>
+      (await api.GET("/api/v1/regulations", { params: { query: ALL } })).data?.results ?? [],
   });
   const cases = useQuery({
     queryKey: ["me", "cases"],
-    queryFn: async () => (await api.GET("/api/v1/me/cases")).data?.results ?? [],
+    queryFn: async () =>
+      (await api.GET("/api/v1/me/cases", { params: { query: ALL } })).data?.results ?? [],
   });
   const s = me.data?.student;
   const pendingAck = (regulations.data ?? []).filter(
@@ -172,7 +175,8 @@ export function MyStatus() {
   });
   const cases = useQuery({
     queryKey: ["me", "cases"],
-    queryFn: async () => (await api.GET("/api/v1/me/cases")).data?.results ?? [],
+    queryFn: async () =>
+      (await api.GET("/api/v1/me/cases", { params: { query: ALL } })).data?.results ?? [],
   });
   const s = me.data?.student;
   const hours = (courses.data ?? []).reduce((n, c) => n + c.credit_hours, 0);

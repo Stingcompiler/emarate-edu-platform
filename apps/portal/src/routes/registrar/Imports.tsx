@@ -16,6 +16,7 @@ import { api } from "../../lib/api";
 import { when, count, N } from "../../lib/format";
 import { num } from "../../lib/reports";
 import { asForm, formData } from "../../lib/upload";
+import { Pager, useServerPages } from "../../components/Pager";
 
 export const IMPORT_STATUS: Record<string, string> = {
   validated: "جاهز للاعتماد",
@@ -38,10 +39,12 @@ type Summary = {
 export function StudentImports() {
   const navigate = useNavigate();
   const input = useRef<HTMLInputElement>(null);
-  const list = useQuery({
-    queryKey: ["student-imports"],
-    queryFn: async () => (await api.GET("/api/v1/student-imports")).data?.results ?? [],
-  });
+  // 10 per page from the server (docs: owner 2026-09-29).
+  const list = useServerPages(
+    ["student-imports"],
+    async (page) =>
+      (await api.GET("/api/v1/student-imports", { params: { query: { page } } })).data,
+  );
   const upload = useMutation({
     mutationFn: async (file: File) => {
       const { data, error } = await api.POST("/api/v1/student-imports", {
@@ -86,7 +89,7 @@ export function StudentImports() {
         )}
       </Card>
       <Card className="mt-4 divide-y divide-border-soft">
-        {(list.data ?? []).map((b) => {
+        {list.items.map((b) => {
           const s = (b.summary ?? {}) as Summary;
           return (
             <Link
@@ -105,8 +108,9 @@ export function StudentImports() {
             </Link>
           );
         })}
-        {!list.data?.length && <p className="px-4 py-4 text-sm text-text-muted">لا دفعات بعد.</p>}
+        {!list.items.length && <p className="px-4 py-4 text-sm text-text-muted">لا دفعات بعد.</p>}
       </Card>
+      <Pager page={list.page} count={list.count} onPage={list.setPage} />
     </PortalShell>
   );
 }

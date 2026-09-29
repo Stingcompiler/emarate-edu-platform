@@ -18,6 +18,7 @@ import { api } from "../../lib/api";
 import { useMe } from "../../lib/auth";
 import { useCurrentTerm, useDepartment, useOfferings } from "../../lib/department";
 import { days, initials, num } from "../../lib/reports";
+import { ALL } from "../../components/Pager";
 
 /** Boards: DesktopDeptDashboard (desktop), AdminHome (phone). The section list is fixed (docs/02 §4.15). */
 export function DepartmentDashboard() {
@@ -44,7 +45,7 @@ export function DepartmentDashboard() {
     queryFn: async () =>
       (
         await api.GET("/api/v1/registration-requests", {
-          params: { query: { status: "pending_approval" } },
+          params: { query: { ...ALL, status: "pending_approval" } },
         })
       ).data ?? null,
   });
@@ -53,7 +54,7 @@ export function DepartmentDashboard() {
     queryFn: async () =>
       (
         await api.GET("/api/v1/result-imports", {
-          params: { query: { status: "validated" } as never },
+          params: { query: { ...ALL, status: "validated" } as never },
         })
       ).data?.results ?? [],
   });

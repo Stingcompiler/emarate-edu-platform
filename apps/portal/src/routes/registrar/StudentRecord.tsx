@@ -9,6 +9,7 @@ import { can } from "../../lib/nav";
 import { initials, num } from "../../lib/reports";
 import { STUDENT_STATUS } from "./StudentRecords";
 import { count, N } from "../../lib/format";
+import { ALL } from "../../components/Pager";
 
 /** Board: HeadRegistrarStudent (phone); desktop derived — data beside enrolment. */
 export function StudentRecord() {
@@ -34,8 +35,11 @@ export function StudentRecord() {
     queryKey: ["cases", "student", id],
     enabled: can(me.data, "cases.view"),
     queryFn: async () =>
-      (await api.GET("/api/v1/cases", { params: { query: { student_record__public_id: id } } }))
-        .data?.results ?? [],
+      (
+        await api.GET("/api/v1/cases", {
+          params: { query: { ...ALL, student_record__public_id: id } },
+        })
+      ).data?.results ?? [],
   });
   const s = student.data;
   const current = (enrollments.data ?? []).filter((e) => e.status === "active");

@@ -16,6 +16,7 @@ import {
 } from "../../components/ui";
 import { api } from "../../lib/api";
 import { when } from "../../lib/format";
+import { ALL, Pager, useLocalPages } from "../../components/Pager";
 
 const LABEL: Record<string, string> = { draft: "مسودة", published: "منشور", archived: "مؤرشف" };
 
@@ -24,15 +25,19 @@ export function SiteHome() {
   const [tab, setTab] = useState<"pages" | "news">("pages");
   const pages = useQuery({
     queryKey: ["site", "pages"],
-    queryFn: async () => (await api.GET("/api/v1/content/pages")).data?.results ?? [],
+    queryFn: async () =>
+      (await api.GET("/api/v1/content/pages", { params: { query: ALL } })).data?.results ?? [],
   });
   const news = useQuery({
     queryKey: ["site", "news"],
-    queryFn: async () => (await api.GET("/api/v1/content/news")).data?.results ?? [],
+    queryFn: async () =>
+      (await api.GET("/api/v1/content/news", { params: { query: ALL } })).data?.results ?? [],
   });
   const drafts = [...(pages.data ?? []), ...(news.data ?? [])].filter(
     (x) => x.status !== "published",
   ).length;
+  const pagedPages = useLocalPages(pages.data ?? []);
+  const pagedNews = useLocalPages(news.data ?? []);
   return (
     <PortalShell
       title="محتوى الموقع"
@@ -98,7 +103,7 @@ export function SiteHome() {
           <SectionLabel>{tab === "pages" ? "صفحات الموقع" : "الأخبار"}</SectionLabel>
           <Card className="divide-y divide-border-soft">
             {tab === "pages"
-              ? (pages.data ?? []).map((p) => (
+              ? pagedPages.shown.map((p) => (
                   <Link
                     key={p.public_id}
                     to={`/site/pages/${p.public_id}`}
@@ -117,7 +122,7 @@ export function SiteHome() {
                     />
                   </Link>
                 ))
-              : (news.data ?? []).map((n) => (
+              : pagedNews.shown.map((n) => (
                   <Link
                     key={n.public_id}
                     to={`/site/news/${n.public_id}`}
@@ -141,6 +146,11 @@ export function SiteHome() {
                 </p>
               )}
           </Card>
+          {tab === "pages" ? (
+            <Pager page={pagedPages.page} count={pagedPages.count} onPage={pagedPages.setPage} />
+          ) : (
+            <Pager page={pagedNews.page} count={pagedNews.count} onPage={pagedNews.setPage} />
+          )}
         </WithSide>
       </div>
     </PortalShell>

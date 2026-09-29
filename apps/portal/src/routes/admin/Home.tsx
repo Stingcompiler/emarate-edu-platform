@@ -10,6 +10,7 @@ import { useMe } from "../../lib/auth";
 import { useCurrentTerm } from "../../lib/department";
 import { when, count, N } from "../../lib/format";
 import { num } from "../../lib/reports";
+import { ALL } from "../../components/Pager";
 
 const GROUPS: { label: string; roles: string[] }[] = [
   { label: "طلاب", roles: ["student"] },
@@ -45,7 +46,8 @@ export function AdminHome() {
   const term = useCurrentTerm();
   const departments = useQuery({
     queryKey: ["departments"],
-    queryFn: async () => (await api.GET("/api/v1/departments")).data?.results ?? [],
+    queryFn: async () =>
+      (await api.GET("/api/v1/departments", { params: { query: ALL } })).data?.results ?? [],
   });
   const programs = useQuery({
     queryKey: ["programs", "all"],

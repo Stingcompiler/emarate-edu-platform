@@ -23,6 +23,7 @@ import {
   useLectures,
   useMyCourses,
 } from "../../lib/learning";
+import { ALL } from "../../components/Pager";
 
 const TABS = [
   { key: "lectures", label: "المحاضرات" },
@@ -43,20 +44,24 @@ export function Course() {
   const exams = useQuery({
     queryKey: ["exams", offering],
     queryFn: async () =>
-      (await api.GET("/api/v1/exams", { params: { query: { offering } } })).data?.results ?? [],
+      (await api.GET("/api/v1/exams", { params: { query: { ...ALL, offering } } })).data?.results ??
+      [],
   });
   const live = useQuery({
     queryKey: ["live", offering],
     queryFn: async () =>
-      (await api.GET("/api/v1/live-sessions", { params: { query: { offering } } })).data?.results ??
-      [],
+      (await api.GET("/api/v1/live-sessions", { params: { query: { ...ALL, offering } } })).data
+        ?.results ?? [],
   });
   const news = useQuery({
     queryKey: ["announcements", "offering", offering],
     queryFn: async () =>
       (
-        (await api.GET("/api/v1/announcements", { params: { query: { scope: "offering" } } })).data
-          ?.results ?? []
+        (
+          await api.GET("/api/v1/announcements", {
+            params: { query: { ...ALL, scope: "offering" } },
+          })
+        ).data?.results ?? []
       ).filter((a) => a.scope_id === offering),
   });
   const [tab, setTab] = useState<(typeof TABS)[number]["key"]>("lectures");

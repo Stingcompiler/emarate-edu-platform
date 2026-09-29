@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 
 import { api } from "./api";
 import { useMe } from "./auth";
+import { ALL } from "../components/Pager";
 
 /**
  * The department the dashboard is about: a department role's own department
@@ -14,7 +15,8 @@ export function useDepartment() {
     { everything?: boolean; departments?: number[] } | undefined;
   const departments = useQuery({
     queryKey: ["departments"],
-    queryFn: async () => (await api.GET("/api/v1/departments")).data?.results ?? [],
+    queryFn: async () =>
+      (await api.GET("/api/v1/departments", { params: { query: ALL } })).data?.results ?? [],
   });
   const fromUrl =
     Number(new URLSearchParams(window.location.search).get("department")) || undefined;
@@ -36,7 +38,7 @@ export function useCurrentTerm() {
     queryKey: ["terms", "current"],
     queryFn: async () => {
       const list =
-        (await api.GET("/api/v1/terms", { params: { query: { is_current: true } } })).data
+        (await api.GET("/api/v1/terms", { params: { query: { ...ALL, is_current: true } } })).data
           ?.results ?? [];
       return list[0] ?? null;
     },

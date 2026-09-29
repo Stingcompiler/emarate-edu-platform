@@ -6,8 +6,9 @@ import { Button, Card } from "../../components/ui";
 import { api } from "../../lib/api";
 import { useMe } from "../../lib/auth";
 import { useDepartment } from "../../lib/department";
-import { downloadCsv, num } from "../../lib/reports";
+import { downloadCsv } from "../../lib/reports";
 import { count, N } from "../../lib/format";
+import { Pager } from "../../components/Pager";
 
 /** Arabic wording for audit actions; unknown ones fall back to "<object>: <verb>". */
 const ACTIONS: Record<string, string> = {
@@ -273,25 +274,7 @@ export function Audit() {
           <Card className="p-4 text-sm text-text-muted">لا عمليات مطابقة.</Card>
         )}
       </div>
-      <div className="mt-3 flex items-center justify-center gap-3 text-sm">
-        <Button
-          variant="secondary"
-          className="min-h-9 px-3"
-          disabled={!list.data?.previous}
-          onClick={() => setPage((p) => p - 1)}
-        >
-          الأحدث
-        </Button>
-        <span className="text-text-muted">صفحة {num(page)}</span>
-        <Button
-          variant="secondary"
-          className="min-h-9 px-3"
-          disabled={!list.data?.next}
-          onClick={() => setPage((p) => p + 1)}
-        >
-          الأقدم
-        </Button>
-      </div>
+      <Pager page={page} count={list.data?.count ?? 0} onPage={setPage} label="صفحات السجل" />
     </PortalShell>
   );
 }

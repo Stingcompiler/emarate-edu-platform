@@ -9,6 +9,7 @@ import { useMe } from "../../lib/auth";
 import { when } from "../../lib/format";
 import { num } from "../../lib/reports";
 import { Inbox } from "./Inbox";
+import { ALL } from "../../components/Pager";
 
 /** Board: ResultsOfficerHome (phone); desktop derived — actions and batches beside display settings. */
 export function ResultsHome() {
@@ -22,8 +23,11 @@ export function ResultsHome() {
   const corrections = useQuery({
     queryKey: ["result-corrections", "pending"],
     queryFn: async () =>
-      (await api.GET("/api/v1/result-corrections", { params: { query: { status: "pending" } } }))
-        .data?.count ?? 0,
+      (
+        await api.GET("/api/v1/result-corrections", {
+          params: { query: { ...ALL, status: "pending" } },
+        })
+      ).data?.count ?? 0,
   });
   const display = useQuery({
     queryKey: ["results", "settings"],
