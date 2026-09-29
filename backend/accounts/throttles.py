@@ -1,15 +1,26 @@
 import hashlib
 
-from rest_framework.throttling import AnonRateThrottle, SimpleRateThrottle
+from rest_framework.throttling import SimpleRateThrottle
 
 
-class LoginThrottle(AnonRateThrottle):
+class _PerIPThrottle(SimpleRateThrottle):
+    """Keyed on the client address whether or not the caller is signed in.
+
+    DRF's ``AnonRateThrottle`` skips signed-in callers, so a student with a session
+    could try passwords or codes for other accounts without any limit.
+    """
+
+    def get_cache_key(self, request, view):
+        return self.cache_format % {"scope": self.scope, "ident": self.get_ident(request)}
+
+
+class LoginThrottle(_PerIPThrottle):
     """Per IP, regardless of the account tried (docs/05 §7: 10/minute)."""
 
     scope = "login"
 
 
-class OTPIPThrottle(AnonRateThrottle):
+class OTPIPThrottle(_PerIPThrottle):
     scope = "otp_ip"
 
 

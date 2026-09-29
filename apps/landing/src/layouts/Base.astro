@@ -79,7 +79,13 @@ const ext = (external: boolean) => (external ? { rel: "noopener", target: "_blan
     <meta name="twitter:card" content={image ? "summary_large_image" : "summary"} />
     <meta name="theme-color" content="#0b2447" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    {jsonLd && <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />}
+    {jsonLd && (
+      // "<" escaped: a title containing "</script>" must not close the tag (stored XSS).
+      <script
+        type="application/ld+json"
+        set:html={JSON.stringify(jsonLd).replace(/</g, "\\u003c")}
+      />
+    )}
   </head>
   <body class:list={["flex min-h-dvh flex-col bg-bg text-text", bottomBar && "pb-20 lg:pb-0"]}>
     <a

@@ -9,6 +9,7 @@ from datetime import timedelta
 from enum import Enum
 
 from django.conf import settings
+from django.db.models import F
 from django.utils import timezone
 
 from organization.models import SystemSettings
@@ -42,20 +43,34 @@ def issue(purpose: str, target: str) -> tuple[OneTimeCode, str]:
 
 
 def check(otp: OneTimeCode | None, code: str) -> OTPResult:
-    """Verify ``code`` against ``otp`` and consume it on success."""
+    """Verify ``code`` against ``otp`` and consume it on success.
+
+    The attempt is counted in one UPDATE before the comparison, so parallel guesses can't
+    all read the same count and exceed ``otp_max_attempts`` (a reset code would otherwise
+    be open to a burst of concurrent tries).
+    """
     if otp is None or otp.used_at is not None:
         return OTPResult.INVALID
     config = SystemSettings.load()
     if otp.attempts >= config.otp_max_attempts:
         return OTPResult.TOO_MANY_ATTEMPTS
-    if timezone.now() >= otp.expires_at:
+    now = timezone.now()
+    if now >= otp.expires_at:
         return OTPResult.EXPIRED
-    otp.attempts += 1
+    rows = OneTimeCode.objects.filter(pk=otp.pk, used_at__isnull=True)
+    counted = rows.filter(attempts__lt=config.otp_max_attempts).update(
+        attempts=F("attempts") + 1, updated_at=now
+    )
+    if not counted:
+        otp.refresh_from_db(fields=["attempts", "used_at"])
+        return OTPResult.INVALID if otp.used_at else OTPResult.TOO_MANY_ATTEMPTS
+    otp.refresh_from_db(fields=["attempts"])
     if hmac.compare_digest(otp.code_hash, _hash(code.strip(), otp.target)):
-        otp.used_at = timezone.now()
-        otp.save(update_fields=["attempts", "used_at", "updated_at"])
+        # Consumed once, even if the right code arrives twice at the same moment.
+        if not rows.update(used_at=now, updated_at=now):
+            return OTPResult.INVALID
+        otp.used_at = now
         return OTPResult.OK
-    otp.save(update_fields=["attempts", "updated_at"])
     if otp.attempts >= config.otp_max_attempts:
         return OTPResult.TOO_MANY_ATTEMPTS
     return OTPResult.INVALID

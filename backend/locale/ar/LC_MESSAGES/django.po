@@ -837,3 +837,15 @@ msgid ""
 msgstr ""
 "لهذا الطالب حساب أو سجل أكاديمي فلا يُحذف. اطلب من شؤون الطلاب تغيير حالته "
 "بدلًا من ذلك."
+
+msgid "Not a browser push service."
+msgstr "هذا ليس عنوان خدمة إشعارات لمتصفح."
+
+msgid "You cannot grant a role to yourself."
+msgstr "لا يمكنك منح نفسك دورًا."
+
+msgid "A student account cannot hold a staff role."
+msgstr "حساب الطالب لا يحمل دورًا إداريًا."
+
+msgid "This student belongs to another department."
+msgstr "هذا الطالب من قسم آخر؛ يسجّله مسؤول المسجلين."
