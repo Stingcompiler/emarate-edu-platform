@@ -49,6 +49,18 @@ for (const account of ACCOUNTS) {
       current = href;
       await page.goto(href);
       await page.waitForLoadState("networkidle");
+      // Arabic counting (review 2026-09-29): 3–10 take the plural («3 طلاب», never «3 طالبًا»);
+      // and no RTL-flipped dividers.
+      const grammar = await page.evaluate(() => {
+        const text = document.querySelector("main")?.textContent ?? "";
+        const wrong = /(?:^|[^\d])(?:[3-9]|10) (?:طالبًا|طلبًا|أستاذًا|عضوًا|تسليمًا)/.exec(text);
+        return {
+          wrong: wrong?.[0] ?? null,
+          flipped: document.querySelectorAll("[class*='divide-x-reverse']").length,
+        };
+      });
+      if (grammar.wrong) problems.push(`${href}: counted noun «${grammar.wrong.trim()}»`);
+      if (grammar.flipped) problems.push(`${href}: divide-x-reverse flips dividers in RTL`);
       // Every destination a role's navigation offers is within its audience (lib/access.ts).
       if (await page.getByText("هذه الصفحة ليست ضمن صلاحياتك").count())
         problems.push(`${href}: shows «غير مسموح» to a role whose navigation links to it`);

@@ -12,7 +12,7 @@ import {
   problemMessage,
 } from "../../components/ui";
 import { api, ok } from "../../lib/api";
-import { count, N } from "../../lib/format";
+import { count, N, fmtDate } from "../../lib/format";
 import { ALL } from "../../components/Pager";
 
 /** Board: HeadRegistrarCycles (phone); desktop derived — cycles + a table of intakes. */
@@ -146,10 +146,10 @@ export function Cycles() {
         <>
           <Card className="mt-4 flex flex-wrap gap-x-6 gap-y-1 p-4 text-sm">
             <span>
-              يفتح: <b>{new Date(cycle.opens_at).toLocaleDateString("ar")}</b>
+              يفتح: <b>{fmtDate(cycle.opens_at)}</b>
             </span>
             <span>
-              يُغلق: <b>{new Date(cycle.closes_at).toLocaleDateString("ar")}</b>
+              يُغلق: <b>{fmtDate(cycle.closes_at)}</b>
             </span>
             <StatusBadge
               status={cycle.is_active ? "approved" : "closed"}
@@ -157,7 +157,7 @@ export function Cycles() {
             />
           </Card>
           <SectionLabel>
-            البرامج في هذه الدورة · {(intakes.data?.length ?? 0).toLocaleString("ar")}
+            البرامج في هذه الدورة · {(intakes.data?.length ?? 0).toLocaleString("ar-u-nu-latn")}
           </SectionLabel>
           <Card className="divide-y divide-border-soft">
             {(intakes.data ?? []).map((i) => (

@@ -17,7 +17,7 @@ import {
 } from "../../components/ui";
 import { api, ok } from "../../lib/api";
 import { useMe } from "../../lib/auth";
-import { when } from "../../lib/format";
+import { when, ltr } from "../../lib/format";
 import { can } from "../../lib/nav";
 import { EVENTS, KIND, KindTile } from "./Cases";
 
@@ -61,7 +61,7 @@ export function CaseDetail() {
     <PortalShell
       title={c?.title ?? "حالة"}
       back={{ label: "الحالات", to: "/cases" }}
-      subtitle={c ? `${c.student.full_name_ar} · ${c.student.university_number}` : undefined}
+      subtitle={c ? `${c.student.full_name_ar} · ${ltr(c.student.university_number)}` : undefined}
     >
       {c && (
         <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start lg:gap-6">

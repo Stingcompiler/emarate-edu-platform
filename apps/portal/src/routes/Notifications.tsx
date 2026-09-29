@@ -104,7 +104,7 @@ export function Notifications() {
       <WithSide
         side={
           <>
-            <SideFigures rows={[["غير مقروءة", unreadCount.toLocaleString("ar")]]} />
+            <SideFigures rows={[["غير مقروءة", unreadCount.toLocaleString("ar-u-nu-latn")]]} />
             <SideNote title="تصلك بالطريقة التي تختارها">
               لكل فئة قنواتها: داخل التطبيق، وعلى الهاتف، وبالبريد.{" "}
               <Link to="/settings" className="font-semibold text-primary">
@@ -124,7 +124,7 @@ export function Notifications() {
               <Chip key={key} active={filter === key} onClick={() => setFilter(key)}>
                 {label}
                 {key === "unread" && unreadCount > 0 && (
-                  <span>{unreadCount.toLocaleString("ar")}</span>
+                  <span>{unreadCount.toLocaleString("ar-u-nu-latn")}</span>
                 )}
               </Chip>
             ))}

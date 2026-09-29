@@ -243,6 +243,14 @@ def test_monitor_extend_reopen_invalidate_and_stats(api, classroom, exam):
     teacher = api(classroom.teacher)
     monitor = teacher.get(f"{URL}/{exam.public_id}/attempts").data["results"]
     assert monitor[0]["status"] == "in_progress" and monitor[0]["remaining_seconds"] > 0
+    # The monitor's figures come from the server, one state at a time (review 2026-09-29, P3).
+    by_state = {
+        s: teacher.get(f"{URL}/{exam.public_id}/attempts", {"state": s, "page_size": 1}).data[
+            "count"
+        ]
+        for s in ("in_progress", "done", "invalidated")
+    }
+    assert by_state == {"in_progress": 1, "done": 0, "invalidated": 0}
     assert student.get(f"{URL}/{exam.public_id}/attempts").status_code == 403
     before = ExamAttempt.objects.get(public_id=attempt["public_id"]).deadline_at
     assert teacher.post(f"{url}/extend", {"minutes": 5}).status_code == 200

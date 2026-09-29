@@ -22,3 +22,23 @@ export function ok<T>(result: { data?: T; error?: unknown; response: Response })
   if (result.response.ok) return result.data as T;
   throw new ApiError(result.response.status, result.error);
 }
+
+/**
+ * Open a link fetched after a click (a signed file URL, a meeting link). The tab opens during
+ * the click — browsers, iOS in particular, block tabs opened after an `await` — and is sent to
+ * the link once it arrives (review 2026-09-29, P13). No link: the tab closes.
+ */
+export async function openAfter(getUrl: () => Promise<string | null | undefined>) {
+  const tab = window.open("about:blank", "_blank");
+  try {
+    const url = await getUrl();
+    if (!url) tab?.close();
+    else if (tab) {
+      tab.opener = null;
+      tab.location.href = url;
+    } else window.location.href = url; // pop-ups blocked outright: open it here
+  } catch (error) {
+    tab?.close();
+    throw error;
+  }
+}

@@ -12,7 +12,7 @@ import {
   StatusBadge,
   problemMessage,
 } from "../../components/ui";
-import { api, ok } from "../../lib/api";
+import { api, ok, openAfter } from "../../lib/api";
 import { useMe } from "../../lib/auth";
 import { when } from "../../lib/format";
 import { can } from "../../lib/nav";
@@ -74,13 +74,14 @@ export function ApplicationDetail() {
     },
     onSuccess: done,
   });
-  const openDoc = async (doc: string) => {
-    const { data } = await api.GET(
-      "/api/v1/applications/{public_id}/documents/{document_id}/link",
-      { params: { path: { public_id: id, document_id: doc } } },
-    );
-    if (data) window.open(data.url, "_blank", "noopener");
-  };
+  const openDoc = (doc: string) =>
+    openAfter(async () => {
+      const { data } = await api.GET(
+        "/api/v1/applications/{public_id}/documents/{document_id}/link",
+        { params: { path: { public_id: id, document_id: doc } } },
+      );
+      return data?.url;
+    });
   const a = app.data;
   const reviewer = !!a?.documents;
   const open = !!a && (a.allowed_transitions.length > 0 || a.status === "accepted");

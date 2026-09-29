@@ -20,7 +20,7 @@ import { ALL } from "../../components/Pager";
 const GROUPS: { key: TaskState[]; label: string }[] = [
   { key: ["late"], label: "متأخر" },
   { key: ["today"], label: "اليوم" },
-  { key: ["week"], label: "هذا الأسبوع" },
+  { key: ["week"], label: "خلال 7 أيام" },
   { key: ["later"], label: "لاحقًا" },
   { key: ["submitted", "graded"], label: "مكتمل" },
 ];
@@ -57,9 +57,9 @@ export function Tasks() {
           <ProgressRing
             value={list.length - open.length}
             max={list.length}
-            label={`أنجزت ${(list.length - open.length).toLocaleString("ar")} من ${list.length.toLocaleString("ar")}`}
+            label={`أنجزت ${(list.length - open.length).toLocaleString("ar-u-nu-latn")} من ${list.length.toLocaleString("ar-u-nu-latn")}`}
           >
-            {`${(list.length - open.length).toLocaleString("ar")}/${list.length.toLocaleString("ar")}`}
+            {`${(list.length - open.length).toLocaleString("ar-u-nu-latn")}/${list.length.toLocaleString("ar-u-nu-latn")}`}
           </ProgressRing>
         ) : undefined
       }
@@ -76,7 +76,10 @@ export function Tasks() {
             return (
               <section key={g.label}>
                 <SectionLabel>
-                  {g.label} · {items.length.toLocaleString("ar")}
+                  {g.label} ·{" "}
+                  {(
+                    items.length + (g.key.includes("week") ? upcomingExams.length : 0)
+                  ).toLocaleString("ar-u-nu-latn")}
                 </SectionLabel>
                 <Card className="motion-stagger divide-y divide-border-soft">
                   {items.map((a) => {
@@ -102,7 +105,7 @@ export function Tasks() {
                           className={`shrink-0 text-xs font-semibold ${state === "late" ? "text-danger-strong" : state === "graded" ? "text-success-strong" : "text-text-muted"}`}
                         >
                           {state === "graded"
-                            ? `${Number(a.mine!.score).toLocaleString("ar")}/${Number(a.max_grade).toLocaleString("ar")}`
+                            ? `${Number(a.mine!.score).toLocaleString("ar-u-nu-latn")}/${Number(a.max_grade).toLocaleString("ar-u-nu-latn")}`
                             : state === "submitted"
                               ? "سُلِّم"
                               : dueLabel(a.due_at, now)}

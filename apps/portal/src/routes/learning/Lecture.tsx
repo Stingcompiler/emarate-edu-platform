@@ -5,7 +5,7 @@ import { Link, useParams } from "react-router";
 
 import { PortalShell } from "../../components/PortalShell";
 import { Button, Card, SectionLabel } from "../../components/ui";
-import { api } from "../../lib/api";
+import { api, ok } from "../../lib/api";
 import {
   dueLabel,
   fmtSize,
@@ -24,8 +24,8 @@ export function Lecture() {
   const lecture = useQuery({
     queryKey: ["lecture", id],
     queryFn: async () =>
-      (await api.GET("/api/v1/lectures/{public_id}", { params: { path: { public_id: id } } }))
-        .data ?? null,
+      ok(await api.GET("/api/v1/lectures/{public_id}", { params: { path: { public_id: id } } })) ??
+      null,
   });
   const l = lecture.data;
   const siblings = useLectures(l?.offering);

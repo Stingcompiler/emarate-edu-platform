@@ -11,7 +11,7 @@ from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.utils.translation import gettext
 from django.views.decorators.csrf import ensure_csrf_cookie
-from drf_spectacular.utils import extend_schema, inline_serializer
+from drf_spectacular.utils import OpenApiParameter, extend_schema, inline_serializer
 from rest_framework import mixins, serializers, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import NotAuthenticated, PermissionDenied
@@ -322,9 +322,17 @@ class UserViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.Gen
     search_fields = ["email", "full_name_ar", "full_name_en"]
     filterset_fields = ["is_active"]
 
+    @extend_schema(parameters=[OpenApiParameter("role", str, required=False)])
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
     def get_queryset(self):
         user = self.request.user
         queryset = User.objects.prefetch_related("role_assignments__department")
+        # ?role=registrar: one role's accounts, filtered by the server (review 2026-09-29, P3).
+        role = self.request.query_params.get("role")
+        if role in Role.values:
+            queryset = queryset.filter(role_assignments__role=role).distinct()
         if rbac.has_role(user, Role.SYSTEM_ADMIN):
             return queryset
         visible: set[str] = set()

@@ -68,7 +68,7 @@ export function Cases() {
   return (
     <PortalShell
       title="الحالات"
-      subtitle={`${open.length.toLocaleString("ar")} مفتوحة · سرية — لا يراها إلا المخوَّلون والطالب المعني بعد النشر`}
+      subtitle={`${open.length.toLocaleString("ar-u-nu-latn")} مفتوحة · سرية — لا يراها إلا المخوَّلون والطالب المعني بعد النشر`}
       titleAction={
         manager ? (
           <Link to="/cases/new">

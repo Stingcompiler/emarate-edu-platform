@@ -41,7 +41,7 @@ export function Redirects() {
   return (
     <PortalShell
       title="التحويلات"
-      subtitle={`${(list.data?.length ?? 0).toLocaleString("ar")} نشطة`}
+      subtitle={`${(list.data?.length ?? 0).toLocaleString("ar-u-nu-latn")} نشطة`}
       back={{ label: "محتوى الموقع", to: "/site" }}
     >
       <WithSide

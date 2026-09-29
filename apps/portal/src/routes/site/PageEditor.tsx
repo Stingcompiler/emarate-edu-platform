@@ -13,7 +13,7 @@ import {
   SectionLabel,
   problemMessage,
 } from "../../components/ui";
-import { api } from "../../lib/api";
+import { api, ok } from "../../lib/api";
 import { useUnsavedChanges } from "../../lib/useUnsavedChanges";
 
 type Block = {
@@ -43,8 +43,11 @@ export function PageEditor() {
     queryKey: ["site", "pages", id],
     enabled: !creating,
     queryFn: async () =>
-      (await api.GET("/api/v1/content/pages/{public_id}", { params: { path: { public_id: id! } } }))
-        .data ?? null,
+      ok(
+        await api.GET("/api/v1/content/pages/{public_id}", {
+          params: { path: { public_id: id! } },
+        }),
+      ) ?? null,
   });
   const [slug, setSlug] = useState("");
   const [title, setTitle] = useState("");
@@ -157,6 +160,7 @@ export function PageEditor() {
                   {b.type === "html" ? (
                     <textarea
                       dir="ltr"
+                      aria-label={`كتلة ${i + 1}: HTML`}
                       value={b.html ?? ""}
                       onChange={(e) => update(i, { html: e.target.value })}
                       className="block min-h-24 w-full rounded-lg border border-border bg-surface p-2 font-mono text-xs"
@@ -172,6 +176,7 @@ export function PageEditor() {
                           )
                         }
                         placeholder={b.type === "image" ? "وصف الصورة" : "نص الزر"}
+                        aria-label={`كتلة ${i + 1}: ${b.type === "image" ? "وصف الصورة" : "نص الزر"}`}
                         className="min-h-10 rounded-lg border border-border bg-surface px-3 text-sm"
                       />
                       <input
@@ -179,11 +184,13 @@ export function PageEditor() {
                         value={b.url ?? ""}
                         onChange={(e) => update(i, { url: e.target.value })}
                         placeholder="https://… أو /path"
+                        aria-label={`كتلة ${i + 1}: الرابط`}
                         className="min-h-10 rounded-lg border border-border bg-surface px-3 text-sm"
                       />
                     </div>
                   ) : (
                     <textarea
+                      aria-label={`كتلة ${i + 1}: ${TYPES.find((t) => t.key === b.type)?.label ?? "نص"}`}
                       value={b.text ?? ""}
                       onChange={(e) => update(i, { text: e.target.value })}
                       className={`block w-full resize-y rounded-lg border border-border bg-surface p-2 ${b.type === "heading" ? "min-h-11 text-lg font-bold" : "min-h-24 text-sm leading-relaxed"}`}

@@ -25,6 +25,7 @@ import {
 } from "../../lib/visitor";
 import { VerifyEmail } from "./VerifyEmail";
 import { VisitorLayout } from "./VisitorLayout";
+import { fmtDate } from "../../lib/format";
 
 type Application = {
   public_id: string;
@@ -211,8 +212,7 @@ function ChooseProgram({
                 </span>
               )}
               <span className="text-xs text-text-muted">
-                {i.department_name} · {i.degree} · يُغلق{" "}
-                {new Date(i.closes_at).toLocaleDateString("ar")}
+                {i.department_name} · {i.degree} · يُغلق {fmtDate(i.closes_at)}
               </span>
             </span>
           </button>
@@ -586,7 +586,7 @@ function Success({ app }: { app: Application }) {
         ].map((t, i) => (
           <li key={t} className="flex gap-3">
             <span className="grid size-7 shrink-0 place-items-center rounded-full bg-primary text-xs font-bold text-white">
-              {(i + 1).toLocaleString("ar")}
+              {(i + 1).toLocaleString("ar-u-nu-latn")}
             </span>
             <span className="text-text">{t}</span>
           </li>

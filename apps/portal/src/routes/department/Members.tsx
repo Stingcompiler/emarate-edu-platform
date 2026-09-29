@@ -133,7 +133,7 @@ export function Members() {
                   <b className="block text-text">{selected.user.full_name_ar}</b>
                   <span className="text-xs text-text-muted">
                     {selected.kind === "ta" ? "معيد" : "أستاذ"} · انضم{" "}
-                    {new Date(selected.created_at).toLocaleDateString("ar", {
+                    {new Date(selected.created_at).toLocaleDateString("ar-u-nu-latn", {
                       month: "long",
                       year: "numeric",
                     })}{" "}
@@ -153,7 +153,7 @@ export function Members() {
                     <b className="block text-lg">
                       {num(metric.get(selected.user.public_id)!.students)}
                     </b>
-                    طالبًا
+                    الطلاب
                   </span>
                   <span className="rounded-lg bg-surface-alt p-2">
                     <b className="block text-lg">
@@ -212,8 +212,9 @@ function AddMember({ department }: { department: number }) {
     queryKey: ["teachers-directory", q],
     enabled: q.trim().length >= 2,
     queryFn: async () =>
-      (await api.GET("/api/v1/teachers-directory", { params: { query: { search: q.trim() } } }))
-        .data ?? [],
+      ok(
+        await api.GET("/api/v1/teachers-directory", { params: { query: { search: q.trim() } } }),
+      ) ?? [],
   });
   const add = useMutation({
     mutationFn: async (user: string) => {

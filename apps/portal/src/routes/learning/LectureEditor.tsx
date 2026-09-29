@@ -13,7 +13,7 @@ import {
   StatusBadge,
   problemMessage,
 } from "../../components/ui";
-import { api } from "../../lib/api";
+import { api, ok } from "../../lib/api";
 import { useUnsavedChanges } from "../../lib/useUnsavedChanges";
 import { fmtSize, useLectures, useCourse } from "../../lib/learning";
 import { tusUpload } from "../../lib/tus";
@@ -30,11 +30,11 @@ export function LectureEditor() {
     queryKey: ["lecture", id],
     enabled: !!id,
     queryFn: async () =>
-      (await api.GET("/api/v1/lectures/{public_id}", { params: { path: { public_id: id! } } }))
-        .data ?? null,
+      ok(await api.GET("/api/v1/lectures/{public_id}", { params: { path: { public_id: id! } } })) ??
+      null,
   });
   const l = existing.data;
-  const offering = l?.offering ?? Number(params.get("offering"));
+  const offering = l?.offering ?? (Number(params.get("offering")) || undefined);
   const course = useCourse(offering).data;
   const siblings = useLectures(offering);
   const [title, setTitle] = useState("");
@@ -57,7 +57,7 @@ export function LectureEditor() {
       let publicId = id;
       if (!publicId) {
         const { data, error } = await api.POST("/api/v1/lectures", {
-          body: { offering, title_ar: title, description, type, order: nextOrder },
+          body: { offering: offering!, title_ar: title, description, type, order: nextOrder },
         });
         if (!data) throw error;
         publicId = data.public_id;
@@ -164,7 +164,7 @@ export function LectureEditor() {
             <SectionLabel>الموارد</SectionLabel>
             {l ? (
               <div data-saves-itself>
-                <Resources lecture={l} offering={offering} onChange={refresh} />
+                <Resources lecture={l} offering={l.offering} onChange={refresh} />
               </div>
             ) : (
               <Card className="p-4 text-sm text-text-muted">
@@ -180,8 +180,7 @@ export function LectureEditor() {
 
 type L = NonNullable<Awaited<ReturnType<typeof loadLecture>>>;
 async function loadLecture(id: string) {
-  return (await api.GET("/api/v1/lectures/{public_id}", { params: { path: { public_id: id } } }))
-    .data;
+  return ok(await api.GET("/api/v1/lectures/{public_id}", { params: { path: { public_id: id } } }));
 }
 
 function Resources({

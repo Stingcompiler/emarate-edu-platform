@@ -19,7 +19,7 @@ import { count, N } from "../../lib/format";
 import { ALL, Pager, useLocalPages } from "../../components/Pager";
 
 type Exam = Schemas["Exam"];
-const when = new Intl.DateTimeFormat("ar", {
+const when = new Intl.DateTimeFormat("ar-u-nu-latn", {
   weekday: "short",
   day: "numeric",
   month: "short",
@@ -37,7 +37,7 @@ export function examPhase(exam: Exam, now = Date.now()): { key: string; label: s
     return { key: "closed", label: "منتهٍ" };
   if (attemptsUsedUp(exam)) return { key: "closed", label: "أنهيته" };
   if (new Date(exam.opens_at).getTime() > now) return { key: "open", label: "مجدول" };
-  return { key: "published", label: "جارٍ الآن" };
+  return { key: "published", label: "مفتوح الآن" };
 }
 
 /** Student only: every allowed attempt is finished, so nothing is left to do. */
@@ -58,10 +58,11 @@ export function Exams() {
   });
   const list = exams.data ?? [];
   const now = Date.now();
+  // Drafts are the teacher's; a student never sees that group (review 2026-09-29).
   const groups = [
-    { key: "published", label: "جارٍ الآن" },
+    { key: "published", label: "مفتوحة الآن" },
     { key: "open", label: "قادمة" },
-    { key: "draft", label: "مسودات" },
+    ...(staff ? [{ key: "draft", label: "مسودات" }] : []),
     { key: "closed", label: "منتهية" },
   ];
   // 10 at a time, in the order the groups appear (live, upcoming, drafts, ended).
@@ -82,7 +83,9 @@ export function Exams() {
       }
     >
       {list.length > 0 && (
-        <div className="mb-2 grid grid-cols-2 gap-2 lg:grid-cols-4">
+        <div
+          className={`mb-2 grid grid-cols-2 gap-2 ${groups.length === 4 ? "lg:grid-cols-4" : "lg:grid-cols-3"}`}
+        >
           {groups.map((g) => (
             <Card key={g.key} className="p-3">
               <p className="text-xl font-bold text-text">

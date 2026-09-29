@@ -272,8 +272,25 @@ class ApplicationViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, views
             assigned_registrar__isnull=True,
             status=Application.Status.SUBMITTED,
         ).count()
+        # Each registrar's load, counted here rather than from one page of applications
+        # (review 2026-09-29, P3).
+        by_registrar = {
+            str(row["assigned_registrar__public_id"]): row["n"]
+            for row in Application.objects.filter(
+                services.staff_q(request.user), assigned_registrar__isnull=False
+            )
+            .exclude(status=Application.Status.DRAFT)
+            .values("assigned_registrar__public_id")
+            .annotate(n=Count("id"))
+            .order_by()
+        }
         return Response(
-            {"by_status": by_status, "by_department": by_department, "unassigned": unassigned}
+            {
+                "by_status": by_status,
+                "by_department": by_department,
+                "unassigned": unassigned,
+                "by_registrar": by_registrar,
+            }
         )
 
 

@@ -43,8 +43,9 @@ export function CaseNew() {
     queryKey: ["students", "lookup", number],
     enabled: number.trim().length >= 4 && !reportId,
     queryFn: async () =>
-      (await api.GET("/api/v1/students", { params: { query: { ...ALL, search: number.trim() } } }))
-        .data?.results ?? [],
+      ok(
+        await api.GET("/api/v1/students", { params: { query: { ...ALL, search: number.trim() } } }),
+      )?.results ?? [],
   });
   const student = students.data?.[0];
 

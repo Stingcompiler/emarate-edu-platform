@@ -30,7 +30,7 @@ export function HRReport() {
               </p>
               <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
                 {[
-                  [num(s.members), "عضوًا", ""],
+                  [num(s.members), "الأعضاء", ""],
                   [days(s.grading_days), "زمن التصحيح", p ? `سابقًا ${days(p.grading_days)}` : ""],
                   [
                     pct(s.upload_percent),

@@ -14,6 +14,7 @@ import {
   problemMessage,
 } from "../../components/ui";
 import { api, ok } from "../../lib/api";
+import { Pager, useServerPages } from "../../components/Pager";
 
 type Summary = { rows?: number; create?: number; error?: number; committed?: number };
 
@@ -39,15 +40,18 @@ export function ResultImportDetail() {
     queryKey: ["result-imports", id],
     queryFn: async () => ok(await api.GET("/api/v1/result-imports/{public_id}", path)) ?? null,
   });
-  const rows = useQuery({
-    queryKey: ["result-imports", id, "rows", only],
-    queryFn: async () =>
-      ok(
-        await api.GET("/api/v1/result-imports/{public_id}/rows", {
-          params: { path: { public_id: id }, query: only === "error" ? { action: "error" } : {} },
-        }),
-      )?.results ?? [],
-  });
+  // Paged by the server, 10 rows at a time — every row reachable, errors after row 10
+  // included (review 2026-09-29, P4).
+  const rows = useServerPages(["result-imports", id, "rows", only], async (page) =>
+    ok(
+      await api.GET("/api/v1/result-imports/{public_id}/rows", {
+        params: {
+          path: { public_id: id },
+          query: { page, ...(only === "error" ? { action: "error" as const } : {}) },
+        },
+      }),
+    ),
+  );
 
   const act = useMutation({
     mutationFn: async (kind: "commit" | "publish" | "unpublish" | "delete") => {
@@ -89,7 +93,11 @@ export function ResultImportDetail() {
                 <span
                   className={`grid size-6 place-items-center rounded-full text-xs font-bold ${s.done ? "bg-success text-white" : "bg-surface-alt text-text-muted"}`}
                 >
-                  {s.done ? <Check size={14} aria-hidden /> : (i + 1).toLocaleString("ar")}
+                  {s.done ? (
+                    <Check size={14} aria-hidden />
+                  ) : (
+                    (i + 1).toLocaleString("ar-u-nu-latn")
+                  )}
                 </span>
                 <span className={s.done ? "text-text" : "text-text-muted"}>{s.label}</span>
               </li>
@@ -170,9 +178,16 @@ export function ResultImportDetail() {
               <span>التقدير</span>
               <span>الحالة</span>
             </div>
-            {(rows.data ?? []).map((row) => {
+            {!rows.query.isPending && !rows.items.length && (
+              <p className="px-4 py-5 text-sm text-text-muted">
+                {only === "error"
+                  ? "لا أخطاء في هذا الملف."
+                  : "لا صفوف للمعاينة — نتائج الدفعة المعتمدة في سجل النتائج."}
+              </p>
+            )}
+            {rows.items.map((row) => {
               const n = row.normalized as Record<string, string | null>;
-              const ok = row.action === "create";
+              const matched = row.action === "create";
               return (
                 <div
                   key={row.row_no}
@@ -188,9 +203,9 @@ export function ResultImportDetail() {
                     {n.letter || "—"}
                   </span>
                   <span
-                    className={`col-span-3 text-xs lg:col-span-1 ${ok ? "text-success-strong" : "text-danger-strong"}`}
+                    className={`col-span-3 text-xs lg:col-span-1 ${matched ? "text-success-strong" : "text-danger-strong"}`}
                   >
-                    {ok
+                    {matched
                       ? `مطابق · ${n.score ?? ""} \u2066${n.letter ?? ""}\u2069`
                       : (row.errors as string[]).join(" · ")}
                   </span>
@@ -198,6 +213,7 @@ export function ResultImportDetail() {
               );
             })}
           </Card>
+          <Pager page={rows.page} count={rows.count} onPage={rows.setPage} label="صفحات الصفوف" />
         </>
       )}
     </PortalShell>

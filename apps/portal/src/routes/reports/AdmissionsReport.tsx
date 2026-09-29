@@ -43,8 +43,9 @@ export function AdmissionsReport() {
   const report = useQuery({
     queryKey: ["reports", "admissions", cycle, department],
     queryFn: async () =>
-      (await api.GET("/api/v1/reports/admissions", { params: { query: { cycle, department } } }))
-        .data ?? null,
+      ok(
+        await api.GET("/api/v1/reports/admissions", { params: { query: { cycle, department } } }),
+      ) ?? null,
   });
   const r = report.data;
   const growth = r?.previous?.total
@@ -92,7 +93,7 @@ export function AdmissionsReport() {
           <div className="mt-4 grid grid-cols-2 gap-2 lg:grid-cols-5">
             <Kpi
               value={r.total ?? "—"}
-              label="طلبًا"
+              label="الطلبات"
               note={
                 growth != null ? (
                   <bdi>{`${growth >= 0 ? "+" : "−"}${num(Math.abs(growth))}٪ عن ${r.previous!.cycle}`}</bdi>

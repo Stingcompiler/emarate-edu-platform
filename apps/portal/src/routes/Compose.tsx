@@ -85,7 +85,7 @@ export function Compose() {
 
   const ready = audience && title.trim().length > 0 && !send.isPending;
   const sendLabel = audience
-    ? `إرسال الآن إلى ${audience.count.toLocaleString("ar")} ${audience.count === 1 ? "مستلم" : "مستلمين"}`
+    ? `إرسال الآن إلى ${audience.count.toLocaleString("ar-u-nu-latn")} ${audience.count === 1 ? "مستلم" : "مستلمين"}`
     : "اختر الجمهور";
 
   return (
@@ -221,7 +221,7 @@ function AudiencePicker({
             </label>
             {single ? (
               <span className="text-sm text-text-muted">
-                {first.option.count.toLocaleString("ar")}
+                {first.option.count.toLocaleString("ar-u-nu-latn")}
               </span>
             ) : (
               <select
@@ -235,7 +235,7 @@ function AudiencePicker({
                 </option>
                 {items.map(({ option, index }) => (
                   <option key={index} value={index}>
-                    {option.label} · {option.count.toLocaleString("ar")}
+                    {option.label} · {option.count.toLocaleString("ar-u-nu-latn")}
                   </option>
                 ))}
               </select>

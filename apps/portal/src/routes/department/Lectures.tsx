@@ -24,7 +24,7 @@ export function DepartmentLectures() {
   const { id, department } = useDepartment();
   const term = useCurrentTerm();
   const offerings = useOfferings(id, term.data?.id);
-  const lectures = useLectures();
+  const lectures = useLectures("all");
   const remove = useMutation({
     mutationFn: async (publicId: string) => {
       const { error, response } = await api.DELETE("/api/v1/lectures/{public_id}", {

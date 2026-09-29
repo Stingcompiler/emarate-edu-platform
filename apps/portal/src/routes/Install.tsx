@@ -112,7 +112,7 @@ export function Install() {
                 {STEPS[platform].map((step, index) => (
                   <li key={step.title} className="flex gap-3 py-3">
                     <span className="grid size-7 shrink-0 place-items-center rounded-full bg-primary text-xs font-bold text-white">
-                      {(index + 1).toLocaleString("ar")}
+                      {(index + 1).toLocaleString("ar-u-nu-latn")}
                     </span>
                     <div>
                       <p className="text-sm font-semibold text-text">{step.title}</p>

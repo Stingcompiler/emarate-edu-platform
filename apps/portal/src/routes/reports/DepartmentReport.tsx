@@ -126,7 +126,7 @@ export function DepartmentReport() {
             />
             <Kpi
               value={k.students ?? "—"}
-              label="طالبًا"
+              label="الطلاب"
               note={`${pct(k.enrolled_percent)} مسجلون في مواد`}
             />
             <Kpi

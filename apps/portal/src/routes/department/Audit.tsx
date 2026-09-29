@@ -180,7 +180,11 @@ export function actionLabel(code: string): string {
 }
 
 const dayKey = (iso: string) =>
-  new Date(iso).toLocaleDateString("ar", { weekday: "long", day: "numeric", month: "long" });
+  new Date(iso).toLocaleDateString("ar-u-nu-latn", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+  });
 
 /** Board: DesktopDeptOperations — every change with before/after; never deleted. */
 export function Audit() {
@@ -257,7 +261,7 @@ export function Audit() {
               {items.map((r) => (
                 <div key={r.id} className="flex gap-3 px-4 py-3 text-sm">
                   <span className="w-12 shrink-0 text-xs text-text-muted">
-                    {new Date(r.at).toLocaleTimeString("ar", {
+                    {new Date(r.at).toLocaleTimeString("ar-u-nu-latn", {
                       hour: "numeric",
                       minute: "2-digit",
                     })}

@@ -4,7 +4,7 @@ import { useParams } from "react-router";
 import { api, ok } from "../../lib/api";
 import { num } from "../../lib/reports";
 import { PrintLayout, PrintTable } from "./PrintLayout";
-import { count, N } from "../../lib/format";
+import { count, N, fmtDate } from "../../lib/format";
 
 /** Official transcript for results staff (board StudentTranscript's «سجل أكاديمي رسمي PDF»). */
 export function PrintTranscript() {
@@ -30,7 +30,7 @@ export function PrintTranscript() {
       title="السجل الأكاديمي"
       meta={
         <>
-          <p>أُصدر {new Date(d.issued_at).toLocaleDateString("ar")}</p>
+          <p>أُصدر {fmtDate(d.issued_at)}</p>
           <p>
             الرقم الجامعي <bdi className="font-semibold">{d.university_number}</bdi>
           </p>
@@ -113,7 +113,7 @@ export function PrintMyResults() {
   return (
     <PrintLayout
       title="كشف النتائج"
-      meta={<p>طُبع {new Date().toLocaleDateString("ar")}</p>}
+      meta={<p>طُبع {new Date().toLocaleDateString("ar-u-nu-latn")}</p>}
       footer="نسخة للاطلاع — السجل الرسمي يصدر من مسؤول النتائج."
     >
       {d.cumulative_gpa && (

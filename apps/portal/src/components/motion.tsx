@@ -13,7 +13,7 @@ const reduced = () =>
 /** A number that counts up to its value once (e.g. figures on a dashboard). */
 export function CountUp({
   value,
-  format = (n) => Math.round(n).toLocaleString("ar"),
+  format = (n) => Math.round(n).toLocaleString("ar-u-nu-latn"),
   duration = 700,
 }: {
   value: number;

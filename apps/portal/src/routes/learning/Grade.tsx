@@ -111,7 +111,7 @@ export function Grade() {
                 <b className="block text-text">{s.student.full_name_ar}</b>
                 <span className="text-xs text-text-muted">
                   <bdi>{s.student.university_number}</bdi> · الإصدار{" "}
-                  {v.version_no.toLocaleString("ar")} · {when(v.submitted_at)}
+                  {v.version_no.toLocaleString("ar-u-nu-latn")} · {when(v.submitted_at)}
                 </span>
               </span>
               <span
@@ -137,7 +137,8 @@ export function Grade() {
                     onClick={() => openFile(f)}
                     className="flex w-full items-center gap-3 px-4 py-3 text-start text-sm text-primary hover:bg-surface-alt"
                   >
-                    <Paperclip size={16} aria-hidden /> الملف {(i + 1).toLocaleString("ar")}
+                    <Paperclip size={16} aria-hidden /> الملف{" "}
+                    {(i + 1).toLocaleString("ar-u-nu-latn")}
                   </button>
                 ))}
                 {Object.entries((v.links as Record<string, string>) ?? {}).map(([k, url]) => (
@@ -158,8 +159,8 @@ export function Grade() {
             {s.grade?.status === "suggested" && (
               <Card className="space-y-2 bg-warning-soft p-4 text-sm text-warning-strong">
                 <b>
-                  اقتراح آلي — {Number(s.grade.score).toLocaleString("ar")} /{" "}
-                  {max.toLocaleString("ar")} · يتطلب اعتمادك
+                  اقتراح آلي — {Number(s.grade.score).toLocaleString("ar-u-nu-latn")} /{" "}
+                  {max.toLocaleString("ar-u-nu-latn")} · يتطلب اعتمادك
                 </b>
                 {s.grade.feedback && <p>{s.grade.feedback}</p>}
                 <Button
@@ -171,7 +172,7 @@ export function Grade() {
                 </Button>
               </Card>
             )}
-            <SectionLabel>الدرجة من {max.toLocaleString("ar")}</SectionLabel>
+            <SectionLabel>الدرجة من {max.toLocaleString("ar-u-nu-latn")}</SectionLabel>
             <Card className="space-y-3 p-4">
               <input
                 inputMode="decimal"
@@ -191,7 +192,7 @@ export function Grade() {
                       onClick={() => setScore(String(n))}
                       className="rounded-full border border-border-soft px-2.5 py-1 text-xs hover:bg-surface-alt"
                     >
-                      {n.toLocaleString("ar")}
+                      {n.toLocaleString("ar-u-nu-latn")}
                     </button>
                   ))}
               </div>

@@ -53,7 +53,8 @@ export function Pager({
       className="mt-4 flex flex-col items-center gap-3 sm:flex-row sm:justify-between"
     >
       <p className="text-sm text-text-muted" aria-live="polite">
-        عرض {from.toLocaleString("ar")}–{to.toLocaleString("ar")} من {count.toLocaleString("ar")}
+        عرض {from.toLocaleString("ar-u-nu-latn")}–{to.toLocaleString("ar-u-nu-latn")} من{" "}
+        {count.toLocaleString("ar-u-nu-latn")}
       </p>
       <div className="flex items-center gap-1">
         <button
@@ -69,7 +70,7 @@ export function Pager({
         </button>
         {/* Numbers: hidden on the narrowest phones, where «2 / 7» says it. */}
         <span className="px-2 text-sm text-text-muted sm:hidden">
-          {page.toLocaleString("ar")} / {pages.toLocaleString("ar")}
+          {page.toLocaleString("ar-u-nu-latn")} / {pages.toLocaleString("ar-u-nu-latn")}
         </span>
         <span className="hidden items-center gap-1 sm:flex">
           {pageList(page, pages).map((p, i) =>
@@ -83,10 +84,10 @@ export function Pager({
                 type="button"
                 onClick={() => go(p)}
                 aria-current={p === page ? "page" : undefined}
-                aria-label={`الصفحة ${p.toLocaleString("ar")}`}
+                aria-label={`الصفحة ${p.toLocaleString("ar-u-nu-latn")}`}
                 className={`${button} ${p === page ? "bg-text font-semibold text-bg" : "text-text hover:bg-surface-alt"}`}
               >
-                {p.toLocaleString("ar")}
+                {p.toLocaleString("ar-u-nu-latn")}
               </button>
             ),
           )}
@@ -114,7 +115,11 @@ type PageOf<T> = { count: number; results: T[] } | null | undefined;
  * changing any of them goes back to page 1. The previous page stays on screen while
  * the next one loads (no flash of an empty list).
  */
-export function useServerPages<T>(key: unknown[], fetchPage: (page: number) => Promise<PageOf<T>>) {
+export function useServerPages<T>(
+  key: unknown[],
+  fetchPage: (page: number) => Promise<PageOf<T>>,
+  options: { refetchInterval?: number } = {},
+) {
   const [page, setPage] = useState(1);
   const filters = JSON.stringify(key);
   const last = useRef(filters);
@@ -128,6 +133,7 @@ export function useServerPages<T>(key: unknown[], fetchPage: (page: number) => P
     queryKey: [...key, "page", page],
     queryFn: () => fetchPage(page),
     placeholderData: keepPreviousData,
+    ...options,
   });
   return {
     query,

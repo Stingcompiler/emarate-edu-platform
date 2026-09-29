@@ -406,3 +406,8 @@ def test_claim_and_assign(
     )
     summary = api(head).get("/api/v1/applications/summary").data
     assert summary["by_status"] == {"submitted": 1}
+    assert summary["by_registrar"] == {str(registrar.public_id): 1}
+    # The users list filters by role on the server (review 2026-09-29, P3).
+    listed = api(head).get("/api/v1/users", {"role": "registrar"}).data["results"]
+    assert str(registrar.public_id) in {u["public_id"] for u in listed}
+    assert all(any(r["role"] == "registrar" for r in u["roles"]) for u in listed)

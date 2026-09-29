@@ -14,20 +14,22 @@ export function Registrars() {
   const users = useQuery({
     queryKey: ["users", "registrars"],
     queryFn: async () =>
-      (await api.GET("/api/v1/users", { params: { query: { is_active: true, page_size: 100 } } }))
-        .data?.results ?? [],
+      // Registrars only, filtered by the server (not the first 100 accounts of every role).
+      ok(
+        await api.GET("/api/v1/users", {
+          params: { query: { is_active: true, role: "registrar", page_size: 100 } },
+        }),
+      )?.results ?? [],
   });
   const load = useQuery({
     queryKey: ["applications", "load"],
+    // Each registrar's load, counted by the server (review 2026-09-29, P3).
     queryFn: async () =>
-      (
-        ok(await api.GET("/api/v1/applications", { params: { query: { page_size: 100 } } }))
-          ?.results ?? []
-      ).reduce<Record<string, number>>((acc, a) => {
-        if (a.assigned_registrar_name)
-          acc[a.assigned_registrar_name] = (acc[a.assigned_registrar_name] ?? 0) + 1;
-        return acc;
-      }, {}),
+      ((
+        ok(await api.GET("/api/v1/applications/summary")) as {
+          by_registrar?: Record<string, number>;
+        }
+      )?.by_registrar ?? {}) as Record<string, number>,
   });
   const refresh = () => client.invalidateQueries({ queryKey: ["users"] });
   const link = useMutation({
@@ -93,7 +95,7 @@ export function Registrars() {
               <span className="min-w-0 flex-1">
                 <b className="block text-text">{u.full_name_ar}</b>
                 <span className="text-xs text-text-muted">
-                  <bdi>{u.email}</bdi> · {count(load.data?.[u.full_name_ar] ?? 0, N.application)}
+                  <bdi>{u.email}</bdi> · {count(load.data?.[u.public_id] ?? 0, N.application)}
                 </span>
               </span>
               <span className="flex flex-wrap items-center gap-1.5">

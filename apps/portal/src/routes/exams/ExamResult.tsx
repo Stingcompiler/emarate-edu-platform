@@ -56,10 +56,10 @@ export function ExamResult() {
                 {r.course_name} · {r.exam_title}
               </p>
               <p className="mt-2 text-5xl font-bold text-text">
-                {r.score !== null ? Number(r.score).toLocaleString("ar") : "—"}
+                {r.score !== null ? Number(r.score).toLocaleString("ar-u-nu-latn") : "—"}
                 <span className="text-2xl text-text-muted">
                   {" "}
-                  / {Number(r.total).toLocaleString("ar")}
+                  / {Number(r.total).toLocaleString("ar-u-nu-latn")}
                 </span>
               </p>
               <div className="mt-3 flex justify-center">
@@ -77,14 +77,16 @@ export function ExamResult() {
                 {r.attempt_no} من {r.max_attempts}
               </p>
             </Card>
-            <Card className="mt-3 grid grid-cols-3 divide-x divide-x-reverse divide-border-soft text-center">
+            <Card className="mt-3 grid grid-cols-3 divide-x divide-border-soft text-center">
               {[
                 { n: r.correct, l: "صحيح" },
                 { n: r.wrong, l: "خطأ" },
                 { n: r.blank, l: "بلا إجابة" },
               ].map((s) => (
                 <div key={s.l} className="py-3">
-                  <p className="text-xl font-bold text-text">{s.n.toLocaleString("ar")}</p>
+                  <p className="text-xl font-bold text-text">
+                    {s.n.toLocaleString("ar-u-nu-latn")}
+                  </p>
                   <p className="text-xs text-text-muted">{s.l}</p>
                 </div>
               ))}
@@ -123,7 +125,7 @@ export function ExamResult() {
                           ) : (
                             part.value.trim() && (
                               <p key={i} className="whitespace-pre-line font-semibold text-text">
-                                {i === 0 && `${q.order.toLocaleString("ar")}. `}
+                                {i === 0 && `${q.order.toLocaleString("ar-u-nu-latn")}. `}
                                 {part.value}
                               </p>
                             )

@@ -47,7 +47,7 @@ export function Approvals() {
   return (
     <PortalShell
       title="طلبات التسجيل"
-      subtitle={`${count(rows.length, N.student)} أكملوا رمز التحقق · الاعتماد يفعّل الحساب ويُشعر الطالب فورًا`}
+      subtitle={`${rows.length ? `${count(rows.length, N.student)} أكملوا رمز التحقق` : "لا طلبات بانتظار الاعتماد"} · الاعتماد يفعّل الحساب ويُشعر الطالب فورًا`}
       back={{ label: "لوحة القسم", to: "/department" }}
     >
       {matching.length > 1 && (

@@ -29,15 +29,15 @@ export function Grading() {
   return (
     <PortalShell
       title="التصحيح"
-      subtitle={`${counts.pending.toLocaleString("ar")} بانتظارك · ${counts.suggested.toLocaleString("ar")} باقتراح آلي جاهز للاعتماد`}
+      subtitle={`${counts.pending.toLocaleString("ar-u-nu-latn")} بانتظارك · ${counts.suggested.toLocaleString("ar-u-nu-latn")} باقتراح آلي جاهز للاعتماد`}
       titleAction={
         counts.done + counts.pending > 0 ? (
           <ProgressRing
             value={counts.done}
             max={counts.done + counts.pending}
-            label={`صُحّح ${counts.done.toLocaleString("ar")} من ${(counts.done + counts.pending).toLocaleString("ar")}`}
+            label={`صُحّح ${counts.done.toLocaleString("ar-u-nu-latn")} من ${(counts.done + counts.pending).toLocaleString("ar-u-nu-latn")}`}
           >
-            {`${Math.round((counts.done / (counts.done + counts.pending)) * 100).toLocaleString("ar")}٪`}
+            {`${Math.round((counts.done / (counts.done + counts.pending)) * 100).toLocaleString("ar-u-nu-latn")}٪`}
           </ProgressRing>
         ) : undefined
       }
@@ -53,7 +53,7 @@ export function Grading() {
             ] as const
           ).map(([k, l]) => (
             <Chip key={k} active={filter === k} onClick={() => setFilter(k)}>
-              {l} {counts[k].toLocaleString("ar")}
+              {l} {counts[k].toLocaleString("ar-u-nu-latn")}
             </Chip>
           ))}
         </div>
@@ -62,7 +62,8 @@ export function Grading() {
         {(q?.groups ?? []).map(({ assignment: a, submissions }) => (
           <section key={a.public_id}>
             <SectionLabel>
-              <bdi>{a.course_code}</bdi> · {a.title} · {submissions.length.toLocaleString("ar")}
+              <bdi>{a.course_code}</bdi> · {a.title} ·{" "}
+              {submissions.length.toLocaleString("ar-u-nu-latn")}
             </SectionLabel>
             <Card className="motion-stagger divide-y divide-border-soft">
               {submissions.map((r) => (
@@ -79,7 +80,7 @@ export function Grading() {
                     <span className="text-xs text-text-muted">
                       {when(r.current_version?.submitted_at ?? r.first_submitted_at)}
                       {r.versions_count > 1
-                        ? ` · إعادة تسليم — الإصدار ${r.versions_count.toLocaleString("ar")}`
+                        ? ` · إعادة تسليم — الإصدار ${r.versions_count.toLocaleString("ar-u-nu-latn")}`
                         : ""}
                       {r.is_late ? " · متأخر" : ""}
                     </span>
@@ -87,12 +88,12 @@ export function Grading() {
                   <span className="shrink-0 text-xs font-semibold">
                     {r.grade?.status === "approved" ? (
                       <span className="text-success-strong">
-                        {Number(r.grade.final_score).toLocaleString("ar")}/
-                        {Number(a.max_grade).toLocaleString("ar")}
+                        {Number(r.grade.final_score).toLocaleString("ar-u-nu-latn")}/
+                        {Number(a.max_grade).toLocaleString("ar-u-nu-latn")}
                       </span>
                     ) : r.grade ? (
                       <span className="text-warning-strong">
-                        {Number(r.grade.score).toLocaleString("ar")} مقترح
+                        {Number(r.grade.score).toLocaleString("ar-u-nu-latn")} مقترح
                       </span>
                     ) : (
                       <span className="text-primary">جديد</span>

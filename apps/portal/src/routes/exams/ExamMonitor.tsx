@@ -16,7 +16,7 @@ import {
 import { api, ok } from "../../lib/api";
 import { formatClock } from "../../lib/exam";
 import { count, N } from "../../lib/format";
-import { ALL } from "../../components/Pager";
+import { Pager, useServerPages } from "../../components/Pager";
 
 type Row = Schemas["AttemptSummary"];
 const LABEL: Record<string, string> = {
@@ -42,16 +42,32 @@ export function ExamMonitor() {
       ok(await api.GET("/api/v1/exams/{public_id}", { params: { path: { public_id: id } } })) ??
       null,
   });
-  const rows = useQuery({
-    queryKey: ["exams", id, "attempts"],
-    queryFn: async () =>
+  // Paged by the server, and each figure counted there: a 500-student exam shows every
+  // attempt and true totals (review 2026-09-29, P3).
+  const rows = useServerPages(
+    ["exams", id, "attempts"],
+    async (page) =>
       ok(
         await api.GET("/api/v1/exams/{public_id}/attempts", {
-          params: { path: { public_id: id }, query: ALL },
+          params: { path: { public_id: id }, query: { page } },
         }),
-      )?.results ?? [],
-    refetchInterval: 30_000,
-  });
+      ),
+    { refetchInterval: 30_000 },
+  );
+  const stateCount = (state: "in_progress" | "done" | "invalidated") =>
+    ({
+      queryKey: ["exams", id, "attempts", "count", state],
+      queryFn: async () =>
+        ok(
+          await api.GET("/api/v1/exams/{public_id}/attempts", {
+            params: { path: { public_id: id }, query: { state, page_size: 1 } },
+          }),
+        )?.count ?? 0,
+      refetchInterval: 30_000,
+    }) as const;
+  const running = useQuery(stateCount("in_progress"));
+  const done = useQuery(stateCount("done"));
+  const invalidated = useQuery(stateCount("invalidated"));
   const [picked, setPicked] = useState<Row | null>(null);
   const [reason, setReason] = useState("");
   const act = useMutation({
@@ -80,13 +96,12 @@ export function ExamMonitor() {
       void client.invalidateQueries({ queryKey: ["exams", id, "attempts"] });
     },
   });
-  const list = rows.data ?? [];
-  const counts = { in_progress: 0, submitted: 0, invalidated: 0 };
-  for (const r of list) {
-    if (r.status === "in_progress") counts.in_progress++;
-    else if (r.status === "invalidated") counts.invalidated++;
-    else counts.submitted++;
-  }
+  const list = rows.items;
+  const counts = {
+    in_progress: running.data ?? 0,
+    submitted: done.data ?? 0,
+    invalidated: invalidated.data ?? 0,
+  };
   const quiet = (r: Row) =>
     r.status === "in_progress" &&
     r.last_saved_at &&
@@ -155,14 +170,14 @@ export function ExamMonitor() {
           </div>
         }
       >
-        <Card className="grid grid-cols-3 divide-x divide-x-reverse divide-border-soft text-center">
+        <Card className="grid grid-cols-3 divide-x divide-border-soft text-center">
           {[
             { n: counts.submitted, l: "أُرسل" },
             { n: counts.in_progress, l: "جارٍ" },
             { n: counts.invalidated, l: "أُلغي" },
           ].map((s) => (
             <div key={s.l} className="py-3">
-              <p className="text-xl font-bold text-text">{s.n.toLocaleString("ar")}</p>
+              <p className="text-xl font-bold text-text">{s.n.toLocaleString("ar-u-nu-latn")}</p>
               <p className="text-xs text-text-muted">{s.l}</p>
             </div>
           ))}
@@ -194,7 +209,7 @@ export function ExamMonitor() {
                 ) : (
                   r.score !== null && (
                     <span className="text-sm font-bold text-text">
-                      {Number(r.score).toLocaleString("ar")}
+                      {Number(r.score).toLocaleString("ar-u-nu-latn")}
                     </span>
                   )
                 )}
@@ -206,6 +221,7 @@ export function ExamMonitor() {
             );
           })}
         </Card>
+        <Pager page={rows.page} count={rows.count} onPage={rows.setPage} label="صفحات المحاولات" />
       </WithSide>
     </PortalShell>
   );

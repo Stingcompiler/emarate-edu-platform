@@ -33,14 +33,15 @@ export function AffairsHome() {
   const open = useQuery({
     queryKey: ["cases", "open"],
     queryFn: async () =>
-      (await api.GET("/api/v1/cases", { params: { query: { status: "open", page_size: 50 } } }))
-        .data ?? null,
+      ok(
+        await api.GET("/api/v1/cases", { params: { query: { status: "open", page_size: 50 } } }),
+      ) ?? null,
   });
   const drafts = useQuery({
     queryKey: ["regulations", "draft"],
     queryFn: async () =>
-      (await api.GET("/api/v1/regulations", { params: { query: { ...ALL, status: "draft" } } }))
-        .data?.results ?? [],
+      ok(await api.GET("/api/v1/regulations", { params: { query: { ...ALL, status: "draft" } } }))
+        ?.results ?? [],
   });
   const required = useQuery({
     queryKey: ["regulations", "required"],

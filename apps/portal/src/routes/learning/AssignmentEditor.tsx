@@ -13,7 +13,7 @@ import {
   StatusBadge,
   problemMessage,
 } from "../../components/ui";
-import { api } from "../../lib/api";
+import { api, ok } from "../../lib/api";
 import { useUnsavedChanges } from "../../lib/useUnsavedChanges";
 import { useLectures, useCourse } from "../../lib/learning";
 
@@ -41,11 +41,12 @@ export function AssignmentEditor() {
     queryKey: ["assignment", id],
     enabled: !!id,
     queryFn: async () =>
-      (await api.GET("/api/v1/assignments/{public_id}", { params: { path: { public_id: id! } } }))
-        .data ?? null,
+      ok(
+        await api.GET("/api/v1/assignments/{public_id}", { params: { path: { public_id: id! } } }),
+      ) ?? null,
   });
   const a = existing.data;
-  const offering = a?.offering ?? Number(params.get("offering"));
+  const offering = a?.offering ?? (Number(params.get("offering")) || undefined);
   const course = useCourse(offering).data;
   const lectures = useLectures(offering);
   const [f, setF] = useState({

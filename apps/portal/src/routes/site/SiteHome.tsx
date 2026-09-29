@@ -42,7 +42,7 @@ export function SiteHome() {
   return (
     <PortalShell
       title="محتوى الموقع"
-      subtitle={drafts ? `${drafts.toLocaleString("ar")} غير منشور` : "كل المحتوى منشور"}
+      subtitle={drafts ? `${drafts.toLocaleString("ar-u-nu-latn")} غير منشور` : "كل المحتوى منشور"}
     >
       <div className="grid grid-cols-3 gap-2">
         {[

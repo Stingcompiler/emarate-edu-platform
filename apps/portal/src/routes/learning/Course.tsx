@@ -55,14 +55,13 @@ export function Course() {
   });
   const news = useQuery({
     queryKey: ["announcements", "offering", offering],
+    // This course's announcements, filtered by the server (review 2026-09-29, P3).
     queryFn: async () =>
-      (
-        ok(
-          await api.GET("/api/v1/announcements", {
-            params: { query: { ...ALL, scope: "offering" } },
-          }),
-        )?.results ?? []
-      ).filter((a) => a.scope_id === offering),
+      ok(
+        await api.GET("/api/v1/announcements", {
+          params: { query: { ...ALL, scope: "offering", scope_id: offering } },
+        }),
+      )?.results ?? [],
   });
   const [tab, setTab] = useState<(typeof TABS)[number]["key"]>("lectures");
   const tabs = TABS.filter((t) => t.key !== "grades" || !staff);
@@ -99,11 +98,11 @@ export function Course() {
                 <Chip key={t.key} active={tab === t.key} onClick={() => setTab(t.key)}>
                   {t.label}
                   {t.key === "lectures"
-                    ? ` ${lecs.length.toLocaleString("ar")}`
+                    ? ` ${lecs.length.toLocaleString("ar-u-nu-latn")}`
                     : t.key === "work"
-                      ? ` ${(work.length + (exams.data?.length ?? 0)).toLocaleString("ar")}`
+                      ? ` ${(work.length + (exams.data?.length ?? 0)).toLocaleString("ar-u-nu-latn")}`
                       : t.key === "news"
-                        ? ` ${(news.data?.length ?? 0).toLocaleString("ar")}`
+                        ? ` ${(news.data?.length ?? 0).toLocaleString("ar-u-nu-latn")}`
                         : ""}
                 </Chip>
               ))}
@@ -206,8 +205,8 @@ export function Course() {
                           />
                         ) : state === "graded" ? (
                           <b className="text-sm text-success-strong" dir="ltr">
-                            {Number(a.mine!.score).toLocaleString("ar")}/
-                            {Number(a.max_grade).toLocaleString("ar")}
+                            {Number(a.mine!.score).toLocaleString("ar-u-nu-latn")}/
+                            {Number(a.max_grade).toLocaleString("ar-u-nu-latn")}
                           </b>
                         ) : state === "submitted" ? (
                           <StatusBadge status="pending" label="سُلِّم" />
@@ -274,20 +273,20 @@ export function Course() {
               <Card className="p-4">
                 <p className="text-3xl font-bold text-text">
                   {possible
-                    ? `${Math.round((100 * earned) / possible).toLocaleString("ar")}٪`
+                    ? `${Math.round((100 * earned) / possible).toLocaleString("ar-u-nu-latn")}٪`
                     : "—"}
                 </p>
                 <p className="text-sm text-text-muted">
-                  {earned.toLocaleString("ar")} من {possible.toLocaleString("ar")} — أعمال الفصل
-                  المصححة
+                  {earned.toLocaleString("ar-u-nu-latn")} من{" "}
+                  {possible.toLocaleString("ar-u-nu-latn")} — أعمال الفصل المصححة
                 </p>
                 <div className="mt-4 divide-y divide-border-soft">
                   {graded.map((a) => (
                     <div key={a.public_id} className="flex justify-between py-2.5 text-sm">
                       <span>{a.title}</span>
                       <b dir="ltr">
-                        {Number(a.mine!.score).toLocaleString("ar")} /{" "}
-                        {Number(a.max_grade).toLocaleString("ar")}
+                        {Number(a.mine!.score).toLocaleString("ar-u-nu-latn")} /{" "}
+                        {Number(a.max_grade).toLocaleString("ar-u-nu-latn")}
                       </b>
                     </div>
                   ))}
