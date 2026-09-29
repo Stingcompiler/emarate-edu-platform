@@ -19,7 +19,7 @@ import {
   problemMessage,
   splitCode,
 } from "../../components/ui";
-import { api } from "../../lib/api";
+import { api, ok } from "../../lib/api";
 import { ALL } from "../../components/Pager";
 
 type Result = Schemas["Result"];
@@ -33,7 +33,7 @@ export function ResultSearch() {
     queryKey: ["results", "search", submitted],
     enabled: submitted.length > 0,
     queryFn: async () =>
-      (await api.GET("/api/v1/results", { params: { query: { ...ALL, search: submitted } } })).data
+      ok(await api.GET("/api/v1/results", { params: { query: { ...ALL, search: submitted } } }))
         ?.results ?? [],
   });
 

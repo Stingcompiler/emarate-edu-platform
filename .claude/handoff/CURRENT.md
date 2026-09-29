@@ -1,4 +1,29 @@
-# Handoff — department manager runs only their department (feat/department-scope) — 2026-09-29
+# Handoff — implementing the full review (docs/qa/full-review-2026-09-29.md §3) — 2026-09-29
+
+## Now: the review's implementation plan, PR by PR
+- **Review:** #44 merged. `docs/qa/full-review-2026-09-29.md` holds:
+  - §1 the method;
+  - §2 the findings (S = security, P = portal logic, W = public site, then per role);
+  - §3 the ordered PRs.
+- **PR 1** `fix/auth-hardening` (#45): S2–S5 and S8–S12. Tests are in `accounts/tests/test_hardening.py`.
+  Merge when CI is green.
+- **PR 2** `fix/portal-foundations`, in progress:
+  - `ok()` + `ApiError` in `lib/api.ts`. 139 calls in 70 files were converted by a script: failed reads
+    throw, and `QueryErrorBanner` (`lib/queryClient.ts`) explains them. A 401 re-checks `me`.
+    `meta: { silent: true }` skips the banner.
+  - `lib/access.ts` `ROUTE_ACCESS`: every `signedIn(el, path)` in `main.tsx` has an audience; outside it the
+    user sees `<NoAccess/>`. `access.test.ts` fails if a route lacks a rule. The e2e sweep fails if a role's
+    own navigation link shows «غير مسموح».
+  - S1: `client.clear()` on sign-out and sign-in.
+  - S6: `safeNext` does a same-origin URL check.
+  - S7: `useUnsavedChanges()` in 7 editors. `data-saves-itself` marks parts that save on their own.
+  - P5: `TakeExam` error state.
+  - P6: `useDepartment` reads the router, and `DepartmentSwitch` appears on department pages when there is a
+    choice.
+- **Next:** PR 3 (data correctness), then PR 4 (workflows), then PR 5 (shared UI), then PR 6 (public site),
+  then PR 7+ (large screens), then motion and polish. Details per PR are in §3 of the review doc.
+- **Review evidence** (screenshots, notes) was in the session scratchpad, so it is not in the repo. The doc
+  carries everything needed.
 
 ## Latest (2026-09-29)
 - **#42 sticky filters: merged.**

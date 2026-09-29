@@ -11,7 +11,7 @@ import {
   StatusBadge,
   problemMessage,
 } from "../../components/ui";
-import { api } from "../../lib/api";
+import { api, ok } from "../../lib/api";
 import { count, N } from "../../lib/format";
 import { ALL } from "../../components/Pager";
 
@@ -21,7 +21,7 @@ export function Cycles() {
   const cycles = useQuery({
     queryKey: ["admissions", "cycles"],
     queryFn: async () =>
-      (await api.GET("/api/v1/admission-cycles", { params: { query: ALL } })).data?.results ?? [],
+      ok(await api.GET("/api/v1/admission-cycles", { params: { query: ALL } }))?.results ?? [],
   });
   const [picked, setPicked] = useState<number | null>(null);
   const cycle = cycles.data?.find((c) => c.id === picked) ?? cycles.data?.[0];
@@ -29,13 +29,13 @@ export function Cycles() {
     queryKey: ["admissions", "intakes", cycle?.id],
     enabled: !!cycle,
     queryFn: async () =>
-      (await api.GET("/api/v1/intakes", { params: { query: { ...ALL, cycle: cycle!.id } } })).data
+      ok(await api.GET("/api/v1/intakes", { params: { query: { ...ALL, cycle: cycle!.id } } }))
         ?.results ?? [],
   });
   const programs = useQuery({
     queryKey: ["programs"],
     queryFn: async () =>
-      (await api.GET("/api/v1/programs", { params: { query: ALL } })).data?.results ?? [],
+      ok(await api.GET("/api/v1/programs", { params: { query: ALL } }))?.results ?? [],
   });
   const toggle = useMutation({
     mutationFn: async ({ id, is_open }: { id: number; is_open: boolean }) => {
@@ -66,7 +66,7 @@ export function Cycles() {
   const years = useQuery({
     queryKey: ["academic-years"],
     queryFn: async () =>
-      (await api.GET("/api/v1/academic-years", { params: { query: ALL } })).data?.results ?? [],
+      ok(await api.GET("/api/v1/academic-years", { params: { query: ALL } }))?.results ?? [],
   });
   const [draft, setDraft] = useState({ name: "", opens: "", closes: "" });
   const create = useMutation({

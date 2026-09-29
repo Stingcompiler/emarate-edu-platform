@@ -12,7 +12,7 @@ import {
   StatusBadge,
   problemMessage,
 } from "../../components/ui";
-import { api } from "../../lib/api";
+import { api, ok } from "../../lib/api";
 import { useMe } from "../../lib/auth";
 import { when } from "../../lib/format";
 import { can } from "../../lib/nav";
@@ -35,7 +35,7 @@ export function ApplicationDetail() {
   const path = { params: { path: { public_id: id } } };
   const app = useQuery({
     queryKey: ["applications", id],
-    queryFn: async () => (await api.GET("/api/v1/applications/{public_id}", path)).data ?? null,
+    queryFn: async () => ok(await api.GET("/api/v1/applications/{public_id}", path)) ?? null,
   });
   const [note, setNote] = useState("");
   const [message, setMessage] = useState("");

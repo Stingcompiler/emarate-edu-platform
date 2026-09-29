@@ -3,7 +3,7 @@ import { useParams } from "react-router";
 
 import { PortalShell } from "../../components/PortalShell";
 import { Button, Card, Notice, SectionLabel, problemMessage, WithSide } from "../../components/ui";
-import { api } from "../../lib/api";
+import { api, ok } from "../../lib/api";
 import { TOPIC_LABEL, days, num, pct } from "../../lib/reports";
 
 /** A teacher reads an HR notice (notification action URL) and acknowledges it. */
@@ -13,7 +13,7 @@ export function MyNotice() {
   const path = { params: { path: { public_id: id } } };
   const notice = useQuery({
     queryKey: ["hr-notices", id],
-    queryFn: async () => (await api.GET("/api/v1/hr-notices/{public_id}", path)).data ?? null,
+    queryFn: async () => ok(await api.GET("/api/v1/hr-notices/{public_id}", path)) ?? null,
   });
   const ack = useMutation({
     mutationFn: async () => {

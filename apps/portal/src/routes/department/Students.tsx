@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Pencil, Plus, Trash2 } from "lucide-react";
 import { type FormEvent, useRef, useState } from "react";
 
+import { DepartmentSwitch } from "../../components/DepartmentSwitch";
 import { PortalShell } from "../../components/PortalShell";
 import {
   Button,
@@ -14,7 +15,7 @@ import {
   StatusBadge,
   problemMessage,
 } from "../../components/ui";
-import { api } from "../../lib/api";
+import { api, ok } from "../../lib/api";
 import { useMe } from "../../lib/auth";
 import { useDepartment } from "../../lib/department";
 import { can } from "../../lib/nav";
@@ -58,7 +59,7 @@ export function DepartmentStudents() {
     queryKey: ["students", id, search, level, status, page],
     enabled: !!id,
     queryFn: async () =>
-      (
+      ok(
         await api.GET("/api/v1/students", {
           params: {
             query: {
@@ -69,8 +70,8 @@ export function DepartmentStudents() {
               page,
             },
           },
-        })
-      ).data ?? null,
+        }),
+      ) ?? null,
   });
   const rows = list.data?.results ?? [];
   const s = rows.find((r) => r.public_id === picked);
@@ -93,6 +94,7 @@ export function DepartmentStudents() {
       subtitle={department?.name_ar}
       back={{ label: "لوحة القسم", to: "/department" }}
     >
+      <DepartmentSwitch />
       <FilterBar>
         <div className="flex flex-wrap items-center gap-2">
           <input

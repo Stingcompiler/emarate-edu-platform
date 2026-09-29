@@ -15,7 +15,7 @@ import {
   WithSide,
   EmptyState,
 } from "../../components/ui";
-import { api } from "../../lib/api";
+import { api, ok } from "../../lib/api";
 import { asForm, formData } from "../../lib/upload";
 import { Pager, useServerPages } from "../../components/Pager";
 
@@ -49,9 +49,8 @@ export function SiteMedia() {
 function Media() {
   const client = useQueryClient();
   // 10 per page from the server (docs: owner 2026-09-29).
-  const media = useServerPages(
-    ["site", "media"],
-    async (page) => (await api.GET("/api/v1/content/media", { params: { query: { page } } })).data,
+  const media = useServerPages(["site", "media"], async (page) =>
+    ok(await api.GET("/api/v1/content/media", { params: { query: { page } } })),
   );
   const upload = useMutation({
     mutationFn: async (file: File) => {
@@ -139,7 +138,7 @@ function Menus() {
   const menu = useQuery({
     queryKey: ["site", "menu", key],
     queryFn: async () =>
-      (await api.GET("/api/v1/content/menus/{key}", { params: { path: { key } } })).data ?? null,
+      ok(await api.GET("/api/v1/content/menus/{key}", { params: { path: { key } } })) ?? null,
   });
   const [items, setItems] = useState<Entry[]>([]);
   useEffect(
@@ -350,7 +349,7 @@ function MenuRow({
 function SiteSettingsForm() {
   const settings = useQuery({
     queryKey: ["site", "settings"],
-    queryFn: async () => (await api.GET("/api/v1/content/site-settings")).data ?? null,
+    queryFn: async () => ok(await api.GET("/api/v1/content/site-settings")) ?? null,
   });
   const [form, setForm] = useState({
     name_ar: "",

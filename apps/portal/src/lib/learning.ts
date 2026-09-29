@@ -1,7 +1,7 @@
 import type { Schemas } from "@ecst/api";
 import { useQuery } from "@tanstack/react-query";
 
-import { api } from "./api";
+import { api, ok } from "./api";
 
 export type Assignment = Schemas["Assignment"];
 export type Lecture = Schemas["Lecture"];
@@ -62,7 +62,7 @@ export async function openFile(publicId: string) {
 export function useMyCourses() {
   return useQuery({
     queryKey: ["me", "courses"],
-    queryFn: async () => (await api.GET("/api/v1/me/courses")).data ?? [],
+    queryFn: async () => ok(await api.GET("/api/v1/me/courses")) ?? [],
   });
 }
 
@@ -76,7 +76,7 @@ export function useCourse(offering?: number) {
     queryKey: ["me", "courses", offering],
     enabled: !!offering,
     queryFn: async () =>
-      (await api.GET("/api/v1/me/courses", { params: { query: { offering } } })).data?.[0] ?? null,
+      ok(await api.GET("/api/v1/me/courses", { params: { query: { offering } } }))?.[0] ?? null,
   });
 }
 
@@ -98,7 +98,7 @@ export function useLectures(offering?: number) {
   return useQuery({
     queryKey: ["lectures", offering ?? "all"],
     queryFn: async () =>
-      (await api.GET("/api/v1/lectures", { params: { query: { offering, page_size: 100 } } })).data
+      ok(await api.GET("/api/v1/lectures", { params: { query: { offering, page_size: 100 } } }))
         ?.results ?? [],
   });
 }

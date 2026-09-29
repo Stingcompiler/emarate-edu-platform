@@ -19,6 +19,8 @@ export function useMe() {
       return data;
     },
     staleTime: 5 * 60_000,
+    // RequireAuth explains a failed check itself (the «تعذّر الاتصال» screen).
+    meta: { silent: true },
   });
 }
 
@@ -30,12 +32,23 @@ export function useSignOut() {
   const client = useQueryClient();
   return async () => {
     await api.POST("/api/v1/auth/logout");
+    // Everything goes, including ["me", …] (results, cases, courses): the next person on
+    // this device must never see the previous one's data (review 2026-09-29, S1).
+    client.clear();
     client.setQueryData(["me"], null);
-    client.removeQueries({ predicate: (q) => q.queryKey[0] !== "me" });
   };
 }
 
-export function RequireAuth({ children }: { children: ReactNode }) {
+export function RequireAuth({
+  children,
+  allow,
+  denied = null,
+}: {
+  children: ReactNode;
+  /** The page's audience (lib/access.ts); signed-in users outside it see `denied`. */
+  allow?: (me: Me) => boolean;
+  denied?: ReactNode;
+}) {
   const me = useMe();
   const location = useLocation();
   if (me.isPending) return <Splash />;
@@ -45,6 +58,7 @@ export function RequireAuth({ children }: { children: ReactNode }) {
     const next = encodeURIComponent(location.pathname + location.search);
     return <Navigate to={`/login?next=${next}`} replace />;
   }
+  if (allow && !allow(me.data)) return denied;
   return children;
 }
 

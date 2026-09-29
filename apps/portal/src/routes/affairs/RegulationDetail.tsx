@@ -13,7 +13,7 @@ import {
   problemMessage,
   WithSide,
 } from "../../components/ui";
-import { api } from "../../lib/api";
+import { api, ok } from "../../lib/api";
 import { useMe } from "../../lib/auth";
 import { can } from "../../lib/nav";
 import { CATEGORIES } from "./RegulationNew";
@@ -28,7 +28,7 @@ export function RegulationDetail() {
   const path = { params: { path: { public_id: id } } };
   const regulation = useQuery({
     queryKey: ["regulations", id],
-    queryFn: async () => (await api.GET("/api/v1/regulations/{public_id}", path)).data ?? null,
+    queryFn: async () => ok(await api.GET("/api/v1/regulations/{public_id}", path)) ?? null,
   });
   const done = () => client.invalidateQueries({ queryKey: ["regulations"] });
   const acknowledge = useMutation({

@@ -15,7 +15,7 @@ import {
   SideNote,
   WithSide,
 } from "../../components/ui";
-import { api } from "../../lib/api";
+import { api, ok } from "../../lib/api";
 import { KIND } from "./Cases";
 import { ALL } from "../../components/Pager";
 
@@ -28,11 +28,11 @@ export function CaseNew() {
     queryKey: ["misconduct-reports", reportId],
     enabled: !!reportId,
     queryFn: async () =>
-      (
+      ok(
         await api.GET("/api/v1/misconduct-reports/{public_id}", {
           params: { path: { public_id: reportId! } },
-        })
-      ).data ?? null,
+        }),
+      ) ?? null,
   });
   const [kind, setKind] = useState<keyof typeof KIND>("academic");
   const [number, setNumber] = useState("");

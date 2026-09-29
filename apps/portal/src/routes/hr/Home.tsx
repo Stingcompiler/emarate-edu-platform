@@ -3,7 +3,7 @@ import { Link } from "react-router";
 
 import { PortalShell } from "../../components/PortalShell";
 import { Button, Card, SectionLabel } from "../../components/ui";
-import { api } from "../../lib/api";
+import { api, ok } from "../../lib/api";
 import { useMe } from "../../lib/auth";
 import { can } from "../../lib/nav";
 import { TeacherStatus, days, initials, num, pct } from "../../lib/reports";
@@ -17,7 +17,7 @@ export function HRHome() {
   const notices = useQuery({
     queryKey: ["hr-notices"],
     queryFn: async () =>
-      (await api.GET("/api/v1/hr-notices", { params: { query: ALL } })).data?.results ?? [],
+      ok(await api.GET("/api/v1/hr-notices", { params: { query: ALL } }))?.results ?? [],
   });
   const r = report.data;
   const below = (r?.rows ?? []).filter((t) => t.status === "below");

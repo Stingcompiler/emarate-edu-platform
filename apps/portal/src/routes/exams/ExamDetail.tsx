@@ -4,7 +4,7 @@ import { Link, useNavigate, useParams } from "react-router";
 
 import { PortalShell } from "../../components/PortalShell";
 import { Button, Card, Notice, SectionLabel, problemMessage, WithSide } from "../../components/ui";
-import { api } from "../../lib/api";
+import { api, ok } from "../../lib/api";
 import { useMe } from "../../lib/auth";
 import { examPhase } from "./Exams";
 
@@ -29,7 +29,7 @@ export function ExamDetail() {
   const exam = useQuery({
     queryKey: ["exams", id],
     queryFn: async () =>
-      (await api.GET("/api/v1/exams/{public_id}", { params: { path: { public_id: id } } })).data ??
+      ok(await api.GET("/api/v1/exams/{public_id}", { params: { path: { public_id: id } } })) ??
       null,
   });
   const start = useMutation({

@@ -17,7 +17,7 @@ import { Link, useNavigate } from "react-router";
 
 import { PortalShell } from "../../components/PortalShell";
 import { Button, Card, SectionLabel } from "../../components/ui";
-import { api } from "../../lib/api";
+import { api, ok } from "../../lib/api";
 import { useMe, useSignOut } from "../../lib/auth";
 import { initials, num } from "../../lib/reports";
 import { count, N } from "../../lib/format";
@@ -51,17 +51,17 @@ export function Me() {
   const navigate = useNavigate();
   const results = useQuery({
     queryKey: ["me", "results"],
-    queryFn: async () => (await api.GET("/api/v1/me/results")).data ?? null,
+    queryFn: async () => ok(await api.GET("/api/v1/me/results")) ?? null,
   });
   const regulations = useQuery({
     queryKey: ["regulations"],
     queryFn: async () =>
-      (await api.GET("/api/v1/regulations", { params: { query: ALL } })).data?.results ?? [],
+      ok(await api.GET("/api/v1/regulations", { params: { query: ALL } }))?.results ?? [],
   });
   const cases = useQuery({
     queryKey: ["me", "cases"],
     queryFn: async () =>
-      (await api.GET("/api/v1/me/cases", { params: { query: ALL } })).data?.results ?? [],
+      ok(await api.GET("/api/v1/me/cases", { params: { query: ALL } }))?.results ?? [],
   });
   const s = me.data?.student;
   const pendingAck = (regulations.data ?? []).filter(
@@ -167,16 +167,16 @@ export function MyStatus() {
   const me = useMe();
   const results = useQuery({
     queryKey: ["me", "results"],
-    queryFn: async () => (await api.GET("/api/v1/me/results")).data ?? null,
+    queryFn: async () => ok(await api.GET("/api/v1/me/results")) ?? null,
   });
   const courses = useQuery({
     queryKey: ["me", "courses"],
-    queryFn: async () => (await api.GET("/api/v1/me/courses")).data ?? [],
+    queryFn: async () => ok(await api.GET("/api/v1/me/courses")) ?? [],
   });
   const cases = useQuery({
     queryKey: ["me", "cases"],
     queryFn: async () =>
-      (await api.GET("/api/v1/me/cases", { params: { query: ALL } })).data?.results ?? [],
+      ok(await api.GET("/api/v1/me/cases", { params: { query: ALL } }))?.results ?? [],
   });
   const s = me.data?.student;
   const hours = (courses.data ?? []).reduce((n, c) => n + c.credit_hours, 0);

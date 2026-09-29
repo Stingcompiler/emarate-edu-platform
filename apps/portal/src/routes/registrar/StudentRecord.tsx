@@ -3,7 +3,7 @@ import { Link, useParams } from "react-router";
 
 import { PortalShell } from "../../components/PortalShell";
 import { Card, SectionLabel, StatusBadge } from "../../components/ui";
-import { api } from "../../lib/api";
+import { api, ok } from "../../lib/api";
 import { useMe } from "../../lib/auth";
 import { can } from "../../lib/nav";
 import { initials, num } from "../../lib/reports";
@@ -25,21 +25,21 @@ export function StudentRecord() {
     queryKey: ["enrollments", "student", id],
     enabled: can(me.data, "enrollment.manage"),
     queryFn: async () =>
-      (
+      ok(
         await api.GET("/api/v1/enrollments", {
           params: { query: { student_record__public_id: id, page_size: 100 } },
-        })
-      ).data?.results ?? [],
+        }),
+      )?.results ?? [],
   });
   const cases = useQuery({
     queryKey: ["cases", "student", id],
     enabled: can(me.data, "cases.view"),
     queryFn: async () =>
-      (
+      ok(
         await api.GET("/api/v1/cases", {
           params: { query: { ...ALL, student_record__public_id: id } },
-        })
-      ).data?.results ?? [],
+        }),
+      )?.results ?? [],
   });
   const s = student.data;
   const current = (enrollments.data ?? []).filter((e) => e.status === "active");

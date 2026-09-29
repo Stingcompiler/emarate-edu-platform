@@ -3,7 +3,7 @@ import { useState } from "react";
 
 import { PortalShell } from "../../components/PortalShell";
 import { Button, Card, Notice, problemMessage } from "../../components/ui";
-import { api } from "../../lib/api";
+import { api, ok } from "../../lib/api";
 import { when, count, N } from "../../lib/format";
 import { initials, num } from "../../lib/reports";
 
@@ -13,11 +13,11 @@ export function Approvals() {
   const list = useQuery({
     queryKey: ["registration-requests", "pending"],
     queryFn: async () =>
-      (
+      ok(
         await api.GET("/api/v1/registration-requests", {
           params: { query: { status: "pending_approval", page_size: 100 } },
-        })
-      ).data ?? null,
+        }),
+      ) ?? null,
   });
   const rows = list.data?.results ?? [];
   const [reasons, setReasons] = useState<Record<string, string>>({});

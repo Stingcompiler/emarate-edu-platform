@@ -15,7 +15,7 @@ import {
   problemMessage,
   SideNote,
 } from "../../components/ui";
-import { api } from "../../lib/api";
+import { api, ok } from "../../lib/api";
 import { useMe } from "../../lib/auth";
 import { when } from "../../lib/format";
 import { can } from "../../lib/nav";
@@ -30,7 +30,7 @@ export function CaseDetail() {
   const path = { params: { path: { public_id: id } } };
   const data = useQuery({
     queryKey: ["cases", id],
-    queryFn: async () => (await api.GET("/api/v1/cases/{public_id}", path)).data ?? null,
+    queryFn: async () => ok(await api.GET("/api/v1/cases/{public_id}", path)) ?? null,
   });
   const [note, setNote] = useState("");
   const [decision, setDecision] = useState("");

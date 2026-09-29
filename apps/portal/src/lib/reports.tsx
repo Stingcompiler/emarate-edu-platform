@@ -5,7 +5,7 @@ import { Link, useNavigate } from "react-router";
 
 import { Button, Card, Notice, problemMessage } from "../components/ui";
 import { CountUp } from "../components/motion";
-import { api } from "./api";
+import { api, ok } from "./api";
 import { count, N } from "./format";
 import { ALL } from "../components/Pager";
 
@@ -187,7 +187,7 @@ export function PastReports({ kind }: { kind: SnapshotBody["kind"] }) {
   const list = useQuery({
     queryKey: ["report-snapshots", kind],
     queryFn: async () =>
-      (await api.GET("/api/v1/report-snapshots", { params: { query: { ...ALL, kind } } })).data
+      ok(await api.GET("/api/v1/report-snapshots", { params: { query: { ...ALL, kind } } }))
         ?.results ?? [],
   });
   if (!list.data?.length) return null;
@@ -249,7 +249,7 @@ export function useTerms() {
   return useQuery({
     queryKey: ["terms"],
     queryFn: async () =>
-      (await api.GET("/api/v1/terms", { params: { query: ALL } })).data?.results ?? [],
+      ok(await api.GET("/api/v1/terms", { params: { query: ALL } }))?.results ?? [],
   });
 }
 
@@ -257,6 +257,6 @@ export function useDepartments() {
   return useQuery({
     queryKey: ["departments"],
     queryFn: async () =>
-      (await api.GET("/api/v1/departments", { params: { query: ALL } })).data?.results ?? [],
+      ok(await api.GET("/api/v1/departments", { params: { query: ALL } }))?.results ?? [],
   });
 }

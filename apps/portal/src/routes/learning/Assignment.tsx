@@ -12,7 +12,7 @@ import {
   StatusBadge,
   problemMessage,
 } from "../../components/ui";
-import { api } from "../../lib/api";
+import { api, ok } from "../../lib/api";
 import { when, count, N } from "../../lib/format";
 import { dueLabel, fmtSize, openFile, useCourse, isCourseStaff } from "../../lib/learning";
 import { asForm, formData } from "../../lib/upload";
@@ -33,7 +33,7 @@ export function Assignment() {
   const path = { params: { path: { public_id: id } } };
   const assignment = useQuery({
     queryKey: ["assignment", id],
-    queryFn: async () => (await api.GET("/api/v1/assignments/{public_id}", path)).data ?? null,
+    queryFn: async () => ok(await api.GET("/api/v1/assignments/{public_id}", path)) ?? null,
   });
   const a = assignment.data;
   const course = useCourse(a?.offering).data;
@@ -75,7 +75,7 @@ function StudentView({ a }: { a: A }) {
   const mine = useQuery({
     queryKey: ["assignment", a.public_id, "mine"],
     queryFn: async () =>
-      (await api.GET("/api/v1/assignments/{public_id}/my-submission", path)).data ?? null,
+      ok(await api.GET("/api/v1/assignments/{public_id}/my-submission", path)) ?? null,
   });
   const s = mine.data;
   const now = Date.now();
@@ -325,11 +325,11 @@ function Submissions({ id, max }: { id: string; max: string }) {
   const list = useQuery({
     queryKey: ["assignment", id, "submissions"],
     queryFn: async () =>
-      (
+      ok(
         await api.GET("/api/v1/assignments/{public_id}/submissions", {
           params: { path: { public_id: id }, query: ALL },
-        })
-      ).data?.results ?? [],
+        }),
+      )?.results ?? [],
   });
   const rows = list.data ?? [];
   const waiting = rows.filter((r) => r.grade?.status !== "approved").length;

@@ -34,6 +34,7 @@ export function Login() {
     });
     setBusy(false);
     if (data) {
+      client.clear(); // nothing cached from another account survives a sign-in (S1)
       client.setQueryData(["me"], data);
       navigate(next, { replace: true });
       return;
@@ -107,6 +108,13 @@ export function Login() {
 
 /** Only same-site paths are honoured after login (no open redirects). */
 export function safeNext(value: string | null): string {
-  if (value && value.startsWith("/") && !value.startsWith("//")) return value;
-  return "/";
+  if (!value || !value.startsWith("/")) return "/";
+  // "/\\evil.com" and "//evil.com" resolve to another site; keep only same-origin paths.
+  try {
+    const url = new URL(value, window.location.origin);
+    if (url.origin !== window.location.origin) return "/";
+    return url.pathname + url.search + url.hash;
+  } catch {
+    return "/";
+  }
 }

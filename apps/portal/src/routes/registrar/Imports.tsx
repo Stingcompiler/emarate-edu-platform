@@ -12,7 +12,7 @@ import {
   problemMessage,
   ScrollRegion,
 } from "../../components/ui";
-import { api } from "../../lib/api";
+import { api, ok } from "../../lib/api";
 import { when, count, N } from "../../lib/format";
 import { num } from "../../lib/reports";
 import { asForm, formData } from "../../lib/upload";
@@ -40,10 +40,8 @@ export function StudentImports() {
   const navigate = useNavigate();
   const input = useRef<HTMLInputElement>(null);
   // 10 per page from the server (docs: owner 2026-09-29).
-  const list = useServerPages(
-    ["student-imports"],
-    async (page) =>
-      (await api.GET("/api/v1/student-imports", { params: { query: { page } } })).data,
+  const list = useServerPages(["student-imports"], async (page) =>
+    ok(await api.GET("/api/v1/student-imports", { params: { query: { page } } })),
   );
   const upload = useMutation({
     mutationFn: async (file: File) => {
@@ -133,23 +131,23 @@ function ImportDetailBody({ id }: { id: string }) {
   const path = { params: { path: { public_id: id } } };
   const batch = useQuery({
     queryKey: ["student-imports", id],
-    queryFn: async () => (await api.GET("/api/v1/student-imports/{public_id}", path)).data ?? null,
+    queryFn: async () => ok(await api.GET("/api/v1/student-imports/{public_id}", path)) ?? null,
   });
   const rows = useQuery({
     queryKey: ["student-imports", id, "rows"],
     queryFn: async () =>
-      (
+      ok(
         await api.GET("/api/v1/student-imports/{public_id}/rows", {
           ...path,
           params: { ...path.params, query: { page_size: 100 } },
-        })
-      ).data?.results ?? [],
+        }),
+      )?.results ?? [],
   });
   const [filter, setFilter] = useState<string>("");
   const programs = useQuery({
     queryKey: ["programs", "all"],
     queryFn: async () =>
-      (await api.GET("/api/v1/programs", { params: { query: { page_size: 100 } as never } })).data
+      ok(await api.GET("/api/v1/programs", { params: { query: { page_size: 100 } as never } }))
         ?.results ?? [],
   });
   const programName = (id: unknown) =>

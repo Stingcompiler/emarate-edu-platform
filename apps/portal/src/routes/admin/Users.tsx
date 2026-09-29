@@ -13,7 +13,7 @@ import {
   StatusBadge,
   problemMessage,
 } from "../../components/ui";
-import { api } from "../../lib/api";
+import { api, ok } from "../../lib/api";
 import { hasRole, useMe } from "../../lib/auth";
 import { when } from "../../lib/format";
 import { initials, num, useDepartments } from "../../lib/reports";
@@ -30,11 +30,11 @@ export function AdminUsers() {
   const list = useQuery({
     queryKey: ["users", search, active, page],
     queryFn: async () =>
-      (
+      ok(
         await api.GET("/api/v1/users", {
           params: { query: { search: search || undefined, is_active: active, page } },
-        })
-      ).data ?? null,
+        }),
+      ) ?? null,
   });
   const rows = list.data?.results ?? [];
   return (

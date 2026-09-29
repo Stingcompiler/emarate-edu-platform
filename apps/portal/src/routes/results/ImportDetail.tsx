@@ -13,7 +13,7 @@ import {
   STATUS_LABELS,
   problemMessage,
 } from "../../components/ui";
-import { api } from "../../lib/api";
+import { api, ok } from "../../lib/api";
 
 type Summary = { rows?: number; create?: number; error?: number; committed?: number };
 
@@ -37,16 +37,16 @@ export function ResultImportDetail() {
 
   const batch = useQuery({
     queryKey: ["result-imports", id],
-    queryFn: async () => (await api.GET("/api/v1/result-imports/{public_id}", path)).data ?? null,
+    queryFn: async () => ok(await api.GET("/api/v1/result-imports/{public_id}", path)) ?? null,
   });
   const rows = useQuery({
     queryKey: ["result-imports", id, "rows", only],
     queryFn: async () =>
-      (
+      ok(
         await api.GET("/api/v1/result-imports/{public_id}/rows", {
           params: { path: { public_id: id }, query: only === "error" ? { action: "error" } : {} },
-        })
-      ).data?.results ?? [],
+        }),
+      )?.results ?? [],
   });
 
   const act = useMutation({

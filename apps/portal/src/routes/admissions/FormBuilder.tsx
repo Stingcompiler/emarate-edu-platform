@@ -13,7 +13,7 @@ import {
   problemMessage,
   SideNote,
 } from "../../components/ui";
-import { api } from "../../lib/api";
+import { api, ok } from "../../lib/api";
 import { useMe } from "../../lib/auth";
 import { can } from "../../lib/nav";
 import type { Field, FormSchema } from "../../lib/visitor";
@@ -39,7 +39,7 @@ export function FormBuilder() {
   const templates = useQuery({
     queryKey: ["admissions", "templates"],
     queryFn: async () =>
-      (await api.GET("/api/v1/form-templates", { params: { query: ALL } })).data?.results ?? [],
+      ok(await api.GET("/api/v1/form-templates", { params: { query: ALL } }))?.results ?? [],
   });
   const [picked, setPicked] = useState<number | null>(null);
   const template = templates.data?.find((t) => t.id === picked) ?? templates.data?.[0];

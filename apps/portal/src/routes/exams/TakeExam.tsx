@@ -13,7 +13,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 
 import { Button, Notice } from "../../components/ui";
-import { api } from "../../lib/api";
+import { ApiError, api, ok } from "../../lib/api";
 import {
   answered,
   type AnswerValue,
@@ -45,14 +45,16 @@ export function TakeExam() {
   const navigate = useNavigate();
   const query = useQuery({
     queryKey: ["attempt", id],
-    queryFn: async () => {
-      const { data } = await api.GET("/api/v1/exam-attempts/{public_id}", {
-        params: { path: { public_id: id } },
-      });
-      return (data as unknown as AttemptPayload) ?? null;
-    },
+    queryFn: async () =>
+      ok(
+        await api.GET("/api/v1/exam-attempts/{public_id}", {
+          params: { path: { public_id: id } },
+        }),
+      ) as unknown as AttemptPayload,
     staleTime: Infinity,
     refetchOnWindowFocus: false,
+    // The exam shows its own message (the focused mode has no banner).
+    meta: { silent: true },
   });
   const attempt = query.data;
 
@@ -61,6 +63,35 @@ export function TakeExam() {
       navigate(`/exam-attempts/${id}/result`, { replace: true });
   }, [attempt, id, navigate]);
 
+  if (query.isError) {
+    // Never an endless «loading» (review 2026-09-29, P5): say why and offer a retry.
+    const status = query.error instanceof ApiError ? query.error.status : 0;
+    const text =
+      status === 404 || status === 403
+        ? "هذه المحاولة ليست لك أو لم تعد موجودة."
+        : "تعذّر تحميل الاختبار. إجاباتك المحفوظة على هذا الجهاز لم تُفقد.";
+    return (
+      <div role="alert" className="grid min-h-dvh place-items-center bg-bg-subtle p-6 text-center">
+        <div className="max-w-sm space-y-4">
+          <p className="font-semibold text-text">{text}</p>
+          <div className="flex justify-center gap-2">
+            {status !== 404 && status !== 403 && (
+              <Button className="min-h-11 px-5" onClick={() => void query.refetch()}>
+                أعد المحاولة
+              </Button>
+            )}
+            <Button
+              variant="secondary"
+              className="min-h-11 px-5"
+              onClick={() => navigate("/exams")}
+            >
+              الاختبارات
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
   if (!attempt)
     return (
       <div className="grid min-h-dvh place-items-center bg-bg-subtle text-text-muted">

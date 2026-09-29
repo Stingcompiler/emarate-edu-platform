@@ -13,7 +13,7 @@ import {
   problemMessage,
   WithSide,
 } from "../../components/ui";
-import { api } from "../../lib/api";
+import { api, ok } from "../../lib/api";
 
 /** Board: TeacherLiveNew (phone); desktop derived. The link is visible only to those in scope. */
 export function LiveNew() {
@@ -22,7 +22,7 @@ export function LiveNew() {
     // Courses taught plus, for a department manager/supervisor, the department's courses.
     queryKey: ["me", "courses", "managed"],
     queryFn: async () =>
-      (await api.GET("/api/v1/me/courses", { params: { query: { managed: true } } })).data ?? [],
+      ok(await api.GET("/api/v1/me/courses", { params: { query: { managed: true } } })) ?? [],
   });
   const teaching = (courses.data ?? []).filter((c) => c.my_role !== "student");
   const [offering, setOffering] = useState("");

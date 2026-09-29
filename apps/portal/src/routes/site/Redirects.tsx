@@ -4,7 +4,7 @@ import { useState } from "react";
 
 import { PortalShell } from "../../components/PortalShell";
 import { Button, Card, Notice, SideNote, WithSide, problemMessage } from "../../components/ui";
-import { api } from "../../lib/api";
+import { api, ok } from "../../lib/api";
 import { ALL, Pager, useLocalPages } from "../../components/Pager";
 
 /** Board: DesktopSiteRedirects (desktop). Phone derived as a card list. 404 suggestions arrive with the public site (Phase 9). */
@@ -13,7 +13,7 @@ export function Redirects() {
   const list = useQuery({
     queryKey: ["site", "redirects"],
     queryFn: async () =>
-      (await api.GET("/api/v1/content/redirects", { params: { query: ALL } })).data?.results ?? [],
+      ok(await api.GET("/api/v1/content/redirects", { params: { query: ALL } }))?.results ?? [],
   });
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");

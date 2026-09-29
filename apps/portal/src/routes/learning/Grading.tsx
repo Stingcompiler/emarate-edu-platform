@@ -6,7 +6,7 @@ import { Link } from "react-router";
 import { PortalShell } from "../../components/PortalShell";
 import { ProgressRing } from "../../components/motion";
 import { FilterBar, Card, Chip, EmptyState, SectionLabel } from "../../components/ui";
-import { api } from "../../lib/api";
+import { api, ok } from "../../lib/api";
 import { when } from "../../lib/format";
 import { initials } from "../../lib/reports";
 
@@ -16,7 +16,7 @@ export function useGradingQueue(status: Status = "pending") {
   return useQuery({
     queryKey: ["grading", status],
     queryFn: async () =>
-      (await api.GET("/api/v1/grading-queue", { params: { query: { status } } })).data ?? null,
+      ok(await api.GET("/api/v1/grading-queue", { params: { query: { status } } })) ?? null,
   });
 }
 

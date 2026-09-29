@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 
 import { PortalShell } from "../../components/PortalShell";
 import { Button, Card, Notice, SectionLabel, Switch, problemMessage } from "../../components/ui";
-import { api } from "../../lib/api";
+import { api, ok } from "../../lib/api";
 
 type S = {
   student_registration_requires_approval: boolean;
@@ -22,11 +22,11 @@ export function AdminSettings() {
   const client = useQueryClient();
   const settings = useQuery({
     queryKey: ["system-settings"],
-    queryFn: async () => (await api.GET("/api/v1/system-settings")).data ?? null,
+    queryFn: async () => ok(await api.GET("/api/v1/system-settings")) ?? null,
   });
   const health = useQuery({
     queryKey: ["health"],
-    queryFn: async () => (await api.GET("/api/public/health")).data ?? null,
+    queryFn: async () => ok(await api.GET("/api/public/health")) ?? null,
   });
   const [f, setF] = useState<S | null>(null);
   useEffect(() => {

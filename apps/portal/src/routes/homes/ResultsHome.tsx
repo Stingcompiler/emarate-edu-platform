@@ -4,7 +4,7 @@ import { Link } from "react-router";
 
 import { PortalShell } from "../../components/PortalShell";
 import { Card, SectionLabel, StatusBadge, STATUS_LABELS } from "../../components/ui";
-import { api } from "../../lib/api";
+import { api, ok } from "../../lib/api";
 import { useMe } from "../../lib/auth";
 import { when } from "../../lib/format";
 import { num } from "../../lib/reports";
@@ -17,21 +17,21 @@ export function ResultsHome() {
   const batches = useQuery({
     queryKey: ["result-imports", "home"],
     queryFn: async () =>
-      (await api.GET("/api/v1/result-imports", { params: { query: { page_size: 20 } } })).data
+      ok(await api.GET("/api/v1/result-imports", { params: { query: { page_size: 20 } } }))
         ?.results ?? [],
   });
   const corrections = useQuery({
     queryKey: ["result-corrections", "pending"],
     queryFn: async () =>
-      (
+      ok(
         await api.GET("/api/v1/result-corrections", {
           params: { query: { ...ALL, status: "pending" } },
-        })
-      ).data?.count ?? 0,
+        }),
+      )?.count ?? 0,
   });
   const display = useQuery({
     queryKey: ["results", "settings"],
-    queryFn: async () => (await api.GET("/api/v1/results/settings")).data ?? null,
+    queryFn: async () => ok(await api.GET("/api/v1/results/settings")) ?? null,
   });
   const list = batches.data ?? [];
   const d = display.data;

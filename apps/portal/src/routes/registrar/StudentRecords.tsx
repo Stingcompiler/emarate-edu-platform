@@ -4,7 +4,7 @@ import { Link } from "react-router";
 
 import { PortalShell } from "../../components/PortalShell";
 import { FilterBar, Card, Chip, StatusBadge } from "../../components/ui";
-import { api } from "../../lib/api";
+import { api, ok } from "../../lib/api";
 import { Picker, initials, num, useDepartments } from "../../lib/reports";
 import { Pager } from "../../components/Pager";
 
@@ -25,11 +25,11 @@ export function StudentRecords() {
   const list = useQuery({
     queryKey: ["students", "records", department, search, level, page],
     queryFn: async () =>
-      (
+      ok(
         await api.GET("/api/v1/students", {
           params: { query: { department, search: search || undefined, level, page } },
-        })
-      ).data ?? null,
+        }),
+      ) ?? null,
   });
   const rows = list.data?.results ?? [];
   return (

@@ -12,9 +12,10 @@ import {
 } from "lucide-react";
 import { Link } from "react-router";
 
+import { DepartmentSwitch } from "../../components/DepartmentSwitch";
 import { PortalShell } from "../../components/PortalShell";
 import { Card, CodeTile, SectionLabel, splitCode } from "../../components/ui";
-import { api } from "../../lib/api";
+import { api, ok } from "../../lib/api";
 import { useMe } from "../../lib/auth";
 import { useCurrentTerm, useDepartment, useOfferings } from "../../lib/department";
 import { days, initials, num } from "../../lib/reports";
@@ -37,26 +38,26 @@ export function DepartmentDashboard() {
     queryKey: ["reports", "teachers", "dash", id],
     enabled: !!id,
     queryFn: async () =>
-      (await api.GET("/api/v1/reports/teachers", { params: { query: { department: id } } })).data ??
+      ok(await api.GET("/api/v1/reports/teachers", { params: { query: { department: id } } })) ??
       null,
   });
   const approvals = useQuery({
     queryKey: ["registration-requests", "pending"],
     queryFn: async () =>
-      (
+      ok(
         await api.GET("/api/v1/registration-requests", {
           params: { query: { ...ALL, status: "pending_approval" } },
-        })
-      ).data ?? null,
+        }),
+      ) ?? null,
   });
   const batches = useQuery({
     queryKey: ["result-imports", "validated", id],
     queryFn: async () =>
-      (
+      ok(
         await api.GET("/api/v1/result-imports", {
           params: { query: { ...ALL, status: "validated" } as never },
-        })
-      ).data?.results ?? [],
+        }),
+      )?.results ?? [],
   });
   const k = report.data?.kpis;
   const list = offerings.data ?? [];
@@ -142,6 +143,7 @@ export function DepartmentDashboard() {
           : undefined
       }
     >
+      <DepartmentSwitch />
       <div className="grid grid-cols-2 gap-2 lg:grid-cols-4">
         {[
           [

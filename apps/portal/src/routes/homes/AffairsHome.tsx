@@ -4,7 +4,7 @@ import { Link } from "react-router";
 
 import { PortalShell } from "../../components/PortalShell";
 import { Card, SectionLabel } from "../../components/ui";
-import { api } from "../../lib/api";
+import { api, ok } from "../../lib/api";
 import { useMe } from "../../lib/auth";
 import { when, count, N } from "../../lib/format";
 import { num } from "../../lib/reports";
@@ -24,11 +24,11 @@ export function AffairsHome() {
   const reports = useQuery({
     queryKey: ["misconduct-reports", "new"],
     queryFn: async () =>
-      (
+      ok(
         await api.GET("/api/v1/misconduct-reports", {
           params: { query: { ...ALL, status: "new" } },
-        })
-      ).data?.results ?? [],
+        }),
+      )?.results ?? [],
   });
   const open = useQuery({
     queryKey: ["cases", "open"],
@@ -45,15 +45,15 @@ export function AffairsHome() {
   const required = useQuery({
     queryKey: ["regulations", "required"],
     queryFn: async () =>
-      (
+      ok(
         await api.GET("/api/v1/regulations", {
           params: { query: { ...ALL, status: "published", requires_acknowledgement: true } },
-        })
-      ).data?.results ?? [],
+        }),
+      )?.results ?? [],
   });
   const affairs = useQuery({
     queryKey: ["reports", "affairs", "home"],
-    queryFn: async () => (await api.GET("/api/v1/reports/affairs")).data ?? null,
+    queryFn: async () => ok(await api.GET("/api/v1/reports/affairs")) ?? null,
   });
   const cases = open.data?.results ?? [];
   const stale = cases.filter(

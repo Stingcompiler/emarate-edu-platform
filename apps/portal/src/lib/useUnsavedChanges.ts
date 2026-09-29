@@ -1,0 +1,44 @@
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useBlocker } from "react-router";
+
+const MESSAGE = "لديك تعديلات لم تُحفظ. مغادرة الصفحة وتجاهلها؟";
+
+/**
+ * Guards an editor's unsaved work (review 2026-09-29, S7): leaving inside the portal asks
+ * first, closing or reloading the tab warns. Put `onInput` on the editor's wrapper — any
+ * typing, selecting or ticking inside marks it edited — and call `saved()` once the server
+ * accepted it (before navigating away). Mark parts that save on their own with
+ * `data-saves-itself`.
+ */
+export function useUnsavedChanges() {
+  const dirtyRef = useRef(false);
+  const [dirty, setDirty] = useState(false);
+  const blocker = useBlocker(
+    ({ currentLocation, nextLocation }) =>
+      dirtyRef.current && currentLocation.pathname !== nextLocation.pathname,
+  );
+  useEffect(() => {
+    if (blocker.state !== "blocked") return;
+    if (window.confirm(MESSAGE)) blocker.proceed();
+    else blocker.reset();
+  }, [blocker]);
+  useEffect(() => {
+    if (!dirty) return;
+    const warn = (event: BeforeUnloadEvent) => event.preventDefault();
+    window.addEventListener("beforeunload", warn);
+    return () => window.removeEventListener("beforeunload", warn);
+  }, [dirty]);
+  const onInput = useCallback((event: { target: EventTarget }) => {
+    const target = event.target as HTMLElement;
+    // Uploads and parts that save themselves (questions, resources) aren't pending edits.
+    if ((target as HTMLInputElement).type === "file" || target.closest?.("[data-saves-itself]"))
+      return;
+    dirtyRef.current = true;
+    setDirty(true);
+  }, []);
+  const saved = useCallback(() => {
+    dirtyRef.current = false;
+    setDirty(false);
+  }, []);
+  return { dirty, onInput, saved };
+}

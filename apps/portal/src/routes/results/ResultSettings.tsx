@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 
 import { PortalShell } from "../../components/PortalShell";
 import { Button, Card, Notice, SectionLabel, Switch } from "../../components/ui";
-import { api } from "../../lib/api";
+import { api, ok } from "../../lib/api";
 import { ALL } from "../../components/Pager";
 
 type Display = Schemas["DisplaySettings"];
@@ -25,23 +25,22 @@ export function ResultSettings() {
   const client = useQueryClient();
   const settings = useQuery({
     queryKey: ["results", "settings"],
-    queryFn: async () => (await api.GET("/api/v1/results/settings")).data ?? null,
+    queryFn: async () => ok(await api.GET("/api/v1/results/settings")) ?? null,
   });
   const terms = useQuery({
     queryKey: ["terms"],
     queryFn: async () =>
-      (await api.GET("/api/v1/terms", { params: { query: ALL } })).data?.results ?? [],
+      ok(await api.GET("/api/v1/terms", { params: { query: ALL } }))?.results ?? [],
   });
   const releases = useQuery({
     queryKey: ["results", "releases"],
     queryFn: async () =>
-      (await api.GET("/api/v1/results/term-releases", { params: { query: ALL } })).data?.results ??
-      [],
+      ok(await api.GET("/api/v1/results/term-releases", { params: { query: ALL } }))?.results ?? [],
   });
   const scales = useQuery({
     queryKey: ["results", "scales"],
     queryFn: async () =>
-      (await api.GET("/api/v1/results/grading-scales", { params: { query: ALL } })).data?.results ??
+      ok(await api.GET("/api/v1/results/grading-scales", { params: { query: ALL } }))?.results ??
       [],
   });
   const [notice, setNotice] = useState("");

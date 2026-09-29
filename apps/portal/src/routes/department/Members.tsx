@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { Link } from "react-router";
 
+import { DepartmentSwitch } from "../../components/DepartmentSwitch";
 import { PortalShell } from "../../components/PortalShell";
 import {
   FilterBar,
@@ -12,7 +13,7 @@ import {
   SectionLabel,
   problemMessage,
 } from "../../components/ui";
-import { api } from "../../lib/api";
+import { api, ok } from "../../lib/api";
 import { useMe } from "../../lib/auth";
 import { useCurrentTerm, useDepartment, useOfferings } from "../../lib/department";
 import { can } from "../../lib/nav";
@@ -30,17 +31,17 @@ export function Members() {
     queryKey: ["members", id],
     enabled: !!id,
     queryFn: async () =>
-      (
+      ok(
         await api.GET("/api/v1/departments/{department_id}/members", {
           params: { path: { department_id: id! } },
-        })
-      ).data ?? [],
+        }),
+      ) ?? [],
   });
   const metrics = useQuery({
     queryKey: ["reports", "teachers", "dash", id],
     enabled: !!id,
     queryFn: async () =>
-      (await api.GET("/api/v1/reports/teachers", { params: { query: { department: id } } })).data ??
+      ok(await api.GET("/api/v1/reports/teachers", { params: { query: { department: id } } })) ??
       null,
   });
   const [filter, setFilter] = useState<"all" | "teacher" | "ta" | "idle">("all");
@@ -76,6 +77,7 @@ export function Members() {
       subtitle={department?.name_ar}
       back={{ label: "لوحة القسم", to: "/department" }}
     >
+      <DepartmentSwitch />
       <FilterBar>
         <div className="flex flex-wrap gap-2">
           {(

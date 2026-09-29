@@ -19,7 +19,7 @@ import {
   problemMessage,
   splitCode,
 } from "../../components/ui";
-import { api } from "../../lib/api";
+import { api, ok } from "../../lib/api";
 import { useMe } from "../../lib/auth";
 import { when } from "../../lib/format";
 import { can } from "../../lib/nav";
@@ -36,7 +36,7 @@ export function Corrections() {
   const list = useQuery({
     queryKey: ["result-corrections"],
     queryFn: async () =>
-      (await api.GET("/api/v1/result-corrections", { params: { query: ALL } })).data?.results ?? [],
+      ok(await api.GET("/api/v1/result-corrections", { params: { query: ALL } }))?.results ?? [],
   });
   const all = list.data ?? [];
   const shown = all.filter((c) => c.status === tab);

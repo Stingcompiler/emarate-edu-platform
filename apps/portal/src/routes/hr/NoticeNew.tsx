@@ -12,7 +12,7 @@ import {
   problemMessage,
   SideNote,
 } from "../../components/ui";
-import { api } from "../../lib/api";
+import { api, ok } from "../../lib/api";
 import { TOPIC_LABEL, days, initials, num, pct } from "../../lib/reports";
 import { ROLE_LINE, useTeachersReport } from "./Teachers";
 import { count, N } from "../../lib/format";
@@ -44,11 +44,11 @@ export function NoticeNew() {
     queryKey: ["reports", "teacher", teacherId],
     enabled: !!teacherId,
     queryFn: async () =>
-      (
+      ok(
         await api.GET("/api/v1/reports/teachers/{public_id}", {
           params: { path: { public_id: teacherId } },
-        })
-      ).data ?? null,
+        }),
+      ) ?? null,
   });
   const send = useMutation({
     mutationFn: async () => {

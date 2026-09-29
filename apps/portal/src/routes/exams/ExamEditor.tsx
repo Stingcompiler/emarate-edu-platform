@@ -16,7 +16,8 @@ import {
   TextArea,
   problemMessage,
 } from "../../components/ui";
-import { api } from "../../lib/api";
+import { api, ok } from "../../lib/api";
+import { useUnsavedChanges } from "../../lib/useUnsavedChanges";
 import { type QType, TYPE_LABEL } from "../../lib/exam";
 import { count, N } from "../../lib/format";
 
@@ -33,6 +34,7 @@ const local = (iso: string) =>
  * question list beside the editor). Correct answers never reach students.
  */
 export function ExamEditor() {
+  const unsaved = useUnsavedChanges();
   const { id } = useParams();
   const navigate = useNavigate();
   const client = useQueryClient();
@@ -41,36 +43,36 @@ export function ExamEditor() {
     // Courses taught plus, for a department manager/supervisor, the department's courses.
     queryKey: ["me", "courses", "managed"],
     queryFn: async () =>
-      (await api.GET("/api/v1/me/courses", { params: { query: { managed: true } } })).data ?? [],
+      ok(await api.GET("/api/v1/me/courses", { params: { query: { managed: true } } })) ?? [],
     enabled: creating,
   });
   const exam = useQuery({
     queryKey: ["exams", id],
     enabled: !creating,
     queryFn: async () =>
-      (await api.GET("/api/v1/exams/{public_id}", { params: { path: { public_id: id! } } })).data ??
+      ok(await api.GET("/api/v1/exams/{public_id}", { params: { path: { public_id: id! } } })) ??
       null,
   });
   const questions = useQuery({
     queryKey: ["exams", id, "questions"],
     enabled: !creating,
     queryFn: async () =>
-      ((
+      (ok(
         await api.GET("/api/v1/exams/{public_id}/questions", {
           params: { path: { public_id: id! } },
-        })
-      ).data ?? []) as Question[],
+        }),
+      ) ?? []) as unknown as Question[],
   });
   const problems = useQuery({
     queryKey: ["exams", id, "problems"],
     enabled: !creating,
     queryFn: async () =>
       (
-        (
+        ok(
           await api.GET("/api/v1/exams/{public_id}/problems", {
             params: { path: { public_id: id! } },
-          })
-        ).data as { problems?: string[] } | undefined
+          }),
+        ) as { problems?: string[] } | undefined
       )?.problems ?? [],
   });
 
@@ -127,8 +129,11 @@ export function ExamEditor() {
       if (!res.data) throw res.error;
       return res.data;
     },
-    onSuccess: (data) =>
-      creating ? navigate(`/exams/${data.public_id}/edit`, { replace: true }) : refresh(),
+    onSuccess: (data) => {
+      unsaved.saved();
+      if (creating) navigate(`/exams/${data.public_id}/edit`, { replace: true });
+      else refresh();
+    },
   });
   const publish = useMutation({
     mutationFn: async () => {
@@ -150,192 +155,197 @@ export function ExamEditor() {
       subtitle="الوقت من ساعة الخادم · النافذة والمدة منفصلتان"
       back={{ label: "الاختبارات", to: creating ? "/exams" : `/exams/${id}` }}
     >
-      <div className="lg:grid lg:grid-cols-[360px_minmax(0,1fr)] lg:items-start lg:gap-6">
-        <section>
-          <SectionLabel>الإعدادات</SectionLabel>
-          <Card>
-            {creating && (
-              <label className="block border-b border-border-soft px-4 py-2.5">
-                <span className="block text-xs text-text-muted">المادة</span>
-                <select
-                  className="mt-1 block min-h-10 w-full bg-transparent text-base text-text"
-                  value={form.offering}
-                  onChange={(ev) => set({ offering: ev.target.value })}
-                >
-                  <option value="">اختر…</option>
-                  {(courses.data ?? [])
-                    .filter((c) => c.my_role !== "student")
-                    .map((c) => (
-                      <option key={c.offering_id} value={c.offering_id}>
-                        {c.code} — {c.name_ar}
-                      </option>
-                    ))}
-                </select>
-              </label>
-            )}
-            <Field
-              label="اسم الاختبار"
-              value={form.title}
-              onChange={(ev) => set({ title: ev.target.value })}
-              disabled={!editable}
-            />
-            <Field
-              label="يفتح"
-              type="datetime-local"
-              value={form.opens_at}
-              onChange={(ev) => set({ opens_at: ev.target.value })}
-              disabled={!editable}
-            />
-            <Field
-              label="يُغلق"
-              type="datetime-local"
-              value={form.closes_at}
-              onChange={(ev) => set({ closes_at: ev.target.value })}
-              disabled={!editable}
-            />
-            <Field
-              label="مدة المحاولة (دقيقة)"
-              type="number"
-              min={1}
-              value={form.duration_minutes}
-              onChange={(ev) => set({ duration_minutes: Number(ev.target.value) })}
-              disabled={!editable}
-            />
-            <Field
-              label="درجة النجاح"
-              inputMode="decimal"
-              value={form.pass_marks}
-              onChange={(ev) => set({ pass_marks: ev.target.value })}
-              disabled={!editable}
-              hint={creating ? undefined : `المجموع ${total.toLocaleString("ar")}`}
-            />
-            <Field
-              label="المحاولات"
-              type="number"
-              min={1}
-              value={form.max_attempts}
-              onChange={(ev) => set({ max_attempts: Number(ev.target.value) })}
-              disabled={!editable}
-            />
-          </Card>
-          <Card className="mt-3 divide-y divide-border-soft">
-            {(
-              [
-                ["allow_backtrack", "الرجوع للسؤال السابق"],
-                ["shuffle_questions", "ترتيب الأسئلة عشوائي"],
-                ["shuffle_choices", "ترتيب الاختيارات عشوائي"],
-                ["show_answers", "عرض الإجابات الصحيحة بعد النتيجة"],
-              ] as const
-            ).map(([key, label]) => (
-              <label
-                key={key}
-                className="flex min-h-12 items-center justify-between px-4 text-sm text-text"
-              >
-                {label}
-                <input
-                  type="checkbox"
-                  className="size-5 accent-[var(--color-primary)]"
-                  checked={form[key]}
-                  onChange={(ev) => set({ [key]: ev.target.checked })}
-                  disabled={!editable}
-                />
-              </label>
-            ))}
-          </Card>
-          <div className="mt-3 flex flex-wrap gap-2">
-            {[
-              ["immediate", "فور الإرسال"],
-              ["after_close", "بعد الإغلاق"],
-              ["manual", "يدويًا"],
-            ].map(([key, label]) => (
-              <Chip
-                key={key}
-                active={form.result_visibility === key}
-                onClick={() => set({ result_visibility: key })}
-              >
-                {label}
-              </Chip>
-            ))}
-          </div>
-          {save.isError && (
-            <div className="mt-3">
-              <Notice>{problemMessage(save.error)}</Notice>
-            </div>
-          )}
-          <Button
-            className="mt-4 w-full"
-            variant={creating ? "primary" : "secondary"}
-            onClick={() => save.mutate()}
-            disabled={save.isPending || !form.title || (creating && !form.offering) || !editable}
-          >
-            {creating ? "التالي: الأسئلة" : "حفظ الإعدادات"}
-          </Button>
-        </section>
-
-        {creating && (
-          // Desktop: the questions column is not empty while the exam is being created.
-          <section className="mt-6 lg:mt-0">
-            <SectionLabel>الأسئلة</SectionLabel>
-            <Card className="space-y-3 p-5 text-sm leading-6 text-text-muted">
-              <p>
-                بعد حفظ الإعدادات بزر «التالي: الأسئلة» تضيف الأسئلة هنا، ولكلٍّ درجته، ويظهر مجموع
-                الدرجات أولًا بأول.
-              </p>
-              <ul className="flex flex-wrap gap-2">
-                {(Object.keys(TYPE_LABEL) as QType[]).map((t) => (
-                  <li key={t} className="rounded-full bg-surface-alt px-3 py-1 text-xs text-text">
-                    {TYPE_LABEL[t]}
-                  </li>
-                ))}
-              </ul>
-              <p>يبقى الاختبار مسودة لا يراها الطلاب حتى تنشره.</p>
-            </Card>
-          </section>
-        )}
-        {!creating && e && (
-          <section className="mt-6 lg:mt-0">
-            <div className="flex items-center justify-between">
-              <SectionLabel>
-                الأسئلة · {(questions.data?.length ?? 0).toLocaleString("ar")} ·{" "}
-                {count(total, N.mark)}
-              </SectionLabel>
-              <StatusBadge
-                status={e.status}
-                label={e.status === "draft" ? "مسودة" : e.status === "published" ? "منشور" : "مغلق"}
+      <div className="contents" onInput={unsaved.onInput}>
+        <div className="lg:grid lg:grid-cols-[360px_minmax(0,1fr)] lg:items-start lg:gap-6">
+          <section>
+            <SectionLabel>الإعدادات</SectionLabel>
+            <Card>
+              {creating && (
+                <label className="block border-b border-border-soft px-4 py-2.5">
+                  <span className="block text-xs text-text-muted">المادة</span>
+                  <select
+                    className="mt-1 block min-h-10 w-full bg-transparent text-base text-text"
+                    value={form.offering}
+                    onChange={(ev) => set({ offering: ev.target.value })}
+                  >
+                    <option value="">اختر…</option>
+                    {(courses.data ?? [])
+                      .filter((c) => c.my_role !== "student")
+                      .map((c) => (
+                        <option key={c.offering_id} value={c.offering_id}>
+                          {c.code} — {c.name_ar}
+                        </option>
+                      ))}
+                  </select>
+                </label>
+              )}
+              <Field
+                label="اسم الاختبار"
+                value={form.title}
+                onChange={(ev) => set({ title: ev.target.value })}
+                disabled={!editable}
               />
-            </div>
-            {(problems.data ?? []).length > 0 && (
-              <Notice tone="warning">{problems.data!.join(" · ")}</Notice>
-            )}
-            <div className="mt-3 space-y-3">
-              {(questions.data ?? []).map((q, i) => (
-                <QuestionCard
-                  key={q.id}
-                  examId={id!}
-                  question={q}
-                  position={i + 1}
-                  onChanged={refresh}
-                  locked={e.status !== "draft"}
-                />
+              <Field
+                label="يفتح"
+                type="datetime-local"
+                value={form.opens_at}
+                onChange={(ev) => set({ opens_at: ev.target.value })}
+                disabled={!editable}
+              />
+              <Field
+                label="يُغلق"
+                type="datetime-local"
+                value={form.closes_at}
+                onChange={(ev) => set({ closes_at: ev.target.value })}
+                disabled={!editable}
+              />
+              <Field
+                label="مدة المحاولة (دقيقة)"
+                type="number"
+                min={1}
+                value={form.duration_minutes}
+                onChange={(ev) => set({ duration_minutes: Number(ev.target.value) })}
+                disabled={!editable}
+              />
+              <Field
+                label="درجة النجاح"
+                inputMode="decimal"
+                value={form.pass_marks}
+                onChange={(ev) => set({ pass_marks: ev.target.value })}
+                disabled={!editable}
+                hint={creating ? undefined : `المجموع ${total.toLocaleString("ar")}`}
+              />
+              <Field
+                label="المحاولات"
+                type="number"
+                min={1}
+                value={form.max_attempts}
+                onChange={(ev) => set({ max_attempts: Number(ev.target.value) })}
+                disabled={!editable}
+              />
+            </Card>
+            <Card className="mt-3 divide-y divide-border-soft">
+              {(
+                [
+                  ["allow_backtrack", "الرجوع للسؤال السابق"],
+                  ["shuffle_questions", "ترتيب الأسئلة عشوائي"],
+                  ["shuffle_choices", "ترتيب الاختيارات عشوائي"],
+                  ["show_answers", "عرض الإجابات الصحيحة بعد النتيجة"],
+                ] as const
+              ).map(([key, label]) => (
+                <label
+                  key={key}
+                  className="flex min-h-12 items-center justify-between px-4 text-sm text-text"
+                >
+                  {label}
+                  <input
+                    type="checkbox"
+                    className="size-5 accent-[var(--color-primary)]"
+                    checked={form[key]}
+                    onChange={(ev) => set({ [key]: ev.target.checked })}
+                    disabled={!editable}
+                  />
+                </label>
               ))}
-              {e.status === "draft" && <NewQuestion examId={id!} onAdded={refresh} />}
+            </Card>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {[
+                ["immediate", "فور الإرسال"],
+                ["after_close", "بعد الإغلاق"],
+                ["manual", "يدويًا"],
+              ].map(([key, label]) => (
+                <Chip
+                  key={key}
+                  active={form.result_visibility === key}
+                  onClick={() => set({ result_visibility: key })}
+                >
+                  {label}
+                </Chip>
+              ))}
             </div>
-            {publish.isError && (
+            {save.isError && (
               <div className="mt-3">
-                <Notice>{problemMessage(publish.error)}</Notice>
+                <Notice>{problemMessage(save.error)}</Notice>
               </div>
             )}
-            {e.status === "draft" && (
-              <Button
-                className="mt-4 w-full"
-                onClick={() => publish.mutate()}
-                disabled={publish.isPending || (problems.data ?? []).length > 0}
-              >
-                جدولة ونشر
-              </Button>
-            )}
+            <Button
+              className="mt-4 w-full"
+              variant={creating ? "primary" : "secondary"}
+              onClick={() => save.mutate()}
+              disabled={save.isPending || !form.title || (creating && !form.offering) || !editable}
+            >
+              {creating ? "التالي: الأسئلة" : "حفظ الإعدادات"}
+            </Button>
           </section>
-        )}
+
+          {creating && (
+            // Desktop: the questions column is not empty while the exam is being created.
+            <section className="mt-6 lg:mt-0">
+              <SectionLabel>الأسئلة</SectionLabel>
+              <Card className="space-y-3 p-5 text-sm leading-6 text-text-muted">
+                <p>
+                  بعد حفظ الإعدادات بزر «التالي: الأسئلة» تضيف الأسئلة هنا، ولكلٍّ درجته، ويظهر
+                  مجموع الدرجات أولًا بأول.
+                </p>
+                <ul className="flex flex-wrap gap-2">
+                  {(Object.keys(TYPE_LABEL) as QType[]).map((t) => (
+                    <li key={t} className="rounded-full bg-surface-alt px-3 py-1 text-xs text-text">
+                      {TYPE_LABEL[t]}
+                    </li>
+                  ))}
+                </ul>
+                <p>يبقى الاختبار مسودة لا يراها الطلاب حتى تنشره.</p>
+              </Card>
+            </section>
+          )}
+          {!creating && e && (
+            // Questions save one by one; typing here isn't unsaved exam settings.
+            <section data-saves-itself className="mt-6 lg:mt-0">
+              <div className="flex items-center justify-between">
+                <SectionLabel>
+                  الأسئلة · {(questions.data?.length ?? 0).toLocaleString("ar")} ·{" "}
+                  {count(total, N.mark)}
+                </SectionLabel>
+                <StatusBadge
+                  status={e.status}
+                  label={
+                    e.status === "draft" ? "مسودة" : e.status === "published" ? "منشور" : "مغلق"
+                  }
+                />
+              </div>
+              {(problems.data ?? []).length > 0 && (
+                <Notice tone="warning">{problems.data!.join(" · ")}</Notice>
+              )}
+              <div className="mt-3 space-y-3">
+                {(questions.data ?? []).map((q, i) => (
+                  <QuestionCard
+                    key={q.id}
+                    examId={id!}
+                    question={q}
+                    position={i + 1}
+                    onChanged={refresh}
+                    locked={e.status !== "draft"}
+                  />
+                ))}
+                {e.status === "draft" && <NewQuestion examId={id!} onAdded={refresh} />}
+              </div>
+              {publish.isError && (
+                <div className="mt-3">
+                  <Notice>{problemMessage(publish.error)}</Notice>
+                </div>
+              )}
+              {e.status === "draft" && (
+                <Button
+                  className="mt-4 w-full"
+                  onClick={() => publish.mutate()}
+                  disabled={publish.isPending || (problems.data ?? []).length > 0}
+                >
+                  جدولة ونشر
+                </Button>
+              )}
+            </section>
+          )}
+        </div>
       </div>
     </PortalShell>
   );
