@@ -5,24 +5,24 @@ const T = {
   home: { ar: "الرئيسية", en: "Home" },
   about: { ar: "عن الكلية", en: "About" },
   departments: { ar: "الأقسام", en: "Departments" },
-  programs: { ar: "البرامج", en: "Programs" },
+  programs: { ar: "البرامج", en: "Programmes" },
   admission: { ar: "القبول", en: "Admission" },
   news: { ar: "الأخبار والفعاليات", en: "News & events" },
   contact: { ar: "تواصل", en: "Contact" },
   portal: { ar: "دخول المنصة", en: "Sign in" },
   apply: { ar: "قدّم الآن", en: "Apply now" },
   track: { ar: "تابع طلبك", en: "Track your application" },
-  explore: { ar: "استكشف البرامج", en: "Explore programs" },
+  explore: { ar: "استكشف البرامج", en: "Explore programmes" },
   open: { ar: "يقبل الآن", en: "Open" },
   closed: { ar: "مغلق حاليًا", en: "Closed" },
   all: { ar: "الكل", en: "All" },
   students: { ar: "الطلاب", en: "students" },
   teachers: { ar: "أعضاء هيئة التدريس", en: "faculty" },
-  programsCount: { ar: "البرامج", en: "programs" },
+  programsCount: { ar: "البرامج", en: "programmes" },
   departmentsCount: { ar: "الأقسام", en: "departments" },
   upcoming: { ar: "الفعالية القادمة", en: "Next event" },
   latestNews: { ar: "الأخبار", en: "News" },
-  openPrograms: { ar: "البرامج المفتوحة", en: "Open programs" },
+  openPrograms: { ar: "البرامج المفتوحة", en: "Open programmes" },
   plan: { ar: "الخطة الدراسية", en: "Study plan" },
   level: { ar: "المستوى", en: "Level" },
   levels: { ar: "المستويات", en: "levels" },
@@ -43,6 +43,15 @@ export const t = (lang: Lang, key: Key) => T[key][lang];
 export const dir = (lang: Lang) => (lang === "ar" ? "rtl" : "ltr");
 export const href = (lang: Lang, path = "") =>
   `/${lang}/${path}`.replace(/\/+$/, "/").replace(/\/\/+/g, "/");
+/** True when the text is (or starts as) Arabic — an untranslated fallback on English pages. */
+export const isArabic = (text?: string | null) => !!text && /[\u0600-\u06FF]/.test(text);
+/** An admission cycle's name for the page's language: the college names cycles in Arabic
+ *  («قبول 2026/2027»), so English pages say «Admissions 2026/2027» (W3). */
+export const cycleName = (lang: Lang, name: string) => {
+  if (lang === "ar" || !isArabic(name)) return name;
+  const year = name.match(/\d{4}(?:\/\d{2,4})?/)?.[0];
+  return year ? `Admissions ${year}` : "Admissions";
+};
 /** English falls back to Arabic when a field has no translation yet. */
 export const pick = (lang: Lang, ar: string, en?: string | null) => (lang === "en" && en ? en : ar);
 export const langPaths = () => LANGS.map((lang) => ({ params: { lang } }));
@@ -51,18 +60,28 @@ export const fmtDate = (
   iso: string,
   opts: Intl.DateTimeFormatOptions = { day: "numeric", month: "long", year: "numeric" },
 ) => new Date(iso).toLocaleDateString(lang === "ar" ? "ar-u-nu-latn" : "en-GB", opts);
+/** A time of day alone («3:00 م» · «15:00»): toLocaleDateString would add the date. */
+export const fmtTime = (lang: Lang, iso: string) =>
+  new Date(iso).toLocaleTimeString(lang === "ar" ? "ar-u-nu-latn" : "en-GB", {
+    hour: "numeric",
+    minute: "2-digit",
+  });
 export const num = (lang: Lang, n: number) =>
   n.toLocaleString(lang === "ar" ? "ar-u-nu-latn" : "en");
 /** A counted noun in either language. Arabic: 1 and 100+ singular, 2 dual (without the
  *  number), 3–10 plural, 11–99 accusative singular — «٥ أقسام», «قسمان», «١١ برنامجًا». */
 type Noun = { one: string; two: string; few: string; many: string; en: [string, string] };
 const arRule = new Intl.PluralRules("ar");
-export function count(lang: Lang, n: number, noun: Noun): string {
-  if (lang === "en") return `${num(lang, n)} ${n === 1 ? noun.en[0] : noun.en[1]}`;
+/** The noun that goes with n, without the number (for a big figure over its label). */
+export function word(lang: Lang, n: number, noun: Noun): string {
+  if (lang === "en") return n === 1 ? noun.en[0] : noun.en[1];
   const form = arRule.select(n);
   if (form === "two") return noun.two;
-  const word = form === "few" ? noun.few : form === "many" ? noun.many : noun.one;
-  return `${num(lang, n)} ${word}`;
+  return form === "few" ? noun.few : form === "many" ? noun.many : noun.one;
+}
+export function count(lang: Lang, n: number, noun: Noun): string {
+  if (lang === "ar" && arRule.select(n) === "two") return noun.two;
+  return `${num(lang, n)} ${word(lang, n, noun)}`;
 }
 export const N = {
   program: {
@@ -70,7 +89,7 @@ export const N = {
     two: "برنامجان",
     few: "برامج",
     many: "برنامجًا",
-    en: ["program", "programs"],
+    en: ["programme", "programmes"],
   },
   department: {
     one: "قسم",
@@ -85,6 +104,13 @@ export const N = {
     few: "أعضاء هيئة تدريس",
     many: "عضو هيئة تدريس",
     en: ["faculty member", "faculty"],
+  },
+  upcomingEvent: {
+    one: "فعالية قادمة",
+    two: "فعاليتان قادمتان",
+    few: "فعاليات قادمة",
+    many: "فعالية قادمة",
+    en: ["upcoming event", "upcoming events"],
   },
   day: { one: "يوم", two: "يومين", few: "أيام", many: "يومًا", en: ["day", "days"] },
   hour: {

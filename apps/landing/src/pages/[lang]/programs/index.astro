@@ -88,7 +88,7 @@ const lead =
           {g.name}{" "}
           <span class="text-sm font-normal text-text-muted">· {num(lang, g.items.length)}</span>
         </h2>
-        <ul class="mt-4 grid divide-y divide-border-soft overflow-hidden rounded-2xl border border-border-soft bg-surface lg:grid-cols-2 lg:divide-y-0 lg:[&>li]:border-b lg:[&>li]:border-border-soft lg:[&>li:nth-child(odd)]:border-e">
+        <ul class="mt-4 grid divide-y divide-border-soft overflow-hidden rounded-2xl border border-border-soft bg-surface lg:grid-cols-2 lg:divide-y-0 lg:[&>li]:border-b lg:[&>li]:border-border-soft lg:[&>li:nth-child(odd)]:border-e lg:[&>li:last-child:nth-child(odd)]:col-span-2 lg:[&>li:last-child:nth-child(odd)]:border-e-0">
           {g.items.map((p) => (
             <ProgramRow lang={lang} program={p} />
           ))}
@@ -96,7 +96,7 @@ const lead =
       </section>
     ))}
     {!all.length && (
-      <p class="text-text-muted">{lang === "ar" ? "لا برامج منشورة بعد." : "No programs yet."}</p>
+      <p class="text-text-muted">{lang === "ar" ? "لا برامج منشورة بعد." : "No programmes yet."}</p>
     )}
   </div>
 </Base>

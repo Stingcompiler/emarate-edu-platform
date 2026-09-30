@@ -34,7 +34,10 @@ test("every public page loads, fits, is accessible and has its SEO basics", asyn
       lang: document.documentElement.lang,
       canonical: document.querySelector('link[rel="canonical"]')?.getAttribute("href"),
       imagesWithoutAlt: document.querySelectorAll("img:not([alt])").length,
-      links: [...document.querySelectorAll("a[href^='/']")].map((a) => a.getAttribute("href")!),
+      // Pages only: files such as an event's .ics are downloads, checked on their own.
+      links: [...document.querySelectorAll("a[href^='/']:not([download])")].map((a) =>
+        a.getAttribute("href")!,
+      ),
       // Large screens: every block of <main> spans the header's container (no phone-width
       // column floating in the middle of a wide screen — owner rule, skill responsive-page).
       narrow: (() => {
@@ -138,6 +141,45 @@ test("WhatsApp is one tap away, and parents have their own page", async ({ page 
   await expect(page.getByText("ساعات العمل:")).toBeVisible();
   // The contact page shows WhatsApp in its quick row, so no floating button there.
   await expect(page.getByRole("link", { name: "تواصل عبر واتساب" })).toHaveCount(0);
+});
+
+test("an event can be added to a calendar, with directions to the college", async ({
+  page,
+  request,
+}) => {
+  await page.goto(`${SITE}/ar/events/open-day/`);
+  const add = page.getByRole("link", { name: "أضف إلى التقويم" });
+  await expect(add).toHaveAttribute("href", "/events/open-day.ics");
+  const ics = await request.get(`${SITE}/events/open-day.ics`);
+  expect(ics.ok()).toBe(true);
+  expect(ics.headers()["content-type"]).toContain("text/calendar");
+  const body = await ics.text();
+  expect(body).toContain("BEGIN:VEVENT");
+  expect(body).toMatch(/DTSTART:\d{8}T\d{6}Z/);
+  expect(body).toContain("SUMMARY:يوم التعريف بالكلية");
+  await expect(page.getByRole("link", { name: "الاتجاهات إلى الكلية" })).toBeVisible();
+});
+
+test("English pages mark Arabic-only content, and every trail is structured data", async ({
+  page,
+}) => {
+  // The demo's official pages are written in Arabic only.
+  await page.goto(`${SITE}/en/about/dean/`);
+  await expect(page.getByText("Available in Arabic for now.")).toBeVisible();
+  await expect(
+    page.locator('main [lang="ar"][dir="rtl"], [lang="ar"][dir="rtl"]').first(),
+  ).toBeAttached();
+  await page.goto(`${SITE}/ar/programs/BIT/`);
+  const trail = page.getByRole("navigation", { name: "مسار الصفحة" });
+  await expect(trail.locator('[aria-current="page"]')).toHaveText("بكالوريوس تقنية المعلومات");
+  const lds = await page.locator('script[type="application/ld+json"]').allTextContents();
+  const crumbs = lds.map((t) => JSON.parse(t)).find((d) => d["@type"] === "BreadcrumbList");
+  expect(crumbs.itemListElement.map((i: { name: string }) => i.name)).toEqual([
+    "الرئيسية",
+    "البرامج",
+    "تقنية المعلومات",
+    "بكالوريوس تقنية المعلومات",
+  ]);
 });
 
 test("the site menus come from the CMS and behave like menus", async ({ page, isMobile }) => {

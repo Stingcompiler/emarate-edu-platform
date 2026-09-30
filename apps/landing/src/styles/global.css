@@ -21,3 +21,10 @@
     transform: none !important;
   }
 }
+
+/* English pages show Arabic where the college hasn't translated yet (W3). Each paragraph takes
+   its direction from its own first letter, so a fallback reads right-to-left instead of
+   scrambled («60 الشهادة الثانوية … ٪»); translated English is unaffected. */
+html[lang="en"] :where(p, li, dd, dt, h1, h2, h3, h4, td, th, blockquote, figcaption, summary) {
+  unicode-bidi: plaintext;
+}

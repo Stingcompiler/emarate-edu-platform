@@ -1,4 +1,5 @@
 ---
+import ArabicOnly from "../../components/ArabicOnly.astro";
 import Blocks from "../../components/Blocks.astro";
 import FeesTable from "../../components/FeesTable.astro";
 import PageHead from "../../components/PageHead.astro";
@@ -14,7 +15,7 @@ import {
   describe,
   programs as loadPrograms,
 } from "../../lib/api";
-import { LANGS, type Lang, href, pick, t } from "../../lib/i18n";
+import { LANGS, type Lang, href, pick, t, isArabic } from "../../lib/i18n";
 import { related } from "../../lib/related";
 
 // The college's official pages (backend content/official.py) at their own path —
@@ -74,7 +75,9 @@ const more = await related(
   />
   <WithAside>
     <article class="max-w-3xl">
-      <Blocks blocks={page.blocks} />
+      <ArabicOnly lang={lang} when={isArabic(JSON.stringify(page.blocks))}>
+        <Blocks blocks={page.blocks} />
+      </ArabicOnly>
       {priced.length > 0 && <FeesTable lang={lang} programs={priced} />}
       {heads.length > 0 && (
         <section class="mt-8">

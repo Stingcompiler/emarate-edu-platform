@@ -6,6 +6,7 @@ import { PORTAL, intakes, programs } from "../../../lib/api";
 import {
   N,
   arrow,
+  cycleName,
   faqLd,
   count,
   fmtDate,
@@ -123,13 +124,13 @@ const lead = L(
   lang={lang}
   title={title}
   path="admissions/"
-  description={cycle ? `${cycle.cycle} — ${lead}` : lead}
+  description={cycle ? `${cycleName(lang, cycle.cycle)} — ${lead}` : lead}
   jsonLd={jsonLd}
 >
   <PageHead lang={lang} title={L("كيف تلتحق بالكلية", "How to join the college")} lead={lead}>
     {cycle && (
       <p class="mt-4 inline-block rounded-full bg-accent-soft px-3 py-1 text-xs font-semibold text-accent-hover">
-        {cycle.cycle}
+        {cycleName(lang, cycle.cycle)}
       </p>
     )}
   </PageHead>

@@ -5,7 +5,7 @@ import SideLinks from "../../../components/SideLinks.astro";
 import WithAside from "../../../components/WithAside.astro";
 import Base from "../../../layouts/Base.astro";
 import { events, pastEvents } from "../../../lib/api";
-import { type Lang, langPaths } from "../../../lib/i18n";
+import { type Lang, langPaths, N, num, word } from "../../../lib/i18n";
 import { related } from "../../../lib/related";
 
 // docs/07 §1 `/events`: upcoming first, then the archive (ended events keep their pages).
@@ -26,7 +26,7 @@ const more = await related(lang, ["calendar", "news", "announcements"]);
   <WithAside>
     <section>
       <h2 class="font-display text-xl font-bold">{L("القادمة", "Upcoming")}</h2>
-      <ul class="mt-4 grid gap-3 xl:grid-cols-2">
+      <ul class="mt-4 grid gap-3 xl:grid-cols-2 xl:[&>li:last-child:nth-child(odd)]:col-span-2">
         {upcoming.map((e) => (
           <EventRow lang={lang} event={e} />
         ))}
@@ -40,7 +40,7 @@ const more = await related(lang, ["calendar", "news", "announcements"]);
     {past.length > 0 && (
       <section class="mt-10">
         <h2 class="font-display text-xl font-bold">{L("فعاليات سابقة", "Past events")}</h2>
-        <ul class="mt-4 grid gap-3 xl:grid-cols-2">
+        <ul class="mt-4 grid gap-3 xl:grid-cols-2 xl:[&>li:last-child:nth-child(odd)]:col-span-2">
           {past.map((e) => (
             <EventRow lang={lang} event={e} />
           ))}
@@ -49,8 +49,8 @@ const more = await related(lang, ["calendar", "news", "announcements"]);
     )}
     <Fragment slot="aside">
       <div class="rounded-2xl bg-bg-subtle p-4">
-        <p class="font-display text-3xl font-bold text-primary">{upcoming.length}</p>
-        <p class="text-sm text-text-muted">{L("فعاليات قادمة", "upcoming events")}</p>
+        <p class="font-display text-3xl font-bold text-primary">{num(lang, upcoming.length)}</p>
+        <p class="text-sm text-text-muted">{word(lang, upcoming.length, N.upcomingEvent)}</p>
       </div>
       <SideLinks lang={lang} title={L("ذو صلة", "Related")} links={more} />
     </Fragment>

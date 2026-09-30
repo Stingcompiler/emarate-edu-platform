@@ -13,7 +13,19 @@ import {
   site,
   stats,
 } from "../../lib/api";
-import { arrow, fmtDate, href, type Lang, langPaths, num, pick, t, count, N } from "../../lib/i18n";
+import {
+  arrow,
+  cycleName,
+  fmtDate,
+  href,
+  type Lang,
+  langPaths,
+  num,
+  pick,
+  t,
+  count,
+  N,
+} from "../../lib/i18n";
 
 export const getStaticPaths = langPaths;
 const lang = Astro.params.lang as Lang;
@@ -39,7 +51,7 @@ const closes = open.map((p) => p.intake!.closes_at).sort()[0];
 const daysLeft = closes
   ? Math.max(0, Math.ceil((new Date(closes).getTime() - Date.now()) / 86400000))
   : null;
-const cycle = open[0]?.intake?.cycle;
+const cycle = open[0]?.intake ? cycleName(lang, open[0].intake.cycle) : undefined;
 const next = upcoming
   .filter((e) => new Date(e.ends_at) > new Date())
   .sort((a, b) => a.starts_at.localeCompare(b.starts_at))[0];
@@ -152,7 +164,7 @@ const jsonLd = {
       <div>
         {cycle && (
           <p class="inline-flex rounded-full bg-accent-soft px-3 py-1 text-xs font-semibold text-accent-700">
-            {lang === "ar" ? `القبول مفتوح · ${cycle}` : `Admission open · ${cycle}`}
+            {lang === "ar" ? `القبول مفتوح · ${cycle}` : `${cycle} · open`}
           </p>
         )}
         {/* The two lines rise from behind a mask — line by line, never per letter (Arabic). */}

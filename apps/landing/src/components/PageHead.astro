@@ -5,10 +5,29 @@ interface Props {
   lang: Lang;
   title: string;
   lead?: string;
-  /** [label, path]; an empty path is a section without its own page. */
+  /** [label, path] of the pages above this one; an empty path is a section without its own
+   *  page. A crumb pointing at this page itself is dropped — the trail always ends with it. */
   crumbs?: [string, string][];
 }
 const { lang, title, lead, crumbs = [] } = Astro.props;
+const here = Astro.url.pathname.replace(/\/?$/, "/");
+// One trail on every page (review 2026-09-29 🟢): home › ancestors › this page.
+const trail = crumbs.filter(([, path]) => !path || href(lang, path) !== here);
+const absolute = (path: string) => new URL(path, Astro.site ?? Astro.url).toString();
+const breadcrumbLd = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    [t(lang, "home"), href(lang)],
+    ...trail.filter(([, path]) => path).map(([label, path]) => [label, href(lang, path)]),
+    [title, here],
+  ].map(([name, path], i) => ({
+    "@type": "ListItem",
+    position: i + 1,
+    name,
+    item: absolute(path!),
+  })),
+};
 ---
 
 <div class="border-b border-border-soft bg-bg-subtle">
@@ -17,9 +36,11 @@ const { lang, title, lead, crumbs = [] } = Astro.props;
       <a href={href(lang)} class="hover:text-text">
         {t(lang, "home")}
       </a>
-      {crumbs.map(([label, path]) => (
+      {trail.map(([label, path]) => (
         <>
-          <span class="mx-1">/</span>
+          <span class="mx-1" aria-hidden="true">
+            /
+          </span>
           {path ? (
             <a href={href(lang, path)} class="hover:text-text">
               {label}
@@ -29,9 +50,20 @@ const { lang, title, lead, crumbs = [] } = Astro.props;
           )}
         </>
       ))}
+      <span class="mx-1" aria-hidden="true">
+        /
+      </span>
+      <span aria-current="page" class="text-text">
+        {title}
+      </span>
     </nav>
     <h1 class="mt-2 font-display text-3xl font-bold leading-snug text-text lg:text-4xl">{title}</h1>
     {lead && <p class="mt-3 max-w-2xl text-base leading-7 text-text-muted">{lead}</p>}
     <slot />
   </div>
 </div>
+<script
+  is:inline
+  type="application/ld+json"
+  set:html={JSON.stringify(breadcrumbLd).replace(/</g, "\\u003c")}
+/>

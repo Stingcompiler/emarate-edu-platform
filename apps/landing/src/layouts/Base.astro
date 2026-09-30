@@ -97,7 +97,7 @@ const ext = (external: boolean) => (external ? { rel: "noopener", target: "_blan
       />
     )}
   </head>
-  <body class:list={["flex min-h-dvh flex-col bg-bg text-text", bottomBar && "pb-20 lg:pb-0"]}>
+  <body class="flex min-h-dvh flex-col bg-bg text-text">
     <a
       href="#main"
       class="sr-only focus:not-sr-only focus:absolute focus:m-2 focus:rounded focus:bg-surface focus:px-3 focus:py-2"
@@ -276,7 +276,14 @@ const ext = (external: boolean) => (external ? { rel: "noopener", target: "_blan
       <slot />
     </main>
 
-    <footer class="mt-16 bg-header text-sm text-navy-100">
+    <footer
+      class:list={[
+        "mt-16 bg-header text-sm text-navy-100",
+        // Room for the phone's fixed bottom bar, in the footer's own colour (W8: it was a
+        // white strip under the footer when the padding sat on <body>).
+        bottomBar && "pb-20 lg:pb-0",
+      ]}
+    >
       <div
         class="mx-auto grid max-w-6xl grid-cols-2 gap-8 px-4 py-10 lg:grid-cols-[var(--footer-cols)] lg:px-8"
         style={`--footer-cols: 1.5fr repeat(${Math.max(footerColumns.length, 1)}, 1fr)`}
@@ -323,10 +330,10 @@ const ext = (external: boolean) => (external ? { rel: "noopener", target: "_blan
         {footerColumns.map((col) => (
           <nav aria-label={col.label}>
             <p class="font-semibold text-white">{col.label}</p>
-            <ul class="mt-3 space-y-2">
+            <ul class="mt-3 space-y-1">
               {col.children.map((c) => (
                 <li>
-                  <a href={c.href} {...ext(c.external)} class="hover:text-white">
+                  <a href={c.href} {...ext(c.external)} class="inline-block py-1 hover:text-white">
                     {c.label}
                   </a>
                 </li>
@@ -416,10 +423,34 @@ const ext = (external: boolean) => (external ? { rel: "noopener", target: "_blan
           { rootMargin: "0px 0px -8% 0px" },
         );
         document.querySelectorAll<HTMLElement>("[data-reveal], [data-count]").forEach((el) => {
-          // Only what is still below the fold waits for its entrance.
-          if (el.getBoundingClientRect().top > window.innerHeight) el.classList.add("is-pending");
+          // Only what is well below the fold waits for its entrance (W5: not what sits just
+          // under it, which a short scroll or a tall screen may never "enter").
+          if (el.getBoundingClientRect().top > window.innerHeight * 1.25)
+            el.classList.add("is-pending");
           seen.observe(el);
         });
+        // A safety net (W5): printing, or an in-app browser whose observer never reports,
+        // must not leave content hidden — whatever is on or above the screen is shown.
+        const catchUp = (all = false) =>
+          document.querySelectorAll<HTMLElement>(".is-pending").forEach((el) => {
+            // Above the observer's own line (rootMargin −8%): it should have fired already.
+            if (all || el.getBoundingClientRect().top < window.innerHeight * 0.9) {
+              el.classList.remove("is-pending");
+              seen.unobserve(el);
+            }
+          });
+        window.addEventListener("beforeprint", () => catchUp(true));
+        setTimeout(catchUp, 2500);
+        let queued = false;
+        window.addEventListener(
+          "scroll",
+          () => {
+            if (queued) return;
+            queued = true;
+            setTimeout(() => ((queued = false), catchUp()), 400);
+          },
+          { passive: true },
+        );
       }
 
       // Menus are <details> (they work without JS); this makes them behave like menus:

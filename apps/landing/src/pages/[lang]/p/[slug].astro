@@ -1,10 +1,11 @@
 ---
+import ArabicOnly from "../../../components/ArabicOnly.astro";
 import Blocks from "../../../components/Blocks.astro";
 import PageHead from "../../../components/PageHead.astro";
 import WithAside from "../../../components/WithAside.astro";
 import Base from "../../../layouts/Base.astro";
 import { type Page, get, pages, describe } from "../../../lib/api";
-import { LANGS, type Lang, pick } from "../../../lib/i18n";
+import { LANGS, type Lang, pick, isArabic } from "../../../lib/i18n";
 
 // Published CMS pages other than the official ones (those live at their own path).
 export async function getStaticPaths() {
@@ -32,7 +33,9 @@ const title = pick(lang, page.title_ar, page.title_en);
   <PageHead lang={lang} title={title} />
   <WithAside>
     <article class="max-w-3xl">
-      <Blocks blocks={page.blocks} />
+      <ArabicOnly lang={lang} when={isArabic(JSON.stringify(page.blocks))}>
+        <Blocks blocks={page.blocks} />
+      </ArabicOnly>
     </article>
   </WithAside>
 </Base>
