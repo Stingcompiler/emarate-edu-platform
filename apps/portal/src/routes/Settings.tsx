@@ -6,7 +6,16 @@ import { Link, useNavigate } from "react-router";
 
 import { PortalShell } from "../components/PortalShell";
 import { Segmented } from "../components/motion";
-import { Button, Card, SectionLabel, WithSide } from "../components/ui";
+import {
+  Button,
+  Card,
+  Field,
+  Notice,
+  SectionLabel,
+  Switch,
+  WithSide,
+  problemMessage,
+} from "../components/ui";
 import { api, ok } from "../lib/api";
 import { hasRole, useMe, useSignOut } from "../lib/auth";
 import { disablePush, enablePush, pushState, type PushState } from "../lib/push";
@@ -90,6 +99,7 @@ export function Settings() {
         }
       >
         <PushCard />
+        {hasRole(me.data, "teacher", "ta", "department_manager") && <PublicProfileCard />}
 
         <SectionLabel>الإشعارات — لكل فئة قنواتها</SectionLabel>
         <Card className="overflow-hidden">
@@ -169,6 +179,99 @@ const PUSH_TEXT: Record<PushState, string> = {
   "needs-install": "على iPhone تعمل الإشعارات بعد تثبيت التطبيق على الشاشة الرئيسية.",
   unsupported: "هذا المتصفح لا يدعم الإشعارات الفورية.",
 };
+
+/**
+ * The member's own choice to appear on their department's page of the college site (owner
+ * decision 2026-09-30): off until they turn it on, with the title shown beside the name.
+ */
+function PublicProfileCard() {
+  const client = useQueryClient();
+  const profile = useQuery({
+    queryKey: ["me", "public-profile"],
+    queryFn: async () => ok(await api.GET("/api/v1/me/public-profile")) ?? null,
+  });
+  const [draft, setDraft] = useState({
+    full_name_en: "",
+    academic_title_ar: "",
+    academic_title_en: "",
+  });
+  useEffect(() => {
+    const p = profile.data;
+    if (p)
+      setDraft({
+        full_name_en: p.full_name_en ?? "",
+        academic_title_ar: p.academic_title_ar ?? "",
+        academic_title_en: p.academic_title_en ?? "",
+      });
+  }, [profile.data]);
+  const save = useMutation({
+    mutationFn: async (body: Partial<Schemas["PublicProfile"]>) => {
+      const { data, error } = await api.PATCH("/api/v1/me/public-profile", { body });
+      if (!data) throw error;
+      return data;
+    },
+    onSuccess: (data) => client.setQueryData(["me", "public-profile"], data),
+  });
+  const p = profile.data;
+  if (!p) return null;
+  const changed =
+    draft.full_name_en !== (p.full_name_en ?? "") ||
+    draft.academic_title_ar !== (p.academic_title_ar ?? "") ||
+    draft.academic_title_en !== (p.academic_title_en ?? "");
+  return (
+    <>
+      <SectionLabel>الظهور في صفحة القسم على موقع الكلية</SectionLabel>
+      <Card className="overflow-hidden">
+        <div className="flex items-center justify-between gap-3 px-4 py-3">
+          <div>
+            <p className="text-sm font-semibold text-text">أظهر اسمي ولقبي في صفحة قسمي</p>
+            <p className="mt-0.5 text-xs text-text-muted">
+              باختيارك وحدك، وتستطيع إيقافه متى شئت. لا يظهر بريدك ولا هاتفك.
+            </p>
+          </div>
+          <Switch
+            checked={p.public_profile ?? false}
+            label="أظهر اسمي ولقبي في صفحة قسمي"
+            disabled={save.isPending}
+            onChange={(value) => save.mutate({ public_profile: value })}
+          />
+        </div>
+        <div className="border-t border-border-soft sm:grid sm:grid-cols-2">
+          <Field
+            label="اللقب العلمي (مثل: أستاذ مشارك)"
+            value={draft.academic_title_ar}
+            maxLength={100}
+            onChange={(e) => setDraft({ ...draft, academic_title_ar: e.target.value })}
+          />
+          <Field
+            label="اللقب بالإنجليزية"
+            dir="ltr"
+            value={draft.academic_title_en}
+            maxLength={100}
+            onChange={(e) => setDraft({ ...draft, academic_title_en: e.target.value })}
+          />
+          <Field
+            label="الاسم بالإنجليزية (للصفحة الإنجليزية)"
+            dir="ltr"
+            value={draft.full_name_en}
+            maxLength={200}
+            onChange={(e) => setDraft({ ...draft, full_name_en: e.target.value })}
+          />
+          <div className="flex items-center justify-end px-4 py-2.5">
+            <Button disabled={!changed || save.isPending} onClick={() => save.mutate(draft)}>
+              {save.isPending ? "جارٍ الحفظ…" : "حفظ"}
+            </Button>
+          </div>
+        </div>
+        {save.isError && (
+          <div className="px-4 pb-3">
+            <Notice>{problemMessage(save.error)}</Notice>
+          </div>
+        )}
+      </Card>
+    </>
+  );
+}
 
 function PushCard() {
   const [state, setState] = useState<PushState | null>(null);

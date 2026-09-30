@@ -75,6 +75,7 @@ urlpatterns = [
     path("auth/refresh", accounts.RefreshView.as_view(), name="auth-refresh"),
     path("auth/logout", accounts.LogoutView.as_view(), name="auth-logout"),
     path("me", accounts.MeView.as_view(), name="me"),
+    path("me/public-profile", accounts.MyPublicProfileView.as_view(), name="me-public-profile"),
     path("me/courses", academic.MyCoursesView.as_view(), name="me-courses"),
     path("system-settings", organization.SystemSettingsView.as_view(), name="system-settings"),
     path(

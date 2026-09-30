@@ -261,6 +261,11 @@ def has_role(user, *roles: Role) -> bool:
     return any(role in held for role in roles)
 
 
+def has_role_in(user, role: Role, department_id: int | None) -> bool:
+    """True if ``user`` holds ``role`` for exactly this department."""
+    return department_id is not None and (role, department_id) in _assignments(user)
+
+
 def scope_for(user, capability: str) -> Scope:
     allowed = CAPABILITIES[capability]
     departments: set[int] = set()

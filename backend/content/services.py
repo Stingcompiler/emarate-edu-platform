@@ -71,6 +71,14 @@ def may_announce(user, scope: str, scope_id: int | None, audience: str) -> bool:
         and rbac.can(user, "learning.manage", department)
     ):
         return True
+    # Owner decision 2026-09-30: a department manager publishes their department's news on
+    # its public page (department scope only — the college-wide site stays the site team's).
+    if (
+        scope == A.Scope.DEPARTMENT
+        and audience == A.Audience.PUBLIC
+        and rbac.has_role_in(user, Role.DEPARTMENT_MANAGER, scope_id)
+    ):
+        return True
     if scope == A.Scope.OFFERING and audience == A.Audience.STUDENTS:
         row = (
             OfferingInstructor.objects.filter(offering=scope_id, user=user)
@@ -142,6 +150,13 @@ def feed_q(user) -> Q:
 
 def public_q() -> Q:
     return live_q() & Q(audience=A.Audience.PUBLIC, scope=A.Scope.COLLEGE)
+
+
+def department_public_q_any(department_ids) -> Q:
+    """Departments' public news, shown on their pages of the public site."""
+    return live_q() & Q(
+        audience=A.Audience.PUBLIC, scope=A.Scope.DEPARTMENT, scope_id__in=department_ids
+    )
 
 
 def request_site_rebuild() -> None:

@@ -53,6 +53,11 @@ class User(PublicIdModel, AbstractUser):
     full_name_en = models.CharField(max_length=200, blank=True)
     phone_e164 = models.CharField(max_length=20, blank=True)
     must_change_password = models.BooleanField(default=False)
+    # The member's own consent to appear on their department's public page (owner decision
+    # 2026-09-30), with the academic title shown there. Off until the member turns it on.
+    public_profile = models.BooleanField(default=False)
+    academic_title_ar = models.CharField(max_length=100, blank=True)
+    academic_title_en = models.CharField(max_length=100, blank=True)
     last_seen = models.DateTimeField(null=True, blank=True)
 
     USERNAME_FIELD = "email"

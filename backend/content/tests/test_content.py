@@ -120,8 +120,10 @@ def test_announcement_scopes_and_feed(api, classroom, make_user, it_dept, ba_dep
         expires_at=timezone.now() - timedelta(minutes=1)
     )
     assert api().get("/api/public/announcements").data == []
+    # A department's public news is its manager's to publish (owner 2026-09-30), not the
+    # site team's; a programme or course can't be public at all.
     public_dept = {**dept, "audience": "public"}
-    assert api(site).post(A, public_dept, format="json").status_code == 400
+    assert api(site).post(A, public_dept, format="json").status_code == 403
 
 
 def test_events_media_menus_redirects_settings(api, site, make_user, settings):

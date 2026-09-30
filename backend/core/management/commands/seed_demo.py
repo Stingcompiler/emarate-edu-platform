@@ -628,6 +628,28 @@ class Command(BaseCommand):
                     publish_at=now,
                     created_by=users[Role.TEACHER],
                 )
+        # The department page (owner decision 2026-09-30): two demo members who chose to appear,
+        # and one piece of news by the department's manager — marked «مثال».
+        for role, title in [
+            (Role.DEPARTMENT_MANAGER, "(مثال) أستاذ مشارك"),
+            (Role.TEACHER, "(مثال) محاضر"),
+        ]:
+            member = users[role]
+            if not member.public_profile:
+                member.public_profile = True
+                member.academic_title_ar = title
+                member.save(update_fields=["public_profile", "academic_title_ar"])
+        if not Announcement.objects.filter(scope="department", audience="public").exists():
+            Announcement.objects.create(
+                scope="department",
+                scope_id=Department.objects.get(code="IT").pk,
+                audience="public",
+                title="(مثال) افتتاح معمل الشبكات",
+                body="<p>(مثال) خبر من القسم ينشره مدير القسم على صفحة القسم.</p>",
+                status="published",
+                publish_at=now,
+                created_by=users[Role.DEPARTMENT_MANAGER],
+            )
         # The official pages (about, dean, fees, privacy …) exist as system drafts after
         # migrate; the demo publishes them with a placeholder text marked as such. The
         # college writes the real text — never invent official facts here.

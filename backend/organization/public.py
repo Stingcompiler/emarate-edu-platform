@@ -20,8 +20,9 @@ from rest_framework.response import Response
 from academic.models import Course, DepartmentMembership
 from accounts.models import RoleAssignment
 from accounts.rbac import Role
-from content.models import Page, Status
+from content.models import Announcement, Page, Status
 from content.official import ORDER, public_path
+from content.services import department_public_q_any
 from content.views import PUBLIC_CACHE, _PublicRead
 from students.models import StudentRecord
 
@@ -89,6 +90,21 @@ class PublicProgramDetailSerializer(PublicProgramSerializer):
     plan = PlanLevelSerializer(many=True)
 
 
+class FacultyMemberSerializer(S.Serializer):
+    name_ar = S.CharField()
+    name_en = S.CharField()
+    title_ar = S.CharField()
+    title_en = S.CharField()
+    role = S.ChoiceField(choices=["manager", "teacher", "ta"])
+
+
+class DepartmentNewsSerializer(S.Serializer):
+    public_id = S.CharField()
+    title = S.CharField()
+    body = S.CharField()
+    publish_at = S.DateTimeField(allow_null=True)
+
+
 class PublicDepartmentSerializer(S.Serializer):
     id = S.IntegerField()
     code = S.CharField()
@@ -99,6 +115,10 @@ class PublicDepartmentSerializer(S.Serializer):
     teachers = S.IntegerField()
     students = S.IntegerField()
     programs = PublicProgramSerializer(many=True)
+    # Members who chose to appear (their own consent), the head first; empty until then.
+    faculty = FacultyMemberSerializer(many=True)
+    # The department's own public news, newest first (at most five).
+    news = DepartmentNewsSerializer(many=True)
 
 
 class PublicPageRefSerializer(S.Serializer):
@@ -263,6 +283,13 @@ def _departments(queryset) -> list[dict]:
     programs: dict[str, list] = defaultdict(list)
     for row in _programs(_active_programs().filter(department_id__in=ids)):
         programs[row["department_code"]].append(row)
+    faculty = _faculty(ids)
+    news: dict[int, list] = defaultdict(list)
+    for a in Announcement.objects.filter(department_public_q_any(ids)).order_by(
+        "-publish_at", "-id"
+    ):
+        if len(news[a.scope_id]) < 5:
+            news[a.scope_id].append(a)
     return [
         {
             "id": d.id,
@@ -274,9 +301,51 @@ def _departments(queryset) -> list[dict]:
             "teachers": teachers.get(d.id, 0),
             "students": students.get(d.id, 0),
             "programs": programs.get(d.code, []),
+            "faculty": faculty.get(d.id, []),
+            "news": news.get(d.id, []),
         }
         for d in queryset
     ]
+
+
+def _faculty(ids: list[int]) -> dict[int, list[dict]]:
+    """Members who turned on their public profile, per department: the head, then teachers,
+    then teaching assistants, each by name. Nobody appears without their own consent."""
+    rows: dict[int, list[dict]] = defaultdict(list)
+    seen: set[tuple[int, int]] = set()
+
+    def add(department_id, user, role):
+        if (department_id, user.pk) in seen:
+            return
+        seen.add((department_id, user.pk))
+        rows[department_id].append(
+            {
+                "name_ar": user.full_name_ar,
+                "name_en": user.full_name_en,
+                "title_ar": user.academic_title_ar,
+                "title_en": user.academic_title_en,
+                "role": role,
+            }
+        )
+
+    visible = {"user__public_profile": True, "user__is_active": True}
+    for ra in (
+        RoleAssignment.objects.filter(
+            role=Role.DEPARTMENT_MANAGER, department_id__in=ids, **visible
+        )
+        .select_related("user")
+        .order_by("user__full_name_ar")
+    ):
+        add(ra.department_id, ra.user, "manager")
+    order = {DepartmentMembership.Kind.TEACHER: 0, DepartmentMembership.Kind.TA: 1}
+    members = (
+        DepartmentMembership.objects.filter(department_id__in=ids, **visible)
+        .select_related("user")
+        .order_by("user__full_name_ar")
+    )
+    for m in sorted(members, key=lambda m: order.get(m.kind, 2)):
+        add(m.department_id, m.user, m.kind)
+    return rows
 
 
 @PUBLIC_CACHE

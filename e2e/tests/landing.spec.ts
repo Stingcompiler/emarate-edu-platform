@@ -182,6 +182,21 @@ test("English pages mark Arabic-only content, and every trail is structured data
   ]);
 });
 
+test("a department page shows the members who chose to appear, and its own news", async ({
+  page,
+}) => {
+  // The demo's IT head and a teacher turned their public profile on; the head posted news.
+  await page.goto(`${SITE}/ar/departments/IT/`);
+  const faculty = page.getByRole("region", { name: "هيئة التدريس" });
+  await expect(faculty.getByText("د. مصطفى الأمين")).toBeVisible();
+  await expect(faculty.getByText("رئيس القسم")).toBeVisible();
+  const news = page.getByRole("region", { name: "أخبار القسم" });
+  await expect(news.getByRole("heading", { name: "(مثال) افتتاح معمل الشبكات" })).toBeVisible();
+  // Another department has neither yet, so neither section shows.
+  await page.goto(`${SITE}/ar/departments/BA/`);
+  await expect(page.getByRole("region", { name: "هيئة التدريس" })).toHaveCount(0);
+});
+
 test("the site menus come from the CMS and behave like menus", async ({ page, isMobile }) => {
   await page.goto(`${SITE}/ar/`);
   const header = page.locator("header");

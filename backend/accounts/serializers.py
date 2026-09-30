@@ -240,3 +240,18 @@ class RegistrationDecisionSerializer(serializers.Serializer):
 
 class UserActiveSerializer(serializers.Serializer):
     is_active = serializers.BooleanField()
+
+
+class PublicProfileSerializer(serializers.ModelSerializer):
+    """What a member shows on their department's public page — only with their own consent."""
+
+    class Meta:
+        model = User
+        fields = [
+            "public_profile",
+            "full_name_ar",
+            "full_name_en",
+            "academic_title_ar",
+            "academic_title_en",
+        ]
+        read_only_fields = ["full_name_ar"]

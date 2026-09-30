@@ -113,6 +113,7 @@ ADMISSION_REVIEW = frozenset({R.SYSTEM_ADMIN, R.HEAD_REGISTRAR, R.REGISTRAR})
 # url name → (path template, roles allowed to read, roles that get 404 instead of 403)
 READS: dict[str, tuple[str, frozenset, frozenset]] = {
     "me": ("/api/v1/me", EVERYONE, frozenset()),
+    "me-public-profile": ("/api/v1/me/public-profile", EVERYONE, frozenset()),
     "me-courses": ("/api/v1/me/courses", EVERYONE, frozenset()),
     "system-settings": ("/api/v1/system-settings", frozenset({R.SYSTEM_ADMIN}), frozenset()),
     "college-list": ("/api/v1/colleges", STRUCTURE, frozenset()),
