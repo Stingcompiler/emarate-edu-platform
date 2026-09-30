@@ -121,11 +121,19 @@ export type Program = {
   levels_count: number;
   /** The college's stated total to graduate; null until it is entered (never a course sum). */
   credit_hours: number | null;
+  /** Yearly fees the college states; null (or missing from an older API) → not shown. */
+  fee_sdg?: number | null;
+  fee_usd?: number | null;
   intake: Intake | null;
 };
 export type ProgramDetail = Program & {
   description_ar: string;
   description_en: string;
+  /** One item each; empty until the college writes them. */
+  outcomes_ar?: string[];
+  outcomes_en?: string[];
+  careers_ar?: string[];
+  careers_en?: string[];
   requirements_ar: string;
   required_documents: { key: string; label: string; required: boolean }[];
   plan: {

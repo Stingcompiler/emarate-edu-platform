@@ -6,6 +6,7 @@ The Astro build reads these at build time; nothing personal is exposed.
 
 from __future__ import annotations
 
+import re
 from collections import defaultdict
 
 from django.db.models import Count, Q
@@ -51,6 +52,9 @@ class PublicProgramSerializer(S.Serializer):
     levels_count = S.IntegerField()
     # The programme's stated total (Program.total_credit_hours); null until the college sets it.
     credit_hours = S.IntegerField(allow_null=True)
+    # Yearly fees as the college states them; null until set (never a guess).
+    fee_sdg = S.IntegerField(allow_null=True)
+    fee_usd = S.IntegerField(allow_null=True)
     intake = IntakeStateSerializer(allow_null=True)
 
 
@@ -75,6 +79,11 @@ class RequiredDocumentSerializer(S.Serializer):
 class PublicProgramDetailSerializer(PublicProgramSerializer):
     description_ar = S.CharField()
     description_en = S.CharField()
+    # One item per line in the portal, a list here; empty until the college writes them.
+    outcomes_ar = S.ListField(child=S.CharField())
+    outcomes_en = S.ListField(child=S.CharField())
+    careers_ar = S.ListField(child=S.CharField())
+    careers_en = S.ListField(child=S.CharField())
     requirements_ar = S.CharField()
     required_documents = RequiredDocumentSerializer(many=True)
     plan = PlanLevelSerializer(many=True)
@@ -170,12 +179,23 @@ def _programs(queryset) -> list[dict]:
                 "duration_terms": p.duration_terms,
                 "levels_count": p.levels_count,
                 "credit_hours": p.total_credit_hours,
+                "fee_sdg": p.annual_fee_sdg,
+                "fee_usd": p.annual_fee_usd,
                 "intake": intake,
                 "description_ar": p.description_ar,
                 "description_en": p.description_en,
             }
         )
     return rows
+
+
+_MARKER = re.compile(r"^(?:[-•*·]|\d{1,2}[.)-])\s+")
+
+
+def _lines(text: str) -> list[str]:
+    """One item per line; list markers someone typed ("- ", "• ", "1. ") are dropped."""
+    items = (_MARKER.sub("", line.strip()).strip() for line in text.splitlines())
+    return [item for item in items if item]
 
 
 def _active_programs():
@@ -206,6 +226,10 @@ class PublicProgramView(_PublicRead):
             levels[course.default_level].append(course)
         intake = row["intake"] or {}
         row.update(
+            outcomes_ar=_lines(program.outcomes_ar),
+            outcomes_en=_lines(program.outcomes_en),
+            careers_ar=_lines(program.careers_ar),
+            careers_en=_lines(program.careers_en),
             requirements_ar=intake.get("requirements_ar", ""),
             required_documents=intake.get("required_documents", []),
             plan=[

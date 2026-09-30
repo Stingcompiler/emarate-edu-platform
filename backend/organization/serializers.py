@@ -36,10 +36,20 @@ class ProgramSerializer(serializers.ModelSerializer):
             "total_credit_hours",
             "description_ar",
             "description_en",
+            "annual_fee_sdg",
+            "annual_fee_usd",
+            "outcomes_ar",
+            "outcomes_en",
+            "careers_ar",
+            "careers_en",
             "is_active",
         ]
         read_only_fields = ["name"]
-        extra_kwargs = {"total_credit_hours": {"min_value": 1, "max_value": 300}}
+        extra_kwargs = {
+            "total_credit_hours": {"min_value": 1, "max_value": 300},
+            "annual_fee_sdg": {"min_value": 1},
+            "annual_fee_usd": {"min_value": 1},
+        }
 
 
 class SystemSettingsSerializer(serializers.ModelSerializer):
