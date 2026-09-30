@@ -7,4 +7,6 @@ export default defineConfig({
   site: "https://ecst.edu.sd",
   output: "static",
   vite: { plugins: [tailwindcss()] },
+  // The end-to-end runs screenshot the dev server: no Astro toolbar over the pages.
+  devToolbar: { enabled: !process.env.ECST_E2E },
 });
