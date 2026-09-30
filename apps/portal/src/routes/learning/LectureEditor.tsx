@@ -361,6 +361,7 @@ function Resources({
           value={link.title}
           onChange={(e) => setLink({ ...link, title: e.target.value })}
           placeholder="عنوان الرابط"
+          aria-label="عنوان الرابط"
           className="block min-h-10 w-full rounded-lg border border-border bg-surface px-3 text-sm"
         />
         <input
@@ -368,6 +369,7 @@ function Resources({
           value={link.url}
           onChange={(e) => setLink({ ...link, url: e.target.value })}
           placeholder="https://"
+          aria-label="الرابط"
           className="block min-h-10 w-full rounded-lg border border-border bg-surface px-3 text-sm"
         />
         <Button

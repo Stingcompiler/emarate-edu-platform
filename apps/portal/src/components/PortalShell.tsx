@@ -1,7 +1,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Bell, LogOut } from "lucide-react";
 import { type ComponentProps, useEffect } from "react";
-import { Link, useNavigate } from "react-router";
+import { Link, useLocation, useNavigate } from "react-router";
 
 import { api } from "../lib/api";
 import { hasRole, useMe, useSignOut } from "../lib/auth";
@@ -31,6 +31,7 @@ export function PortalShell(props: Props) {
   const client = useQueryClient();
   const signOut = useSignOut();
   const navigate = useNavigate();
+  const { pathname } = useLocation();
   const count = unread.data?.count ?? 0;
 
   useEffect(() => {
@@ -53,7 +54,9 @@ export function PortalShell(props: Props) {
       // Students and teachers benefit most from push + offline: nudge them to install on phones.
       children={
         <>
-          {(me.data?.student || hasRole(me.data, "teacher", "ta")) && <InstallHint />}
+          {/* Only on the home screens (review 2026-09-29): not above exams, grading or forms. */}
+          {(me.data?.student || hasRole(me.data, "teacher", "ta")) &&
+            (pathname === "/" || pathname === "/me") && <InstallHint />}
           {props.children}
         </>
       }

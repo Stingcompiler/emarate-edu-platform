@@ -513,6 +513,7 @@ function NewQuestion({ examId, onAdded }: { examId: string; onAdded: () => void 
                   )
                 }
                 placeholder={`الخيار ${i + 1}`}
+                aria-label={`الخيار ${i + 1}`}
                 className="min-h-10 flex-1 rounded-lg border border-border bg-surface px-3 text-sm"
               />
             </div>
@@ -541,6 +542,7 @@ function NewQuestion({ examId, onAdded }: { examId: string; onAdded: () => void 
           value={accepted}
           onChange={(e) => setAccepted(e.target.value)}
           placeholder="الإجابات المقبولة، مفصولة بفاصلة"
+          aria-label="الإجابات المقبولة، مفصولة بفاصلة"
           className="mt-3 min-h-10 w-full rounded-lg border border-border bg-surface px-3 text-sm"
         />
       )}

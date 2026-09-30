@@ -246,6 +246,7 @@ export function Audit() {
               setPage(1);
             }}
             placeholder="بحث في السجل (اسم، مادة، طالب…)"
+            aria-label="بحث في السجل (اسم، مادة، طالب)"
             className="min-h-10 flex-1 rounded-full border border-border-soft bg-surface px-4 text-sm sm:max-w-md"
           />
           <Button variant="secondary" className="min-h-9 px-3" onClick={csv}>

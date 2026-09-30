@@ -27,6 +27,7 @@ export function TranscriptLookup() {
             value={number}
             onChange={(e) => setNumber(e.target.value.trim())}
             placeholder="26-IT-0001"
+            aria-label="الرقم الجامعي"
             className="min-h-11 flex-1 rounded-lg border border-border bg-surface px-3 font-mono text-sm"
           />
           <Button

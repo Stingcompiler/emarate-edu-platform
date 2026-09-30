@@ -169,7 +169,7 @@ export function Structure() {
                 dir="ltr"
                 value={dForm.code}
                 onChange={(e) => setD({ ...dForm, code: e.target.value.toUpperCase() })}
-                placeholder="CODE"
+                placeholder="الرمز (بالإنجليزية)"
                 aria-label="رمز القسم"
                 className={input}
               />
@@ -185,7 +185,7 @@ export function Structure() {
               dir="ltr"
               value={dForm.name_en}
               onChange={(e) => setD({ ...dForm, name_en: e.target.value })}
-              placeholder="English name"
+              placeholder="الاسم بالإنجليزية"
               aria-label="الاسم بالإنجليزية"
               className={`${input} w-full`}
             />
@@ -349,7 +349,7 @@ export function Structure() {
                 dir="ltr"
                 value={pForm.name_en}
                 onChange={(e) => setP({ ...pForm, name_en: e.target.value })}
-                placeholder="English name"
+                placeholder="الاسم بالإنجليزية"
                 aria-label="الاسم بالإنجليزية"
                 className={input}
               />

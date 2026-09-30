@@ -71,7 +71,7 @@ function Unavailable({ onRetry }: { onRetry: () => void }) {
         <button
           type="button"
           onClick={onRetry}
-          className="min-h-11 rounded-xl bg-primary px-5 text-sm font-semibold text-white hover:bg-primary-hover"
+          className="min-h-11 rounded-xl bg-primary px-5 text-sm font-semibold text-on-primary hover:bg-primary-hover"
         >
           إعادة المحاولة
         </button>

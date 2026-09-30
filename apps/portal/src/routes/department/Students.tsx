@@ -106,6 +106,7 @@ export function DepartmentStudents() {
               setPage(1);
             }}
             placeholder="بحث بالاسم أو الرقم الجامعي"
+            aria-label="بحث بالاسم أو الرقم الجامعي"
             className="min-h-10 flex-1 rounded-full border border-border-soft bg-surface px-4 text-sm sm:max-w-sm"
           />
           {[undefined, 1, 2, 3, 4].map((l) => (
@@ -384,6 +385,7 @@ function StudentForm({
           dir="ltr"
           value={f.university_number}
           placeholder={student ? undefined : "يُصدر تلقائيًا إن تُرك فارغًا"}
+          aria-label={student ? undefined : "يُصدر تلقائيًا إن تُرك فارغًا"}
           disabled={student?.has_account}
           hint={student?.has_account ? "لا يتغير بعد تفعيل الطالب حسابه." : undefined}
           onChange={(e) => setF({ ...f, university_number: e.target.value })}

@@ -35,7 +35,10 @@ export function InstallHint() {
       <span className="flex-1">
         ثبّت التطبيق على هاتفك لتصلك الإشعارات ويعمل التنزيل دون اتصال.
       </span>
-      <Link to="/install" className="font-semibold underline">
+      <Link
+        to="/install"
+        className="-my-2 inline-flex min-h-11 items-center px-2 font-semibold underline"
+      >
         كيف؟
       </Link>
       <button

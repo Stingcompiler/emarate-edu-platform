@@ -202,6 +202,7 @@ export function Grade() {
                 value={feedback}
                 onChange={(e) => setFeedback(e.target.value)}
                 placeholder="ملاحظة للطالب (تظهر مع الدرجة)"
+                aria-label="ملاحظة للطالب"
                 className="block min-h-24 w-full rounded-lg border border-border bg-surface p-2 text-sm"
               />
               {(save.isError || approve.isError) && (

@@ -57,6 +57,7 @@ export function ResultSearch() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="الرقم الجامعي أو الاسم"
+            aria-label="الرقم الجامعي أو الاسم"
             dir="auto"
             className="min-h-11 flex-1 rounded-lg border border-border bg-surface px-3 text-sm"
           />

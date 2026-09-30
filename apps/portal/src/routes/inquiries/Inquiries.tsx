@@ -233,6 +233,7 @@ function InquiryDetail({ inquiry: i }: { inquiry: Inquiry }) {
           value={body}
           onChange={(e) => setBody(e.target.value)}
           placeholder="اكتب الرد…"
+          aria-label="اكتب الرد"
           className="block min-h-28 w-full resize-y bg-transparent p-1 text-sm leading-relaxed text-text outline-none"
         />
         <label className="mt-2 flex items-center gap-2 text-xs text-text-muted">

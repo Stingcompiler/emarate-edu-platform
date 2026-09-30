@@ -50,6 +50,7 @@ export function StudentRecords() {
               setPage(1);
             }}
             placeholder="بحث بالاسم أو الرقم الجامعي"
+            aria-label="بحث بالاسم أو الرقم الجامعي"
             className="min-h-10 flex-1 rounded-full border border-border-soft bg-surface px-4 text-sm sm:max-w-sm"
           />
           <Picker

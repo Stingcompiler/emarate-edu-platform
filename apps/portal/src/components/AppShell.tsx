@@ -1,5 +1,5 @@
 import { ChevronRight, type LucideIcon, Menu } from "lucide-react";
-import { type ReactNode, useEffect, useState } from "react";
+import { type ReactNode, useEffect, useRef, useState } from "react";
 import { NavLink } from "react-router";
 import { ThemeToggle } from "./ThemeToggle";
 
@@ -15,6 +15,10 @@ export type NavItem = {
   end?: boolean;
   /** One-word label for the phone tab bar when `label` is too long to fit. */
   short?: string;
+  /** Large screens only (the sidebar): a phone keeps its tabs short, e.g. a student's five. */
+  desktopOnly?: boolean;
+  /** A heading the sidebar shows above the first item of each group (long admin menus). */
+  group?: string;
 };
 
 type AppShellProps = {
@@ -54,7 +58,7 @@ export function AppShell({
   titleAction,
   children,
 }: AppShellProps) {
-  const internal = nav.filter((item) => !item.external);
+  const internal = nav.filter((item) => !item.external && !item.desktopOnly);
   const compact = useScrolledPast(40);
   const showTabs = internal.length >= 2;
 
@@ -91,7 +95,7 @@ export function AppShell({
           {back ? (
             <NavLink
               to={back.to}
-              className="inline-flex min-h-8 items-center gap-1 text-[15px] text-primary"
+              className="-ms-2 inline-flex min-h-11 items-center gap-1 px-2 text-[15px] text-primary"
             >
               <ChevronRight size={20} aria-hidden className="ltr:rotate-180" />
               {back.label}
@@ -112,8 +116,17 @@ export function AppShell({
         {/* Desktop sidebar — first in DOM, so it sits on the right in RTL */}
         <aside className="hidden w-66 shrink-0 border-e border-border-soft bg-surface px-3 py-4 lg:sticky lg:top-14 lg:block lg:h-[calc(100dvh-3.5rem)] lg:self-start lg:overflow-y-auto">
           <nav aria-label="التنقل الرئيسي" className="flex flex-col gap-0.5">
-            {nav.map((item) => (
-              <SidebarLink key={item.to} item={item} />
+            {nav.map((item, i) => (
+              <div key={item.to} className="contents">
+                {item.group && item.group !== nav[i - 1]?.group && (
+                  <p
+                    className={`px-3 pb-1 text-[11px] font-semibold text-text-muted ${i ? "mt-4 border-t border-border-soft pt-3" : ""}`}
+                  >
+                    {item.group}
+                  </p>
+                )}
+                <SidebarLink item={item} />
+              </div>
             ))}
           </nav>
         </aside>
@@ -126,6 +139,17 @@ export function AppShell({
           <div className="mx-auto max-w-[1280px]">
             <div className="mb-5 hidden items-end justify-between gap-4 lg:flex">
               <div>
+                {/* Large screens get the way back too (review 2026-09-29): a detail page
+                    otherwise leaves no trace of where it sits. */}
+                {back && (
+                  <NavLink
+                    to={back.to}
+                    className="mb-1 inline-flex items-center gap-1 text-sm text-primary hover:underline"
+                  >
+                    <ChevronRight size={16} aria-hidden className="ltr:rotate-180" />
+                    {back.label}
+                  </NavLink>
+                )}
                 <h1 className="text-2xl font-bold text-text">{title}</h1>
                 {subtitle && <p className="mt-1 text-sm text-text-muted">{subtitle}</p>}
               </div>
@@ -213,6 +237,34 @@ export function Badge({ count, className = "" }: { count?: number; className?: s
 
 function BottomTabs({ items }: { items: NavItem[] }) {
   const [open, setOpen] = useState(false);
+  const sheet = useRef<HTMLElement>(null);
+  const opener = useRef<HTMLElement | null>(null);
+  // The sheet is a dialog (docs/06 a11y): focus goes in, stays in, Esc closes, and focus
+  // returns to «المزيد».
+  useEffect(() => {
+    if (!open) return;
+    opener.current = document.activeElement as HTMLElement | null;
+    sheet.current?.querySelector<HTMLElement>("a")?.focus();
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setOpen(false);
+      if (event.key !== "Tab" || !sheet.current) return;
+      const links = sheet.current.querySelectorAll<HTMLElement>("a");
+      const first = links[0];
+      const last = links[links.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last?.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first?.focus();
+      }
+    };
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      opener.current?.focus?.();
+    };
+  }, [open]);
   const overflow = items.length > 5;
   const tabs = overflow ? items.slice(0, 4) : items;
   const rest = overflow ? items.slice(4) : [];
@@ -232,7 +284,10 @@ function BottomTabs({ items }: { items: NavItem[] }) {
             className="absolute inset-0 bg-black/30"
             onClick={() => setOpen(false)}
           />
-          <nav className="absolute inset-x-0 bottom-0 flex max-h-[80dvh] flex-col rounded-t-3xl bg-surface pt-3 shadow-lg">
+          <nav
+            ref={sheet}
+            className="motion-sheet absolute inset-x-0 bottom-0 flex max-h-[80dvh] flex-col rounded-t-3xl bg-surface pt-3 shadow-lg"
+          >
             <div className="mx-auto mb-2 h-1 w-10 shrink-0 rounded-full bg-border" aria-hidden />
             {/* Admin roles have many destinations: the list scrolls inside the sheet. */}
             <div className="overflow-y-auto overscroll-contain px-3 pb-[max(1rem,env(safe-area-inset-bottom))]">

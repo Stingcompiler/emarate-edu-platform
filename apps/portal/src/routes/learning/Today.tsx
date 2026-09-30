@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
-import { Radio } from "lucide-react";
 import { Link } from "react-router";
 
+import { LiveBanner } from "../../components/LiveBanner";
 import { PortalShell } from "../../components/PortalShell";
 import { Card, CodeTile, SectionLabel } from "../../components/ui";
 import { api, ok } from "../../lib/api";
@@ -106,22 +106,12 @@ export function Today() {
   return (
     <PortalShell title={`${greeting()}، ${first}`} subtitle={dateLine}>
       {liveNow && (
-        <Link
-          to="/live"
-          className="mb-4 flex items-center gap-3 rounded-2xl bg-danger p-4 text-white shadow-sm"
-        >
-          <Radio size={22} aria-hidden />
-          <span className="min-w-0 flex-1">
-            <b className="block text-xs opacity-90">بث مباشر الآن</b>
-            <span className="block truncate font-semibold">
-              {liveNow.course_name} — {liveNow.title}
-            </span>
-            <span className="text-xs opacity-90">
-              {liveNow.host_name} · بدأ {when(liveNow.starts_at)}
-            </span>
-          </span>
-          <span className="rounded-lg bg-white/20 px-3 py-1.5 text-sm font-semibold">انضمام</span>
-        </Link>
+        <div className="mb-4">
+          <LiveBanner
+            title={`${liveNow.course_name} — ${liveNow.title}`}
+            meta={`${liveNow.host_name} · بدأ ${when(liveNow.starts_at)}`}
+          />
+        </div>
       )}
       <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start lg:gap-6">
         <section>

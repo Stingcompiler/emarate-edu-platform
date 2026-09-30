@@ -134,6 +134,7 @@ export function FormBuilder() {
                 value={f.label}
                 onChange={(e) => set(i, { label: e.target.value })}
                 placeholder="العنوان الظاهر"
+                aria-label="العنوان الظاهر"
                 disabled={!draft || !editor}
                 className="min-h-10 rounded-lg border border-border bg-surface px-3 text-sm"
               />
@@ -143,7 +144,8 @@ export function FormBuilder() {
                 onChange={(e) =>
                   set(i, { key: e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, "_") })
                 }
-                placeholder="key"
+                placeholder="المفتاح (بالإنجليزية)"
+                aria-label="المفتاح"
                 disabled={!draft || !editor}
                 className="min-h-10 rounded-lg border border-border bg-surface px-3 font-mono text-xs"
               />
@@ -200,6 +202,7 @@ export function FormBuilder() {
                     })
                   }
                   placeholder="الخيارات مفصولة بفاصلة"
+                  aria-label="الخيارات مفصولة بفاصلة"
                   disabled={!draft || !editor}
                   className="min-h-10 rounded-lg border border-border bg-surface px-3 text-sm sm:col-span-3"
                 />

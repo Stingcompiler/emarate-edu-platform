@@ -1,8 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
-import { FileText, Plus, Radio } from "lucide-react";
+import { FileText, Plus } from "lucide-react";
 import { useState } from "react";
 import { Link, useParams } from "react-router";
 
+import { LiveBanner } from "../../components/LiveBanner";
 import { PortalShell } from "../../components/PortalShell";
 import {
   Button,
@@ -129,14 +130,9 @@ export function Course() {
           </div>
 
           {liveNow && (
-            <Link
-              to="/live"
-              className="mt-4 flex items-center gap-3 rounded-2xl bg-danger-soft p-4 text-danger-strong"
-            >
-              <Radio size={20} aria-hidden />
-              <span className="flex-1 text-sm font-semibold">بث مباشر الآن — {liveNow.title}</span>
-              <span className="text-sm font-semibold">انضمام</span>
-            </Link>
+            <div className="mt-4">
+              <LiveBanner title={liveNow.title} />
+            </div>
           )}
 
           <div className="mt-4">

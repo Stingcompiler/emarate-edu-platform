@@ -187,6 +187,7 @@ function ChooseProgram({
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         placeholder="ابحث عن برنامج"
+        aria-label="ابحث عن برنامج"
         className="min-h-11 w-full rounded-lg border border-border bg-surface px-3"
       />
       {start.isError && <Notice>{problemMessage(start.error)}</Notice>}
@@ -585,7 +586,7 @@ function Success({ app }: { app: Application }) {
           "عند القبول يصلك رقمك الجامعي ورابط تفعيل حسابك.",
         ].map((t, i) => (
           <li key={t} className="flex gap-3">
-            <span className="grid size-7 shrink-0 place-items-center rounded-full bg-primary text-xs font-bold text-white">
+            <span className="grid size-7 shrink-0 place-items-center rounded-full bg-primary text-xs font-bold text-on-primary">
               {(i + 1).toLocaleString("ar-u-nu-latn")}
             </span>
             <span className="text-text">{t}</span>

@@ -306,6 +306,7 @@ export function ApplicationDetail() {
                     value={note}
                     onChange={(e) => setNote(e.target.value)}
                     placeholder="ملاحظة الانتقال (إلزامية لطلب مستندات)"
+                    aria-label="ملاحظة الانتقال"
                     className="block min-h-20 w-full rounded-lg border border-border bg-surface p-2 text-sm"
                   />
                   <div className="flex flex-wrap gap-2">
@@ -347,6 +348,7 @@ export function ApplicationDetail() {
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                   placeholder="رسالة للمتقدم أو ملاحظة داخلية"
+                  aria-label="رسالة للمتقدم أو ملاحظة داخلية"
                   className="block min-h-20 w-full rounded-lg border border-border bg-surface p-2 text-sm"
                 />
                 <div className="flex gap-2">

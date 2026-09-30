@@ -252,6 +252,7 @@ function AddMember({ department }: { department: number }) {
         value={q}
         onChange={(e) => setQ(e.target.value)}
         placeholder="ابحث بالاسم أو البريد (حساب أستاذ موجود)"
+        aria-label="ابحث بالاسم أو البريد"
         className="block min-h-10 w-full rounded-lg border border-border bg-surface px-3 text-sm"
       />
       {(found.data ?? []).map((p) => (

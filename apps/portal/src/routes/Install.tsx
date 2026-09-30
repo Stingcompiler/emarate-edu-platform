@@ -111,7 +111,7 @@ export function Install() {
               <ol className="mt-4 divide-y divide-border-soft">
                 {STEPS[platform].map((step, index) => (
                   <li key={step.title} className="flex gap-3 py-3">
-                    <span className="grid size-7 shrink-0 place-items-center rounded-full bg-primary text-xs font-bold text-white">
+                    <span className="grid size-7 shrink-0 place-items-center rounded-full bg-primary text-xs font-bold text-on-primary">
                       {(index + 1).toLocaleString("ar-u-nu-latn")}
                     </span>
                     <div>

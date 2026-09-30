@@ -103,6 +103,7 @@ export function NoticeNew() {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="ابحث بالاسم"
+                aria-label="ابحث بالاسم"
                 className="mb-2 min-h-10 w-full rounded-lg border border-border bg-surface px-3 text-sm"
               />
               <div className="max-h-64 divide-y divide-border-soft overflow-y-auto">
@@ -145,6 +146,7 @@ export function NoticeNew() {
             value={body}
             onChange={(e) => setBody(e.target.value)}
             placeholder="نص التنبيه"
+            aria-label="نص التنبيه"
             className="block min-h-36 w-full rounded-lg border border-border bg-surface p-3 text-sm"
           />
           <Card className="divide-y divide-border-soft text-sm">

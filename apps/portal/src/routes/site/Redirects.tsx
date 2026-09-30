@@ -7,6 +7,7 @@ import { Button, Card, Notice, SideNote, WithSide, problemMessage } from "../../
 import { api, ok } from "../../lib/api";
 import { ALL, Pager, useLocalPages } from "../../components/Pager";
 import { useConfirm } from "../../components/Confirm";
+import { count, N } from "../../lib/format";
 
 /** Board: DesktopSiteRedirects (desktop). Phone derived as a card list. 404 suggestions arrive with the public site (Phase 9). */
 export function Redirects() {
@@ -60,6 +61,7 @@ export function Redirects() {
             value={from}
             onChange={(e) => setFrom(e.target.value)}
             placeholder="/old-path"
+            aria-label="من المسار"
             className="min-h-10 flex-1 rounded-lg border border-border bg-surface px-3 text-sm"
           />
           <span className="text-text-muted" aria-hidden>
@@ -70,6 +72,7 @@ export function Redirects() {
             value={to}
             onChange={(e) => setTo(e.target.value)}
             placeholder="/new-path"
+            aria-label="إلى المسار"
             className="min-h-10 flex-1 rounded-lg border border-border bg-surface px-3 text-sm"
           />
           <Button onClick={() => add.mutate()} disabled={!from || !to || add.isPending}>
@@ -87,7 +90,7 @@ export function Redirects() {
               <span className="min-w-0 flex-1 truncate font-mono text-text">
                 {r.from_path} → {r.to_path}
               </span>
-              <span className="text-xs text-text-muted">{r.hits} hits</span>
+              <span className="text-xs text-text-muted">{count(r.hits, N.time)}</span>
               <button
                 type="button"
                 aria-label="حذف"
@@ -98,7 +101,7 @@ export function Redirects() {
                     confirm: "حذف",
                   })) && remove.mutate(r.id)
                 }
-                className="text-danger-strong"
+                className="grid size-11 place-items-center rounded-lg text-danger-strong hover:bg-danger-soft"
               >
                 <Trash2 size={16} />
               </button>
