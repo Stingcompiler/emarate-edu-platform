@@ -2,7 +2,7 @@ from django.utils import timezone
 from django.utils.translation import gettext
 from rest_framework import serializers
 
-from academic.models import CourseOffering
+from academic.models import CourseOffering, Enrollment
 
 from .models import Exam, ExamAttempt, Question
 from .question_types import REGISTRY
@@ -15,6 +15,10 @@ class ExamSerializer(serializers.ModelSerializer):
     total_marks = serializers.DecimalField(max_digits=7, decimal_places=2, read_only=True)
     questions_count = serializers.SerializerMethodField()
     my_attempts = serializers.SerializerMethodField()
+    # For the monitor (review 2026-09-29 PR 7, «لم يبدأ»): on one exam's page for its staff,
+    # the students enrolled and how many of them started; null in lists and for students.
+    students_count = serializers.SerializerMethodField()
+    started_count = serializers.SerializerMethodField()
 
     class Meta:
         model = Exam
@@ -41,6 +45,8 @@ class ExamSerializer(serializers.ModelSerializer):
             "total_marks",
             "questions_count",
             "my_attempts",
+            "students_count",
+            "started_count",
         ]
         read_only_fields = ["public_id", "results_released", "status"]
 
@@ -55,6 +61,25 @@ class ExamSerializer(serializers.ModelSerializer):
 
     def get_questions_count(self, obj) -> int:
         return obj.questions.count()
+
+    def _for_monitor(self) -> bool:
+        view = self.context.get("view")
+        return (
+            getattr(view, "action", None) == "retrieve"
+            and self.context.get("student_record") is None
+        )
+
+    def get_students_count(self, obj) -> int | None:
+        if not self._for_monitor():
+            return None
+        return Enrollment.objects.filter(
+            offering_id=obj.offering_id, status=Enrollment.Status.ACTIVE
+        ).count()
+
+    def get_started_count(self, obj) -> int | None:
+        if not self._for_monitor():
+            return None
+        return obj.attempts.values("student_record").distinct().count()
 
     def get_my_attempts(self, obj) -> list[dict] | None:
         record_ = self.context.get("student_record")

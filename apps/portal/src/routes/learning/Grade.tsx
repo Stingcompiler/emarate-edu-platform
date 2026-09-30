@@ -11,7 +11,8 @@ import { initials } from "../../lib/reports";
 import { openFile } from "../../lib/learning";
 import { ALL } from "../../components/Pager";
 
-/** Board: TeacherGradeSubmission (phone); desktop derived — work on the right, grade panel on the left. */
+/** Boards: TeacherGradeSubmission (phone), DesktopTeacherGrading — the assignment's queue, the
+ *  work, and the grade panel side by side on wide screens. */
 export function Grade() {
   const { id = "" } = useParams();
   const navigate = useNavigate();
@@ -90,6 +91,26 @@ export function Grade() {
     },
     onSuccess: refresh,
   });
+  // J / K walk the queue (board DesktopTeacherGrading), unless typing in the form.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const t = e.target as HTMLElement;
+      if (
+        e.metaKey ||
+        e.ctrlKey ||
+        e.altKey ||
+        t.closest("input, textarea, select, [contenteditable]")
+      )
+        return;
+      if (e.key === "j" && next) navigate(`/submissions/${next.public_id}`);
+      if (e.key === "k" && previous) navigate(`/submissions/${previous.public_id}`);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [next, previous, navigate]);
+  const [list, setList] = useState<"open" | "done">("open");
+  const done = (siblings.data ?? []).filter((x) => x.grade?.status === "approved");
+  const shown = list === "open" ? queue : done;
   const v = s?.current_version;
   const valid = score !== "" && Number(score) >= 0 && Number(score) <= max;
   return (
@@ -103,7 +124,77 @@ export function Grade() {
       back={s ? { label: a?.title ?? "الواجب", to: `/assignments/${s.assignment}` } : undefined}
     >
       {s && v && a && (
-        <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start lg:gap-6">
+        <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start lg:gap-6 xl:grid-cols-[260px_minmax(0,1fr)_340px]">
+          {/* The assignment's queue beside the work (board DesktopTeacherGrading): wide screens
+              only — smaller ones walk it with «التالي» and «السابق». */}
+          <nav aria-label="تسليمات الواجب" className="hidden xl:block xl:sticky xl:top-20">
+            <Card className="overflow-hidden">
+              <div className="flex gap-1 border-b border-border-soft p-2" role="tablist">
+                {(
+                  [
+                    ["open", `غير مصحح ${queue.length.toLocaleString("ar-u-nu-latn")}`],
+                    ["done", `مصحح ${done.length.toLocaleString("ar-u-nu-latn")}`],
+                  ] as const
+                ).map(([key, label]) => (
+                  <button
+                    key={key}
+                    type="button"
+                    role="tab"
+                    aria-selected={list === key}
+                    onClick={() => setList(key)}
+                    className={`flex-1 rounded-lg px-2 py-1.5 text-xs font-semibold ${list === key ? "bg-text text-bg" : "text-text-muted hover:bg-surface-alt"}`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+              <ul className="max-h-[70vh] divide-y divide-border-soft overflow-y-auto">
+                {shown.map((x) => {
+                  const current = x.public_id === id;
+                  return (
+                    <li key={x.public_id}>
+                      <button
+                        type="button"
+                        aria-current={current ? "page" : undefined}
+                        onClick={() => navigate(`/submissions/${x.public_id}`)}
+                        className={`flex w-full items-center gap-2 px-3 py-2.5 text-start hover:bg-surface-alt ${current ? "border-s-2 border-primary bg-primary-soft/40" : ""}`}
+                      >
+                        <span className="grid size-8 shrink-0 place-items-center rounded-full bg-surface-alt text-xs font-semibold text-text-muted">
+                          {initials(x.student.full_name_ar)}
+                        </span>
+                        <span className="min-w-0 flex-1">
+                          <b className="block truncate text-sm text-text">
+                            {x.student.full_name_ar}
+                          </b>
+                          <span
+                            className={`text-xs ${x.is_late ? "text-warning-strong" : "text-text-muted"}`}
+                          >
+                            {when(x.first_submitted_at)}
+                            {x.is_late ? " · متأخر" : ""}
+                          </span>
+                        </span>
+                        {x.grade?.status === "approved" && (
+                          <b className="shrink-0 text-xs text-success-strong">
+                            {markOf(x.grade.score, max)}
+                          </b>
+                        )}
+                        {x.grade?.status === "suggested" && (
+                          <span className="shrink-0 text-[11px] font-semibold text-warning-strong">
+                            اقتراح
+                          </span>
+                        )}
+                      </button>
+                    </li>
+                  );
+                })}
+                {!shown.length && (
+                  <li className="px-3 py-4 text-sm text-text-muted">
+                    {list === "open" ? "لا تسليمات بانتظار التصحيح." : "لا تسليمات مصححة بعد."}
+                  </li>
+                )}
+              </ul>
+            </Card>
+          </nav>
           <div className="space-y-4">
             <Card className="flex items-center gap-3 p-4">
               <span className="grid size-11 place-items-center rounded-full bg-primary-soft text-sm font-semibold text-primary-700">
@@ -243,6 +334,10 @@ export function Grade() {
                   </div>
                 )}
               </div>
+              <p className="hidden text-center text-[11px] text-text-muted lg:block">
+                <kbd className="rounded border border-border-soft px-1">J</kbd> التالي ·{" "}
+                <kbd className="rounded border border-border-soft px-1">K</kbd> السابق
+              </p>
             </Card>
           </aside>
         </div>

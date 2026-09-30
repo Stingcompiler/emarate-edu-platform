@@ -33,7 +33,9 @@ const TONE: Record<string, string> = {
   invalidated: "rejected",
 };
 
-/** Board: TeacherExamMonitor (phone); desktop derived. Refreshes every 30 seconds. */
+/** Board: TeacherExamMonitor (phone); desktop derived — who sent, who is writing, who has not
+ *  started, with the chosen attempt's actions beside the list (a panel on phones). Refreshes
+ *  every 30 seconds. */
 export function ExamMonitor() {
   const confirm = useConfirm();
   const { id = "" } = useParams();
@@ -104,6 +106,17 @@ export function ExamMonitor() {
     submitted: done.data ?? 0,
     invalidated: invalidated.data ?? 0,
   };
+  // «لم يبدأ» (review 2026-09-29 PR 7): enrolled students with no attempt yet.
+  const enrolled = exam.data?.students_count ?? null;
+  const notStarted =
+    enrolled === null ? null : Math.max(0, enrolled - (exam.data?.started_count ?? 0));
+  const figures = [
+    { n: counts.submitted, l: "أُرسل", bar: "bg-success" },
+    { n: counts.in_progress, l: "جارٍ", bar: "bg-primary" },
+    ...(notStarted === null ? [] : [{ n: notStarted, l: "لم يبدأ", bar: "bg-n300" }]),
+    { n: counts.invalidated, l: "أُلغي", bar: "bg-danger" },
+  ];
+  const total = figures.reduce((n, f) => n + f.n, 0);
   const quiet = (r: Row) =>
     r.status === "in_progress" &&
     r.last_saved_at &&
@@ -120,7 +133,19 @@ export function ExamMonitor() {
         side={
           <div>
             {picked ? (
-              <>
+              // Phones: a panel over the list, above the tab bar, so acting never means
+              // scrolling to the bottom of a 500-row list.
+              <div className="max-lg:fixed max-lg:inset-x-3 max-lg:bottom-24 max-lg:z-30 max-lg:rounded-2xl max-lg:bg-bg max-lg:p-1 max-lg:shadow-2xl">
+                <div className="flex items-center justify-between lg:hidden">
+                  <span />
+                  <button
+                    type="button"
+                    onClick={() => setPicked(null)}
+                    className="min-h-11 px-3 text-sm font-semibold text-primary"
+                  >
+                    إغلاق
+                  </button>
+                </div>
                 <SectionLabel>
                   إجراء على محاولة {(picked.student as { full_name_ar: string }).full_name_ar}
                 </SectionLabel>
@@ -175,7 +200,7 @@ export function ExamMonitor() {
                     الخادم تلقائيًا عند انتهاء الوقت.
                   </p>
                 </Card>
-              </>
+              </div>
             ) : (
               <p className="hidden rounded-xl border border-dashed border-border px-4 py-6 text-center text-sm text-text-muted lg:block">
                 اختر محاولة لتمديدها أو إعادة فتحها أو إلغائها.
@@ -184,17 +209,30 @@ export function ExamMonitor() {
           </div>
         }
       >
-        <Card className="grid grid-cols-3 divide-x divide-border-soft text-center">
-          {[
-            { n: counts.submitted, l: "أُرسل" },
-            { n: counts.in_progress, l: "جارٍ" },
-            { n: counts.invalidated, l: "أُلغي" },
-          ].map((s) => (
-            <div key={s.l} className="py-3">
-              <p className="text-xl font-bold text-text">{s.n.toLocaleString("ar-u-nu-latn")}</p>
-              <p className="text-xs text-text-muted">{s.l}</p>
+        <Card className="p-3">
+          <div
+            className={`grid text-center ${figures.length === 4 ? "grid-cols-4" : "grid-cols-3"}`}
+          >
+            {figures.map((f) => (
+              <div key={f.l} className="py-1">
+                <p className="text-xl font-bold text-text">{f.n.toLocaleString("ar-u-nu-latn")}</p>
+                <p className="flex items-center justify-center gap-1 text-xs text-text-muted">
+                  <span aria-hidden="true" className={`size-2 rounded-full ${f.bar}`} />
+                  {f.l}
+                </p>
+              </div>
+            ))}
+          </div>
+          {total > 0 && (
+            <div
+              className="mt-2 flex h-2 overflow-hidden rounded-full bg-surface-alt"
+              aria-hidden="true"
+            >
+              {figures.map((f) => (
+                <span key={f.l} className={f.bar} style={{ width: `${(100 * f.n) / total}%` }} />
+              ))}
             </div>
-          ))}
+          )}
         </Card>
         <SectionLabel>المحاولات — الأقرب للانتهاء أولًا</SectionLabel>
         <Card className="divide-y divide-border-soft">
@@ -234,6 +272,9 @@ export function ExamMonitor() {
               </button>
             );
           })}
+          {!list.length && !rows.query.isPending && (
+            <p className="px-4 py-5 text-sm text-text-muted">لم يبدأ أحد الاختبار بعد.</p>
+          )}
         </Card>
         <Pager page={rows.page} count={rows.count} onPage={rows.setPage} label="صفحات المحاولات" />
       </WithSide>

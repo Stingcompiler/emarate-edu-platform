@@ -327,3 +327,19 @@ def test_reorder_questions(api, classroom):
         == 204
     )
     assert [q["id"] for q in teacher.get(f"{URL}/{exam}/questions").data] == list(reversed(ids))
+
+
+def test_the_monitor_counts_who_has_not_started(api, classroom, exam):
+    """Review 2026-09-29 PR 7: «لم يبدأ» = enrolled students without an attempt."""
+    teacher = api(classroom.teacher)
+    detail = teacher.get(f"{URL}/{exam.public_id}").data
+    enrolled = detail["students_count"]
+    assert enrolled >= 1 and detail["started_count"] == 0
+    api(classroom.student).post(f"{URL}/{exam.public_id}/start")
+    assert teacher.get(f"{URL}/{exam.public_id}").data["started_count"] == 1
+    # Lists and students don't get (or pay for) the figures.
+    listed = next(
+        e for e in teacher.get(URL).data["results"] if e["public_id"] == str(exam.public_id)
+    )
+    assert listed["students_count"] is None
+    assert api(classroom.student).get(f"{URL}/{exam.public_id}").data["students_count"] is None

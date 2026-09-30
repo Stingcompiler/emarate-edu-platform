@@ -197,6 +197,16 @@ export function Course() {
                     الطلاب ودفتر الدرجات
                   </Button>
                 </Link>
+                <Link to="/announcements/new">
+                  <Button variant="secondary" className="min-h-9 px-3">
+                    إعلان
+                  </Button>
+                </Link>
+                <Link to="/live/new">
+                  <Button variant="secondary" className="min-h-9 px-3">
+                    جلسة بث
+                  </Button>
+                </Link>
                 <Link to={`/lectures/new?offering=${offering}`}>
                   <Button variant="secondary" className="min-h-9 px-3">
                     <Plus size={16} aria-hidden /> محاضرة
@@ -245,7 +255,12 @@ export function Course() {
                           {l.type === "lab" ? " · عملي" : ""}
                         </span>
                       </span>
-                      {staff && !l.is_published && <StatusBadge status="draft" label="مسودة" />}
+                      {staff &&
+                        (l.is_published ? (
+                          <StatusBadge status="approved" label="منشورة" />
+                        ) : (
+                          <StatusBadge status="draft" label="مسودة" />
+                        ))}
                     </Link>
                   ))}
                   {!lecs.length && (
