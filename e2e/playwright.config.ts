@@ -43,7 +43,11 @@ export default defineConfig({
       command: "pnpm --filter @ecst/landing exec astro dev --port 4322 --ignore-lock",
       cwd: "..",
       url: "http://localhost:4322/ar/",
-      env: { PUBLIC_API_URL: "http://127.0.0.1:8001", PUBLIC_PORTAL_URL: "http://localhost:5174" },
+      env: {
+        PUBLIC_API_URL: "http://127.0.0.1:8001",
+        PUBLIC_PORTAL_URL: "http://localhost:5174",
+        ECST_E2E: "1",
+      },
       timeout: 120_000,
       reuseExistingServer: false,
       stdout: "ignore",
