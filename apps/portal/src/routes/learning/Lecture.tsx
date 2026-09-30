@@ -4,7 +4,8 @@ import { useState } from "react";
 import { Link, useParams } from "react-router";
 
 import { PortalShell } from "../../components/PortalShell";
-import { Button, Card, SectionLabel } from "../../components/ui";
+import { Button, Card, CodeTile, SectionLabel, WithSide } from "../../components/ui";
+import { count, N } from "../../lib/format";
 import { api, ok } from "../../lib/api";
 import {
   dueLabel,
@@ -14,11 +15,13 @@ import {
   useLectures,
   useCourse,
   isCourseStaff,
+  splitCourse,
+  courseTone,
 } from "../../lib/learning";
 
 type Resource = NonNullable<ReturnType<typeof useLectures>["data"]>[number]["resources"][number];
 
-/** Board: StudentLecture (phone); desktop derived — player and resources side by side. */
+/** Boards: StudentLecture (phone), DesktopStudentCourse (a lecture open beside the course's list). */
 export function Lecture() {
   const { id = "" } = useParams();
   const lecture = useQuery({
@@ -40,6 +43,7 @@ export function Lecture() {
   const video = l?.resources.find((r) => r.kind === "video" && r.video);
   const course = useCourse(l?.offering).data;
   const staff = isCourseStaff(course);
+  const [top, bottom] = splitCourse(course?.code ?? "");
   return (
     <PortalShell
       title={l?.title_ar ?? "المحاضرة"}
@@ -61,12 +65,44 @@ export function Lecture() {
       back={l ? { label: "المادة", to: `/courses/${l.offering}` } : undefined}
     >
       {l && (
-        <div
-          className={
-            video?.video || l.description
-              ? "lg:grid lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start lg:gap-6"
-              : // Nothing to watch or read: the resources are the page (full width, first).
-                "flex flex-col gap-4 [&>aside]:order-first [&>aside]:mt-0"
+        <WithSide
+          side={
+            // The course's lectures beside the one open (board DesktopStudentCourse): where
+            // you are, and one tap to the next. Phones find it under the lecture.
+            <Card className="overflow-hidden">
+              <Link
+                to={`/courses/${l.offering}`}
+                className="flex items-center gap-3 border-b border-border-soft px-4 py-3 hover:bg-surface-alt"
+              >
+                {course && <CodeTile top={top} bottom={bottom} tone={courseTone(course.code)} />}
+                <span className="min-w-0">
+                  <b className="block truncate text-sm text-text">{course?.name_ar ?? "المادة"}</b>
+                  <span className="text-xs text-text-muted">{count(list.length, N.lecture)}</span>
+                </span>
+              </Link>
+              <ol className="max-h-[60vh] overflow-y-auto py-1">
+                {list.map((x, i) => {
+                  const current = x.public_id === id;
+                  return (
+                    <li key={x.public_id}>
+                      <Link
+                        to={`/lectures/${x.public_id}`}
+                        aria-current={current ? "page" : undefined}
+                        className={`flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-surface-alt ${current ? "bg-primary-soft/50 font-semibold" : ""}`}
+                      >
+                        <span
+                          className={`grid size-7 shrink-0 place-items-center rounded-lg text-xs font-bold ${current ? "bg-primary text-on-primary" : "bg-surface-alt text-text-muted"}`}
+                        >
+                          {(i + 1).toLocaleString("ar-u-nu-latn")}
+                        </span>
+                        <span className="min-w-0 flex-1 truncate text-text">{x.title_ar}</span>
+                        {!x.is_published && <span className="text-xs text-text-muted">مسودة</span>}
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ol>
+            </Card>
           }
         >
           <div className="space-y-4">
@@ -77,10 +113,46 @@ export function Lecture() {
                 status={video.video.status}
               />
             )}
+            <div>
+              <SectionLabel>الموارد</SectionLabel>
+              {l.resources.some((r) => r.kind !== "video") ? (
+                <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                  {l.resources
+                    .filter((r) => r.kind !== "video")
+                    .map((r) => (
+                      <Card key={r.id} className="overflow-hidden">
+                        <ResourceRow r={r} />
+                      </Card>
+                    ))}
+                </div>
+              ) : (
+                <Card className="px-4 py-3 text-sm text-text-muted">لا ملفات.</Card>
+              )}
+            </div>
             {l.description && (
-              <Card className="whitespace-pre-line p-4 text-sm leading-7 text-text">
-                {l.description}
+              <Card className="p-4">
+                <h2 className="text-sm font-semibold text-text">عن المحاضرة</h2>
+                <p className="mt-1 whitespace-pre-line text-sm leading-7 text-text">
+                  {l.description}
+                </p>
               </Card>
+            )}
+            {related.length > 0 && (
+              <div>
+                <SectionLabel>مرتبط بهذه المحاضرة</SectionLabel>
+                <Card className="divide-y divide-border-soft">
+                  {related.map((a) => (
+                    <Link
+                      key={a.public_id}
+                      to={`/assignments/${a.public_id}`}
+                      className="block px-4 py-3 hover:bg-surface-alt"
+                    >
+                      <b className="block text-sm text-text">{a.title}</b>
+                      <span className="text-xs text-text-muted">{dueLabel(a.due_at)}</span>
+                    </Link>
+                  ))}
+                </Card>
+              </div>
             )}
             <div className="flex justify-between gap-3">
               {prev ? (
@@ -103,37 +175,7 @@ export function Lecture() {
               )}
             </div>
           </div>
-          <aside className="mt-6 space-y-4 lg:mt-0">
-            <SectionLabel>الموارد</SectionLabel>
-            <Card className="divide-y divide-border-soft">
-              {l.resources
-                .filter((r) => r.kind !== "video")
-                .map((r) => (
-                  <ResourceRow key={r.id} r={r} />
-                ))}
-              {!l.resources.some((r) => r.kind !== "video") && (
-                <p className="px-4 py-3 text-sm text-text-muted">لا ملفات.</p>
-              )}
-            </Card>
-            {related.length > 0 && (
-              <>
-                <SectionLabel>مرتبط بهذه المحاضرة</SectionLabel>
-                <Card className="divide-y divide-border-soft">
-                  {related.map((a) => (
-                    <Link
-                      key={a.public_id}
-                      to={`/assignments/${a.public_id}`}
-                      className="block px-4 py-3 hover:bg-surface-alt"
-                    >
-                      <b className="block text-sm text-text">{a.title}</b>
-                      <span className="text-xs text-text-muted">{dueLabel(a.due_at)}</span>
-                    </Link>
-                  ))}
-                </Card>
-              </>
-            )}
-          </aside>
-        </div>
+        </WithSide>
       )}
     </PortalShell>
   );

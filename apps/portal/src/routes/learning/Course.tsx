@@ -12,13 +12,16 @@ import {
   CodeTile,
   EmptyState,
   SectionLabel,
+  SideFigures,
   StatusBadge,
+  WithSide,
 } from "../../components/ui";
 import { api, ok } from "../../lib/api";
 import { when, count, N } from "../../lib/format";
 import {
   dueLabel,
   splitCourse,
+  courseTone,
   taskState,
   useAssignments,
   useLectures,
@@ -80,6 +83,85 @@ export function Course() {
   const possible = graded.reduce((n, a) => n + Number(a.max_grade ?? 0), 0);
   const [top, bottom] = splitCourse(course?.code ?? "");
   const people = course?.instructors ?? [];
+  // The side column (board DesktopStudentCourse; review 2026-09-29 PR 7): where the course
+  // stands, what comes next and its latest announcement. Phones get it under the tab.
+  const published = lecs.filter((l) => l.is_published).length;
+  const handedIn = work.filter((a) => a.mine).length;
+  const next = work.find((a) => !a.mine && new Date(a.due_at).getTime() > now);
+  const nextExam = (exams.data ?? [])
+    .filter((e) => e.status === "published" && new Date(e.closes_at ?? e.opens_at).getTime() > now)
+    .sort((a, b) => a.opens_at.localeCompare(b.opens_at))[0];
+  const latest = news.data?.[0];
+  const side = (
+    <>
+      <SideFigures
+        title="المادة في أرقام"
+        rows={
+          staff
+            ? [
+                ["محاضرة منشورة", published],
+                ["مسودة", lecs.length - published],
+                ["واجب", work.length],
+                ["اختبار", exams.data?.length ?? 0],
+              ]
+            : [
+                ["محاضرة", published],
+                [`سلّمت من ${work.length.toLocaleString("ar-u-nu-latn")}`, handedIn],
+                ["اختبار", exams.data?.length ?? 0],
+                [
+                  "من أعمال الفصل",
+                  possible
+                    ? `${Math.round((100 * earned) / possible).toLocaleString("ar-u-nu-latn")}٪`
+                    : "—",
+                ],
+              ]
+        }
+      />
+      {!staff && (next || nextExam) && (
+        <Card className="divide-y divide-border-soft">
+          <h2 className="px-4 pt-3 pb-2 text-xs font-semibold text-text-muted">التالي</h2>
+          {next && (
+            <Link
+              to={`/assignments/${next.public_id}`}
+              className="block px-4 py-3 hover:bg-surface-alt"
+            >
+              <b className="block truncate text-sm text-text">{next.title}</b>
+              <span className="text-xs text-warning-strong">{dueLabel(next.due_at)}</span>
+            </Link>
+          )}
+          {nextExam && (
+            <Link
+              to={`/exams/${nextExam.public_id}`}
+              className="block px-4 py-3 hover:bg-surface-alt"
+            >
+              <b className="block truncate text-sm text-text">{nextExam.title}</b>
+              <span className="text-xs text-text-muted">
+                {when(nextExam.opens_at)} · {count(nextExam.duration_minutes, N.minute)}
+              </span>
+            </Link>
+          )}
+        </Card>
+      )}
+      {latest && (
+        <Card className="p-4">
+          <h2 className="text-xs font-semibold text-text-muted">آخر إعلان</h2>
+          <b className="mt-1 block text-sm text-text">{latest.title}</b>
+          <p className="text-xs text-text-muted">
+            {latest.author} · {when(latest.created_at)}
+          </p>
+          {tab !== "news" && (
+            <button
+              type="button"
+              onClick={() => setTab("news")}
+              className="mt-2 text-sm font-semibold text-primary"
+            >
+              كل الإعلانات
+            </button>
+          )}
+        </Card>
+      )}
+    </>
+  );
   return (
     <PortalShell
       title={course?.name_ar ?? "المادة"}
@@ -93,7 +175,7 @@ export function Course() {
       {course && (
         <>
           <div className="flex flex-wrap items-center gap-3">
-            <CodeTile top={top} bottom={bottom} />
+            <CodeTile top={top} bottom={bottom} tone={courseTone(course.code)} />
             <div className="flex flex-wrap gap-2">
               {tabs.map((t) => (
                 <Chip key={t.key} active={tab === t.key} onClick={() => setTab(t.key)}>
@@ -136,162 +218,168 @@ export function Course() {
           )}
 
           <div className="mt-4">
-            {tab === "lectures" && (
-              <Card className="divide-y divide-border-soft">
-                {lecs.map((l) => (
-                  <Link
-                    key={l.public_id}
-                    to={`/lectures/${l.public_id}`}
-                    className="flex items-center gap-3 px-4 py-3 hover:bg-surface-alt"
-                  >
-                    <span className="w-8 text-center font-mono text-sm text-text-muted">
-                      {String(l.order ?? 0).padStart(2, "0")}
-                    </span>
-                    <span className="min-w-0 flex-1">
-                      <span className="block truncate font-semibold text-text">{l.title_ar}</span>
-                      <span className="text-xs text-text-muted">
-                        {l.resources
-                          .map((r) =>
-                            r.kind === "video"
-                              ? "فيديو"
-                              : r.kind === "file"
-                                ? (r.file?.name ?? "ملف")
-                                : "رابط",
-                          )
-                          .join(" · ") || "بلا موارد"}
-                        {l.type === "lab" ? " · عملي" : ""}
-                      </span>
-                    </span>
-                    {staff && !l.is_published && <StatusBadge status="draft" label="مسودة" />}
-                  </Link>
-                ))}
-                {!lecs.length && (
-                  <EmptyState icon={<FileText size={24} aria-hidden />} title="لا محاضرات بعد" />
-                )}
-              </Card>
-            )}
-
-            {tab === "work" && (
-              <div className="space-y-4">
+            <WithSide side={side}>
+              {tab === "lectures" && (
                 <Card className="divide-y divide-border-soft">
-                  {work.map((a) => {
-                    const state = taskState(a);
-                    return (
-                      <Link
-                        key={a.public_id}
-                        to={`/assignments/${a.public_id}`}
-                        className="flex items-center gap-3 px-4 py-3 hover:bg-surface-alt"
-                      >
-                        <span className="min-w-0 flex-1">
-                          <span className="block truncate font-semibold text-text">{a.title}</span>
-                          <span className="text-xs text-text-muted">
-                            {when(a.due_at)} · {count(Number(a.max_grade), N.mark)}
-                          </span>
+                  {lecs.map((l) => (
+                    <Link
+                      key={l.public_id}
+                      to={`/lectures/${l.public_id}`}
+                      className="flex items-center gap-3 px-4 py-3 hover:bg-surface-alt"
+                    >
+                      <span className="w-8 text-center font-mono text-sm text-text-muted">
+                        {String(l.order ?? 0).padStart(2, "0")}
+                      </span>
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate font-semibold text-text">{l.title_ar}</span>
+                        <span className="text-xs text-text-muted">
+                          {l.resources
+                            .map((r) =>
+                              r.kind === "video"
+                                ? "فيديو"
+                                : r.kind === "file"
+                                  ? (r.file?.name ?? "ملف")
+                                  : "رابط",
+                            )
+                            .join(" · ") || "بلا موارد"}
+                          {l.type === "lab" ? " · عملي" : ""}
                         </span>
-                        {staff ? (
-                          <StatusBadge
-                            status={a.status}
-                            label={
-                              a.status === "draft"
-                                ? "مسودة"
-                                : a.status === "closed"
-                                  ? "مغلق"
-                                  : "منشور"
-                            }
-                          />
-                        ) : state === "graded" ? (
-                          <b className="text-sm text-success-strong" dir="ltr">
-                            {Number(a.mine!.score).toLocaleString("ar-u-nu-latn")}/
-                            {Number(a.max_grade).toLocaleString("ar-u-nu-latn")}
-                          </b>
-                        ) : state === "submitted" ? (
-                          <StatusBadge status="pending" label="سُلِّم" />
-                        ) : (
-                          <span
-                            className={`text-xs font-semibold ${state === "late" ? "text-danger-strong" : "text-warning-strong"}`}
-                          >
-                            {dueLabel(a.due_at)}
-                          </span>
-                        )}
-                      </Link>
-                    );
-                  })}
-                  {!work.length && <p className="px-4 py-4 text-sm text-text-muted">لا واجبات.</p>}
+                      </span>
+                      {staff && !l.is_published && <StatusBadge status="draft" label="مسودة" />}
+                    </Link>
+                  ))}
+                  {!lecs.length && (
+                    <EmptyState icon={<FileText size={24} aria-hidden />} title="لا محاضرات بعد" />
+                  )}
                 </Card>
-                {(exams.data ?? []).length > 0 && (
-                  <>
-                    <SectionLabel>الاختبارات</SectionLabel>
-                    <Card className="divide-y divide-border-soft">
-                      {exams.data!.map((e) => (
+              )}
+
+              {tab === "work" && (
+                <div className="space-y-4">
+                  <Card className="divide-y divide-border-soft">
+                    {work.map((a) => {
+                      const state = taskState(a);
+                      return (
                         <Link
-                          key={e.public_id}
-                          to={`/exams/${e.public_id}`}
+                          key={a.public_id}
+                          to={`/assignments/${a.public_id}`}
                           className="flex items-center gap-3 px-4 py-3 hover:bg-surface-alt"
                         >
                           <span className="min-w-0 flex-1">
                             <span className="block truncate font-semibold text-text">
-                              {e.title}
+                              {a.title}
                             </span>
                             <span className="text-xs text-text-muted">
-                              {when(e.opens_at)} · {count(e.duration_minutes, N.minute)} ·{" "}
-                              {count(e.questions_count, N.question)}
+                              {when(a.due_at)} · {count(Number(a.max_grade), N.mark)}
                             </span>
                           </span>
+                          {staff ? (
+                            <StatusBadge
+                              status={a.status}
+                              label={
+                                a.status === "draft"
+                                  ? "مسودة"
+                                  : a.status === "closed"
+                                    ? "مغلق"
+                                    : "منشور"
+                              }
+                            />
+                          ) : state === "graded" ? (
+                            <b className="text-sm text-success-strong" dir="ltr">
+                              {Number(a.mine!.score).toLocaleString("ar-u-nu-latn")}/
+                              {Number(a.max_grade).toLocaleString("ar-u-nu-latn")}
+                            </b>
+                          ) : state === "submitted" ? (
+                            <StatusBadge status="pending" label="سُلِّم" />
+                          ) : (
+                            <span
+                              className={`text-xs font-semibold ${state === "late" ? "text-danger-strong" : "text-warning-strong"}`}
+                            >
+                              {dueLabel(a.due_at)}
+                            </span>
+                          )}
                         </Link>
-                      ))}
-                    </Card>
-                  </>
-                )}
-              </div>
-            )}
-
-            {tab === "news" && (
-              <div className="space-y-3">
-                {(news.data ?? []).map((n) => (
-                  <Card key={n.public_id} className="p-4">
-                    <p className="text-xs text-text-muted">
-                      {n.author} · {when(n.created_at)}
-                    </p>
-                    <p className="mt-1 font-semibold text-text">{n.title}</p>
-                    <div
-                      className="mt-1 text-sm leading-7 text-text"
-                      dangerouslySetInnerHTML={{ __html: n.body }}
-                    />
+                      );
+                    })}
+                    {!work.length && (
+                      <p className="px-4 py-4 text-sm text-text-muted">لا واجبات.</p>
+                    )}
                   </Card>
-                ))}
-                {!news.data?.length && (
-                  <Card className="p-4 text-sm text-text-muted">لا إعلانات لهذه المادة.</Card>
-                )}
-              </div>
-            )}
-
-            {tab === "grades" && !staff && (
-              <Card className="p-4">
-                <p className="text-3xl font-bold text-text">
-                  {possible
-                    ? `${Math.round((100 * earned) / possible).toLocaleString("ar-u-nu-latn")}٪`
-                    : "—"}
-                </p>
-                <p className="text-sm text-text-muted">
-                  {earned.toLocaleString("ar-u-nu-latn")} من{" "}
-                  {possible.toLocaleString("ar-u-nu-latn")} — أعمال الفصل المصححة
-                </p>
-                <div className="mt-4 divide-y divide-border-soft">
-                  {graded.map((a) => (
-                    <div key={a.public_id} className="flex justify-between py-2.5 text-sm">
-                      <span>{a.title}</span>
-                      <b dir="ltr">
-                        {Number(a.mine!.score).toLocaleString("ar-u-nu-latn")} /{" "}
-                        {Number(a.max_grade).toLocaleString("ar-u-nu-latn")}
-                      </b>
-                    </div>
-                  ))}
+                  {(exams.data ?? []).length > 0 && (
+                    <>
+                      <SectionLabel>الاختبارات</SectionLabel>
+                      <Card className="divide-y divide-border-soft">
+                        {exams.data!.map((e) => (
+                          <Link
+                            key={e.public_id}
+                            to={`/exams/${e.public_id}`}
+                            className="flex items-center gap-3 px-4 py-3 hover:bg-surface-alt"
+                          >
+                            <span className="min-w-0 flex-1">
+                              <span className="block truncate font-semibold text-text">
+                                {e.title}
+                              </span>
+                              <span className="text-xs text-text-muted">
+                                {when(e.opens_at)} · {count(e.duration_minutes, N.minute)} ·{" "}
+                                {count(e.questions_count, N.question)}
+                              </span>
+                            </span>
+                          </Link>
+                        ))}
+                      </Card>
+                    </>
+                  )}
                 </div>
-                <p className="mt-3 text-xs text-text-muted">
-                  النتيجة النهائية تُعلن في صفحة النتائج بعد اعتمادها.
-                </p>
-              </Card>
-            )}
+              )}
+
+              {tab === "news" && (
+                <div className="space-y-3">
+                  {(news.data ?? []).map((n) => (
+                    <Card key={n.public_id} className="p-4">
+                      <p className="text-xs text-text-muted">
+                        {n.author} · {when(n.created_at)}
+                      </p>
+                      <p className="mt-1 font-semibold text-text">{n.title}</p>
+                      <div
+                        className="mt-1 text-sm leading-7 text-text"
+                        dangerouslySetInnerHTML={{ __html: n.body }}
+                      />
+                    </Card>
+                  ))}
+                  {!news.data?.length && (
+                    <Card className="p-4 text-sm text-text-muted">لا إعلانات لهذه المادة.</Card>
+                  )}
+                </div>
+              )}
+
+              {tab === "grades" && !staff && (
+                <Card className="p-4">
+                  <p className="text-3xl font-bold text-text">
+                    {possible
+                      ? `${Math.round((100 * earned) / possible).toLocaleString("ar-u-nu-latn")}٪`
+                      : "—"}
+                  </p>
+                  <p className="text-sm text-text-muted">
+                    {earned.toLocaleString("ar-u-nu-latn")} من{" "}
+                    {possible.toLocaleString("ar-u-nu-latn")} — أعمال الفصل المصححة
+                  </p>
+                  <div className="mt-4 divide-y divide-border-soft">
+                    {graded.map((a) => (
+                      <div key={a.public_id} className="flex justify-between py-2.5 text-sm">
+                        <span>{a.title}</span>
+                        <b dir="ltr">
+                          {Number(a.mine!.score).toLocaleString("ar-u-nu-latn")} /{" "}
+                          {Number(a.max_grade).toLocaleString("ar-u-nu-latn")}
+                        </b>
+                      </div>
+                    ))}
+                  </div>
+                  <p className="mt-3 text-xs text-text-muted">
+                    النتيجة النهائية تُعلن في صفحة النتائج بعد اعتمادها.
+                  </p>
+                </Card>
+              )}
+            </WithSide>
           </div>
         </>
       )}

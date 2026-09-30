@@ -322,10 +322,29 @@ export function StatusBadge({ status, label }: { status: string; label: string }
   );
 }
 
+/** Soft background + strong text pairs (AA in both themes) that tell courses apart. */
+export const COURSE_TONES = {
+  primary: "bg-primary-soft text-primary-700",
+  success: "bg-success-soft text-success-strong",
+  warning: "bg-warning-soft text-warning-strong",
+  info: "bg-info-soft text-info-strong",
+} as const;
+export type CourseTone = keyof typeof COURSE_TONES;
+
 /** A small rounded code tile (course code / initials), as on the boards. */
-export function CodeTile({ top, bottom }: { top: string; bottom?: string }) {
+export function CodeTile({
+  top,
+  bottom,
+  tone = "primary",
+}: {
+  top: string;
+  bottom?: string;
+  tone?: CourseTone;
+}) {
   return (
-    <span className="grid size-11 shrink-0 place-items-center rounded-lg bg-primary-soft text-center leading-tight text-primary-700">
+    <span
+      className={`grid size-11 shrink-0 place-items-center rounded-lg text-center leading-tight ${COURSE_TONES[tone]}`}
+    >
       <span className="text-[11px] font-semibold">{top}</span>
       {bottom && <span className="text-sm font-bold">{bottom}</span>}
     </span>

@@ -7,7 +7,15 @@ import { Card, CodeTile, SectionLabel } from "../../components/ui";
 import { api, ok } from "../../lib/api";
 import { useMe } from "../../lib/auth";
 import { when, count, N, score } from "../../lib/format";
-import { dueLabel, splitCourse, taskState, useAssignments, useLectures } from "../../lib/learning";
+import { num } from "../../lib/reports";
+import {
+  courseTone,
+  dueLabel,
+  splitCourse,
+  taskState,
+  useAssignments,
+  useLectures,
+} from "../../lib/learning";
 import { examPhase } from "../exams/Exams";
 import { ALL } from "../../components/Pager";
 
@@ -18,7 +26,8 @@ function greeting(now = new Date()) {
   return h < 12 ? "صباح الخير" : "مساء الخير";
 }
 
-/** Board: StudentToday (phone); desktop derived — agenda beside "attention" and "new". */
+/** Boards: StudentToday (phone), DesktopStudentToday — a banner for what needs a signature,
+ *  then two balanced columns: what is due (today, tomorrow, this week) beside what is new. */
 export function Today() {
   const me = useMe();
   const assignments = useAssignments();
@@ -88,6 +97,43 @@ export function Today() {
         tag: new Date(e.opens_at).getTime() <= now ? "مفتوح" : dueLabel(e.opens_at, now),
       })),
   ].sort((a, b) => a.at.localeCompare(b.at));
+  // Later this week (after tomorrow, within 7 days): what to plan for (board DesktopStudentToday).
+  const weekEnd = now + 7 * DAY;
+  const later = [
+    ...(assignments.data ?? [])
+      .filter((a) => {
+        const due = new Date(a.due_at).getTime();
+        return !a.mine && due >= horizon && due < weekEnd;
+      })
+      .map((a) => ({
+        at: a.due_at,
+        key: `a-${a.public_id}`,
+        code: a.course_code,
+        title: a.title,
+        meta: `${a.course_name} · تسليم`,
+        to: `/assignments/${a.public_id}`,
+      })),
+    ...(exams.data ?? [])
+      .filter((e) => {
+        const opens = new Date(e.opens_at).getTime();
+        return e.status === "published" && opens >= horizon && opens < weekEnd;
+      })
+      .map((e) => ({
+        at: e.opens_at,
+        key: `e-${e.public_id}`,
+        code: e.course_code,
+        title: e.title,
+        meta: `${e.course_name} · ${count(e.duration_minutes, N.minute)}`,
+        to: `/exams/${e.public_id}`,
+      })),
+  ].sort((a, b) => a.at.localeCompare(b.at));
+  // The week's workload: assignments due in the seven days around today, done or not.
+  const week = (assignments.data ?? []).filter((a) => {
+    const due = new Date(a.due_at).getTime();
+    return due > now - 7 * DAY && due < weekEnd;
+  });
+  const done = week.filter((a) => a.mine).length;
+  const late = week.filter((a) => taskState(a, now) === "late").length;
   const pendingAck = (regulations.data ?? []).filter(
     (r) => r.requires_acknowledgement && r.acknowledged === false,
   );
@@ -113,10 +159,25 @@ export function Today() {
           />
         </div>
       )}
-      <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start lg:gap-6">
+      {pendingAck.map((r) => (
+        <Link
+          key={r.public_id}
+          to={`/regulations/${r.public_id}`}
+          className="mb-4 flex items-center justify-between gap-3 rounded-2xl bg-warning-soft px-4 py-3 hover:opacity-95"
+        >
+          <span className="min-w-0">
+            <b className="block text-sm text-text">{r.title} تنتظر إقرارك</b>
+            <span className="text-xs text-warning-strong">إقرار مطلوب قبل ما يشترطه من أعمال</span>
+          </span>
+          <span className="shrink-0 rounded-lg bg-text px-3 py-2 text-xs font-bold text-bg">
+            اقرأ وأقرّ
+          </span>
+        </Link>
+      ))}
+      <div className="lg:grid lg:grid-cols-2 lg:items-start lg:gap-6">
         <section>
           <div className="flex items-end justify-between">
-            <SectionLabel>جدول اليوم والغد</SectionLabel>
+            <SectionLabel>مستحق اليوم والغد</SectionLabel>
             <Link to="/tasks" className="mb-2 text-sm font-semibold text-primary">
               كل المهام
             </Link>
@@ -149,25 +210,42 @@ export function Today() {
               <p className="px-4 py-5 text-sm text-text-muted">لا شيء مجدول اليوم وغدًا.</p>
             )}
           </Card>
-        </section>
-        <aside className="mt-6 space-y-4 lg:mt-0">
-          {pendingAck.length > 0 && (
+          {later.length > 0 && (
             <>
-              <SectionLabel>يتطلب انتباهك</SectionLabel>
+              <SectionLabel>هذا الأسبوع</SectionLabel>
               <Card className="divide-y divide-border-soft">
-                {pendingAck.map((r) => (
-                  <Link
-                    key={r.public_id}
-                    to={`/regulations/${r.public_id}`}
-                    className="block px-4 py-3 hover:bg-surface-alt"
-                  >
-                    <span className="text-xs font-semibold text-warning-strong">إقرار مطلوب</span>
-                    <b className="block text-sm text-text">{r.title}</b>
-                  </Link>
-                ))}
+                {later.map((item) => {
+                  const [top, bottom] = splitCourse(item.code ?? "");
+                  return (
+                    <Link
+                      key={item.key}
+                      to={item.to}
+                      className="flex items-center gap-3 px-4 py-3 hover:bg-surface-alt"
+                    >
+                      <span className="w-16 shrink-0 text-center text-xs leading-tight text-text-muted">
+                        <b className="block text-sm text-text">
+                          {new Date(item.at).toLocaleDateString("ar-u-nu-latn", {
+                            day: "numeric",
+                            month: "short",
+                          })}
+                        </b>
+                        {new Date(item.at).toLocaleDateString("ar-u-nu-latn", { weekday: "long" })}
+                      </span>
+                      {item.code ? (
+                        <CodeTile top={top} bottom={bottom} tone={courseTone(item.code)} />
+                      ) : null}
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate font-semibold text-text">{item.title}</span>
+                        <span className="block truncate text-xs text-text-muted">{item.meta}</span>
+                      </span>
+                    </Link>
+                  );
+                })}
               </Card>
             </>
           )}
+        </section>
+        <aside className="mt-6 lg:mt-0">
           <SectionLabel>جديد في موادك</SectionLabel>
           <Card className="divide-y divide-border-soft">
             {fresh.map((l) => {
@@ -180,7 +258,7 @@ export function Today() {
                   to={`/lectures/${l.public_id}`}
                   className="flex items-center gap-3 px-4 py-3 hover:bg-surface-alt"
                 >
-                  {code ? <CodeTile top={top} bottom={bottom} /> : null}
+                  {code ? <CodeTile top={top} bottom={bottom} tone={courseTone(code)} /> : null}
                   <span className="min-w-0 flex-1">
                     <b className="block truncate text-sm text-text">{l.title_ar}</b>
                     <span className="text-xs text-text-muted">رُفعت {when(l.published_at!)}</span>
@@ -207,6 +285,26 @@ export function Today() {
               <p className="px-4 py-4 text-sm text-text-muted">لا جديد هذا الأسبوع.</p>
             )}
           </Card>
+          {week.length > 0 && (
+            <>
+              <SectionLabel>حجم العمل هذا الأسبوع</SectionLabel>
+              <Card className="px-4 py-3">
+                <p className="text-xs text-text-muted">
+                  {count(week.length, N.task)} · أُنجز {num(done)}
+                  {late > 0 && <span className="text-danger-strong"> · متأخر {num(late)}</span>}
+                </p>
+                {/* One segment per task, filled when handed in. */}
+                <div className="mt-2 flex gap-1" aria-hidden="true">
+                  {week.map((a) => (
+                    <span
+                      key={a.public_id}
+                      className={`h-2 flex-1 rounded-full ${a.mine ? "bg-primary" : taskState(a, now) === "late" ? "bg-danger" : "bg-surface-alt"}`}
+                    />
+                  ))}
+                </div>
+              </Card>
+            </>
+          )}
         </aside>
       </div>
     </PortalShell>
