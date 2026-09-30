@@ -11,7 +11,7 @@ const { title, items } = Astro.props;
   <h2 class="font-display text-xl font-bold">{title}</h2>
   <div class="mt-4 divide-y divide-border-soft rounded-2xl border border-border-soft bg-surface">
     {items.map(([q, a]) => (
-      <details class="group px-4 py-3">
+      <details class="motion-details group px-4 py-3">
         <summary class="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 font-semibold">
           {q}
           <span

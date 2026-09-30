@@ -8,8 +8,13 @@ interface Props {
   /** [label, path] of the pages above this one; an empty path is a section without its own
    *  page. A crumb pointing at this page itself is dropped — the trail always ends with it. */
   crumbs?: [string, string][];
+  /** The featured head (W12) for the pages a visitor decides on — about, admissions, a
+   *  department, a programme: navy, with the page's key facts. Others keep the quiet grey. */
+  feature?: boolean;
+  /** [value, label] pairs shown under the lead of a featured head. */
+  facts?: [string, string][];
 }
-const { lang, title, lead, crumbs = [] } = Astro.props;
+const { lang, title, lead, crumbs = [], feature = false, facts = [] } = Astro.props;
 const here = Astro.url.pathname.replace(/\/?$/, "/");
 // One trail on every page (review 2026-09-29 🟢): home › ancestors › this page.
 const trail = crumbs.filter(([, path]) => !path || href(lang, path) !== here);
@@ -30,8 +35,34 @@ const breadcrumbLd = {
 };
 ---
 
-<div class="border-b border-border-soft bg-bg-subtle">
-  <div class="mx-auto max-w-6xl px-4 py-8 lg:px-8 lg:py-12">
+<div
+  class:list={[
+    feature
+      ? // Muted text inside a featured head (slots included) stays readable on navy.
+        "relative overflow-hidden bg-gradient-to-bl from-navy-800 via-navy-700 to-navy-500 text-white [&_.text-text]:text-white [&_.text-text-muted]:text-navy-200"
+      : "border-b border-border-soft bg-bg-subtle",
+  ]}
+>
+  {feature && (
+    <svg
+      aria-hidden="true"
+      class="pointer-events-none absolute -end-24 -top-24 size-96 text-white/5"
+      viewBox="0 0 200 200"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1"
+    >
+      <circle cx="100" cy="100" r="98" />
+      <circle cx="100" cy="100" r="72" />
+      <circle cx="100" cy="100" r="46" />
+    </svg>
+  )}
+  <div
+    class:list={[
+      "relative mx-auto max-w-6xl px-4 lg:px-8",
+      feature ? "py-10 lg:py-16" : "py-8 lg:py-12",
+    ]}
+  >
     <nav class="text-xs text-text-muted" aria-label={lang === "ar" ? "مسار الصفحة" : "Breadcrumb"}>
       <a href={href(lang)} class="hover:text-text">
         {t(lang, "home")}
@@ -57,8 +88,27 @@ const breadcrumbLd = {
         {title}
       </span>
     </nav>
-    <h1 class="mt-2 font-display text-3xl font-bold leading-snug text-text lg:text-4xl">{title}</h1>
+    <h1
+      class:list={[
+        "mt-2 font-display font-bold leading-snug text-text",
+        feature ? "text-3xl lg:text-5xl" : "text-3xl lg:text-4xl",
+      ]}
+    >
+      {title}
+    </h1>
     {lead && <p class="mt-3 max-w-2xl text-base leading-7 text-text-muted">{lead}</p>}
+    {feature && facts.length > 0 && (
+      <dl class="mt-6 flex flex-wrap gap-2">
+        {facts.map(([value, label]) => (
+          <div class="flex flex-col-reverse rounded-xl bg-white/10 px-4 py-2 ring-1 ring-white/15">
+            <dt class="text-xs text-navy-200">{label}</dt>
+            <dd class="font-display text-lg font-bold leading-tight">
+              <bdi>{value}</bdi>
+            </dd>
+          </div>
+        ))}
+      </dl>
+    )}
     <slot />
   </div>
 </div>

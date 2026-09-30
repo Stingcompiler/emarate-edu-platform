@@ -5,7 +5,19 @@ import SideLinks from "../../../components/SideLinks.astro";
 import WithAside from "../../../components/WithAside.astro";
 import Base from "../../../layouts/Base.astro";
 import { PORTAL, type Department, departments, site } from "../../../lib/api";
-import { LANGS, type Lang, arrow, count, fmtDate, href, N, pick, t } from "../../../lib/i18n";
+import {
+  LANGS,
+  type Lang,
+  arrow,
+  count,
+  fmtDate,
+  href,
+  N,
+  pick,
+  t,
+  num,
+  word,
+} from "../../../lib/i18n";
 
 export async function getStaticPaths() {
   const depts = await departments();
@@ -40,6 +52,8 @@ const others = all
     lang={lang}
     title={lang === "ar" ? `قسم ${name}` : name}
     lead={d.description}
+    feature
+    facts={[[num(lang, d.programs.length), word(lang, d.programs.length, N.program)]]}
     crumbs={[
       [t(lang, "departments"), "departments/"],
       [name, `departments/${d.code}/`],
@@ -51,7 +65,6 @@ const others = all
           <b>{d.manager}</b> · <span class="text-text-muted">{t(lang, "manager")}</span>
         </span>
       )}
-      <span class="text-text-muted">{count(lang, d.programs.length, N.program)}</span>
     </p>
   </PageHead>
   <WithAside>

@@ -20,7 +20,12 @@
   - 🟢 items, and the visitor layout links back to the site.
   - The crawl skips `a[download]`.
   - The landing crawl takes ~3–3.5 min locally (was ~2): the site has more pages now.
-- **Next: 6e**, the feature `PageHead` (W12) and site motion. Then PR 7+ (large screens).
+- **PR 6e `feat/site-feature-motion`** (open after 6d).
+  - `PageHead feature facts` on about, admissions, department and programme.
+  - `motion.css`: `.motion-lift`, `.motion-header[data-scrolled]`, `.motion-details` (via `::details-content`).
+  - Staggered `data-reveal` with `--i` on the home cards.
+  - `dl` items: `dt` before `dd`.
+- **Then PR 7+:** large-screen layouts per role (full review §3 «PR 7 وما بعده»).
 - 6c deferred, waiting on the owner:
   - faculty on the department page (needs a consent field);
   - department news (policy: department roles can't publish public, docs/03 §7).

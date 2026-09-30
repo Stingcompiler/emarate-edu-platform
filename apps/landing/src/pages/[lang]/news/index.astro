@@ -29,7 +29,7 @@ const upcoming = evs
           {items.map((n) => (
             <a
               href={href(lang, `news/${n.slug}/`)}
-              class="block overflow-hidden rounded-2xl border border-border-soft bg-surface hover:shadow-md"
+              class="motion-lift block overflow-hidden rounded-2xl border border-border-soft bg-surface"
             >
               {n.cover_url && (
                 <img
