@@ -6,7 +6,7 @@ test("a student signs in with the university number and lands on Today", async (
   await signIn(page, "26-IT-0001");
   await expect(page).toHaveURL("/");
   await expect(page.getByRole("heading", { level: 1 })).toContainText("محمد");
-  await expect(page.getByText("جدول اليوم والغد")).toBeVisible();
+  await expect(page.getByText("مستحق اليوم والغد")).toBeVisible();
 });
 
 test("a wrong password shows an Arabic error and stays on login", async ({ page }) => {

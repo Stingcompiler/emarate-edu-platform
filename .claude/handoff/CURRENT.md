@@ -25,7 +25,16 @@
   - `motion.css`: `.motion-lift`, `.motion-header[data-scrolled]`, `.motion-details` (via `::details-content`).
   - Staggered `data-reveal` with `--i` on the home cards.
   - `dl` items: `dt` before `dd`.
-- **Then PR 7+:** large-screen layouts per role (full review §3 «PR 7 وما بعده»).
+- **6d #57, 6e #58, 6f #59: merged.** The public-site review series is complete.
+- **PR 7a `feat/student-large-screens`** (student group of full review §3 «PR 7 وما بعده»):
+  - Today: the acknowledgement banner, then two balanced columns: due today and tomorrow, plus «هذا الأسبوع»; new in
+    courses, plus the week's workload.
+  - Course: `WithSide`, with figures, «التالي» and the latest announcement; teachers get their own figures.
+  - Lecture: the content column, with the course's lecture list beside it (current one highlighted).
+  - Courses: `courseTone()` colour per course (`COURSE_TONES`, `CodeTile tone`), and handed-in progress.
+  - Results: navy GPA card with earned hours and per-term chips.
+- **Next:** 7b teacher (grading in three panes, exam monitor, course students table), then 7c department,
+  7d admissions, 7e results/affairs/HR, 7f site/admin, then portal motion.
 - **PR 6f `feat/department-faculty-news`**: the owner approved both 6c deferrals (2026-09-30); docs/03 is now v2.3.
   - `User.public_profile` plus `academic_title_ar/en`, set by the member at `PATCH /api/v1/me/public-profile` (audited
     `profile.public_update`), with a card in «الإعدادات».

@@ -115,6 +115,14 @@ export function useLectures(offering?: number | "all") {
   });
 }
 
+/** A course keeps one colour everywhere (boards: each course its own tile colour). */
+export function courseTone(code: string): "primary" | "success" | "warning" | "info" {
+  const tones = ["primary", "success", "warning", "info"] as const;
+  let hash = 0;
+  for (const ch of code) hash = (hash * 31 + ch.charCodeAt(0)) >>> 0;
+  return tones[hash % tones.length]!;
+}
+
 export const splitCourse = (code: string): [string, string] => {
   const m = /^([A-Za-z]+)(.*)$/.exec(code);
   return m ? [m[1] ?? code, m[2] ?? ""] : [code, ""];

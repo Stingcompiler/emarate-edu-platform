@@ -41,6 +41,12 @@ export function MyResults() {
   const data = results.data;
   const terms = data?.terms ?? [];
   const term = terms.find((t) => t.term === picked) ?? terms[0];
+  // Hours earned: the published courses passed, across every shown term.
+  const earnedHours = terms.reduce(
+    (n, t) =>
+      n + t.results.filter((r) => r.status === "pass").reduce((h, r) => h + r.credit_hours, 0),
+    0,
+  );
   const student = me.data?.student;
 
   return (
@@ -96,18 +102,20 @@ export function MyResults() {
           </div>
           <aside className="hidden space-y-4 lg:block">
             {data?.cumulative_gpa && (
-              <Card className="p-4">
-                <p className="text-xs text-text-muted">المعدل التراكمي</p>
-                <p className="mt-1 text-3xl font-bold text-text">{data.cumulative_gpa}</p>
-                <ul className="mt-3 divide-y divide-border-soft text-sm">
+              // Board DesktopStudentResults: the cumulative GPA as the page's headline figure.
+              <div className="rounded-2xl bg-header p-5 text-center text-white">
+                <p className="text-xs text-navy-200">المعدل التراكمي</p>
+                <p className="mt-1 text-5xl font-bold">{data.cumulative_gpa}</p>
+                <p className="mt-2 text-xs text-navy-200">{count(earnedHours, N.hour)} مكتسبة</p>
+                <ul className="mt-4 grid grid-cols-3 gap-2">
                   {terms.map((t) => (
-                    <li key={t.term} className="flex justify-between py-2">
-                      <span className="text-text-muted">{t.term_name}</span>
-                      <span className="font-semibold text-text">{t.gpa ?? "—"}</span>
+                    <li key={t.term} className="rounded-lg bg-white/10 px-2 py-2">
+                      <b className="block text-base">{t.gpa ?? "—"}</b>
+                      <span className="text-[11px] text-navy-200">{t.term_name}</span>
                     </li>
                   ))}
                 </ul>
-              </Card>
+              </div>
             )}
           </aside>
         </div>
