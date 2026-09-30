@@ -111,6 +111,10 @@ const DEGREE_EN: Record<string, string> = {
 export const degree = (lang: Lang, key: string, label: string) =>
   lang === "en" ? (DEGREE_EN[key] ?? label) : label;
 /** "Forward" arrow for the reading direction. */
+/** Keeps number ranges such as «8:00–15:00» in reading order inside Arabic text (LTR isolate);
+ *  without it the bidi algorithm shows «15:00–8:00». */
+export const isolateNumbers = (text: string) =>
+  text.replace(/\d[\d:.,]*(?:\s*[–-]\s*\d[\d:.,]*)+/g, (run) => `\u2066${run}\u2069`);
 /** A yearly fee as the college states it: «1,600,000 جنيه» · «SDG 1,600,000». */
 export const money = (lang: Lang, n: number, currency: "SDG" | "USD") =>
   lang === "ar"

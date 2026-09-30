@@ -3,7 +3,17 @@ import PageHead from "../../components/PageHead.astro";
 import TrustStrip from "../../components/TrustStrip.astro";
 import Base from "../../layouts/Base.astro";
 import { PORTAL, departments, pages, programs, site } from "../../lib/api";
-import { type Lang, arrow, count, href, langPaths, money, N, pick } from "../../lib/i18n";
+import {
+  type Lang,
+  arrow,
+  count,
+  href,
+  isolateNumbers,
+  langPaths,
+  money,
+  N,
+  pick,
+} from "../../lib/i18n";
 
 /**
  * What a parent asks before trusting the college (landing review 2026-10, PR 6c): is it
@@ -25,7 +35,7 @@ const licence = pick(lang, s.licence_ar ?? "", s.licence_en);
 const fees = all.map((p) => p.fee_sdg).filter((f): f is number => !!f);
 const low = fees.length ? Math.min(...fees) : 0;
 const high = fees.length ? Math.max(...fees) : 0;
-const hours = pick(lang, s.office_hours_ar ?? "", s.office_hours_en);
+const hours = isolateNumbers(pick(lang, s.office_hours_ar ?? "", s.office_hours_en));
 const whatsapp = s.whatsapp_e164 ? `https://wa.me/${s.whatsapp_e164.replace(/\D/g, "")}` : null;
 
 type Answer = { q: string; a: string; links: [string, string][] };
@@ -147,7 +157,16 @@ const answers: Answer[] = [
     )}
     crumbs={[[L("لأولياء الأمور", "For parents"), "parents/"]]}
   />
-  <TrustStrip lang={lang} site={s} programs={all.length} departments={depts.length} class="pt-8" />
+  {/* On the subtle band, as on the home page, so the white figure cards stand out. */}
+  <div class="border-b border-border-soft bg-bg-subtle pb-8">
+    <TrustStrip
+      lang={lang}
+      site={s}
+      programs={all.length}
+      departments={depts.length}
+      class="pt-6"
+    />
+  </div>
   <div class="mx-auto max-w-6xl px-4 py-10 lg:px-8">
     <ul class="grid gap-3 md:grid-cols-2">
       {answers.map((x) => (
