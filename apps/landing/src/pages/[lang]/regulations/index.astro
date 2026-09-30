@@ -47,8 +47,21 @@ const more = await related(lang, ["guide", "calendar", "affairs", "contact"]);
                     ` · ${L("يسري من", "In force from")} ${fmtDate(lang, r.effective_from)}`}
                 </span>
                 {r.body && (
-                  <details class="mt-2">
-                    <summary class="min-h-11 cursor-pointer py-2 text-sm font-semibold text-primary">
+                  <details class="group mt-2">
+                    {/* Its own chevron: the browser's ◄ marker points the wrong way in RTL. */}
+                    <summary class="flex min-h-11 cursor-pointer list-none items-center gap-1.5 py-2 text-sm font-semibold text-primary [&::-webkit-details-marker]:hidden">
+                      <svg
+                        width="14"
+                        height="14"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2.4"
+                        aria-hidden="true"
+                        class="transition-transform group-open:rotate-90 rtl:-scale-x-100 rtl:group-open:-rotate-90"
+                      >
+                        <path d="M9 6l6 6-6 6" />
+                      </svg>
                       {L("اقرأ النص", "Read the text")}
                     </summary>
                     <p class="whitespace-pre-line text-sm leading-7">{r.body}</p>

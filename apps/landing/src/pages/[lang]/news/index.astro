@@ -14,38 +14,46 @@ const upcoming = evs
 
 <Base lang={lang} title={t(lang, "news")} path="news/">
   <PageHead lang={lang} title={t(lang, "news")} crumbs={[[t(lang, "news"), "news/"]]} />
-  <div class="mx-auto grid max-w-6xl gap-10 px-4 py-10 lg:grid-cols-[2fr_1fr] lg:px-8">
-    <section>
-      <h2 class="font-display text-xl font-bold">{t(lang, "latestNews")}</h2>
-      <div class="mt-4 grid gap-4 sm:grid-cols-2">
-        {items.map((n) => (
-          <a
-            href={href(lang, `news/${n.slug}/`)}
-            class="block overflow-hidden rounded-2xl border border-border-soft bg-surface hover:shadow-md"
-          >
-            {n.cover_url && (
-              <img
-                data-reveal="image"
-                src={n.cover_url}
-                alt=""
-                loading="lazy"
-                decoding="async"
-                class="aspect-[16/9] w-full object-cover"
-              />
-            )}
-            <div class="p-4">
-              {n.publish_at && <p class="text-xs text-text-muted">{fmtDate(lang, n.publish_at)}</p>}
-              <h3 class="mt-1 font-bold text-text">{n.title}</h3>
-              {n.summary && <p class="mt-1 text-sm leading-6 text-text-muted">{n.summary}</p>}
-            </div>
-          </a>
-        ))}
-        {!items.length && (
-          <p class="text-sm text-text-muted">{lang === "ar" ? "لا أخبار بعد." : "No news yet."}</p>
-        )}
-      </div>
-    </section>
-    <aside class="space-y-8">
+  {/* No news yet (W4): the page starts with events and announcements, side by side, instead
+      of an empty news column. */}
+  <div
+    class:list={[
+      "mx-auto grid max-w-6xl gap-10 px-4 py-10 lg:px-8",
+      items.length && "lg:grid-cols-[2fr_1fr]",
+    ]}
+  >
+    {items.length > 0 && (
+      <section>
+        <h2 class="font-display text-xl font-bold">{t(lang, "latestNews")}</h2>
+        <div class="mt-4 grid gap-4 sm:grid-cols-2">
+          {items.map((n) => (
+            <a
+              href={href(lang, `news/${n.slug}/`)}
+              class="block overflow-hidden rounded-2xl border border-border-soft bg-surface hover:shadow-md"
+            >
+              {n.cover_url && (
+                <img
+                  data-reveal="image"
+                  src={n.cover_url}
+                  alt=""
+                  loading="lazy"
+                  decoding="async"
+                  class="aspect-[16/9] w-full object-cover"
+                />
+              )}
+              <div class="p-4">
+                {n.publish_at && (
+                  <p class="text-xs text-text-muted">{fmtDate(lang, n.publish_at)}</p>
+                )}
+                <h3 class="mt-1 font-bold text-text">{n.title}</h3>
+                {n.summary && <p class="mt-1 text-sm leading-6 text-text-muted">{n.summary}</p>}
+              </div>
+            </a>
+          ))}
+        </div>
+      </section>
+    )}
+    <aside class:list={[items.length ? "space-y-8" : "grid gap-10 lg:grid-cols-2"]}>
       <section>
         <h2 class="font-display text-xl font-bold">
           {lang === "ar" ? "الفعاليات القادمة" : "Upcoming events"}

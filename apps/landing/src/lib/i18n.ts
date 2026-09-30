@@ -43,6 +43,15 @@ export const t = (lang: Lang, key: Key) => T[key][lang];
 export const dir = (lang: Lang) => (lang === "ar" ? "rtl" : "ltr");
 export const href = (lang: Lang, path = "") =>
   `/${lang}/${path}`.replace(/\/+$/, "/").replace(/\/\/+/g, "/");
+/** True when the text is (or starts as) Arabic — an untranslated fallback on English pages. */
+export const isArabic = (text?: string | null) => !!text && /[\u0600-\u06FF]/.test(text);
+/** An admission cycle's name for the page's language: the college names cycles in Arabic
+ *  («قبول 2026/2027»), so English pages say «Admissions 2026/2027» (W3). */
+export const cycleName = (lang: Lang, name: string) => {
+  if (lang === "ar" || !isArabic(name)) return name;
+  const year = name.match(/\d{4}(?:\/\d{2,4})?/)?.[0];
+  return year ? `Admissions ${year}` : "Admissions";
+};
 /** English falls back to Arabic when a field has no translation yet. */
 export const pick = (lang: Lang, ar: string, en?: string | null) => (lang === "en" && en ? en : ar);
 export const langPaths = () => LANGS.map((lang) => ({ params: { lang } }));
@@ -57,12 +66,16 @@ export const num = (lang: Lang, n: number) =>
  *  number), 3–10 plural, 11–99 accusative singular — «٥ أقسام», «قسمان», «١١ برنامجًا». */
 type Noun = { one: string; two: string; few: string; many: string; en: [string, string] };
 const arRule = new Intl.PluralRules("ar");
-export function count(lang: Lang, n: number, noun: Noun): string {
-  if (lang === "en") return `${num(lang, n)} ${n === 1 ? noun.en[0] : noun.en[1]}`;
+/** The noun that goes with n, without the number (for a big figure over its label). */
+export function word(lang: Lang, n: number, noun: Noun): string {
+  if (lang === "en") return n === 1 ? noun.en[0] : noun.en[1];
   const form = arRule.select(n);
   if (form === "two") return noun.two;
-  const word = form === "few" ? noun.few : form === "many" ? noun.many : noun.one;
-  return `${num(lang, n)} ${word}`;
+  return form === "few" ? noun.few : form === "many" ? noun.many : noun.one;
+}
+export function count(lang: Lang, n: number, noun: Noun): string {
+  if (lang === "ar" && arRule.select(n) === "two") return noun.two;
+  return `${num(lang, n)} ${word(lang, n, noun)}`;
 }
 export const N = {
   program: {
@@ -85,6 +98,13 @@ export const N = {
     few: "أعضاء هيئة تدريس",
     many: "عضو هيئة تدريس",
     en: ["faculty member", "faculty"],
+  },
+  upcomingEvent: {
+    one: "فعالية قادمة",
+    two: "فعاليتان قادمتان",
+    few: "فعاليات قادمة",
+    many: "فعالية قادمة",
+    en: ["upcoming event", "upcoming events"],
   },
   day: { one: "يوم", two: "يومين", few: "أيام", many: "يومًا", en: ["day", "days"] },
   hour: {

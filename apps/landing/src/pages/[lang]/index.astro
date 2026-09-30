@@ -13,7 +13,19 @@ import {
   site,
   stats,
 } from "../../lib/api";
-import { arrow, fmtDate, href, type Lang, langPaths, num, pick, t, count, N } from "../../lib/i18n";
+import {
+  arrow,
+  cycleName,
+  fmtDate,
+  href,
+  type Lang,
+  langPaths,
+  num,
+  pick,
+  t,
+  count,
+  N,
+} from "../../lib/i18n";
 
 export const getStaticPaths = langPaths;
 const lang = Astro.params.lang as Lang;
@@ -39,7 +51,7 @@ const closes = open.map((p) => p.intake!.closes_at).sort()[0];
 const daysLeft = closes
   ? Math.max(0, Math.ceil((new Date(closes).getTime() - Date.now()) / 86400000))
   : null;
-const cycle = open[0]?.intake?.cycle;
+const cycle = open[0]?.intake ? cycleName(lang, open[0].intake.cycle) : undefined;
 const next = upcoming
   .filter((e) => new Date(e.ends_at) > new Date())
   .sort((a, b) => a.starts_at.localeCompare(b.starts_at))[0];

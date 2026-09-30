@@ -1,0 +1,32 @@
+---
+/**
+ * Content the college has written in Arabic only, shown on an English page (W3): marked as
+ * Arabic for screen readers and laid out right-to-left, under a one-line note — instead of
+ * Arabic text scrambled inside an English layout. On Arabic pages it adds nothing.
+ */
+import type { Lang } from "../lib/i18n";
+
+interface Props {
+  lang: Lang;
+  /** Whether the content is an untranslated fallback (see isArabic()). */
+  when: boolean;
+  class?: string;
+}
+const { lang, when, class: className } = Astro.props;
+const fallback = lang === "en" && when;
+---
+
+{fallback ? (
+  <div class={className}>
+    <p class="mb-4 rounded-lg bg-bg-subtle px-3 py-2 text-sm text-text-muted">
+      Available in Arabic for now.
+    </p>
+    <div lang="ar" dir="rtl">
+      <slot />
+    </div>
+  </div>
+) : (
+  <div class={className}>
+    <slot />
+  </div>
+)}

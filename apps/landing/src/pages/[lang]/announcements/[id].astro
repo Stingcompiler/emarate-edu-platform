@@ -1,10 +1,11 @@
 ---
+import ArabicOnly from "../../../components/ArabicOnly.astro";
 import PageHead from "../../../components/PageHead.astro";
 import SideLinks from "../../../components/SideLinks.astro";
 import WithAside from "../../../components/WithAside.astro";
 import Base from "../../../layouts/Base.astro";
 import { type Announcement, announcements } from "../../../lib/api";
-import { LANGS, type Lang, fmtDate, href, t } from "../../../lib/i18n";
+import { LANGS, type Lang, fmtDate, href, t, isArabic } from "../../../lib/i18n";
 import { related } from "../../../lib/related";
 
 export async function getStaticPaths() {
@@ -45,7 +46,9 @@ const summary = a.body
   />
   <WithAside>
     <article class="max-w-3xl">
-      <div class="space-y-4 text-base leading-8" set:html={a.body} />
+      <ArabicOnly lang={lang} when={isArabic(a.body)}>
+        <div class="space-y-4 text-base leading-8" set:html={a.body} />
+      </ArabicOnly>
     </article>
     <Fragment slot="aside">
       <SideLinks

@@ -1,10 +1,11 @@
 ---
+import ArabicOnly from "../../../components/ArabicOnly.astro";
 import PageHead from "../../../components/PageHead.astro";
 import SideLinks from "../../../components/SideLinks.astro";
 import WithAside from "../../../components/WithAside.astro";
 import Base from "../../../layouts/Base.astro";
-import { type Event, events, get, pastEvents } from "../../../lib/api";
-import { LANGS, type Lang, fmtDate, href, t } from "../../../lib/i18n";
+import { type Event, events, get, pastEvents, site } from "../../../lib/api";
+import { LANGS, type Lang, fmtDate, href, t, isArabic } from "../../../lib/i18n";
 import { related } from "../../../lib/related";
 
 export async function getStaticPaths() {
@@ -41,6 +42,16 @@ const others = (await events())
   }));
 const more = await related(lang, ["events", "calendar"]);
 const L = (ar: string, en: string) => (lang === "ar" ? ar : en);
+const s = await site();
+// The time the event ends, when it ends the same day («10:00 ص – 3:00 م»).
+const sameDay = e.starts_at.slice(0, 10) === e.ends_at.slice(0, 10);
+const until = sameDay ? fmtDate(lang, e.ends_at, { hour: "numeric", minute: "2-digit" }) : "";
+// Directions to the college (the event's hall is on campus): its map link, else the address.
+const directions =
+  s.map_url ||
+  (s.address
+    ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(s.address)}`
+    : "");
 const jsonLd = {
   "@context": "https://schema.org",
   "@type": "Event",
@@ -51,10 +62,10 @@ const jsonLd = {
   eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
   location: {
     "@type": "Place",
-    name: e.location || "كلية الإمارات للعلوم والتقنية",
-    address: "الخرطوم، السودان",
+    name: e.location || s.name_ar,
+    address: s.address || "الخرطوم، السودان",
   },
-  organizer: { "@type": "CollegeOrUniversity", name: "كلية الإمارات للعلوم والتقنية" },
+  organizer: { "@type": "CollegeOrUniversity", name: s.name_ar, url: Astro.site?.toString() },
 };
 ---
 
@@ -62,7 +73,7 @@ const jsonLd = {
   <PageHead
     lang={lang}
     title={e.title}
-    lead={`${when}${e.location ? ` · ${e.location}` : ""}`}
+    lead={`${when}${until ? ` – ${until}` : ""}${e.location ? ` · ${e.location}` : ""}`}
     crumbs={[[lang === "ar" ? "الفعاليات" : "Events", "events/"]]}
   >
     {ended && (
@@ -84,25 +95,49 @@ const jsonLd = {
       {e.cover_url && (
         <img data-reveal="image" src={e.cover_url} alt="" class="mb-8 w-full rounded-2xl" />
       )}
-      <div class="space-y-4 text-base leading-8" set:html={e.description} />
+      <ArabicOnly lang={lang} when={isArabic(e.description)}>
+        <div class="space-y-4 text-base leading-8" set:html={e.description} />
+      </ArabicOnly>
     </article>
     <Fragment slot="aside">
-      <dl class="space-y-3 rounded-2xl bg-bg-subtle p-4 text-sm">
-        <div>
-          <dt class="text-text-muted">{L("الموعد", "When")}</dt>
-          <dd class="font-semibold">{when}</dd>
+      {/* W11: the date is in the page head; here is what to do with it. */}
+      {!ended && (
+        <div class="space-y-2 rounded-2xl border border-border-soft bg-surface p-4 text-sm">
+          {e.registration_url && (
+            <a
+              href={e.registration_url}
+              class="flex min-h-11 items-center justify-center rounded-xl bg-accent px-4 font-semibold text-white hover:bg-accent-hover"
+            >
+              {t(lang, "register")}
+            </a>
+          )}
+          <a
+            href={`/events/${e.slug}.ics`}
+            download={`${e.slug}.ics`}
+            class="flex min-h-11 items-center justify-center rounded-xl border border-border px-4 font-semibold text-text hover:bg-surface-alt"
+          >
+            {L("أضف إلى التقويم", "Add to calendar")}
+          </a>
+          {directions && (
+            <a
+              href={directions}
+              rel="noopener"
+              target="_blank"
+              class="flex min-h-11 items-center justify-center rounded-xl border border-border px-4 font-semibold text-text hover:bg-surface-alt"
+            >
+              {L("الاتجاهات إلى الكلية", "Directions to the college")}
+            </a>
+          )}
         </div>
-        {e.location && (
-          <div>
-            <dt class="text-text-muted">{L("المكان", "Where")}</dt>
-            <dd class="font-semibold">{e.location}</dd>
-          </div>
-        )}
-        <div>
-          <dt class="text-text-muted">{L("الحالة", "Status")}</dt>
-          <dd class="font-semibold">{ended ? L("انتهت", "Ended") : L("قادمة", "Upcoming")}</dd>
-        </div>
-      </dl>
+      )}
+      {ended && (
+        <p class="rounded-2xl bg-bg-subtle p-4 text-sm text-text-muted">
+          {L(
+            "انتهت هذه الفعالية. تجد القادمة في صفحة الفعاليات.",
+            "This event has ended; upcoming ones are on the events page.",
+          )}
+        </p>
+      )}
       <SideLinks
         lang={lang}
         title={L("فعاليات قادمة أخرى", "Other upcoming events")}
