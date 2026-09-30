@@ -33,8 +33,17 @@
   - Lecture: the content column, with the course's lecture list beside it (current one highlighted).
   - Courses: `courseTone()` colour per course (`COURSE_TONES`, `CodeTile tone`), and handed-in progress.
   - Results: navy GPA card with earned hours and per-term chips.
-- **Next:** 7b teacher (grading in three panes, exam monitor, course students table), then 7c department,
-  7d admissions, 7e results/affairs/HR, 7f site/admin, then portal motion.
+- **PR 7a #60: merged.**
+- **PR 7b `feat/teacher-large-screens`:**
+  - Grade: three columns from xl (the queue with «غير مصحح/مصحح», the work, the grade panel), plus J/K shortcuts.
+  - Teacher Today: the HR notice as a banner; the schedule and actions beside the queue card (stacked bar by course
+    tone) and the newest hand-ins.
+  - Course students: a table on lg. The gradebook shares the filters, gains a lowest-total sort, colours pending and
+    suggested cells, and gets % and hand-in columns plus an averages footer.
+  - Exam monitor: «لم يبدأ» from the new `students_count`/`started_count` (retrieve only, staff only), a stacked
+    bar, a phone action panel, and an empty state.
+  - Course: staff see a «منشورة» badge, plus «إعلان» and «جلسة بث» buttons.
+- **Next:** 7c department, 7d admissions, 7e results/affairs/HR, 7f site/admin, then portal motion.
 - **PR 6f `feat/department-faculty-news`**: the owner approved both 6c deferrals (2026-09-30); docs/03 is now v2.3.
   - `User.public_profile` plus `academic_title_ar/en`, set by the member at `PATCH /api/v1/me/public-profile` (audited
     `profile.public_update`), with a card in «الإعدادات».

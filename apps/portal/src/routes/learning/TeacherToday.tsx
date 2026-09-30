@@ -3,17 +3,24 @@ import { BookPlus, ClipboardPlus, Megaphone, Radio } from "lucide-react";
 import { Link } from "react-router";
 
 import { PortalShell } from "../../components/PortalShell";
-import { Card, SectionLabel } from "../../components/ui";
+import { COURSE_TONES, Card, CodeTile, SectionLabel } from "../../components/ui";
 import { api, ok } from "../../lib/api";
 import { useMe } from "../../lib/auth";
-import { dueLabel, useAssignments, useMyCourses } from "../../lib/learning";
+import {
+  courseTone,
+  dueLabel,
+  splitCourse,
+  useAssignments,
+  useMyCourses,
+} from "../../lib/learning";
 import { useGradingQueue } from "./Grading";
-import { count, N } from "../../lib/format";
+import { count, N, when } from "../../lib/format";
 import { ALL } from "../../components/Pager";
 
 const DAY = 86_400_000;
 
-/** Board: TeacherToday (phone); desktop derived — agenda beside actions and notices. */
+/** Boards: TeacherToday (phone), DesktopTeacherToday — a notice to acknowledge on top, then the
+ *  day's schedule and actions beside the grading queue (by course) and the newest hand-ins. */
 export function TeacherToday() {
   const me = useMe();
   const courses = useMyCourses();
@@ -99,6 +106,20 @@ export function TeacherToday() {
         tag: dueLabel(a.due_at, now),
       })),
   ].sort((a, b) => a.at.localeCompare(b.at));
+  // The queue by course (board DesktopTeacherToday): a stacked bar in each course's colour,
+  // and the newest hand-ins with the oldest waiting time.
+  const codes = new Map<string, string>(
+    (queue.data?.groups ?? []).map((g) => [g.assignment.course_name, g.assignment.course_code]),
+  );
+  const handIns = (queue.data?.groups ?? []).flatMap((g) =>
+    g.submissions.map((sub) => ({ ...sub, assignment: g.assignment })),
+  );
+  const at = (x: {
+    current_version?: { submitted_at?: string } | null;
+    first_submitted_at: string;
+  }) => x.current_version?.submitted_at ?? x.first_submitted_at;
+  const newest = [...handIns].sort((x, y) => at(y).localeCompare(at(x))).slice(0, 4);
+  const oldest = [...handIns].sort((x, y) => at(x).localeCompare(at(y)))[0];
   const toAck = (notices.data ?? []).filter(
     (n) => n.requires_ack && !n.acknowledged_at && n.teacher === me.data?.public_id,
   );
@@ -109,29 +130,22 @@ export function TeacherToday() {
       title={`${hour < 12 ? "صباح الخير" : "مساء الخير"}، ${first}`}
       subtitle={`${new Date().toLocaleDateString("ar-u-nu-latn", { weekday: "long", day: "numeric", month: "long" })} · ${count(students, N.course)}`}
     >
-      <Link to="/grading" className="block">
-        <Card className="flex items-center gap-4 p-4 transition-shadow hover:shadow-md">
-          <span className="text-4xl font-bold text-primary">
-            {pending.toLocaleString("ar-u-nu-latn")}
+      {toAck.map((n) => (
+        <Link
+          key={n.public_id}
+          to={`/hr-notices/${n.public_id}`}
+          className="mb-4 flex items-center justify-between gap-3 rounded-2xl bg-warning-soft px-4 py-3 hover:opacity-95"
+        >
+          <span className="min-w-0">
+            <b className="block text-sm text-text">{n.subject}</b>
+            <span className="text-xs text-warning-strong">{n.sent_by} · يتطلب إقرار الاطلاع</span>
           </span>
-          <span className="min-w-0 flex-1">
-            <b className="block text-text">
-              {pending ? "بانتظار تصحيحك" : "لا شيء بانتظار تصحيحك ✓"}
-            </b>
-            <span className="text-xs text-text-muted">
-              {/* The busiest three, then «+ N»: never a five-line sentence on a phone. */}
-              {[...byCourse]
-                .sort((x, y) => y.n - x.n)
-                .slice(0, 3)
-                .map((c) => `${c.n.toLocaleString("ar-u-nu-latn")} في ${c.name}`)
-                .join(" · ") || "كل التسليمات مصححة"}
-              {byCourse.length > 3 && ` · + ${count(byCourse.length - 3, N.course)}`}
-            </span>
+          <span className="shrink-0 rounded-lg bg-text px-3 py-2 text-xs font-bold text-bg">
+            اطّلع وأقرّ
           </span>
-          <span className="text-sm font-semibold text-primary">ابدأ</span>
-        </Card>
-      </Link>
-      <div className="mt-2 lg:grid lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start lg:gap-6">
+        </Link>
+      ))}
+      <div className="lg:grid lg:grid-cols-2 lg:items-start lg:gap-6">
         <section>
           <SectionLabel>جدول اليوم</SectionLabel>
           <Card className="divide-y divide-border-soft">
@@ -162,8 +176,6 @@ export function TeacherToday() {
               </p>
             )}
           </Card>
-        </section>
-        <aside className="mt-6 space-y-4 lg:mt-0">
           <SectionLabel>إجراءات سريعة</SectionLabel>
           <div className="grid auto-cols-fr grid-flow-col gap-2 text-center text-xs">
             {[
@@ -194,22 +206,95 @@ export function TeacherToday() {
               </Link>
             ))}
           </div>
-          {toAck.length > 0 && (
+        </section>
+        <aside className="mt-6 lg:mt-0">
+          <div className="flex items-end justify-between">
+            <SectionLabel>طابور التصحيح</SectionLabel>
+            {pending > 0 && (
+              <Link to="/grading" className="mb-2 text-sm font-semibold text-primary">
+                ابدأ التصحيح
+              </Link>
+            )}
+          </div>
+          <Link to="/grading" className="block">
+            <Card className="p-4 transition-shadow hover:shadow-md">
+              <div className="flex items-baseline gap-3">
+                <span className="text-4xl font-bold text-primary">
+                  {pending.toLocaleString("ar-u-nu-latn")}
+                </span>
+                <span className="text-sm text-text-muted">
+                  {pending
+                    ? `بانتظار تصحيحك${oldest ? ` · أقدمها ${when(at(oldest))}` : ""}`
+                    : "لا شيء بانتظار تصحيحك ✓"}
+                </span>
+              </div>
+              {pending > 0 && (
+                <>
+                  <div className="mt-3 flex h-2 overflow-hidden rounded-full" aria-hidden="true">
+                    {byCourse.map((c) => (
+                      <span
+                        key={c.name}
+                        className={`${COURSE_TONES[courseTone(codes.get(c.name) ?? c.name)]} [background:currentColor]`}
+                        style={{ width: `${(100 * c.n) / pending}%` }}
+                      />
+                    ))}
+                  </div>
+                  <ul className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-text-muted">
+                    {[...byCourse]
+                      .sort((x, y) => y.n - x.n)
+                      .map((c) => (
+                        <li key={c.name} className="flex items-center gap-1.5">
+                          <span
+                            aria-hidden="true"
+                            className={`size-2 rounded-full ${COURSE_TONES[courseTone(codes.get(c.name) ?? c.name)]} [background:currentColor]`}
+                          />
+                          {c.name} {c.n.toLocaleString("ar-u-nu-latn")}
+                        </li>
+                      ))}
+                  </ul>
+                </>
+              )}
+            </Card>
+          </Link>
+          {newest.length > 0 && (
             <>
-              <SectionLabel>يتطلب إقرارك</SectionLabel>
+              <SectionLabel>تسليمات جديدة</SectionLabel>
               <Card className="divide-y divide-border-soft">
-                {toAck.map((n) => (
-                  <Link
-                    key={n.public_id}
-                    to={`/hr-notices/${n.public_id}`}
-                    className="block px-4 py-3 hover:bg-surface-alt"
-                  >
-                    <b className="block text-sm text-text">{n.subject}</b>
-                    <span className="text-xs text-text-muted">
-                      {n.sent_by} · يتطلب إقرار الاطلاع
-                    </span>
-                  </Link>
-                ))}
+                {newest.map((sub) => {
+                  const [top, bottom] = splitCourse(sub.assignment.course_code);
+                  return (
+                    <Link
+                      key={sub.public_id}
+                      to={`/submissions/${sub.public_id}`}
+                      className="flex items-center gap-3 px-4 py-3 hover:bg-surface-alt"
+                    >
+                      <CodeTile
+                        top={top}
+                        bottom={bottom}
+                        tone={courseTone(sub.assignment.course_code)}
+                      />
+                      <span className="min-w-0 flex-1">
+                        <b className="block truncate text-sm text-text">
+                          {sub.student.full_name_ar} — {sub.assignment.title}
+                        </b>
+                        <span className="text-xs text-text-muted">{when(at(sub))}</span>
+                      </span>
+                      {sub.grade?.status === "suggested" ? (
+                        <span className="shrink-0 rounded-full bg-success-soft px-2 py-0.5 text-[11px] font-semibold text-success-strong">
+                          اقتراح آلي
+                        </span>
+                      ) : sub.is_late ? (
+                        <span className="shrink-0 rounded-full bg-danger-soft px-2 py-0.5 text-[11px] font-semibold text-danger-strong">
+                          متأخر
+                        </span>
+                      ) : (
+                        <span className="shrink-0 rounded-full bg-info-soft px-2 py-0.5 text-[11px] font-semibold text-info-strong">
+                          جديد
+                        </span>
+                      )}
+                    </Link>
+                  );
+                })}
               </Card>
             </>
           )}
