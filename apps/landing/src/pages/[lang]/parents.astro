@@ -1,0 +1,211 @@
+---
+import PageHead from "../../components/PageHead.astro";
+import TrustStrip from "../../components/TrustStrip.astro";
+import Base from "../../layouts/Base.astro";
+import { PORTAL, departments, pages, programs, site } from "../../lib/api";
+import { type Lang, arrow, count, href, langPaths, money, N, pick } from "../../lib/i18n";
+
+/**
+ * What a parent asks before trusting the college (landing review 2026-10, PR 6c): is it
+ * recognised, what does it cost, what is taught, how to follow an application, who looks after
+ * students, whom to call. Built only from what the college has published — each answer shows
+ * once its source exists, and nothing here states a fact of its own.
+ */
+export const getStaticPaths = langPaths;
+const lang = Astro.params.lang as Lang;
+const [s, all, depts, published] = await Promise.all([
+  site(),
+  programs(),
+  departments(),
+  pages().then((list) => new Set(list.map((p) => p.path))),
+]);
+const L = (ar: string, en: string) => (lang === "ar" ? ar : en);
+const official = (path: string) => (published.has(path) ? href(lang, `${path}/`) : null);
+const licence = pick(lang, s.licence_ar ?? "", s.licence_en);
+const fees = all.map((p) => p.fee_sdg).filter((f): f is number => !!f);
+const low = fees.length ? Math.min(...fees) : 0;
+const high = fees.length ? Math.max(...fees) : 0;
+const hours = pick(lang, s.office_hours_ar ?? "", s.office_hours_en);
+const whatsapp = s.whatsapp_e164 ? `https://wa.me/${s.whatsapp_e164.replace(/\D/g, "")}` : null;
+
+type Answer = { q: string; a: string; links: [string, string][] };
+const answers: Answer[] = [
+  ...(licence || official("about/accreditation")
+    ? [
+        {
+          q: L("هل الكلية معترف بها؟", "Is the college recognised?"),
+          a:
+            licence ||
+            L(
+              "الترخيص والاعتماد كما تنشرهما الكلية.",
+              "Licence and accreditation as published by the college.",
+            ),
+          links: official("about/accreditation")
+            ? ([[L("الاعتماد والاعتراف", "Accreditation"), official("about/accreditation")!]] as [
+                string,
+                string,
+              ][])
+            : [],
+        },
+      ]
+    : []),
+  ...(fees.length || official("admissions/fees")
+    ? [
+        {
+          q: L("كم تكلف الدراسة؟", "What does it cost?"),
+          a: fees.length
+            ? low === high
+              ? L(
+                  `الرسوم السنوية ${money(lang, low, "SDG")}.`,
+                  `The yearly fee is ${money(lang, low, "SDG")}.`,
+                )
+              : L(
+                  `من ${money(lang, low, "SDG")} إلى ${money(lang, high, "SDG")} سنويًا حسب البرنامج.`,
+                  `From ${money(lang, low, "SDG")} to ${money(lang, high, "SDG")} a year, by programme.`,
+                )
+            : L(
+                "الرسوم وطرق الدفع والمنح في صفحة الرسوم.",
+                "Fees, payment and scholarships are on the fees page.",
+              ),
+          links: [
+            ...(official("admissions/fees")
+              ? ([[L("الرسوم والمنح", "Fees and scholarships"), official("admissions/fees")!]] as [
+                  string,
+                  string,
+                ][])
+              : []),
+          ],
+        },
+      ]
+    : []),
+  ...(all.length
+    ? [
+        {
+          q: L("ماذا تُدرّس الكلية؟", "What does the college teach?"),
+          a: L(
+            `${count(lang, all.length, N.program)} في ${count(lang, depts.length, N.department)}، ولكل برنامج مدته وخطته الدراسية وشروط قبوله.`,
+            `${count(lang, all.length, N.program)} in ${count(lang, depts.length, N.department)}, each with its duration, study plan and requirements.`,
+          ),
+          links: [[L("البرامج", "Programmes"), href(lang, "programs/")]] as [string, string][],
+        },
+      ]
+    : []),
+  {
+    q: L("كيف أتابع طلب ابني أو ابنتي؟", "How do I follow an application?"),
+    a: L(
+      "التقديم إلكتروني بالكامل. تُتابع حالة الطلب في أي وقت برقمه المرجعي أو بالبريد الذي قُدّم به، بلا حساب أو زيارة.",
+      "Applying is entirely online. Follow the application any time with its reference number or the email it was made with — no account or visit.",
+    ),
+    links: [
+      [L("تابع الطلب", "Track the application"), `${PORTAL}/track`],
+      [L("خطوات القبول", "How to apply"), href(lang, "admissions/")],
+    ],
+  },
+  ...(official("student-life/affairs") || official("academics/student-guide")
+    ? [
+        {
+          q: L("من يرعى الطلاب؟", "Who looks after students?"),
+          a: L(
+            "شؤون الطلاب والإرشاد الأكاديمي، ودليل الطالب يشرح الحضور والامتحانات والخدمات.",
+            "Student affairs and academic advising; the student guide explains attendance, exams and services.",
+          ),
+          links: [
+            ...(official("student-life/affairs")
+              ? ([[L("شؤون الطلاب", "Student affairs"), official("student-life/affairs")!]] as [
+                  string,
+                  string,
+                ][])
+              : []),
+            ...(official("academics/student-guide")
+              ? ([[L("دليل الطالب", "Student guide"), official("academics/student-guide")!]] as [
+                  string,
+                  string,
+                ][])
+              : []),
+          ],
+        },
+      ]
+    : []),
+];
+---
+
+<Base
+  lang={lang}
+  title={L("لأولياء الأمور", "For parents")}
+  path="parents/"
+  description={L(
+    `ما يسأل عنه وليّ الأمر عن ${s.name_ar}: الاعتراف، والتكلفة، والبرامج، ومتابعة الطلب، ومن يُسأل.`,
+    `What parents ask about ${s.name_en || s.name_ar}: recognition, cost, programmes, following an application, and whom to ask.`,
+  )}
+>
+  <PageHead
+    lang={lang}
+    title={L("لأولياء الأمور", "For parents")}
+    lead={L(
+      "إجابات مختصرة عمّا يسأل عنه وليّ الأمر قبل أن يطمئن، مع رابط إلى المصدر الرسمي لكل إجابة.",
+      "Short answers to what parents ask first, each linked to its official source.",
+    )}
+    crumbs={[[L("لأولياء الأمور", "For parents"), "parents/"]]}
+  />
+  <TrustStrip lang={lang} site={s} programs={all.length} departments={depts.length} class="pt-8" />
+  <div class="mx-auto max-w-6xl px-4 py-10 lg:px-8">
+    <ul class="grid gap-3 md:grid-cols-2">
+      {answers.map((x) => (
+        <li class="flex flex-col rounded-2xl border border-border-soft bg-surface p-5">
+          <h2 class="font-display text-lg font-bold">{x.q}</h2>
+          <p class="mt-2 flex-1 text-sm leading-7 text-text-muted">{x.a}</p>
+          {x.links.length > 0 && (
+            <p class="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-sm font-semibold">
+              {x.links.map(([label, url]) => (
+                <a href={url} class="text-primary hover:underline">
+                  {label} {arrow(lang)}
+                </a>
+              ))}
+            </p>
+          )}
+        </li>
+      ))}
+    </ul>
+    <section
+      aria-labelledby="ask"
+      class="mt-8 rounded-2xl bg-bg-subtle p-5 sm:flex sm:items-center sm:justify-between sm:gap-6"
+    >
+      <div>
+        <h2 id="ask" class="font-display text-lg font-bold">
+          {L("سؤال لم تجد إجابته؟", "A question not answered here?")}
+        </h2>
+        {hours && (
+          <p class="mt-1 text-sm text-text-muted">
+            {L("ساعات العمل:", "Office hours:")} {hours}
+          </p>
+        )}
+      </div>
+      <p class="mt-4 flex flex-wrap gap-2 sm:mt-0">
+        {whatsapp && (
+          <a
+            href={whatsapp}
+            rel="noopener"
+            target="_blank"
+            class="inline-flex min-h-11 items-center rounded-xl bg-success px-4 text-sm font-semibold text-white hover:bg-success-strong"
+          >
+            WhatsApp
+          </a>
+        )}
+        {s.phone && (
+          <a
+            href={`tel:${s.phone.replace(/\s/g, "")}`}
+            class="inline-flex min-h-11 items-center rounded-xl border border-border bg-surface px-4 text-sm font-semibold"
+          >
+            <bdi dir="ltr">{s.phone}</bdi>
+          </a>
+        )}
+        <a
+          href={href(lang, "contact/")}
+          class="inline-flex min-h-11 items-center rounded-xl border border-border bg-surface px-4 text-sm font-semibold text-primary"
+        >
+          {L("راسلنا", "Write to us")}
+        </a>
+      </p>
+    </section>
+  </div>
+</Base>

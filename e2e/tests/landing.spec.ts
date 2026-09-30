@@ -88,6 +88,42 @@ test("the programme page keeps «apply to this programme» in reach on the phone
   await expect(sticky).toHaveAttribute("href", /\/apply\?program=BIT$/);
 });
 
+test("the programme finder narrows by name, spelling-tolerant, and by department", async ({
+  page,
+}) => {
+  await page.goto(`${SITE}/ar/programs/`);
+  const rows = page.locator("[data-degree]:visible");
+  const total = await rows.count();
+  // «ادارة» without the hamza still finds «إدارة الأعمال».
+  await page.getByRole("searchbox").fill("ادارة الاعمال");
+  await expect(rows.first()).toBeVisible();
+  expect(await rows.count()).toBeLessThan(total);
+  for (const text of await rows.allTextContents()) expect(text).toContain("الأعمال");
+  await page.getByRole("searchbox").fill("");
+  await page.getByRole("button", { name: "الهندسة", exact: true }).click();
+  await expect(rows.first()).toBeVisible();
+  for (const text of await page.locator("[data-group]:visible h2").allTextContents())
+    expect(text).toContain("الهندسة");
+  await page.getByRole("searchbox").fill("لا يوجد برنامج بهذا الاسم");
+  await expect(page.getByText("لا برامج تطابق البحث.")).toBeVisible();
+});
+
+test("WhatsApp is one tap away, and parents have their own page", async ({ page }) => {
+  // The demo sets a (fake) WhatsApp number and office hours (seed_demo).
+  await page.goto(`${SITE}/ar/`);
+  await expect(page.getByRole("link", { name: "تواصل عبر واتساب" })).toHaveAttribute(
+    "href",
+    /^https:\/\/wa\.me\/\d+$/,
+  );
+  await page.getByRole("link", { name: "دليل وليّ الأمر" }).click();
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("لأولياء الأمور");
+  await expect(page.getByRole("heading", { name: "كم تكلف الدراسة؟" })).toBeVisible();
+  await page.goto(`${SITE}/ar/contact/`);
+  await expect(page.getByText("ساعات العمل:")).toBeVisible();
+  // The contact page shows WhatsApp in its quick row, so no floating button there.
+  await expect(page.getByRole("link", { name: "تواصل عبر واتساب" })).toHaveCount(0);
+});
+
 test("the site menus come from the CMS and behave like menus", async ({ page, isMobile }) => {
   await page.goto(`${SITE}/ar/`);
   const header = page.locator("header");

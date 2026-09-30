@@ -12,7 +12,11 @@ const open = all.filter((p) => p.intake?.accepting);
 const closes = open.map((p) => p.intake!.closes_at).sort()[0];
 const groups = [...new Set(all.map((p) => p.department_code))].map((code) => {
   const items = all.filter((p) => p.department_code === code);
-  return { name: pick(lang, items[0]!.department_name, items[0]!.department_name_en), items };
+  return {
+    code,
+    name: pick(lang, items[0]!.department_name, items[0]!.department_name_en),
+    items,
+  };
 });
 const degrees = [...new Map(all.map((p) => [p.degree, p.degree_label])).entries()];
 const lead =
@@ -28,22 +32,53 @@ const lead =
     lead={lead}
     crumbs={[[t(lang, "programs"), "programs/"]]}
   >
-    <div
-      class="mt-5 flex flex-wrap gap-2"
-      role="group"
-      aria-label={lang === "ar" ? "تصفية" : "Filter"}
-    >
-      <button type="button" data-filter="all" aria-pressed="true" class="chip">
-        {t(lang, "all")}
-      </button>
-      {degrees.map(([key, label]) => (
-        <button type="button" data-filter={`degree:${key}`} aria-pressed="false" class="chip">
-          {degree(lang, key, label)}
+    {/* The finder (W14): type a name, or narrow by degree, department or open intake. */}
+    <div class="mt-5 space-y-3" data-finder>
+      <label class="block max-w-md">
+        <span class="sr-only">{lang === "ar" ? "ابحث عن برنامج" : "Search programmes"}</span>
+        <input
+          type="search"
+          data-search-input
+          placeholder={lang === "ar" ? "ابحث باسم البرنامج أو رمزه" : "Search by name or code"}
+          class="block min-h-11 w-full rounded-xl border border-border bg-surface px-4 text-sm"
+        />
+      </label>
+      <div
+        class="flex flex-wrap gap-2"
+        role="group"
+        aria-label={lang === "ar" ? "الدرجة" : "Degree"}
+      >
+        <button type="button" data-facet="all" aria-pressed="true" class="chip">
+          {t(lang, "all")}
         </button>
-      ))}
-      <button type="button" data-filter="open" aria-pressed="false" class="chip">
-        {t(lang, "open")}
-      </button>
+        {degrees.map(([key, label]) => (
+          <button type="button" data-facet={`degree:${key}`} aria-pressed="false" class="chip">
+            {degree(lang, key, label)}
+          </button>
+        ))}
+        <button type="button" data-facet="open" aria-pressed="false" class="chip">
+          {t(lang, "open")}
+        </button>
+      </div>
+      {groups.length > 1 && (
+        <div
+          class="flex flex-wrap gap-2"
+          role="group"
+          aria-label={lang === "ar" ? "القسم" : "Department"}
+        >
+          <button type="button" data-dept="all" aria-pressed="true" class="chip">
+            {lang === "ar" ? "كل الأقسام" : "All departments"}
+          </button>
+          {groups.map((g) => (
+            <button type="button" data-dept={g.code} aria-pressed="false" class="chip">
+              {g.name}
+            </button>
+          ))}
+        </div>
+      )}
+      <p data-none role="status" class="hidden text-sm text-text-muted">
+        {lang === "ar" ? "لا برامج تطابق البحث." : "No programme matches."}
+      </p>
     </div>
   </PageHead>
   <div class="mx-auto max-w-6xl space-y-10 px-4 py-10 lg:px-8">
@@ -82,24 +117,45 @@ const lead =
 </style>
 
 <script>
-  // Progressive enhancement: without JS every program stays visible.
-  const buttons = document.querySelectorAll<HTMLButtonElement>("[data-filter]");
-  buttons.forEach((button) =>
-    button.addEventListener("click", () => {
-      const filter = button.dataset.filter!;
-      buttons.forEach((b) => b.setAttribute("aria-pressed", String(b === button)));
-      document.querySelectorAll<HTMLElement>("[data-degree]").forEach((card) => {
-        const show =
-          filter === "all" ||
-          (filter === "open" && card.dataset.open === "1") ||
-          filter === `degree:${card.dataset.degree}`;
-        card.hidden = !show;
-      });
-      document.querySelectorAll<HTMLElement>("[data-group]").forEach((group) => {
-        group.hidden = ![...group.querySelectorAll<HTMLElement>("[data-degree]")].some(
-          (c) => !c.hidden,
-        );
-      });
-    }),
-  );
+  import { fold } from "../../../lib/fold";
+
+  // Progressive enhancement: without JS every programme stays visible.
+  const state = { facet: "all", dept: "all", q: "" };
+  const apply = () => {
+    let shown = 0;
+    document.querySelectorAll<HTMLElement>("[data-degree]").forEach((row) => {
+      const show =
+        (state.facet === "all" ||
+          (state.facet === "open" && row.dataset.open === "1") ||
+          state.facet === `degree:${row.dataset.degree}`) &&
+        (state.dept === "all" || row.dataset.department === state.dept) &&
+        (!state.q || row.dataset.search!.includes(state.q));
+      row.hidden = !show;
+      if (show) shown++;
+    });
+    document.querySelectorAll<HTMLElement>("[data-group]").forEach((group) => {
+      group.hidden = ![...group.querySelectorAll<HTMLElement>("[data-degree]")].some(
+        (c) => !c.hidden,
+      );
+    });
+    document.querySelector("[data-none]")?.classList.toggle("hidden", shown > 0);
+  };
+  const chips = (attr: "facet" | "dept") => {
+    const buttons = document.querySelectorAll<HTMLButtonElement>(`[data-${attr}]`);
+    buttons.forEach((button) =>
+      button.addEventListener("click", () => {
+        state[attr] = button.dataset[attr]!;
+        buttons.forEach((b) => b.setAttribute("aria-pressed", String(b === button)));
+        apply();
+      }),
+    );
+  };
+  chips("facet");
+  chips("dept");
+  document
+    .querySelector<HTMLInputElement>("[data-search-input]")
+    ?.addEventListener("input", (e) => {
+      state.q = fold((e.target as HTMLInputElement).value);
+      apply();
+    });
 </script>

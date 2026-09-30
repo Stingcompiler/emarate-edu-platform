@@ -628,6 +628,12 @@ class Command(BaseCommand):
             site_settings.phone = "+249 000 000 000"
             site_settings.address = "عنوان تجريبي — الخرطوم، السودان"
             site_settings.save()
+        if not (site_settings.whatsapp_e164 or site_settings.office_hours_ar):
+            # The WhatsApp button and office hours (landing review PR 6c), equally fake.
+            site_settings.whatsapp_e164 = "+249000000000"
+            site_settings.office_hours_ar = "(مثال) الأحد–الخميس، 8:00–15:00"
+            site_settings.office_hours_en = "(Example) Sunday–Thursday, 8:00–15:00"
+            site_settings.save()
         Event.objects.get_or_create(
             slug="orientation-2026",
             defaults={

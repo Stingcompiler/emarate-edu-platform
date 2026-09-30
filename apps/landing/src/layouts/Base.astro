@@ -355,6 +355,35 @@ const ext = (external: boolean) => (external ? { rel: "noopener", target: "_blan
         </div>
       </div>
     </footer>
+    {/* WhatsApp is how most applicants and parents here ask first (landing review 2026-10):
+        one tap from every page. On a page with its own bottom bar the phone uses that. */}
+    {s.whatsapp_e164 && path !== "contact/" && (
+      <a
+        href={`https://wa.me/${s.whatsapp_e164.replace(/\D/g, "")}`}
+        rel="noopener"
+        target="_blank"
+        data-no-print
+        data-whatsapp-float
+        aria-label={lang === "ar" ? "تواصل عبر واتساب" : "Chat on WhatsApp"}
+        class:list={[
+          "fixed end-4 bottom-4 z-10 size-14 place-items-center rounded-full bg-success text-white shadow-lg hover:bg-success-strong mb-[env(safe-area-inset-bottom)]",
+          bottomBar ? "hidden lg:grid" : "grid",
+        ]}
+      >
+        <svg
+          width="26"
+          height="26"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.8"
+          aria-hidden="true"
+        >
+          <path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-5A8 8 0 1 1 21 12z" />
+          <path d="M9 9.5c0 3 2.5 5.5 5.5 5.5l1-1.5-2-1-1 1c-1-.5-2-1.5-2.5-2.5l1-1-1-2z" />
+        </svg>
+      </a>
+    )}
     <script>
       // Motion (packages/ui/src/motion.css): reveal what scrolls into view and count figures
       // up once. Nothing is hidden before this runs, and «reduce motion» turns it off.

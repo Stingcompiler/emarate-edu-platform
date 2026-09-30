@@ -19,6 +19,29 @@ const TYPES: [string, string, string][] = [
   ["general", "أخرى", "Other"],
 ];
 const L = (ar: string, en: string) => (lang === "ar" ? ar : en);
+const hours = pick(lang, s.office_hours_ar ?? "", s.office_hours_en);
+const quick = [
+  ...(s.phone
+    ? [{ label: L("اتصل", "Call"), value: s.phone, href: `tel:${s.phone.replace(/\s/g, "")}` }]
+    : []),
+  ...(s.whatsapp_e164
+    ? [
+        {
+          label: "WhatsApp",
+          value: s.whatsapp_e164,
+          href: `https://wa.me/${s.whatsapp_e164.replace(/\D/g, "")}`,
+          external: true,
+        },
+      ]
+    : []),
+  ...(s.email ? [{ label: L("البريد", "Email"), value: s.email, href: `mailto:${s.email}` }] : []),
+];
+// The college's own map link when set, else a search for the address.
+const mapHref =
+  s.map_url ||
+  (s.address
+    ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(s.address)}`
+    : "");
 // Answers people often look for before writing.
 const answers = await related(lang, ["admissions", "fees", "programs", "calendar"]);
 ---
@@ -32,7 +55,32 @@ const answers = await related(lang, ["admissions", "fees", "programs", "calendar
       "Your message reaches the right office, usually answered within a working day. Follow up with your reference number — no account needed.",
     )}
     crumbs={[[t(lang, "contact"), "contact/"]]}
-  />
+  >
+    {/* Call, chat or write in one tap before any form (W13); the hours say when someone answers. */}
+    {quick.length > 0 && (
+      <ul class="mt-5 grid gap-2 sm:flex sm:flex-wrap">
+        {quick.map((q) => (
+          <li>
+            <a
+              href={q.href}
+              {...(q.external ? { rel: "noopener", target: "_blank" } : {})}
+              class="flex min-h-12 items-center gap-3 rounded-xl border border-border-soft bg-surface px-4 py-2 text-sm hover:border-primary"
+            >
+              <span class="font-semibold">{q.label}</span>
+              <bdi dir="ltr" class="ms-auto text-text-muted sm:ms-0">
+                {q.value}
+              </bdi>
+            </a>
+          </li>
+        ))}
+      </ul>
+    )}
+    {hours && (
+      <p class="mt-3 text-sm text-text-muted">
+        {L("ساعات العمل:", "Office hours:")} <span class="font-semibold text-text">{hours}</span>
+      </p>
+    )}
+  </PageHead>
   <div class="mx-auto grid max-w-6xl gap-10 px-4 py-10 lg:grid-cols-[2fr_1fr] lg:px-8">
     <form id="contact" data-api={API} data-lang={lang} class="space-y-5" novalidate>
       <fieldset>
@@ -230,38 +278,13 @@ const answers = await related(lang, ["admissions", "fees", "programs", "calendar
         title={L("قد تجد إجابتك هنا", "Your answer may be here")}
         links={answers}
       />
-      {s.phone && (
-        <a href={`tel:${s.phone.replace(/\s/g, "")}`} class="block rounded-2xl bg-bg-subtle p-4">
-          <span class="text-text-muted">{L("الهاتف", "Phone")}</span>
-          <b dir="ltr" class="block">
-            {s.phone}
-          </b>
-        </a>
-      )}
-      {s.email && (
-        <a href={`mailto:${s.email}`} class="block rounded-2xl bg-bg-subtle p-4">
-          <span class="text-text-muted">{L("البريد", "Email")}</span>
-          <b class="block">{s.email}</b>
-        </a>
-      )}
-      {s.whatsapp_e164 && (
-        <a
-          href={`https://wa.me/${s.whatsapp_e164.replace("+", "")}`}
-          class="block rounded-2xl bg-bg-subtle p-4"
-        >
-          <span class="text-text-muted">WhatsApp</span>
-          <b dir="ltr" class="block">
-            {s.whatsapp_e164}
-          </b>
-        </a>
-      )}
       {s.address && (
         <div class="rounded-2xl bg-bg-subtle p-4">
           <span class="text-text-muted">{L("العنوان", "Address")}</span>
           <b class="block">{s.address}</b>
           {/* A link, not an embedded map: light, private, and no coordinates to invent. */}
           <a
-            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(s.address)}`}
+            href={mapHref}
             rel="noopener"
             target="_blank"
             class="mt-2 inline-block font-semibold text-primary"
