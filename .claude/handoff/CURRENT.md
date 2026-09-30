@@ -1,25 +1,31 @@
-# Handoff — implementing the full review (docs/qa/full-review-2026-09-29.md §3) — 2026-09-29
+# Handoff — public-site institution review, then large screens — 2026-09-30
 
-## Now: the review's implementation plan, PR by PR
-- **Review:** #44 merged. `docs/qa/full-review-2026-09-29.md` holds:
-  - §1 the method;
-  - §2 the findings (S = security, P = portal logic, W = public site, then per role);
-  - §3 the ordered PRs.
-- **Merged:** PR 1 #45 (auth hardening, S2–S12) and PR 2 #46 (portal foundations).
-  - PR 2 added `ok()`/`ApiError`, `QueryErrorBanner`, `ROUTE_ACCESS` with `NoAccess`, clearing the cache on
-    sign-out and sign-in, `safeNext`, `useUnsavedChanges`, the `TakeExam` error state, and `DepartmentSwitch`.
-- **PR 3** `fix/data-correctness`:
-  - Import detail uses server paging.
-  - Monitor: `?state=` counts plus paging. Users: `?role=`. `summary.by_registrar`. Announcements: `?scope_id=`.
-  - `lib/format`: `fmtDate`, `when()` future/yesterday, `score()` («6 من 10»), `ltr()` isolation, the
-    `ar-u-nu-latn` locale everywhere, and nouns `member` and `regulation`.
-  - `divide-x-reverse` removed; `openAfter()` for links fetched after a click.
-  - Closed assignment state; no drafts shown to students; Tasks «خلال 7 أيام».
-  - The sweep now guards against hand-written plurals and flipped dividers.
-- **Next:** PR 4 (workflows), then PR 5 (shared UI), then PR 6 (public site),
-  then PR 7+ (large screens), then motion and polish. Details per PR are in §3 of the review doc.
-- **Review evidence** (screenshots, notes) was in the session scratchpad, so it is not in the repo. The doc
-  carries everything needed.
+## Now: the landing institution review (docs/qa/landing-institution-review-2026-10.md §6)
+- **Done and merged:**
+  - full review PRs 1–5b, #45–#51;
+  - the review plan, #52;
+  - the review report, #53.
+- **PR 6a #54 `feat/site-trust`** (open, Auto-fix on; merge when CI is green).
+  - `SiteSettings` gains `founded_year`, `licence_*`, `figures` (≤6), `office_hours_*`, `map_url`,
+    `hero_image` and `share_image`; migration `content/0005`.
+  - The portal form is in `SiteMedia.tsx`.
+  - Public site: `TrustStrip.astro` replaces the account counts. Also added: the hero image, audience entry
+    points, the header «قدّم الآن» while an intake is open, a description and `og:image` on every page
+    (`describe()` in `lib/api.ts`), and richer JSON-LD.
+  - Visually checked on the built site at 1440 and 390.
+- **Next:**
+  - **6b**: programme page (fees SDG/USD, outcomes and careers, a key-facts box, study plan hours, brochure,
+    `EducationalOccupationalProgram`).
+  - **6c**: WhatsApp button, contact row with hours and map, department page, programme finder, parents page.
+  - **6d**: English fallbacks, event `.ics`, `PageHead`, footer, motion.
+  - Then **PR 7+**: large-screen layouts per role (full review §3), then motion and polish.
+- **Visual checks of the built site:**
+  - Write a temporary `e2e/tests/zz-*.spec.ts`, never committed.
+  - PATCH the settings as `site@demo.ecst.test` via the e2e API (:8001).
+  - Build the landing with `PUBLIC_API_URL=http://127.0.0.1:8001` (the test process cwd is the **repo root**).
+  - Serve `apps/landing/dist` with `python3 -m http.server`, then take screenshots.
+- **Content only the college can supply** is listed in report §5: licence, fees, figures, photos, programme
+  texts, heads and faculty, office hours.
 
 ## Latest (2026-09-29)
 - **#42 sticky filters: merged.**

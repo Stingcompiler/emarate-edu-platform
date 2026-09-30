@@ -80,6 +80,18 @@ export type Site = {
   address: string;
   social: Record<string, string>;
   seo: { description?: string };
+  // Trust signals the college sets (review 2026-09-30); all optional — nothing shows unset.
+  founded_year?: number | null;
+  licence_ar?: string;
+  licence_en?: string;
+  licence_url?: string;
+  figures?: { value: string; label_ar: string; label_en?: string }[];
+  office_hours_ar?: string;
+  office_hours_en?: string;
+  map_url?: string;
+  hero_image_url?: string | null;
+  hero_image_alt_ar?: string;
+  share_image_url?: string | null;
 };
 export type Intake = {
   id: number;
@@ -175,6 +187,14 @@ export type Page = {
   seo: { description?: string };
   updated_at: string;
 };
+/** A page's own description for search results and share cards: its SEO text, else its
+ *  first paragraph (≤ 160 characters). */
+export function describe(page: Page): string | undefined {
+  if (page.seo?.description) return page.seo.description;
+  const text = page.blocks.find((b) => b.type === "paragraph" && b.text?.trim())?.text?.trim();
+  if (!text) return undefined;
+  return text.length > 160 ? `${text.slice(0, 157).trimEnd()}…` : text;
+}
 export type Stats = { students: number; teachers: number; programs: number; departments: number };
 
 export const site = () =>

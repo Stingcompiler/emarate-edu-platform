@@ -29,6 +29,26 @@ class SiteSettings(SingletonModel):
     address = models.CharField(max_length=300, blank=True)
     social = models.JSONField(default=dict, blank=True)  # {"facebook": url, ...}
     seo = models.JSONField(default=dict, blank=True)  # {"description": "...", "keywords": [...]}
+    # Trust signals (docs/qa/landing-institution-review-2026-10.md §6, PR 6a). The college fills
+    # them in; the site shows nothing until they are set — never a zero or a portal count.
+    founded_year = models.PositiveSmallIntegerField(null=True, blank=True)
+    licence_ar = models.CharField(
+        max_length=300, blank=True, help_text="e.g. the ministry licence and decision number."
+    )
+    licence_en = models.CharField(max_length=300, blank=True)
+    licence_url = models.CharField(max_length=300, blank=True)  # a site path or https link
+    # [{"value": "1,200+", "label_ar": "خريج", "label_en": "graduates"}, …] — at most six.
+    figures = models.JSONField(default=list, blank=True)
+    office_hours_ar = models.CharField(max_length=200, blank=True)
+    office_hours_en = models.CharField(max_length=200, blank=True)
+    map_url = models.URLField(max_length=500, blank=True)
+    hero_image = models.ForeignKey(
+        "MediaAsset", on_delete=models.SET_NULL, null=True, blank=True, related_name="+"
+    )
+    # The picture shown when a page is shared (WhatsApp, Facebook…); the logo if unset.
+    share_image = models.ForeignKey(
+        "MediaAsset", on_delete=models.SET_NULL, null=True, blank=True, related_name="+"
+    )
 
     def __str__(self) -> str:
         return "site settings"

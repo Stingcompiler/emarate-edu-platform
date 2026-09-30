@@ -109,7 +109,8 @@ test("the site menus come from the CMS and behave like menus", async ({ page, is
   await expect(calendar).toBeHidden();
   if (isMobile) {
     await toggle.click();
-    await expect(header.getByRole("link", { name: "قدّم الآن" })).toBeVisible();
+    // The open menu carries «apply» too (the top bar has its own button while an intake is open).
+    await expect(header.getByRole("group").getByRole("link", { name: "قدّم الآن" })).toBeVisible();
   }
   const footer = page.locator("footer");
   await expect(footer.getByRole("link", { name: "اللوائح" })).toBeVisible();

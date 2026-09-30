@@ -322,3 +322,37 @@ def test_publishing_from_the_editor_dates_the_news(api, site):
     url = f"/api/v1/content/news/{draft.data['public_id']}"
     assert api(site).patch(url, {"status": "published"}, format="json").data["publish_at"]
     assert [n["slug"] for n in api().get("/api/public/news").data] == ["later", "lab"]
+
+
+def test_trust_signals_in_site_settings(api, site):
+    """Review 2026-09-30 (PR 6a): the college sets its own figures, licence, hours and images."""
+    image = api(site).post(
+        "/api/v1/content/media", {"file": _png(), "alt_ar": "الحرم"}, format="multipart"
+    )
+    body = {
+        "founded_year": 2005,
+        "licence_ar": "مرخّصة من وزارة التعليم العالي — القرار 12 لسنة 2005",
+        "licence_url": "/ar/about/accreditation/",
+        "figures": [
+            {"value": "1,200+", "label_ar": "خريج", "label_en": "graduates"},
+            {"value": "", "label_ar": "فارغ"},  # dropped
+        ],
+        "office_hours_ar": "الأحد–الخميس 8:00–15:00",
+        "hero_image": image.data["public_id"],
+        "share_image": image.data["public_id"],
+    }
+    saved = api(site).patch("/api/v1/content/site-settings", body, format="json")
+    assert saved.status_code == 200, saved.data
+    public = api().get("/api/public/site").data
+    assert public["founded_year"] == 2005
+    assert public["figures"] == [{"value": "1,200+", "label_ar": "خريج", "label_en": "graduates"}]
+    assert public["hero_image_url"].startswith("http") and public["hero_image_alt_ar"] == "الحرم"
+    assert public["share_image_url"]
+    for bad in (
+        {"founded_year": 1500},
+        {"licence_url": "//evil.example"},
+        {"figures": [{"value": str(i), "label_ar": "x"} for i in range(7)]},
+    ):
+        assert (
+            api(site).patch("/api/v1/content/site-settings", bad, format="json").status_code == 400
+        )

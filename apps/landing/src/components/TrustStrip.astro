@@ -1,0 +1,89 @@
+---
+import type { Site } from "../lib/api";
+import { arrow, href, type Lang, num, pick, t } from "../lib/i18n";
+
+/**
+ * What makes an applicant's parent trust the college (review 2026-09-30): the licence first,
+ * then figures the college itself states — never portal account counts, never a zero. The
+ * catalogue's programmes and departments are real data and always shown.
+ */
+interface Props {
+  lang: Lang;
+  site: Site;
+  programs: number;
+  departments: number;
+  class?: string;
+}
+const { lang, site, programs, departments, class: className = "" } = Astro.props;
+const licence = pick(lang, site.licence_ar ?? "", site.licence_en);
+const licenceHref = site.licence_url?.startsWith("/")
+  ? site.licence_url
+  : site.licence_url || href(lang, "about/accreditation/");
+const figures = [
+  ...(site.founded_year
+    ? [{ value: String(site.founded_year), label: lang === "ar" ? "سنة التأسيس" : "founded" }]
+    : []),
+  ...(site.figures ?? []).map((f) => ({
+    value: f.value,
+    label: pick(lang, f.label_ar, f.label_en),
+  })),
+  ...(programs ? [{ value: num(lang, programs), label: t(lang, "programsCount") }] : []),
+  ...(departments ? [{ value: num(lang, departments), label: t(lang, "departmentsCount") }] : []),
+].slice(0, 6);
+// One row on large screens, whatever the count; on a phone two columns, and an odd last figure
+// takes the whole row instead of standing alone. Full class names so Tailwind keeps them.
+const cols = [
+  "",
+  "grid-cols-1",
+  "grid-cols-2",
+  "grid-cols-2 sm:grid-cols-3",
+  "grid-cols-2 sm:grid-cols-4",
+  "grid-cols-2 sm:grid-cols-5",
+  "grid-cols-2 sm:grid-cols-3 lg:grid-cols-6",
+][figures.length];
+const odd = figures.length > 1 && figures.length % 2 === 1;
+---
+
+{(licence || figures.length > 0) && (
+  <div class:list={["mx-auto max-w-6xl px-4 lg:px-8", className]}>
+    {licence && (
+      <a
+        href={licenceHref}
+        class="flex items-center gap-3 rounded-2xl border border-success/30 bg-success-soft px-4 py-3 text-sm text-success-strong hover:opacity-90"
+      >
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          aria-hidden="true"
+          class="shrink-0"
+        >
+          <path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z" />
+          <path d="M9 12l2 2 4-4" />
+        </svg>
+        <span class="min-w-0 flex-1 font-semibold">{licence}</span>
+        <span aria-hidden="true">{arrow(lang)}</span>
+      </a>
+    )}
+    {figures.length > 0 && (
+      <dl class:list={["mt-3 grid gap-2", cols]}>
+        {figures.map((f, i) => (
+          <div
+            class:list={[
+              "rounded-2xl bg-surface p-4 text-center shadow-sm",
+              odd && i === figures.length - 1 && "col-span-2 sm:col-span-1",
+            ]}
+          >
+            <dd class="font-display text-2xl font-bold text-primary">
+              <bdi>{f.value}</bdi>
+            </dd>
+            <dt class="text-xs text-text-muted">{f.label}</dt>
+          </div>
+        ))}
+      </dl>
+    )}
+  </div>
+)}

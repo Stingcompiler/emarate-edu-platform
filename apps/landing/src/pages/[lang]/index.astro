@@ -1,5 +1,6 @@
 ---
 import ProgramCard from "../../components/ProgramCard.astro";
+import TrustStrip from "../../components/TrustStrip.astro";
 import Base from "../../layouts/Base.astro";
 import {
   PORTAL,
@@ -43,6 +44,70 @@ const next = upcoming
   .filter((e) => new Date(e.ends_at) > new Date())
   .sort((a, b) => a.starts_at.localeCompare(b.starts_at))[0];
 const name = pick(lang, s.name_ar, s.name_en);
+const lead =
+  lang === "ar"
+    ? `${count(lang, st.programs || all.length, N.program)} في ${count(lang, st.departments, N.department)} — تقديم إلكتروني بالكامل ومتابعة للطلب من هاتفك.`
+    : `${count(lang, st.programs || all.length, N.program)} in ${count(lang, st.departments, N.department)} — apply online and follow your application from your phone.`;
+const audiences =
+  lang === "ar"
+    ? [
+        {
+          title: "للمتقدمين",
+          links: [
+            ["خطوات القبول ومواعيده", href(lang, "admissions/")],
+            ["البرامج وشروطها", href(lang, "programs/")],
+            ["الرسوم والمنح", href(lang, "admissions/fees/")],
+            ["تابع طلبك", `${PORTAL}/track`],
+          ],
+        },
+        {
+          title: "لطلاب الكلية",
+          links: [
+            ["دخول المنصة", `${PORTAL}/login`],
+            ["التقويم الأكاديمي", href(lang, "calendar/")],
+            ["اللوائح والأنظمة", href(lang, "regulations/")],
+            ["الإعلانات", href(lang, "announcements/")],
+          ],
+        },
+        {
+          title: "لأولياء الأمور",
+          links: [
+            ["الاعتماد والاعتراف", href(lang, "about/accreditation/")],
+            ["الرسوم والمنح", href(lang, "admissions/fees/")],
+            ["القيادة", href(lang, "about/leadership/")],
+            ["تواصل معنا", href(lang, "contact/")],
+          ],
+        },
+      ]
+    : [
+        {
+          title: "Applicants",
+          links: [
+            ["Admission steps and dates", href(lang, "admissions/")],
+            ["Programs and requirements", href(lang, "programs/")],
+            ["Fees and grants", href(lang, "admissions/fees/")],
+            ["Track your application", `${PORTAL}/track`],
+          ],
+        },
+        {
+          title: "Current students",
+          links: [
+            ["Sign in to the portal", `${PORTAL}/login`],
+            ["Academic calendar", href(lang, "calendar/")],
+            ["Regulations", href(lang, "regulations/")],
+            ["Announcements", href(lang, "announcements/")],
+          ],
+        },
+        {
+          title: "Parents",
+          links: [
+            ["Accreditation", href(lang, "about/accreditation/")],
+            ["Fees and grants", href(lang, "admissions/fees/")],
+            ["Leadership", href(lang, "about/leadership/")],
+            ["Contact us", href(lang, "contact/")],
+          ],
+        },
+      ];
 const jsonLd = {
   "@context": "https://schema.org",
   "@type": "CollegeOrUniversity",
@@ -57,11 +122,31 @@ const jsonLd = {
     addressLocality: "الخرطوم",
     addressCountry: "SD",
   },
-  sameAs: Object.values(s.social ?? {}),
+  sameAs: Object.values(s.social ?? {}).filter(Boolean),
+  // Richer identity for search engines (review 2026-09-30).
+  logo: new URL("/favicon.svg", Astro.site).toString(),
+  image: s.share_image_url || s.hero_image_url || undefined,
+  foundingDate: s.founded_year ? String(s.founded_year) : undefined,
+  description: s.seo?.description || s.tagline || lead,
+  contactPoint:
+    s.phone || s.email
+      ? {
+          "@type": "ContactPoint",
+          contactType: "admissions",
+          telephone: s.phone || undefined,
+          email: s.email || undefined,
+          availableLanguage: ["ar", "en"],
+        }
+      : undefined,
 };
 ---
 
-<Base lang={lang} title={name} jsonLd={jsonLd}>
+<Base
+  lang={lang}
+  title={name}
+  description={s.seo?.description || s.tagline || `${name} — ${lead}`}
+  jsonLd={jsonLd}
+>
   <section class="bg-bg-subtle">
     <div class="mx-auto grid max-w-6xl gap-8 px-4 py-10 lg:grid-cols-[1.2fr_1fr] lg:items-center lg:px-8 lg:py-16">
       <div>
@@ -81,11 +166,7 @@ const jsonLd = {
             </span>
           ))}
         </h1>
-        <p class="mt-4 max-w-xl text-base leading-7 text-text-muted">
-          {lang === "ar"
-            ? `${count(lang, st.programs || all.length, N.program)} في ${count(lang, st.departments, N.department)} — تقديم إلكتروني بالكامل ومتابعة للطلب من هاتفك.`
-            : `${count(lang, st.programs || all.length, N.program)} in ${count(lang, st.departments, N.department)} — apply online and follow your application from your phone.`}
-        </p>
+        <p class="mt-4 max-w-xl text-base leading-7 text-text-muted">{lead}</p>
         <div class="mt-6 flex flex-wrap gap-3">
           <a
             href={href(lang, "programs/")}
@@ -141,20 +222,28 @@ const jsonLd = {
         </div>
       )}
     </div>
-    <div class="mx-auto grid max-w-6xl grid-cols-3 gap-2 px-4 pb-10 lg:px-8">
-      {[
-        [st.students, t(lang, "students")],
-        [st.teachers, t(lang, "teachers")],
-        [st.programs, t(lang, "programsCount")],
-      ].map(([n, l]) => (
-        <div class="rounded-2xl bg-surface p-4 text-center shadow-sm">
-          <p class="font-display text-2xl font-bold text-primary" data-count={Number(n)}>
-            {num(lang, Number(n))}
-          </p>
-          <p class="text-xs text-text-muted">{l}</p>
-        </div>
-      ))}
-    </div>
+    {s.hero_image_url && (
+      // The college's own picture (campus, students): the page's priority image.
+      <div class="mx-auto max-w-6xl px-4 pb-6 lg:px-8">
+        <img
+          src={s.hero_image_url}
+          alt={s.hero_image_alt_ar ?? ""}
+          width="1200"
+          height="514"
+          fetchpriority="high"
+          decoding="async"
+          class="aspect-[4/3] w-full rounded-3xl object-cover sm:aspect-[21/9]"
+        />
+      </div>
+    )}
+    {/* The licence and the college's own figures — not portal account counts (review 2026-09-30). */}
+    <TrustStrip
+      lang={lang}
+      site={s}
+      programs={st.programs || all.length}
+      departments={st.departments || depts.length}
+      class="pb-10"
+    />
   </section>
 
   {pinned.length > 0 && (
@@ -177,6 +266,33 @@ const jsonLd = {
       </ul>
     </section>
   )}
+
+  {/* Who is visiting (review 2026-09-30; benchmark: Khalifa, PSUT): each finds their door. */}
+  <section
+    class="mx-auto max-w-6xl px-4 pt-10 lg:px-8"
+    aria-label={lang === "ar" ? "طرق مختصرة" : "Shortcuts"}
+  >
+    <div class="grid gap-3 md:grid-cols-3">
+      {audiences.map((a) => (
+        <div class="rounded-2xl border border-border-soft bg-surface p-5">
+          <h2 class="font-display text-lg font-bold">{a.title}</h2>
+          <ul class="mt-3 space-y-1">
+            {a.links.map(([label, url]) => (
+              <li>
+                <a
+                  href={url}
+                  class="flex min-h-11 items-center justify-between rounded-lg px-2 text-sm font-semibold text-primary hover:bg-surface-alt"
+                >
+                  {label}
+                  <span aria-hidden="true">{arrow(lang)}</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))}
+    </div>
+  </section>
 
   <section class="mx-auto max-w-6xl px-4 pt-10 lg:px-8">
     <div class="flex items-end justify-between">
@@ -238,80 +354,85 @@ const jsonLd = {
     </section>
   )}
 
-  <section class="mx-auto grid max-w-6xl gap-8 px-4 pt-12 lg:grid-cols-[1fr_2fr] lg:px-8">
-    <div>
-      <h2 class="font-display text-xl font-bold">{t(lang, "upcoming")}</h2>
-      {next ? (
-        <a
-          href={href(lang, `events/${next.slug}/`)}
-          class="mt-4 flex gap-4 rounded-2xl border border-border-soft bg-surface p-4 hover:shadow-sm"
-        >
-          <span class="grid w-16 shrink-0 place-items-center rounded-xl bg-primary-soft py-2 text-center text-primary-700">
-            <b class="block text-2xl">{fmtDate(lang, next.starts_at, { day: "numeric" })}</b>
-            <span class="text-xs">{fmtDate(lang, next.starts_at, { month: "long" })}</span>
-          </span>
-          <span>
-            <b class="block text-text">{next.title}</b>
-            <span class="text-sm text-text-muted">
-              {fmtDate(lang, next.starts_at, {
-                weekday: "long",
-                hour: "numeric",
-                minute: "2-digit",
-              })}
-              {next.location ? ` · ${next.location}` : ""}
-            </span>
-          </span>
-        </a>
-      ) : (
-        <p class="mt-4 text-sm text-text-muted">
-          {lang === "ar" ? "لا فعاليات قادمة الآن." : "No upcoming events."}
-        </p>
-      )}
-    </div>
-    <div>
-      <div class="flex items-end justify-between">
-        <h2 class="font-display text-xl font-bold">{t(lang, "latestNews")}</h2>
-        <a href={href(lang, "news/")} class="text-sm font-semibold text-primary">
-          {t(lang, "all")}
-        </a>
-      </div>
-      <ul class="mt-4 divide-y divide-border-soft rounded-2xl border border-border-soft bg-surface">
-        {latest.slice(0, 3).map((n) => (
-          <li>
+  {/* Nothing empty on show (review 2026-09-30): no news → the event (or nothing) instead. */}
+  {(next || latest.length > 0) && (
+    <section
+      class:list={[
+        "mx-auto grid max-w-6xl gap-8 px-4 pt-12 lg:px-8",
+        next && latest.length > 0 && "lg:grid-cols-[1fr_2fr]",
+      ]}
+    >
+      {next && (
+        <div>
+          <h2 class="font-display text-xl font-bold">{t(lang, "upcoming")}</h2>
+          {next ? (
             <a
-              href={href(lang, `news/${n.slug}/`)}
-              class="flex gap-3 px-4 py-3 hover:bg-surface-alt"
+              href={href(lang, `events/${next.slug}/`)}
+              class="mt-4 flex gap-4 rounded-2xl border border-border-soft bg-surface p-4 hover:shadow-sm"
             >
-              {n.cover_url && (
-                <img
-                  data-reveal="image"
-                  src={n.cover_url}
-                  alt=""
-                  loading="lazy"
-                  decoding="async"
-                  class="size-16 shrink-0 rounded-lg object-cover"
-                />
-              )}
-              <span class="min-w-0">
-                {n.publish_at && (
-                  <span class="block text-xs text-text-muted">{fmtDate(lang, n.publish_at)}</span>
-                )}
-                <b class="block text-text">{n.title}</b>
-                {n.summary && (
-                  <span class="mt-0.5 line-clamp-2 block text-sm leading-6 text-text-muted">
-                    {n.summary}
-                  </span>
-                )}
+              <span class="grid w-16 shrink-0 place-items-center rounded-xl bg-primary-soft py-2 text-center text-primary-700">
+                <b class="block text-2xl">{fmtDate(lang, next.starts_at, { day: "numeric" })}</b>
+                <span class="text-xs">{fmtDate(lang, next.starts_at, { month: "long" })}</span>
+              </span>
+              <span>
+                <b class="block text-text">{next.title}</b>
+                <span class="text-sm text-text-muted">
+                  {fmtDate(lang, next.starts_at, {
+                    weekday: "long",
+                    hour: "numeric",
+                    minute: "2-digit",
+                  })}
+                  {next.location ? ` · ${next.location}` : ""}
+                </span>
               </span>
             </a>
-          </li>
-        ))}
-        {!latest.length && (
-          <li class="px-4 py-3 text-sm text-text-muted">
-            {lang === "ar" ? "لا أخبار بعد." : "No news yet."}
-          </li>
-        )}
-      </ul>
-    </div>
-  </section>
+          ) : null}
+        </div>
+      )}
+      {latest.length > 0 && (
+        <div>
+          <div class="flex items-end justify-between">
+            <h2 class="font-display text-xl font-bold">{t(lang, "latestNews")}</h2>
+            <a href={href(lang, "news/")} class="text-sm font-semibold text-primary">
+              {t(lang, "all")}
+            </a>
+          </div>
+          <ul class="mt-4 divide-y divide-border-soft rounded-2xl border border-border-soft bg-surface">
+            {latest.slice(0, 3).map((n) => (
+              <li>
+                <a
+                  href={href(lang, `news/${n.slug}/`)}
+                  class="flex gap-3 px-4 py-3 hover:bg-surface-alt"
+                >
+                  {n.cover_url && (
+                    <img
+                      data-reveal="image"
+                      src={n.cover_url}
+                      alt=""
+                      loading="lazy"
+                      decoding="async"
+                      class="size-16 shrink-0 rounded-lg object-cover"
+                    />
+                  )}
+                  <span class="min-w-0">
+                    {n.publish_at && (
+                      <span class="block text-xs text-text-muted">
+                        {fmtDate(lang, n.publish_at)}
+                      </span>
+                    )}
+                    <b class="block text-text">{n.title}</b>
+                    {n.summary && (
+                      <span class="mt-0.5 line-clamp-2 block text-sm leading-6 text-text-muted">
+                        {n.summary}
+                      </span>
+                    )}
+                  </span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </section>
+  )}
 </Base>

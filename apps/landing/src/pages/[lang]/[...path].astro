@@ -4,7 +4,14 @@ import PageHead from "../../components/PageHead.astro";
 import SideLinks from "../../components/SideLinks.astro";
 import WithAside from "../../components/WithAside.astro";
 import Base from "../../layouts/Base.astro";
-import { type Page, type PageRef, departments, page as loadPage, pages } from "../../lib/api";
+import {
+  type Page,
+  type PageRef,
+  departments,
+  page as loadPage,
+  pages,
+  describe,
+} from "../../lib/api";
 import { LANGS, type Lang, href, pick, t } from "../../lib/i18n";
 import { related } from "../../lib/related";
 
@@ -50,7 +57,12 @@ const more = await related(
 );
 ---
 
-<Base lang={lang} title={title} path={`${path}/`} description={page.seo?.description}>
+<Base
+  lang={lang}
+  title={title}
+  path={`${path}/`}
+  description={lang === "ar" ? describe(page) : page.seo?.description}
+>
   <PageHead
     lang={lang}
     title={title}
