@@ -7,20 +7,22 @@
   - the review report, #53.
 - **PR 6a #54: merged.** Site settings gained trust signals (licence, figures, hero and share images);
   `TrustStrip`, the header «قدّم الآن», descriptions and `og:image` on every page.
-- **PR 6b `feat/program-page`** (in progress).
-  - `Program` gains `annual_fee_sdg`/`_usd` and `outcomes_*`/`careers_*` (one per line); migration
-    `organization/0005`.
-  - Public API: `fee_sdg`/`fee_usd` in the list; outcomes and careers as lists in the detail.
-  - Portal: in «الهيكل الأكاديمي», «صفحة الموقع: الوصف والرسوم» opens `ProgramPageForm`.
-  - Site:
-    - «أساسيات المتقدم» card (sticky on large screens), then outcomes, careers, admission, and the plan
-      with hours per course and level;
-    - print styles as the brochure;
-    - `FeesTable` on `admissions/fees`;
-    - Offers in the JSON-LD.
-  - The e2e phone bar is `[data-apply-bar]`.
+- **PR 6b #55: merged.**
+  - Programme fees, outcomes and careers, with an editor in «الهيكل الأكاديمي».
+  - The «أساسيات المتقدم» card, print as a brochure, `FeesTable`.
+- **PR 6c `feat/site-contact-departments`** (open).
+  - A floating WhatsApp button (`[data-whatsapp-float]`; hidden on the contact page, and on phones where there is
+    a bottom bar).
+  - Contact: a quick-contact row, office hours, and `map_url`.
+  - Department page: `ProgramRow`, an apply strip, other departments.
+  - Programme finder: search with `lib/fold.ts` plus department chips.
+  - `/parents/` built from published data only.
+  - `isolateNumbers()` for hours.
+  - Demo: a fake WhatsApp number and office hours.
+  - Deferred:
+    - faculty on the department page (needs a consent field);
+    - department news (policy: department roles can't publish public, docs/03 §7).
 - **Next:**
-  - **6c**: WhatsApp button, contact row with hours and map, department page, programme finder, parents page.
   - **6d**: English fallbacks, event `.ics`, `PageHead`, footer, motion.
   - Then **PR 7+**: large-screen layouts per role (full review §3), then motion and polish.
 - **Visual checks of the built site:**
