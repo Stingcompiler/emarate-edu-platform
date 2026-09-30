@@ -111,6 +111,11 @@ const DEGREE_EN: Record<string, string> = {
 export const degree = (lang: Lang, key: string, label: string) =>
   lang === "en" ? (DEGREE_EN[key] ?? label) : label;
 /** "Forward" arrow for the reading direction. */
+/** A yearly fee as the college states it: «1,600,000 جنيه» · «SDG 1,600,000». */
+export const money = (lang: Lang, n: number, currency: "SDG" | "USD") =>
+  lang === "ar"
+    ? `${num(lang, n)} ${currency === "SDG" ? "جنيه" : "دولار"}`
+    : `${currency === "SDG" ? "SDG" : "US$"} ${num(lang, n)}`;
 export const arrow = (lang: Lang) => (lang === "ar" ? "←" : "→");
 /** schema.org FAQPage for the same questions a page shows (rich results). */
 export const faqLd = (items: [string, string][]) => ({

@@ -1,3 +1,4 @@
+import type { Schemas } from "@ecst/api";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 
@@ -6,9 +7,11 @@ import {
   Button,
   Card,
   Chip,
+  Field,
   Notice,
   SectionLabel,
   StatusBadge,
+  TextArea,
   problemMessage,
 } from "../../components/ui";
 import { api, ok } from "../../lib/api";
@@ -16,6 +19,7 @@ import { num } from "../../lib/reports";
 import { count, N, fmtDate } from "../../lib/format";
 import { ALL } from "../../components/Pager";
 import { useConfirm } from "../../components/Confirm";
+import { useUnsavedChanges } from "../../lib/useUnsavedChanges";
 
 const DEGREE: Record<string, string> = {
   diploma: "دبلوم",
@@ -55,6 +59,8 @@ export function Structure() {
       ok(await api.GET("/api/v1/academic-years", { params: { query: ALL } }))?.results ?? [],
   });
   const [picked, setPicked] = useState<number | null>(null);
+  // The programme whose public page is open for editing (description, fees, outcomes).
+  const [editing, setEditing] = useState<number | null>(null);
   const dept = departments.data?.find((d) => d.id === picked) ?? departments.data?.[0];
   const deptPrograms = (programs.data ?? []).filter((p) => p.department === dept?.id);
   const refresh = (key: string) => client.invalidateQueries({ queryKey: [key] });
@@ -309,6 +315,14 @@ export function Structure() {
                 <span className="min-w-0">
                   <bdi className="block font-mono text-xs text-text-muted">{p.code}</bdi>
                   <b className="block">{p.name_ar}</b>
+                  <button
+                    type="button"
+                    aria-expanded={editing === p.id}
+                    onClick={() => setEditing(editing === p.id ? null : p.id)}
+                    className="mt-0.5 text-xs font-semibold text-primary hover:underline"
+                  >
+                    {editing === p.id ? "إغلاق صفحة الموقع" : "صفحة الموقع: الوصف والرسوم"}
+                  </button>
                 </span>
                 <span className="text-text-muted">{DEGREE[p.degree] ?? p.degree}</span>
                 <span className="text-text-muted">
@@ -328,6 +342,18 @@ export function Structure() {
             ))}
             {!deptPrograms.length && <p className="px-4 py-3 text-sm text-text-muted">لا برامج.</p>}
           </Card>
+          {deptPrograms
+            .filter((p) => p.id === editing)
+            .map((p) => (
+              <ProgramPageForm
+                key={p.id}
+                program={p}
+                onDone={() => {
+                  setEditing(null);
+                  void refresh("programs");
+                }}
+              />
+            ))}
           {dept && (
             <Card className="mt-3 grid gap-2 p-3 sm:grid-cols-[90px_minmax(0,1fr)_minmax(0,1fr)]">
               <input
@@ -410,6 +436,133 @@ export function Structure() {
         </section>
       </div>
     </PortalShell>
+  );
+}
+
+const PAGE_FIELDS = [
+  "description_ar",
+  "description_en",
+  "outcomes_ar",
+  "outcomes_en",
+  "careers_ar",
+  "careers_en",
+] as const;
+type PageKey = (typeof PAGE_FIELDS)[number] | "annual_fee_sdg" | "annual_fee_usd";
+
+/**
+ * What the public programme page shows beyond the structure (landing review 2026-10, PR 6b):
+ * the description, yearly fees, outcomes and careers. Blank fields stay off the site.
+ */
+function ProgramPageForm({ program, onDone }: { program: Schemas["Program"]; onDone: () => void }) {
+  const [form, setForm] = useState<Record<PageKey, string>>(
+    () =>
+      ({
+        ...Object.fromEntries(PAGE_FIELDS.map((k) => [k, program[k] ?? ""])),
+        annual_fee_sdg: program.annual_fee_sdg ? String(program.annual_fee_sdg) : "",
+        annual_fee_usd: program.annual_fee_usd ? String(program.annual_fee_usd) : "",
+      }) as Record<PageKey, string>,
+  );
+  const unsaved = useUnsavedChanges();
+  const set = (key: PageKey, value: string) => setForm((f) => ({ ...f, [key]: value }));
+  const save = useMutation({
+    mutationFn: async () => {
+      const { data, error } = await api.PATCH("/api/v1/programs/{id}", {
+        params: { path: { id: program.id } },
+        body: {
+          ...Object.fromEntries(PAGE_FIELDS.map((k) => [k, form[k].trim()])),
+          annual_fee_sdg: form.annual_fee_sdg ? Number(form.annual_fee_sdg) : null,
+          annual_fee_usd: form.annual_fee_usd ? Number(form.annual_fee_usd) : null,
+        },
+      });
+      if (!data) throw error;
+    },
+    onSuccess: () => {
+      unsaved.saved();
+      onDone();
+    },
+  });
+  const lines = "سطر لكل بند";
+  return (
+    <Card className="mt-3">
+      <form
+        onInput={unsaved.onInput}
+        onSubmit={(e) => {
+          e.preventDefault();
+          save.mutate();
+        }}
+      >
+        <div className="border-b border-border-soft px-4 py-3">
+          <p className="font-semibold">صفحة «{program.name_ar}» في الموقع</p>
+          <p className="mt-0.5 text-xs text-text-muted">
+            ما يُترك فارغًا لا يظهر في الموقع. تظهر التعديلات بعد إعادة بناء الموقع.
+          </p>
+        </div>
+        <div className="grid lg:grid-cols-2">
+          <TextArea
+            label="الوصف"
+            value={form.description_ar}
+            onChange={(e) => set("description_ar", e.target.value)}
+          />
+          <TextArea
+            label="الوصف بالإنجليزية"
+            dir="ltr"
+            value={form.description_en}
+            onChange={(e) => set("description_en", e.target.value)}
+          />
+          <Field
+            label="الرسوم السنوية بالجنيه السوداني"
+            type="number"
+            min={1}
+            inputMode="numeric"
+            value={form.annual_fee_sdg}
+            onChange={(e) => set("annual_fee_sdg", e.target.value)}
+          />
+          <Field
+            label="الرسوم السنوية بالدولار (للوافدين)"
+            type="number"
+            min={1}
+            inputMode="numeric"
+            value={form.annual_fee_usd}
+            onChange={(e) => set("annual_fee_usd", e.target.value)}
+          />
+          <TextArea
+            label={`مخرجات التعلم — ${lines}`}
+            value={form.outcomes_ar}
+            onChange={(e) => set("outcomes_ar", e.target.value)}
+          />
+          <TextArea
+            label={`مخرجات التعلم بالإنجليزية — ${lines}`}
+            dir="ltr"
+            value={form.outcomes_en}
+            onChange={(e) => set("outcomes_en", e.target.value)}
+          />
+          <TextArea
+            label={`المسارات المهنية — ${lines}`}
+            value={form.careers_ar}
+            onChange={(e) => set("careers_ar", e.target.value)}
+          />
+          <TextArea
+            label={`المسارات المهنية بالإنجليزية — ${lines}`}
+            dir="ltr"
+            value={form.careers_en}
+            onChange={(e) => set("careers_en", e.target.value)}
+          />
+        </div>
+        {save.isError && (
+          <div className="px-4 pt-3">
+            <Notice>{problemMessage(save.error)}</Notice>
+          </div>
+        )}
+        <div className="flex flex-wrap justify-end gap-2 border-t border-border-soft p-3">
+          <Button variant="secondary" onClick={onDone}>
+            إلغاء
+          </Button>
+          <Button type="submit" disabled={save.isPending}>
+            {save.isPending ? "جارٍ الحفظ…" : "حفظ صفحة البرنامج"}
+          </Button>
+        </div>
+      </form>
+    </Card>
   );
 }
 

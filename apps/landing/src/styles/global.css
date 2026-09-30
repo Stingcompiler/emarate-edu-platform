@@ -2,3 +2,22 @@
 @import "@ecst/ui/theme.css";
 
 @source "../../../../packages/ui/src";
+
+/* A programme page prints as a one-document brochure (landing review 2026-10, PR 6b): no site
+   chrome, no sticky bars, nothing left hidden by motion. */
+@media print {
+  body > header,
+  body > footer,
+  [data-no-print] {
+    display: none !important;
+  }
+  body {
+    background: #fff !important;
+    padding-bottom: 0 !important;
+  }
+  [data-reveal],
+  .motion-lines > * {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}

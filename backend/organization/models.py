@@ -46,6 +46,15 @@ class Program(BilingualNameModel, TimestampedModel):
     # Public site copy (docs/02 §6); plain text, shown on the program page.
     description_ar = models.TextField(blank=True)
     description_en = models.TextField(blank=True)
+    # What an applicant weighs first (landing review 2026-10, PR 6b): the yearly fee in
+    # Sudanese pounds and, for international applicants, in US dollars. Blank → not shown.
+    annual_fee_sdg = models.PositiveIntegerField(null=True, blank=True)
+    annual_fee_usd = models.PositiveIntegerField(null=True, blank=True)
+    # One item per line: what graduates can do, and where they work.
+    outcomes_ar = models.TextField(blank=True)
+    outcomes_en = models.TextField(blank=True)
+    careers_ar = models.TextField(blank=True)
+    careers_en = models.TextField(blank=True)
     is_active = models.BooleanField(default=True)
 
     class Meta:

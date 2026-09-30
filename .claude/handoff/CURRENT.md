@@ -5,17 +5,21 @@
   - full review PRs 1–5b, #45–#51;
   - the review plan, #52;
   - the review report, #53.
-- **PR 6a #54 `feat/site-trust`** (open, Auto-fix on; merge when CI is green).
-  - `SiteSettings` gains `founded_year`, `licence_*`, `figures` (≤6), `office_hours_*`, `map_url`,
-    `hero_image` and `share_image`; migration `content/0005`.
-  - The portal form is in `SiteMedia.tsx`.
-  - Public site: `TrustStrip.astro` replaces the account counts. Also added: the hero image, audience entry
-    points, the header «قدّم الآن» while an intake is open, a description and `og:image` on every page
-    (`describe()` in `lib/api.ts`), and richer JSON-LD.
-  - Visually checked on the built site at 1440 and 390.
+- **PR 6a #54: merged.** Site settings gained trust signals (licence, figures, hero and share images);
+  `TrustStrip`, the header «قدّم الآن», descriptions and `og:image` on every page.
+- **PR 6b `feat/program-page`** (in progress).
+  - `Program` gains `annual_fee_sdg`/`_usd` and `outcomes_*`/`careers_*` (one per line); migration
+    `organization/0005`.
+  - Public API: `fee_sdg`/`fee_usd` in the list; outcomes and careers as lists in the detail.
+  - Portal: in «الهيكل الأكاديمي», «صفحة الموقع: الوصف والرسوم» opens `ProgramPageForm`.
+  - Site:
+    - «أساسيات المتقدم» card (sticky on large screens), then outcomes, careers, admission, and the plan
+      with hours per course and level;
+    - print styles as the brochure;
+    - `FeesTable` on `admissions/fees`;
+    - Offers in the JSON-LD.
+  - The e2e phone bar is `[data-apply-bar]`.
 - **Next:**
-  - **6b**: programme page (fees SDG/USD, outcomes and careers, a key-facts box, study plan hours, brochure,
-    `EducationalOccupationalProgram`).
   - **6c**: WhatsApp button, contact row with hours and map, department page, programme finder, parents page.
   - **6d**: English fallbacks, event `.ics`, `PageHead`, footer, motion.
   - Then **PR 7+**: large-screen layouts per role (full review §3), then motion and polish.
