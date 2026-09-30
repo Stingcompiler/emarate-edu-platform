@@ -1,22 +1,41 @@
 ---
 import PageHead from "../../../components/PageHead.astro";
-import ProgramCard from "../../../components/ProgramCard.astro";
+import ProgramRow from "../../../components/ProgramRow.astro";
+import SideLinks from "../../../components/SideLinks.astro";
+import WithAside from "../../../components/WithAside.astro";
 import Base from "../../../layouts/Base.astro";
-import { type Department, departments } from "../../../lib/api";
-import { LANGS, type Lang, num, pick, t, count, N } from "../../../lib/i18n";
+import { PORTAL, type Department, departments, site } from "../../../lib/api";
+import { LANGS, type Lang, arrow, count, fmtDate, href, N, pick, t } from "../../../lib/i18n";
 
 export async function getStaticPaths() {
   const depts = await departments();
   return LANGS.flatMap((lang) =>
-    depts.map((d) => ({ params: { lang, code: d.code }, props: { department: d } })),
+    depts.map((d) => ({ params: { lang, code: d.code }, props: { department: d, all: depts } })),
   );
 }
 const lang = Astro.params.lang as Lang;
-const { department: d } = Astro.props as { department: Department };
+const { department: d, all } = Astro.props as { department: Department; all: Department[] };
+const s = await site();
+const L = (ar: string, en: string) => (lang === "ar" ? ar : en);
 const name = pick(lang, d.name_ar, d.name_en);
+const open = d.programs.filter((p) => p.intake?.accepting);
+const closes = open.map((p) => p.intake!.closes_at).sort()[0];
+// Searches need a description even before the department writes one — built from its data.
+const summary =
+  d.description ||
+  L(
+    `قسم ${name} في ${s.name_ar}: ${count(lang, d.programs.length, N.program)}.`,
+    `${name} at ${s.name_en || s.name_ar}: ${count(lang, d.programs.length, N.program)}.`,
+  );
+const others = all
+  .filter((o) => o.code !== d.code)
+  .map((o) => ({
+    label: pick(lang, o.name_ar, o.name_en),
+    href: href(lang, `departments/${o.code}/`),
+  }));
 ---
 
-<Base lang={lang} title={name} path={`departments/${d.code}/`} description={d.description}>
+<Base lang={lang} title={name} path={`departments/${d.code}/`} description={summary}>
   <PageHead
     lang={lang}
     title={lang === "ar" ? `قسم ${name}` : name}
@@ -26,21 +45,57 @@ const name = pick(lang, d.name_ar, d.name_en);
       [name, `departments/${d.code}/`],
     ]}
   >
-    {d.manager && (
-      <p class="mt-4 text-sm">
-        <b>{d.manager}</b> · <span class="text-text-muted">{t(lang, "manager")}</span>
-      </p>
-    )}
-    <p class="mt-4 text-sm text-text-muted">{count(lang, d.programs.length, N.program)}</p>
+    <p class="mt-4 flex flex-wrap gap-x-4 gap-y-1 text-sm">
+      {d.manager && (
+        <span>
+          <b>{d.manager}</b> · <span class="text-text-muted">{t(lang, "manager")}</span>
+        </span>
+      )}
+      <span class="text-text-muted">{count(lang, d.programs.length, N.program)}</span>
+    </p>
   </PageHead>
-  <section class="mx-auto max-w-6xl px-4 py-10 lg:px-8">
-    <h2 class="font-display text-xl font-bold">
-      {t(lang, "programs")} · {d.programs.length}
-    </h2>
-    <div class="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-      {d.programs.map((p) => (
-        <ProgramCard lang={lang} program={p} />
-      ))}
+  <WithAside>
+    <div>
+      {open.length > 0 && (
+        <div class="mb-8 flex flex-wrap items-center gap-3 rounded-2xl bg-success-soft p-4 text-sm text-success-strong">
+          <span class="font-semibold">
+            {L(
+              `${count(lang, open.length, N.program)} في القسم تقبل الآن حتى ${fmtDate(lang, closes!)}`,
+              `${count(lang, open.length, N.program)} open until ${fmtDate(lang, closes!)}`,
+            )}
+          </span>
+          <a
+            href={`${PORTAL}/apply`}
+            class="ms-auto rounded-lg bg-accent px-4 py-2 font-semibold text-white hover:bg-accent-hover"
+          >
+            {t(lang, "apply")}
+          </a>
+        </div>
+      )}
+      <h2 class="font-display text-xl font-bold">{t(lang, "programs")}</h2>
+      {d.programs.length > 0 ? (
+        <ul class="mt-4 divide-y divide-border-soft overflow-hidden rounded-2xl border border-border-soft bg-surface">
+          {d.programs.map((p) => (
+            <ProgramRow lang={lang} program={p} />
+          ))}
+        </ul>
+      ) : (
+        <p class="mt-4 text-sm text-text-muted">
+          {L("لا برامج منشورة في القسم بعد.", "No programmes published yet.")}
+        </p>
+      )}
+      <a
+        href={href(lang, "contact/")}
+        class="mt-8 flex items-center justify-between gap-3 rounded-2xl bg-bg-subtle p-4 text-sm font-semibold text-primary"
+      >
+        {L(`لديك سؤال عن قسم ${name}؟ تواصل معنا`, `A question about ${name}? Contact us`)}
+        <span aria-hidden="true">{arrow(lang)}</span>
+      </a>
     </div>
-  </section>
+    <Fragment slot="aside">
+      {others.length > 0 && (
+        <SideLinks lang={lang} title={L("أقسام أخرى", "Other departments")} links={others} />
+      )}
+    </Fragment>
+  </WithAside>
 </Base>
