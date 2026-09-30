@@ -44,6 +44,10 @@ const next = upcoming
   .filter((e) => new Date(e.ends_at) > new Date())
   .sort((a, b) => a.starts_at.localeCompare(b.starts_at))[0];
 const name = pick(lang, s.name_ar, s.name_en);
+const lead =
+  lang === "ar"
+    ? `${count(lang, st.programs || all.length, N.program)} في ${count(lang, st.departments, N.department)} — تقديم إلكتروني بالكامل ومتابعة للطلب من هاتفك.`
+    : `${count(lang, st.programs || all.length, N.program)} in ${count(lang, st.departments, N.department)} — apply online and follow your application from your phone.`;
 const audiences =
   lang === "ar"
     ? [
@@ -123,7 +127,7 @@ const jsonLd = {
   logo: new URL("/favicon.svg", Astro.site).toString(),
   image: s.share_image_url || s.hero_image_url || undefined,
   foundingDate: s.founded_year ? String(s.founded_year) : undefined,
-  description: s.seo?.description || s.tagline || undefined,
+  description: s.seo?.description || s.tagline || lead,
   contactPoint:
     s.phone || s.email
       ? {
@@ -137,7 +141,12 @@ const jsonLd = {
 };
 ---
 
-<Base lang={lang} title={name} jsonLd={jsonLd}>
+<Base
+  lang={lang}
+  title={name}
+  description={s.seo?.description || s.tagline || `${name} — ${lead}`}
+  jsonLd={jsonLd}
+>
   <section class="bg-bg-subtle">
     <div class="mx-auto grid max-w-6xl gap-8 px-4 py-10 lg:grid-cols-[1.2fr_1fr] lg:items-center lg:px-8 lg:py-16">
       <div>
@@ -157,11 +166,7 @@ const jsonLd = {
             </span>
           ))}
         </h1>
-        <p class="mt-4 max-w-xl text-base leading-7 text-text-muted">
-          {lang === "ar"
-            ? `${count(lang, st.programs || all.length, N.program)} في ${count(lang, st.departments, N.department)} — تقديم إلكتروني بالكامل ومتابعة للطلب من هاتفك.`
-            : `${count(lang, st.programs || all.length, N.program)} in ${count(lang, st.departments, N.department)} — apply online and follow your application from your phone.`}
-        </p>
+        <p class="mt-4 max-w-xl text-base leading-7 text-text-muted">{lead}</p>
         <div class="mt-6 flex flex-wrap gap-3">
           <a
             href={href(lang, "programs/")}
