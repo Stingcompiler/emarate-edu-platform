@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 
 import { PortalShell } from "../../components/PortalShell";
-import { FilterBar, Button, Card } from "../../components/ui";
+import { FilterBar, Button, Card, WithSide } from "../../components/ui";
 import { api, ok } from "../../lib/api";
 import { useMe } from "../../lib/auth";
 import { useDepartment } from "../../lib/department";
@@ -179,6 +179,102 @@ export function actionLabel(code: string): string {
   return `${VERBS[verb] ?? "عملية"} · ${NOUNS[object] ?? NOUNS[noun] ?? object}`;
 }
 
+type Entry = {
+  id: number;
+  at: string;
+  actor: string;
+  action: string;
+  target_type: string;
+  target_id: string;
+  target_repr: string;
+  old: unknown;
+  new: unknown;
+};
+
+const show = (v: unknown) =>
+  v === null || v === undefined || v === ""
+    ? "—"
+    : typeof v === "object"
+      ? JSON.stringify(v)
+      : String(v);
+
+/** One entry in full: who, when, what, and each changed field before and after (board
+ *  DesktopDeptOperations). The log is read-only; nothing here edits it. */
+function AuditDetail({ r }: { r: Entry }) {
+  const before = (r.old && typeof r.old === "object" ? r.old : {}) as Record<string, unknown>;
+  const after = (r.new && typeof r.new === "object" ? r.new : {}) as Record<string, unknown>;
+  const fields = [...new Set([...Object.keys(before), ...Object.keys(after)])].filter(
+    (k) => show(before[k]) !== show(after[k]),
+  );
+  return (
+    <div className="space-y-3 text-sm">
+      <div>
+        <b className="block text-text">{actionLabel(r.action)}</b>
+        <span className="text-xs text-text-muted">
+          {new Date(r.at).toLocaleString("ar-u-nu-latn", {
+            weekday: "long",
+            day: "numeric",
+            month: "long",
+            hour: "numeric",
+            minute: "2-digit",
+          })}{" "}
+          · بواسطة {r.actor || "النظام"}
+        </span>
+      </div>
+      <dl className="divide-y divide-border-soft">
+        {[
+          ["الهدف", r.target_repr],
+          ["النوع", r.target_type],
+          ["المعرّف", r.target_id],
+        ].map(([k, v]) => (
+          <div key={k} className="flex justify-between gap-3 py-1.5">
+            <dt className="text-text-muted">{k}</dt>
+            <dd className="min-w-0 truncate text-end font-semibold text-text">
+              <bdi>{v || "—"}</bdi>
+            </dd>
+          </div>
+        ))}
+      </dl>
+      {fields.length > 0 ? (
+        <div className="overflow-hidden rounded-xl border border-border-soft">
+          <table className="w-full table-fixed text-xs">
+            <thead className="bg-surface-alt text-text-muted">
+              <tr>
+                <th scope="col" className="px-2 py-1.5 text-start font-medium">
+                  الحقل
+                </th>
+                <th scope="col" className="px-2 py-1.5 text-start font-medium">
+                  قبل
+                </th>
+                <th scope="col" className="px-2 py-1.5 text-start font-medium">
+                  بعد
+                </th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border-soft">
+              {fields.map((k) => (
+                <tr key={k}>
+                  <th scope="row" className="px-2 py-1.5 text-start font-normal text-text-muted">
+                    <bdi>{k}</bdi>
+                  </th>
+                  <td className="break-words bg-danger-soft/50 px-2 py-1.5">
+                    <bdi>{show(before[k])}</bdi>
+                  </td>
+                  <td className="break-words bg-success-soft/50 px-2 py-1.5">
+                    <bdi>{show(after[k])}</bdi>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ) : (
+        <p className="text-xs text-text-muted">لا قيم متغيّرة مسجّلة لهذه العملية.</p>
+      )}
+    </div>
+  );
+}
+
 const dayKey = (iso: string) =>
   new Date(iso).toLocaleDateString("ar-u-nu-latn", {
     weekday: "long",
@@ -186,7 +282,8 @@ const dayKey = (iso: string) =>
     month: "long",
   });
 
-/** Board: DesktopDeptOperations — every change with before/after; never deleted. */
+/** Board: DesktopDeptOperations — every change with before/after; never deleted. Choosing an
+ *  entry shows it in full beside the list (under it on phones). */
 export function Audit() {
   const me = useMe();
   const everything = !!(
@@ -197,6 +294,7 @@ export function Audit() {
   const department = everything ? undefined : dept.department;
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
+  const [picked, setPicked] = useState<number | null>(null);
   const list = useQuery({
     queryKey: ["audit", id, search, page],
     queryFn: async () =>
@@ -254,33 +352,63 @@ export function Audit() {
           </Button>
         </div>
       </FilterBar>
-      <div className="mt-4 space-y-4">
-        {groups.map(([day, items]) => (
-          <section key={day}>
-            <p className="mb-2 text-xs font-semibold text-text-muted">{day}</p>
-            <Card className="divide-y divide-border-soft">
-              {items.map((r) => (
-                <div key={r.id} className="flex gap-3 px-4 py-3 text-sm">
-                  <span className="w-12 shrink-0 text-xs text-text-muted">
-                    {new Date(r.at).toLocaleTimeString("ar-u-nu-latn", {
-                      hour: "numeric",
-                      minute: "2-digit",
-                    })}
-                  </span>
-                  <span className="min-w-0 flex-1">
-                    <b className="text-text">{r.actor || "النظام"}</b>{" "}
-                    <span className="text-text-muted">· {actionLabel(r.action)}</span>
-                    <span className="block truncate text-text">{r.target_repr}</span>
-                  </span>
-                </div>
-              ))}
-            </Card>
-          </section>
-        ))}
-        {!rows.length && !list.isPending && (
-          <Card className="p-4 text-sm text-text-muted">لا عمليات مطابقة.</Card>
-        )}
-      </div>
+      <WithSide
+        side={
+          <Card className="hidden p-4 lg:block">
+            {rows.find((r) => r.id === picked) ? (
+              <AuditDetail r={rows.find((r) => r.id === picked)! as Entry} />
+            ) : (
+              <p className="text-sm text-text-muted">
+                اختر عملية لترى تفاصيلها وقيمها قبل التغيير وبعده.
+              </p>
+            )}
+            <p className="mt-4 text-xs leading-relaxed text-text-muted">
+              السجل للقراءة فقط: لا تُعدَّل عملية ولا تُحذف.
+            </p>
+          </Card>
+        }
+      >
+        <div className="mt-4 space-y-4">
+          {groups.map(([day, items]) => (
+            <section key={day}>
+              <p className="mb-2 text-xs font-semibold text-text-muted">{day}</p>
+              <Card className="divide-y divide-border-soft">
+                {items.map((r) => (
+                  <div key={r.id}>
+                    <button
+                      type="button"
+                      aria-expanded={picked === r.id}
+                      onClick={() => setPicked(picked === r.id ? null : r.id)}
+                      className={`flex w-full gap-3 px-4 py-3 text-start text-sm hover:bg-surface-alt ${picked === r.id ? "bg-primary-soft/40" : ""}`}
+                    >
+                      <span className="w-12 shrink-0 text-xs text-text-muted">
+                        {new Date(r.at).toLocaleTimeString("ar-u-nu-latn", {
+                          hour: "numeric",
+                          minute: "2-digit",
+                        })}
+                      </span>
+                      <span className="min-w-0 flex-1">
+                        <b className="text-text">{r.actor || "النظام"}</b>{" "}
+                        <span className="text-text-muted">· {actionLabel(r.action)}</span>
+                        <span className="block truncate text-text">{r.target_repr}</span>
+                      </span>
+                    </button>
+                    {/* Phones: the details open under the entry. */}
+                    {picked === r.id && (
+                      <div className="border-t border-border-soft bg-surface-alt/40 px-4 py-3 lg:hidden">
+                        <AuditDetail r={r as Entry} />
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </Card>
+            </section>
+          ))}
+          {!rows.length && !list.isPending && (
+            <Card className="p-4 text-sm text-text-muted">لا عمليات مطابقة.</Card>
+          )}
+        </div>
+      </WithSide>
       <Pager page={page} count={list.data?.count ?? 0} onPage={setPage} label="صفحات السجل" />
     </PortalShell>
   );
