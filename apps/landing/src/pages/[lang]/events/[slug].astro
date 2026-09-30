@@ -5,7 +5,7 @@ import SideLinks from "../../../components/SideLinks.astro";
 import WithAside from "../../../components/WithAside.astro";
 import Base from "../../../layouts/Base.astro";
 import { type Event, events, get, pastEvents, site } from "../../../lib/api";
-import { LANGS, type Lang, fmtDate, href, t, isArabic } from "../../../lib/i18n";
+import { LANGS, type Lang, fmtDate, fmtTime, href, t, isArabic } from "../../../lib/i18n";
 import { related } from "../../../lib/related";
 
 export async function getStaticPaths() {
@@ -45,7 +45,7 @@ const L = (ar: string, en: string) => (lang === "ar" ? ar : en);
 const s = await site();
 // The time the event ends, when it ends the same day («10:00 ص – 3:00 م»).
 const sameDay = e.starts_at.slice(0, 10) === e.ends_at.slice(0, 10);
-const until = sameDay ? fmtDate(lang, e.ends_at, { hour: "numeric", minute: "2-digit" }) : "";
+const until = sameDay ? fmtTime(lang, e.ends_at) : "";
 // Directions to the college (the event's hall is on campus): its map link, else the address.
 const directions =
   s.map_url ||

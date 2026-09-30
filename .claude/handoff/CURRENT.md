@@ -10,21 +10,20 @@
 - **PR 6b #55: merged.**
   - Programme fees, outcomes and careers, with an editor in «الهيكل الأكاديمي».
   - The «أساسيات المتقدم» card, print as a brochure, `FeesTable`.
-- **PR 6c `feat/site-contact-departments`** (open).
-  - A floating WhatsApp button (`[data-whatsapp-float]`; hidden on the contact page, and on phones where there is
-    a bottom bar).
-  - Contact: a quick-contact row, office hours, and `map_url`.
-  - Department page: `ProgramRow`, an apply strip, other departments.
-  - Programme finder: search with `lib/fold.ts` plus department chips.
-  - `/parents/` built from published data only.
-  - `isolateNumbers()` for hours.
-  - Demo: a fake WhatsApp number and office hours.
-  - Deferred:
-    - faculty on the department page (needs a consent field);
-    - department news (policy: department roles can't publish public, docs/03 §7).
-- **Next:**
-  - **6d**: English fallbacks, event `.ics`, `PageHead`, footer, motion.
-  - Then **PR 7+**: large-screen layouts per role (full review §3), then motion and polish.
+- **PR 6c #56: merged.** Floating WhatsApp button (`[data-whatsapp-float]`), contact quick row and hours, department page,
+  programme finder (`lib/fold.ts`), `/parents/`, `isolateNumbers()`.
+- **PR 6d `feat/site-polish`** (open).
+  - W3: `ArabicOnly.astro`, the `html[lang=en]` plaintext CSS rule, `cycleName()`.
+  - W5: the reveal safety net. W8: footer padding. W9: odd-cell spans; news without news.
+  - W11: `pages/events/[slug].ics.ts`, directions, `fmtTime()`.
+  - `PageHead` builds the trail and the `BreadcrumbList`.
+  - 🟢 items, and the visitor layout links back to the site.
+  - The crawl skips `a[download]`.
+  - The landing crawl takes ~3–3.5 min locally (was ~2): the site has more pages now.
+- **Next: 6e**, the feature `PageHead` (W12) and site motion. Then PR 7+ (large screens).
+- 6c deferred, waiting on the owner:
+  - faculty on the department page (needs a consent field);
+  - department news (policy: department roles can't publish public, docs/03 §7).
 - **Visual checks of the built site:**
   - Write a temporary `e2e/tests/zz-*.spec.ts`, never committed.
   - PATCH the settings as `site@demo.ecst.test` via the e2e API (:8001).

@@ -5,24 +5,24 @@ const T = {
   home: { ar: "الرئيسية", en: "Home" },
   about: { ar: "عن الكلية", en: "About" },
   departments: { ar: "الأقسام", en: "Departments" },
-  programs: { ar: "البرامج", en: "Programs" },
+  programs: { ar: "البرامج", en: "Programmes" },
   admission: { ar: "القبول", en: "Admission" },
   news: { ar: "الأخبار والفعاليات", en: "News & events" },
   contact: { ar: "تواصل", en: "Contact" },
   portal: { ar: "دخول المنصة", en: "Sign in" },
   apply: { ar: "قدّم الآن", en: "Apply now" },
   track: { ar: "تابع طلبك", en: "Track your application" },
-  explore: { ar: "استكشف البرامج", en: "Explore programs" },
+  explore: { ar: "استكشف البرامج", en: "Explore programmes" },
   open: { ar: "يقبل الآن", en: "Open" },
   closed: { ar: "مغلق حاليًا", en: "Closed" },
   all: { ar: "الكل", en: "All" },
   students: { ar: "الطلاب", en: "students" },
   teachers: { ar: "أعضاء هيئة التدريس", en: "faculty" },
-  programsCount: { ar: "البرامج", en: "programs" },
+  programsCount: { ar: "البرامج", en: "programmes" },
   departmentsCount: { ar: "الأقسام", en: "departments" },
   upcoming: { ar: "الفعالية القادمة", en: "Next event" },
   latestNews: { ar: "الأخبار", en: "News" },
-  openPrograms: { ar: "البرامج المفتوحة", en: "Open programs" },
+  openPrograms: { ar: "البرامج المفتوحة", en: "Open programmes" },
   plan: { ar: "الخطة الدراسية", en: "Study plan" },
   level: { ar: "المستوى", en: "Level" },
   levels: { ar: "المستويات", en: "levels" },
@@ -60,6 +60,12 @@ export const fmtDate = (
   iso: string,
   opts: Intl.DateTimeFormatOptions = { day: "numeric", month: "long", year: "numeric" },
 ) => new Date(iso).toLocaleDateString(lang === "ar" ? "ar-u-nu-latn" : "en-GB", opts);
+/** A time of day alone («3:00 م» · «15:00»): toLocaleDateString would add the date. */
+export const fmtTime = (lang: Lang, iso: string) =>
+  new Date(iso).toLocaleTimeString(lang === "ar" ? "ar-u-nu-latn" : "en-GB", {
+    hour: "numeric",
+    minute: "2-digit",
+  });
 export const num = (lang: Lang, n: number) =>
   n.toLocaleString(lang === "ar" ? "ar-u-nu-latn" : "en");
 /** A counted noun in either language. Arabic: 1 and 100+ singular, 2 dual (without the
@@ -83,7 +89,7 @@ export const N = {
     two: "برنامجان",
     few: "برامج",
     many: "برنامجًا",
-    en: ["program", "programs"],
+    en: ["programme", "programmes"],
   },
   department: {
     one: "قسم",

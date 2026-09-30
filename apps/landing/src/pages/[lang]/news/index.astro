@@ -72,7 +72,11 @@ const upcoming = evs
                 <span>
                   <b class="block text-sm text-text">{e.title}</b>
                   <span class="text-xs text-text-muted">
-                    {fmtDate(lang, e.starts_at, { hour: "numeric", minute: "2-digit" })}
+                    {fmtDate(lang, e.starts_at, {
+                      weekday: "long",
+                      hour: "numeric",
+                      minute: "2-digit",
+                    })}
                     {e.location ? ` · ${e.location}` : ""}
                   </span>
                 </span>
