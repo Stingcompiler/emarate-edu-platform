@@ -127,7 +127,12 @@ const lead = L(
   description={cycle ? `${cycleName(lang, cycle.cycle)} — ${lead}` : lead}
   jsonLd={jsonLd}
 >
-  <PageHead lang={lang} title={L("كيف تلتحق بالكلية", "How to join the college")} lead={lead}>
+  <PageHead
+    lang={lang}
+    title={L("كيف تلتحق بالكلية", "How to join the college")}
+    lead={lead}
+    feature
+  >
     {cycle && (
       <p class="mt-4 inline-block rounded-full bg-accent-soft px-3 py-1 text-xs font-semibold text-accent-hover">
         {cycleName(lang, cycle.cycle)}

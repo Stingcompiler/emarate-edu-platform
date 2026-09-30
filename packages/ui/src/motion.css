@@ -179,6 +179,47 @@
   animation-duration: var(--dur-4);
 }
 
+/* Public site (landing review PR 6e). A card that is a link lifts a little under the pointer —
+   it says «this opens», on devices that hover. */
+@media (hover: hover) {
+  .motion-lift {
+    transition:
+      transform var(--dur-2) var(--ease-out),
+      box-shadow var(--dur-2) var(--ease-out);
+  }
+  .motion-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px -12px rgb(17 23 39 / 0.25);
+  }
+}
+
+/* The sticky header gains a shadow once the page scrolls under it (the page script sets
+   data-scrolled), so it reads as floating above the content. */
+.motion-header {
+  transition: box-shadow var(--dur-2) var(--ease-out);
+}
+.motion-header[data-scrolled] {
+  box-shadow: 0 6px 20px -14px rgb(17 23 39 / 0.35);
+}
+
+/* Disclosure rows (FAQ) open and close with their height, where the browser can animate to
+   «auto»; elsewhere they simply open. */
+@supports (interpolate-size: allow-keywords) {
+  .motion-details {
+    interpolate-size: allow-keywords;
+  }
+  .motion-details::details-content {
+    block-size: 0;
+    overflow: clip;
+    transition:
+      block-size var(--dur-2) var(--ease-out),
+      content-visibility var(--dur-2) allow-discrete;
+  }
+  .motion-details[open]::details-content {
+    block-size: auto;
+  }
+}
+
 /* Everyone who asked for less motion gets none — including transitions. */
 @media (prefers-reduced-motion: reduce) {
   *,
@@ -192,5 +233,8 @@
   }
   .motion-confetti {
     display: none;
+  }
+  .motion-lift:hover {
+    transform: none;
   }
 }

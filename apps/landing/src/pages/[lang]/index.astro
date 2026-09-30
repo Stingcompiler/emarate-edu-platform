@@ -285,8 +285,12 @@ const jsonLd = {
     aria-label={lang === "ar" ? "طرق مختصرة" : "Shortcuts"}
   >
     <div class="grid gap-3 md:grid-cols-3">
-      {audiences.map((a) => (
-        <div class="rounded-2xl border border-border-soft bg-surface p-5">
+      {audiences.map((a, i) => (
+        <div
+          data-reveal
+          style={`--i:${i}`}
+          class="rounded-2xl border border-border-soft bg-surface p-5"
+        >
           <h2 class="font-display text-lg font-bold">{a.title}</h2>
           <ul class="mt-3 space-y-1">
             {a.links.map(([label, url]) => (
@@ -314,10 +318,12 @@ const jsonLd = {
       </a>
     </div>
     <div class="mt-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
-      {depts.map((d) => (
+      {depts.map((d, i) => (
         <a
+          data-reveal
+          style={`--i:${i}`}
           href={href(lang, `departments/${d.code}/`)}
-          class="rounded-2xl border border-border-soft bg-surface p-4 hover:shadow-md"
+          class="motion-lift rounded-2xl border border-border-soft bg-surface p-4"
         >
           <b class="block text-text">{pick(lang, d.name_ar, d.name_en)}</b>
           <span class="text-xs text-text-muted">{count(lang, d.programs.length, N.program)}</span>

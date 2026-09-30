@@ -104,7 +104,7 @@ const ext = (external: boolean) => (external ? { rel: "noopener", target: "_blan
     >
       {lang === "ar" ? "تخطَّ إلى المحتوى" : "Skip to content"}
     </a>
-    <header class="sticky top-0 z-20 border-b border-border-soft bg-surface/90 backdrop-blur">
+    <header class="motion-header sticky top-0 z-20 border-b border-border-soft bg-surface/90 backdrop-blur">
       <div class="mx-auto flex h-16 max-w-6xl items-center gap-4 px-4 lg:px-8">
         <a href={href(lang)} class="flex min-w-0 items-center gap-2 text-sm font-bold text-text">
           <img src="/favicon.svg" alt="" width="32" height="32" class="rounded-md" />
@@ -452,6 +452,12 @@ const ext = (external: boolean) => (external ? { rel: "noopener", target: "_blan
           { passive: true },
         );
       }
+
+      // The header floats (a shadow) once content scrolls under it.
+      const header = document.querySelector<HTMLElement>("header.motion-header");
+      const lift = () => header?.toggleAttribute("data-scrolled", window.scrollY > 8);
+      lift();
+      window.addEventListener("scroll", lift, { passive: true });
 
       // Menus are <details> (they work without JS); this makes them behave like menus:
       // one open at a time, closed by a tap outside or by Esc.

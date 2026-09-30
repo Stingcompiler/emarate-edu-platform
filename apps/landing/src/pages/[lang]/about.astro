@@ -3,26 +3,49 @@ import ArabicOnly from "../../components/ArabicOnly.astro";
 import Blocks from "../../components/Blocks.astro";
 import PageHead from "../../components/PageHead.astro";
 import Base from "../../layouts/Base.astro";
-import { type Page, departments, get, pages, site, stats } from "../../lib/api";
+import { type Page, departments, get, pages, site } from "../../lib/api";
 import { type Lang, arrow, href, langPaths, num, pick, t, isArabic } from "../../lib/i18n";
 
 export const getStaticPaths = langPaths;
 const lang = Astro.params.lang as Lang;
 // The "about" CMS page, when the site team has published one.
-const [s, page, st, depts, published] = await Promise.all([
+const [s, page, depts, published] = await Promise.all([
   site(),
   get<Page | null>("pages/about", null),
-  stats(),
   departments(),
   pages(),
 ]);
 // The published "about" sub-pages (history, dean, leadership …).
 const more = published.filter((p) => p.path.startsWith("about/"));
 const title = page ? pick(lang, page.title_ar, page.title_en) : t(lang, "about");
+// The featured head's facts: what the college states and what the catalogue holds — no
+// account counts (W2).
+const programCount = depts.reduce((n, d) => n + d.programs.length, 0);
+const facts: [string, string][] = [
+  ...(s.founded_year
+    ? ([[String(s.founded_year), lang === "ar" ? "سنة التأسيس" : "founded"]] as [string, string][])
+    : []),
+  ...(s.figures ?? []).map(
+    (f) => [f.value, pick(lang, f.label_ar, f.label_en)] as [string, string],
+  ),
+  ...(programCount
+    ? ([[num(lang, programCount), t(lang, "programsCount")]] as [string, string][])
+    : []),
+  ...(depts.length
+    ? ([[num(lang, depts.length), t(lang, "departmentsCount")]] as [string, string][])
+    : []),
+];
 ---
 
 <Base lang={lang} title={title} path="about/" description={page?.seo?.description}>
-  <PageHead lang={lang} title={title} lead={s.tagline} crumbs={[[t(lang, "about"), "about/"]]} />
+  <PageHead
+    lang={lang}
+    title={title}
+    lead={s.tagline}
+    crumbs={[[t(lang, "about"), "about/"]]}
+    feature
+    facts={facts}
+  />
   <div class="mx-auto grid max-w-6xl gap-10 px-4 py-10 lg:grid-cols-[2fr_1fr] lg:px-8">
     <div>
       {page ? (
@@ -52,24 +75,6 @@ const title = page ? pick(lang, page.title_ar, page.title_en) : t(lang, "about")
           ))}
         </nav>
       )}
-      {/* Figures the college states, not portal account counts (review 2026-09-30). */}
-      <div class="grid grid-cols-2 gap-2">
-        {[
-          ...(s.founded_year
-            ? [[String(s.founded_year), lang === "ar" ? "سنة التأسيس" : "founded"]]
-            : []),
-          ...(s.figures ?? []).map((f) => [f.value, pick(lang, f.label_ar, f.label_en)]),
-          [num(lang, st.programs), t(lang, "programsCount")],
-          [num(lang, st.departments), t(lang, "departmentsCount")],
-        ].map(([n, l]) => (
-          <div class="rounded-2xl bg-bg-subtle p-4 text-center">
-            <p class="font-display text-xl font-bold text-primary">
-              <bdi>{n}</bdi>
-            </p>
-            <p class="text-xs text-text-muted">{l}</p>
-          </div>
-        ))}
-      </div>
       {depts.some((d) => d.manager) && (
         <div class="rounded-2xl border border-border-soft bg-surface p-4">
           <h2 class="font-bold">{lang === "ar" ? "القيادة الأكاديمية" : "Academic leadership"}</h2>

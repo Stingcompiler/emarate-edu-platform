@@ -46,6 +46,8 @@ for (const [account, paths] of Object.entries(PAGES)) {
 }
 
 test("dark mode keeps AA contrast", async ({ page }) => {
+  // Five axe audits, like the signed-in ones above: 30s fails on a loaded machine, not a finding.
+  test.setTimeout(60_000);
   await page.emulateMedia({ colorScheme: "dark" });
   await audit(page, "/login");
   await signIn(page, "26-IT-0001");
