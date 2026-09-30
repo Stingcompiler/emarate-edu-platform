@@ -242,8 +242,8 @@ msgstr "إعلانات الكلية بلا معرّف نطاق."
 msgid "Choose the department, program or course."
 msgstr "اختر القسم أو البرنامج أو المادة."
 
-msgid "Public announcements are college-wide."
-msgstr "الإعلانات العامة على مستوى الكلية."
+msgid "Public announcements are for the college or a department."
+msgstr "الإعلانات العامة للكلية أو لقسم (في صفحته على الموقع)."
 
 msgid "Must be after the start."
 msgstr "يجب أن يكون بعد البداية."

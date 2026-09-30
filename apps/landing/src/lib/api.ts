@@ -151,6 +151,16 @@ export type Department = {
   teachers: number;
   students: number;
   programs: Program[];
+  /** Members who chose to appear, the head first (missing from an older API → none). */
+  faculty?: {
+    name_ar: string;
+    name_en: string;
+    title_ar: string;
+    title_en: string;
+    role: "manager" | "teacher" | "ta";
+  }[];
+  /** The department's own public news, newest first. */
+  news?: { public_id: string; title: string; body: string; publish_at: string | null }[];
 };
 export type News = {
   slug: string;

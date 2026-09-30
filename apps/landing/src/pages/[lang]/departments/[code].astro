@@ -1,4 +1,5 @@
 ---
+import ArabicOnly from "../../../components/ArabicOnly.astro";
 import PageHead from "../../../components/PageHead.astro";
 import ProgramRow from "../../../components/ProgramRow.astro";
 import SideLinks from "../../../components/SideLinks.astro";
@@ -17,6 +18,7 @@ import {
   t,
   num,
   word,
+  isArabic,
 } from "../../../lib/i18n";
 
 export async function getStaticPaths() {
@@ -39,6 +41,17 @@ const summary =
     `قسم ${name} في ${s.name_ar}: ${count(lang, d.programs.length, N.program)}.`,
     `${name} at ${s.name_en || s.name_ar}: ${count(lang, d.programs.length, N.program)}.`,
   );
+// Members who chose to appear (their own consent, owner decision 2026-09-30), and the
+// department's own public news.
+const faculty = d.faculty ?? [];
+const news = d.news ?? [];
+const ROLE: Record<string, string> = {
+  manager: L("رئيس القسم", "Head of department"),
+  teacher: "",
+  ta: L("معيد", "Teaching assistant"),
+};
+const initial = (name: string) =>
+  (name.replace(/^(د|أ|م|Dr|Prof|Mr|Ms)\.?\s+/u, "").trim()[0] ?? "").toUpperCase();
 const others = all
   .filter((o) => o.code !== d.code)
   .map((o) => ({
@@ -96,6 +109,55 @@ const others = all
         <p class="mt-4 text-sm text-text-muted">
           {L("لا برامج منشورة في القسم بعد.", "No programmes published yet.")}
         </p>
+      )}
+      {faculty.length > 0 && (
+        <section aria-labelledby="faculty" class="mt-10">
+          <h2 id="faculty" class="font-display text-xl font-bold">
+            {L("هيئة التدريس", "Faculty")}
+          </h2>
+          <ul class="mt-4 grid gap-3 sm:grid-cols-2">
+            {faculty.map((m, i) => (
+              <li
+                data-reveal
+                style={`--i:${i}`}
+                class="flex items-center gap-3 rounded-2xl border border-border-soft bg-surface p-4"
+              >
+                <span
+                  aria-hidden="true"
+                  class="grid size-11 shrink-0 place-items-center rounded-full bg-primary-soft font-bold text-primary-700"
+                >
+                  {initial(pick(lang, m.name_ar, m.name_en))}
+                </span>
+                <span class="min-w-0">
+                  <b class="block text-text">{pick(lang, m.name_ar, m.name_en)}</b>
+                  <span class="text-sm text-text-muted">
+                    {[pick(lang, m.title_ar, m.title_en), ROLE[m.role]].filter(Boolean).join(" · ")}
+                  </span>
+                </span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+      {news.length > 0 && (
+        <section aria-labelledby="news" class="mt-10">
+          <h2 id="news" class="font-display text-xl font-bold">
+            {L("أخبار القسم", "Department news")}
+          </h2>
+          <ul class="mt-4 space-y-3">
+            {news.map((n) => (
+              <li class="rounded-2xl border border-border-soft bg-surface p-4">
+                {n.publish_at && (
+                  <p class="text-xs text-text-muted">{fmtDate(lang, n.publish_at)}</p>
+                )}
+                <h3 class="mt-1 font-bold text-text">{n.title}</h3>
+                <ArabicOnly lang={lang} when={isArabic(n.body)} class="mt-2">
+                  <div class="space-y-2 text-sm leading-7 text-text-muted" set:html={n.body} />
+                </ArabicOnly>
+              </li>
+            ))}
+          </ul>
+        </section>
       )}
       <a
         href={href(lang, "contact/")}

@@ -90,6 +90,17 @@ export function AnnouncementNew() {
           audience: "all_internal",
         });
     }
+    // A department's news on its page of the college site — its manager's alone (owner
+    // decision 2026-09-30); the server checks the same rule.
+    for (const r of me.data?.roles ?? [])
+      if (r.role === "department_manager" && r.department)
+        list.push({
+          key: `p${r.department}`,
+          label: `قسم ${r.department_name} — خبر على صفحة القسم في الموقع العام`,
+          scope: "department",
+          scope_id: r.department,
+          audience: "public",
+        });
     for (const c of courses.data ?? []) {
       // A TA announces to a course only when the teacher allowed it (docs/03 §3.9); a
       // department manager/supervisor to every course of the department.

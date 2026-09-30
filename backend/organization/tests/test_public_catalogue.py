@@ -156,3 +156,71 @@ def test_programme_fees_outcomes_and_careers(api, it_program, it_dept, make_user
     # Structure stays the system admin's: a department manager can't set fees.
     manager = api(make_user(Role.DEPARTMENT_MANAGER, department=it_dept))
     assert manager.patch(url, {"annual_fee_sdg": 1}, format="json").status_code == 403
+
+
+def test_department_page_lists_faculty_only_with_their_consent(api, it_dept, make_user):
+    """Owner decision 2026-09-30: members appear on the public page by their own choice."""
+    from academic.models import DepartmentMembership
+    from audit.models import AuditLog
+
+    head = make_user(Role.DEPARTMENT_MANAGER, department=it_dept, full_name_ar="د. رئيس")
+    teacher = make_user(Role.TEACHER, full_name_ar="أ. أستاذ")
+    ta = make_user(Role.TEACHER, full_name_ar="م. معيد")
+    shy = make_user(Role.TEACHER, full_name_ar="أ. لا يظهر")
+    for user, kind in [(teacher, "teacher"), (ta, "ta"), (shy, "teacher")]:
+        DepartmentMembership.objects.create(department=it_dept, user=user, kind=kind)
+    url = f"/api/public/departments/{it_dept.code}"
+    assert api().get(url).data["faculty"] == []
+
+    for user, title in [(ta, "معيد"), (teacher, "أستاذ مشارك"), (head, "أستاذ")]:
+        saved = api(user).patch(
+            "/api/v1/me/public-profile",
+            {"public_profile": True, "academic_title_ar": title},
+            format="json",
+        )
+        assert saved.status_code == 200, saved.data
+    assert AuditLog.objects.filter(action="profile.public_update", target_id=str(ta.pk)).exists()
+    faculty = api().get(url).data["faculty"]
+    assert [(f["name_ar"], f["role"], f["title_ar"]) for f in faculty] == [
+        ("د. رئيس", "manager", "أستاذ"),
+        ("أ. أستاذ", "teacher", "أستاذ مشارك"),
+        ("م. معيد", "ta", "معيد"),
+    ]
+    # Turning it off removes them; nobody else can switch it for them.
+    api(teacher).patch("/api/v1/me/public-profile", {"public_profile": False}, format="json")
+    assert "أ. أستاذ" not in [f["name_ar"] for f in api().get(url).data["faculty"]]
+
+
+def test_a_department_manager_publishes_the_departments_public_news(
+    api, it_dept, ba_dept, make_user
+):
+    """Owner decision 2026-09-30: department news on its public page, by its manager only."""
+    manager = api(make_user(Role.DEPARTMENT_MANAGER, department=it_dept))
+    supervisor = api(make_user(Role.DEPARTMENT_SUPERVISOR, department=it_dept))
+
+    def post(client, scope, scope_id):
+        return client.post(
+            "/api/v1/announcements",
+            {
+                "scope": scope,
+                "scope_id": scope_id,
+                "audience": "public",
+                "title": "افتتاح معمل الشبكات",
+                "body": "<p>نص الخبر</p>",
+            },
+            format="json",
+        )
+
+    created = post(manager, "department", it_dept.pk)
+    assert created.status_code == 201, created.data
+    assert post(manager, "department", ba_dept.pk).status_code == 403  # not their department
+    assert post(manager, "college", None).status_code == 403  # the site stays the site team's
+    assert post(supervisor, "department", it_dept.pk).status_code == 403
+    public_id = created.data["public_id"]
+    assert manager.post(f"/api/v1/announcements/{public_id}/publish").status_code == 200
+    news = api().get(f"/api/public/departments/{it_dept.code}").data["news"]
+    assert [n["title"] for n in news] == ["افتتاح معمل الشبكات"]
+    assert api().get(f"/api/public/departments/{ba_dept.code}").data["news"] == []
+    # The college-wide list stays college-scoped.
+    titles = [a["title"] for a in api().get("/api/public/announcements").data]
+    assert "افتتاح معمل الشبكات" not in titles

@@ -145,9 +145,10 @@ class AnnouncementSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 {"scope_id": [gettext("Choose the department, program or course.")]}
             )
-        if attrs.get("audience") == "public" and scope != "college":
+        # Public news is the college's, or a department's on its own page (owner 2026-09-30).
+        if attrs.get("audience") == "public" and scope not in ("college", "department"):
             raise serializers.ValidationError(
-                {"audience": [gettext("Public announcements are college-wide.")]}
+                {"audience": [gettext("Public announcements are for the college or a department.")]}
             )
         return attrs
 

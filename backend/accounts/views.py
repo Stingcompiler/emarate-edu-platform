@@ -5,6 +5,7 @@ import time
 
 from django.conf import settings
 from django.core.cache import cache
+from django.db import transaction
 from django.db.models import Count, Q
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
@@ -22,7 +23,7 @@ from rest_framework_simplejwt.exceptions import TokenBackendError, TokenError
 from rest_framework_simplejwt.state import token_backend
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from audit.services import RequestMeta
+from audit.services import RequestMeta, record, snapshot
 from core.permissions import capability
 
 from . import rbac, services
@@ -35,6 +36,7 @@ from .serializers import (
     MeSerializer,
     PasswordForgotSerializer,
     PasswordResetSerializer,
+    PublicProfileSerializer,
     RegistrationCompleteResponseSerializer,
     RegistrationCompleteSerializer,
     RegistrationDecisionSerializer,
@@ -195,6 +197,34 @@ class MeView(APIView):
     @extend_schema(responses=MeSerializer, tags=["me"])
     def get(self, request):
         return Response(MeSerializer(request.user).data)
+
+
+class MyPublicProfileView(APIView):
+    """The member's own choice to appear on their department's public page, and how
+    (owner decision 2026-09-30). Only the member sets it; the change is audited."""
+
+    permission_classes = [IsAuthenticated]
+    FIELDS = ["public_profile", "full_name_en", "academic_title_ar", "academic_title_en"]
+
+    @extend_schema(responses=PublicProfileSerializer, tags=["me"])
+    def get(self, request):
+        return Response(PublicProfileSerializer(request.user).data)
+
+    @extend_schema(request=PublicProfileSerializer, responses=PublicProfileSerializer, tags=["me"])
+    def patch(self, request):
+        serializer = PublicProfileSerializer(request.user, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        old = snapshot(request.user, self.FIELDS)
+        with transaction.atomic():
+            user = serializer.save()
+            record(
+                RequestMeta.from_request(request),
+                "profile.public_update",
+                user,
+                old=old,
+                new=snapshot(user, self.FIELDS),
+            )
+        return Response(PublicProfileSerializer(user).data)
 
 
 # ─── Public: registration, password reset, activation ─────────────────────

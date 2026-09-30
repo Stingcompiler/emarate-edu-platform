@@ -26,9 +26,14 @@
   - Staggered `data-reveal` with `--i` on the home cards.
   - `dl` items: `dt` before `dd`.
 - **Then PR 7+:** large-screen layouts per role (full review §3 «PR 7 وما بعده»).
-- 6c deferred, waiting on the owner:
-  - faculty on the department page (needs a consent field);
-  - department news (policy: department roles can't publish public, docs/03 §7).
+- **PR 6f `feat/department-faculty-news`**: the owner approved both 6c deferrals (2026-09-30); docs/03 is now v2.3.
+  - `User.public_profile` plus `academic_title_ar/en`, set by the member at `PATCH /api/v1/me/public-profile` (audited
+    `profile.public_update`), with a card in «الإعدادات».
+  - Public department data gains `faculty` (the opted-in head, then teachers, then TAs) and `news`.
+  - `may_announce`: a department manager may post a public, department-scoped announcement
+    (`rbac.has_role_in`). The college-wide public list stays college-only.
+  - Composer option «خبر على صفحة القسم».
+  - Demo: two opted-in members and one department news item.
 - **Visual checks of the built site:**
   - Write a temporary `e2e/tests/zz-*.spec.ts`, never committed.
   - PATCH the settings as `site@demo.ecst.test` via the e2e API (:8001).
