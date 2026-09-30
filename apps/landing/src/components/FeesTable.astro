@@ -1,0 +1,115 @@
+---
+import type { Program } from "../lib/api";
+import { degree, href, type Lang, money, pick, years } from "../lib/i18n";
+
+/**
+ * Yearly fees of every programme, built from the programmes' own fields (landing review
+ * 2026-10, PR 6b) — under the college's official text on «الرسوم والمنح». Programmes without
+ * a stated fee are left out; nothing shows until at least one has one.
+ */
+interface Props {
+  lang: Lang;
+  programs: Program[];
+}
+const { lang, programs } = Astro.props;
+const L = (ar: string, en: string) => (lang === "ar" ? ar : en);
+const priced = programs.filter((p) => p.fee_sdg || p.fee_usd);
+const groups = [...new Set(priced.map((p) => p.degree))].map((key) => ({
+  label: degree(lang, key, priced.find((p) => p.degree === key)!.degree_label),
+  rows: priced.filter((p) => p.degree === key),
+}));
+const anyUsd = priced.some((p) => p.fee_usd);
+---
+
+{groups.length > 0 && (
+  <section aria-labelledby="fees-table" class="mt-10">
+    <h2 id="fees-table" class="font-display text-xl font-bold">
+      {L("الرسوم السنوية لكل برنامج", "Yearly fees by programme")}
+    </h2>
+    {groups.map((g) => (
+      <div class="mt-5">
+        <h3 class="text-sm font-bold text-primary">{g.label}</h3>
+        {/* Phone: a card per programme; from sm up a table. */}
+        <ul class="mt-2 space-y-2 sm:hidden">
+          {g.rows.map((p) => (
+            <li class="rounded-2xl border border-border-soft bg-surface p-4 text-sm">
+              <a href={href(lang, `programs/${p.code}/`)} class="font-semibold text-primary">
+                {pick(lang, p.name_ar, p.name_en)}
+              </a>
+              <p class="mt-0.5 text-xs text-text-muted">
+                {pick(lang, p.department_name, p.department_name_en)} ·{" "}
+                {years(lang, p.duration_terms)}
+              </p>
+              <dl class="mt-2 grid grid-cols-2 gap-2">
+                {p.fee_sdg && (
+                  <div>
+                    <dt class="text-xs text-text-muted">{L("سنويًا", "Yearly")}</dt>
+                    <dd class="font-semibold">
+                      <bdi>{money(lang, p.fee_sdg, "SDG")}</bdi>
+                    </dd>
+                  </div>
+                )}
+                {p.fee_usd && (
+                  <div>
+                    <dt class="text-xs text-text-muted">{L("للوافدين", "International")}</dt>
+                    <dd class="font-semibold">
+                      <bdi>{money(lang, p.fee_usd, "USD")}</bdi>
+                    </dd>
+                  </div>
+                )}
+              </dl>
+            </li>
+          ))}
+        </ul>
+        <div class="mt-2 hidden overflow-hidden rounded-2xl border border-border-soft sm:block">
+          <table class="w-full text-sm">
+            <thead class="bg-surface-alt text-xs text-text-muted">
+              <tr>
+                <th scope="col" class="px-4 py-2 text-start font-medium">
+                  {L("البرنامج", "Programme")}
+                </th>
+                <th scope="col" class="px-4 py-2 text-start font-medium">
+                  {L("المدة", "Duration")}
+                </th>
+                <th scope="col" class="px-4 py-2 text-end font-medium">
+                  {L("سنويًا", "Yearly")}
+                </th>
+                {anyUsd && (
+                  <th scope="col" class="px-4 py-2 text-end font-medium">
+                    {L("للوافدين", "International")}
+                  </th>
+                )}
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-border-soft bg-surface">
+              {g.rows.map((p) => (
+                <tr>
+                  <th scope="row" class="px-4 py-3 text-start font-normal">
+                    <a
+                      href={href(lang, `programs/${p.code}/`)}
+                      class="font-semibold text-primary hover:underline"
+                    >
+                      {pick(lang, p.name_ar, p.name_en)}
+                    </a>
+                    <span class="block text-xs text-text-muted">
+                      {pick(lang, p.department_name, p.department_name_en)}
+                    </span>
+                  </th>
+                  <td class="px-4 py-3 text-text-muted">{years(lang, p.duration_terms)}</td>
+                  <td class="px-4 py-3 text-end font-semibold whitespace-nowrap">
+                    {p.fee_sdg ? <bdi>{money(lang, p.fee_sdg, "SDG")}</bdi> : "—"}
+                  </td>
+                  {anyUsd && (
+                    <td class="px-4 py-3 text-end font-semibold whitespace-nowrap">
+                      {p.fee_usd ? <bdi>{money(lang, p.fee_usd, "USD")}</bdi> : "—"}
+                    </td>
+                  )}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    ))}
+  </section>
+)}

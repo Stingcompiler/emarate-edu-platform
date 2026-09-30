@@ -209,6 +209,28 @@ class Command(BaseCommand):
                     # college enters its own in «الهيكل الأكاديمي».
                     programs[p_code].total_credit_hours = {4: 68, 8: 132, 10: 160}.get(terms)
                     programs[p_code].save(update_fields=["total_credit_hours"])
+                if programs[p_code].annual_fee_sdg is None:
+                    # Demo fees and sample outcomes (marked «مثال»), so the programme page and
+                    # the fees table can be seen; the college enters its own.
+                    diploma = degree == Program.Degree.DIPLOMA
+                    programs[p_code].annual_fee_sdg = 900_000 if diploma else 1_600_000
+                    programs[p_code].annual_fee_usd = 700 if diploma else 1_200
+                    programs[p_code].outcomes_ar = (
+                        f"(مثال) يطبّق أساسيات {p_ar} في مشروعات حقيقية\n"
+                        "(مثال) يعمل ضمن فريق ويكتب تقارير مهنية\n"
+                        "(مثال) يستخدم الأدوات الحديثة في مجاله"
+                    )
+                    programs[
+                        p_code
+                    ].careers_ar = "(مثال) القطاع الحكومي\n(مثال) الشركات الخاصة\n(مثال) العمل الحر"
+                    programs[p_code].save(
+                        update_fields=[
+                            "annual_fee_sdg",
+                            "annual_fee_usd",
+                            "outcomes_ar",
+                            "careers_ar",
+                        ]
+                    )
 
         year, _ = AcademicYear.objects.get_or_create(
             name="2026/2027",

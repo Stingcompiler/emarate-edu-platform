@@ -122,3 +122,37 @@ def test_the_system_admin_sets_a_programmes_total_hours(api, it_program, make_us
     assert admin.patch(url, {"total_credit_hours": 301}, format="json").status_code == 400
     assert admin.patch(url, {"total_credit_hours": None}, format="json").status_code == 200
     assert api().get(f"/api/public/programs/{it_program.code}").data["credit_hours"] is None
+
+
+def test_programme_fees_outcomes_and_careers(api, it_program, it_dept, make_user):
+    """Landing review 2026-10 (PR 6b): the facts an applicant weighs, set by the system admin."""
+    admin = api(make_user(Role.SYSTEM_ADMIN))
+    url = f"/api/v1/programs/{it_program.pk}"
+    public = f"/api/public/programs/{it_program.code}"
+    blank = api().get(public).data
+    assert blank["fee_sdg"] is None and blank["fee_usd"] is None
+    assert blank["outcomes_ar"] == [] and blank["careers_ar"] == []
+
+    saved = admin.patch(
+        url,
+        {
+            "annual_fee_sdg": 1_500_000,
+            "annual_fee_usd": 1200,
+            "outcomes_ar": "- يصمم الشبكات\n\n2. يدير قواعد البيانات\n• 3.5 مثال رقمي يبقى",
+            "careers_ar": "مهندس شبكات\nمحلل نظم\n",
+        },
+        format="json",
+    )
+    assert saved.status_code == 200, saved.data
+    data = api().get(public).data
+    assert (data["fee_sdg"], data["fee_usd"]) == (1_500_000, 1200)
+    assert data["outcomes_ar"] == ["يصمم الشبكات", "يدير قواعد البيانات", "3.5 مثال رقمي يبقى"]
+    assert data["careers_ar"] == ["مهندس شبكات", "محلل نظم"]
+    listed = next(p for p in api().get("/api/public/programs").data if p["code"] == it_program.code)
+    assert listed["fee_sdg"] == 1_500_000
+
+    assert admin.patch(url, {"annual_fee_sdg": 0}, format="json").status_code == 400
+    assert admin.patch(url, {"annual_fee_usd": -5}, format="json").status_code == 400
+    # Structure stays the system admin's: a department manager can't set fees.
+    manager = api(make_user(Role.DEPARTMENT_MANAGER, department=it_dept))
+    assert manager.patch(url, {"annual_fee_sdg": 1}, format="json").status_code == 403

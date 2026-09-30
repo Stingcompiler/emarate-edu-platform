@@ -73,19 +73,35 @@ test("every public page loads, fits, is accessible and has its SEO basics", asyn
   expect(problems, problems.join("\n")).toEqual([]);
 });
 
-test("the programme page keeps «apply to this programme» in reach on the phone", async ({
-  page,
-  isMobile,
-}) => {
+test("the programme page keeps «apply to this programme» in reach", async ({ page, isMobile }) => {
   await page.goto(`${SITE}/ar/programs/BIT/`);
-  const sticky = page.getByRole("link", { name: "قدّم لهذا البرنامج" });
-  if (!isMobile) {
-    await expect(sticky).toBeHidden(); // desktop keeps the button in the page header
-    return;
+  const bar = page.locator("[data-apply-bar]").getByRole("link", { name: "قدّم لهذا البرنامج" });
+  const card = page
+    .getByRole("region", { name: "أساسيات المتقدم" })
+    .getByRole("link", { name: "قدّم لهذا البرنامج" });
+  await expect(card).toHaveAttribute("href", /\/apply\?program=BIT$/);
+  await page.mouse.wheel(0, 3000); // scrolled past the page header's button
+  if (isMobile) {
+    await expect(bar).toBeInViewport();
+    await expect(bar).toHaveAttribute("href", /\/apply\?program=BIT$/);
+  } else {
+    await expect(bar).toBeHidden();
+    await expect(card).toBeInViewport(); // the side card is sticky on large screens
   }
-  await page.mouse.wheel(0, 3000); // scrolled past the header's button
-  await expect(sticky).toBeInViewport();
-  await expect(sticky).toHaveAttribute("href", /\/apply\?program=BIT$/);
+});
+
+test("the programme page states its fees, and the fees page lists every programme", async ({
+  page,
+}) => {
+  // The demo data sets yearly fees (seed_demo); the college enters its own.
+  await page.goto(`${SITE}/ar/programs/BIT/`);
+  const facts = page.getByRole("region", { name: "أساسيات المتقدم" });
+  await expect(facts).toContainText("الرسوم السنوية");
+  await expect(facts).toContainText("جنيه");
+  await expect(page.getByRole("heading", { name: "ماذا ستتعلم" })).toBeVisible();
+  await page.goto(`${SITE}/ar/admissions/fees/`);
+  const table = page.getByRole("region", { name: "الرسوم السنوية لكل برنامج" });
+  await expect(table.getByRole("link", { name: "بكالوريوس تقنية المعلومات" })).toBeVisible();
 });
 
 test("the site menus come from the CMS and behave like menus", async ({ page, isMobile }) => {
