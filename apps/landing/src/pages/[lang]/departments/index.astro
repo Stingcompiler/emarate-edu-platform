@@ -2,17 +2,16 @@
 import PageHead from "../../../components/PageHead.astro";
 import Base from "../../../layouts/Base.astro";
 import { departments } from "../../../lib/api";
-import { type Lang, href, langPaths, num, pick, t, count, N } from "../../../lib/i18n";
+import { type Lang, href, langPaths, num, pick, t, count, N, arrow } from "../../../lib/i18n";
 
 export const getStaticPaths = langPaths;
 const lang = Astro.params.lang as Lang;
 const depts = await departments();
 const programs = depts.reduce((n, d) => n + d.programs.length, 0);
-const teachers = depts.reduce((n, d) => n + d.teachers, 0);
 const lead =
   lang === "ar"
-    ? `${count(lang, depts.length, N.department)} · ${count(lang, programs, N.program)} · ${count(lang, teachers, N.faculty)}`
-    : `${count(lang, depts.length, N.department)} · ${count(lang, programs, N.program)} · ${count(lang, teachers, N.faculty)}`;
+    ? `${count(lang, depts.length, N.department)} · ${count(lang, programs, N.program)}`
+    : `${count(lang, depts.length, N.department)} · ${count(lang, programs, N.program)}`;
 ---
 
 <Base lang={lang} title={t(lang, "departments")} path="departments/">
@@ -33,20 +32,10 @@ const lead =
         </span>
         <h2 class="mt-3 font-display text-xl font-bold">{pick(lang, d.name_ar, d.name_en)}</h2>
         {d.description && <p class="mt-2 text-sm leading-6 text-text-muted">{d.description}</p>}
-        <div class="mt-4 grid grid-cols-3 gap-2 text-center text-xs text-text-muted">
-          <span>
-            <b class="block text-lg text-text">{num(lang, d.programs.length)}</b>
-            {t(lang, "programs")}
-          </span>
-          <span>
-            <b class="block text-lg text-text">{num(lang, d.teachers)}</b>
-            {t(lang, "teachers")}
-          </span>
-          <span>
-            <b class="block text-lg text-text">{num(lang, d.students)}</b>
-            {t(lang, "students")}
-          </span>
-        </div>
+        {/* Programmes only: portal account counts are not the college's figures (review 2026-09-30). */}
+        <p class="mt-4 text-sm font-semibold text-primary">
+          {count(lang, d.programs.length, N.program)} {arrow(lang)}
+        </p>
         {d.manager && (
           <p class="mt-4 border-t border-border-soft pt-3 text-xs text-text-muted">
             {t(lang, "manager")} · <b class="text-text">{d.manager}</b>

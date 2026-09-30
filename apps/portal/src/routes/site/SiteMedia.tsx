@@ -354,10 +354,18 @@ function MenuRow({
   );
 }
 
+type Figure = { value: string; label_ar: string; label_en?: string };
+
 function SiteSettingsForm() {
   const settings = useQuery({
     queryKey: ["site", "settings"],
     queryFn: async () => ok(await api.GET("/api/v1/content/site-settings")) ?? null,
+  });
+  const media = useQuery({
+    queryKey: ["site", "media", "all"],
+    queryFn: async () =>
+      ok(await api.GET("/api/v1/content/media", { params: { query: { page_size: 100 } } }))
+        ?.results ?? [],
   });
   const [form, setForm] = useState({
     name_ar: "",
@@ -366,10 +374,20 @@ function SiteSettingsForm() {
     phone: "",
     whatsapp_e164: "",
     address: "",
+    founded_year: "",
+    licence_ar: "",
+    licence_en: "",
+    licence_url: "",
+    office_hours_ar: "",
+    office_hours_en: "",
+    map_url: "",
+    hero_image: "",
+    share_image: "",
   });
+  const [figures, setFigures] = useState<Figure[]>([]);
   useEffect(() => {
     const s = settings.data;
-    if (s)
+    if (s) {
       setForm({
         name_ar: s.name_ar ?? "",
         tagline: s.tagline ?? "",
@@ -377,11 +395,31 @@ function SiteSettingsForm() {
         phone: s.phone ?? "",
         whatsapp_e164: s.whatsapp_e164 ?? "",
         address: s.address ?? "",
+        founded_year: s.founded_year ? String(s.founded_year) : "",
+        licence_ar: s.licence_ar ?? "",
+        licence_en: s.licence_en ?? "",
+        licence_url: s.licence_url ?? "",
+        office_hours_ar: s.office_hours_ar ?? "",
+        office_hours_en: s.office_hours_en ?? "",
+        map_url: s.map_url ?? "",
+        hero_image: s.hero_image ?? "",
+        share_image: s.share_image ?? "",
       });
+      setFigures(((s.figures as Figure[] | undefined) ?? []).map((f) => ({ ...f })));
+    }
   }, [settings.data]);
   const save = useMutation({
     mutationFn: async () => {
-      const { data, error } = await api.PATCH("/api/v1/content/site-settings", { body: form });
+      const body = {
+        ...form,
+        founded_year: form.founded_year ? Number(form.founded_year) : null,
+        hero_image: form.hero_image || null,
+        share_image: form.share_image || null,
+        figures,
+      };
+      const { data, error } = await api.PATCH("/api/v1/content/site-settings", {
+        body: body as never,
+      });
       if (!data) throw error;
     },
   });
@@ -430,6 +468,163 @@ function SiteSettingsForm() {
               value={form.address}
               onChange={(e) => set({ address: e.target.value })}
             />
+            <Field
+              label="ساعات العمل"
+              value={form.office_hours_ar}
+              placeholder="الأحد–الخميس 8:00–15:00"
+              onChange={(e) => set({ office_hours_ar: e.target.value })}
+            />
+            <Field
+              label="ساعات العمل بالإنجليزية"
+              dir="ltr"
+              value={form.office_hours_en}
+              onChange={(e) => set({ office_hours_en: e.target.value })}
+            />
+            <Field
+              label="رابط الخريطة (https://…)"
+              dir="ltr"
+              value={form.map_url}
+              onChange={(e) => set({ map_url: e.target.value })}
+            />
+          </Card>
+        </div>
+        <div>
+          {/* What makes a parent trust the college (review 2026-09-30): shown on the home
+              page only once filled in — never a zero or a portal count. */}
+          <SectionLabel>الترخيص والأرقام — تظهر في الصفحة الرئيسية</SectionLabel>
+          <Card>
+            <Field
+              label="سنة التأسيس"
+              inputMode="numeric"
+              dir="ltr"
+              value={form.founded_year}
+              onChange={(e) => set({ founded_year: e.target.value.replace(/\D/g, "").slice(0, 4) })}
+            />
+            <Field
+              label="الترخيص (جملة واحدة)"
+              value={form.licence_ar}
+              placeholder="مرخّصة من وزارة التعليم العالي والبحث العلمي — القرار رقم … لسنة …"
+              onChange={(e) => set({ licence_ar: e.target.value })}
+            />
+            <Field
+              label="الترخيص بالإنجليزية"
+              dir="ltr"
+              value={form.licence_en}
+              onChange={(e) => set({ licence_en: e.target.value })}
+            />
+            <Field
+              label="رابط التفاصيل"
+              dir="ltr"
+              value={form.licence_url}
+              placeholder="/ar/about/accreditation/"
+              onChange={(e) => set({ licence_url: e.target.value })}
+            />
+          </Card>
+          <Card className="mt-3 space-y-2 p-4">
+            <p className="text-sm font-semibold text-text">أرقام الكلية (حتى ستة)</p>
+            <p className="text-xs text-text-muted">
+              أرقام موثّقة تحددها الكلية، مثل: الخريجون، البرامج المعتمدة، الشركاء.
+            </p>
+            {figures.map((f, i) => (
+              <div key={i} className="grid grid-cols-[90px_1fr_1fr_auto] items-center gap-2">
+                <input
+                  aria-label={`الرقم ${i + 1}`}
+                  dir="ltr"
+                  value={f.value}
+                  placeholder="1,200+"
+                  onChange={(e) =>
+                    setFigures((all) =>
+                      all.map((x, j) => (j === i ? { ...x, value: e.target.value } : x)),
+                    )
+                  }
+                  className="min-h-11 rounded-lg border border-border bg-surface px-2 text-center text-sm"
+                />
+                <input
+                  aria-label={`عنوان الرقم ${i + 1}`}
+                  value={f.label_ar}
+                  placeholder="خريج"
+                  onChange={(e) =>
+                    setFigures((all) =>
+                      all.map((x, j) => (j === i ? { ...x, label_ar: e.target.value } : x)),
+                    )
+                  }
+                  className="min-h-11 rounded-lg border border-border bg-surface px-2 text-sm"
+                />
+                <input
+                  aria-label={`عنوان الرقم ${i + 1} بالإنجليزية`}
+                  dir="ltr"
+                  value={f.label_en ?? ""}
+                  placeholder="graduates"
+                  onChange={(e) =>
+                    setFigures((all) =>
+                      all.map((x, j) => (j === i ? { ...x, label_en: e.target.value } : x)),
+                    )
+                  }
+                  className="min-h-11 rounded-lg border border-border bg-surface px-2 text-sm"
+                />
+                <button
+                  type="button"
+                  aria-label={`حذف الرقم ${i + 1}`}
+                  onClick={() => setFigures((all) => all.filter((_, j) => j !== i))}
+                  className="grid size-11 place-items-center rounded-lg text-danger-strong hover:bg-danger-soft"
+                >
+                  ×
+                </button>
+              </div>
+            ))}
+            {figures.length < 6 && (
+              <Button
+                variant="secondary"
+                className="min-h-11"
+                onClick={() =>
+                  setFigures((all) => [...all, { value: "", label_ar: "", label_en: "" }])
+                }
+              >
+                + رقم
+              </Button>
+            )}
+          </Card>
+        </div>
+        <div>
+          <SectionLabel>الصور — من مكتبة الوسائط</SectionLabel>
+          <Card>
+            {(
+              [
+                ["hero_image", "صورة الصفحة الرئيسية (الحرم أو الطلاب)"],
+                ["share_image", "صورة المشاركة (واتساب وفيسبوك)؛ الشعار إن تُركت"],
+              ] as const
+            ).map(([key, label]) => {
+              const picked = (media.data ?? []).find((m) => m.public_id === form[key]);
+              return (
+                <label
+                  key={key}
+                  className="block border-b border-border-soft px-4 py-3 last:border-b-0"
+                >
+                  <span className="block text-xs text-text-muted">{label}</span>
+                  <span className="mt-1 flex items-center gap-3">
+                    {picked?.url && (
+                      <img
+                        src={picked.url}
+                        alt=""
+                        className="size-12 shrink-0 rounded-lg object-cover"
+                      />
+                    )}
+                    <select
+                      value={form[key]}
+                      onChange={(e) => set({ [key]: e.target.value })}
+                      className="min-h-11 w-full rounded-lg border border-border bg-surface px-3 text-sm"
+                    >
+                      <option value="">بلا صورة</option>
+                      {(media.data ?? []).map((m) => (
+                        <option key={m.public_id} value={m.public_id}>
+                          {m.alt_ar || m.url.split("/").pop()}
+                        </option>
+                      ))}
+                    </select>
+                  </span>
+                </label>
+              );
+            })}
           </Card>
         </div>
       </div>

@@ -49,16 +49,19 @@ const title = page ? pick(lang, page.title_ar, page.title_en) : t(lang, "about")
           ))}
         </nav>
       )}
+      {/* Figures the college states, not portal account counts (review 2026-09-30). */}
       <div class="grid grid-cols-2 gap-2">
         {[
-          [st.students, t(lang, "students")],
-          [st.teachers, t(lang, "teachers")],
-          [st.programs, t(lang, "programsCount")],
-          [st.departments, t(lang, "departmentsCount")],
+          ...(s.founded_year
+            ? [[String(s.founded_year), lang === "ar" ? "سنة التأسيس" : "founded"]]
+            : []),
+          ...(s.figures ?? []).map((f) => [f.value, pick(lang, f.label_ar, f.label_en)]),
+          [num(lang, st.programs), t(lang, "programsCount")],
+          [num(lang, st.departments), t(lang, "departmentsCount")],
         ].map(([n, l]) => (
           <div class="rounded-2xl bg-bg-subtle p-4 text-center">
-            <p class="font-display text-xl font-bold text-primary" data-count={Number(n)}>
-              {num(lang, Number(n))}
+            <p class="font-display text-xl font-bold text-primary">
+              <bdi>{n}</bdi>
             </p>
             <p class="text-xs text-text-muted">{l}</p>
           </div>

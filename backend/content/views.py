@@ -204,13 +204,17 @@ class SiteSettingsView(APIView):
 
     @extend_schema(responses=SiteSettingsSerializer)
     def get(self, request):
-        return Response(SiteSettingsSerializer(SiteSettings.load()).data)
+        return Response(
+            SiteSettingsSerializer(SiteSettings.load(), context={"request": request}).data
+        )
 
     @extend_schema(request=SiteSettingsSerializer, responses=SiteSettingsSerializer)
     def patch(self, request):
         settings_ = SiteSettings.load()
         old = snapshot(settings_)
-        data = SiteSettingsSerializer(settings_, data=request.data, partial=True)
+        data = SiteSettingsSerializer(
+            settings_, data=request.data, partial=True, context={"request": request}
+        )
         data.is_valid(raise_exception=True)
         data.save()
         record(_meta(request), "site.settings", settings_, old=old, new=snapshot(settings_))
@@ -406,7 +410,9 @@ class PublicAnnouncementList(_PublicRead):
 class PublicSiteSettingsView(_PublicRead):
     @extend_schema(responses=SiteSettingsSerializer)
     def get(self, request):
-        return Response(SiteSettingsSerializer(SiteSettings.load()).data)
+        return Response(
+            SiteSettingsSerializer(SiteSettings.load(), context={"request": request}).data
+        )
 
 
 @PUBLIC_CACHE

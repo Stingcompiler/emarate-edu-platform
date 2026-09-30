@@ -288,7 +288,26 @@ class RedirectSerializer(serializers.ModelSerializer):
         return value
 
 
+class _MediaRef(serializers.SlugRelatedField):
+    def __init__(self, **kwargs):
+        super().__init__(
+            slug_field="public_id",
+            queryset=MediaAsset.objects.all(),
+            allow_null=True,
+            required=False,
+            **kwargs,
+        )
+
+
 class SiteSettingsSerializer(serializers.ModelSerializer):
+    hero_image = _MediaRef()
+    share_image = _MediaRef()
+    hero_image_url = serializers.SerializerMethodField()
+    hero_image_alt_ar = serializers.CharField(
+        source="hero_image.alt_ar", read_only=True, default=""
+    )
+    share_image_url = serializers.SerializerMethodField()
+
     class Meta:
         model = SiteSettings
         fields = [
@@ -301,4 +320,61 @@ class SiteSettingsSerializer(serializers.ModelSerializer):
             "address",
             "social",
             "seo",
+            "founded_year",
+            "licence_ar",
+            "licence_en",
+            "licence_url",
+            "figures",
+            "office_hours_ar",
+            "office_hours_en",
+            "map_url",
+            "hero_image",
+            "hero_image_url",
+            "hero_image_alt_ar",
+            "share_image",
+            "share_image_url",
         ]
+
+    def _url(self, asset) -> str | None:
+        if asset is None or not asset.file:
+            return None
+        request = self.context.get("request")
+        url = asset.file.url
+        return request.build_absolute_uri(url) if request else url
+
+    def get_hero_image_url(self, obj) -> str | None:
+        return self._url(obj.hero_image)
+
+    def get_share_image_url(self, obj) -> str | None:
+        return self._url(obj.share_image)
+
+    def validate_founded_year(self, value):
+        if value is not None and not 1800 <= value <= 2100:
+            raise serializers.ValidationError(gettext("Enter a year between 1800 and 2100."))
+        return value
+
+    def validate_licence_url(self, value):
+        value = value.strip()
+        if value and not (
+            value.startswith("https://") or (value.startswith("/") and not value.startswith("//"))
+        ):
+            raise serializers.ValidationError(
+                gettext("Use a portal path (/...) or an https:// link.")
+            )
+        return value
+
+    def validate_figures(self, value):
+        """At most six {value, label_ar, label_en}; blank rows are dropped."""
+        if not isinstance(value, list):
+            raise serializers.ValidationError(gettext("A list of figures."))
+        clean = []
+        for row in value:
+            if not isinstance(row, dict):
+                raise serializers.ValidationError(gettext("A list of figures."))
+            item = {k: str(row.get(k, "")).strip()[:60] for k in ("value", "label_ar", "label_en")}
+            item["value"] = item["value"][:20]
+            if item["value"] and item["label_ar"]:
+                clean.append(item)
+        if len(clean) > 6:
+            raise serializers.ValidationError(gettext("At most six figures."))
+        return clean

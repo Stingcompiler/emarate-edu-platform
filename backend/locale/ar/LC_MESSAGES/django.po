@@ -852,3 +852,12 @@ msgstr "هذا الطالب من قسم آخر؛ يسجّله مسؤول الم�
 
 msgid "Give the reason for rejecting."
 msgstr "اكتب سبب الرفض."
+
+msgid "Enter a year between 1800 and 2100."
+msgstr "أدخل سنة بين 1800 و2100."
+
+msgid "A list of figures."
+msgstr "قائمة أرقام."
+
+msgid "At most six figures."
+msgstr "ستة أرقام على الأكثر."

@@ -3,7 +3,7 @@ import "@fontsource/ibm-plex-sans-arabic/400.css";
 import "@fontsource/ibm-plex-sans-arabic/600.css";
 import "@fontsource/noto-kufi-arabic/700.css";
 import "../styles/global.css";
-import { PORTAL, site as loadSite, pages } from "../lib/api";
+import { PORTAL, site as loadSite, pages, programs as loadPrograms } from "../lib/api";
 import { type Lang, dir, href, pick, t } from "../lib/i18n";
 import { navigation } from "../lib/menus";
 
@@ -31,7 +31,17 @@ const shortName = siteName.split(" ").slice(0, 2).join(" ");
 const other: Lang = lang === "ar" ? "en" : "ar";
 const canonical = new URL(href(lang, path), Astro.site);
 const alternate = (l: Lang) => new URL(href(l, path), Astro.site).toString();
-const desc = description || s.seo?.description || s.tagline || siteName;
+// Every page describes itself (review 2026-09-30: ~70 pages shared the college's name as
+// their description, so search results all looked alike).
+const desc =
+  description ||
+  (title !== siteName
+    ? `${title} — ${siteName}${s.tagline ? `. ${s.tagline}` : ""}`
+    : s.seo?.description || s.tagline || siteName);
+// A picture for WhatsApp/Facebook previews: the page's own, else the college's share image.
+const shareImage = image || s.share_image_url || null;
+// «قدّم الآن» sits in the header whenever an intake is open (review W1).
+const applying = (await loadPrograms()).some((p) => p.intake?.accepting);
 const fullTitle = title === siteName ? title : `${title} — ${siteName}`;
 const current = Astro.url.pathname;
 const header = await navigation(lang, "header", current);
@@ -75,8 +85,8 @@ const ext = (external: boolean) => (external ? { rel: "noopener", target: "_blan
     <meta property="og:description" content={desc} />
     <meta property="og:url" content={canonical} />
     <meta property="og:locale" content={lang === "ar" ? "ar_SD" : "en_GB"} />
-    {image && <meta property="og:image" content={image} />}
-    <meta name="twitter:card" content={image ? "summary_large_image" : "summary"} />
+    {shareImage && <meta property="og:image" content={shareImage} />}
+    <meta name="twitter:card" content={shareImage ? "summary_large_image" : "summary"} />
     <meta name="theme-color" content="#0b2447" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     {jsonLd && (
@@ -167,10 +177,21 @@ const ext = (external: boolean) => (external ? { rel: "noopener", target: "_blan
         </a>
         <a
           href={`${PORTAL}/login`}
-          class="ms-auto whitespace-nowrap rounded-md bg-surface-alt px-3 py-2 text-xs font-semibold text-text hover:bg-border-soft sm:ms-0 sm:text-sm"
+          class:list={[
+            "whitespace-nowrap rounded-md px-3 py-2 text-xs font-semibold text-text hover:bg-surface-alt sm:text-sm",
+            applying ? "hidden sm:inline-block" : "ms-auto bg-surface-alt sm:ms-0",
+          ]}
         >
           {t(lang, "portal")}
         </a>
+        {applying && (
+          <a
+            href={`${PORTAL}/apply`}
+            class="ms-auto whitespace-nowrap rounded-md bg-accent px-3 py-2 text-xs font-bold text-white hover:bg-accent-hover sm:ms-0 sm:text-sm"
+          >
+            {t(lang, "apply")}
+          </a>
+        )}
         <details data-menu class="lg:hidden">
           <summary
             class="grid size-10 cursor-pointer list-none place-items-center rounded-md hover:bg-surface-alt"

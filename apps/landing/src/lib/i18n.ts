@@ -50,8 +50,9 @@ export const fmtDate = (
   lang: Lang,
   iso: string,
   opts: Intl.DateTimeFormatOptions = { day: "numeric", month: "long", year: "numeric" },
-) => new Date(iso).toLocaleDateString(lang === "ar" ? "ar" : "en-GB", opts);
-export const num = (lang: Lang, n: number) => n.toLocaleString(lang === "ar" ? "ar" : "en");
+) => new Date(iso).toLocaleDateString(lang === "ar" ? "ar-u-nu-latn" : "en-GB", opts);
+export const num = (lang: Lang, n: number) =>
+  n.toLocaleString(lang === "ar" ? "ar-u-nu-latn" : "en");
 /** A counted noun in either language. Arabic: 1 and 100+ singular, 2 dual (without the
  *  number), 3–10 plural, 11–99 accusative singular — «٥ أقسام», «قسمان», «١١ برنامجًا». */
 type Noun = { one: string; two: string; few: string; many: string; en: [string, string] };
