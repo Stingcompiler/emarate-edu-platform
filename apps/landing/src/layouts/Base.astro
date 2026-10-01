@@ -126,13 +126,15 @@ const ext = (external: boolean) => (external ? { rel: "noopener", target: "_blan
             e.children.length ? (
               <details data-menu class="relative">
                 <summary
+                  data-current={e.active ? "" : undefined}
                   class:list={[
-                    "flex cursor-pointer list-none items-center gap-1 rounded-md px-2.5 py-2 text-sm font-semibold whitespace-nowrap hover:bg-surface-alt",
+                    "motion-nav-link flex cursor-pointer list-none items-center gap-1 rounded-md px-2.5 py-2 text-sm font-semibold whitespace-nowrap hover:bg-surface-alt",
                     e.active ? "text-primary" : "text-text-muted",
                   ]}
                 >
                   {e.label}
                   <svg
+                    class="motion-chevron"
                     width="12"
                     height="12"
                     viewBox="0 0 24 24"
@@ -144,7 +146,7 @@ const ext = (external: boolean) => (external ? { rel: "noopener", target: "_blan
                     <path d="m6 9 6 6 6-6" />
                   </svg>
                 </summary>
-                <div class="absolute start-0 top-11 z-30 w-64 rounded-xl border border-border-soft bg-surface p-2 shadow-lg">
+                <div class="motion-drop absolute start-0 top-11 z-30 w-64 rounded-xl border border-border-soft bg-surface p-2 shadow-lg">
                   {e.children.map((c) => (
                     <a
                       href={c.href}
@@ -166,7 +168,7 @@ const ext = (external: boolean) => (external ? { rel: "noopener", target: "_blan
                 {...ext(e.external)}
                 aria-current={e.active ? "page" : undefined}
                 class:list={[
-                  "rounded-md px-2.5 py-2 text-sm font-semibold whitespace-nowrap hover:bg-surface-alt",
+                  "motion-nav-link rounded-md px-2.5 py-2 text-sm font-semibold whitespace-nowrap hover:bg-surface-alt",
                   e.active ? "text-primary" : "text-text-muted",
                 ]}
               >
@@ -243,6 +245,7 @@ const ext = (external: boolean) => (external ? { rel: "noopener", target: "_blan
             aria-label={lang === "ar" ? "القائمة" : "Menu"}
           >
             <svg
+              class="motion-burger"
               width="20"
               height="20"
               viewBox="0 0 24 24"
@@ -251,10 +254,12 @@ const ext = (external: boolean) => (external ? { rel: "noopener", target: "_blan
               stroke-width="2"
               aria-hidden="true"
             >
-              <path d="M4 7h16M4 12h16M4 17h16" />
+              <path d="M4 7h16" />
+              <path d="M4 12h16" />
+              <path d="M4 17h16" />
             </svg>
           </summary>
-          <div class="fixed inset-x-0 top-16 max-h-[calc(100dvh-4rem)] overflow-y-auto border-b border-border-soft bg-surface px-4 pb-6 pt-2 shadow-lg">
+          <div class="motion-drop fixed inset-x-0 top-16 max-h-[calc(100dvh-4rem)] overflow-y-auto border-b border-border-soft bg-surface px-4 pb-6 pt-2 shadow-lg">
             <div class="mx-auto max-w-2xl">
               <div class="grid grid-cols-2 gap-2 py-2">
                 <a

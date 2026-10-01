@@ -202,6 +202,69 @@
   box-shadow: 0 6px 20px -14px rgb(17 23 39 / 0.35);
 }
 
+/* Public site navbar (owner, 2026-10-01). A line under a nav item grows from its centre on
+   hover or keyboard focus, and stays under the current page's section: it says where you are
+   and what you are about to open. */
+.motion-nav-link {
+  position: relative;
+}
+.motion-nav-link::after {
+  content: "";
+  position: absolute;
+  inset-inline: 0.625rem;
+  bottom: 0.25rem;
+  height: 2px;
+  border-radius: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transition: transform var(--dur-2) var(--ease-out);
+}
+.motion-nav-link:hover::after,
+.motion-nav-link:focus-visible::after,
+.motion-nav-link[aria-current="page"]::after,
+.motion-nav-link[data-current]::after,
+details[open] > .motion-nav-link::after {
+  transform: scaleX(1);
+}
+
+/* A dropdown or the phone menu appears from under its trigger; its arrow turns to show it is
+   open. Closing is immediate (<details> removes the panel). */
+details[open] > .motion-drop {
+  transition:
+    opacity var(--dur-2) var(--ease-out),
+    transform var(--dur-2) var(--ease-out);
+}
+@starting-style {
+  details[open] > .motion-drop {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+.motion-chevron {
+  transition: transform var(--dur-2) var(--ease-out);
+}
+details[open] > summary .motion-chevron {
+  transform: rotate(180deg);
+}
+
+/* The phone menu's ☰ becomes ✕ while the menu is open (the same button closes it). */
+.motion-burger > * {
+  transform-box: fill-box;
+  transform-origin: center;
+  transition:
+    transform var(--dur-2) var(--ease-out),
+    opacity var(--dur-1) var(--ease-out);
+}
+details[open] > summary .motion-burger > :nth-child(1) {
+  transform: translateY(5px) rotate(45deg);
+}
+details[open] > summary .motion-burger > :nth-child(2) {
+  opacity: 0;
+}
+details[open] > summary .motion-burger > :nth-child(3) {
+  transform: translateY(-5px) rotate(-45deg);
+}
+
 /* Disclosure rows (FAQ) open and close with their height, where the browser can animate to
    «auto»; elsewhere they simply open. */
 @supports (interpolate-size: allow-keywords) {
