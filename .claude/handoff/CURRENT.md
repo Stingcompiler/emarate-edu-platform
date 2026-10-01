@@ -1,4 +1,4 @@
-# Handoff — public-site institution review, then large screens — 2026-09-30
+# Handoff — public-site review, large screens, motion and deferred items: all merged — 2026-10-01
 
 ## Now: the landing institution review (docs/qa/landing-institution-review-2026-10.md §6)
 - **Done and merged:**
@@ -93,13 +93,19 @@
 - **PR #68 `feat/editor-toast`: merged.** The page editor's toast says what the save did. Pinned action bars carry
   `data-dock`; while a note shows, the toast follows the highest docked bar near the bottom of the screen (every
   frame), so it never covers buttons on phones. Settings puts the PATCH result in the cache at once.
-- **PR #69 `feat/lecture-order-views`:** `POST /api/v1/lectures/reorder` (the full list, each lecture once; `edit`
+- **PR #69 `feat/lecture-order-views`: merged.** `POST /api/v1/lectures/reorder` (the full list, each lecture once; `edit`
   flag; audited `lecture.reorder`) and `LectureView` + `POST /api/v1/lectures/{id}/view` (an enrolled student
   opening a published lecture; not audited, like `read_at`). `views_count` on lectures for the course's staff only.
   Course page: «ترتيب المحاضرات» (`LectureOrder.tsx`: handle drag with pointer events, arrows, 44px targets on
   phones). Lecture rows and the department lectures page show «فتحها N طالبًا».
-- **Next:** the missing visual checks: Grade and ExamMonitor at 390 with an attempt (the phone action panel),
-  the DepartmentReport side column at 1440, and ImportDetail with a batch (needs an e2e spec that uploads one).
+- **PR #70 `fix/dept-report-side`: merged.** The last visual checks (screenshots with real data from a temporary e2e
+  spec): exam monitor at 390 with a live attempt and its action sheet, grading at 390 with a submission, and result
+  batch detail at 390/1280 with an uploaded batch were all fine. Two fixes: the department report's 1440 side
+  column (`lg:items-start` beat `min-[1440px]:items-stretch` in the CSS order; now `lg:max-[1439px]:items-start`), and
+  the batch summary badge at xl (`xl:items-start`).
+- **State:** every planned phase is merged (review series 6a–6f, large screens 7a–7f, motion, plan progress, lecture
+  order and views, visual checks). Nothing is open. Next work comes from the owner; content only the college can
+  supply (licence, real figures, fees, photos) is still theirs to provide.
 - **PR 6f `feat/department-faculty-news`**: the owner approved both 6c deferrals (2026-09-30); docs/03 is now v2.3.
   - `User.public_profile` plus `academic_title_ar/en`, set by the member at `PATCH /api/v1/me/public-profile` (audited
     `profile.public_update`), with a card in «الإعدادات».
