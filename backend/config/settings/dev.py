@@ -5,7 +5,7 @@ in-memory cache, media on the local disk.
 """
 
 from .base import *  # noqa: F403
-from .base import BASE_DIR, REST_FRAMEWORK
+from .base import BASE_DIR, REST_FRAMEWORK, STORAGES
 from .env import env, env_list
 
 DEBUG = True
@@ -30,6 +30,18 @@ DATABASES = {
             "transaction_mode": "IMMEDIATE",
         },
     }
+}
+
+# Public media (site images): production serves them from the CDN at absolute URLs. Here the
+# API serves them itself (config/urls.py, DEBUG only) and links them absolutely, so the public
+# site (:4321) and the portal (:5173) both load them from the API's origin.
+PUBLIC_MEDIA_URL = env("PUBLIC_MEDIA_URL", "http://localhost:8000/media/public/")
+STORAGES = {
+    **STORAGES,
+    "public": {
+        **STORAGES["public"],
+        "OPTIONS": {**STORAGES["public"]["OPTIONS"], "base_url": PUBLIC_MEDIA_URL},
+    },
 }
 
 CELERY_TASK_ALWAYS_EAGER = True

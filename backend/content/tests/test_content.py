@@ -358,3 +358,25 @@ def test_trust_signals_in_site_settings(api, site):
         assert (
             api(site).patch("/api/v1/content/site-settings", bad, format="json").status_code == 400
         )
+
+
+def test_image_blocks_accept_our_public_media_only(settings):
+    """The image picker links the public media storage; other http hosts are dropped."""
+    from content.sanitize import clean_blocks
+
+    settings.STORAGES = {
+        **settings.STORAGES,
+        "public": {
+            **settings.STORAGES["public"],
+            "OPTIONS": {"base_url": "http://localhost:8000/media/public/"},
+        },
+    }
+    ours = "http://localhost:8000/media/public/media/2026/10/a.jpg"
+    blocks = clean_blocks(
+        [
+            {"type": "image", "url": ours, "alt": "x"},
+            {"type": "image", "url": "http://evil.test/a.jpg", "alt": "x"},
+            {"type": "image", "url": "http://localhost:8000/media/public/../private/a", "alt": "x"},
+        ]
+    )
+    assert [b.get("url") for b in blocks] == [ours, None, None]
