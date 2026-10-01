@@ -248,5 +248,7 @@ def ensure_drafts(**kwargs) -> None:
                     title_ar=page.title_ar,
                     title_en=page.title_en,
                     blocks=blocks(page),
+                    # A gallery reads best side by side; the editor can change it.
+                    image_layout="grid" if page.slug == "gallery" else "single",
                     status=Status.DRAFT,
                 )

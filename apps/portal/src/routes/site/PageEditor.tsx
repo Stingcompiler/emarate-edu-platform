@@ -61,6 +61,8 @@ export function PageEditor() {
   // The search result's text (review 2026-09-29 PR 7, «لوح SEO»): blank → the site uses the
   // page's first paragraph.
   const [description, setDescription] = useState("");
+  // «عرض الصور» (owner request 2026-10-01): consecutive images one per row or in a grid.
+  const [layout, setLayout] = useState<"single" | "grid">("single");
   // Phones: edit or preview, one at a time; large screens show both side by side.
   const [pane, setPane] = useState<"edit" | "preview">("edit");
   // Where «+» between blocks inserts, and which image block is choosing from the library.
@@ -79,6 +81,7 @@ export function PageEditor() {
       setTitle(page.data.title_ar);
       setBlocks((page.data.blocks as Block[]) ?? []);
       setDescription(((page.data.seo ?? {}) as { description?: string }).description ?? "");
+      setLayout(page.data.image_layout ?? "single");
     }
   }, [page.data]);
   const firstParagraph = blocks.find((b) => b.type === "paragraph" && b.text?.trim())?.text ?? "";
@@ -87,7 +90,7 @@ export function PageEditor() {
   const save = useMutation({
     mutationFn: async (status: "draft" | "published") => {
       const seo = { ...((page.data?.seo ?? {}) as object), description: description.trim() };
-      const body = { slug, title_ar: title, blocks, status, seo } as never;
+      const body = { slug, title_ar: title, blocks, image_layout: layout, status, seo } as never;
       const res = creating
         ? await api.POST("/api/v1/content/pages", { body })
         : await api.PATCH("/api/v1/content/pages/{public_id}", {
@@ -116,6 +119,17 @@ export function PageEditor() {
   // On a live page, saving keeps it live; taking it down is its own, confirmed action
   // (review 2026-09-29: «حفظ مسودة» used to unpublish a published page silently).
   const published = page.data?.status === "published";
+  // The preview groups consecutive images as the site does in a grid.
+  const preview: (
+    { kind: "block"; block: Block; at: number } | { kind: "images"; images: Block[]; at: number }
+  )[] = [];
+  blocks.forEach((block, at) => {
+    const last = preview[preview.length - 1];
+    if (layout === "grid" && block.type === "image" && block.url) {
+      if (last?.kind === "images") last.images.push(block);
+      else preview.push({ kind: "images", images: [block], at });
+    } else preview.push({ kind: "block", block, at });
+  });
   const state = unsaved.dirty
     ? { tone: "pending", label: "تغييرات غير محفوظة" }
     : save.isSuccess
@@ -182,6 +196,23 @@ export function PageEditor() {
               />
             </Card>
             <SectionLabel>الكتل</SectionLabel>
+            {blocks.some((b) => b.type === "image") && (
+              <div className="mb-3 flex flex-wrap items-center justify-between gap-2 rounded-xl bg-surface px-3 py-2 shadow-xs">
+                <span className="text-sm font-semibold text-text">عرض الصور في الموقع</span>
+                <Segmented
+                  label="عرض الصور في الموقع"
+                  value={layout}
+                  onChange={(next) => {
+                    setLayout(next);
+                    unsaved.changed();
+                  }}
+                  options={[
+                    { key: "single", label: "واحدة" },
+                    { key: "grid", label: "شبكة" },
+                  ]}
+                />
+              </div>
+            )}
             <div className="space-y-3">
               {blocks.map((b, i) => (
                 <div key={i}>
@@ -427,44 +458,20 @@ export function PageEditor() {
             <SectionLabel>معاينة</SectionLabel>
             <Card className="space-y-3 p-5">
               <h2 className="font-display text-2xl font-bold text-text">{title}</h2>
-              {blocks.map((b, i) =>
-                b.type === "heading" ? (
-                  <h3 key={i} className="text-lg font-bold text-text">
-                    {b.text}
-                  </h3>
-                ) : b.type === "paragraph" ? (
-                  <p key={i} className="whitespace-pre-line text-sm leading-loose text-text">
-                    {b.text}
-                  </p>
-                ) : b.type === "note" ? (
-                  <p
-                    key={i}
-                    className="whitespace-pre-line rounded-lg border border-warning/40 bg-warning-soft px-3 py-2 text-sm leading-relaxed text-text"
-                  >
-                    {b.text}
-                  </p>
-                ) : b.type === "cta" ? (
-                  <span
-                    key={i}
-                    className="inline-flex rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-white"
-                  >
-                    {b.text}
-                  </span>
-                ) : b.type === "image" ? (
-                  b.url ? (
-                    <img key={i} src={b.url} alt={b.alt ?? ""} className="w-full rounded-lg" />
-                  ) : (
-                    <div
-                      key={i}
-                      className="grid h-32 place-items-center rounded-lg bg-surface-alt text-xs text-text-muted"
-                    >
-                      {b.alt || "صورة"}
-                    </div>
-                  )
+              {preview.map((item) =>
+                item.kind === "images" ? (
+                  <div key={`g${item.at}`} className="grid grid-cols-2 gap-2 lg:grid-cols-3">
+                    {item.images.map((b, n) => (
+                      <img
+                        key={n}
+                        src={b.url}
+                        alt={b.alt ?? ""}
+                        className="aspect-[4/3] w-full rounded-lg object-cover"
+                      />
+                    ))}
+                  </div>
                 ) : (
-                  <p key={i} className="text-xs text-text-muted">
-                    [HTML — يُعقَّم في الخادم]
-                  </p>
+                  renderBlock(item.block, item.at)
                 ),
               )}
             </Card>
@@ -473,4 +480,45 @@ export function PageEditor() {
       </div>
     </PortalShell>
   );
+
+  function renderBlock(b: Block, i: number) {
+    return b.type === "heading" ? (
+      <h3 key={i} className="text-lg font-bold text-text">
+        {b.text}
+      </h3>
+    ) : b.type === "paragraph" ? (
+      <p key={i} className="whitespace-pre-line text-sm leading-loose text-text">
+        {b.text}
+      </p>
+    ) : b.type === "note" ? (
+      <p
+        key={i}
+        className="whitespace-pre-line rounded-lg border border-warning/40 bg-warning-soft px-3 py-2 text-sm leading-relaxed text-text"
+      >
+        {b.text}
+      </p>
+    ) : b.type === "cta" ? (
+      <span
+        key={i}
+        className="inline-flex rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-white"
+      >
+        {b.text}
+      </span>
+    ) : b.type === "image" ? (
+      b.url ? (
+        <img key={i} src={b.url} alt={b.alt ?? ""} className="w-full rounded-lg" />
+      ) : (
+        <div
+          key={i}
+          className="grid h-32 place-items-center rounded-lg bg-surface-alt text-xs text-text-muted"
+        >
+          {b.alt || "صورة"}
+        </div>
+      )
+    ) : (
+      <p key={i} className="text-xs text-text-muted">
+        [HTML — يُعقَّم في الخادم]
+      </p>
+    );
+  }
 }

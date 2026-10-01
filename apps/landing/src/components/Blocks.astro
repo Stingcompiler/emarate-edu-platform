@@ -3,13 +3,39 @@ import type { Block } from "../lib/api";
 
 interface Props {
   blocks: Block[];
+  /** «عرض الصور» from the page editor: consecutive images one per row, or side by side. */
+  layout?: "single" | "grid";
 }
-const { blocks } = Astro.props;
+const { blocks, layout = "single" } = Astro.props;
+
+// In a grid, a run of consecutive images becomes one group; everything else stays a block.
+type Item = Block | { type: "images"; items: Block[] };
+const items: Item[] = [];
+for (const b of blocks) {
+  const last = items[items.length - 1];
+  if (layout === "grid" && b.type === "image" && b.url) {
+    if (last?.type === "images") last.items.push(b);
+    else items.push({ type: "images", items: [b] });
+  } else items.push(b);
+}
 ---
 
 <div class="prose-site space-y-4 text-base leading-8 text-text">
-  {blocks.map((b) =>
-    b.type === "heading" ? (
+  {items.map((b) =>
+    b.type === "images" ? (
+      <div class="grid grid-cols-2 gap-3 lg:grid-cols-3">
+        {b.items.map((img) => (
+          <img
+            data-reveal="image"
+            src={img.url}
+            alt={img.alt ?? ""}
+            loading="lazy"
+            decoding="async"
+            class="aspect-[4/3] w-full rounded-xl object-cover"
+          />
+        ))}
+      </div>
+    ) : b.type === "heading" ? (
       <h2 class="pt-2 font-display text-xl font-bold">{b.text}</h2>
     ) : b.type === "paragraph" ? (
       <p class="whitespace-pre-line">{b.text}</p>

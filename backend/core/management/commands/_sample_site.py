@@ -65,7 +65,8 @@ def _image(width: int, height: int, seed: int, *, portrait: bool = False) -> byt
     label = "SAMPLE IMAGE"
     box = draw.textbbox((0, 0), label, font=font)
     pad = size // 2
-    x, y = width - (box[2] - box[0]) - 3 * pad, height - (box[3] - box[1]) - 3 * pad
+    # Bottom centre: a grid crops the sides of a picture, never the middle.
+    x, y = (width - (box[2] - box[0])) // 2, height - (box[3] - box[1]) - 3 * pad
     draw.rounded_rectangle(
         [x - pad, y - pad, x + box[2] - box[0] + pad, y + box[3] - box[1] + pad * 1.4],
         radius=pad,
@@ -187,7 +188,7 @@ def seed(users) -> None:
             *(
                 {
                     "type": "image",
-                    "url": _asset(site_user, f"gallery-{i}", ar, en, (1200, 800), i).file.url,
+                    "url": _asset(site_user, f"gallery-{i}", ar, en, (1200, 900), i).file.url,
                     "alt": f"{ALT_PREFIX} — {ar}",
                 }
                 for i, (ar, en) in enumerate(pictures)

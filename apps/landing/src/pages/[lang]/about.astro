@@ -50,7 +50,7 @@ const facts: [string, string][] = [
     <div>
       {page ? (
         <ArabicOnly lang={lang} when={isArabic(JSON.stringify(page.blocks))}>
-          <Blocks blocks={page.blocks} />
+          <Blocks blocks={page.blocks} layout={page.image_layout} />
         </ArabicOnly>
       ) : (
         <p class="text-text-muted">{pick(lang, s.name_ar, s.name_en)}</p>
