@@ -100,13 +100,6 @@ export function navFor(me: Me | null | undefined, unread: number): NavItem[] {
     items.push({ label: "إدارة النظام", short: "الرئيسية", to: "/system", icon: LayoutDashboard });
     items.push({ label: "المستخدمون", to: "/system/users", icon: Users, end: false });
     items.push({
-      label: "الأدوار والصلاحيات",
-      short: "الأدوار",
-      to: "/system/roles",
-      icon: KeyRound,
-      desktopOnly: true,
-    });
-    items.push({
       label: "الهيكل الأكاديمي",
       short: "الهيكل",
       to: "/system/structure",
@@ -117,6 +110,13 @@ export function navFor(me: Me | null | undefined, unread: number): NavItem[] {
       short: "الإعدادات",
       to: "/system/settings",
       icon: SlidersHorizontal,
+    });
+    items.push({
+      label: "الأدوار والصلاحيات",
+      short: "الأدوار",
+      to: "/system/roles",
+      icon: KeyRound,
+      desktopOnly: true,
     });
     items.push({ label: "التدقيق", to: "/audit", icon: History });
   }

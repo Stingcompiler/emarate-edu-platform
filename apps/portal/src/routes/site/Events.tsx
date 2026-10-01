@@ -89,7 +89,7 @@ export function Events() {
           </Card>
         ) : (
           <>
-            <div className="mb-3 flex gap-2" role="tablist">
+            <div className="mb-3 flex gap-2" role="group" aria-label="القادمة أو السابقة">
               <Chip active={tab === "upcoming"} onClick={() => setTab("upcoming")}>
                 القادمة {upcoming.length.toLocaleString("ar-u-nu-latn")}
               </Chip>
