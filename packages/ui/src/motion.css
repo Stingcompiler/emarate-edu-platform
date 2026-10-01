@@ -220,6 +220,57 @@
   }
 }
 
+/* Portal (review 2026-09-29 §2.6). A bar grows to its value when it first appears: the inline
+   width is the end; @starting-style (important, to win over the inline style for that first
+   frame only) is the start. Browsers without it show the bar at once. */
+.motion-grow {
+  transition: width var(--dur-4) var(--ease-out);
+}
+@starting-style {
+  .motion-grow {
+    width: 0 !important;
+  }
+}
+
+/* Sequential grading: the next submission slides in from the reading direction's end. */
+@keyframes next-in {
+  from {
+    opacity: 0;
+    transform: translateX(var(--next-from, 16px));
+  }
+}
+[dir="rtl"] .motion-next {
+  --next-from: -16px;
+}
+.motion-next {
+  animation: next-in var(--dur-3) var(--ease-out) both;
+}
+
+/* A row that has been decided leaves: it fades and folds away before the list refreshes. */
+@keyframes leave {
+  to {
+    opacity: 0;
+    max-height: 0;
+    padding-block: 0;
+    margin-block: 0;
+  }
+}
+.motion-leave {
+  overflow: hidden;
+  max-height: 12rem;
+  animation: leave var(--dur-2) var(--ease-out) forwards;
+}
+
+/* A row whose state changed since the last refresh flashes once (exam monitor). */
+@keyframes flash {
+  from {
+    background-color: var(--color-warning-soft);
+  }
+}
+.motion-flash {
+  animation: flash 1.2s var(--ease-out);
+}
+
 /* Everyone who asked for less motion gets none — including transitions. */
 @media (prefers-reduced-motion: reduce) {
   *,

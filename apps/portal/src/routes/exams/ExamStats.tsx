@@ -78,7 +78,7 @@ export function ExamStats() {
                 <span className="w-24 lg:w-72">
                   <span className="block h-1.5 overflow-hidden rounded-full bg-surface-alt">
                     <span
-                      className="block h-full bg-primary"
+                      className="motion-grow block h-full bg-primary"
                       style={{ width: `${(q.correct_rate ?? 0) * 100}%` }}
                     />
                   </span>

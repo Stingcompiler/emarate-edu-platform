@@ -16,6 +16,7 @@ import { api, ok } from "../../lib/api";
 import { TOPIC_LABEL, days, initials, num, pct } from "../../lib/reports";
 import { ROLE_LINE, useTeachersReport } from "./Teachers";
 import { count, N } from "../../lib/format";
+import { useToast } from "../../components/Toast";
 
 const TEMPLATES: Record<string, (d: string) => string> = {
   grading: (d) =>
@@ -50,6 +51,7 @@ export function NoticeNew() {
         }),
       ) ?? null,
   });
+  const toast = useToast();
   const send = useMutation({
     mutationFn: async () => {
       const { data, error } = await api.POST("/api/v1/hr-notices", {
@@ -63,7 +65,10 @@ export function NoticeNew() {
       });
       if (!data) throw error;
     },
-    onSuccess: () => navigate(`/hr/teachers/${teacherId}`),
+    onSuccess: () => {
+      toast("أُرسل التنبيه");
+      navigate(`/hr/teachers/${teacherId}`);
+    },
   });
   useEffect(() => {
     // Start from the topic's template once the teacher's figures are known.

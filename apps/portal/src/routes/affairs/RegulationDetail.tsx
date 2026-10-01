@@ -17,6 +17,7 @@ import { api, ok } from "../../lib/api";
 import { useMe } from "../../lib/auth";
 import { can } from "../../lib/nav";
 import { CATEGORIES } from "./RegulationNew";
+import { useToast } from "../../components/Toast";
 
 /** Board: StudentRegulations (reading + acknowledgement sheet). Desktop: derived. */
 export function RegulationDetail() {
@@ -31,6 +32,7 @@ export function RegulationDetail() {
     queryFn: async () => ok(await api.GET("/api/v1/regulations/{public_id}", path)) ?? null,
   });
   const done = () => client.invalidateQueries({ queryKey: ["regulations"] });
+  const toast = useToast();
   const acknowledge = useMutation({
     mutationFn: async () => {
       const { error, response } = await api.POST(
@@ -39,7 +41,10 @@ export function RegulationDetail() {
       );
       if (!response.ok) throw error;
     },
-    onSuccess: done,
+    onSuccess: () => {
+      toast("سُجّل إقرارك باللائحة");
+      void done();
+    },
   });
   const publish = useMutation({
     mutationFn: async () => {

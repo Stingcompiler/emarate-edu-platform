@@ -43,7 +43,7 @@ export function HRHome() {
               {(["ok", "warn", "below"] as const).map((k) => (
                 <span
                   key={k}
-                  className={k === "ok" ? "bg-success" : k === "warn" ? "bg-warning" : "bg-danger"}
+                  className={`motion-grow ${k === "ok" ? "bg-success" : k === "warn" ? "bg-warning" : "bg-danger"}`}
                   style={{ width: `${(100 * counts[k]) / Math.max(1, r.summary.members)}%` }}
                 />
               ))}

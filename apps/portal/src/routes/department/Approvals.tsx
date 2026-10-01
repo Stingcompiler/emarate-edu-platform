@@ -6,6 +6,7 @@ import { Button, Card, Notice, problemMessage } from "../../components/ui";
 import { api, ok } from "../../lib/api";
 import { when, count, N } from "../../lib/format";
 import { initials, num } from "../../lib/reports";
+import { useToast } from "../../components/Toast";
 
 /** Board: AdminApprovals (phone); desktop derived — cards in two columns. */
 export function Approvals() {
@@ -21,6 +22,8 @@ export function Approvals() {
   });
   const rows = list.data?.results ?? [];
   const [reasons, setReasons] = useState<Record<string, string>>({});
+  const [leaving, setLeaving] = useState<Set<string>>(new Set());
+  const toast = useToast();
   const decide = useMutation({
     mutationFn: async ({ id, approve }: { id: string; approve: boolean }) => {
       const { data, error } = await api.POST("/api/v1/registration-requests/{public_id}/decide", {
@@ -29,7 +32,12 @@ export function Approvals() {
       });
       if (!data) throw error;
     },
-    onSuccess: () => client.invalidateQueries({ queryKey: ["registration-requests"] }),
+    // The decided request fades and folds away, then the list refreshes (review §2.6).
+    onSuccess: (_, { id, approve }) => {
+      setLeaving((l) => new Set(l).add(id));
+      toast(approve ? "اعتُمد التسجيل" : "رُفض الطلب");
+      setTimeout(() => void client.invalidateQueries({ queryKey: ["registration-requests"] }), 250);
+    },
   });
   const matching = rows.filter((r) => r.email_matches_record);
   const approveAll = useMutation({
@@ -67,7 +75,10 @@ export function Approvals() {
       )}
       <div className="grid gap-3 lg:grid-cols-2">
         {rows.map((r) => (
-          <Card key={r.public_id} className="space-y-3 p-4">
+          <Card
+            key={r.public_id}
+            className={`space-y-3 p-4 ${leaving.has(r.public_id) ? "motion-leave" : ""}`}
+          >
             <div className="flex items-center gap-3">
               <span className="grid size-10 place-items-center rounded-full bg-primary-soft text-sm font-semibold text-primary-700">
                 {initials(r.full_name_ar)}

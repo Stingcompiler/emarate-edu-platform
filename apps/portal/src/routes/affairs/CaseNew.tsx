@@ -17,6 +17,7 @@ import {
 } from "../../components/ui";
 import { api, ok } from "../../lib/api";
 import { KIND } from "./Cases";
+import { useToast } from "../../components/Toast";
 
 /** Board: StudentAffairsCaseNew (phone). Opening from a misconduct report converts it. Desktop: derived. */
 export function CaseNew() {
@@ -57,6 +58,7 @@ export function CaseNew() {
   const [chosen, setChosen] = useState<NonNullable<typeof students.data>[number] | null>(null);
   const student = chosen ?? exact ?? null;
 
+  const toast = useToast();
   const open = useMutation({
     mutationFn: async () => {
       if (reportId) {
@@ -73,7 +75,10 @@ export function CaseNew() {
       if (!data) throw error;
       return data.public_id;
     },
-    onSuccess: (caseId) => navigate(`/cases/${caseId}`),
+    onSuccess: (caseId) => {
+      toast("فُتحت الحالة");
+      navigate(`/cases/${caseId}`);
+    },
   });
   const dismiss = useMutation({
     mutationFn: async () => {

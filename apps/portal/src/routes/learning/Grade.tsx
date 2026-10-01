@@ -10,6 +10,7 @@ import { when, score as markOf } from "../../lib/format";
 import { initials } from "../../lib/reports";
 import { openFile } from "../../lib/learning";
 import { ALL } from "../../components/Pager";
+import { useToast } from "../../components/Toast";
 
 /** Boards: TeacherGradeSubmission (phone), DesktopTeacherGrading — the assignment's queue, the
  *  work, and the grade panel side by side on wide screens. */
@@ -66,6 +67,7 @@ export function Grade() {
     void client.invalidateQueries({ queryKey: ["assignment"] });
     void client.invalidateQueries({ queryKey: ["grading"] });
   };
+  const toast = useToast();
   const save = useMutation({
     mutationFn: async (andNext: boolean) => {
       const { data, error } = await api.PUT("/api/v1/submissions/{public_id}/grade", {
@@ -80,6 +82,7 @@ export function Grade() {
       return andNext;
     },
     onSuccess: (andNext) => {
+      toast("حُفظت الدرجة");
       refresh();
       if (andNext && next) navigate(`/submissions/${next.public_id}`);
     },
@@ -195,7 +198,8 @@ export function Grade() {
               </ul>
             </Card>
           </nav>
-          <div className="space-y-4">
+          {/* Keyed by the submission: the next one slides in (review §2.6, sequential grading). */}
+          <div key={id} className="motion-next space-y-4">
             <Card className="flex items-center gap-3 p-4">
               <span className="grid size-11 place-items-center rounded-full bg-primary-soft text-sm font-semibold text-primary-700">
                 {initials(s.student.full_name_ar)}
@@ -300,7 +304,7 @@ export function Grade() {
                 <Notice>{problemMessage(save.error ?? approve.error)}</Notice>
               )}
               {save.isSuccess && !next && (
-                <Notice tone="success">حُفظت الدرجة ✓ — لا تسليمات أخرى بانتظارك هنا.</Notice>
+                <Notice tone="info">لا تسليمات أخرى بانتظارك هنا.</Notice>
               )}
               {/* Pinned above the phone's tab bar: grading is done one after another. */}
               <div className="sticky bottom-24 z-10 -mx-4 space-y-2 bg-surface px-4 py-2 lg:static lg:mx-0 lg:p-0">

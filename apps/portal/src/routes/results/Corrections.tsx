@@ -24,6 +24,7 @@ import { useMe } from "../../lib/auth";
 import { when } from "../../lib/format";
 import { can } from "../../lib/nav";
 import { ALL, Pager, useLocalPages } from "../../components/Pager";
+import { useToast } from "../../components/Toast";
 
 type Correction = Schemas["Correction"];
 type Tab = "pending" | "approved" | "rejected";
@@ -92,6 +93,7 @@ export function Corrections() {
 function CorrectionRow({ correction: c, approver }: { correction: Correction; approver: boolean }) {
   const client = useQueryClient();
   const [note, setNote] = useState("");
+  const toast = useToast();
   const decide = useMutation({
     mutationFn: async (approve: boolean) => {
       const { data, error } = await api.POST("/api/v1/result-corrections/{public_id}/decide", {
@@ -100,7 +102,10 @@ function CorrectionRow({ correction: c, approver }: { correction: Correction; ap
       });
       if (!data) throw error;
     },
-    onSuccess: () => client.invalidateQueries({ queryKey: ["result-corrections"] }),
+    onSuccess: (_, approve) => {
+      toast(approve ? "اعتُمد التعديل" : "رُفض التعديل");
+      void client.invalidateQueries({ queryKey: ["result-corrections"] });
+    },
   });
   const [top, bottom] = splitCode(c.result.course_code);
   const oldScore = (c.old as { score?: string | null }).score ?? "—";

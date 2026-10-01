@@ -16,6 +16,7 @@ import {
 import { api, ok } from "../../lib/api";
 import { Pager, useServerPages } from "../../components/Pager";
 import { useConfirm } from "../../components/Confirm";
+import { useToast } from "../../components/Toast";
 
 type Summary = { rows?: number; create?: number; error?: number; committed?: number };
 
@@ -55,6 +56,7 @@ export function ResultImportDetail() {
     ),
   );
 
+  const toast = useToast();
   const act = useMutation({
     mutationFn: async (kind: "commit" | "publish" | "unpublish" | "delete") => {
       const call =
@@ -66,6 +68,14 @@ export function ResultImportDetail() {
       return kind;
     },
     onSuccess: (kind) => {
+      toast(
+        {
+          commit: "اعتُمدت النتائج",
+          publish: "نُشرت النتائج للطلاب",
+          unpublish: "أُلغي نشر النتائج",
+          delete: "أُلغيت الدفعة",
+        }[kind],
+      );
       void client.invalidateQueries({ queryKey: ["result-imports"] });
       if (kind === "delete") navigate("/result-imports");
     },

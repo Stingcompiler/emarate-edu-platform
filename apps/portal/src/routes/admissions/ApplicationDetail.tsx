@@ -18,6 +18,7 @@ import { when } from "../../lib/format";
 import { can } from "../../lib/nav";
 import { STATUS_LABEL, STATUS_TONE } from "../../lib/visitor";
 import { useConfirm } from "../../components/Confirm";
+import { useToast } from "../../components/Toast";
 
 const ACTION: Record<string, string> = {
   under_review: "بدء المراجعة",
@@ -46,6 +47,7 @@ export function ApplicationDetail() {
     setMessage("");
     void client.invalidateQueries({ queryKey: ["applications"] });
   };
+  const toast = useToast();
   const act = useMutation({
     mutationFn: async (kind: string) => {
       const res =
@@ -63,8 +65,20 @@ export function ApplicationDetail() {
                   body: { to: kind as never, note },
                 });
       if (!res.data) throw res.error;
+      return kind;
     },
-    onSuccess: done,
+    onSuccess: (kind) => {
+      toast(
+        kind === "register"
+          ? "حُوِّل المتقدم إلى طالب"
+          : kind === "claim"
+            ? "تولّيت الطلب"
+            : kind.startsWith("msg:")
+              ? "أُرسلت الرسالة"
+              : "حُدّثت حالة الطلب",
+      );
+      done();
+    },
   });
   const review = useMutation({
     mutationFn: async ({ doc, status }: { doc: string; status: "accepted" | "rejected" }) => {
