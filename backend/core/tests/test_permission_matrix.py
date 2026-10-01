@@ -116,6 +116,7 @@ READS: dict[str, tuple[str, frozenset, frozenset]] = {
     "me-public-profile": ("/api/v1/me/public-profile", EVERYONE, frozenset()),
     "me-courses": ("/api/v1/me/courses", EVERYONE, frozenset()),
     "system-settings": ("/api/v1/system-settings", frozenset({R.SYSTEM_ADMIN}), frozenset()),
+    "system-status": ("/api/v1/system-status", frozenset({R.SYSTEM_ADMIN}), frozenset()),
     "college-list": ("/api/v1/colleges", STRUCTURE, frozenset()),
     "college-detail": ("/api/v1/colleges/{college}", STRUCTURE, frozenset()),
     "department-list": ("/api/v1/departments", STRUCTURE, frozenset()),
@@ -138,6 +139,11 @@ READS: dict[str, tuple[str, frozenset, frozenset]] = {
     "student-import-list": ("/api/v1/student-imports", IMPORTS, frozenset()),
     "student-import-detail": ("/api/v1/student-imports/{batch}", IMPORTS, frozenset()),
     "student-import-rows": ("/api/v1/student-imports/{batch}/rows", IMPORTS, frozenset()),
+    "roles": (
+        "/api/v1/roles",
+        frozenset({R.SYSTEM_ADMIN, R.ACADEMIC_AFFAIRS, R.HEAD_REGISTRAR}),
+        frozenset(),
+    ),
     "user-list": (
         "/api/v1/users",
         frozenset({R.SYSTEM_ADMIN, R.ACADEMIC_AFFAIRS, R.HEAD_REGISTRAR}),

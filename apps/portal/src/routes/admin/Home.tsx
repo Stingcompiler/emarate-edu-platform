@@ -1,5 +1,15 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Activity, Building2, Mail, Settings2, Users } from "lucide-react";
+import {
+  Activity,
+  Building2,
+  Mail,
+  Settings2,
+  Users,
+  Database,
+  Zap,
+  HardDrive,
+  UserCheck,
+} from "lucide-react";
 import { Link } from "react-router";
 
 import { PortalShell } from "../../components/PortalShell";
@@ -42,6 +52,16 @@ export function AdminHome() {
       const { data, error } = await api.GET("/api/public/health");
       return data ?? error ?? null;
     },
+  });
+  // Backups, email and records-vs-accounts (review 2026-09-29 PR 7, «بلاطات صحة»).
+  const status = useQuery({
+    queryKey: ["system-status"],
+    queryFn: async () =>
+      (ok(await api.GET("/api/v1/system-status")) as {
+        backups: { count: number; latest: string | null };
+        email: { backend: string; sends_real_mail: boolean };
+        students: { records: number; accounts: number };
+      } | null) ?? null,
   });
   const settings = useQuery({
     queryKey: ["system-settings"],
@@ -92,30 +112,68 @@ export function AdminHome() {
       title="إدارة النظام"
       subtitle={`${me.data?.full_name_ar ?? ""} · مدير النظام${health.data?.version ? ` · الإصدار ${health.data.version}` : ""}`}
     >
-      <div className="grid grid-cols-3 gap-2">
-        {[
-          ["الخدمة", healthy ? "سليمة" : "تحقق", healthy],
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 xl:grid-cols-6">
+        {(
           [
-            "قاعدة البيانات",
-            checks.database === "ok" ? "متصلة" : (checks.database ?? "—"),
-            checks.database === "ok",
-          ],
-          [
-            "الذاكرة المؤقتة",
-            checks.cache === "ok" ? "تعمل" : (checks.cache ?? "—"),
-            checks.cache === "ok",
-          ],
-        ].map(([l, v, good]) => (
-          <Card key={String(l)} className="p-3 text-center">
-            <p
-              className={`text-sm font-bold ${good ? "text-success-strong" : "text-warning-strong"}`}
+            [Activity, "الخدمة", healthy ? "سليمة" : "تحقق", healthy],
+            [
+              Database,
+              "قاعدة البيانات",
+              checks.database === "ok" ? "متصلة" : (checks.database ?? "—"),
+              checks.database === "ok",
+            ],
+            [
+              Zap,
+              "الذاكرة المؤقتة",
+              checks.cache === "ok" ? "تعمل" : (checks.cache ?? "—"),
+              checks.cache === "ok",
+            ],
+            [
+              HardDrive,
+              "آخر نسخة احتياطية",
+              status.data?.backups.latest ? when(status.data.backups.latest) : "لا نسخ بعد",
+              !!status.data?.backups.latest &&
+                Date.now() - new Date(status.data.backups.latest).getTime() < 8 * 86_400_000,
+            ],
+            [
+              Mail,
+              "البريد",
+              status.data
+                ? status.data.email.sends_real_mail
+                  ? `يُرسل · ${status.data.email.backend}`
+                  : `تجريبي · ${status.data.email.backend}`
+                : "—",
+              !!status.data?.email.sends_real_mail,
+            ],
+            [
+              UserCheck,
+              "حسابات الطلاب من السجلات",
+              status.data
+                ? `${num(status.data.students.accounts)} / ${num(status.data.students.records)}`
+                : "—",
+              true,
+            ],
+          ] as [typeof Activity, string, string, boolean][]
+        ).map(([Icon, l, v, good]) => (
+          <Card key={l} className="flex items-center gap-3 p-3">
+            <span
+              className={`grid size-9 shrink-0 place-items-center rounded-full ${good ? "bg-success-soft text-success-strong" : "bg-warning-soft text-warning-strong"}`}
             >
-              {String(v)}
-            </p>
-            <p className="text-[11px] text-text-muted">{String(l)}</p>
+              <Icon size={17} aria-hidden />
+            </span>
+            <span className="min-w-0">
+              <b className="block truncate text-sm text-text">{v}</b>
+              <span className="text-[11px] text-text-muted">{l}</span>
+            </span>
           </Card>
         ))}
       </div>
+      <Link
+        to="/system/roles"
+        className="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-primary hover:underline"
+      >
+        الأدوار والصلاحيات
+      </Link>
       <div className="mt-6 lg:grid lg:grid-cols-2 lg:items-start lg:gap-6">
         <div className="space-y-4">
           <SectionLabel>إعدادات النظام</SectionLabel>

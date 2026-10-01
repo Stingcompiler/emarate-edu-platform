@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { Link } from "react-router";
+import { Link, useSearchParams } from "react-router";
 
 import { PortalShell } from "../../components/PortalShell";
 import {
@@ -27,12 +27,32 @@ export function AdminUsers() {
   const [search, setSearch] = useState("");
   const [active, setActive] = useState<boolean | undefined>(true);
   const [page, setPage] = useState(1);
+  // The role filter, with each role's count (review 2026-09-29 PR 7); kept in the address so
+  // «من يحمل هذا الدور» on the roles page lands here filtered.
+  const [params, setParams] = useSearchParams();
+  const role = params.get("role") ?? "";
+  const counts = useQuery({
+    queryKey: ["role-assignments", "counts"],
+    queryFn: async () =>
+      (
+        ok(await api.GET("/api/v1/role-assignments/counts")) as {
+          counts: Record<string, number>;
+        } | null
+      )?.counts ?? {},
+  });
   const list = useQuery({
-    queryKey: ["users", search, active, page],
+    queryKey: ["users", search, active, role, page],
     queryFn: async () =>
       ok(
         await api.GET("/api/v1/users", {
-          params: { query: { search: search || undefined, is_active: active, page } },
+          params: {
+            query: {
+              search: search || undefined,
+              is_active: active,
+              role: role || undefined,
+              page,
+            } as never,
+          },
         }),
       ) ?? null,
   });
@@ -91,6 +111,29 @@ export function AdminUsers() {
                   الكل
                 </Chip>
               </div>
+              {Object.keys(counts.data ?? {}).length > 0 && (
+                <select
+                  value={role}
+                  onChange={(e) => {
+                    const next = new URLSearchParams(params);
+                    if (e.target.value) next.set("role", e.target.value);
+                    else next.delete("role");
+                    setParams(next, { replace: true });
+                    setPage(1);
+                  }}
+                  aria-label="الدور"
+                  className="min-h-11 rounded-full border border-border-soft bg-surface px-3 text-sm sm:min-h-10"
+                >
+                  <option value="">كل الأدوار</option>
+                  {Object.entries(counts.data ?? {})
+                    .sort((a, b) => b[1] - a[1])
+                    .map(([k, n]) => (
+                      <option key={k} value={k}>
+                        {ROLE_LABEL[k] ?? k} · {num(n)}
+                      </option>
+                    ))}
+                </select>
+              )}
             </div>
           </FilterBar>
           <Card className="mt-3 divide-y divide-border-soft">

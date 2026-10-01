@@ -61,14 +61,28 @@
   - Import: `WithSide` with the steps, the columns (required ones marked), and a blank-template CSV.
   - Form builder: `ApplicantPreview` in both side columns.
 - **PR 7d #63: merged.**
-- **PR 7e `feat/results-affairs-large-screens`:**
+- **PR 7e #64 `feat/results-affairs-large-screens`: merged.**
   - Cases: from xl a preview of the chosen row beside the table (details, events timeline, open link).
   - HR teachers: `heat()` cells (red past the threshold, amber near it) and a row tint for «تحت الحد».
   - Academic home: department leadership as a card grid on top (2 columns on the phone, 4 on xl), then the
     decisions.
   - Result batch detail: from xl, the summary and actions in a sticky side column beside the rows. Not visually
     checked: the demo has no batch.
-- **Next:** 7f site/admin, then portal motion.
+- **PR 7f `feat/site-admin-large-screens`:**
+  - New `GET /api/v1/roles` (`users.view`), read-only from `rbac.CAPABILITIES`, with a matrix row and test. Page
+    `/system/roles` (`RolesMatrix.tsx`; the name avoids a clash with `admin/roles.ts` on case-insensitive disks) shows
+    the matrix with Arabic capability names, a role side panel, and CSV.
+  - New `GET /api/v1/system-status` (`settings.manage`): latest backup, email backend (dev/console mailers don't
+    count as sending), student records vs active accounts. The admin home shows 6 health tiles with icons.
+  - Users: a role filter with counts (`role-assignments/counts`), kept in `?role=`.
+  - Events: upcoming and past tabs, with the next event as a hero.
+  - Page editor: «+» between blocks, the media library picker for images, a search panel (`seo.description`, a 160
+    counter, a result preview), and an edit/preview `Segmented` on phones.
+  - Structure: the hours field says «حُفظ ✓».
+- **Always run `pnpm format:check` (the whole repo) before pushing:** CI fails on any unformatted file, e.g. JSON
+  written by a script.
+- **Next:** portal motion PR, then the deferred API items (plan progress per level; lecture reorder and views), then
+  the missing visual checks.
 - **PR 6f `feat/department-faculty-news`**: the owner approved both 6c deferrals (2026-09-30); docs/03 is now v2.3.
   - `User.public_profile` plus `academic_title_ar/en`, set by the member at `PATCH /api/v1/me/public-profile` (audited
     `profile.public_update`), with a card in «الإعدادات».

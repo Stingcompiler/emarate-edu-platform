@@ -46,6 +46,7 @@ import { ResultImports } from "./routes/results/Imports";
 import { MyResults } from "./routes/results/MyResults";
 import { AdminHome } from "./routes/admin/Home";
 import { AdminSettings } from "./routes/admin/Settings";
+import { Roles } from "./routes/admin/RolesMatrix";
 import { Structure } from "./routes/admin/Structure";
 import { AdminUser } from "./routes/admin/User";
 import { AdminUsers } from "./routes/admin/Users";
@@ -227,6 +228,7 @@ const router = createBrowserRouter([
   { path: "/system", element: signedIn(<AdminHome />, "/system") },
   { path: "/system/users", element: signedIn(<AdminUsers />, "/system/users") },
   { path: "/system/users/:id", element: signedIn(<AdminUser />, "/system/users/:id") },
+  { path: "/system/roles", element: signedIn(<Roles />, "/system/roles") },
   { path: "/system/structure", element: signedIn(<Structure />, "/system/structure") },
   { path: "/system/settings", element: signedIn(<AdminSettings />, "/system/settings") },
   { path: "/audit", element: signedIn(<Audit />, "/audit") },
