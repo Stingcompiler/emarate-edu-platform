@@ -132,7 +132,10 @@ export function RegulationDetail() {
               </Card>
             )}
             {r.requires_acknowledgement && r.acknowledged === false && (
-              <Card className="sticky bottom-24 space-y-3 p-4 shadow-md lg:static lg:shadow-xs">
+              <Card
+                data-dock
+                className="sticky bottom-24 space-y-3 p-4 shadow-md lg:static lg:shadow-xs"
+              >
                 <label className="flex items-center gap-3 text-sm text-text">
                   <input
                     type="checkbox"
