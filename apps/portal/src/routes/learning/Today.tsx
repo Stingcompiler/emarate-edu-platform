@@ -178,7 +178,7 @@ export function Today() {
         <section>
           <div className="flex items-end justify-between">
             <SectionLabel>مستحق اليوم والغد</SectionLabel>
-            <Link to="/tasks" className="mb-2 text-sm font-semibold text-primary">
+            <Link to="/tasks" className="tap-44 mb-2 text-sm font-semibold text-primary">
               كل المهام
             </Link>
           </div>

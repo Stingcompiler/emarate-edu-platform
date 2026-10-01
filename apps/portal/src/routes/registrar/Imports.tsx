@@ -114,7 +114,7 @@ export function StudentImports() {
               <button
                 type="button"
                 onClick={() => downloadCsv("students-template", TEMPLATE, [])}
-                className="mt-3 text-sm font-semibold text-primary hover:underline"
+                className="tap-44 mt-3 text-sm font-semibold text-primary hover:underline"
               >
                 تنزيل القالب الفارغ (CSV)
               </button>

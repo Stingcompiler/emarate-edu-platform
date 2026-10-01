@@ -47,7 +47,39 @@ export function HRReport() {
                 ))}
               </div>
               <SectionLabel>حسب القسم</SectionLabel>
-              <ScrollRegion label="حسب القسم">
+              {/* Phones: a card per department, each figure labelled (no sideways table). */}
+              <ul className="space-y-2 sm:hidden">
+                {r.departments.map((d) => (
+                  <li key={d.department} className="rounded-lg bg-surface-alt p-3">
+                    <p className="font-semibold">{d.department || "—"}</p>
+                    <dl className="mt-1 grid grid-cols-2 gap-x-3 gap-y-1 text-xs">
+                      {(
+                        [
+                          ["أعضاء", num(d.members)],
+                          ["زمن التصحيح", days(d.grading_days)],
+                          ["انتظام الرفع", pct(d.upload_percent)],
+                          ["جلسات بث", `${num(d.live_held)}/${num(d.live_planned)}`],
+                          ["تحت الحد", num(d.below)],
+                        ] as const
+                      ).map(([l, v]) => (
+                        <div key={l} className="flex justify-between gap-2">
+                          <dt className="text-text-muted">{l}</dt>
+                          <dd
+                            className={
+                              l === "تحت الحد" && d.below
+                                ? "font-semibold text-danger-strong"
+                                : "font-semibold"
+                            }
+                          >
+                            {v}
+                          </dd>
+                        </div>
+                      ))}
+                    </dl>
+                  </li>
+                ))}
+              </ul>
+              <ScrollRegion label="حسب القسم" className="hidden sm:block">
                 <table className="w-full min-w-[520px] text-sm">
                   <thead className="text-xs text-text-muted">
                     <tr className="text-start">

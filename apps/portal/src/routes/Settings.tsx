@@ -102,7 +102,38 @@ export function Settings() {
         {hasRole(me.data, "teacher", "ta", "department_manager") && <PublicProfileCard />}
 
         <SectionLabel>الإشعارات — لكل فئة قنواتها</SectionLabel>
-        <Card className="overflow-hidden">
+        {/* Phones: one row per category with its channels as labelled switches (no table). */}
+        <Card className="divide-y divide-border-soft sm:hidden">
+          {rows.map((row) => (
+            <div key={row.category} className="px-4 py-3">
+              <p className="text-sm font-medium text-text">{LABELS[row.category]}</p>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {CHANNELS.map((c) => (
+                  <button
+                    key={c.key}
+                    type="button"
+                    role="switch"
+                    aria-checked={row[c.key]}
+                    aria-label={`${LABELS[row.category]} — ${c.label}`}
+                    onClick={() => toggle(row.category, c.key)}
+                    className={`inline-flex min-h-11 items-center gap-2 rounded-full border px-3 text-xs font-semibold ${
+                      row[c.key]
+                        ? "border-primary bg-primary-soft text-primary-700"
+                        : "border-border text-text-muted"
+                    }`}
+                  >
+                    <span
+                      aria-hidden
+                      className={`size-3 rounded-full border-2 ${row[c.key] ? "border-primary bg-primary" : "border-n300"}`}
+                    />
+                    {c.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          ))}
+        </Card>
+        <Card className="hidden overflow-hidden sm:block">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border-soft text-xs text-text-muted">

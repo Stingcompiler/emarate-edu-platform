@@ -126,7 +126,10 @@ export function DepartmentLectures() {
           }
         />
         <Kpi value={total.length - published.length} label="مسودة" />
-        <Kpi value={latest ? when(latest) : "—"} label="آخر رفع" />
+        {/* The fifth tile takes the whole row on phones instead of sitting alone in half. */}
+        <div className="col-span-2 lg:col-span-1">
+          <Kpi value={latest ? when(latest) : "—"} label="آخر رفع" />
+        </div>
       </div>
       <FilterBar>
         <div className="flex flex-wrap items-center gap-2">

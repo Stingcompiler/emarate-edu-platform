@@ -63,7 +63,10 @@ export function Kpi({
 }) {
   return (
     <Card className="px-4 py-3">
-      <p className={`text-2xl font-bold ${tone === "danger" ? "text-danger-strong" : "text-text"}`}>
+      {/* A sentence («قبل دقيقة واحدة») reads as text, not as a headline figure. */}
+      <p
+        className={`font-bold ${typeof value === "string" && value.length > 8 ? "text-base leading-snug" : "text-2xl"} ${tone === "danger" ? "text-danger-strong" : "text-text"}`}
+      >
         {typeof value === "number" ? <CountUp value={value} format={(n) => num(n)} /> : value}
       </p>
       <p className="text-xs text-text-muted">{label}</p>
@@ -112,12 +115,12 @@ export function Bars({
       <div className="motion-bars flex h-32 items-end gap-1.5" dir="ltr">
         {values.map((v, i) => (
           <div key={i} className="flex flex-1 flex-col items-center gap-1">
-            <span className="text-[10px] text-text-muted">{num(v)}</span>
+            <span className="text-[11px] text-text-muted">{num(v)}</span>
             <div
               className={`motion-bar w-full rounded-t ${i === values.length - 1 ? "bg-primary" : "bg-primary-soft"}`}
               style={{ height: `${Math.max(4, (v / max) * 96)}px`, ["--i" as string]: i }}
             />
-            {labels && <span className="text-[10px] text-text-muted">{labels[i]}</span>}
+            {labels && <span className="text-[11px] text-text-muted">{labels[i]}</span>}
           </div>
         ))}
       </div>

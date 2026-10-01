@@ -233,7 +233,7 @@ const jsonLd = [programLd, faqLd(faq)];
             <dd class="text-end font-semibold">
               <a
                 href={href(lang, `departments/${p.department_code}/`)}
-                class="text-primary hover:underline"
+                class="tap-44 text-primary hover:underline"
               >
                 {dept}
               </a>
@@ -313,11 +313,15 @@ const jsonLd = [programLd, faqLd(faq)];
           <div class="flex flex-wrap items-center justify-between gap-2 pt-1 text-sm">
             <a
               href={href(lang, "admissions/fees/")}
-              class="font-semibold text-primary hover:underline"
+              class="tap-44 font-semibold text-primary hover:underline"
             >
               {L("الرسوم والمنح", "Fees and scholarships")} {arrow(lang)}
             </a>
-            <button type="button" data-print class="font-semibold text-text-muted hover:text-text">
+            <button
+              type="button"
+              data-print
+              class="tap-44 font-semibold text-text-muted hover:text-text"
+            >
               {L("اطبع صفحة البرنامج", "Print this programme")}
             </button>
           </div>

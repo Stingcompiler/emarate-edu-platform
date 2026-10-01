@@ -107,7 +107,7 @@ export function Notifications() {
             <SideFigures rows={[["غير مقروءة", unreadCount.toLocaleString("ar-u-nu-latn")]]} />
             <SideNote title="تصلك بالطريقة التي تختارها">
               لكل فئة قنواتها: داخل التطبيق، وعلى الهاتف، وبالبريد.{" "}
-              <Link to="/settings" className="font-semibold text-primary">
+              <Link to="/settings" className="tap-44 font-semibold text-primary">
                 الإعدادات
               </Link>
             </SideNote>

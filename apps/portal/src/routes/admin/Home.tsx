@@ -170,7 +170,7 @@ export function AdminHome() {
       </div>
       <Link
         to="/system/roles"
-        className="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-primary hover:underline"
+        className="tap-44 mt-3 inline-flex items-center gap-1 text-sm font-semibold text-primary hover:underline"
       >
         الأدوار والصلاحيات
       </Link>
@@ -231,7 +231,7 @@ export function AdminHome() {
         <div className="mt-6 space-y-4 lg:mt-0">
           <div className="flex items-end justify-between">
             <SectionLabel>المستخدمون · {num(total)}</SectionLabel>
-            <Link to="/system/users" className="mb-2 text-sm font-semibold text-primary">
+            <Link to="/system/users" className="tap-44 mb-2 text-sm font-semibold text-primary">
               إدارة
             </Link>
           </div>
