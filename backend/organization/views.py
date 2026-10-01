@@ -1,7 +1,12 @@
+from datetime import UTC, datetime
+
+from django.conf import settings
 from django.db import transaction
 from drf_spectacular.utils import extend_schema
-from rest_framework import generics
+from rest_framework import generics, serializers
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from audit.services import RequestMeta, record, snapshot
 from core.permissions import capability
@@ -79,3 +84,56 @@ class SystemSettingsView(generics.RetrieveUpdateAPIView):
                 old=old,
                 new=snapshot(obj),
             )
+
+
+class SystemStatusSerializer(serializers.Serializer):
+    backups = serializers.DictField()
+    email = serializers.DictField()
+    students = serializers.DictField()
+
+
+_TEST_MAILERS = ("console", "locmem", "filebased", "dummy", "dev")
+
+
+@extend_schema(tags=["system"], responses=SystemStatusSerializer)
+class SystemStatusView(APIView):
+    """The admin home's status tiles (review 2026-09-29 PR 7): the latest encrypted backup,
+    whether email really leaves the system, and student records against activated accounts."""
+
+    permission_classes = [IsAuthenticated, capability("settings.manage")]
+
+    def get(self, request):
+        from core import backups
+        from students.models import StudentRecord
+
+        names = backups.existing()
+        latest = None
+        if names:
+            stamp = names[-1].rsplit("ecst-", 1)[-1].split(".", 1)[0]
+            try:
+                latest = datetime.strptime(stamp, "%Y%m%dT%H%M%SZ").replace(tzinfo=UTC)
+            except ValueError:
+                latest = None
+        backend = settings.MAILERS.get("default", {}).get("BACKEND", "")
+        records = StudentRecord.objects.all()
+        return Response(
+            {
+                "backups": {
+                    "count": len(names),
+                    "latest": latest.isoformat() if latest else None,
+                },
+                "email": {
+                    # "anymail.backends.brevo.EmailBackend" → "brevo"; "core.mail.DevEmailBackend"
+                    # → "dev".
+                    "backend": (
+                        backend.rsplit(".", 1)[-1].removesuffix("EmailBackend").lower()
+                        or backend.rsplit(".", 2)[-2]
+                    ),
+                    "sends_real_mail": not any(t in backend.lower() for t in _TEST_MAILERS),
+                },
+                "students": {
+                    "records": records.count(),
+                    "accounts": records.filter(user__isnull=False, user__is_active=True).count(),
+                },
+            }
+        )

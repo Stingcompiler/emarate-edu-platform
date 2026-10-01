@@ -137,6 +137,7 @@ export const ROUTE_ACCESS: Record<string, Allow> = {
   "/system": cap("settings.manage"),
   "/system/users": cap("users.view"),
   "/system/users/:id": cap("users.view"),
+  "/system/roles": cap("users.view"),
   "/system/structure": cap("structure.manage"),
   "/system/settings": cap("settings.manage"),
   "/audit": cap("audit.view"),

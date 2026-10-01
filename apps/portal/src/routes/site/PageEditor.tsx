@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowDown, ArrowUp, Plus, Trash2 } from "lucide-react";
+import { ArrowDown, ArrowUp, ImageIcon, Plus, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 
@@ -17,6 +17,7 @@ import {
 import { api, ok } from "../../lib/api";
 import { useUnsavedChanges } from "../../lib/useUnsavedChanges";
 import { useConfirm } from "../../components/Confirm";
+import { Segmented } from "../../components/motion";
 
 type Block = {
   type: "heading" | "paragraph" | "note" | "html" | "image" | "cta";
@@ -34,7 +35,8 @@ const TYPES: { key: Block["type"]; label: string }[] = [
   { key: "html", label: "HTML" },
 ];
 
-/** Board: DesktopSiteCMS (desktop): blocks editor + live preview. Phone derived: stacked. */
+/** Board: DesktopSiteCMS (desktop): blocks editor + live preview, insertion between blocks, the
+ *  media library and the search panel. Phones switch between editing and the preview. */
 export function PageEditor() {
   const confirm = useConfirm();
   const unsaved = useUnsavedChanges();
@@ -55,16 +57,35 @@ export function PageEditor() {
   const [slug, setSlug] = useState("");
   const [title, setTitle] = useState("");
   const [blocks, setBlocks] = useState<Block[]>([{ type: "paragraph", text: "" }]);
+  // The search result's text (review 2026-09-29 PR 7, «لوح SEO»): blank → the site uses the
+  // page's first paragraph.
+  const [description, setDescription] = useState("");
+  // Phones: edit or preview, one at a time; large screens show both side by side.
+  const [pane, setPane] = useState<"edit" | "preview">("edit");
+  // Where «+» between blocks inserts, and which image block is choosing from the library.
+  const [insertAt, setInsertAt] = useState<number | null>(null);
+  const [picking, setPicking] = useState<number | null>(null);
+  const media = useQuery({
+    queryKey: ["site", "media", "all"],
+    enabled: picking !== null,
+    queryFn: async () =>
+      ok(await api.GET("/api/v1/content/media", { params: { query: { page_size: 100 } } }))
+        ?.results ?? [],
+  });
   useEffect(() => {
     if (page.data) {
       setSlug(page.data.slug);
       setTitle(page.data.title_ar);
       setBlocks((page.data.blocks as Block[]) ?? []);
+      setDescription(((page.data.seo ?? {}) as { description?: string }).description ?? "");
     }
   }, [page.data]);
+  const firstParagraph = blocks.find((b) => b.type === "paragraph" && b.text?.trim())?.text ?? "";
+  const searchText = (description.trim() || firstParagraph).slice(0, 160);
   const save = useMutation({
     mutationFn: async (status: "draft" | "published") => {
-      const body = { slug, title_ar: title, blocks, status } as never;
+      const seo = { ...((page.data?.seo ?? {}) as object), description: description.trim() };
+      const body = { slug, title_ar: title, blocks, status, seo } as never;
       const res = creating
         ? await api.POST("/api/v1/content/pages", { body })
         : await api.PATCH("/api/v1/content/pages/{public_id}", {
@@ -92,6 +113,10 @@ export function PageEditor() {
         : { tone: "draft", label: "مسودة" };
   const update = (i: number, patch: Partial<Block>) =>
     setBlocks((bs) => bs.map((b, j) => (j === i ? { ...b, ...patch } : b)));
+  const insert = (at: number, type: Block["type"]) => {
+    setBlocks((bs) => [...bs.slice(0, at), { type }, ...bs.slice(at)]);
+    setInsertAt(null);
+  };
   const moveBlock = (i: number, d: number) =>
     setBlocks((bs) => {
       const next = [...bs];
@@ -113,8 +138,19 @@ export function PageEditor() {
       back={{ label: "محتوى الموقع", to: "/site" }}
     >
       <div className="contents" onInput={unsaved.onInput}>
+        <div className="mb-3 lg:hidden">
+          <Segmented
+            label="التحرير أو المعاينة"
+            value={pane}
+            onChange={setPane}
+            options={[
+              { key: "edit", label: "تحرير" },
+              { key: "preview", label: "معاينة" },
+            ]}
+          />
+        </div>
         <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:items-start lg:gap-6">
-          <div>
+          <div className={pane === "edit" ? "" : "hidden lg:block"}>
             <Card>
               <Field label="العنوان" value={title} onChange={(e) => setTitle(e.target.value)} />
               <Field
@@ -136,80 +172,146 @@ export function PageEditor() {
             <SectionLabel>الكتل</SectionLabel>
             <div className="space-y-3">
               {blocks.map((b, i) => (
-                <Card key={i} className="p-3">
-                  <div className="mb-2 flex items-center gap-2 text-xs text-text-muted">
-                    <span className="font-semibold">
-                      {TYPES.find((t) => t.key === b.type)?.label}
-                    </span>
-                    <span className="ms-auto flex gap-1">
-                      <button
-                        type="button"
-                        aria-label="أعلى"
-                        disabled={i === 0}
-                        onClick={() => moveBlock(i, -1)}
-                        className="grid size-8 place-items-center rounded-md hover:bg-surface-alt disabled:opacity-30"
-                      >
-                        <ArrowUp size={14} />
-                      </button>
-                      <button
-                        type="button"
-                        aria-label="أسفل"
-                        disabled={i === blocks.length - 1}
-                        onClick={() => moveBlock(i, 1)}
-                        className="grid size-8 place-items-center rounded-md hover:bg-surface-alt disabled:opacity-30"
-                      >
-                        <ArrowDown size={14} />
-                      </button>
-                      <button
-                        type="button"
-                        aria-label="حذف"
-                        onClick={() => setBlocks((bs) => bs.filter((_, j) => j !== i))}
-                        className="grid size-8 place-items-center rounded-md text-danger-strong hover:bg-danger-soft"
-                      >
-                        <Trash2 size={14} />
-                      </button>
-                    </span>
-                  </div>
-                  {b.type === "html" ? (
-                    <textarea
-                      dir="ltr"
-                      aria-label={`كتلة ${i + 1}: HTML`}
-                      value={b.html ?? ""}
-                      onChange={(e) => update(i, { html: e.target.value })}
-                      className="block min-h-24 w-full rounded-lg border border-border bg-surface p-2 font-mono text-xs"
-                    />
-                  ) : b.type === "image" || b.type === "cta" ? (
-                    <div className="grid gap-2">
-                      <input
-                        value={b.text ?? b.alt ?? ""}
-                        onChange={(e) =>
-                          update(
-                            i,
-                            b.type === "image" ? { alt: e.target.value } : { text: e.target.value },
-                          )
-                        }
-                        placeholder={b.type === "image" ? "وصف الصورة" : "نص الزر"}
-                        aria-label={`كتلة ${i + 1}: ${b.type === "image" ? "وصف الصورة" : "نص الزر"}`}
-                        className="min-h-10 rounded-lg border border-border bg-surface px-3 text-sm"
-                      />
-                      <input
-                        dir="ltr"
-                        value={b.url ?? ""}
-                        onChange={(e) => update(i, { url: e.target.value })}
-                        placeholder="https://… أو /path"
-                        aria-label={`كتلة ${i + 1}: الرابط`}
-                        className="min-h-10 rounded-lg border border-border bg-surface px-3 text-sm"
-                      />
+                <div key={i}>
+                  {i > 0 && (
+                    <div className="-my-1.5 flex justify-center" data-saves-itself>
+                      {insertAt === i ? (
+                        <span className="flex flex-wrap justify-center gap-1.5 rounded-xl bg-surface p-2 shadow-md">
+                          {TYPES.map((t) => (
+                            <Chip key={t.key} onClick={() => insert(i, t.key)}>
+                              {t.label}
+                            </Chip>
+                          ))}
+                          <Chip onClick={() => setInsertAt(null)}>إلغاء</Chip>
+                        </span>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => setInsertAt(i)}
+                          aria-label={`إضافة كتلة قبل الكتلة ${i + 1}`}
+                          className="grid size-7 place-items-center rounded-full border border-dashed border-border bg-surface text-text-muted hover:border-primary hover:text-primary"
+                        >
+                          <Plus size={14} aria-hidden />
+                        </button>
+                      )}
                     </div>
-                  ) : (
-                    <textarea
-                      aria-label={`كتلة ${i + 1}: ${TYPES.find((t) => t.key === b.type)?.label ?? "نص"}`}
-                      value={b.text ?? ""}
-                      onChange={(e) => update(i, { text: e.target.value })}
-                      className={`block w-full resize-y rounded-lg border border-border bg-surface p-2 ${b.type === "heading" ? "min-h-11 text-lg font-bold" : "min-h-24 text-sm leading-relaxed"}`}
-                    />
                   )}
-                </Card>
+                  <Card className="p-3">
+                    <div className="mb-2 flex items-center gap-2 text-xs text-text-muted">
+                      <span className="font-semibold">
+                        {TYPES.find((t) => t.key === b.type)?.label}
+                      </span>
+                      <span className="ms-auto flex gap-1">
+                        <button
+                          type="button"
+                          aria-label="أعلى"
+                          disabled={i === 0}
+                          onClick={() => moveBlock(i, -1)}
+                          className="grid size-8 place-items-center rounded-md hover:bg-surface-alt disabled:opacity-30"
+                        >
+                          <ArrowUp size={14} />
+                        </button>
+                        <button
+                          type="button"
+                          aria-label="أسفل"
+                          disabled={i === blocks.length - 1}
+                          onClick={() => moveBlock(i, 1)}
+                          className="grid size-8 place-items-center rounded-md hover:bg-surface-alt disabled:opacity-30"
+                        >
+                          <ArrowDown size={14} />
+                        </button>
+                        <button
+                          type="button"
+                          aria-label="حذف"
+                          onClick={() => setBlocks((bs) => bs.filter((_, j) => j !== i))}
+                          className="grid size-8 place-items-center rounded-md text-danger-strong hover:bg-danger-soft"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </span>
+                    </div>
+                    {b.type === "html" ? (
+                      <textarea
+                        dir="ltr"
+                        aria-label={`كتلة ${i + 1}: HTML`}
+                        value={b.html ?? ""}
+                        onChange={(e) => update(i, { html: e.target.value })}
+                        className="block min-h-24 w-full rounded-lg border border-border bg-surface p-2 font-mono text-xs"
+                      />
+                    ) : b.type === "image" || b.type === "cta" ? (
+                      <div className="grid gap-2">
+                        <input
+                          value={b.text ?? b.alt ?? ""}
+                          onChange={(e) =>
+                            update(
+                              i,
+                              b.type === "image"
+                                ? { alt: e.target.value }
+                                : { text: e.target.value },
+                            )
+                          }
+                          placeholder={b.type === "image" ? "وصف الصورة" : "نص الزر"}
+                          aria-label={`كتلة ${i + 1}: ${b.type === "image" ? "وصف الصورة" : "نص الزر"}`}
+                          className="min-h-10 rounded-lg border border-border bg-surface px-3 text-sm"
+                        />
+                        <input
+                          dir="ltr"
+                          value={b.url ?? ""}
+                          onChange={(e) => update(i, { url: e.target.value })}
+                          placeholder="https://… أو /path"
+                          aria-label={`كتلة ${i + 1}: الرابط`}
+                          className="min-h-10 rounded-lg border border-border bg-surface px-3 text-sm"
+                        />
+                        {b.type === "image" && (
+                          <>
+                            <button
+                              type="button"
+                              onClick={() => setPicking(picking === i ? null : i)}
+                              aria-expanded={picking === i}
+                              className="inline-flex items-center gap-1.5 justify-self-start text-sm font-semibold text-primary"
+                            >
+                              <ImageIcon size={15} aria-hidden /> من مكتبة الوسائط
+                            </button>
+                            {picking === i && (
+                              <div className="grid max-h-56 grid-cols-3 gap-2 overflow-y-auto rounded-lg bg-surface-alt p-2 sm:grid-cols-4">
+                                {(media.data ?? []).map((m) => (
+                                  <button
+                                    key={m.public_id}
+                                    type="button"
+                                    onClick={() => {
+                                      update(i, { url: m.url, alt: b.alt || m.alt_ar || "" });
+                                      setPicking(null);
+                                    }}
+                                    className="overflow-hidden rounded-md ring-primary hover:ring-2"
+                                    aria-label={m.alt_ar || "صورة من المكتبة"}
+                                  >
+                                    <img
+                                      src={m.url}
+                                      alt=""
+                                      className="aspect-square w-full object-cover"
+                                    />
+                                  </button>
+                                ))}
+                                {!media.isPending && !media.data?.length && (
+                                  <p className="col-span-full p-2 text-xs text-text-muted">
+                                    المكتبة فارغة — ارفع صورًا من «الوسائط».
+                                  </p>
+                                )}
+                              </div>
+                            )}
+                          </>
+                        )}
+                      </div>
+                    ) : (
+                      <textarea
+                        aria-label={`كتلة ${i + 1}: ${TYPES.find((t) => t.key === b.type)?.label ?? "نص"}`}
+                        value={b.text ?? ""}
+                        onChange={(e) => update(i, { text: e.target.value })}
+                        className={`block w-full resize-y rounded-lg border border-border bg-surface p-2 ${b.type === "heading" ? "min-h-11 text-lg font-bold" : "min-h-24 text-sm leading-relaxed"}`}
+                      />
+                    )}
+                  </Card>
+                </div>
               ))}
             </div>
             <div className="mt-3 flex flex-wrap gap-2">
@@ -273,7 +375,40 @@ export function PageEditor() {
               )}
             </div>
           </div>
-          <aside className="mt-6 lg:sticky lg:top-20 lg:mt-0">
+          <aside
+            className={`mt-6 space-y-4 lg:sticky lg:top-20 lg:mt-0 lg:block ${pane === "preview" ? "" : "hidden"}`}
+          >
+            <Card className="p-4">
+              <h2 className="text-sm font-semibold text-text">الظهور في نتائج البحث</h2>
+              <label className="mt-2 block">
+                <span className="text-xs text-text-muted">
+                  الوصف (يُترك فارغًا فيُستخدم أول فقرة)
+                </span>
+                <textarea
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  maxLength={300}
+                  className="mt-1 block min-h-16 w-full rounded-lg border border-border bg-surface p-2 text-sm"
+                />
+              </label>
+              <p
+                className={`text-end text-[11px] ${description.length > 160 ? "text-danger-strong" : "text-text-muted"}`}
+              >
+                {description.length.toLocaleString("ar-u-nu-latn")} / 160
+              </p>
+              {/* How a search engine shows it. */}
+              <div className="mt-2 rounded-lg bg-surface-alt p-3" aria-hidden="true">
+                <p className="text-xs text-success-strong" dir="ltr">
+                  ecst.edu.sd › {page.data?.path ?? (slug ? `p/${slug}` : "…")}
+                </p>
+                <p className="truncate text-base text-primary">
+                  {title || "عنوان الصفحة"} | كلية الإمارات للعلوم والتقنية
+                </p>
+                <p className="line-clamp-2 text-xs text-text-muted">
+                  {searchText || "اكتب وصفًا أو فقرة أولى تعرّف بالصفحة."}
+                </p>
+              </div>
+            </Card>
             <SectionLabel>معاينة</SectionLabel>
             <Card className="space-y-3 p-5">
               <h2 className="font-display text-2xl font-bold text-text">{title}</h2>
@@ -301,12 +436,16 @@ export function PageEditor() {
                     {b.text}
                   </span>
                 ) : b.type === "image" ? (
-                  <div
-                    key={i}
-                    className="grid h-32 place-items-center rounded-lg bg-surface-alt text-xs text-text-muted"
-                  >
-                    {b.alt || "صورة"}
-                  </div>
+                  b.url ? (
+                    <img key={i} src={b.url} alt={b.alt ?? ""} className="w-full rounded-lg" />
+                  ) : (
+                    <div
+                      key={i}
+                      className="grid h-32 place-items-center rounded-lg bg-surface-alt text-xs text-text-muted"
+                    >
+                      {b.alt || "صورة"}
+                    </div>
+                  )
                 ) : (
                   <p key={i} className="text-xs text-text-muted">
                     [HTML — يُعقَّم في الخادم]

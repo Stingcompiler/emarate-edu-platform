@@ -199,6 +199,55 @@ class MeView(APIView):
         return Response(MeSerializer(request.user).data)
 
 
+class RoleSummarySerializer(serializers.Serializer):
+    key = serializers.CharField()
+    label = serializers.CharField()
+    department_scoped = serializers.BooleanField()
+    users = serializers.IntegerField()
+
+
+class CapabilityRowSerializer(serializers.Serializer):
+    key = serializers.CharField()
+    roles = serializers.ListField(child=serializers.CharField())
+
+
+class RolesMatrixSerializer(serializers.Serializer):
+    roles = RoleSummarySerializer(many=True)
+    capabilities = CapabilityRowSerializer(many=True)
+
+
+class RolesView(APIView):
+    """«الأدوار والصلاحيات», read-only (review 2026-09-29 PR 7, board DesktopRolesMatrix): the
+    roles, how many active accounts hold each, and which roles carry each capability — read from
+    accounts/rbac.py, the one source of truth (docs/03). Changing them is a code change."""
+
+    permission_classes = [IsAuthenticated, capability("users.view")]
+
+    @extend_schema(responses=RolesMatrixSerializer, tags=["users"])
+    def get(self, request):
+        counts = dict(
+            RoleAssignment.objects.filter(user__is_active=True)
+            .values("role")
+            .annotate(n=Count("user", distinct=True))
+            .order_by()
+            .values_list("role", "n")
+        )
+        roles = [
+            {
+                "key": role.value,
+                "label": role.label,
+                "department_scoped": role in rbac.DEPARTMENT_SCOPED_ROLES,
+                "users": counts.get(role.value, 0),
+            }
+            for role in Role
+        ]
+        capabilities = [
+            {"key": key, "roles": sorted(str(r) for r in allowed)}
+            for key, allowed in rbac.CAPABILITIES.items()
+        ]
+        return Response({"roles": roles, "capabilities": capabilities})
+
+
 class MyPublicProfileView(APIView):
     """The member's own choice to appear on their department's public page, and how
     (owner decision 2026-09-30). Only the member sets it; the change is audited."""

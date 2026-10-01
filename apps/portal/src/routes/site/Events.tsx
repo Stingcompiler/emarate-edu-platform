@@ -7,6 +7,7 @@ import { PortalShell } from "../../components/PortalShell";
 import {
   Button,
   Card,
+  Chip,
   EmptyState,
   Field,
   Notice,
@@ -37,7 +38,19 @@ export function Events() {
     queryFn: async () =>
       ok(await api.GET("/api/v1/content/events", { params: { query: ALL } }))?.results ?? [],
   });
-  const paged = useLocalPages(events.data ?? []);
+  // Upcoming (soonest first) and past (latest first), with the next one as the page's hero
+  // (review 2026-09-29 PR 7 «الفعاليات: القادمة والسابقة، والبطل»).
+  const [tab, setTab] = useState<"upcoming" | "past">("upcoming");
+  const now = Date.now();
+  const upcoming = (events.data ?? [])
+    .filter((e) => new Date(e.ends_at).getTime() > now)
+    .sort((a, b) => a.starts_at.localeCompare(b.starts_at));
+  const past = (events.data ?? [])
+    .filter((e) => new Date(e.ends_at).getTime() <= now)
+    .sort((a, b) => b.starts_at.localeCompare(a.starts_at));
+  const next = upcoming[0];
+  const list = tab === "upcoming" ? upcoming.slice(next ? 1 : 0) : past;
+  const paged = useLocalPages(list, [tab]);
   return (
     <PortalShell
       title="الفعاليات"
@@ -75,33 +88,80 @@ export function Events() {
             <EmptyState icon={<CalendarDays size={24} aria-hidden />} title="لا فعاليات بعد" />
           </Card>
         ) : (
-          <Card className="divide-y divide-border-soft">
-            {paged.shown.map((e) => (
+          <>
+            <div className="mb-3 flex gap-2" role="tablist">
+              <Chip active={tab === "upcoming"} onClick={() => setTab("upcoming")}>
+                القادمة {upcoming.length.toLocaleString("ar-u-nu-latn")}
+              </Chip>
+              <Chip active={tab === "past"} onClick={() => setTab("past")}>
+                السابقة {past.length.toLocaleString("ar-u-nu-latn")}
+              </Chip>
+            </div>
+            {tab === "upcoming" && next && (
               <Link
-                key={e.public_id}
-                to={`/events/${e.public_id}`}
-                className="flex items-center gap-3 px-4 py-3 hover:bg-surface-alt"
+                to={`/events/${next.public_id}`}
+                className="mb-3 block overflow-hidden rounded-2xl bg-header text-white hover:opacity-95"
               >
-                <span className="grid w-14 shrink-0 place-items-center rounded-lg bg-accent-soft py-1 text-accent">
-                  <span className="text-lg font-bold leading-tight">
-                    {day.format(new Date(e.starts_at))}
+                {next.cover_url && (
+                  <img src={next.cover_url} alt="" className="aspect-[3/1] w-full object-cover" />
+                )}
+                <span className="flex items-center gap-4 p-4">
+                  <span className="grid w-16 shrink-0 place-items-center rounded-xl bg-white/10 py-2">
+                    <span className="text-2xl font-bold leading-tight">
+                      {day.format(new Date(next.starts_at))}
+                    </span>
+                    <span className="text-xs">{month.format(new Date(next.starts_at))}</span>
                   </span>
-                  <span className="text-[11px]">{month.format(new Date(e.starts_at))}</span>
-                </span>
-                <span className="min-w-0 flex-1">
-                  <span className="block truncate text-sm font-semibold text-text">{e.title}</span>
-                  <span className="text-xs text-text-muted">
-                    {time.format(new Date(e.starts_at))}
-                    {e.location ? ` · ${e.location}` : ""}
+                  <span className="min-w-0 flex-1">
+                    <span className="text-xs text-navy-200">الفعالية القادمة</span>
+                    <b className="block truncate text-lg">{next.title}</b>
+                    <span className="text-sm text-navy-200">
+                      {time.format(new Date(next.starts_at))}
+                      {next.location ? ` · ${next.location}` : ""}
+                    </span>
+                  </span>
+                  <span className="shrink-0 rounded-full bg-white/15 px-2.5 py-1 text-xs font-semibold">
+                    {LABEL[next.status ?? "draft"] ?? ""}
                   </span>
                 </span>
-                <StatusBadge
-                  status={e.status === "cancelled" ? "rejected" : (e.status ?? "draft")}
-                  label={LABEL[e.status ?? "draft"] ?? ""}
-                />
               </Link>
-            ))}
-          </Card>
+            )}
+            {list.length > 0 ? (
+              <Card className="divide-y divide-border-soft">
+                {paged.shown.map((e) => (
+                  <Link
+                    key={e.public_id}
+                    to={`/events/${e.public_id}`}
+                    className="flex items-center gap-3 px-4 py-3 hover:bg-surface-alt"
+                  >
+                    <span className="grid w-14 shrink-0 place-items-center rounded-lg bg-accent-soft py-1 text-accent">
+                      <span className="text-lg font-bold leading-tight">
+                        {day.format(new Date(e.starts_at))}
+                      </span>
+                      <span className="text-[11px]">{month.format(new Date(e.starts_at))}</span>
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate text-sm font-semibold text-text">
+                        {e.title}
+                      </span>
+                      <span className="text-xs text-text-muted">
+                        {time.format(new Date(e.starts_at))}
+                        {e.location ? ` · ${e.location}` : ""}
+                      </span>
+                    </span>
+                    <StatusBadge
+                      status={e.status === "cancelled" ? "rejected" : (e.status ?? "draft")}
+                      label={LABEL[e.status ?? "draft"] ?? ""}
+                    />
+                  </Link>
+                ))}
+              </Card>
+            ) : (
+              <p className="px-1 py-3 text-sm text-text-muted">
+                {tab === "upcoming" ? (next ? "" : "لا فعاليات قادمة.") : "لا فعاليات سابقة."}
+              </p>
+            )}
+          </>
         )}
         <Pager page={paged.page} count={paged.count} onPage={paged.setPage} />
       </WithSide>

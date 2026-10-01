@@ -32,6 +32,7 @@ import {
   Send,
   Settings,
   SlidersHorizontal,
+  KeyRound,
 } from "lucide-react";
 
 import type { NavItem } from "../components/AppShell";
@@ -98,6 +99,13 @@ export function navFor(me: Me | null | undefined, unread: number): NavItem[] {
   if (hasRole(me, "system_admin")) {
     items.push({ label: "إدارة النظام", short: "الرئيسية", to: "/system", icon: LayoutDashboard });
     items.push({ label: "المستخدمون", to: "/system/users", icon: Users, end: false });
+    items.push({
+      label: "الأدوار والصلاحيات",
+      short: "الأدوار",
+      to: "/system/roles",
+      icon: KeyRound,
+      desktopOnly: true,
+    });
     items.push({
       label: "الهيكل الأكاديمي",
       short: "الهيكل",

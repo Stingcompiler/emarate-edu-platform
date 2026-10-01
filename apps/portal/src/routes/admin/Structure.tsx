@@ -300,7 +300,7 @@ export function Structure() {
             قسم {dept?.name_ar ?? ""} — البرامج · {num(deptPrograms.length)}
           </SectionLabel>
           <Card className="divide-y divide-border-soft">
-            <div className="hidden grid-cols-[minmax(0,1fr)_88px_120px_76px_56px] gap-3 bg-surface-alt px-4 py-2 text-xs text-text-muted md:grid">
+            <div className="hidden grid-cols-[minmax(0,1fr)_88px_120px_120px_56px] gap-3 bg-surface-alt px-4 py-2 text-xs text-text-muted md:grid">
               <span>البرنامج</span>
               <span>الدرجة</span>
               <span>المدة</span>
@@ -310,7 +310,7 @@ export function Structure() {
             {deptPrograms.map((p) => (
               <div
                 key={p.id}
-                className="grid gap-1 px-4 py-3 text-sm md:grid-cols-[minmax(0,1fr)_88px_120px_76px_56px] md:items-center md:gap-3"
+                className="grid gap-1 px-4 py-3 text-sm md:grid-cols-[minmax(0,1fr)_88px_120px_120px_56px] md:items-center md:gap-3"
               >
                 <span className="min-w-0">
                   <bdi className="block font-mono text-xs text-text-muted">{p.code}</bdi>
@@ -613,6 +613,16 @@ function HoursInput({
         onKeyDown={(e) => e.key === "Enter" && (e.target as HTMLInputElement).blur()}
         className={`w-16 rounded border px-1 py-1 text-sm ${save.isError ? "border-danger" : "border-border"}`}
       />
+      {/* It saves on leaving the field: say so (review 2026-09-29 PR 7, «تأكيد حفظ الساعات»). */}
+      <span role="status" className="w-10 text-[11px]">
+        {save.isPending ? (
+          <span className="text-text-muted">…</span>
+        ) : save.isSuccess ? (
+          <span className="text-success-strong">حُفظ ✓</span>
+        ) : save.isError ? (
+          <span className="text-danger-strong">لم يُحفظ</span>
+        ) : null}
+      </span>
     </span>
   );
 }
