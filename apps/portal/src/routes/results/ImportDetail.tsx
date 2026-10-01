@@ -106,130 +106,142 @@ export function ResultImportDetail() {
             ))}
           </ol>
 
-          <Card className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-2 px-4 py-3 text-sm">
-            <StatusBadge status={b.status} label={STATUS_LABELS[b.status] ?? b.status} />
-            <span>
-              الصفوف: <b>{summary.rows ?? 0}</b>
-            </span>
-            <span className="text-success-strong">
-              صالحة: <b>{summary.create ?? 0}</b>
-            </span>
-            <span className="text-danger-strong">
-              أخطاء: <b>{summary.error ?? 0}</b>
-            </span>
-            <span className="text-text-muted">
-              الأعمدة: {(b.detected_columns as string[]).map((c) => COLUMNS[c] ?? c).join("، ")}
-            </span>
-          </Card>
+          {/* From xl the verification summary and the actions sit beside the rows (board
+              DesktopResultsImport); narrower screens keep them above. */}
+          <div className="mt-4 xl:grid xl:grid-cols-[minmax(0,1fr)_320px] xl:items-start xl:gap-6">
+            <aside className="xl:sticky xl:top-20 xl:col-start-2 xl:row-start-1">
+              <Card className="flex flex-wrap items-center gap-x-6 gap-y-2 px-4 py-3 text-sm xl:flex-col xl:items-stretch xl:gap-y-2.5">
+                <StatusBadge status={b.status} label={STATUS_LABELS[b.status] ?? b.status} />
+                <span>
+                  الصفوف: <b>{summary.rows ?? 0}</b>
+                </span>
+                <span className="text-success-strong">
+                  صالحة: <b>{summary.create ?? 0}</b>
+                </span>
+                <span className="text-danger-strong">
+                  أخطاء: <b>{summary.error ?? 0}</b>
+                </span>
+                <span className="text-text-muted">
+                  الأعمدة: {(b.detected_columns as string[]).map((c) => COLUMNS[c] ?? c).join("، ")}
+                </span>
+              </Card>
 
-          <div className="mt-4 flex flex-wrap gap-2">
-            {(b.status === "validated" || b.status === "has_errors") && (
-              <>
-                <Button
-                  onClick={() => act.mutate("commit")}
-                  disabled={act.isPending || !summary.create}
-                >
-                  اعتماد النتائج الصالحة ({summary.create ?? 0})
-                  {summary.error ? " — تُتخطّى الأخطاء" : ""}
-                </Button>
-                <Button
-                  variant="secondary"
-                  onClick={async () =>
-                    (await confirm({
-                      title: "إلغاء الدفعة؟",
-                      body: "يُحذف الملف ومعاينته؛ لا تتأثر أي نتيجة معتمدة.",
-                      confirm: "إلغاء الدفعة",
-                      cancel: "تراجع",
-                    })) && act.mutate("delete")
-                  }
-                  disabled={act.isPending}
-                >
-                  إلغاء الدفعة
-                </Button>
-              </>
-            )}
-            {(b.status === "committed" || b.status === "unpublished") && (
-              <Button onClick={() => act.mutate("publish")} disabled={act.isPending}>
-                نشر للطلاب
-              </Button>
-            )}
-            {b.status === "published" && (
-              <Button
-                variant="secondary"
-                onClick={async () =>
-                  (await confirm({
-                    title: "إلغاء نشر نتائج الدفعة؟",
-                    body: "تختفي هذه النتائج من «نتائجي» عند الطلاب حتى تنشرها مجددًا.",
-                    confirm: "إلغاء النشر",
-                    cancel: "تراجع",
-                  })) && act.mutate("unpublish")
-                }
-                disabled={act.isPending}
-              >
-                إلغاء النشر
-              </Button>
-            )}
-          </div>
-          {act.isError && (
-            <div className="mt-3">
-              <Notice>{problemMessage(act.error)}</Notice>
-            </div>
-          )}
-
-          <div className="mt-6 flex items-center gap-2">
-            <h2 className="text-xs font-semibold text-text-muted">معاينة الصفوف</h2>
-            <Chip active={only === "all"} onClick={() => setOnly("all")}>
-              الكل
-            </Chip>
-            <Chip active={only === "error"} onClick={() => setOnly("error")}>
-              الأخطاء فقط ({summary.error ?? 0})
-            </Chip>
-          </div>
-          <Card className="mt-2 divide-y divide-border-soft overflow-hidden">
-            <div className="hidden grid-cols-[48px_140px_110px_70px_70px_1fr] gap-3 bg-surface-alt px-4 py-2 text-xs text-text-muted lg:grid">
-              <span>#</span>
-              <span>الرقم الجامعي</span>
-              <span>المقرر</span>
-              <span>الدرجة</span>
-              <span>التقدير</span>
-              <span>الحالة</span>
-            </div>
-            {!rows.query.isPending && !rows.items.length && (
-              <p className="px-4 py-5 text-sm text-text-muted">
-                {only === "error"
-                  ? "لا أخطاء في هذا الملف."
-                  : "لا صفوف للمعاينة — نتائج الدفعة المعتمدة في سجل النتائج."}
-              </p>
-            )}
-            {rows.items.map((row) => {
-              const n = row.normalized as Record<string, string | null>;
-              const matched = row.action === "create";
-              return (
-                <div
-                  key={row.row_no}
-                  className="grid grid-cols-[40px_1fr_auto] gap-x-3 gap-y-1 px-4 py-3 text-sm lg:grid-cols-[48px_140px_110px_70px_70px_1fr] lg:items-center"
-                >
-                  <span className="text-text-muted">{row.row_no}</span>
-                  <span className="font-medium text-text" dir="ltr">
-                    {n.university_number}
-                  </span>
-                  <span className="text-text-muted lg:text-text">{n.course_code}</span>
-                  <span className="hidden lg:block">{n.score ?? "—"}</span>
-                  <span className="hidden font-bold lg:block" dir="ltr">
-                    {n.letter || "—"}
-                  </span>
-                  <span
-                    className={`col-span-3 text-xs lg:col-span-1 ${matched ? "text-success-strong" : "text-danger-strong"}`}
+              <div className="mt-4 flex flex-wrap gap-2 xl:flex-col">
+                {(b.status === "validated" || b.status === "has_errors") && (
+                  <>
+                    <Button
+                      onClick={() => act.mutate("commit")}
+                      disabled={act.isPending || !summary.create}
+                    >
+                      اعتماد النتائج الصالحة ({summary.create ?? 0})
+                      {summary.error ? " — تُتخطّى الأخطاء" : ""}
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      onClick={async () =>
+                        (await confirm({
+                          title: "إلغاء الدفعة؟",
+                          body: "يُحذف الملف ومعاينته؛ لا تتأثر أي نتيجة معتمدة.",
+                          confirm: "إلغاء الدفعة",
+                          cancel: "تراجع",
+                        })) && act.mutate("delete")
+                      }
+                      disabled={act.isPending}
+                    >
+                      إلغاء الدفعة
+                    </Button>
+                  </>
+                )}
+                {(b.status === "committed" || b.status === "unpublished") && (
+                  <Button onClick={() => act.mutate("publish")} disabled={act.isPending}>
+                    نشر للطلاب
+                  </Button>
+                )}
+                {b.status === "published" && (
+                  <Button
+                    variant="secondary"
+                    onClick={async () =>
+                      (await confirm({
+                        title: "إلغاء نشر نتائج الدفعة؟",
+                        body: "تختفي هذه النتائج من «نتائجي» عند الطلاب حتى تنشرها مجددًا.",
+                        confirm: "إلغاء النشر",
+                        cancel: "تراجع",
+                      })) && act.mutate("unpublish")
+                    }
+                    disabled={act.isPending}
                   >
-                    {matched
-                      ? `مطابق · ${n.score ?? ""} \u2066${n.letter ?? ""}\u2069`
-                      : (row.errors as string[]).join(" · ")}
-                  </span>
+                    إلغاء النشر
+                  </Button>
+                )}
+              </div>
+              {act.isError && (
+                <div className="mt-3">
+                  <Notice>{problemMessage(act.error)}</Notice>
                 </div>
-              );
-            })}
-          </Card>
-          <Pager page={rows.page} count={rows.count} onPage={rows.setPage} label="صفحات الصفوف" />
+              )}
+            </aside>
+            <section className="mt-6 min-w-0 xl:col-start-1 xl:row-start-1 xl:mt-0">
+              <div className="flex items-center gap-2">
+                <h2 className="text-xs font-semibold text-text-muted">معاينة الصفوف</h2>
+                <Chip active={only === "all"} onClick={() => setOnly("all")}>
+                  الكل
+                </Chip>
+                <Chip active={only === "error"} onClick={() => setOnly("error")}>
+                  الأخطاء فقط ({summary.error ?? 0})
+                </Chip>
+              </div>
+              <Card className="mt-2 divide-y divide-border-soft overflow-hidden">
+                <div className="hidden grid-cols-[48px_140px_110px_70px_70px_1fr] gap-3 bg-surface-alt px-4 py-2 text-xs text-text-muted lg:grid">
+                  <span>#</span>
+                  <span>الرقم الجامعي</span>
+                  <span>المقرر</span>
+                  <span>الدرجة</span>
+                  <span>التقدير</span>
+                  <span>الحالة</span>
+                </div>
+                {!rows.query.isPending && !rows.items.length && (
+                  <p className="px-4 py-5 text-sm text-text-muted">
+                    {only === "error"
+                      ? "لا أخطاء في هذا الملف."
+                      : "لا صفوف للمعاينة — نتائج الدفعة المعتمدة في سجل النتائج."}
+                  </p>
+                )}
+                {rows.items.map((row) => {
+                  const n = row.normalized as Record<string, string | null>;
+                  const matched = row.action === "create";
+                  return (
+                    <div
+                      key={row.row_no}
+                      className="grid grid-cols-[40px_1fr_auto] gap-x-3 gap-y-1 px-4 py-3 text-sm lg:grid-cols-[48px_140px_110px_70px_70px_1fr] lg:items-center"
+                    >
+                      <span className="text-text-muted">{row.row_no}</span>
+                      <span className="font-medium text-text" dir="ltr">
+                        {n.university_number}
+                      </span>
+                      <span className="text-text-muted lg:text-text">{n.course_code}</span>
+                      <span className="hidden lg:block">{n.score ?? "—"}</span>
+                      <span className="hidden font-bold lg:block" dir="ltr">
+                        {n.letter || "—"}
+                      </span>
+                      <span
+                        className={`col-span-3 text-xs lg:col-span-1 ${matched ? "text-success-strong" : "text-danger-strong"}`}
+                      >
+                        {matched
+                          ? `مطابق · ${n.score ?? ""} \u2066${n.letter ?? ""}\u2069`
+                          : (row.errors as string[]).join(" · ")}
+                      </span>
+                    </div>
+                  );
+                })}
+              </Card>
+              <Pager
+                page={rows.page}
+                count={rows.count}
+                onPage={rows.setPage}
+                label="صفحات الصفوف"
+              />
+            </section>
+          </div>
         </>
       )}
     </PortalShell>
