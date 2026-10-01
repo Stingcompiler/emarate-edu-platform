@@ -307,7 +307,10 @@ export function Grade() {
                 <Notice tone="info">لا تسليمات أخرى بانتظارك هنا.</Notice>
               )}
               {/* Pinned above the phone's tab bar: grading is done one after another. */}
-              <div className="sticky bottom-24 z-10 -mx-4 space-y-2 bg-surface px-4 py-2 lg:static lg:mx-0 lg:p-0">
+              <div
+                data-dock
+                className="sticky bottom-24 z-10 -mx-4 space-y-2 bg-surface px-4 py-2 lg:static lg:mx-0 lg:p-0"
+              >
                 <Button
                   className="min-h-11 w-full"
                   disabled={!valid || save.isPending}

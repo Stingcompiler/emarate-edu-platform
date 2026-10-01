@@ -44,8 +44,11 @@ export function AdminSettings() {
     mutationFn: async () => {
       const { data, error } = await api.PATCH("/api/v1/system-settings", { body: f! });
       if (!data) throw error;
+      return data;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      // The saved values at once, so the «unsaved changes» bar leaves with the toast.
+      client.setQueryData(["system-settings"], data);
       toast("حُفظت الإعدادات");
       void client.invalidateQueries({ queryKey: ["system-settings"] });
     },
@@ -156,6 +159,7 @@ export function AdminSettings() {
       )}
       {changes > 0 && (
         <div
+          data-dock
           role="region"
           aria-label="تغييرات غير محفوظة"
           className="sticky bottom-24 z-20 mt-4 flex flex-wrap items-center gap-2 rounded-2xl bg-text px-4 py-3 text-bg shadow-lg lg:bottom-6"

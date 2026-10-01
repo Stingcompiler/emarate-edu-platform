@@ -18,6 +18,7 @@ import { api, ok } from "../../lib/api";
 import { useUnsavedChanges } from "../../lib/useUnsavedChanges";
 import { useConfirm } from "../../components/Confirm";
 import { Segmented } from "../../components/motion";
+import { useToast } from "../../components/Toast";
 
 type Block = {
   type: "heading" | "paragraph" | "note" | "html" | "image" | "cta";
@@ -82,6 +83,7 @@ export function PageEditor() {
   }, [page.data]);
   const firstParagraph = blocks.find((b) => b.type === "paragraph" && b.text?.trim())?.text ?? "";
   const searchText = (description.trim() || firstParagraph).slice(0, 160);
+  const toast = useToast();
   const save = useMutation({
     mutationFn: async (status: "draft" | "published") => {
       const seo = { ...((page.data?.seo ?? {}) as object), description: description.trim() };
@@ -95,8 +97,18 @@ export function PageEditor() {
       if (!res.data) throw res.error;
       return res.data;
     },
-    onSuccess: (data) => {
+    onSuccess: (data, status) => {
       unsaved.saved();
+      // The badge keeps the page's state; the note says what this save did.
+      const was = published ? "live" : "draft";
+      toast(
+        {
+          "live-published": "حُفظت الصفحة المنشورة",
+          "draft-published": "نُشرت الصفحة",
+          "live-draft": "أُلغي نشر الصفحة",
+          "draft-draft": "حُفظت المسودة",
+        }[`${was}-${status}` as const],
+      );
       void client.invalidateQueries({ queryKey: ["site"] });
       if (creating) navigate(`/site/pages/${data.public_id}`, { replace: true });
     },
@@ -328,7 +340,10 @@ export function PageEditor() {
               </div>
             )}
             {/* Above the phone's tab bar while editing; in the flow on large screens. */}
-            <div className="sticky bottom-24 z-10 mt-4 flex flex-wrap items-center gap-2 rounded-2xl bg-surface p-2 shadow-md lg:static lg:bg-transparent lg:p-0 lg:shadow-none">
+            <div
+              data-dock
+              className="sticky bottom-24 z-10 mt-4 flex flex-wrap items-center gap-2 rounded-2xl bg-surface p-2 shadow-md lg:static lg:bg-transparent lg:p-0 lg:shadow-none"
+            >
               <StatusBadge status={state.tone} label={state.label} />
               {published ? (
                 <>

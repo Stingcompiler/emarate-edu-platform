@@ -1,6 +1,7 @@
 import type {
   Ref,
   ButtonHTMLAttributes,
+  HTMLAttributes,
   InputHTMLAttributes,
   ReactNode,
   TextareaHTMLAttributes,
@@ -37,9 +38,12 @@ export function Button({
   );
 }
 
-export function Card({ children, className = "" }: { children: ReactNode; className?: string }) {
+export function Card({ children, className = "", ...rest }: HTMLAttributes<HTMLDivElement>) {
   return (
-    <div className={`rounded-xl border border-border-soft bg-surface shadow-xs ${className}`}>
+    <div
+      {...rest}
+      className={`rounded-xl border border-border-soft bg-surface shadow-xs ${className}`}
+    >
       {children}
     </div>
   );
