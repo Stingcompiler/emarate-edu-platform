@@ -6,6 +6,7 @@ import { Button, Card, Notice, SectionLabel, Switch, problemMessage } from "../.
 import { api, ok } from "../../lib/api";
 import { count, N } from "../../lib/format";
 import { useUnsavedChanges } from "../../lib/useUnsavedChanges";
+import { useToast } from "../../components/Toast";
 
 type S = {
   student_registration_requires_approval: boolean;
@@ -38,12 +39,16 @@ export function AdminSettings() {
   useEffect(() => {
     if (settings.data) setF(settings.data as S);
   }, [settings.data]);
+  const toast = useToast();
   const save = useMutation({
     mutationFn: async () => {
       const { data, error } = await api.PATCH("/api/v1/system-settings", { body: f! });
       if (!data) throw error;
     },
-    onSuccess: () => client.invalidateQueries({ queryKey: ["system-settings"] }),
+    onSuccess: () => {
+      toast("حُفظت الإعدادات");
+      void client.invalidateQueries({ queryKey: ["system-settings"] });
+    },
   });
   // What differs from the server: shown in one save bar across the page, and guarded when
   // leaving (review 2026-09-29).
@@ -147,11 +152,6 @@ export function AdminSettings() {
       {save.isError && (
         <div className="mt-4">
           <Notice>{problemMessage(save.error)}</Notice>
-        </div>
-      )}
-      {save.isSuccess && !changes && (
-        <div className="mt-4">
-          <Notice tone="success">حُفظت الإعدادات.</Notice>
         </div>
       )}
       {changes > 0 && (

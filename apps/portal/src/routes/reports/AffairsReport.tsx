@@ -165,7 +165,10 @@ export function AffairsReport() {
                       <b>{pct(a.percent)}</b>
                     </div>
                     <div className="mt-1 h-2 overflow-hidden rounded-full bg-surface-alt">
-                      <div className="h-full bg-primary" style={{ width: `${a.percent ?? 0}%` }} />
+                      <div
+                        className="motion-grow h-full bg-primary"
+                        style={{ width: `${a.percent ?? 0}%` }}
+                      />
                     </div>
                   </div>
                 ))}

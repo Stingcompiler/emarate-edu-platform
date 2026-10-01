@@ -100,7 +100,7 @@ export function Courses() {
                         aria-valuenow={progress.done}
                       >
                         <span
-                          className={`block h-full rounded-full ${COURSE_TONES[tone]} [background:currentColor]`}
+                          className={`motion-grow block h-full rounded-full ${COURSE_TONES[tone]} [background:currentColor]`}
                           style={{ width: `${(100 * progress.done) / progress.of}%` }}
                         />
                       </div>

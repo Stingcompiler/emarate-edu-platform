@@ -114,7 +114,7 @@ export function TeacherProfile() {
                   </div>
                   <div className="mt-1 h-2 overflow-hidden rounded-full bg-surface-alt">
                     <div
-                      className={`h-full ${b.bad ? "bg-danger" : "bg-success"}`}
+                      className={`motion-grow h-full ${b.bad ? "bg-danger" : "bg-success"}`}
                       style={{ width: `${Math.round(b.ratio * 100)}%` }}
                     />
                   </div>

@@ -17,6 +17,7 @@ import { when, count, N, score } from "../../lib/format";
 import { dueLabel, fmtSize, openFile, useCourse, isCourseStaff } from "../../lib/learning";
 import { asForm, formData } from "../../lib/upload";
 import { ALL } from "../../components/Pager";
+import { useToast } from "../../components/Toast";
 
 const absolute = (iso: string) =>
   new Date(iso).toLocaleString("ar-u-nu-latn", {
@@ -234,6 +235,7 @@ function SubmitForm({ a, again, onDone }: { a: A; again: boolean; onDone: () => 
   const [links, setLinks] = useState<Record<string, string>>({});
   const input = useRef<HTMLInputElement>(null);
   const types = a.submission_types ?? [];
+  const toast = useToast();
   const submit = useMutation({
     mutationFn: async () => {
       const ids: string[] = [];
@@ -256,6 +258,7 @@ function SubmitForm({ a, again, onDone }: { a: A; again: boolean; onDone: () => 
       if (!data) throw error;
     },
     onSuccess: () => {
+      toast("سُلِّم الواجب");
       setContent("");
       setFiles([]);
       setLinks({});

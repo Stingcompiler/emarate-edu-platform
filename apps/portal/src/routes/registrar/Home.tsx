@@ -154,7 +154,7 @@ export function RegistrarHome() {
             {PIPELINE.filter((p) => p.n).map((p) => (
               <span
                 key={p.key}
-                className={p.bar}
+                className={`motion-grow ${p.bar}`}
                 style={{ width: `${(100 * p.n) / pipelineTotal}%` }}
               />
             ))}
@@ -278,7 +278,7 @@ export function RegistrarHome() {
                       </span>
                       <span className="h-1.5 w-16 overflow-hidden rounded-full bg-surface-alt">
                         <span
-                          className="block h-full rounded-full bg-primary"
+                          className="motion-grow block h-full rounded-full bg-primary"
                           style={{ width: `${(100 * n) / busiest}%` }}
                         />
                       </span>

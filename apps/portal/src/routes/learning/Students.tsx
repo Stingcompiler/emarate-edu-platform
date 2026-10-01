@@ -188,7 +188,7 @@ export function Students() {
                         <span className="flex items-center gap-2">
                           <span className="h-1.5 flex-1 overflow-hidden rounded-full bg-surface-alt">
                             <span
-                              className={`block h-full rounded-full ${p < 50 ? "bg-danger" : "bg-primary"}`}
+                              className={`motion-grow block h-full rounded-full ${p < 50 ? "bg-danger" : "bg-primary"}`}
                               style={{ width: `${Math.min(100, p)}%` }}
                             />
                           </span>

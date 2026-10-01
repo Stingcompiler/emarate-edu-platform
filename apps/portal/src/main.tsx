@@ -98,6 +98,7 @@ import { Install } from "./routes/Install";
 import { Login } from "./routes/Login";
 import { NotFound } from "./routes/NotFound";
 import { ConfirmProvider } from "./components/Confirm";
+import { ToastProvider } from "./components/Toast";
 import { NoAccess } from "./components/NoAccess";
 import { QueryErrorBanner } from "./components/QueryErrorBanner";
 import { ROUTE_ACCESS } from "./lib/access";
@@ -242,7 +243,9 @@ createRoot(root).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
       <ConfirmProvider>
-        <RouterProvider router={router} />
+        <ToastProvider>
+          <RouterProvider router={router} />
+        </ToastProvider>
       </ConfirmProvider>
       <QueryErrorBanner />
     </QueryClientProvider>

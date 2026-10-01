@@ -175,7 +175,7 @@ export function DepartmentLectures() {
                     </span>
                     <span className="h-1.5 w-20 overflow-hidden rounded-full bg-surface-alt">
                       <span
-                        className="block h-full rounded-full bg-primary"
+                        className="motion-grow block h-full rounded-full bg-primary"
                         style={{ width: c.all ? `${(100 * c.done) / c.all}%` : "0%" }}
                       />
                     </span>

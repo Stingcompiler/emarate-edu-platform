@@ -234,7 +234,7 @@ export function TeacherToday() {
                     {byCourse.map((c) => (
                       <span
                         key={c.name}
-                        className={`${COURSE_TONES[courseTone(codes.get(c.name) ?? c.name)]} [background:currentColor]`}
+                        className={`motion-grow ${COURSE_TONES[courseTone(codes.get(c.name) ?? c.name)]} [background:currentColor]`}
                         style={{ width: `${(100 * c.n) / pending}%` }}
                       />
                     ))}

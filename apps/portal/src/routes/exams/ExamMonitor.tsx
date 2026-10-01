@@ -1,6 +1,6 @@
 import type { Schemas } from "@ecst/api";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router";
 
 import { PortalShell } from "../../components/PortalShell";
@@ -101,6 +101,25 @@ export function ExamMonitor() {
     },
   });
   const list = rows.items;
+  // Rows whose state changed since the last refresh flash once (review 2026-09-29 §2.6);
+  // nothing flashes on the first load.
+  const seen = useRef<Map<string, string> | null>(null);
+  const [changed, setChanged] = useState<Set<string>>(new Set());
+  const unflash = useRef<ReturnType<typeof setTimeout>>(undefined);
+  useEffect(() => () => clearTimeout(unflash.current), []);
+  useEffect(() => {
+    const now = new Map(list.map((r) => [r.public_id, r.status]));
+    const before = seen.current;
+    seen.current = now;
+    if (!before) return;
+    const moved = new Set(
+      [...now].filter(([id, st]) => before.has(id) && before.get(id) !== st).map(([id]) => id),
+    );
+    if (!moved.size) return;
+    setChanged(moved);
+    clearTimeout(unflash.current);
+    unflash.current = setTimeout(() => setChanged(new Set()), 1300);
+  }, [list]);
   const counts = {
     in_progress: running.data ?? 0,
     submitted: done.data ?? 0,
@@ -229,7 +248,11 @@ export function ExamMonitor() {
               aria-hidden="true"
             >
               {figures.map((f) => (
-                <span key={f.l} className={f.bar} style={{ width: `${(100 * f.n) / total}%` }} />
+                <span
+                  key={f.l}
+                  className={`motion-grow ${f.bar}`}
+                  style={{ width: `${(100 * f.n) / total}%` }}
+                />
               ))}
             </div>
           )}
@@ -244,7 +267,7 @@ export function ExamMonitor() {
                 key={r.public_id}
                 type="button"
                 onClick={() => setPicked(r)}
-                className={`flex w-full items-center gap-3 px-4 py-3 text-start hover:bg-surface-alt ${picked?.public_id === r.public_id ? "bg-primary-soft" : ""}`}
+                className={`flex w-full items-center gap-3 px-4 py-3 text-start hover:bg-surface-alt ${picked?.public_id === r.public_id ? "bg-primary-soft" : ""} ${changed.has(r.public_id) ? "motion-flash" : ""}`}
               >
                 <span className="min-w-0 flex-1">
                   <span className="block text-sm font-semibold text-text">{s.full_name_ar}</span>

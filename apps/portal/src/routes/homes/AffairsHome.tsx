@@ -96,7 +96,7 @@ export function AffairsHome() {
                   <span className="font-bold">{num(pct)}٪</span>
                 </div>
                 <div className="mt-2 h-2 overflow-hidden rounded-full bg-surface-alt">
-                  <div className="h-full bg-primary" style={{ width: `${pct}%` }} />
+                  <div className="motion-grow h-full bg-primary" style={{ width: `${pct}%` }} />
                 </div>
                 <p className="mt-2 text-xs text-text-muted">
                   أقرّ {num(r.acknowledgements_count)} من {num(students)} ·{" "}

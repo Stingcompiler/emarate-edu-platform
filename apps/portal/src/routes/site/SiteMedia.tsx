@@ -19,6 +19,7 @@ import { api, ok } from "../../lib/api";
 import { asForm, formData } from "../../lib/upload";
 import { Pager, useServerPages } from "../../components/Pager";
 import { useConfirm } from "../../components/Confirm";
+import { useToast } from "../../components/Toast";
 
 type Tab = "media" | "menus" | "settings";
 
@@ -408,6 +409,7 @@ function SiteSettingsForm() {
       setFigures(((s.figures as Figure[] | undefined) ?? []).map((f) => ({ ...f })));
     }
   }, [settings.data]);
+  const toast = useToast();
   const save = useMutation({
     mutationFn: async () => {
       const body = {
@@ -422,6 +424,7 @@ function SiteSettingsForm() {
       });
       if (!data) throw error;
     },
+    onSuccess: () => toast("حُفظت إعدادات الموقع"),
   });
   const set = (patch: Partial<typeof form>) => setForm((f) => ({ ...f, ...patch }));
   return (
@@ -628,11 +631,6 @@ function SiteSettingsForm() {
           </Card>
         </div>
       </div>
-      {save.isSuccess && (
-        <div className="mt-3">
-          <Notice tone="success">حُفظت الإعدادات.</Notice>
-        </div>
-      )}
       {save.isError && (
         <div className="mt-3">
           <Notice>{problemMessage(save.error)}</Notice>

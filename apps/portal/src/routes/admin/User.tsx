@@ -17,6 +17,7 @@ import { useMe } from "../../lib/auth";
 import { initials, useDepartments } from "../../lib/reports";
 import { DEPARTMENT_ROLES, ROLE_LABEL, ROLE_ORDER } from "./roles";
 import { useConfirm } from "../../components/Confirm";
+import { useToast } from "../../components/Toast";
 
 /** Board: SystemAdminUser (phone); desktop derived — account beside roles and scopes. */
 export function AdminUser() {
@@ -39,6 +40,7 @@ export function AdminUser() {
   const [picked, setRole] = useState("");
   const role = picked; // nothing preselected: the admin chooses (review 2026-09-29)
   const [department, setDepartment] = useState("");
+  const toast = useToast();
   const grant = useMutation({
     mutationFn: async () => {
       const { data, error } = await api.POST("/api/v1/role-assignments", {
@@ -50,7 +52,10 @@ export function AdminUser() {
       });
       if (!data) throw error;
     },
-    onSuccess: refresh,
+    onSuccess: () => {
+      toast("مُنح الدور");
+      refresh();
+    },
   });
   const revoke = useMutation({
     mutationFn: async (assignment: number) => {
