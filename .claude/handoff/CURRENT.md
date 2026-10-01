@@ -117,7 +117,7 @@
   - Dev serves the public media bucket only (`config/urls.py`, DEBUG), linked absolutely (`PUBLIC_MEDIA_URL`, :8000;
     e2e :8001); the block sanitizer accepts URLs under our own public media base.
   - The Astro dev server caches API responses for its lifetime: restart it after reseeding.
-- **#76 image layout per page:** `Page.image_layout` (`single` | `grid`), chosen in the page editor («عرض الصور في
+- **#76 image layout per page: merged.** `Page.image_layout` (`single` | `grid`), chosen in the page editor («عرض الصور في
   الموقع: واحدة / شبكة», `content.manage` = site manager and system admin, audited `page.update`); the gallery starts as
   a grid; `Blocks.astro` groups consecutive images (2 columns, 3 from lg).
 - **State:** every planned phase and request is merged and nothing is open. Next work comes from the owner; real
