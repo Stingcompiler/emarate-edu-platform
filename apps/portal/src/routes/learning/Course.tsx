@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { FileText, Plus } from "lucide-react";
+import { ArrowUpDown, FileText, Plus } from "lucide-react";
 import { useState } from "react";
 import { Link, useParams } from "react-router";
 
@@ -29,6 +29,7 @@ import {
   isCourseStaff,
 } from "../../lib/learning";
 import { ALL } from "../../components/Pager";
+import { LectureOrder } from "./LectureOrder";
 
 const TABS = [
   { key: "lectures", label: "المحاضرات" },
@@ -68,6 +69,7 @@ export function Course() {
       )?.results ?? [],
   });
   const [tab, setTab] = useState<(typeof TABS)[number]["key"]>("lectures");
+  const [ordering, setOrdering] = useState(false);
   const tabs = TABS.filter((t) => t.key !== "grades" || !staff);
   const lecs = (lectures.data ?? []).slice().sort((a, b) => (b.order ?? 0) - (a.order ?? 0));
   const work = (assignments.data ?? []).slice().sort((a, b) => a.due_at.localeCompare(b.due_at));
@@ -229,7 +231,26 @@ export function Course() {
 
           <div className="mt-4">
             <WithSide side={side}>
-              {tab === "lectures" && (
+              {tab === "lectures" && staff && lecs.length > 1 && !ordering && (
+                <div className="mb-2 flex justify-end">
+                  <Button
+                    variant="secondary"
+                    className="min-h-9 px-3"
+                    onClick={() => setOrdering(true)}
+                  >
+                    <ArrowUpDown size={16} aria-hidden /> ترتيب المحاضرات
+                  </Button>
+                </div>
+              )}
+              {tab === "lectures" && ordering && (
+                <LectureOrder
+                  offering={offering}
+                  // The syllabus order, first lecture on top (the list below shows the latest first).
+                  lectures={lecs.slice().reverse()}
+                  onDone={() => setOrdering(false)}
+                />
+              )}
+              {tab === "lectures" && !ordering && (
                 <Card className="divide-y divide-border-soft">
                   {lecs.map((l) => (
                     <Link
@@ -253,6 +274,9 @@ export function Course() {
                             )
                             .join(" · ") || "بلا موارد"}
                           {l.type === "lab" ? " · عملي" : ""}
+                          {staff && l.is_published && l.views_count != null
+                            ? ` · ${l.views_count ? `فتحها ${count(l.views_count, N.student)}` : "لم يفتحها أحد بعد"}`
+                            : ""}
                         </span>
                       </span>
                       {staff &&

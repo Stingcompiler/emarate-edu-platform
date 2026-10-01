@@ -46,6 +46,15 @@ class ResourceCreateSerializer(serializers.Serializer):
 class LectureSerializer(serializers.ModelSerializer):
     offering = serializers.PrimaryKeyRelatedField(queryset=CourseOffering.objects.all())
     resources = ResourceSerializer(many=True, read_only=True)
+    views_count = serializers.SerializerMethodField(
+        help_text="Students who opened the lecture; staff of the course only, else null."
+    )
+
+    def get_views_count(self, lecture) -> int | None:
+        staff = self.context.get("staff_offerings")
+        if staff is None or lecture.offering_id not in staff:
+            return None
+        return getattr(lecture, "views_total", None)
 
     class Meta:
         model = Lecture
@@ -60,9 +69,15 @@ class LectureSerializer(serializers.ModelSerializer):
             "is_published",
             "published_at",
             "resources",
+            "views_count",
             "created_at",
         ]
         read_only_fields = ["public_id", "is_published", "published_at", "resources", "created_at"]
+
+
+class LectureReorderSerializer(serializers.Serializer):
+    offering = serializers.PrimaryKeyRelatedField(queryset=CourseOffering.objects.all())
+    lectures = serializers.ListField(child=serializers.UUIDField(), allow_empty=False)
 
 
 class LinkFieldSerializer(serializers.ModelSerializer):
