@@ -109,6 +109,7 @@ export function Registrars() {
                     {r.department_name}
                     <button
                       type="button"
+                      className="tap-44 -me-1 grid size-5 place-items-center rounded-full hover:bg-surface"
                       aria-label={`فك الربط بـ${r.department_name}`}
                       onClick={async () =>
                         (await confirm({

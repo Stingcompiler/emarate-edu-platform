@@ -319,7 +319,7 @@ export function Structure() {
                     type="button"
                     aria-expanded={editing === p.id}
                     onClick={() => setEditing(editing === p.id ? null : p.id)}
-                    className="mt-0.5 text-xs font-semibold text-primary hover:underline"
+                    className="tap-44 mt-0.5 text-xs font-semibold text-primary hover:underline"
                   >
                     {editing === p.id ? "إغلاق صفحة الموقع" : "صفحة الموقع: الوصف والرسوم"}
                   </button>
@@ -397,7 +397,7 @@ export function Structure() {
                     max={10}
                     value={pForm.levels_count}
                     onChange={(e) => setP({ ...pForm, levels_count: Number(e.target.value) })}
-                    className="w-14 rounded border border-border px-1 py-1"
+                    className="w-14 rounded border border-border px-1 py-1 max-lg:min-h-10"
                   />
                 </label>
                 <label className="flex items-center gap-1 text-xs text-text-muted">
@@ -408,7 +408,7 @@ export function Structure() {
                     max={20}
                     value={pForm.duration_terms}
                     onChange={(e) => setP({ ...pForm, duration_terms: Number(e.target.value) })}
-                    className="w-14 rounded border border-border px-1 py-1"
+                    className="w-14 rounded border border-border px-1 py-1 max-lg:min-h-10"
                   />
                 </label>
                 <label className="flex items-center gap-1 text-xs text-text-muted">
@@ -420,7 +420,7 @@ export function Structure() {
                     value={pForm.total_credit_hours}
                     onChange={(e) => setP({ ...pForm, total_credit_hours: e.target.value })}
                     placeholder="—"
-                    className="w-16 rounded border border-border px-1 py-1"
+                    className="w-16 rounded border border-border px-1 py-1 max-lg:min-h-10"
                   />
                 </label>
                 <Button
@@ -611,7 +611,7 @@ function HoursInput({
         onChange={(e) => setDraft(e.target.value)}
         onBlur={commit}
         onKeyDown={(e) => e.key === "Enter" && (e.target as HTMLInputElement).blur()}
-        className={`w-16 rounded border px-1 py-1 text-sm ${save.isError ? "border-danger" : "border-border"}`}
+        className={`w-16 rounded border px-1 py-1 text-sm max-lg:min-h-10 ${save.isError ? "border-danger" : "border-border"}`}
       />
       {/* It saves on leaving the field: say so (review 2026-09-29 PR 7, «تأكيد حفظ الساعات»). */}
       <span role="status" className="w-10 text-[11px]">

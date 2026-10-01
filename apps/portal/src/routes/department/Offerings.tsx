@@ -221,7 +221,7 @@ export function Offerings() {
                 <span className="min-w-0">
                   <Link
                     to={`/courses/${o.id}`}
-                    className="block truncate font-bold text-text hover:text-primary"
+                    className="tap-44 block truncate font-bold text-text hover:text-primary"
                   >
                     {o.course_detail.name_ar}
                   </Link>
@@ -365,7 +365,7 @@ function Slot({
             type="button"
             aria-label={`إزالة ${label}`}
             onClick={onRemove}
-            className="grid size-7 place-items-center rounded-full text-text-muted hover:bg-surface-alt hover:text-danger-strong"
+            className="grid size-10 place-items-center rounded-full text-text-muted hover:bg-surface-alt hover:text-danger-strong lg:size-7"
           >
             <X size={14} aria-hidden />
           </button>

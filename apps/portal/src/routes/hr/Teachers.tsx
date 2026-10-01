@@ -276,16 +276,19 @@ export function Teachers() {
               <span className="hidden xl:inline">
                 <TeacherStatus status={t.status} />
               </span>
-              <span className="col-span-3 flex gap-3 text-xs xl:col-span-1">
+              <span className="col-span-3 flex gap-5 text-xs xl:col-span-1">
                 {notify && t.status !== "ok" && t.status !== "none" && (
                   <Link
                     to={`/hr/notices/new?teacher=${t.public_id}`}
-                    className="font-semibold text-danger-strong"
+                    className="tap-44 font-semibold text-danger-strong"
                   >
                     تنبيه
                   </Link>
                 )}
-                <Link to={`/hr/teachers/${t.public_id}`} className="font-semibold text-primary">
+                <Link
+                  to={`/hr/teachers/${t.public_id}`}
+                  className="tap-44 font-semibold text-primary"
+                >
                   الملف
                 </Link>
               </span>

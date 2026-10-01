@@ -103,7 +103,9 @@ export function Cycles() {
         ))}
       </div>
       <details className="mt-3 rounded-xl border border-border-soft bg-surface p-3 text-sm">
-        <summary className="cursor-pointer font-semibold text-primary">دورة جديدة</summary>
+        <summary className="flex min-h-11 cursor-pointer items-center font-semibold text-primary">
+          دورة جديدة
+        </summary>
         <div className="mt-3 grid gap-2 sm:grid-cols-[1fr_180px_180px_auto]">
           <input
             value={draft.name}

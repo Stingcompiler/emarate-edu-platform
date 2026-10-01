@@ -103,7 +103,44 @@ export function AffairsReport() {
           <div className="mt-6 lg:grid lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start lg:gap-6">
             <div className="space-y-4">
               <SectionLabel>الحالات حسب النوع والقسم</SectionLabel>
-              <Card className="p-4">
+              {/* Phones: a card per department (and the college), each kind labelled. */}
+              <ul className="space-y-2 sm:hidden">
+                {[
+                  ...r.rows.map((row) => ({
+                    name: row.department || "—",
+                    counts: kinds.map((k) => row.by_kind[k] ?? 0),
+                    total: row.total,
+                    per100: num(row.per_100, 1),
+                  })),
+                  {
+                    name: "الكلية",
+                    counts: totals,
+                    total: r.total,
+                    per100: r.students ? num((100 * r.total) / r.students, 1) : "—",
+                  },
+                ].map((row) => (
+                  <li key={row.name}>
+                    <Card className="p-3">
+                      <div className="flex items-baseline justify-between gap-2">
+                        <p className="font-semibold">{row.name}</p>
+                        <p className="text-xs text-text-muted">
+                          <b className="text-sm text-text">{num(row.total)}</b> · لكل 100 طالب{" "}
+                          {row.per100}
+                        </p>
+                      </div>
+                      <dl className="mt-2 grid grid-cols-2 gap-x-3 gap-y-1 text-xs">
+                        {kinds.map((k, i) => (
+                          <div key={k} className="flex justify-between gap-2">
+                            <dt className="text-text-muted">{KIND[k] ?? k}</dt>
+                            <dd className="font-semibold">{num(row.counts[i] ?? 0)}</dd>
+                          </div>
+                        ))}
+                      </dl>
+                    </Card>
+                  </li>
+                ))}
+              </ul>
+              <Card className="hidden p-4 sm:block">
                 <ScrollRegion label="الحالات حسب النوع والقسم">
                   <table className="w-full min-w-[480px] text-sm">
                     <thead className="text-xs text-text-muted">

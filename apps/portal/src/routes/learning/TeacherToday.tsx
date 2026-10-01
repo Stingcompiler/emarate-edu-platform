@@ -211,7 +211,7 @@ export function TeacherToday() {
           <div className="flex items-end justify-between">
             <SectionLabel>طابور التصحيح</SectionLabel>
             {pending > 0 && (
-              <Link to="/grading" className="mb-2 text-sm font-semibold text-primary">
+              <Link to="/grading" className="tap-44 mb-2 text-sm font-semibold text-primary">
                 ابدأ التصحيح
               </Link>
             )}

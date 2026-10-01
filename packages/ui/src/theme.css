@@ -132,3 +132,29 @@
     outline-offset: 2px;
   }
 }
+
+/* iOS Safari zooms into a field whose text is under 16px and leaves the page zoomed in,
+   which reads as «the page doesn't fit the phone». On touch screens small fields get 16px
+   (unlayered, so it wins over text-sm/text-xs; larger fields keep their size). */
+@media (pointer: coarse) {
+  :is(input, select, textarea):not(
+    [class*="text-lg"],
+    [class*="text-xl"],
+    [class*="text-2xl"],
+    [class*="text-3xl"],
+    [class*="text-4xl"]
+  ) {
+    font-size: 16px;
+  }
+}
+
+/* A small text link or icon keeps its look but gets a 44px touch area (docs/06: touch
+   targets ≥ 44px on phones) through an invisible layer around it. */
+@utility tap-44 {
+  position: relative;
+  &::before {
+    content: "";
+    position: absolute;
+    inset: max(-12px, calc((100% - 44px) / 2)) max(-8px, calc((100% - 44px) / 2));
+  }
+}

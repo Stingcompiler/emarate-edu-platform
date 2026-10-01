@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Link } from "react-router";
 
 import { PortalShell } from "../../components/PortalShell";
-import { Card, Notice, ScrollRegion, WithSide } from "../../components/ui";
+import { Card, Chip, Notice, ScrollRegion, WithSide } from "../../components/ui";
 import { api, ok } from "../../lib/api";
 import { downloadCsv, num } from "../../lib/reports";
 
@@ -98,9 +98,11 @@ export function Roles() {
         <button
           type="button"
           onClick={csv}
-          className="min-h-9 rounded-lg border border-border px-3 text-sm font-semibold hover:bg-surface-alt"
+          aria-label="تصدير المصفوفة"
+          className="min-h-11 whitespace-nowrap rounded-lg border border-border px-3 text-sm font-semibold hover:bg-surface-alt lg:min-h-9"
         >
-          تصدير المصفوفة
+          <span className="lg:hidden">CSV</span>
+          <span className="hidden lg:inline">تصدير المصفوفة</span>
         </button>
       }
     >
@@ -134,7 +136,7 @@ export function Roles() {
               </ul>
               <Link
                 to={`/system/users?role=${role.key}`}
-                className="mt-4 inline-block font-semibold text-primary hover:underline"
+                className="tap-44 mt-4 inline-block font-semibold text-primary hover:underline"
               >
                 من يحمل هذا الدور
               </Link>
@@ -143,7 +145,19 @@ export function Roles() {
         }
       >
         {matrix.isError && <Notice>تعذّر تحميل المصفوفة.</Notice>}
-        <Card className="overflow-hidden">
+        {/* Phones: no sideways matrix — pick a role, its card and permissions follow. */}
+        <div
+          role="group"
+          aria-label="اختر دورًا"
+          className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 lg:hidden"
+        >
+          {roles.map((r) => (
+            <Chip key={r.key} active={r.key === role?.key} onClick={() => setPicked(r.key)}>
+              {r.label}
+            </Chip>
+          ))}
+        </div>
+        <Card className="hidden overflow-hidden lg:block">
           <ScrollRegion label="مصفوفة الصلاحيات">
             <table className="w-full min-w-[720px] text-xs">
               <thead className="bg-surface-alt text-text-muted">
@@ -209,7 +223,7 @@ export function Roles() {
             </table>
           </ScrollRegion>
         </Card>
-        <p className="mt-2 text-xs text-text-muted">
+        <p className="mt-2 hidden text-xs text-text-muted lg:block">
           ✓ في كل الكلية · «قسمه» داخل قسمه فقط · — لا يملكها. اختر عمود دور لترى تفاصيله.
         </p>
       </WithSide>

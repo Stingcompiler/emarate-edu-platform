@@ -35,7 +35,7 @@ export function HRHome() {
               <p className="text-sm font-semibold text-text">
                 التوزيع · هيئة التدريس: {count(r.summary.members, N.member)} · {r.term.name}
               </p>
-              <Link to="/hr/report" className="text-xs font-semibold text-primary">
+              <Link to="/hr/report" className="tap-44 text-xs font-semibold text-primary">
                 التقرير
               </Link>
             </div>

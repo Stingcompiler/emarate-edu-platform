@@ -253,7 +253,7 @@ export function RegistrarHome() {
             <>
               <div className="flex items-end justify-between">
                 <SectionLabel>المسجلون · الحمل الحالي</SectionLabel>
-                <Link to="/registrars" className="mb-2 text-sm font-semibold text-primary">
+                <Link to="/registrars" className="tap-44 mb-2 text-sm font-semibold text-primary">
                   إدارة
                 </Link>
               </div>
