@@ -68,6 +68,14 @@ const FILTERS = [
 ];
 
 /** Board: DesktopHRTeachers (desktop table); phone derived — one card per teacher. */
+/** Heat cells (board DesktopHRTeachers): red past the threshold, amber close to it. */
+const heat = (bad: boolean, near = false) =>
+  bad
+    ? "rounded-md bg-danger-soft px-1.5 py-1 font-semibold text-danger-strong"
+    : near
+      ? "rounded-md bg-warning-soft px-1.5 py-1 text-warning-strong"
+      : "";
+
 export function Teachers() {
   const me = useMe();
   const notify = can(me.data, "hr.notify");
@@ -208,7 +216,7 @@ export function Teachers() {
           {rows.map((t) => (
             <div
               key={t.public_id}
-              className="grid grid-cols-[auto_1fr_auto] items-center gap-x-3 gap-y-1 px-4 py-3 text-sm xl:grid-cols-[minmax(0,1.6fr)_70px_90px_60px_60px_60px_60px_70px_70px_110px] xl:gap-2"
+              className={`grid grid-cols-[auto_1fr_auto] items-center gap-x-3 gap-y-1 px-4 py-3 text-sm xl:grid-cols-[minmax(0,1.6fr)_70px_90px_60px_60px_60px_60px_70px_70px_110px] xl:gap-2 ${t.status === "below" ? "bg-danger-soft/30" : ""}`}
             >
               <Link
                 to={`/hr/teachers/${t.public_id}`}
@@ -234,7 +242,12 @@ export function Teachers() {
                 {num(t.offerings)} · {num(t.students)}
               </span>
               <span
-                className={`hidden xl:inline ${t.upload_percent != null && r && t.upload_percent < r.thresholds.upload_percent ? "font-semibold text-danger-strong" : ""}`}
+                className={`hidden xl:inline ${heat(
+                  t.upload_percent != null && !!r && t.upload_percent < r.thresholds.upload_percent,
+                  t.upload_percent != null &&
+                    !!r &&
+                    t.upload_percent < r.thresholds.upload_percent + 15,
+                )}`}
               >
                 {t.lectures == null
                   ? "—"
@@ -243,12 +256,21 @@ export function Teachers() {
               <span className="hidden xl:inline">{num(t.assignments)}</span>
               <span className="hidden xl:inline">{num(t.exams)}</span>
               <span
-                className={`hidden xl:inline ${t.grading_days != null && r && t.grading_days > r.thresholds.grading_days ? "font-semibold text-danger-strong" : ""}`}
+                className={`hidden xl:inline ${heat(
+                  t.grading_days != null && !!r && t.grading_days > r.thresholds.grading_days,
+                  t.grading_days != null && !!r && t.grading_days > r.thresholds.grading_days * 0.8,
+                )}`}
               >
                 {num(t.grading_days, 1)}
               </span>
-              <span className="hidden xl:inline">{pct(t.ungraded_percent)}</span>
-              <span className="hidden xl:inline">
+              <span
+                className={`hidden xl:inline ${heat(false, t.ungraded_percent != null && t.ungraded_percent > 25)}`}
+              >
+                {pct(t.ungraded_percent)}
+              </span>
+              <span
+                className={`hidden xl:inline ${heat(false, (t.live_planned ?? 0) > 0 && (t.live_held ?? 0) < (t.live_planned ?? 0))}`}
+              >
                 {num(t.live_held)}/{num(t.live_planned)}
               </span>
               <span className="hidden xl:inline">

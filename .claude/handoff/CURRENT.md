@@ -60,7 +60,15 @@
   - Student records: a table on lg.
   - Import: `WithSide` with the steps, the columns (required ones marked), and a blank-template CSV.
   - Form builder: `ApplicantPreview` in both side columns.
-- **Next:** 7e results/affairs/HR, 7f site/admin, then portal motion.
+- **PR 7d #63: merged.**
+- **PR 7e `feat/results-affairs-large-screens`:**
+  - Cases: from xl a preview of the chosen row beside the table (details, events timeline, open link).
+  - HR teachers: `heat()` cells (red past the threshold, amber near it) and a row tint for «تحت الحد».
+  - Academic home: department leadership as a card grid on top (2 columns on the phone, 4 on xl), then the
+    decisions.
+  - Result batch detail: from xl, the summary and actions in a sticky side column beside the rows. Not visually
+    checked: the demo has no batch.
+- **Next:** 7f site/admin, then portal motion.
 - **PR 6f `feat/department-faculty-news`**: the owner approved both 6c deferrals (2026-09-30); docs/03 is now v2.3.
   - `User.public_profile` plus `academic_title_ar/en`, set by the member at `PATCH /api/v1/me/public-profile` (audited
     `profile.public_update`), with a card in «الإعدادات».

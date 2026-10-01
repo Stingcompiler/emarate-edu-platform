@@ -37,7 +37,8 @@ export const EVENTS: Record<string, string> = {
   reopened: "أُعيد فتحها",
 };
 
-/** Boards: StudentAffairsCases (phone) and DesktopStudentAffairsCases (desktop table). */
+/** Boards: StudentAffairsCases (phone) and DesktopStudentAffairsCases (desktop table, the chosen
+ *  case previewed beside it from xl). */
 export function Cases() {
   const me = useMe();
   const manager = can(me.data, "cases.manage");
@@ -63,6 +64,9 @@ export function Cases() {
     (c) => !kind || c.kind === kind,
   );
   const paged = useLocalPages(shown, [tab, kind]);
+  // The case shown beside the table on wide screens (board DesktopStudentAffairsCases).
+  const [previewId, setPreviewId] = useState<string | null>(null);
+  const preview = paged.shown.find((c) => c.public_id === previewId) ?? paged.shown[0];
   const age = (iso: string) => Math.floor((Date.now() - new Date(iso).getTime()) / 86_400_000);
 
   return (
@@ -169,60 +173,113 @@ export function Cases() {
               </Link>
             ))}
           </Card>
-          {/* Desktop: table */}
-          <Card className="mt-4 hidden overflow-hidden lg:block">
-            <table className="w-full text-sm">
-              <thead className="bg-surface-alt text-xs text-text-muted">
-                <tr>
-                  <th className="px-4 py-2.5 text-start font-medium">الحالة</th>
-                  <th className="px-3 py-2.5 text-start font-medium">الطالب</th>
-                  <th className="px-3 py-2.5 text-start font-medium">المرحلة</th>
-                  <th className="px-3 py-2.5 text-start font-medium">العمر</th>
-                  <th className="px-4 py-2.5 text-start font-medium">آخر إجراء</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border-soft">
-                {paged.shown.map((c) => {
-                  const last = c.events[c.events.length - 1];
-                  return (
-                    <tr key={c.public_id} className="hover:bg-surface-alt">
-                      <td className="px-4 py-3">
-                        <Link
-                          to={`/cases/${c.public_id}`}
-                          className="flex items-center gap-2 font-semibold text-text"
-                        >
-                          <KindTile kind={c.kind} small />
-                          {c.title}
-                        </Link>
-                      </td>
-                      <td className="px-3">
-                        {c.student.full_name_ar}{" "}
-                        <span className="text-xs text-text-muted" dir="ltr">
-                          {c.student.university_number}
-                        </span>
-                      </td>
-                      <td className="px-3">
-                        <StatusBadge
-                          status={c.status}
-                          label={STATUS_LABELS[c.status] ?? c.status}
-                        />
-                      </td>
-                      <td
-                        className={`px-3 ${age(c.created_at) > 14 ? "font-semibold text-danger-strong" : ""}`}
+          {/* Desktop: table, and from xl the chosen case beside it. */}
+          <div className="mt-4 hidden lg:block xl:grid xl:grid-cols-[minmax(0,1fr)_340px] xl:items-start xl:gap-4">
+            <Card className="overflow-hidden">
+              <table className="w-full text-sm">
+                <thead className="bg-surface-alt text-xs text-text-muted">
+                  <tr>
+                    <th className="px-4 py-2.5 text-start font-medium">الحالة</th>
+                    <th className="px-3 py-2.5 text-start font-medium">الطالب</th>
+                    <th className="px-3 py-2.5 text-start font-medium">المرحلة</th>
+                    <th className="px-3 py-2.5 text-start font-medium">العمر</th>
+                    <th className="px-4 py-2.5 text-start font-medium">آخر إجراء</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border-soft">
+                  {paged.shown.map((c) => {
+                    const last = c.events[c.events.length - 1];
+                    return (
+                      <tr
+                        key={c.public_id}
+                        onClick={() => setPreviewId(c.public_id)}
+                        className={`cursor-pointer hover:bg-surface-alt ${preview?.public_id === c.public_id ? "xl:bg-primary-soft/40" : ""}`}
                       >
-                        {ageLabel(age(c.created_at))}
-                      </td>
-                      <td className="px-4 text-xs text-text-muted">
-                        {last
-                          ? `${last.note || EVENTS[last.kind] || last.kind} · ${when(last.at)}`
-                          : "—"}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </Card>
+                        <td className="px-4 py-3">
+                          <Link
+                            to={`/cases/${c.public_id}`}
+                            className="flex items-center gap-2 font-semibold text-text"
+                          >
+                            <KindTile kind={c.kind} small />
+                            {c.title}
+                          </Link>
+                        </td>
+                        <td className="px-3">
+                          {c.student.full_name_ar}{" "}
+                          <span className="text-xs text-text-muted" dir="ltr">
+                            {c.student.university_number}
+                          </span>
+                        </td>
+                        <td className="px-3">
+                          <StatusBadge
+                            status={c.status}
+                            label={STATUS_LABELS[c.status] ?? c.status}
+                          />
+                        </td>
+                        <td
+                          className={`px-3 ${age(c.created_at) > 14 ? "font-semibold text-danger-strong" : ""}`}
+                        >
+                          {ageLabel(age(c.created_at))}
+                        </td>
+                        <td className="px-4 text-xs text-text-muted">
+                          {last
+                            ? `${last.note || EVENTS[last.kind] || last.kind} · ${when(last.at)}`
+                            : "—"}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </Card>
+            {preview && (
+              <aside className="hidden xl:sticky xl:top-20 xl:block" aria-label="معاينة الحالة">
+                <Card className="p-4 text-sm">
+                  <div className="flex items-start gap-2">
+                    <KindTile kind={preview.kind} small />
+                    <span className="min-w-0">
+                      <b className="block text-text">{preview.title}</b>
+                      <span className="text-xs text-text-muted">
+                        {preview.student.full_name_ar} ·{" "}
+                        <bdi>{preview.student.university_number}</bdi>
+                      </span>
+                    </span>
+                  </div>
+                  <dl className="mt-3 divide-y divide-border-soft">
+                    {[
+                      ["النوع", KIND[preview.kind as keyof typeof KIND]?.label ?? preview.kind],
+                      ["المرحلة", STATUS_LABELS[preview.status] ?? preview.status],
+                      ["العمر", ageLabel(age(preview.created_at))],
+                    ].map(([k, v]) => (
+                      <div key={k} className="flex justify-between gap-3 py-1.5">
+                        <dt className="text-text-muted">{k}</dt>
+                        <dd className="font-semibold text-text">{v}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                  <ol className="mt-3 space-y-3 border-s-2 border-border-soft ps-4">
+                    {preview.events.map((e, i) => (
+                      <li key={i} className="relative">
+                        <span
+                          aria-hidden="true"
+                          className="absolute -start-[1.4rem] top-1 size-3 rounded-full border-2 border-surface bg-primary"
+                        />
+                        <b className="block text-text">{EVENTS[e.kind] ?? e.kind}</b>
+                        {e.note && <span className="block text-xs text-text-muted">{e.note}</span>}
+                        <span className="text-xs text-text-muted">{when(e.at)}</span>
+                      </li>
+                    ))}
+                  </ol>
+                  <Link
+                    to={`/cases/${preview.public_id}`}
+                    className="mt-4 flex min-h-11 items-center justify-center rounded-lg bg-primary font-semibold text-on-primary hover:bg-primary-hover"
+                  >
+                    فتح الحالة كاملة
+                  </Link>
+                </Card>
+              </aside>
+            )}
+          </div>
         </>
       )}
       <Pager page={paged.page} count={paged.count} onPage={paged.setPage} />
