@@ -164,12 +164,45 @@ export function Cycles() {
             {(intakes.data ?? []).map((i) => (
               <div key={i.id} className="flex items-center gap-3 px-4 py-3">
                 <span className="min-w-0 flex-1">
-                  <span className="block text-sm font-semibold text-text">{i.program_name}</span>
+                  <span className="flex items-center gap-2">
+                    <span className="text-sm font-semibold text-text">{i.program_name}</span>
+                    <StatusBadge
+                      status={i.is_open ? "approved" : "closed"}
+                      label={i.is_open ? "يقبل" : "مغلق"}
+                    />
+                  </span>
                   <span className="text-xs text-text-muted">
                     {i.department_name} · {count(i.applications_count ?? 0, N.application)}
                     {i.capacity ? ` · ${i.capacity} مقعد` : ""}
                   </span>
+                  {/* Applications against seats (board DesktopHeadRegistrar «الدورات بحالة وسعة»). */}
+                  {i.capacity ? (
+                    <span className="mt-1.5 flex max-w-xs items-center gap-2">
+                      <span
+                        className="h-1.5 flex-1 overflow-hidden rounded-full bg-surface-alt"
+                        role="progressbar"
+                        aria-label={`الطلبات من المقاعد — ${i.program_name}`}
+                        aria-valuemin={0}
+                        aria-valuemax={i.capacity}
+                        aria-valuenow={Math.min(i.capacity, i.applications_count ?? 0)}
+                      >
+                        <span
+                          className={`block h-full rounded-full ${(i.applications_count ?? 0) >= i.capacity ? "bg-warning" : "bg-primary"}`}
+                          style={{
+                            width: `${Math.min(100, (100 * (i.applications_count ?? 0)) / i.capacity)}%`,
+                          }}
+                        />
+                      </span>
+                      <span className="w-10 text-end text-xs text-text-muted">
+                        {Math.round(
+                          (100 * (i.applications_count ?? 0)) / i.capacity,
+                        ).toLocaleString("ar-u-nu-latn")}
+                        ٪
+                      </span>
+                    </span>
+                  ) : null}
                 </span>
+
                 <Button
                   variant={i.is_open ? "secondary" : "primary"}
                   className="min-h-9 px-3"

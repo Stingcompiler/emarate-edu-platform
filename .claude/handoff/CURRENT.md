@@ -52,7 +52,15 @@
     inline under the entry on phones.
   - Courses: phone cards compact (a `xl:contents` row for students, lectures and actions).
   - The new-course form deliberately stays where it is (moving it would change a flow).
-- **Next:** 7d admissions, 7e results/affairs/HR, 7f site/admin, then portal motion.
+- **PR 7c #62: merged.** It also fixed a time-zone flake in `test_program_intake_state_and_seats`.
+- **PR 7d `feat/admissions-large-screens`:**
+  - Registrar home: a pipeline card (a stacked bar per stage, each count linking to its list). The head also gets
+    each registrar's load from `summary.by_registrar` and the users query `role=registrar`.
+  - Cycles: an «يقبل/مغلق» badge and an applications-against-seats bar per intake.
+  - Student records: a table on lg.
+  - Import: `WithSide` with the steps, the columns (required ones marked), and a blank-template CSV.
+  - Form builder: `ApplicantPreview` in both side columns.
+- **Next:** 7e results/affairs/HR, 7f site/admin, then portal motion.
 - **PR 6f `feat/department-faculty-news`**: the owner approved both 6c deferrals (2026-09-30); docs/03 is now v2.3.
   - `User.public_profile` plus `academic_title_ar/en`, set by the member at `PATCH /api/v1/me/public-profile` (audited
     `profile.public_update`), with a card in «الإعدادات».
