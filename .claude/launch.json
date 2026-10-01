@@ -22,6 +22,12 @@
       "port": 5173
     },
     {
+      "name": "landing",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--filter", "@ecst/landing", "dev"],
+      "port": 4321
+    },
+    {
       "name": "boards",
       "runtimeExecutable": "python3",
       "runtimeArgs": ["scripts/boards.py", "serve"],

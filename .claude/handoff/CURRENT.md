@@ -60,7 +60,14 @@
   - Student records: a table on lg.
   - Import: `WithSide` with the steps, the columns (required ones marked), and a blank-template CSV.
   - Form builder: `ApplicantPreview` in both side columns.
-- **PR 7d #63: merged.** **PR 7e #64:** cases preview, HR heat cells, academic cards, result-batch side column.
+- **PR 7d #63: merged.**
+- **PR 7e #64 `feat/results-affairs-large-screens`: merged.**
+  - Cases: from xl a preview of the chosen row beside the table (details, events timeline, open link).
+  - HR teachers: `heat()` cells (red past the threshold, amber near it) and a row tint for «تحت الحد».
+  - Academic home: department leadership as a card grid on top (2 columns on the phone, 4 on xl), then the
+    decisions.
+  - Result batch detail: from xl, the summary and actions in a sticky side column beside the rows. Not visually
+    checked: the demo has no batch.
 - **PR 7f `feat/site-admin-large-screens`:**
   - New `GET /api/v1/roles` (`users.view`), read-only from `rbac.CAPABILITIES`, with a matrix row and test. Page
     `/system/roles` (`RolesMatrix.tsx`; the name avoids a clash with `admin/roles.ts` on case-insensitive disks) shows
