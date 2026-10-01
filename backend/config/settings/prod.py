@@ -28,7 +28,19 @@ CACHES = {
 CELERY_BROKER_URL = _redis_url
 
 # Anymail provider is chosen by environment (Brevo, Resend, ...); see .env.example.
-MAILERS = {"default": {"BACKEND": env("MAILER_BACKEND", "anymail.backends.brevo.EmailBackend")}}
+# Or plain SMTP (e.g. Brevo's smtp-relay with an SMTP key) when no API key is available.
+_MAILER = env("MAILER_BACKEND", "anymail.backends.brevo.EmailBackend")
+_SMTP = "django.core.mail.backends.smtp.EmailBackend"
+MAILERS = {"default": {"BACKEND": _MAILER}}
+if _MAILER == _SMTP:
+    MAILERS["default"]["OPTIONS"] = {
+        "host": env("SMTP_HOST", required=True),
+        "port": int(env("SMTP_PORT", "587")),
+        "username": env("SMTP_USER", required=True),
+        "password": env("SMTP_PASSWORD", required=True),
+        "use_tls": env_bool("SMTP_TLS", True),
+        "timeout": 20,
+    }
 ANYMAIL = {
     "BREVO_API_KEY": env("BREVO_API_KEY"),
     "RESEND_API_KEY": env("RESEND_API_KEY"),
