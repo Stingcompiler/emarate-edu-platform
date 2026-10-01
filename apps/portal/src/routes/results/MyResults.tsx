@@ -20,6 +20,7 @@ import { useMe } from "../../lib/auth";
 import { count, N, ltr } from "../../lib/format";
 
 type Term = Schemas["MyTerm"];
+type Plan = Schemas["MyPlanProgress"];
 const date = new Intl.DateTimeFormat("ar-u-nu-latn", { day: "numeric", month: "long" });
 
 /**
@@ -41,12 +42,16 @@ export function MyResults() {
   const data = results.data;
   const terms = data?.terms ?? [];
   const term = terms.find((t) => t.term === picked) ?? terms[0];
-  // Hours earned: the published courses passed, across every shown term.
-  const earnedHours = terms.reduce(
-    (n, t) =>
-      n + t.results.filter((r) => r.status === "pass").reduce((h, r) => h + r.credit_hours, 0),
-    0,
-  );
+  // Hours earned: from the study plan when the program has one (each passed course once),
+  // otherwise the published courses passed across every shown term.
+  const plan = data?.plan ?? null;
+  const earnedHours =
+    plan?.earned_hours ??
+    terms.reduce(
+      (n, t) =>
+        n + t.results.filter((r) => r.status === "pass").reduce((h, r) => h + r.credit_hours, 0),
+      0,
+    );
   const student = me.data?.student;
 
   return (
@@ -99,6 +104,11 @@ export function MyResults() {
             <p className="mt-2 px-1 text-xs text-text-muted">
               أي تعديل لاحق على نتيجة معتمدة يصلك بإشعار.
             </p>
+            {plan && (
+              <div className="mt-5 lg:hidden">
+                <PlanProgress plan={plan} />
+              </div>
+            )}
           </div>
           <aside className="hidden space-y-4 lg:block">
             {data?.cumulative_gpa && (
@@ -106,7 +116,10 @@ export function MyResults() {
               <div className="rounded-2xl bg-header p-5 text-center text-white">
                 <p className="text-xs text-navy-200">المعدل التراكمي</p>
                 <p className="mt-1 text-5xl font-bold">{data.cumulative_gpa}</p>
-                <p className="mt-2 text-xs text-navy-200">{count(earnedHours, N.hour)} مكتسبة</p>
+                <p className="mt-2 text-xs text-navy-200">
+                  {count(earnedHours, N.hour)} مكتسبة
+                  {plan && ` من ${plan.total_hours.toLocaleString("ar-u-nu-latn")}`}
+                </p>
                 <ul className="mt-4 grid grid-cols-3 gap-2">
                   {terms.map((t) => (
                     <li key={t.term} className="rounded-lg bg-white/10 px-2 py-2">
@@ -117,10 +130,49 @@ export function MyResults() {
                 </ul>
               </div>
             )}
+            {plan && <PlanProgress plan={plan} />}
           </aside>
         </div>
       )}
     </PortalShell>
+  );
+}
+
+/** Board DesktopStudentResults «التقدم في الخطة»: hours earned of each level's plan. */
+function PlanProgress({ plan }: { plan: Plan }) {
+  const n = (v: number) => v.toLocaleString("ar-u-nu-latn");
+  return (
+    <Card className="p-4">
+      <h2 className="text-sm font-bold text-text">التقدم في الخطة</h2>
+      <ul className="mt-3 space-y-3">
+        {plan.levels.map((l) => (
+          <li key={l.level}>
+            <div className="flex items-baseline justify-between text-xs">
+              <span className="font-semibold text-text">المستوى {n(l.level)}</span>
+              <span className="text-text-muted" dir="ltr">
+                {n(l.earned)}/{n(l.required)}
+              </span>
+            </div>
+            <div
+              className="mt-1 h-1.5 overflow-hidden rounded-full bg-surface-alt"
+              role="progressbar"
+              aria-label={`ساعات المستوى ${n(l.level)}`}
+              aria-valuemin={0}
+              aria-valuemax={l.required}
+              aria-valuenow={Math.min(l.earned, l.required)}
+            >
+              <span
+                className={`motion-grow block h-full rounded-full ${l.earned >= l.required ? "bg-success" : "bg-primary"}`}
+                style={{ width: `${Math.min(100, (100 * l.earned) / l.required)}%` }}
+              />
+            </div>
+          </li>
+        ))}
+      </ul>
+      <p className="mt-3 text-xs text-text-muted">
+        {count(plan.earned_hours, N.hour)} مكتسبة من {n(plan.total_hours)}
+      </p>
+    </Card>
   );
 }
 
