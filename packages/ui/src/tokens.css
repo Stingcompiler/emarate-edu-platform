@@ -53,10 +53,11 @@
   --accent-hover: #e8c1ca;
   --accent-soft: #460e1b;
   --header-bg: #0c111c;
-  /* Status colours and "strong text on soft" (primary-700) are raw scale values, so dark
+  /* Status colours and "strong text on soft" (primary-700, accent-700) are raw scale values, so dark
    * mode redefines them here: soft backgrounds become dark tints, strong text becomes light.
    * Keeps WCAG AA (docs/06 §1) — checked by e2e/tests/a11y.spec.ts. */
   --color-primary-700: #c4d3e6;
+  --color-accent-700: #e8c1ca;
   --color-success-soft: #12301f;
   --color-success-strong: #86d3a8;
   --color-warning-soft: #3a2a0e;
@@ -87,10 +88,11 @@
     --accent-hover: #e8c1ca;
     --accent-soft: #460e1b;
     --header-bg: #0c111c;
-    /* Status colours and "strong text on soft" (primary-700) are raw scale values, so dark
+    /* Status colours and "strong text on soft" (primary-700, accent-700) are raw scale values, so dark
      * mode redefines them here: soft backgrounds become dark tints, strong text becomes light.
      * Keeps WCAG AA (docs/06 §1) — checked by e2e/tests/a11y.spec.ts. */
     --color-primary-700: #c4d3e6;
+    --color-accent-700: #e8c1ca;
     --color-success-soft: #12301f;
     --color-success-strong: #86d3a8;
     --color-warning-soft: #3a2a0e;

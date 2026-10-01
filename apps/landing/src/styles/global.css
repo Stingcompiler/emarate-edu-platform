@@ -28,3 +28,9 @@
 html[lang="en"] :where(p, li, dd, dt, h1, h2, h3, h4, td, th, blockquote, figcaption, summary) {
   unicode-bidi: plaintext;
 }
+
+/* The theme switch shows what it turns on (D28): a moon in light mode, a sun in dark. */
+:root:not([data-theme="dark"]) .theme-when-dark,
+:root[data-theme="dark"] .theme-when-light {
+  display: none;
+}

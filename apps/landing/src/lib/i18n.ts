@@ -32,6 +32,8 @@ const T = {
   manager: { ar: "مدير القسم", en: "Head of department" },
   privacy: { ar: "الخصوصية", en: "Privacy" },
   other: { ar: "English", en: "العربية" },
+  darkMode: { ar: "الوضع الداكن", en: "Dark mode" },
+  lightMode: { ar: "الوضع الفاتح", en: "Light mode" },
   announcements: { ar: "الإعلانات", en: "Announcements" },
   register: { ar: "سجّل", en: "Register" },
   readMore: { ar: "اقرأ المزيد", en: "Read more" },

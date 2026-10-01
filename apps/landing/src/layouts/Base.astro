@@ -62,10 +62,17 @@ const ext = (external: boolean) => (external ? { rel: "noopener", target: "_blan
 ---
 
 <!doctype html>
-<!-- The public site is a white brand surface (docs/brand); dark mode is portal-only (D27). -->
+<!-- Light by default, the white brand surface (docs/brand); a visitor may choose dark (D28). -->
 <html lang={lang} dir={dir(lang)} data-theme="light" class="bg-bg">
   <head>
     <meta charset="utf-8" />
+    <!-- Before paint, so a dark choice never flashes white. Same key as the portal. -->
+    <script is:inline>
+      try {
+        if (localStorage.getItem("ecst-theme") === "dark")
+          document.documentElement.setAttribute("data-theme", "dark");
+      } catch {}
+    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{fullTitle}</title>
     <meta name="description" content={desc} />
@@ -168,10 +175,48 @@ const ext = (external: boolean) => (external ? { rel: "noopener", target: "_blan
             ),
           )}
         </nav>
+        <button
+          type="button"
+          data-theme-toggle
+          aria-pressed="false"
+          class="hidden size-10 shrink-0 place-items-center rounded-md text-text-muted hover:bg-surface-alt hover:text-text sm:ms-auto sm:grid lg:ms-0"
+        >
+          <span class="sr-only theme-when-light">{t(lang, "darkMode")}</span>
+          <span class="sr-only theme-when-dark">{t(lang, "lightMode")}</span>
+          <svg
+            class="theme-when-light"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.75"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
+          </svg>
+          <svg
+            class="theme-when-dark"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.75"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <circle cx="12" cy="12" r="4" />
+            <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" />
+          </svg>
+        </button>
         <a
           href={href(other, path)}
           hreflang={other}
-          class="hidden text-xs font-semibold text-text-muted hover:text-text sm:ms-auto sm:inline lg:ms-0"
+          class="hidden text-xs font-semibold text-text-muted hover:text-text sm:inline"
         >
           {t(lang, "other")}
         </a>
@@ -187,7 +232,7 @@ const ext = (external: boolean) => (external ? { rel: "noopener", target: "_blan
         {applying && (
           <a
             href={`${PORTAL}/apply`}
-            class="ms-auto whitespace-nowrap rounded-md bg-accent px-3 py-2 text-xs font-bold text-white hover:bg-accent-hover sm:ms-0 sm:text-sm"
+            class="ms-auto whitespace-nowrap rounded-md bg-accent px-3 py-2 text-xs font-bold text-on-primary hover:bg-accent-hover sm:ms-0 sm:text-sm"
           >
             {t(lang, "apply")}
           </a>
@@ -214,7 +259,7 @@ const ext = (external: boolean) => (external ? { rel: "noopener", target: "_blan
               <div class="grid grid-cols-2 gap-2 py-2">
                 <a
                   href={`${PORTAL}/apply`}
-                  class="rounded-lg bg-primary px-3 py-3 text-center text-sm font-bold text-white"
+                  class="rounded-lg bg-primary px-3 py-3 text-center text-sm font-bold text-on-primary"
                 >
                   {t(lang, "apply")}
                 </a>
@@ -266,6 +311,15 @@ const ext = (external: boolean) => (external ? { rel: "noopener", target: "_blan
               >
                 {t(lang, "other")}
               </a>
+              <button
+                type="button"
+                data-theme-toggle
+                aria-pressed="false"
+                class="flex w-full items-center gap-2 border-t border-border-soft px-3 py-3 text-start text-sm font-semibold text-text-muted hover:bg-surface-alt sm:hidden"
+              >
+                <span class="theme-when-light">{t(lang, "darkMode")}</span>
+                <span class="theme-when-dark">{t(lang, "lightMode")}</span>
+              </button>
             </div>
           </div>
         </details>
@@ -458,6 +512,38 @@ const ext = (external: boolean) => (external ? { rel: "noopener", target: "_blan
       const lift = () => header?.toggleAttribute("data-scrolled", window.scrollY > 8);
       lift();
       window.addEventListener("scroll", lift, { passive: true });
+
+      // Light or dark (D28): the choice is kept, in the same key as the portal. Printing (the
+      // programme brochure) is always light.
+      const root = document.documentElement;
+      const toggles = () => document.querySelectorAll<HTMLButtonElement>("[data-theme-toggle]");
+      const show = () =>
+        toggles().forEach((b) =>
+          b.setAttribute("aria-pressed", String(root.dataset.theme === "dark")),
+        );
+      show();
+      toggles().forEach((b) =>
+        b.addEventListener("click", () => {
+          const next = root.dataset.theme === "dark" ? "light" : "dark";
+          root.dataset.theme = next;
+          try {
+            if (next === "dark") localStorage.setItem("ecst-theme", "dark");
+            else localStorage.removeItem("ecst-theme");
+          } catch {
+            /* private mode: the choice lasts for this page */
+          }
+          show();
+        }),
+      );
+      let printedFrom = "";
+      window.addEventListener("beforeprint", () => {
+        printedFrom = root.dataset.theme ?? "light";
+        root.dataset.theme = "light";
+      });
+      window.addEventListener(
+        "afterprint",
+        () => printedFrom && (root.dataset.theme = printedFrom),
+      );
 
       // Menus are <details> (they work without JS); this makes them behave like menus:
       // one open at a time, closed by a tap outside or by Esc.
