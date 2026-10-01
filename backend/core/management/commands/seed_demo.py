@@ -24,6 +24,8 @@ from learning.models import Lecture
 from organization.models import College, Department, Program, SystemSettings
 from students.models import StudentRecord
 
+from . import _sample_site as sample_site
+
 DOMAIN = "demo.ecst.test"
 
 DEPARTMENTS = [
@@ -337,6 +339,8 @@ class Command(BaseCommand):
         self._phase6(users, autumn)
         self._phase7(users, meta, year)
         self._phase8(users, autumn)
+        # Sample site content (licence, figures, pictures, news …), each marked as an example.
+        sample_site.seed(users)
         return {
             "departments": Department.objects.count(),
             "programs": Program.objects.count(),

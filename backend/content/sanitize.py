@@ -1,6 +1,7 @@
 """Server-side HTML sanitizing for rich text (docs/05 §9 «XSS»): allow-list via nh3."""
 
 import nh3
+from django.conf import settings
 
 TAGS = {
     "p",
@@ -61,6 +62,11 @@ def _safe_url(url) -> bool:
     if not isinstance(url, str):
         return False
     if url.startswith("https://"):
+        return True
+    # Our own public media (the image picker's links): the CDN in production, the API's
+    # origin in development (http://localhost:8000/media/public/…).
+    media = settings.STORAGES["public"].get("OPTIONS", {}).get("base_url") or ""
+    if media.startswith("http") and url.startswith(media) and ".." not in url:
         return True
     return url.startswith("/") and not url.startswith(("//", "/\\"))
 

@@ -5,7 +5,7 @@ A throwaway SQLite file seeded with the demo data; the portal runs on :5174 and 
 """
 
 from .dev import *  # noqa: F403
-from .dev import BASE_DIR, DATABASES, REST_FRAMEWORK
+from .dev import BASE_DIR, DATABASES, REST_FRAMEWORK, STORAGES
 from .env import env
 
 DATABASES = {
@@ -24,5 +24,17 @@ REST_FRAMEWORK = {
     **REST_FRAMEWORK,
     "DEFAULT_THROTTLE_RATES": {
         scope: "100000/minute" for scope in REST_FRAMEWORK["DEFAULT_THROTTLE_RATES"]
+    },
+}
+
+# The test API serves the public media on its own port (see dev.py).
+STORAGES = {
+    **STORAGES,
+    "public": {
+        **STORAGES["public"],
+        "OPTIONS": {
+            **STORAGES["public"]["OPTIONS"],
+            "base_url": "http://127.0.0.1:8001/media/public/",
+        },
     },
 }

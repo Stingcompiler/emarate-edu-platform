@@ -40,6 +40,22 @@ def test_seed_is_complete_and_idempotent(db, settings, monkeypatch):
     again = (Program.objects.count(), StudentRecord.objects.count(), Enrollment.objects.count())
     assert again == counts
     assert Department.objects.count() == 4
+    # Sample site content: each piece says it is an example, and a rerun adds nothing.
+    from content.models import MediaAsset, News, Page, SiteSettings
+
+    site = SiteSettings.load()
+    assert site.licence_ar.startswith("(مثال)") and site.hero_image_id and site.share_image_id
+    assert all(f["label_ar"].startswith("(مثال)") for f in site.figures)
+    assert MediaAsset.objects.exclude(alt_ar__startswith="(مثال) صورة تجريبية").count() == 0
+    assert all(
+        n.title.startswith("(مثال)") for n in News.objects.filter(slug__startswith="sample-")
+    )
+    gallery = Page.objects.get(slug="gallery").blocks
+    assert sum(b["type"] == "image" for b in gallery) == 6
+    assert all(p.description_ar.startswith("(مثال)") for p in Program.objects.all())
+    pictures = MediaAsset.objects.count()
+    _seed()
+    assert MediaAsset.objects.count() == pictures
     assert counts[:2] == (11, 40)
     assert set(RoleAssignment.objects.values_list("role", flat=True)) == set(Role)
 
