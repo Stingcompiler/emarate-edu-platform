@@ -36,6 +36,30 @@ class Lecture(PublicIdModel, TimestampedModel):
         return self.title_ar
 
 
+class LectureView(models.Model):
+    """A student opened a published lecture: once per student, with when and how often.
+
+    The student's own reading state (like a notification's read_at), so not audited. Staff see
+    how many students opened each lecture (docs/07 teacher lectures).
+    """
+
+    lecture = models.ForeignKey(Lecture, on_delete=models.CASCADE, related_name="views")
+    student_record = models.ForeignKey(
+        "students.StudentRecord", on_delete=models.CASCADE, related_name="+"
+    )
+    first_seen_at = models.DateTimeField(auto_now_add=True)
+    last_seen_at = models.DateTimeField(auto_now=True)
+    times = models.PositiveIntegerField(default=1)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["lecture", "student_record"], name="uniq_lecture_view")
+        ]
+
+    def __str__(self) -> str:
+        return f"{self.student_record_id} → {self.lecture_id}"
+
+
 class LectureResource(TimestampedModel):
     class Kind(models.TextChoices):
         FILE = "file", "ملف"

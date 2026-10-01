@@ -6,6 +6,7 @@ import re
 from decimal import Decimal
 
 from django.db import IntegrityError, transaction
+from django.db.models import F
 from django.utils import timezone
 from django.utils.translation import gettext
 from rest_framework.exceptions import NotFound, PermissionDenied, ValidationError
@@ -22,6 +23,7 @@ from .models import (
     Assignment,
     Lecture,
     LectureResource,
+    LectureView,
     Submission,
     SubmissionGrade,
     SubmissionVersion,
@@ -94,6 +96,54 @@ def set_lecture_published(meta: RequestMeta, lecture: Lecture, published: bool) 
         if published and first_time:
             events.lecture_published(lecture)
     return lecture
+
+
+def reorder_lectures(meta: RequestMeta, offering, public_ids: list[str]) -> None:
+    """Renumber an offering's lectures 1…n in the given order (docs/07: a list sorted by drag).
+
+    The list must name every lecture of the offering exactly once, so a stale screen can't
+    leave two lectures at the same place.
+    """
+    require(meta.actor, offering, "edit")
+    wanted = [str(p) for p in public_ids]
+    with transaction.atomic():
+        lectures = list(Lecture.objects.select_for_update().filter(offering=offering))
+        by_id = {str(lec.public_id): lec for lec in lectures}
+        if len(wanted) != len(set(wanted)) or set(wanted) != set(by_id):
+            raise ValidationError(
+                {"lectures": gettext("The list must name every lecture of the course once.")}
+            )
+        old = [str(lec.public_id) for lec in lectures]  # Meta ordering: order, then id
+        changed = []
+        for n, pid in enumerate(wanted, start=1):
+            lec = by_id[pid]
+            if lec.order != n:
+                lec.order = n
+                changed.append(lec)
+        Lecture.objects.bulk_update(changed, ["order"])
+        record(
+            meta,
+            "lecture.reorder",
+            offering,
+            old={"order": old},
+            new={"order": wanted},
+            department_id=_dept(offering),
+        )
+
+
+def record_view(user, lecture: Lecture) -> bool:
+    """Note that an enrolled student opened a published lecture. Anyone else: nothing."""
+    if not lecture.is_published:
+        return False
+    record_ = StudentRecord.objects.filter(user=user).first()
+    if record_ is None or not access.for_offering(user, lecture.offering).submit:
+        return False
+    seen, created = LectureView.objects.get_or_create(lecture=lecture, student_record=record_)
+    if not created:
+        LectureView.objects.filter(pk=seen.pk).update(
+            times=F("times") + 1, last_seen_at=timezone.now()
+        )
+    return True
 
 
 def delete_lecture(meta: RequestMeta, lecture: Lecture) -> None:

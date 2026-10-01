@@ -1,6 +1,6 @@
 from decimal import Decimal
 
-from django.db.models import Prefetch, Q
+from django.db.models import Count, Prefetch, Q
 from django.shortcuts import get_object_or_404
 from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework import mixins, serializers, status, viewsets
@@ -18,6 +18,7 @@ from .serializers import (
     AssignmentSerializer,
     GradeInputSerializer,
     GradeSerializer,
+    LectureReorderSerializer,
     LectureSerializer,
     ResourceCreateSerializer,
     ResourceSerializer,
@@ -51,7 +52,22 @@ class LectureViewSet(viewsets.ModelViewSet):
             Lecture.objects.filter(visible)
             .select_related("offering__course")
             .prefetch_related("resources__file", "resources__video")
+            .annotate(views_total=Count("views"))
+            # An aggregate drops Meta.ordering; keep the course's order for pagination.
+            .order_by("offering", "order", "id")
         )
+
+    def get_serializer_context(self):
+        # View counts go to the course's staff only (see LectureSerializer.views_count).
+        context = super().get_serializer_context()
+        user = self.request.user if self.request else None
+        if user is not None and user.is_authenticated:
+            context["staff_offerings"] = set(
+                Lecture.objects.filter(access.staff_offerings_q(user))
+                .values_list("offering_id", flat=True)
+                .distinct()
+            )
+        return context
 
     def create(self, request, *args, **kwargs):
         data = self.get_serializer(data=request.data)
@@ -81,6 +97,24 @@ class LectureViewSet(viewsets.ModelViewSet):
     def unpublish(self, request, public_id=None):
         lecture = services.set_lecture_published(_meta(request), self.get_object(), False)
         return Response(self.get_serializer(lecture).data)
+
+    @extend_schema(request=LectureReorderSerializer, responses={204: None})
+    @action(detail=False, methods=["post"])
+    def reorder(self, request):
+        """Renumber a course's lectures in the given order (every lecture, once)."""
+        data = LectureReorderSerializer(data=request.data)
+        data.is_valid(raise_exception=True)
+        services.reorder_lectures(
+            _meta(request), data.validated_data["offering"], data.validated_data["lectures"]
+        )
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @extend_schema(request=None, responses={204: None})
+    @action(detail=True, methods=["post"], url_path="view")
+    def mark_viewed(self, request, public_id=None):
+        """An enrolled student opened the lecture; for anyone else it changes nothing."""
+        services.record_view(request.user, self.get_object())
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     @extend_schema(request=ResourceCreateSerializer, responses={201: ResourceSerializer})
     @action(detail=True, methods=["post"], url_path="resources")

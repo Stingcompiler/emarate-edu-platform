@@ -421,3 +421,60 @@ def test_grading_queue_respects_ta_delegation(api, classroom):
     assert ta.get("/api/v1/grading-queue").data["counts"]["pending"] == 1
     # The gradebook is read access: TAs of the course see it either way.
     assert ta.get(f"/api/v1/gradebooks/{classroom.offering.pk}").status_code == 200
+
+
+def test_lecture_reorder_is_whole_audited_and_for_editors(api, classroom, make_user, it_offering):
+    """docs/07 teacher lectures: «قائمة قابلة للترتيب (سحب)»."""
+    teacher = api(classroom.teacher)
+    ids = [
+        teacher.post(
+            "/api/v1/lectures",
+            {"offering": classroom.offering.pk, "title_ar": f"م{n}", "order": n},
+        ).data["public_id"]
+        for n in (1, 2, 3)
+    ]
+    url = "/api/v1/lectures/reorder"
+    new = [ids[2], ids[0], ids[1]]
+    assert (
+        teacher.post(url, {"offering": classroom.offering.pk, "lectures": new}).status_code == 204
+    )
+    listed = teacher.get("/api/v1/lectures", {"offering": classroom.offering.pk}).data["results"]
+    assert [(r["public_id"], r["order"]) for r in listed] == [(p, n) for n, p in enumerate(new, 1)]
+    log = AuditLog.objects.get(action="lecture.reorder")
+    assert log.new == {"order": new} and log.old == {"order": ids}
+
+    # Every lecture, each once: a stale or partial list changes nothing.
+    for bad in (new[:2], [*new, new[0]], [new[0], new[0], new[1]]):
+        assert (
+            teacher.post(url, {"offering": classroom.offering.pk, "lectures": bad}).status_code
+            == 400
+        )
+    # The TA edits; a student may not; an outsider doesn't see the course.
+    body = {"offering": classroom.offering.pk, "lectures": ids}
+    assert api(classroom.ta).post(url, body).status_code == 204
+    assert api(classroom.student).post(url, body).status_code == 403
+    assert api(make_user(Role.TEACHER)).post(url, body).status_code == 404
+
+
+def test_lecture_views_are_counted_for_staff_only(api, classroom, make_user):
+    lecture = _lecture(api, classroom)
+    draft = _lecture(api, classroom, publish=False)
+    student = api(classroom.student)
+    view = f"/api/v1/lectures/{lecture}/view"
+    assert student.post(view).status_code == 204
+    assert student.post(view).status_code == 204  # counted once per student
+    assert student.post(f"/api/v1/lectures/{draft}/view").status_code == 404
+    # Staff opening the lecture is not a student view.
+    assert api(classroom.teacher).post(view).status_code == 204
+    from learning.models import LectureView
+
+    seen = LectureView.objects.get()
+    assert seen.times == 2 and seen.student_record == classroom.record
+
+    teacher = api(classroom.teacher)
+    assert teacher.get(f"/api/v1/lectures/{lecture}").data["views_count"] == 1
+    rows = teacher.get("/api/v1/lectures", {"offering": classroom.offering.pk}).data["results"]
+    assert {r["public_id"]: r["views_count"] for r in rows} == {lecture: 1, draft: 0}
+    # Students don't see how many classmates opened it.
+    assert student.get(f"/api/v1/lectures/{lecture}").data["views_count"] is None
+    assert api(make_user(Role.STUDENT)).post(view).status_code == 404

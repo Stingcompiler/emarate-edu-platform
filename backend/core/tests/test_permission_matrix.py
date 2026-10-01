@@ -440,6 +440,8 @@ COVERED_ELSEWHERE = {
     "report-snapshot-detail": "reports.tests.test_reports::test_snapshots_are_frozen_and_scoped",
     "lecture-publish": _L + "test_students_see_published_lectures_only",
     "lecture-unpublish": _L + "test_resource_removal_and_unpublish",
+    "lecture-reorder": _L + "test_lecture_reorder_is_whole_audited_and_for_editors",
+    "lecture-mark-viewed": _L + "test_lecture_views_are_counted_for_staff_only",
     "lecture-add-resource": _L + "test_lecture_file_link_is_signed_and_scoped",
     "lecture-remove-resource": _L + "test_resource_removal_and_unpublish",
     "assignment-publish": _L + "test_drafts_are_hidden_and_publish_needs_submission_types",

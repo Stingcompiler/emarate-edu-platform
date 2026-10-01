@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { ExternalLink, FileText, Link2, Pencil, PlayCircle } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router";
 
 import { PortalShell } from "../../components/PortalShell";
@@ -44,6 +44,16 @@ export function Lecture() {
   const course = useCourse(l?.offering).data;
   const staff = isCourseStaff(course);
   const [top, bottom] = splitCourse(course?.code ?? "");
+  // The course's staff see how many students opened each lecture (docs/07); a student's
+  // opening is noted once per visit. Staff opening it are not counted.
+  const opened = l?.public_id;
+  const asStudent = course?.my_role === "student";
+  useEffect(() => {
+    if (opened && asStudent)
+      void api.POST("/api/v1/lectures/{public_id}/view", {
+        params: { path: { public_id: opened } },
+      });
+  }, [opened, asStudent]);
   return (
     <PortalShell
       title={l?.title_ar ?? "المحاضرة"}

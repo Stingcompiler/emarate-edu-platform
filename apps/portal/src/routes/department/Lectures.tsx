@@ -231,6 +231,9 @@ export function DepartmentLectures() {
                             ? `${count(l.resources.length, N.resource)}`
                             : "بلا موارد"}
                           {l.published_at ? ` · ${when(l.published_at)}` : ""}
+                          {l.is_published && l.views_count != null
+                            ? ` · ${l.views_count ? `فتحها ${count(l.views_count, N.student)}` : "لم يفتحها أحد بعد"}`
+                            : ""}
                         </span>
                       </Link>
                       <StatusBadge
