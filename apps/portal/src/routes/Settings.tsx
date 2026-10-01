@@ -307,15 +307,22 @@ function PublicProfileCard() {
 function PushCard() {
   const [state, setState] = useState<PushState | null>(null);
   const [busy, setBusy] = useState(false);
+  const [problem, setProblem] = useState("");
   useEffect(() => {
-    void pushState().then(setState);
+    void pushState()
+      .then(setState)
+      .catch(() => setState("unsupported"));
   }, []);
   if (state === null) return null;
 
   async function flip() {
     setBusy(true);
+    setProblem("");
     try {
       setState(state === "on" ? await disablePush() : await enablePush());
+    } catch {
+      // Silent failures left users thinking push was on (owner, 2026-10-01).
+      setProblem("تعذّر تغيير الإشعارات على هذا الجهاز الآن. حاول مرة أخرى.");
     } finally {
       setBusy(false);
     }
@@ -329,6 +336,11 @@ function PushCard() {
       <div className="min-w-0 flex-1">
         <p className="text-sm font-semibold text-text">الإشعارات على هذا الجهاز</p>
         <p className="text-sm leading-relaxed text-text-muted">{PUSH_TEXT[state]}</p>
+        {problem && (
+          <p className="mt-1 text-xs text-danger-strong" role="alert">
+            {problem}
+          </p>
+        )}
       </div>
       {state === "needs-install" ? (
         <Link to="/install">

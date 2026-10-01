@@ -170,12 +170,12 @@ export function Structure() {
           </Card>
           <Card className="space-y-2 p-3">
             <p className="text-sm font-semibold">+ قسم</p>
-            <div className="grid grid-cols-[80px_1fr] gap-2">
+            <div className="grid grid-cols-[96px_1fr] gap-2">
               <input
                 dir="ltr"
                 value={dForm.code}
                 onChange={(e) => setD({ ...dForm, code: e.target.value.toUpperCase() })}
-                placeholder="الرمز (بالإنجليزية)"
+                placeholder="IT"
                 aria-label="رمز القسم"
                 className={input}
               />
@@ -310,7 +310,9 @@ export function Structure() {
             {deptPrograms.map((p) => (
               <div
                 key={p.id}
-                className="grid gap-1 px-4 py-3 text-sm md:grid-cols-[minmax(0,1fr)_88px_120px_120px_56px] md:items-center md:gap-3"
+                // Phones: a card — name and status on one line, the facts on the next, then the
+                // hours; from md the five columns of the header above.
+                className="grid grid-cols-[minmax(0,1fr)_auto] gap-x-3 gap-y-1.5 px-4 py-3 text-sm md:grid-cols-[minmax(0,1fr)_88px_120px_120px_56px] md:items-center md:gap-3"
               >
                 <span className="min-w-0">
                   <bdi className="block font-mono text-xs text-text-muted">{p.code}</bdi>
@@ -324,20 +326,28 @@ export function Structure() {
                     {editing === p.id ? "إغلاق صفحة الموقع" : "صفحة الموقع: الوصف والرسوم"}
                   </button>
                 </span>
-                <span className="text-text-muted">{DEGREE[p.degree] ?? p.degree}</span>
-                <span className="text-text-muted">
+                <span className="hidden text-text-muted md:block">
+                  {DEGREE[p.degree] ?? p.degree}
+                </span>
+                <span className="col-span-2 text-xs text-text-muted md:col-span-1 md:text-sm">
+                  <span className="md:hidden">{DEGREE[p.degree] ?? p.degree} · </span>
                   {count(p.duration_terms, N.term)} · {num(p.levels_count)} مستويات
                 </span>
-                <HoursInput
-                  program={p.id}
-                  name={p.name_ar}
-                  value={p.total_credit_hours ?? null}
-                  onSaved={() => refresh("programs")}
-                />
-                <StatusBadge
-                  status={p.is_active ? "approved" : "closed"}
-                  label={p.is_active ? "نشط" : "موقوف"}
-                />
+                <span className="col-span-2 md:col-span-1">
+                  <HoursInput
+                    program={p.id}
+                    name={p.name_ar}
+                    value={p.total_credit_hours ?? null}
+                    onSaved={() => refresh("programs")}
+                  />
+                </span>
+                {/* Its own size, beside the name on phones (it used to stretch into a bar). */}
+                <span className="col-start-2 row-start-1 self-start justify-self-end md:col-start-auto md:row-start-auto md:self-center md:justify-self-start">
+                  <StatusBadge
+                    status={p.is_active ? "approved" : "closed"}
+                    label={p.is_active ? "نشط" : "موقوف"}
+                  />
+                </span>
               </div>
             ))}
             {!deptPrograms.length && <p className="px-4 py-3 text-sm text-text-muted">لا برامج.</p>}

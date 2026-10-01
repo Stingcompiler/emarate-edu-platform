@@ -42,12 +42,14 @@ export async function enablePush(): Promise<PushState> {
       applicationServerKey: keyBytes(config.public_key),
     }));
   const json = subscription.toJSON();
-  await api.POST("/api/v1/push/subscriptions", {
+  const { response } = await api.POST("/api/v1/push/subscriptions", {
     body: {
       endpoint: subscription.endpoint,
       keys: { p256dh: json.keys?.p256dh ?? "", auth: json.keys?.auth ?? "" },
     },
   });
+  // The browser is subscribed, but nothing reaches it until the API knows this device.
+  if (!response.ok) throw new Error(`push registration failed (${response.status})`);
   return "on";
 }
 
