@@ -120,7 +120,7 @@ export function ResultImportDetail() {
               DesktopResultsImport); narrower screens keep them above. */}
           <div className="mt-4 xl:grid xl:grid-cols-[minmax(0,1fr)_320px] xl:items-start xl:gap-6">
             <aside className="xl:sticky xl:top-20 xl:col-start-2 xl:row-start-1">
-              <Card className="flex flex-wrap items-center gap-x-6 gap-y-2 px-4 py-3 text-sm xl:flex-col xl:items-stretch xl:gap-y-2.5">
+              <Card className="flex flex-wrap items-center gap-x-6 gap-y-2 px-4 py-3 text-sm xl:flex-col xl:items-start xl:gap-y-2.5">
                 <StatusBadge status={b.status} label={STATUS_LABELS[b.status] ?? b.status} />
                 <span>
                   الصفوف: <b>{summary.rows ?? 0}</b>
