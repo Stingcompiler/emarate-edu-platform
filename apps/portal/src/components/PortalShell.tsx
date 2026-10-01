@@ -8,6 +8,7 @@ import { hasRole, useMe, useSignOut } from "../lib/auth";
 import { navFor } from "../lib/nav";
 import { AppShell, Badge } from "./AppShell";
 import { InstallHint } from "./InstallHint";
+import { PushPrompt } from "./PushPrompt";
 import { ThemeToggle } from "./ThemeToggle";
 
 type Props = Omit<ComponentProps<typeof AppShell>, "nav" | "actions" | "eyebrow">;
@@ -57,6 +58,8 @@ export function PortalShell(props: Props) {
           {/* Only on the home screens (review 2026-09-29): not above exams, grading or forms. */}
           {(me.data?.student || hasRole(me.data, "teacher", "ta")) &&
             (pathname === "/" || pathname === "/me") && <InstallHint />}
+          {/* Every role: the invitation to turn notifications on (home and notifications). */}
+          {me.data && (pathname === "/" || pathname === "/notifications") && <PushPrompt />}
           {props.children}
         </>
       }
