@@ -34,6 +34,8 @@ const T = {
   other: { ar: "English", en: "العربية" },
   darkMode: { ar: "الوضع الداكن", en: "Dark mode" },
   lightMode: { ar: "الوضع الفاتح", en: "Light mode" },
+  poweredBy: { ar: "مدعوم من ستينج سيستم", en: "Powered by Sting System" },
+  newTab: { ar: "(يفتح في تبويب جديد)", en: "(opens in a new tab)" },
   announcements: { ar: "الإعلانات", en: "Announcements" },
   register: { ar: "سجّل", en: "Register" },
   readMore: { ar: "اقرأ المزيد", en: "Read more" },
