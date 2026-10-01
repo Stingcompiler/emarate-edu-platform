@@ -1,4 +1,12 @@
-import { type ReactNode, createContext, useCallback, useContext, useRef, useState } from "react";
+import {
+  type ReactNode,
+  createContext,
+  useCallback,
+  useContext,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 
 type Say = (message: string) => void;
 
@@ -7,7 +15,8 @@ const ToastContext = createContext<Say>(() => {});
 /**
  * «حُفظ ✓» after an action (review 2026-09-29 §2.6): a short note that rises above the phone's
  * tab bar, its check drawing itself, and leaves after a moment. Announced politely to screen
- * readers; «reduce motion» keeps the note and drops the movement.
+ * readers; «reduce motion» keeps the note and drops the movement. A page's pinned action bar
+ * (`data-dock`, e.g. the page editor's save buttons) stays uncovered: the note rises above it.
  * `const done = useToast(); … onSuccess: () => done("سُلِّم الواجب")`.
  */
 export function useToast(): Say {
@@ -22,13 +31,33 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     setNote({ id: Date.now(), message });
     timer.current = setTimeout(() => setNote(null), 2600);
   }, []);
+  const box = useRef<HTMLDivElement>(null);
+  // Followed every frame while the note shows: a bar may leave with the save a tick later
+  // (the settings «unsaved changes» bar) or arrive with the next item (grading).
+  useLayoutEffect(() => {
+    if (!note) return;
+    let frame = 0;
+    const place = () => {
+      const tops = [...document.querySelectorAll<HTMLElement>("[data-dock]")]
+        .filter((e) => ["sticky", "fixed"].includes(getComputedStyle(e).position))
+        .map((e) => e.getBoundingClientRect())
+        .filter((r) => r.height > 0 && r.top < innerHeight && r.bottom > innerHeight - 200)
+        .map((r) => r.top);
+      if (box.current)
+        box.current.style.bottom = tops.length ? `${innerHeight - Math.min(...tops) + 8}px` : "";
+      frame = requestAnimationFrame(place);
+    };
+    place();
+    return () => cancelAnimationFrame(frame);
+  }, [note]);
   return (
     <ToastContext.Provider value={say}>
       {children}
       <div
+        ref={box}
         role="status"
         aria-live="polite"
-        className="pointer-events-none fixed inset-x-0 bottom-24 z-50 flex justify-center px-4 lg:bottom-6"
+        className="pointer-events-none fixed inset-x-0 bottom-24 z-50 flex justify-center px-4 transition-[bottom] duration-200 motion-reduce:transition-none lg:bottom-6"
       >
         {note && (
           <span

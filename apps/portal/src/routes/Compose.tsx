@@ -163,7 +163,7 @@ export function Compose() {
               {sent && <Notice tone="success">{sent}</Notice>}
               {send.isError && <Notice>{problemMessage(send.error)}</Notice>}
             </div>
-            <div className="sticky bottom-24 z-[5] mt-3 lg:static">
+            <div data-dock className="sticky bottom-24 z-[5] mt-3 lg:static">
               <Button type="submit" className="w-full shadow-md lg:shadow-none" disabled={!ready}>
                 <Send size={18} aria-hidden className="rtl:-scale-x-100" />
                 {send.isPending ? "جارٍ الإرسال…" : sendLabel}
