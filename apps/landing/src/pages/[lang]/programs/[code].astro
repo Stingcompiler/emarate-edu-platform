@@ -183,7 +183,7 @@ const jsonLd = [programLd, faqLd(faq)];
         <a
           href={applyUrl}
           data-no-print
-          class="ms-auto rounded-lg bg-accent px-4 py-2 font-semibold text-white hover:bg-accent-hover"
+          class="ms-auto rounded-lg bg-accent px-4 py-2 font-semibold text-on-primary hover:bg-accent-hover"
         >
           {t(lang, "apply")}
         </a>
@@ -269,14 +269,14 @@ const jsonLd = [programLd, faqLd(faq)];
           {open ? (
             <a
               href={applyUrl}
-              class="flex min-h-12 items-center justify-center rounded-xl bg-accent px-4 font-semibold text-white hover:bg-accent-hover"
+              class="flex min-h-12 items-center justify-center rounded-xl bg-accent px-4 font-semibold text-on-primary hover:bg-accent-hover"
             >
               {L("قدّم لهذا البرنامج", "Apply to this programme")}
             </a>
           ) : (
             <a
               href={href(lang, "admissions/")}
-              class="flex min-h-12 items-center justify-center rounded-xl bg-primary px-4 font-semibold text-white hover:bg-primary-hover"
+              class="flex min-h-12 items-center justify-center rounded-xl bg-primary px-4 font-semibold text-on-primary hover:bg-primary-hover"
             >
               {L("مواعيد القبول", "Admission dates")}
             </a>
@@ -473,7 +473,7 @@ const jsonLd = [programLd, faqLd(faq)];
       >
         <a
           href={applyUrl}
-          class="flex min-h-12 flex-1 items-center justify-center rounded-xl bg-accent px-4 font-semibold text-white hover:bg-accent-hover"
+          class="flex min-h-12 flex-1 items-center justify-center rounded-xl bg-accent px-4 font-semibold text-on-primary hover:bg-accent-hover"
         >
           {lang === "ar" ? "قدّم لهذا البرنامج" : "Apply to this programme"}
         </a>

@@ -199,7 +199,7 @@ const lead = L(
             style={`--i: ${i + 1}`}
             class="flex gap-3 rounded-2xl border border-border-soft bg-surface p-4"
           >
-            <span class="grid size-8 shrink-0 place-items-center rounded-full bg-primary text-sm font-bold text-white">
+            <span class="grid size-8 shrink-0 place-items-center rounded-full bg-primary text-sm font-bold text-on-primary">
               {num(lang, i + 1)}
             </span>
             <span>
@@ -276,7 +276,7 @@ const lead = L(
       {accepting.length > 0 && (
         <a
           href={`${PORTAL}/apply`}
-          class="rounded-xl bg-accent px-5 py-3 font-semibold text-white hover:bg-accent-hover"
+          class="rounded-xl bg-accent px-5 py-3 font-semibold text-on-primary hover:bg-accent-hover"
         >
           {t(lang, "apply")} {arrow(lang)}
         </a>

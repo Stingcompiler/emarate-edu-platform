@@ -182,7 +182,7 @@ const jsonLd = {
         <div class="mt-6 flex flex-wrap gap-3">
           <a
             href={href(lang, "programs/")}
-            class="rounded-lg bg-primary px-5 py-3 text-sm font-semibold text-white hover:bg-primary-hover"
+            class="rounded-lg bg-primary px-5 py-3 text-sm font-semibold text-on-primary hover:bg-primary-hover"
           >
             {t(lang, "explore")}
           </a>
@@ -223,7 +223,7 @@ const jsonLd = {
           <div class="mt-6 flex flex-wrap items-center gap-4">
             <a
               href={`${PORTAL}/apply`}
-              class="rounded-lg bg-accent px-5 py-3 text-sm font-bold text-white hover:bg-accent-hover"
+              class="rounded-lg bg-accent px-5 py-3 text-sm font-bold text-on-primary hover:bg-accent-hover"
             >
               {t(lang, "apply")} {arrow(lang)}
             </a>
@@ -267,7 +267,7 @@ const jsonLd = {
               href={href(lang, `announcements/${a.public_id}/`)}
               class="flex items-center gap-3 rounded-2xl border border-accent-soft bg-accent-soft/40 px-4 py-3 hover:bg-accent-soft"
             >
-              <span class="rounded-full bg-accent px-2 py-0.5 text-xs font-semibold text-white">
+              <span class="rounded-full bg-accent px-2 py-0.5 text-xs font-semibold text-on-primary">
                 {lang === "ar" ? "إعلان" : "Notice"}
               </span>
               <b class="min-w-0 flex-1 truncate text-sm text-text">{a.title}</b>
