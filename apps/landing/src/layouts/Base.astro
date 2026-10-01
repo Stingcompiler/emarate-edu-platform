@@ -398,9 +398,26 @@ const ext = (external: boolean) => (external ? { rel: "noopener", target: "_blan
       </div>
       <div class="border-t border-navy-700">
         <div class="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-x-6 gap-y-2 px-4 py-4 text-xs text-navy-300 lg:px-8">
-          <p>
-            © {new Date().getFullYear()} {siteName}
-          </p>
+          {/* The copyright, then who built the site: beside it on wide screens, under it on phones. */}
+          <div class="flex flex-col gap-1 md:flex-row md:items-center md:gap-3">
+            <p>
+              © {new Date().getFullYear()} {siteName}
+            </p>
+            <span aria-hidden="true" class="hidden md:inline">
+              ·
+            </span>
+            <p>
+              <a
+                href="https://stingdev.pro"
+                target="_blank"
+                rel="noopener"
+                class="underline-offset-2 hover:text-white hover:underline"
+              >
+                {t(lang, "poweredBy")}
+                <span class="sr-only"> {t(lang, "newTab")}</span>
+              </a>
+            </p>
+          </div>
           {legal.length > 0 && (
             <nav
               aria-label={lang === "ar" ? "السياسات" : "Policies"}
