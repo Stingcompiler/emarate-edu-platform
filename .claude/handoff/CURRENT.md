@@ -68,7 +68,7 @@
     decisions.
   - Result batch detail: from xl, the summary and actions in a sticky side column beside the rows. Not visually
     checked: the demo has no batch.
-- **PR 7f `feat/site-admin-large-screens`:**
+- **PR 7f #65 `feat/site-admin-large-screens`: merged.**
   - New `GET /api/v1/roles` (`users.view`), read-only from `rbac.CAPABILITIES`, with a matrix row and test. Page
     `/system/roles` (`RolesMatrix.tsx`; the name avoids a clash with `admin/roles.ts` on case-insensitive disks) shows
     the matrix with Arabic capability names, a role side panel, and CSV.
@@ -81,8 +81,18 @@
   - Structure: the hours field says «حُفظ ✓».
 - **Always run `pnpm format:check` (the whole repo) before pushing:** CI fails on any unformatted file, e.g. JSON
   written by a script.
-- **Next:** portal motion PR, then the deferred API items (plan progress per level; lecture reorder and views), then
-  the missing visual checks.
+- **PR #66 `feat/portal-motion`: merged.** `components/Toast.tsx` (`ToastProvider`, `useToast()`): a «حُفظ ✓» note
+  above the phone's tab bar after save/send actions; it replaced inline success notes that said the same thing.
+  motion.css gains `.motion-grow` (bars), `.motion-next` (grading's next submission), `.motion-leave` (decided
+  approvals) and `.motion-flash` (exam monitor rows whose state changed). Nothing moves on the exam screen.
+- **PR `feat/plan-progress`:** `/api/v1/me/results` gains `plan` (`services.plan_progress`): per level, the plan's
+  hours (the program's active courses plus the department's shared ones, by `default_level`) and the hours earned
+  (published passes in released terms, each course once); the total is the program's stated
+  `total_credit_hours`, else the plan's sum; `null` with no courses. Results shows «التقدم في الخطة» in the side
+  column (lg) and after the courses (phone), and «X ساعة مكتسبة من Y» under the cumulative GPA.
+- **Next:** the page editor save toast (`useToast`, now that #65 and #66 are in), then lecture drag reorder and
+  per-lecture view counts (new endpoints: matrix rows, audited writes, tests), then the missing visual checks
+  (Grade and ExamMonitor at 390 with an attempt, DepartmentReport side column at 1440, ImportDetail with a batch).
 - **PR 6f `feat/department-faculty-news`**: the owner approved both 6c deferrals (2026-09-30); docs/03 is now v2.3.
   - `User.public_profile` plus `academic_title_ar/en`, set by the member at `PATCH /api/v1/me/public-profile` (audited
     `profile.public_update`), with a card in «الإعدادات».

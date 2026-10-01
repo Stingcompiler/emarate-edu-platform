@@ -1,10 +1,11 @@
 """Results: import → commit → publish, corrections, display rules, GPA (Phase 4)."""
 
+from datetime import date
 from decimal import Decimal
 
 import pytest
 
-from academic.models import Course, CourseOffering, Enrollment
+from academic.models import Course, CourseOffering, Enrollment, Term
 from accounts.rbac import Role
 from audit.models import AuditLog
 from conftest import csv_upload
@@ -244,3 +245,65 @@ def test_delete_needs_an_uncommitted_batch_and_release_is_audited(api, officer, 
     batch = _upload(api(officer), term, "26-IT-0100,IT101,91,,").data["public_id"]
     assert api(officer).delete(f"{URL}/{batch}").status_code == 204
     assert not TermResultRelease.objects.exists()
+
+
+def test_plan_progress_per_level(
+    api, officer, classroom, term, it_dept, it_program, django_capture_on_commit_callbacks
+):
+    """Board DesktopStudentResults «التقدم في الخطة»: hours earned against the plan, per level."""
+    # Plan: IT101 (level 1, 3h, the fixture), a shared department course (level 1, 2h), a level 2
+    # course (4h); an inactive course and another department's course don't count.
+    shared = Course.objects.create(
+        department=it_dept, code="GEN1", name_ar="مهارات", credit_hours=2
+    )
+    Course.objects.create(
+        department=it_dept,
+        program=it_program,
+        code="IT201",
+        name_ar="هياكل",
+        default_level=2,
+        credit_hours=4,
+    )
+    Course.objects.create(
+        department=it_dept, program=it_program, code="OLD1", name_ar="قديم", is_active=False
+    )
+    mine = api(classroom.student).get("/api/v1/me/results").data
+    assert mine["plan"] == {
+        "total_hours": 9,
+        "earned_hours": 0,
+        "levels": [
+            {"level": 1, "required": 5, "earned": 0},
+            {"level": 2, "required": 4, "earned": 0},
+        ],
+    }
+    # A published pass counts once even with a retake; a fail doesn't count.
+    record_ = classroom.record
+    later = Term.objects.create(
+        academic_year=term.academic_year,
+        order=2,
+        name_ar="الفصل الثاني",
+        starts_on=date(2027, 2, 1),
+        ends_on=date(2027, 6, 30),
+    )
+    retake = CourseOffering.objects.create(course=classroom.offering.course, term=later)
+    gen = CourseOffering.objects.create(course=shared, term=term)
+    for offering in (retake, gen):
+        Enrollment.objects.create(offering=offering, student_record=record_)
+    capture = django_capture_on_commit_callbacks
+    _publish(api, officer, term, "26-IT-0100,IT101,80,,", "26-IT-0100,GEN1,30,,", capture=capture)
+    _publish(api, officer, later, "26-IT-0100,IT101,85,,", capture=capture)
+    it_program.total_credit_hours = 132
+    it_program.save()
+    plan = api(classroom.student).get("/api/v1/me/results").data["plan"]
+    assert (plan["total_hours"], plan["earned_hours"]) == (132, 3)
+    assert plan["levels"][0] == {"level": 1, "required": 5, "earned": 3}
+    # A term the results officer has hidden doesn't count.
+    TermResultRelease.objects.create(term=term, is_visible=False)
+    TermResultRelease.objects.create(term=later, is_visible=False)
+    assert api(classroom.student).get("/api/v1/me/results").data["plan"]["earned_hours"] == 0
+
+
+def test_plan_progress_is_null_without_courses(api, make_user, make_student, ba_program):
+    student = make_user(Role.STUDENT)
+    make_student(ba_program, "26-BA-0001", user=student)
+    assert api(student).get("/api/v1/me/results").data["plan"] is None

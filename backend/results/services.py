@@ -4,11 +4,12 @@ from __future__ import annotations
 
 from decimal import ROUND_HALF_UP, Decimal
 
-from django.db import IntegrityError, transaction
+from django.db import IntegrityError, models, transaction
 from django.utils import timezone
 from django.utils.translation import gettext
 from rest_framework.exceptions import PermissionDenied, ValidationError
 
+from academic.models import Course
 from accounts import rbac
 from audit.services import RequestMeta, record
 from core.errors import Conflict
@@ -246,12 +247,56 @@ def _gpa(rows) -> Decimal | None:
     return (points / credits).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
 
 
-def student_view(record_) -> dict:
-    display = ResultDisplaySettings.load()
+def _hidden_terms(record_) -> set[int]:
     hidden = TermResultRelease.objects.filter(is_visible=False).filter(
         program__isnull=True
     ) | TermResultRelease.objects.filter(is_visible=False, program=record_.program_id)
-    hidden_terms = set(hidden.values_list("term_id", flat=True))
+    return set(hidden.values_list("term_id", flat=True))
+
+
+def plan_progress(record_) -> dict | None:
+    """Credit hours earned against the study plan, per level (board DesktopStudentResults).
+
+    The plan is the program's active courses plus the department's shared ones, by their
+    ``default_level``. Earned hours count each passed course once, from published results in
+    terms the results officer has released; they reveal no marks. ``None`` when the program
+    has no courses entered yet.
+    """
+    program = record_.program
+    plan = Course.objects.filter(is_active=True, department_id=program.department_id).filter(
+        models.Q(program=program) | models.Q(program__isnull=True)
+    )
+    required: dict[int, int] = {}
+    for level, hours in plan.values_list("default_level", "credit_hours"):
+        required[level] = required.get(level, 0) + hours
+    if not required:
+        return None
+    passed = set(
+        AcademicResult.objects.filter(
+            student_record=record_, is_published=True, status=AcademicResult.Status.PASS
+        )
+        .exclude(term_id__in=_hidden_terms(record_))
+        .values_list("offering__course_id", "offering__course__default_level")
+        .order_by()
+    )
+    hours_of = dict(plan.values_list("pk", "credit_hours"))
+    earned: dict[int, int] = {}
+    for course_id, level in passed:
+        if course_id in hours_of:
+            earned[level] = earned.get(level, 0) + hours_of[course_id]
+    rows = [
+        {"level": n, "required": required[n], "earned": earned.get(n, 0)} for n in sorted(required)
+    ]
+    return {
+        "total_hours": program.total_credit_hours or sum(required.values()),
+        "earned_hours": sum(earned.values()),
+        "levels": rows,
+    }
+
+
+def student_view(record_) -> dict:
+    display = ResultDisplaySettings.load()
+    hidden_terms = _hidden_terms(record_)
     results = (
         AcademicResult.objects.filter(student_record=record_, is_published=True)
         .exclude(term_id__in=hidden_terms)
@@ -276,6 +321,7 @@ def student_view(record_) -> dict:
         "display": display,
         "terms": [{"term": t["term"], "rows": t["rows"], "gpa": _gpa(t["rows"])} for t in ordered],
         "cumulative_gpa": _gpa(all_rows),
+        "plan": plan_progress(record_),
     }
 
 

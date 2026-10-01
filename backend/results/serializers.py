@@ -200,11 +200,24 @@ class MyTermSerializer(serializers.Serializer):
     results = MyResultRowSerializer(many=True)
 
 
+class MyPlanLevelSerializer(serializers.Serializer):
+    level = serializers.IntegerField()
+    required = serializers.IntegerField()
+    earned = serializers.IntegerField()
+
+
+class MyPlanProgressSerializer(serializers.Serializer):
+    total_hours = serializers.IntegerField()
+    earned_hours = serializers.IntegerField()
+    levels = MyPlanLevelSerializer(many=True)
+
+
 class MyResultsSerializer(serializers.Serializer):
     notice = serializers.CharField()
     show = serializers.DictField(child=serializers.BooleanField())
     cumulative_gpa = serializers.DecimalField(max_digits=4, decimal_places=2, allow_null=True)
     terms = MyTermSerializer(many=True)
+    plan = MyPlanProgressSerializer(allow_null=True)
 
     @staticmethod
     def build(view: dict) -> dict:
@@ -217,6 +230,7 @@ class MyResultsSerializer(serializers.Serializer):
             "gpa": display.show_gpa,
         }
         return {
+            "plan": view["plan"],
             "notice": display.notice_text,
             "show": show,
             "cumulative_gpa": view["cumulative_gpa"] if show["gpa"] else None,
