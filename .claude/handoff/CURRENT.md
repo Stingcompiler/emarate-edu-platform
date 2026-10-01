@@ -110,9 +110,18 @@
     script applies it before paint, key `ecst-theme`, the portal's); the toggle sits in the header (sm up) and the phone
     menu; printing is always light. Text on accent/primary fills uses `text-on-primary`, never `text-white`, and dark
     tokens redefine `accent-700` like `primary-700`. An axe crawl of all 96 pages in dark was clean.
-- **Demo data:** loaded in the dev database (`seed_demo`; the existing accounts kept their passwords).
-- **State:** every planned phase is merged and nothing is open. Next work comes from the owner; content only the
-  college can supply (licence, real figures, fees, photos) is still theirs to provide.
+- **#75 sample site content: merged.** `seed_demo` fills what only the college can supply, every piece marked
+  («(مثال)»/«(Example)», images «SAMPLE IMAGE» with an «(مثال) صورة تجريبية» alt; `core/management/commands/_sample_site.py`):
+  licence line, figures, tagline, hero/share images, 3 news with covers, event covers, a 6-image gallery, a dean
+  silhouette, programme and department texts. Never overwrites, reruns add nothing.
+  - Dev serves the public media bucket only (`config/urls.py`, DEBUG), linked absolutely (`PUBLIC_MEDIA_URL`, :8000;
+    e2e :8001); the block sanitizer accepts URLs under our own public media base.
+  - The Astro dev server caches API responses for its lifetime: restart it after reseeding.
+- **#76 image layout per page: merged.** `Page.image_layout` (`single` | `grid`), chosen in the page editor («عرض الصور في
+  الموقع: واحدة / شبكة», `content.manage` = site manager and system admin, audited `page.update`); the gallery starts as
+  a grid; `Blocks.astro` groups consecutive images (2 columns, 3 from lg).
+- **State:** every planned phase and request is merged and nothing is open. Next work comes from the owner; real
+  content (licence, figures, fees, photos) replaces the samples in «محتوى الموقع».
 - **PR 6f `feat/department-faculty-news`**: the owner approved both 6c deferrals (2026-09-30); docs/03 is now v2.3.
   - `User.public_profile` plus `academic_title_ar/en`, set by the member at `PATCH /api/v1/me/public-profile` (audited
     `profile.public_update`), with a card in «الإعدادات».
