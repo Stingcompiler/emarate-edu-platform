@@ -103,9 +103,16 @@
   batch detail at 390/1280 with an uploaded batch were all fine. Two fixes: the department report's 1440 side
   column (`lg:items-start` beat `min-[1440px]:items-stretch` in the CSS order; now `lg:max-[1439px]:items-start`), and
   the batch summary badge at xl (`xl:items-start`).
-- **State:** every planned phase is merged (review series 6a–6f, large screens 7a–7f, motion, plan progress, lecture
-  order and views, visual checks). Nothing is open. Next work comes from the owner; content only the college can
-  supply (licence, real figures, fees, photos) is still theirs to provide.
+- **Dark mode in the nav (owner request 2026-10-01): merged.**
+  - **#72 (portal):** `ThemeRow` (`components/ThemeToggle.tsx`) at the foot of the sidebar and of the phone «المزيد»
+    sheet, beside the top-bar moon; all toggles stay in step through `useTheme`.
+  - **#73 (public site, decision D28 in docs/02):** light by default; a visitor may choose dark (an inline `<head>`
+    script applies it before paint, key `ecst-theme`, the portal's); the toggle sits in the header (sm up) and the phone
+    menu; printing is always light. Text on accent/primary fills uses `text-on-primary`, never `text-white`, and dark
+    tokens redefine `accent-700` like `primary-700`. An axe crawl of all 96 pages in dark was clean.
+- **Demo data:** loaded in the dev database (`seed_demo`; the existing accounts kept their passwords).
+- **State:** every planned phase is merged and nothing is open. Next work comes from the owner; content only the
+  college can supply (licence, real figures, fees, photos) is still theirs to provide.
 - **PR 6f `feat/department-faculty-news`**: the owner approved both 6c deferrals (2026-09-30); docs/03 is now v2.3.
   - `User.public_profile` plus `academic_title_ar/en`, set by the member at `PATCH /api/v1/me/public-profile` (audited
     `profile.public_update`), with a card in «الإعدادات».
