@@ -89,6 +89,16 @@ class Page(PublicIdModel, TimestampedModel):
     title_en = models.CharField(max_length=200, blank=True)
     blocks = models.JSONField(default=list, blank=True)
     seo = models.JSONField(default=dict, blank=True)
+
+    class ImageLayout(models.TextChoices):
+        SINGLE = "single", "صورة في كل سطر"
+        GRID = "grid", "شبكة"
+
+    # How consecutive image blocks show on the site, chosen by whoever edits the page (the
+    # site manager or the system admin): one per row, or side by side in a grid.
+    image_layout = models.CharField(
+        max_length=10, choices=ImageLayout.choices, default=ImageLayout.SINGLE
+    )
     status = models.CharField(max_length=10, choices=Status.choices, default=Status.DRAFT)
     publish_at = models.DateTimeField(null=True, blank=True)
     # Blank for the official drafts the system creates (content/official.py).

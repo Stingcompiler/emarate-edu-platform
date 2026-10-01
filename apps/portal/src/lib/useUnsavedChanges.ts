@@ -46,9 +46,14 @@ export function useUnsavedChanges(computed?: boolean) {
     dirtyRef.current = true;
     setDirty(true);
   }, []);
+  // A change made with a button (a Segmented choice) rather than typing.
+  const changed = useCallback(() => {
+    dirtyRef.current = true;
+    setDirty(true);
+  }, []);
   const saved = useCallback(() => {
     dirtyRef.current = false;
     setDirty(false);
   }, []);
-  return { dirty, onInput, saved };
+  return { dirty, onInput, changed, saved };
 }
