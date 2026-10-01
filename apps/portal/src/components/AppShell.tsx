@@ -1,7 +1,7 @@
 import { ChevronRight, type LucideIcon, Menu } from "lucide-react";
 import { type ReactNode, useEffect, useRef, useState } from "react";
 import { NavLink } from "react-router";
-import { ThemeToggle } from "./ThemeToggle";
+import { ThemeRow, ThemeToggle } from "./ThemeToggle";
 
 export type NavItem = {
   label: string;
@@ -128,6 +128,11 @@ export function AppShell({
                 <SidebarLink item={item} />
               </div>
             ))}
+            <div className="mt-4 border-t border-border-soft pt-3">
+              <ThemeRow
+                className={`${sidebarItem} w-full text-text-muted hover:bg-surface-alt hover:text-text`}
+              />
+            </div>
           </nav>
         </aside>
 
@@ -244,11 +249,11 @@ function BottomTabs({ items }: { items: NavItem[] }) {
   useEffect(() => {
     if (!open) return;
     opener.current = document.activeElement as HTMLElement | null;
-    sheet.current?.querySelector<HTMLElement>("a")?.focus();
+    sheet.current?.querySelector<HTMLElement>("a, button")?.focus();
     const onKey = (event: KeyboardEvent) => {
       if (event.key === "Escape") setOpen(false);
       if (event.key !== "Tab" || !sheet.current) return;
-      const links = sheet.current.querySelectorAll<HTMLElement>("a");
+      const links = sheet.current.querySelectorAll<HTMLElement>("a, button");
       const first = links[0];
       const last = links[links.length - 1];
       if (event.shiftKey && document.activeElement === first) {
@@ -316,6 +321,12 @@ function BottomTabs({ items }: { items: NavItem[] }) {
                   </NavLink>
                 );
               })}
+              <div className="mt-1 border-t border-border-soft pt-1">
+                <ThemeRow
+                  iconSize={22}
+                  className="flex min-h-12 w-full items-center gap-3 rounded-xl px-3 text-[15px] text-text hover:bg-surface-alt"
+                />
+              </div>
             </div>
           </nav>
         </div>
