@@ -72,6 +72,7 @@ class PageSerializer(serializers.ModelSerializer):
             "title_ar",
             "title_en",
             "blocks",
+            "image_layout",
             "seo",
             "status",
             "publish_at",

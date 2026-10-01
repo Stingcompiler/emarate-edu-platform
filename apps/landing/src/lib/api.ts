@@ -202,6 +202,8 @@ export type Page = {
   title_ar: string;
   title_en: string;
   blocks: Block[];
+  /** How consecutive images show: one per row, or a grid (chosen in the page editor). */
+  image_layout?: "single" | "grid";
   seo: { description?: string };
   updated_at: string;
 };

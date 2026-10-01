@@ -34,7 +34,7 @@ const title = pick(lang, page.title_ar, page.title_en);
   <WithAside>
     <article class="max-w-3xl">
       <ArabicOnly lang={lang} when={isArabic(JSON.stringify(page.blocks))}>
-        <Blocks blocks={page.blocks} />
+        <Blocks blocks={page.blocks} layout={page.image_layout} />
       </ArabicOnly>
     </article>
   </WithAside>

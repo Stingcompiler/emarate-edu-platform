@@ -380,3 +380,25 @@ def test_image_blocks_accept_our_public_media_only(settings):
         ]
     )
     assert [b.get("url") for b in blocks] == [ours, None, None]
+
+
+def test_image_layout_is_chosen_by_the_page_editors(api, site, make_user):
+    """«عرض الصور»: one per row or a grid, set by the site manager or the system admin."""
+    from audit.models import AuditLog
+    from content.models import Page
+
+    body = {"slug": "labs", "title_ar": "المعامل", "status": "published", "blocks": []}
+    created = api(site).post("/api/v1/content/pages", body, format="json").data
+    assert created["image_layout"] == "single"
+    url = f"/api/v1/content/pages/{created['public_id']}"
+    assert api(site).patch(url, {"image_layout": "grid"}, format="json").status_code == 200
+    assert api().get("/api/public/pages/labs").data["image_layout"] == "grid"
+    log = AuditLog.objects.filter(action="page.update").latest("id")
+    assert log.old["image_layout"] == "single" and log.new["image_layout"] == "grid"
+    assert api(site).patch(url, {"image_layout": "mosaic"}, format="json").status_code == 400
+    admin = make_user(Role.SYSTEM_ADMIN)
+    assert api(admin).patch(url, {"image_layout": "single"}, format="json").status_code == 200
+    events = make_user(Role.EVENTS_MANAGER)
+    assert api(events).patch(url, {"image_layout": "grid"}, format="json").status_code == 403
+    # The gallery's system draft starts as a grid.
+    assert Page.objects.get(slug="gallery").image_layout == "grid"
