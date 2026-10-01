@@ -11,10 +11,11 @@ import {
   StatusBadge,
   problemMessage,
   ScrollRegion,
+  WithSide,
 } from "../../components/ui";
 import { api, ok } from "../../lib/api";
 import { when, count, N } from "../../lib/format";
-import { num } from "../../lib/reports";
+import { downloadCsv, num } from "../../lib/reports";
 import { asForm, formData } from "../../lib/upload";
 import { Pager, useServerPages } from "../../components/Pager";
 
@@ -35,7 +36,22 @@ type Summary = {
   updated?: number;
 };
 
-/** Board: DesktopStudentsImport step 1 — upload (Excel/CSV), then preview per batch. */
+// The importer's columns (backend students/importer.py HEADERS): the first four are required.
+const TEMPLATE = [
+  "الرقم الجامعي",
+  "الاسم",
+  "رمز البرنامج",
+  "المستوى",
+  "البريد",
+  "الهاتف",
+  "الجنس",
+  "تاريخ الميلاد",
+  "الرقم الوطني",
+];
+const REQUIRED_COLUMNS = 4;
+
+/** Board: DesktopStudentsImport step 1 — upload (Excel/CSV), then preview per batch; the steps,
+ *  the columns and a blank template beside them on large screens. */
 export function StudentImports() {
   const navigate = useNavigate();
   const input = useRef<HTMLInputElement>(null);
@@ -60,55 +76,102 @@ export function StudentImports() {
       subtitle="رفع الملف ← الأعمدة المكتشفة ← المعاينة ← الاعتماد"
       back={{ label: "سجل الطلاب", to: "/students" }}
     >
-      <Card className="p-5">
-        <button
-          type="button"
-          onClick={() => input.current?.click()}
-          className="flex w-full flex-col items-center gap-2 rounded-2xl border-2 border-dashed border-border p-8 text-sm text-text-muted hover:bg-surface-alt"
-          disabled={upload.isPending}
-        >
-          <FileUp size={28} aria-hidden />
-          {upload.isPending ? "يُتحقق من الملف…" : "اختر ملف .xlsx أو .csv"}
-          <span className="text-xs">
-            الأعمدة: الرقم الجامعي، الاسم، البرنامج، المستوى، البريد… يُتحقق منها قبل أي تغيير.
-          </span>
-        </button>
-        <input
-          ref={input}
-          type="file"
-          accept=".xlsx,.csv"
-          hidden
-          onChange={(e) => e.target.files?.[0] && upload.mutate(e.target.files[0])}
-        />
-        {upload.isError && (
-          <div className="mt-3">
-            <Notice>{problemMessage(upload.error)}</Notice>
-          </div>
-        )}
-      </Card>
-      <Card className="mt-4 divide-y divide-border-soft">
-        {list.items.map((b) => {
-          const s = (b.summary ?? {}) as Summary;
-          return (
-            <Link
-              key={b.public_id}
-              to={`/student-imports/${b.public_id}`}
-              className="flex items-center gap-3 px-4 py-3 hover:bg-surface-alt"
-            >
-              <span className="min-w-0 flex-1">
-                <b className="block truncate text-sm text-text">{b.file_name}</b>
-                <span className="text-xs text-text-muted">
-                  {b.uploaded_by} · {when(b.created_at)} · {count(s.rows ?? 0, N.row)} · إنشاء{" "}
-                  {num(s.create ?? 0)} · تحديث {num(s.update ?? 0)} · أخطاء {num(s.error ?? 0)}
+      <WithSide
+        side={
+          <>
+            <Card className="p-4 text-sm">
+              <h2 className="font-semibold text-text">الخطوات</h2>
+              <ol className="mt-2 space-y-1.5 text-text-muted">
+                {["رفع الملف", "الأعمدة المكتشفة", "المعاينة: إنشاء وتحديث وأخطاء", "الاعتماد"].map(
+                  (step, i) => (
+                    <li key={step} className="flex items-center gap-2">
+                      <span className="grid size-6 shrink-0 place-items-center rounded-full bg-primary-soft text-xs font-bold text-primary-700">
+                        {num(i + 1)}
+                      </span>
+                      {step}
+                    </li>
+                  ),
+                )}
+              </ol>
+              <p className="mt-3 text-xs leading-relaxed text-text-muted">
+                لا يتغير شيء قبل الاعتماد. الخلية الفارغة لا تمحو قيمة موجودة، والصفوف الخاطئة
+                تُصدَّر لتصحيحها وإعادة رفعها.
+              </p>
+            </Card>
+            <Card className="p-4 text-sm">
+              <h2 className="font-semibold text-text">الأعمدة</h2>
+              <ul className="mt-2 flex flex-wrap gap-1.5">
+                {TEMPLATE.map((c, i) => (
+                  <li
+                    key={c}
+                    className={`rounded-full px-2.5 py-1 text-xs ${i < REQUIRED_COLUMNS ? "bg-primary-soft font-semibold text-primary-700" : "bg-surface-alt text-text-muted"}`}
+                  >
+                    {c}
+                    {i < REQUIRED_COLUMNS ? " *" : ""}
+                  </li>
+                ))}
+              </ul>
+              <button
+                type="button"
+                onClick={() => downloadCsv("students-template", TEMPLATE, [])}
+                className="mt-3 text-sm font-semibold text-primary hover:underline"
+              >
+                تنزيل القالب الفارغ (CSV)
+              </button>
+            </Card>
+          </>
+        }
+      >
+        <Card className="p-5">
+          <button
+            type="button"
+            onClick={() => input.current?.click()}
+            className="flex w-full flex-col items-center gap-2 rounded-2xl border-2 border-dashed border-border p-8 text-sm text-text-muted hover:bg-surface-alt"
+            disabled={upload.isPending}
+          >
+            <FileUp size={28} aria-hidden />
+            {upload.isPending ? "يُتحقق من الملف…" : "اختر ملف .xlsx أو .csv"}
+            <span className="text-xs">
+              الأعمدة: الرقم الجامعي، الاسم، البرنامج، المستوى، البريد… يُتحقق منها قبل أي تغيير.
+            </span>
+          </button>
+          <input
+            ref={input}
+            type="file"
+            accept=".xlsx,.csv"
+            hidden
+            onChange={(e) => e.target.files?.[0] && upload.mutate(e.target.files[0])}
+          />
+          {upload.isError && (
+            <div className="mt-3">
+              <Notice>{problemMessage(upload.error)}</Notice>
+            </div>
+          )}
+        </Card>
+        <Card className="mt-4 divide-y divide-border-soft">
+          {list.items.map((b) => {
+            const s = (b.summary ?? {}) as Summary;
+            return (
+              <Link
+                key={b.public_id}
+                to={`/student-imports/${b.public_id}`}
+                className="flex items-center gap-3 px-4 py-3 hover:bg-surface-alt"
+              >
+                <span className="min-w-0 flex-1">
+                  <b className="block truncate text-sm text-text">{b.file_name}</b>
+                  <span className="text-xs text-text-muted">
+                    {b.uploaded_by} · {when(b.created_at)} · {count(s.rows ?? 0, N.row)} · إنشاء{" "}
+                    {num(s.create ?? 0)} · تحديث {num(s.update ?? 0)} · أخطاء {num(s.error ?? 0)}
+                  </span>
                 </span>
-              </span>
-              <StatusBadge status={b.status} label={IMPORT_STATUS[b.status] ?? b.status} />
-            </Link>
-          );
-        })}
-        {!list.items.length && <p className="px-4 py-4 text-sm text-text-muted">لا دفعات بعد.</p>}
-      </Card>
-      <Pager page={list.page} count={list.count} onPage={list.setPage} />
+                <StatusBadge status={b.status} label={IMPORT_STATUS[b.status] ?? b.status} />
+              </Link>
+            );
+          })}
+          {!list.items.length && <p className="px-4 py-4 text-sm text-text-muted">لا دفعات بعد.</p>}
+        </Card>
+        <Pager page={list.page} count={list.count} onPage={list.setPage} />
+      </WithSide>
     </PortalShell>
   );
 }

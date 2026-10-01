@@ -12,7 +12,8 @@ import { initials, num } from "../../lib/reports";
 import { STATUS_LABEL } from "../../lib/visitor";
 import { ALL } from "../../components/Pager";
 
-/** Boards: HeadRegistrarHome and RegistrarHome (phone); desktop derived — counters, action inbox, lists. */
+/** Boards: HeadRegistrarHome and RegistrarHome (phone), DesktopHeadRegistrar — the applications'
+ *  path as one bar, the action inbox, and (for the head) each registrar's load. */
 export function RegistrarHome() {
   const me = useMe();
   const client = useQueryClient();
@@ -25,6 +26,7 @@ export function RegistrarHome() {
             by_status: Record<string, number>;
             by_department: Record<string, number>;
             unassigned: number;
+            by_registrar?: Record<string, number>;
           }
         | undefined,
   });
@@ -66,6 +68,17 @@ export function RegistrarHome() {
         }),
       ) ?? null,
   });
+  // Registrars and their current load (board DesktopHeadRegistrar): the head's view only.
+  const registrars = useQuery({
+    queryKey: ["users", "registrars"],
+    enabled: head,
+    queryFn: async () =>
+      ok(
+        await api.GET("/api/v1/users", {
+          params: { query: { is_active: true, role: "registrar", page_size: 100 } },
+        }),
+      )?.results ?? [],
+  });
   const claim = useMutation({
     mutationFn: async (id: string) => {
       const { data, error } = await api.POST("/api/v1/applications/{public_id}/claim", {
@@ -76,6 +89,19 @@ export function RegistrarHome() {
     onSuccess: () => client.invalidateQueries({ queryKey: ["applications"] }),
   });
   const s = summary.data?.by_status ?? {};
+  // The applications' path as one bar (board DesktopHeadRegistrar), each stage linking to its list.
+  const PIPELINE = [
+    { key: "submitted", bar: "bg-primary-300" },
+    { key: "under_review", bar: "bg-primary" },
+    { key: "missing_documents", bar: "bg-warning" },
+    { key: "eligible", bar: "bg-primary-800" },
+    { key: "accepted", bar: "bg-success" },
+    { key: "rejected", bar: "bg-danger" },
+    { key: "waitlisted", bar: "bg-n300" },
+  ].map((p) => ({ ...p, n: s[p.key] ?? 0 }));
+  const pipelineTotal = PIPELINE.reduce((n, p) => n + p.n, 0);
+  const load = summary.data?.by_registrar ?? {};
+  const busiest = Math.max(1, ...Object.values(load));
   const accepted = s.accepted ?? 0;
   const inbox = [
     {
@@ -118,25 +144,38 @@ export function RegistrarHome() {
       title={head ? "لوحة القبول" : "القبول — أقسامي"}
       subtitle={`${me.data?.full_name_ar ?? ""} · ${head ? "مسؤول المسجلين" : "مسجل"}`}
     >
-      <div className="grid grid-cols-3 gap-2 lg:grid-cols-6">
-        {[
-          "submitted",
-          "under_review",
-          "missing_documents",
-          "accepted",
-          "rejected",
-          "waitlisted",
-        ].map((k) => (
-          <Link
-            key={k}
-            to={`/applications?status=${k}`}
-            className="rounded-2xl bg-surface p-3 text-center shadow-sm hover:bg-surface-alt"
+      <Card className="p-4">
+        <p className="text-sm font-semibold text-text">مسار الطلبات · {num(pipelineTotal)}</p>
+        {pipelineTotal > 0 && (
+          <div
+            className="mt-3 flex h-3 overflow-hidden rounded-full bg-surface-alt"
+            aria-hidden="true"
           >
-            <p className="text-xl font-bold text-text">{num(s[k] ?? 0)}</p>
-            <p className="text-[11px] text-text-muted">{STATUS_LABEL[k] ?? k}</p>
-          </Link>
-        ))}
-      </div>
+            {PIPELINE.filter((p) => p.n).map((p) => (
+              <span
+                key={p.key}
+                className={p.bar}
+                style={{ width: `${(100 * p.n) / pipelineTotal}%` }}
+              />
+            ))}
+          </div>
+        )}
+        <div className="mt-3 grid grid-cols-4 gap-1 sm:gap-2 lg:grid-cols-7">
+          {PIPELINE.map((p) => (
+            <Link
+              key={p.key}
+              to={`/applications?status=${p.key}`}
+              className="rounded-xl px-2 py-1.5 hover:bg-surface-alt"
+            >
+              <b className="block text-lg text-text">{num(p.n)}</b>
+              <span className="flex items-center gap-1 text-[11px] text-text-muted">
+                <span aria-hidden="true" className={`size-2 shrink-0 rounded-full ${p.bar}`} />
+                {STATUS_LABEL[p.key] ?? p.key}
+              </span>
+            </Link>
+          ))}
+        </div>
+      </Card>
       <div className="mt-6 lg:grid lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start lg:gap-6">
         <div className="space-y-4">
           <SectionLabel>يحتاج إجراءك</SectionLabel>
@@ -210,6 +249,46 @@ export function RegistrarHome() {
               </Link>
             ))}
           </Card>
+          {head && (registrars.data ?? []).length > 0 && (
+            <>
+              <div className="flex items-end justify-between">
+                <SectionLabel>المسجلون · الحمل الحالي</SectionLabel>
+                <Link to="/registrars" className="mb-2 text-sm font-semibold text-primary">
+                  إدارة
+                </Link>
+              </div>
+              <Card className="divide-y divide-border-soft text-sm">
+                {(registrars.data ?? []).map((u) => {
+                  const n = load[u.public_id] ?? 0;
+                  const depts = u.roles
+                    .filter((r) => r.role === "registrar" && r.department)
+                    .map((r) => r.department_name);
+                  return (
+                    <div key={u.public_id} className="flex items-center gap-3 px-4 py-2.5">
+                      <span className="grid size-8 shrink-0 place-items-center rounded-full bg-primary-soft text-xs font-semibold text-primary-700">
+                        {initials(u.full_name_ar)}
+                      </span>
+                      <span className="min-w-0 flex-1">
+                        <b className="block truncate text-text">{u.full_name_ar}</b>
+                        <span
+                          className={`text-xs ${depts.length ? "text-text-muted" : "text-warning-strong"}`}
+                        >
+                          {depts.join(" · ") || "بلا قسم"}
+                        </span>
+                      </span>
+                      <span className="h-1.5 w-16 overflow-hidden rounded-full bg-surface-alt">
+                        <span
+                          className="block h-full rounded-full bg-primary"
+                          style={{ width: `${(100 * n) / busiest}%` }}
+                        />
+                      </span>
+                      <b className="w-8 text-end">{num(n)}</b>
+                    </div>
+                  );
+                })}
+              </Card>
+            </>
+          )}
           {head && (
             <>
               <SectionLabel>الإدارة</SectionLabel>

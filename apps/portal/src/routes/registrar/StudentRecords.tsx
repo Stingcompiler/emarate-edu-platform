@@ -80,7 +80,61 @@ export function StudentRecords() {
           ))}
         </div>
       </FilterBar>
-      <Card className="mt-4 divide-y divide-border-soft">
+      {/* Large screens: a table (review 2026-09-29 PR 7, «سجل الطلاب بجدول»); phones keep rows. */}
+      <Card className="mt-4 hidden overflow-hidden lg:block">
+        <table className="w-full text-sm">
+          <thead className="bg-surface-alt text-xs text-text-muted">
+            <tr>
+              {["الطالب", "الرقم الجامعي", "البرنامج", "المستوى", "الحساب", "الحالة"].map((h) => (
+                <th key={h} scope="col" className="px-4 py-2 text-start font-medium">
+                  {h}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-border-soft">
+            {rows.map((r) => (
+              <tr key={r.public_id} className="hover:bg-surface-alt">
+                <th scope="row" className="px-4 py-2.5 text-start font-normal">
+                  <Link
+                    to={`/students/${r.public_id}`}
+                    className="flex items-center gap-3 font-semibold text-text hover:text-primary"
+                  >
+                    <span className="grid size-8 shrink-0 place-items-center rounded-full bg-primary-soft text-xs text-primary-700">
+                      {initials(r.full_name_ar)}
+                    </span>
+                    {r.full_name_ar}
+                  </Link>
+                </th>
+                <td className="px-4 py-2.5 text-text-muted">
+                  <bdi>{r.university_number}</bdi>
+                </td>
+                <td className="px-4 py-2.5 text-text-muted">{r.program_name}</td>
+                <td className="px-4 py-2.5">{num(r.level)}</td>
+                <td
+                  className={`px-4 py-2.5 text-xs ${r.has_account ? "text-success-strong" : "text-text-muted"}`}
+                >
+                  {r.has_account ? "مفعّل" : "لم يفعّل"}
+                </td>
+                <td className="px-4 py-2.5">
+                  <StatusBadge
+                    status={
+                      r.status === "active"
+                        ? "approved"
+                        : r.status === "suspended"
+                          ? "rejected"
+                          : "closed"
+                    }
+                    label={STUDENT_STATUS[r.status] ?? r.status}
+                  />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        {!rows.length && <p className="px-4 py-4 text-sm text-text-muted">لا نتائج.</p>}
+      </Card>
+      <Card className="mt-4 divide-y divide-border-soft lg:hidden">
         {rows.map((r) => (
           <Link
             key={r.public_id}
