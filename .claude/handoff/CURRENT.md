@@ -85,14 +85,21 @@
   above the phone's tab bar after save/send actions; it replaced inline success notes that said the same thing.
   motion.css gains `.motion-grow` (bars), `.motion-next` (grading's next submission), `.motion-leave` (decided
   approvals) and `.motion-flash` (exam monitor rows whose state changed). Nothing moves on the exam screen.
-- **PR `feat/plan-progress`:** `/api/v1/me/results` gains `plan` (`services.plan_progress`): per level, the plan's
+- **PR #67 `feat/plan-progress`: merged.** `/api/v1/me/results` gains `plan` (`services.plan_progress`): per level, the plan's
   hours (the program's active courses plus the department's shared ones, by `default_level`) and the hours earned
   (published passes in released terms, each course once); the total is the program's stated
   `total_credit_hours`, else the plan's sum; `null` with no courses. Results shows «التقدم في الخطة» in the side
   column (lg) and after the courses (phone), and «X ساعة مكتسبة من Y» under the cumulative GPA.
-- **Next:** the page editor save toast (`useToast`, now that #65 and #66 are in), then lecture drag reorder and
-  per-lecture view counts (new endpoints: matrix rows, audited writes, tests), then the missing visual checks
-  (Grade and ExamMonitor at 390 with an attempt, DepartmentReport side column at 1440, ImportDetail with a batch).
+- **PR #68 `feat/editor-toast`: merged.** The page editor's toast says what the save did. Pinned action bars carry
+  `data-dock`; while a note shows, the toast follows the highest docked bar near the bottom of the screen (every
+  frame), so it never covers buttons on phones. Settings puts the PATCH result in the cache at once.
+- **PR #69 `feat/lecture-order-views`:** `POST /api/v1/lectures/reorder` (the full list, each lecture once; `edit`
+  flag; audited `lecture.reorder`) and `LectureView` + `POST /api/v1/lectures/{id}/view` (an enrolled student
+  opening a published lecture; not audited, like `read_at`). `views_count` on lectures for the course's staff only.
+  Course page: «ترتيب المحاضرات» (`LectureOrder.tsx`: handle drag with pointer events, arrows, 44px targets on
+  phones). Lecture rows and the department lectures page show «فتحها N طالبًا».
+- **Next:** the missing visual checks: Grade and ExamMonitor at 390 with an attempt (the phone action panel),
+  the DepartmentReport side column at 1440, and ImportDetail with a batch (needs an e2e spec that uploads one).
 - **PR 6f `feat/department-faculty-news`**: the owner approved both 6c deferrals (2026-09-30); docs/03 is now v2.3.
   - `User.public_profile` plus `academic_title_ar/en`, set by the member at `PATCH /api/v1/me/public-profile` (audited
     `profile.public_update`), with a card in «الإعدادات».
