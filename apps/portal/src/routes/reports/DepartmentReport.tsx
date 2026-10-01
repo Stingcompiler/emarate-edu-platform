@@ -153,8 +153,11 @@ export function DepartmentReport() {
             />
           </div>
 
-          <div className="mt-6 ">
-            <section>
+          {/* From 1440 the chart and the comparison sit beside the table (board
+              DesktopDeptReports); narrower screens keep them in a row under it, where the
+              table has room for its columns. */}
+          <div className="mt-6 min-[1440px]:grid min-[1440px]:grid-cols-[minmax(0,1fr)_340px] min-[1440px]:items-start min-[1440px]:gap-6">
+            <section className="min-w-0">
               <SectionLabel>المواد — {r.term.name} · الأقل رفعًا أولًا</SectionLabel>
               <Card className="divide-y divide-border-soft">
                 <div className="hidden grid-cols-[88px_minmax(0,1.4fr)_minmax(0,1fr)_64px_80px_72px_72px_96px] gap-3 bg-surface-alt px-4 py-2 text-xs text-text-muted lg:grid">
@@ -212,7 +215,7 @@ export function DepartmentReport() {
                 )}
               </Card>
             </section>
-            <aside className="mt-6 grid gap-4 lg:grid-cols-3 lg:items-start">
+            <aside className="mt-6 grid gap-4 lg:grid-cols-3 lg:items-start min-[1440px]:sticky min-[1440px]:top-20 min-[1440px]:mt-0 min-[1440px]:flex min-[1440px]:flex-col min-[1440px]:items-stretch">
               <Card className="p-4">
                 <p className="mb-3 text-sm font-semibold text-text">
                   الرفع الأسبوعي — آخر 8 أسابيع

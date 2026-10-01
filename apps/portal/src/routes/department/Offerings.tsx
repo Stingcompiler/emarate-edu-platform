@@ -272,45 +272,49 @@ export function Offerings() {
                   </label>
                 )}
               </div>
-              <span className="text-xs text-text-muted xl:text-sm xl:text-text">
-                <span className="hidden xl:inline">{num(o.enrolled_count)}</span>
-                <span className="xl:hidden">{count(o.enrolled_count, N.student)}</span>
-              </span>
-              <span
-                className={`text-xs xl:text-sm ${s && s.lectures < s.planned / 2 ? "font-semibold text-danger-strong" : "text-text-muted xl:text-text"}`}
-              >
-                {s ? `${num(s.lectures)}/${num(s.planned)}` : "—"}
-                <span className="xl:hidden"> محاضرات</span>
-              </span>
-              <span className="flex items-center gap-1 xl:justify-end">
-                {manage && (
-                  <button
-                    type="button"
-                    aria-label={`تعديل ${o.course_detail.name_ar}`}
-                    aria-expanded={editing === o.id}
-                    onClick={() => setEditing(editing === o.id ? null : o.id)}
-                    className="grid size-9 place-items-center rounded-full text-text-muted hover:bg-surface-alt hover:text-primary"
-                  >
-                    <Pencil size={15} aria-hidden />
-                  </button>
-                )}
-                {canDelete && (
-                  <button
-                    type="button"
-                    aria-label={`حذف ${o.course_detail.name_ar}`}
-                    onClick={async () =>
-                      (await confirm({
-                        title: `حذف «${o.course_detail.name_ar}» من هذا الفصل؟`,
-                        body: `شعبة ${o.section}. لا تُحذف مادة عليها تسجيل طلاب — يرفضها النظام.`,
-                        confirm: "حذف المادة",
-                      })) && removeOffering.mutate({ id: o.id, course: o.course_detail.id })
-                    }
-                    className="grid size-9 place-items-center rounded-full text-text-muted hover:bg-surface-alt hover:text-danger-strong"
-                  >
-                    <Trash2 size={15} aria-hidden />
-                  </button>
-                )}
-              </span>
+              {/* Phones: students, lectures and actions share one row (compact cards,
+                  review 2026-09-29 PR 7); from xl they are the table's own cells. */}
+              <div className="flex items-center gap-3 xl:contents">
+                <span className="text-xs text-text-muted xl:text-sm xl:text-text">
+                  <span className="hidden xl:inline">{num(o.enrolled_count)}</span>
+                  <span className="xl:hidden">{count(o.enrolled_count, N.student)}</span>
+                </span>
+                <span
+                  className={`text-xs xl:text-sm ${s && s.lectures < s.planned / 2 ? "font-semibold text-danger-strong" : "text-text-muted xl:text-text"}`}
+                >
+                  {s ? `${num(s.lectures)}/${num(s.planned)}` : "—"}
+                  <span className="xl:hidden"> محاضرات</span>
+                </span>
+                <span className="ms-auto flex items-center gap-1 xl:ms-0 xl:justify-end">
+                  {manage && (
+                    <button
+                      type="button"
+                      aria-label={`تعديل ${o.course_detail.name_ar}`}
+                      aria-expanded={editing === o.id}
+                      onClick={() => setEditing(editing === o.id ? null : o.id)}
+                      className="grid size-9 place-items-center rounded-full text-text-muted hover:bg-surface-alt hover:text-primary"
+                    >
+                      <Pencil size={15} aria-hidden />
+                    </button>
+                  )}
+                  {canDelete && (
+                    <button
+                      type="button"
+                      aria-label={`حذف ${o.course_detail.name_ar}`}
+                      onClick={async () =>
+                        (await confirm({
+                          title: `حذف «${o.course_detail.name_ar}» من هذا الفصل؟`,
+                          body: `شعبة ${o.section}. لا تُحذف مادة عليها تسجيل طلاب — يرفضها النظام.`,
+                          confirm: "حذف المادة",
+                        })) && removeOffering.mutate({ id: o.id, course: o.course_detail.id })
+                      }
+                      className="grid size-9 place-items-center rounded-full text-text-muted hover:bg-surface-alt hover:text-danger-strong"
+                    >
+                      <Trash2 size={15} aria-hidden />
+                    </button>
+                  )}
+                </span>
+              </div>
               {editing === o.id && (
                 <EditOffering
                   offering={o}

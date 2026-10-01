@@ -43,7 +43,16 @@
   - Exam monitor: «لم يبدأ» from the new `students_count`/`started_count` (retrieve only, staff only), a stacked
     bar, a phone action panel, and an empty state.
   - Course: staff see a «منشورة» badge, plus «إعلان» and «جلسة بث» buttons.
-- **Next:** 7c department, 7d admissions, 7e results/affairs/HR, 7f site/admin, then portal motion.
+- **PR 7b #61: merged.**
+- **PR 7c `feat/department-large-screens`** (additions only, docs/02 D20):
+  - Lectures: `Kpi` row, search and course filter; `WithSide` with 8-week `Bars` and per-course published share. Cards
+    use 2 columns only from 2xl.
+  - Reports: chart and comparison beside the table from 1440 (flex column); below 1440 unchanged.
+  - Audit: entries are buttons; `AuditDetail` (target, type, id, changed fields before/after) in a side card on lg,
+    inline under the entry on phones.
+  - Courses: phone cards compact (a `xl:contents` row for students, lectures and actions).
+  - The new-course form deliberately stays where it is (moving it would change a flow).
+- **Next:** 7d admissions, 7e results/affairs/HR, 7f site/admin, then portal motion.
 - **PR 6f `feat/department-faculty-news`**: the owner approved both 6c deferrals (2026-09-30); docs/03 is now v2.3.
   - `User.public_profile` plus `academic_title_ar/en`, set by the member at `PATCH /api/v1/me/public-profile` (audited
     `profile.public_update`), with a card in «الإعدادات».
