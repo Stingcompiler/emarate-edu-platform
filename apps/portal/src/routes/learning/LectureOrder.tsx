@@ -84,7 +84,7 @@ export function LectureOrder({
             <button
               type="button"
               aria-label={`اسحب «${r.title_ar}»`}
-              className="grid size-9 shrink-0 cursor-grab touch-none place-items-center rounded-md text-text-muted hover:bg-surface-alt active:cursor-grabbing"
+              className="grid size-11 shrink-0 cursor-grab lg:size-9 touch-none place-items-center rounded-md text-text-muted hover:bg-surface-alt active:cursor-grabbing"
               onPointerDown={(e) => onDown(e, r.public_id)}
               onPointerMove={onMove}
               onPointerUp={onUp}
@@ -95,7 +95,7 @@ export function LectureOrder({
             <span className="w-7 text-center font-mono text-sm text-text-muted">
               {String(i + 1).padStart(2, "0")}
             </span>
-            <span className="min-w-0 flex-1 truncate text-sm font-semibold text-text">
+            <span className="min-w-0 flex-1 text-sm font-semibold leading-snug text-text line-clamp-2 lg:truncate">
               {r.title_ar}
               {!r.is_published && <span className="font-normal text-text-muted"> · مسودة</span>}
             </span>
@@ -104,7 +104,7 @@ export function LectureOrder({
               aria-label={`«${r.title_ar}» أعلى`}
               disabled={i === 0}
               onClick={() => move(i, i - 1)}
-              className="grid size-9 place-items-center rounded-md text-text-muted hover:bg-surface-alt disabled:opacity-30"
+              className="grid size-11 place-items-center rounded-md lg:size-9 text-text-muted hover:bg-surface-alt disabled:opacity-30"
             >
               <ArrowUp size={16} aria-hidden />
             </button>
@@ -113,7 +113,7 @@ export function LectureOrder({
               aria-label={`«${r.title_ar}» أسفل`}
               disabled={i === rows.length - 1}
               onClick={() => move(i, i + 1)}
-              className="grid size-9 place-items-center rounded-md text-text-muted hover:bg-surface-alt disabled:opacity-30"
+              className="grid size-11 place-items-center rounded-md lg:size-9 text-text-muted hover:bg-surface-alt disabled:opacity-30"
             >
               <ArrowDown size={16} aria-hidden />
             </button>
