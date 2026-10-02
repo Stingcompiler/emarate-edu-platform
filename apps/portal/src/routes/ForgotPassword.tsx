@@ -11,6 +11,7 @@ import {
   PasswordField,
 } from "../components/ui";
 import { api } from "../lib/api";
+import { OtpInput } from "../components/OtpInput";
 
 /** Boards: AuthForgot → AuthReset (phone); desktop uses the centred auth card. */
 export function ForgotPassword() {
@@ -74,15 +75,11 @@ export function ForgotPassword() {
           />
           {sent && (
             <>
-              <Field
+              <OtpInput
                 label="الرمز"
-                inputMode="numeric"
-                autoComplete="one-time-code"
-                dir="ltr"
-                className="text-center tracking-[0.5em]"
-                maxLength={6}
+                hint="6 أرقام وصلت إلى بريدك"
                 value={code}
-                onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))}
+                onChange={setCode}
                 required
                 autoFocus
               />

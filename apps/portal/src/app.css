@@ -3,3 +3,18 @@
 
 /* Tailwind scans these packages too, so shared components get their classes. */
 @source "../../../packages/ui/src";
+
+/* The blinking caret in the active code box (OtpInput); still under «reduce motion». */
+@keyframes otp-blink {
+  50% {
+    opacity: 0;
+  }
+}
+.otp-caret {
+  animation: otp-blink 1s steps(1) infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .otp-caret {
+    animation: none;
+  }
+}
