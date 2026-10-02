@@ -295,12 +295,14 @@ export function Structure() {
             </Button>
           </Card>
         </aside>
-        <section>
+        {/* Its layout follows its own width (container query), not the screen's: beside the
+            320px column at 1024–1279 it is narrow even on a laptop (owner, 2026-10-02). */}
+        <section className="@container min-w-0">
           <SectionLabel>
             قسم {dept?.name_ar ?? ""} — البرامج · {num(deptPrograms.length)}
           </SectionLabel>
           <Card className="divide-y divide-border-soft">
-            <div className="hidden grid-cols-[minmax(0,1fr)_88px_120px_120px_56px] gap-3 bg-surface-alt px-4 py-2 text-xs text-text-muted md:grid">
+            <div className="hidden grid-cols-[minmax(0,1fr)_88px_120px_120px_56px] gap-3 bg-surface-alt px-4 py-2 text-xs text-text-muted @2xl:grid">
               <span>البرنامج</span>
               <span>الدرجة</span>
               <span>المدة</span>
@@ -312,7 +314,7 @@ export function Structure() {
                 key={p.id}
                 // Phones: a card — name and status on one line, the facts on the next, then the
                 // hours; from md the five columns of the header above.
-                className="grid grid-cols-[minmax(0,1fr)_auto] gap-x-3 gap-y-1.5 px-4 py-3 text-sm md:grid-cols-[minmax(0,1fr)_88px_120px_120px_56px] md:items-center md:gap-3"
+                className="grid grid-cols-[minmax(0,1fr)_auto] gap-x-3 gap-y-1.5 px-4 py-3 text-sm @2xl:grid-cols-[minmax(0,1fr)_88px_120px_120px_56px] @2xl:items-center @2xl:gap-3"
               >
                 <span className="min-w-0">
                   <bdi className="block font-mono text-xs text-text-muted">{p.code}</bdi>
@@ -326,14 +328,14 @@ export function Structure() {
                     {editing === p.id ? "إغلاق صفحة الموقع" : "صفحة الموقع: الوصف والرسوم"}
                   </button>
                 </span>
-                <span className="hidden text-text-muted md:block">
+                <span className="hidden text-text-muted @2xl:block">
                   {DEGREE[p.degree] ?? p.degree}
                 </span>
-                <span className="col-span-2 text-xs text-text-muted md:col-span-1 md:text-sm">
-                  <span className="md:hidden">{DEGREE[p.degree] ?? p.degree} · </span>
+                <span className="col-span-2 text-xs text-text-muted @2xl:col-span-1 @2xl:text-sm">
+                  <span className="@2xl:hidden">{DEGREE[p.degree] ?? p.degree} · </span>
                   {count(p.duration_terms, N.term)} · {num(p.levels_count)} مستويات
                 </span>
-                <span className="col-span-2 md:col-span-1">
+                <span className="col-span-2 @2xl:col-span-1">
                   <HoursInput
                     program={p.id}
                     name={p.name_ar}
@@ -342,7 +344,7 @@ export function Structure() {
                   />
                 </span>
                 {/* Its own size, beside the name on phones (it used to stretch into a bar). */}
-                <span className="col-start-2 row-start-1 self-start justify-self-end md:col-start-auto md:row-start-auto md:self-center md:justify-self-start">
+                <span className="col-start-2 row-start-1 self-start justify-self-end @2xl:col-start-auto @2xl:row-start-auto @2xl:self-center @2xl:justify-self-start">
                   <StatusBadge
                     status={p.is_active ? "approved" : "closed"}
                     label={p.is_active ? "نشط" : "موقوف"}
@@ -365,7 +367,7 @@ export function Structure() {
               />
             ))}
           {dept && (
-            <Card className="mt-3 grid gap-2 p-3 sm:grid-cols-[90px_minmax(0,1fr)_minmax(0,1fr)]">
+            <Card className="mt-3 grid gap-2 p-3 @lg:grid-cols-[90px_minmax(0,1fr)_minmax(0,1fr)]">
               <input
                 dir="ltr"
                 value={pForm.code}
@@ -389,7 +391,7 @@ export function Structure() {
                 aria-label="الاسم بالإنجليزية"
                 className={input}
               />
-              <div className="flex flex-wrap items-center gap-2 sm:col-span-3">
+              <div className="flex flex-wrap items-center gap-2 @lg:col-span-3">
                 {Object.entries(DEGREE).map(([k, l]) => (
                   <Chip
                     key={k}
@@ -507,7 +509,7 @@ function ProgramPageForm({ program, onDone }: { program: Schemas["Program"]; onD
             ما يُترك فارغًا لا يظهر في الموقع. تظهر التعديلات بعد إعادة بناء الموقع.
           </p>
         </div>
-        <div className="grid lg:grid-cols-2">
+        <div className="grid @2xl:grid-cols-2">
           <TextArea
             label="الوصف"
             value={form.description_ar}
@@ -608,7 +610,7 @@ function HoursInput({
   };
   return (
     <span className="flex items-center gap-1">
-      <span className="text-xs text-text-muted md:hidden">ساعات للتخرج</span>
+      <span className="text-xs text-text-muted @2xl:hidden">ساعات للتخرج</span>
       <input
         type="number"
         min={1}
