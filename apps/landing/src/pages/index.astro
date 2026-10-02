@@ -10,6 +10,8 @@ const target = new URL("/ar/", Astro.site).toString();
     <meta charset="utf-8" />
     <meta http-equiv="refresh" content="0; url=/ar/" />
     <link rel="canonical" href={target} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    {import.meta.env.SITE_NOINDEX === "1" && <meta name="robots" content="noindex, nofollow" />}
     <title>كلية الإمارات للعلوم والتقنية</title>
   </head>
   <body>
