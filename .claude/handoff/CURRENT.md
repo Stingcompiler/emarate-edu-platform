@@ -1,6 +1,44 @@
-# Handoff — public-site review, large screens, motion and deferred items: all merged — 2026-10-01
+# Handoff — visual review (phone + large screens + site) and the demo server — 2026-10-02
 
-## Now: the landing institution review (docs/qa/landing-institution-review-2026-10.md §6)
+## Now: the owner's full visual review («بعض الصفحات مكسورة على الهاتف وبعضها رديء على الشاشات الكبيرة»)
+- **Method.** Temporary Playwright crawlers (deleted after use) signed in as every demo account,
+  visited every linked portal page at 390 and 1440, and crawled the public site the same way.
+  - Screenshots went to `.scratch/` (untracked). Contact sheets were made with Pillow from `backend/.venv`.
+  - Overflow is checked against `scrollWidth`. Chrome on Android widens the layout viewport instead of
+    scrolling, so `innerWidth` alone hides the fault.
+  - A heading-gap check flags an `h2` less than 10px below the content above it.
+  - No horizontal overflow was found anywhere. All faults were layout and polish.
+- **Merged:**
+  - #88: e2e ports via `E2E_API_PORT`, `E2E_PORTAL_PORT`, `E2E_SITE_PORT`.
+    - Port 8001 is held by another local project. Run `E2E_API_PORT=8011 E2E_PORTAL_PORT=5184 E2E_SITE_PORT=4332 pnpm e2e`.
+  - #89, batch 1:
+    - the assignment 404 toast (`okOrNone`);
+    - the registrar and application phone squeezes;
+    - the empty result-batch preview;
+    - `fileName()` bidi.
+- **Batch 2, `fix/visual-batch2`** (one PR: phone, large screens and the site), with these patterns:
+  - `SectionLabel` has `first:mt-0`. A column whose first child is a heading needs `mt-6 lg:mt-0` when the
+    columns stack on phones.
+  - Odd counts:
+    - `[&>:last-child:nth-child(odd)]:col-span-2`;
+    - news uses `[&>a:first-child:nth-last-child(odd)]:col-span-2` (the newest leads).
+  - `lib/media.ts isWide()`: students and teachers open the first row in the side panel on lg (no empty hint).
+  - Publish buttons: `flex-1 lg:flex-none lg:px-8` inside a `lg:justify-end` row.
+  - Site `Blocks` images are capped at `max-h-[min(55vh,32rem)]`, centred.
+  - The leadership page puts the heads list inside the page's own «رؤساء الأقسام» section, except on English
+    fallback pages.
+- **Not done (owner's call or low value):**
+  - the audit log as a table;
+  - the teacher profile layout on xl;
+  - the calendar side column as a card.
+- **Server (needs SSH).** The owner must run `ssh-add --apple-use-keychain ~/.ssh/ovh_vps_ed25519`; the key has a
+  passphrase, never handle it. Then:
+  1. Check logs: `journalctl -u ecst-api -u ecst-worker`.
+  2. Add `SITE_URL=https://ecst.stingdev.pro` and `SITE_NOINDEX=1` to `/opt/ecst/bin/build-site`.
+  3. Deploy the portal build and refresh the site source, then rebuild it (see memory `ecst-vps-deployment`).
+
+
+## Earlier: the landing institution review (docs/qa/landing-institution-review-2026-10.md §6)
 - **Done and merged:**
   - full review PRs 1–5b, #45–#51;
   - the review plan, #52;
