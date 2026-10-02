@@ -27,15 +27,16 @@
   - Site `Blocks` images are capped at `max-h-[min(55vh,32rem)]`, centred.
   - The leadership page puts the heads list inside the page's own «رؤساء الأقسام» section, except on English
     fallback pages.
-- **Not done (owner's call or low value):**
-  - the audit log as a table;
-  - the teacher profile layout on xl;
-  - the calendar side column as a card.
-- **Server (needs SSH).** The owner must run `ssh-add --apple-use-keychain ~/.ssh/ovh_vps_ed25519`; the key has a
-  passphrase, never handle it. Then:
-  1. Check logs: `journalctl -u ecst-api -u ecst-worker`.
-  2. Add `SITE_URL=https://ecst.stingdev.pro` and `SITE_NOINDEX=1` to `/opt/ecst/bin/build-site`.
-  3. Deploy the portal build and refresh the site source, then rebuild it (see memory `ecst-vps-deployment`).
+- **Batch 3 #91 (merged and deployed):**
+  - the audit log is a table on lg, with the newest entry open beside it;
+  - the teacher profile puts indicators and courses side by side when there is no HR column;
+  - the calendar's upcoming events are a card with date tiles.
+- **Server: deployed through #91 (2026-10-02).**
+  - `build-site` exports `SITE_URL` and `SITE_NOINDEX=1`, so robots.txt has Disallow and the pages carry noindex.
+  - The logs are clean: no API 5xx.
+  - Redis restarts during unattended-upgrades. The worker reconnects by itself.
+  - The SSH key has a passphrase. When `ssh-add -l` is empty, the owner runs
+    `ssh-add --apple-use-keychain ~/.ssh/ovh_vps_ed25519`.
 
 
 ## Earlier: the landing institution review (docs/qa/landing-institution-review-2026-10.md §6)
