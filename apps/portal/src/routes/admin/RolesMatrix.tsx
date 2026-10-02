@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Link } from "react-router";
 
 import { PortalShell } from "../../components/PortalShell";
-import { Card, Chip, Notice, ScrollRegion, WithSide } from "../../components/ui";
+import { Card, Notice, ScrollRegion, WithSide } from "../../components/ui";
 import { api, ok } from "../../lib/api";
 import { downloadCsv, num } from "../../lib/reports";
 
@@ -145,18 +145,22 @@ export function Roles() {
         }
       >
         {matrix.isError && <Notice>تعذّر تحميل المصفوفة.</Notice>}
-        {/* Phones: no sideways matrix — pick a role, its card and permissions follow. */}
-        <div
-          role="group"
-          aria-label="اختر دورًا"
-          className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 lg:hidden"
-        >
-          {roles.map((r) => (
-            <Chip key={r.key} active={r.key === role?.key} onClick={() => setPicked(r.key)}>
-              {r.label}
-            </Chip>
-          ))}
-        </div>
+        {/* Phones: no sideways matrix — pick a role (a select: 14 chips ran off the screen),
+            its card and permissions follow. */}
+        <label className="block lg:hidden">
+          <span className="block px-1 text-xs text-text-muted">الدور</span>
+          <select
+            value={role?.key ?? ""}
+            onChange={(e) => setPicked(e.target.value)}
+            className="mt-1 block min-h-11 w-full rounded-xl border border-border bg-surface px-3 text-sm font-semibold"
+          >
+            {roles.map((r) => (
+              <option key={r.key} value={r.key}>
+                {r.label} · {num(r.users)}
+              </option>
+            ))}
+          </select>
+        </label>
         <Card className="hidden overflow-hidden lg:block">
           <ScrollRegion label="مصفوفة الصلاحيات">
             <table className="w-full min-w-[720px] text-xs">

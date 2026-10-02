@@ -133,8 +133,10 @@ export function Compose() {
               />
             </Card>
 
-            <SectionLabel>القنوات والفئة</SectionLabel>
-            <div className="flex flex-wrap gap-2">
+            {/* Two labelled groups: where it is delivered, and what kind it is (they ran
+                together in one wrapping row on phones). */}
+            <SectionLabel>القنوات</SectionLabel>
+            <div className="flex flex-wrap gap-2" role="group" aria-label="القنوات">
               <Chip active disabled title="كل إشعار يصل إلى صندوق الإشعارات">
                 داخل التطبيق
               </Chip>
@@ -144,7 +146,9 @@ export function Compose() {
               <Chip active={email} onClick={() => setEmail(!email)}>
                 بريد
               </Chip>
-              <span className="mx-1 w-px self-stretch bg-border-soft" aria-hidden />
+            </div>
+            <SectionLabel>الفئة</SectionLabel>
+            <div className="flex flex-wrap gap-2" role="group" aria-label="الفئة">
               {CATEGORIES.map((c) => (
                 <Chip key={c.key} active={category === c.key} onClick={() => setCategory(c.key)}>
                   {c.label}

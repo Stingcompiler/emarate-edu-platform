@@ -13,6 +13,7 @@ import {
   SectionLabel,
   problemMessage,
 } from "../../components/ui";
+import { isWide } from "../../lib/media";
 import { api, ok } from "../../lib/api";
 import { useMe } from "../../lib/auth";
 import { useCurrentTerm, useDepartment, useOfferings } from "../../lib/department";
@@ -58,7 +59,10 @@ export function Members() {
         : m.kind === filter,
   );
   const metric = new Map((metrics.data?.rows ?? []).map((r) => [r.public_id, r]));
-  const selected = (members.data ?? []).find((m) => m.user.public_id === picked);
+  // Large screens open the first member in the side panel rather than leaving it empty.
+  const selected =
+    (members.data ?? []).find((m) => m.user.public_id === picked) ??
+    (isWide() ? rows[0] : undefined);
   const remove = useMutation({
     mutationFn: async (membership: number) => {
       const { error, response } = await api.DELETE(
@@ -106,14 +110,15 @@ export function Members() {
                 key={m.id}
                 type="button"
                 onClick={() => setPicked(m.user.public_id)}
-                className={`flex w-full items-center gap-3 px-4 py-3 text-start hover:bg-surface-alt ${picked === m.user.public_id ? "bg-primary-soft/40" : ""}`}
+                className={`flex w-full items-center gap-3 px-4 py-3 text-start hover:bg-surface-alt ${selected?.user.public_id === m.user.public_id ? "bg-primary-soft/40" : ""}`}
               >
                 <span className="grid size-9 shrink-0 place-items-center rounded-full bg-primary-soft text-xs font-semibold text-primary-700">
                   {initials(m.user.full_name_ar)}
                 </span>
                 <span className="min-w-0 flex-1">
                   <b className="block truncate text-sm text-text">{m.user.full_name_ar}</b>
-                  <span className="block truncate text-xs text-text-muted">
+                  {/* Course codes wrap on phones instead of being cut after the first one. */}
+                  <span className="block text-xs text-text-muted sm:truncate">
                     {m.kind === "ta" ? "معيد" : "أستاذ"} ·{" "}
                     {courses.map((o) => o.course_detail.code).join(" · ") || "بلا مواد"}
                   </span>

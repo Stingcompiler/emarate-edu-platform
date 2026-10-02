@@ -55,6 +55,17 @@ const siblings = section
   : LEGAL.includes(path)
     ? all.filter((p) => LEGAL.includes(p.path))
     : [];
+// When the page has its own «رؤساء الأقسام» section, the list goes inside it (at the end of
+// that section) instead of under a second heading of the same name at the end of the page.
+const HEADS = ["رؤساء الأقسام", "Heads of department"];
+// (Not on an English page showing the Arabic text: the split would repeat its Arabic note.)
+const fallback = lang === "en" && isArabic(JSON.stringify(page.blocks));
+const at =
+  heads.length && !fallback
+    ? page.blocks.findIndex((b) => b.type === "heading" && HEADS.includes((b.text ?? "").trim()))
+    : -1;
+const next = at < 0 ? -1 : page.blocks.findIndex((b, i) => i > at && b.type === "heading");
+const cut = at < 0 ? page.blocks.length : next < 0 ? page.blocks.length : next;
 const sideTitle = crumb ? pick(lang, crumb[0], crumb[1]) : lang === "ar" ? "السياسات" : "Policies";
 const more = await related(
   lang,
@@ -76,14 +87,16 @@ const more = await related(
   <WithAside>
     <article class="max-w-3xl">
       <ArabicOnly lang={lang} when={isArabic(JSON.stringify(page.blocks))}>
-        <Blocks blocks={page.blocks} layout={page.image_layout} />
+        <Blocks blocks={page.blocks.slice(0, cut)} layout={page.image_layout} />
       </ArabicOnly>
       {priced.length > 0 && <FeesTable lang={lang} programs={priced} />}
       {heads.length > 0 && (
-        <section class="mt-8">
-          <h2 class="font-display text-xl font-bold">
-            {lang === "ar" ? "رؤساء الأقسام" : "Heads of department"}
-          </h2>
+        <section class={at < 0 ? "mt-8" : "mt-4"}>
+          {at < 0 && (
+            <h2 class="font-display text-xl font-bold">
+              {lang === "ar" ? "رؤساء الأقسام" : "Heads of department"}
+            </h2>
+          )}
           <ul class="mt-4 grid gap-3 sm:grid-cols-2">
             {heads.map((d) => (
               <li class="rounded-2xl border border-border-soft bg-surface p-4">
@@ -98,6 +111,13 @@ const more = await related(
             ))}
           </ul>
         </section>
+      )}
+      {cut < page.blocks.length && (
+        <div class="mt-4">
+          <ArabicOnly lang={lang} when={isArabic(JSON.stringify(page.blocks))}>
+            <Blocks blocks={page.blocks.slice(cut)} layout={page.image_layout} />
+          </ArabicOnly>
+        </div>
       )}
     </article>
     <Fragment slot="aside">

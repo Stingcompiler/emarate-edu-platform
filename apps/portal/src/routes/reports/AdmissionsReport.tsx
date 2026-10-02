@@ -90,7 +90,7 @@ export function AdmissionsReport() {
       </div>
       {r && (
         <>
-          <div className="mt-4 grid grid-cols-2 gap-2 lg:grid-cols-5">
+          <div className="mt-4 grid grid-cols-2 gap-2 lg:grid-cols-5 max-lg:[&>:last-child:nth-child(odd)]:col-span-2">
             <Kpi
               value={r.total ?? "—"}
               label="الطلبات"

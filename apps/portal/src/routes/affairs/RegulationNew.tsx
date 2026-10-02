@@ -146,6 +146,7 @@ export function RegulationNew() {
           />
           <TextArea
             label="النص أو ملخص للطالب"
+            rows={10}
             value={body}
             onChange={(e) => setBody(e.target.value)}
           />

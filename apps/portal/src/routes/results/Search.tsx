@@ -77,11 +77,11 @@ export function ResultSearch() {
       {!submitted && (
         // Before a search, explain what the page does instead of an empty wide screen.
         <div className="mt-5 grid gap-3 lg:grid-cols-3">
-          <SideNote title="١ ابحث">
+          <SideNote title="1 · ابحث">
             بالرقم الجامعي أو باسم الطالب؛ تظهر كل نتائجه المعتمدة.
           </SideNote>
-          <SideNote title="٢ اختر النتيجة">تظهر درجتها وإصدارها وحالة نشرها.</SideNote>
-          <SideNote title="٣ اطلب التعديل">
+          <SideNote title="2 · اختر النتيجة">تظهر درجتها وإصدارها وحالة نشرها.</SideNote>
+          <SideNote title="3 · اطلب التعديل">
             بالقيمة الجديدة والسبب؛ لا تتغير قبل موافقة أمين الشؤون العلمية.
           </SideNote>
         </div>

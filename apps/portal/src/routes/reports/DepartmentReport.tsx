@@ -175,7 +175,9 @@ export function DepartmentReport() {
                     key={c.public_id}
                     className="grid grid-cols-[minmax(0,1fr)_auto] gap-x-3 gap-y-0.5 px-4 py-3 text-sm lg:grid-cols-[88px_minmax(0,1.4fr)_minmax(0,1fr)_64px_80px_72px_72px_96px] lg:items-center"
                   >
-                    <bdi className="font-mono text-xs text-text-muted">{c.code}</bdi>
+                    <bdi className="col-start-1 row-start-1 font-mono text-xs text-text-muted lg:col-start-auto lg:row-start-auto">
+                      {c.code}
+                    </bdi>
                     <span className="col-start-1 font-semibold text-text lg:col-start-auto">
                       {c.name}{" "}
                       <span className="text-xs font-normal text-text-muted">· م{num(c.level)}</span>
@@ -185,10 +187,24 @@ export function DepartmentReport() {
                     >
                       {c.teachers.join("، ") || "بلا أستاذ"}
                     </span>
-                    <span className="col-start-1 text-xs text-text-muted lg:col-start-auto lg:text-sm lg:text-text">
-                      <span className="lg:hidden">
-                        {count(c.students, N.student)} · {num(c.lectures)}/{num(c.planned)} محاضرات
-                        · تسليم {pct(c.submission_percent)} · غير مصحح {num(c.ungraded)}
+                    <span className="col-span-2 col-start-1 text-xs text-text-muted lg:col-span-1 lg:col-start-auto lg:text-sm lg:text-text">
+                      {/* Phones: the table's figures as separate items, flagged like the
+                          columns (one long grey sentence read as a collapsed table). */}
+                      <span className="mt-1 flex flex-wrap gap-x-3 gap-y-0.5 lg:hidden">
+                        <span>{count(c.students, N.student)}</span>
+                        <span
+                          className={
+                            c.lectures < c.planned / 2 ? "font-semibold text-danger-strong" : ""
+                          }
+                        >
+                          {num(c.lectures)}/{num(c.planned)} محاضرات
+                        </span>
+                        <span>تسليم {pct(c.submission_percent)}</span>
+                        <span
+                          className={c.ungraded > 10 ? "font-semibold text-warning-strong" : ""}
+                        >
+                          غير مصحح {num(c.ungraded)}
+                        </span>
                       </span>
                       <span className="hidden lg:inline">{num(c.students)}</span>
                     </span>
@@ -203,7 +219,7 @@ export function DepartmentReport() {
                     >
                       {num(c.ungraded)}
                     </span>
-                    <span className="row-start-1 text-xs text-text-muted lg:row-start-auto">
+                    <span className="col-start-2 row-start-1 text-end text-xs text-text-muted lg:col-start-auto lg:row-start-auto lg:text-start">
                       {c.last_upload ? when(c.last_upload) : "—"}
                     </span>
                   </div>

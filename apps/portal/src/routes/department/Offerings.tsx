@@ -175,7 +175,7 @@ export function Offerings() {
           aria-label="بحث في المواد"
           className="min-h-10 w-full rounded-full border border-border-soft bg-surface px-4 text-sm sm:max-w-sm sm:flex-1"
         />
-        <div className="-mx-4 flex gap-2 overflow-x-auto px-4 sm:mx-0 sm:px-0">
+        <div className="flex flex-wrap gap-2">
           {(Object.keys(FILTERS) as (keyof typeof FILTERS)[]).map((k) => (
             <Chip key={k} active={filter === k} onClick={() => setFilter(k)}>
               {FILTERS[k].label} {num(rows.filter(FILTERS[k].test).length)}
@@ -540,7 +540,7 @@ function NewOffering({
   });
   const input = "min-h-10 rounded-lg border border-border bg-surface px-3 text-sm";
   return (
-    <section id="new-offering">
+    <section id="new-offering" className="mt-6">
       <SectionLabel>مادة جديدة هذا الفصل</SectionLabel>
       <Card className="grid gap-2 p-4 sm:grid-cols-[110px_minmax(0,1fr)_minmax(0,1fr)_90px_90px_70px_auto]">
         <input

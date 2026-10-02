@@ -49,13 +49,15 @@ for (const b of blocks) {
     ) : b.type === "html" ? (
       <div set:html={b.html} />
     ) : b.type === "image" && b.url ? (
+      // Capped in height and centred: a portrait (the dean's photo) at the column's full
+      // width stood taller than the screen; a landscape picture still fills the column.
       <img
         data-reveal="image"
         src={b.url}
         alt={b.alt ?? ""}
         loading="lazy"
         decoding="async"
-        class="w-full rounded-2xl"
+        class="mx-auto block h-auto max-h-[min(55vh,32rem)] w-auto max-w-full rounded-2xl"
       />
     ) : b.type === "cta" && b.url ? (
       <a

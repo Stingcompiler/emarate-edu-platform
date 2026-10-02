@@ -333,7 +333,7 @@ export function EventEditor() {
             {missing.length > 0 && (
               <p className="mt-3 text-xs text-text-muted">للنشر أكمل: {missing.join("، ")}.</p>
             )}
-            <div className="mt-4 flex flex-wrap gap-2">
+            <div className="mt-4 flex flex-wrap gap-2 lg:justify-end">
               <Button
                 variant="secondary"
                 onClick={() => save.mutate("draft")}
@@ -342,7 +342,7 @@ export function EventEditor() {
                 حفظ مسودة
               </Button>
               <Button
-                className="flex-1"
+                className="flex-1 lg:flex-none lg:px-8"
                 onClick={() => save.mutate("published")}
                 disabled={missing.length > 0 || endsBeforeStart || save.isPending}
               >
