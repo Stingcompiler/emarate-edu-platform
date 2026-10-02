@@ -3,7 +3,7 @@ import { expect, test } from "@playwright/test";
 
 // The public site (docs/02 §6): every page reachable from /ar/ and /en/ loads, links nowhere
 // broken, fits the screen, is accessible (WCAG AA) and carries its SEO basics.
-const SITE = "http://localhost:4322";
+const SITE = process.env.E2E_SITE_URL ?? "http://localhost:4322";
 
 test("every public page loads, fits, is accessible and has its SEO basics", async ({
   page,
