@@ -11,8 +11,12 @@ from .env import env
 DATABASES = {
     "default": {**DATABASES["default"], "NAME": env("E2E_DB", str(BASE_DIR / "e2e.sqlite3"))}
 }
-CSRF_TRUSTED_ORIGINS = ["http://localhost:5174", "http://127.0.0.1:5174"]
-PUBLIC_SITE_ORIGINS = ["http://localhost:4322", "http://127.0.0.1:4322"]
+# Ports follow e2e/playwright.config.ts (E2E_*_PORT), so a busy default can move.
+_API = env("E2E_API_PORT", "8001")
+_PORTAL = env("E2E_PORTAL_PORT", "5174")
+_SITE = env("E2E_SITE_PORT", "4322")
+CSRF_TRUSTED_ORIGINS = [f"http://localhost:{_PORTAL}", f"http://127.0.0.1:{_PORTAL}"]
+PUBLIC_SITE_ORIGINS = [f"http://localhost:{_SITE}", f"http://127.0.0.1:{_SITE}"]
 MAILERS = {
     "default": {
         "BACKEND": "core.mail.DevEmailBackend",
@@ -34,7 +38,7 @@ STORAGES = {
         **STORAGES["public"],
         "OPTIONS": {
             **STORAGES["public"]["OPTIONS"],
-            "base_url": "http://127.0.0.1:8001/media/public/",
+            "base_url": f"http://127.0.0.1:{_API}/media/public/",
         },
     },
 }
