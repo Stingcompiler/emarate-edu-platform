@@ -248,7 +248,8 @@ const lead = L(
       </section>
 
       {general.length > 0 && (
-        <section>
+        // Stays in view beside the long programme list on wide screens.
+        <section class="lg:sticky lg:top-24 lg:self-start">
           <h2 class="font-display text-xl font-bold">
             {L("المستندات العامة", "General documents")}
           </h2>

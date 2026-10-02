@@ -205,7 +205,9 @@ export function AnnouncementNew() {
               <Notice>{problemMessage(save.error)}</Notice>
             </div>
           )}
-          <div className="mt-4 flex gap-2">
+          {/* Wide screens: the actions at the end, sized to their text (a stretched button
+              across 760px read as a banner). */}
+          <div className="mt-4 flex gap-2 lg:justify-end">
             <Button
               variant="secondary"
               disabled={!option || !title || save.isPending}
@@ -214,7 +216,7 @@ export function AnnouncementNew() {
               حفظ مسودة
             </Button>
             <Button
-              className="flex-1"
+              className="flex-1 lg:flex-none lg:px-8"
               disabled={!option || !title || !body || save.isPending}
               onClick={() => save.mutate(true)}
             >

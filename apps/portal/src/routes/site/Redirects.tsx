@@ -1,9 +1,17 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Trash2 } from "lucide-react";
+import { Route, Trash2 } from "lucide-react";
 import { useState } from "react";
 
 import { PortalShell } from "../../components/PortalShell";
-import { Button, Card, Notice, SideNote, WithSide, problemMessage } from "../../components/ui";
+import {
+  Button,
+  Card,
+  EmptyState,
+  Notice,
+  SideNote,
+  WithSide,
+  problemMessage,
+} from "../../components/ui";
 import { api, ok } from "../../lib/api";
 import { ALL, Pager, useLocalPages } from "../../components/Pager";
 import { useConfirm } from "../../components/Confirm";
@@ -107,6 +115,11 @@ export function Redirects() {
               </button>
             </div>
           ))}
+          {list.data && !list.data.length && (
+            <EmptyState icon={<Route size={24} aria-hidden />} title="لا تحويلات بعد">
+              أضف تحويلًا حين تغيّر رابط صفحة، فيصل من حفظ الرابط القديم إلى الجديد.
+            </EmptyState>
+          )}
         </Card>
         <Pager page={paged.page} count={paged.count} onPage={paged.setPage} />
       </WithSide>

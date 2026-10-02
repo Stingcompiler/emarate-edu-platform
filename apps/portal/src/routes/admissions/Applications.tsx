@@ -236,18 +236,24 @@ export function Applications() {
               )}
               <Link
                 to={`/applications/${a.public_id}`}
-                className="grid min-w-0 flex-1 gap-x-3 gap-y-0.5 px-4 py-3 hover:bg-surface-alt lg:grid-cols-[140px_minmax(0,1fr)_minmax(0,1fr)_140px_120px] lg:items-center"
+                className={`grid min-w-0 flex-1 grid-cols-[minmax(0,1fr)_auto] gap-x-3 gap-y-0.5 py-3 pe-4 hover:bg-surface-alt lg:grid-cols-[140px_minmax(0,1fr)_minmax(0,1fr)_140px_120px] lg:items-center ${head ? "ps-1 lg:ps-4" : "ps-4"}`}
               >
-                <span className="text-xs text-text-muted">
+                {/* Phones: the status sits at the top beside the reference and the name, not on
+                    a fifth line of its own. */}
+                <span className="col-start-1 text-xs text-text-muted lg:col-start-auto">
                   <bdi className="font-mono">{a.reference_no}</bdi> ·{" "}
                   {when(a.submitted_at ?? a.created_at)}
                 </span>
-                <span className="text-sm font-semibold text-text">{a.full_name}</span>
-                <span className="text-sm text-text-muted">{a.program_name}</span>
-                <span className="text-xs text-text-muted">
+                <span className="col-start-1 text-sm font-semibold text-text lg:col-start-auto">
+                  {a.full_name}
+                </span>
+                <span className="col-start-1 text-sm text-text-muted lg:col-start-auto">
+                  {a.program_name}
+                </span>
+                <span className="col-start-1 text-xs text-text-muted lg:col-start-auto">
                   {a.assigned_registrar_name ?? "غير موزع"}
                 </span>
-                <span>
+                <span className="col-start-2 row-span-2 row-start-1 lg:col-start-auto lg:row-auto lg:row-start-auto">
                   <StatusBadge
                     status={STATUS_TONE[a.status] ?? "neutral"}
                     label={STATUS_LABEL[a.status] ?? a.status}

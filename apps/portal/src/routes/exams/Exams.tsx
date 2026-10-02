@@ -84,7 +84,7 @@ export function Exams() {
     >
       {list.length > 0 && (
         <div
-          className={`mb-2 grid grid-cols-2 gap-2 ${groups.length === 4 ? "lg:grid-cols-4" : "lg:grid-cols-3"}`}
+          className={`mb-6 grid gap-2 ${groups.length === 4 ? "grid-cols-2 lg:grid-cols-4" : "grid-cols-3"}`}
         >
           {groups.map((g) => (
             <Card key={g.key} className="p-3">

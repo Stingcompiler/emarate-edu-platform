@@ -99,10 +99,14 @@ function Media() {
       )}
       <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
         {media.items.map((m) => (
-          <Card key={m.public_id} className="overflow-hidden">
+          <Card key={m.public_id} className="flex flex-col overflow-hidden">
             <img src={m.url} alt={m.alt_ar ?? ""} className="aspect-video w-full object-cover" />
-            <div className="flex items-center gap-2 p-2 text-xs">
-              <span className="min-w-0 flex-1 truncate text-text">{m.alt_ar || "بلا alt"}</span>
+            {/* The name on its own lines; the size and delete under it (two cards a row on
+                phones left the name a few letters). */}
+            <p className="line-clamp-2 px-2 pt-2 text-xs break-words text-text">
+              {m.alt_ar || "بلا alt"}
+            </p>
+            <div className="mt-auto flex items-center justify-between gap-2 px-2 pb-1 text-xs">
               <span className="text-text-muted" dir="ltr">
                 {m.width}×{m.height}
               </span>
@@ -531,7 +535,7 @@ function SiteSettingsForm() {
             {figures.map((f, i) => (
               <div
                 key={i}
-                className="grid grid-cols-[90px_minmax(0,1fr)_minmax(0,1fr)_auto] items-center gap-2"
+                className="grid grid-cols-[80px_minmax(0,1fr)_auto] items-center gap-2 sm:grid-cols-[90px_minmax(0,1fr)_minmax(0,1fr)_auto]"
               >
                 <input
                   aria-label={`الرقم ${i + 1}`}
@@ -566,13 +570,13 @@ function SiteSettingsForm() {
                       all.map((x, j) => (j === i ? { ...x, label_en: e.target.value } : x)),
                     )
                   }
-                  className="min-h-11 rounded-lg border border-border bg-surface px-2 text-sm"
+                  className="col-span-2 min-h-11 rounded-lg border border-border bg-surface px-2 text-sm sm:col-span-1"
                 />
                 <button
                   type="button"
                   aria-label={`حذف الرقم ${i + 1}`}
                   onClick={() => setFigures((all) => all.filter((_, j) => j !== i))}
-                  className="grid size-11 place-items-center rounded-lg text-danger-strong hover:bg-danger-soft"
+                  className="col-start-3 row-start-1 grid size-11 place-items-center rounded-lg text-danger-strong hover:bg-danger-soft sm:col-start-auto sm:row-start-auto"
                 >
                   ×
                 </button>

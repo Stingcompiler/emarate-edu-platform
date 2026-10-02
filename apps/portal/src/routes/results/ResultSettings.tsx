@@ -107,7 +107,9 @@ export function ResultSettings() {
               ))}
           </Card>
         </div>
-        <div>
+        {/* Stacked on phones its heading is the column's first child (no top margin of its
+            own), so the column carries the gap. */}
+        <div className="mt-6 lg:mt-0">
           <SectionLabel>مقياس التقدير</SectionLabel>
           <Card className="divide-y divide-border-soft">
             {(scales.data?.length ? scales.data : [{ id: 0, program: null, ranges: [] }]).map(

@@ -131,7 +131,7 @@ export function DepartmentLectures() {
           <Kpi value={latest ? when(latest) : "—"} label="آخر رفع" />
         </div>
       </div>
-      <FilterBar>
+      <FilterBar className="mb-4">
         <div className="flex flex-wrap items-center gap-2">
           <input
             value={q}
@@ -223,12 +223,17 @@ export function DepartmentLectures() {
                 </div>
                 <Card className="divide-y divide-border-soft">
                   {mine.map((l) => (
-                    <div key={l.public_id} className="flex items-center gap-3 px-4 py-2.5 text-sm">
+                    <div
+                      key={l.public_id}
+                      className="flex flex-wrap items-center gap-x-3 gap-y-1 px-4 py-2.5 text-sm"
+                    >
+                      {/* Phones: the title takes the whole line and the state and actions sit
+                          under it (they cut the title to a few letters beside them). */}
                       <Link
                         to={`/lectures/${l.public_id}`}
-                        className="min-w-0 flex-1 hover:text-primary"
+                        className="min-w-0 basis-full hover:text-primary sm:flex-1 sm:basis-0"
                       >
-                        <b className="block truncate">{l.title_ar}</b>
+                        <b className="line-clamp-2 sm:block sm:truncate">{l.title_ar}</b>
                         <span className="text-xs text-text-muted">
                           {l.resources.length
                             ? `${count(l.resources.length, N.resource)}`
@@ -239,52 +244,54 @@ export function DepartmentLectures() {
                             : ""}
                         </span>
                       </Link>
-                      <StatusBadge
-                        status={l.is_published ? "published" : "draft"}
-                        label={l.is_published ? "منشورة" : "مسودة"}
-                      />
-                      {canManage && (
-                        <>
+                      <span className="ms-auto flex items-center gap-1">
+                        <StatusBadge
+                          status={l.is_published ? "published" : "draft"}
+                          label={l.is_published ? "منشورة" : "مسودة"}
+                        />
+                        {canManage && (
+                          <>
+                            <button
+                              type="button"
+                              aria-label={l.is_published ? "إلغاء نشر المحاضرة" : "نشر المحاضرة"}
+                              title={l.is_published ? "إلغاء النشر" : "نشر"}
+                              onClick={() =>
+                                publish.mutate({ publicId: l.public_id, on: !l.is_published })
+                              }
+                              className="grid size-10 place-items-center sm:size-8 rounded-full text-text-muted hover:bg-surface-alt hover:text-primary"
+                            >
+                              {l.is_published ? (
+                                <EyeOff size={15} aria-hidden />
+                              ) : (
+                                <Eye size={15} aria-hidden />
+                              )}
+                            </button>
+                            <Link
+                              to={`/lectures/${l.public_id}/edit`}
+                              aria-label="تعديل المحاضرة"
+                              className="grid size-10 place-items-center sm:size-8 rounded-full text-text-muted hover:bg-surface-alt hover:text-primary"
+                            >
+                              <Pencil size={15} aria-hidden />
+                            </Link>
+                          </>
+                        )}
+                        {canDelete && (
                           <button
                             type="button"
-                            aria-label={l.is_published ? "إلغاء نشر المحاضرة" : "نشر المحاضرة"}
-                            title={l.is_published ? "إلغاء النشر" : "نشر"}
-                            onClick={() =>
-                              publish.mutate({ publicId: l.public_id, on: !l.is_published })
+                            aria-label="حذف المحاضرة"
+                            onClick={async () =>
+                              (await confirm({
+                                title: `حذف «${l.title_ar}»؟`,
+                                body: "تختفي المحاضرة وموادها من صفحة المادة عند الطلاب.",
+                                confirm: "حذف المحاضرة",
+                              })) && remove.mutate(l.public_id)
                             }
-                            className="grid size-8 place-items-center rounded-full text-text-muted hover:bg-surface-alt hover:text-primary"
+                            className="grid size-10 place-items-center sm:size-8 text-danger-strong"
                           >
-                            {l.is_published ? (
-                              <EyeOff size={15} aria-hidden />
-                            ) : (
-                              <Eye size={15} aria-hidden />
-                            )}
+                            <Trash2 size={15} aria-hidden />
                           </button>
-                          <Link
-                            to={`/lectures/${l.public_id}/edit`}
-                            aria-label="تعديل المحاضرة"
-                            className="grid size-8 place-items-center rounded-full text-text-muted hover:bg-surface-alt hover:text-primary"
-                          >
-                            <Pencil size={15} aria-hidden />
-                          </Link>
-                        </>
-                      )}
-                      {canDelete && (
-                        <button
-                          type="button"
-                          aria-label="حذف المحاضرة"
-                          onClick={async () =>
-                            (await confirm({
-                              title: `حذف «${l.title_ar}»؟`,
-                              body: "تختفي المحاضرة وموادها من صفحة المادة عند الطلاب.",
-                              confirm: "حذف المحاضرة",
-                            })) && remove.mutate(l.public_id)
-                          }
-                          className="grid size-8 place-items-center text-danger-strong"
-                        >
-                          <Trash2 size={15} aria-hidden />
-                        </button>
-                      )}
+                        )}
+                      </span>
                     </div>
                   ))}
                   {!mine.length && <p className="px-4 py-3 text-sm text-text-muted">لا محاضرات.</p>}

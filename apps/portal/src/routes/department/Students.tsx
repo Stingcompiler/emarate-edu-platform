@@ -16,6 +16,7 @@ import {
   problemMessage,
 } from "../../components/ui";
 import { api, ok } from "../../lib/api";
+import { isWide } from "../../lib/media";
 import { useMe } from "../../lib/auth";
 import { useDepartment } from "../../lib/department";
 import { can } from "../../lib/nav";
@@ -76,7 +77,8 @@ export function DepartmentStudents() {
       ) ?? null,
   });
   const rows = list.data?.results ?? [];
-  const s = rows.find((r) => r.public_id === picked);
+  // Large screens open the first student in the side panel rather than leaving it empty.
+  const s = rows.find((r) => r.public_id === picked) ?? (isWide() ? rows[0] : undefined);
   const refresh = () => client.invalidateQueries({ queryKey: ["students"] });
   const remove = useMutation({
     mutationFn: async (publicId: string) => {
@@ -95,20 +97,30 @@ export function DepartmentStudents() {
       title={`طلاب القسم · ${num(list.data?.count ?? 0)}`}
       subtitle={department?.name_ar}
       back={{ label: "لوحة القسم", to: "/department" }}
+      titleAction={
+        canManage ? (
+          <Button className="min-h-10 px-3" onClick={() => open("new")}>
+            <Plus size={16} aria-hidden />
+            طالب
+          </Button>
+        ) : undefined
+      }
     >
       <DepartmentSwitch />
       <FilterBar>
-        <div className="flex flex-wrap items-center gap-2">
-          <input
-            value={search}
-            onChange={(e) => {
-              setSearch(e.target.value);
-              setPage(1);
-            }}
-            placeholder="بحث بالاسم أو الرقم الجامعي"
-            aria-label="بحث بالاسم أو الرقم الجامعي"
-            className="min-h-10 flex-1 rounded-full border border-border-soft bg-surface px-4 text-sm sm:max-w-sm"
-          />
+        {/* Search on its own line, then the levels, then the statuses; the «+ طالب» action
+            sits with the title (it was lost among the chips on phones). */}
+        <input
+          value={search}
+          onChange={(e) => {
+            setSearch(e.target.value);
+            setPage(1);
+          }}
+          placeholder="بحث بالاسم أو الرقم الجامعي"
+          aria-label="بحث بالاسم أو الرقم الجامعي"
+          className="min-h-10 w-full rounded-full border border-border-soft bg-surface px-4 text-sm sm:max-w-sm"
+        />
+        <div className="mt-2 flex flex-wrap items-center gap-2">
           {[undefined, 1, 2, 3, 4].map((l) => (
             <Chip
               key={l ?? 0}
@@ -121,15 +133,9 @@ export function DepartmentStudents() {
               {l ? `م${num(l)}` : "كل المستويات"}
             </Chip>
           ))}
-          {canManage && (
-            <Button className="min-h-9 px-3 sm:ms-auto" onClick={() => open("new")}>
-              <Plus size={16} aria-hidden />
-              طالب
-            </Button>
-          )}
         </div>
         <div className="mt-2 flex flex-wrap gap-2">
-          {["active", "suspended", "graduated", "withdrawn", ""].map((k) => (
+          {["", "active", "suspended", "graduated", "withdrawn"].map((k) => (
             <Chip
               key={k || "all"}
               active={status === k}
@@ -154,7 +160,7 @@ export function DepartmentStudents() {
                   setPicked(r.public_id);
                   setMode("view");
                 }}
-                className="flex w-full items-center gap-3 px-4 py-3 text-start hover:bg-surface-alt"
+                className={`flex w-full items-center gap-3 px-4 py-3 text-start hover:bg-surface-alt ${s?.public_id === r.public_id ? "lg:bg-primary-soft/40" : ""}`}
               >
                 <span className="grid size-9 shrink-0 place-items-center rounded-full bg-primary-soft text-xs font-semibold text-primary-700">
                   {initials(r.full_name_ar)}

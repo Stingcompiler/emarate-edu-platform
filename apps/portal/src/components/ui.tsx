@@ -461,7 +461,8 @@ export function SideFigures({ title, rows }: { title?: string; rows: [string, Re
   return (
     <Card className="p-4">
       {title && <h2 className="mb-3 text-xs font-semibold text-text-muted">{title}</h2>}
-      <dl className="grid grid-cols-2 gap-3">
+      {/* An odd last tile takes the row instead of leaving an empty half beside it. */}
+      <dl className="grid grid-cols-2 gap-3 [&>:last-child:nth-child(odd)]:col-span-2">
         {rows.map(([label, value]) => (
           <div key={label} className="rounded-lg bg-surface-alt p-3">
             <dd className="text-xl font-bold text-text">

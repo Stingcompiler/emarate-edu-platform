@@ -162,11 +162,13 @@ export function Cycles() {
           <SectionLabel>
             البرامج في هذه الدورة · {(intakes.data?.length ?? 0).toLocaleString("ar-u-nu-latn")}
           </SectionLabel>
-          <Card className="divide-y divide-border-soft">
+          {/* Two columns on wide screens: one row across 1100px put the button far from the
+              programme it closes. */}
+          <Card className="grid divide-y divide-border-soft overflow-hidden xl:grid-cols-2 xl:divide-y-0 xl:[&>div]:border-b xl:[&>div]:border-border-soft xl:[&>div:last-child:nth-child(odd)]:col-span-2 xl:[&>div:nth-child(odd)]:border-e">
             {(intakes.data ?? []).map((i) => (
-              <div key={i.id} className="flex items-center gap-3 px-4 py-3">
+              <div key={i.id} className="flex items-start gap-4 px-4 py-3">
                 <span className="min-w-0 flex-1">
-                  <span className="flex items-center gap-2">
+                  <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
                     <span className="text-sm font-semibold text-text">{i.program_name}</span>
                     <StatusBadge
                       status={i.is_open ? "approved" : "closed"}
@@ -195,7 +197,7 @@ export function Cycles() {
                           }}
                         />
                       </span>
-                      <span className="w-10 text-end text-xs text-text-muted">
+                      <span className="shrink-0 text-end text-xs whitespace-nowrap text-text-muted">
                         {Math.round(
                           (100 * (i.applications_count ?? 0)) / i.capacity,
                         ).toLocaleString("ar-u-nu-latn")}
@@ -205,9 +207,10 @@ export function Cycles() {
                   ) : null}
                 </span>
 
+                {/* Top-aligned beside the name: centred, it sat over the seats percentage. */}
                 <Button
                   variant={i.is_open ? "secondary" : "primary"}
-                  className="min-h-9 px-3"
+                  className="min-h-10 shrink-0 px-3 sm:min-h-9"
                   disabled={toggle.isPending}
                   onClick={() => toggle.mutate({ id: i.id, is_open: !i.is_open })}
                 >
@@ -225,6 +228,9 @@ export function Cycles() {
                   + {p.name_ar}
                 </Chip>
               ))}
+            {programs.data && programs.data.every((p) => used.has(p.id)) && (
+              <p className="text-sm text-text-muted">كل البرامج مضافة إلى هذه الدورة.</p>
+            )}
           </div>
           {(toggle.isError || add.isError) && (
             <div className="mt-3">

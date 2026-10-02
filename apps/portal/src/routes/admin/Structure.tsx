@@ -137,6 +137,7 @@ export function Structure() {
   const err = setCurrent.error ?? addDept.error ?? addProgram.error ?? addTerm.error;
   // min-w-0 w-full: a field never sets its row's width (a text field's default is ~200px).
   const input = "min-h-10 w-full min-w-0 rounded-lg border border-border bg-surface px-3 text-sm";
+  const label = "grid min-w-0 gap-1 text-xs font-medium text-text-muted";
   return (
     <PortalShell
       title="الهيكل الأكاديمي"
@@ -370,41 +371,54 @@ export function Structure() {
               />
             ))}
           {dept && (
-            <Card className="mt-3 grid gap-2 p-3 @lg:grid-cols-[90px_minmax(0,1fr)_minmax(0,1fr)]">
-              <input
-                dir="ltr"
-                value={pForm.code}
-                onChange={(e) => setP({ ...pForm, code: e.target.value.toUpperCase() })}
-                placeholder="BIT"
-                aria-label="رمز البرنامج"
-                className={input}
-              />
-              <input
-                value={pForm.name_ar}
-                onChange={(e) => setP({ ...pForm, name_ar: e.target.value })}
-                placeholder="اسم البرنامج"
-                aria-label="اسم البرنامج"
-                className={input}
-              />
-              <input
-                dir="ltr"
-                value={pForm.name_en}
-                onChange={(e) => setP({ ...pForm, name_en: e.target.value })}
-                placeholder="الاسم بالإنجليزية"
-                aria-label="الاسم بالإنجليزية"
-                className={input}
-              />
-              <div className="flex flex-wrap items-center gap-2 @lg:col-span-3">
-                {Object.entries(DEGREE).map(([k, l]) => (
-                  <Chip
-                    key={k}
-                    active={pForm.degree === k}
-                    onClick={() => setP({ ...pForm, degree: k })}
-                  >
-                    {l}
-                  </Chip>
-                ))}
-                <label className="flex items-center gap-1 text-xs text-text-muted">
+            // A labelled form (it was a row of bare boxes whose placeholders were the only hint).
+            <Card className="mt-3 space-y-3 p-4">
+              <p className="text-sm font-semibold">برنامج جديد في {dept.name_ar}</p>
+              <div className="grid gap-3 @lg:grid-cols-[110px_minmax(0,1fr)_minmax(0,1fr)]">
+                <label className={label}>
+                  رمز البرنامج
+                  <input
+                    dir="ltr"
+                    value={pForm.code}
+                    onChange={(e) => setP({ ...pForm, code: e.target.value.toUpperCase() })}
+                    placeholder="BIT"
+                    className={input}
+                  />
+                </label>
+                <label className={label}>
+                  اسم البرنامج
+                  <input
+                    value={pForm.name_ar}
+                    onChange={(e) => setP({ ...pForm, name_ar: e.target.value })}
+                    className={input}
+                  />
+                </label>
+                <label className={label}>
+                  الاسم بالإنجليزية
+                  <input
+                    dir="ltr"
+                    value={pForm.name_en}
+                    onChange={(e) => setP({ ...pForm, name_en: e.target.value })}
+                    className={input}
+                  />
+                </label>
+              </div>
+              <div role="group" aria-label="الدرجة" className={label}>
+                الدرجة
+                <span className="flex flex-wrap gap-2">
+                  {Object.entries(DEGREE).map(([k, l]) => (
+                    <Chip
+                      key={k}
+                      active={pForm.degree === k}
+                      onClick={() => setP({ ...pForm, degree: k })}
+                    >
+                      {l}
+                    </Chip>
+                  ))}
+                </span>
+              </div>
+              <div className="grid grid-cols-3 gap-3 @lg:max-w-md">
+                <label className={label}>
                   مستويات
                   <input
                     type="number"
@@ -412,10 +426,10 @@ export function Structure() {
                     max={10}
                     value={pForm.levels_count}
                     onChange={(e) => setP({ ...pForm, levels_count: Number(e.target.value) })}
-                    className="w-14 rounded border border-border px-1 py-1 max-lg:min-h-10"
+                    className={input}
                   />
                 </label>
-                <label className="flex items-center gap-1 text-xs text-text-muted">
+                <label className={label}>
                   فصول
                   <input
                     type="number"
@@ -423,10 +437,10 @@ export function Structure() {
                     max={20}
                     value={pForm.duration_terms}
                     onChange={(e) => setP({ ...pForm, duration_terms: Number(e.target.value) })}
-                    className="w-14 rounded border border-border px-1 py-1 max-lg:min-h-10"
+                    className={input}
                   />
                 </label>
-                <label className="flex items-center gap-1 text-xs text-text-muted">
+                <label className={label}>
                   ساعات للتخرج
                   <input
                     type="number"
@@ -435,11 +449,13 @@ export function Structure() {
                     value={pForm.total_credit_hours}
                     onChange={(e) => setP({ ...pForm, total_credit_hours: e.target.value })}
                     placeholder="—"
-                    className="w-16 rounded border border-border px-1 py-1 max-lg:min-h-10"
+                    className={input}
                   />
                 </label>
+              </div>
+              <div className="flex justify-end">
                 <Button
-                  className="ms-auto min-h-9 px-4"
+                  className="min-h-10 w-full px-5 @lg:w-auto"
                   disabled={!pForm.code || !pForm.name_ar}
                   onClick={() => addProgram.mutate()}
                 >

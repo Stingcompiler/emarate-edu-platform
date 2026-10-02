@@ -60,7 +60,7 @@ export function HRHome() {
               </span>
             </div>
           </Card>
-          <div className="mt-2 lg:grid lg:grid-cols-2 lg:gap-6">
+          <div className="mt-6 lg:grid lg:grid-cols-2 lg:gap-6">
             <section>
               <SectionLabel>تحت الحد · {num(below.length)}</SectionLabel>
               <Card className="divide-y divide-border-soft">
@@ -115,8 +115,10 @@ export function HRHome() {
                 ))}
               </Card>
             </section>
-            <section>
-              <div className="flex items-end justify-between">
+            {/* Stacked on phones the heading is this column's first child (no top margin of
+                its own), so the column carries the gap. */}
+            <section className="mt-6 lg:mt-0">
+              <div className="flex items-end justify-between gap-3">
                 <SectionLabel>التنبيهات المرسلة</SectionLabel>
                 {can(me.data, "hr.notify") && (
                   <Link to="/hr/notices/new">

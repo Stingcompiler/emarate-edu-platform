@@ -25,7 +25,9 @@ const upcoming = evs
     {items.length > 0 && (
       <section>
         <h2 class="font-display text-xl font-bold">{t(lang, "latestNews")}</h2>
-        <div class="mt-4 grid gap-4 sm:grid-cols-2">
+        {/* An odd count: the newest leads across both columns (wider picture) so the last
+            card is not left alone in half a row. */}
+        <div class="mt-4 grid gap-4 sm:grid-cols-2 sm:[&>a:first-child:nth-last-child(odd)]:col-span-2 sm:[&>a:first-child:nth-last-child(odd)_img]:aspect-[21/9]">
           {items.map((n) => (
             <a
               href={href(lang, `news/${n.slug}/`)}

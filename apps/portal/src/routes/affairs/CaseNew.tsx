@@ -218,7 +218,7 @@ export function CaseNew() {
               <Notice>{problemMessage(open.error ?? dismiss.error)}</Notice>
             </div>
           )}
-          <div className="mt-5 flex gap-2">
+          <div className="mt-5 flex gap-2 lg:justify-end">
             {reportId && (
               <Button
                 variant="secondary"
@@ -230,7 +230,7 @@ export function CaseNew() {
             )}
             <Button
               type="submit"
-              className="flex-1"
+              className="flex-1 lg:flex-none lg:px-8"
               disabled={open.isPending || (!reportId && (!student || !title))}
             >
               فتح الحالة
