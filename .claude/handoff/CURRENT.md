@@ -120,8 +120,25 @@
 - **#76 image layout per page: merged.** `Page.image_layout` (`single` | `grid`), chosen in the page editor («عرض الصور في
   الموقع: واحدة / شبكة», `content.manage` = site manager and system admin, audited `page.update`); the gallery starts as
   a grid; `Blocks.astro` groups consecutive images (2 columns, 3 from lg).
-- **State:** every planned phase and request is merged and nothing is open. Next work comes from the owner; real
-  content (licence, figures, fees, photos) replaces the samples in «محتوى الموقع».
+- **#78–#82: merged.** Footer «مدعوم من ستينج سيستم» (#78), navbar motion (#79), SMTP mail backend from the env
+  (#80), phone layout pass over every dashboard and public page (#81: tables → cards on phones, iOS 16px fields,
+  `tap-44` touch areas in `@ecst/ui/theme.css`), and `PushPrompt` + the structure page on phones (#82).
+- **Demo deployment (owner's OVH VPS, shared with other projects — never touch them):**
+  - Site https://ecst.stingdev.pro, portal https://portal.ecst.stingdev.pro (DNS at Namecheap; Caddy block
+    `/etc/caddy/ecst.caddy`, imported from the Caddyfile).
+  - Everything under `/opt/ecst` (user `ecst`): `app/` (backend), `venv/` (uv, Python 3.13), `env` (secrets,
+    root:ecst 640 — never print it), `media/`, `src/` (landing + packages for on-server builds), `node/` (private
+    Node 22). systemd: `ecst-api` (gunicorn 127.0.0.1:8100), `ecst-worker` (celery worker --beat),
+    `ecst-site-build.{service,path,timer}` + `ecst-rebuild-hook.socket` (CMS rebuild hook, plus every 6 h).
+  - Postgres db/role `ecst`, Redis db 3, `MEDIA_BACKEND=local`, mail via Brevo SMTP (`ecst@stingdev.pro`).
+  - Demo data seeded; demo password in root-only `/opt/ecst/demo-password` (the owner sets it with
+    `sudo /opt/ecst/bin/set-demo-password`).
+  - Update: `git archive origin/main backend scripts` → rsync into `/opt/ecst/app` (exclude media, staticfiles) →
+    migrate, collectstatic, restart; portal: build locally with `VITE_SITE_URL=https://ecst.stingdev.pro/ar/` and
+    upload to `/opt/ecst/portal`; site: refresh `/opt/ecst/src` and `systemctl start ecst-site-build`. Upload
+    archives as files (scp), never piped together with a remote script.
+  - Push works end to end (verified on the owner's Android, 2026-10-02).
+- **State:** nothing open. Next work comes from the owner; real content replaces the samples in «محتوى الموقع».
 - **PR 6f `feat/department-faculty-news`**: the owner approved both 6c deferrals (2026-09-30); docs/03 is now v2.3.
   - `User.public_profile` plus `academic_title_ar/en`, set by the member at `PATCH /api/v1/me/public-profile` (audited
     `profile.public_update`), with a card in «الإعدادات».
