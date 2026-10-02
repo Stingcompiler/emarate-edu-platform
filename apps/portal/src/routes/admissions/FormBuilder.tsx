@@ -195,7 +195,7 @@ export function FormBuilder() {
       <div className="mt-4 lg:grid lg:grid-cols-[minmax(0,1fr)_280px] lg:gap-6">
         <div className="space-y-3">
           {fields.map((f, i) => (
-            <Card key={i} className="grid gap-2 p-3 sm:grid-cols-[1fr_140px_auto]">
+            <Card key={i} className="grid gap-2 p-3 sm:grid-cols-[minmax(0,1fr)_140px_auto]">
               <input
                 value={f.label}
                 onChange={(e) => set(i, { label: e.target.value })}

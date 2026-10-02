@@ -173,7 +173,7 @@ export function DepartmentReport() {
                 {r.rows.map((c) => (
                   <div
                     key={c.public_id}
-                    className="grid grid-cols-[1fr_auto] gap-x-3 gap-y-0.5 px-4 py-3 text-sm lg:grid-cols-[88px_minmax(0,1.4fr)_minmax(0,1fr)_64px_80px_72px_72px_96px] lg:items-center"
+                    className="grid grid-cols-[minmax(0,1fr)_auto] gap-x-3 gap-y-0.5 px-4 py-3 text-sm lg:grid-cols-[88px_minmax(0,1.4fr)_minmax(0,1fr)_64px_80px_72px_72px_96px] lg:items-center"
                   >
                     <bdi className="font-mono text-xs text-text-muted">{c.code}</bdi>
                     <span className="col-start-1 font-semibold text-text lg:col-start-auto">

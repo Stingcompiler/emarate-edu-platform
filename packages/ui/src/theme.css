@@ -120,6 +120,13 @@
 }
 
 @layer base {
+  /* A grid with no columns of its own (`grid gap-4 lg:grid-cols-2` on a phone) gets one column
+     that keeps to its container. Its implicit column is «auto» and grows to the widest child
+     (a truncated name, a text field), which pushed pages past 320–360px Android screens
+     (owner, 2026-10-02). Any grid-cols-* utility still wins: utilities sit above this layer. */
+  .grid:not([class*="grid-flow-col"]) {
+    grid-template-columns: minmax(0, 1fr);
+  }
   html {
     font-family: var(--font-sans);
     line-height: var(--leading-arabic);

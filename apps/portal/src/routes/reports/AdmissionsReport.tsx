@@ -189,7 +189,7 @@ export function AdmissionsReport() {
               {r.registrars.map((g) => (
                 <div
                   key={g.name}
-                  className="grid grid-cols-[auto_1fr] items-center gap-x-3 gap-y-0.5 px-4 py-3 text-sm lg:grid-cols-[minmax(0,1fr)_90px_70px_70px_90px_70px]"
+                  className="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-x-3 gap-y-0.5 px-4 py-3 text-sm lg:grid-cols-[minmax(0,1fr)_90px_70px_70px_90px_70px]"
                 >
                   <span className="flex items-center gap-3 lg:col-span-1">
                     <span className="grid size-8 place-items-center rounded-full bg-primary-soft text-xs font-semibold text-primary-700">

@@ -106,7 +106,7 @@ export function Cycles() {
         <summary className="flex min-h-11 cursor-pointer items-center font-semibold text-primary">
           دورة جديدة
         </summary>
-        <div className="mt-3 grid gap-2 sm:grid-cols-[1fr_180px_180px_auto]">
+        <div className="mt-3 grid gap-2 sm:grid-cols-[minmax(0,1fr)_180px_180px_auto]">
           <input
             value={draft.name}
             onChange={(e) => setDraft({ ...draft, name: e.target.value })}
