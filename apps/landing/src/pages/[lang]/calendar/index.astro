@@ -47,7 +47,7 @@ const rows = [
     lead={L("مواعيد الفصول الدراسية والتقديم.", "Term and admission dates.")}
     crumbs={[[L("التقويم الأكاديمي", "Academic calendar"), "calendar/"]]}
   />
-  <div class="mx-auto grid max-w-6xl gap-10 px-4 py-10 lg:grid-cols-[2fr_1fr] lg:px-8">
+  <div class="mx-auto grid max-w-6xl gap-10 px-4 py-10 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] lg:px-8">
     <ol class="divide-y divide-border-soft rounded-2xl border border-border-soft bg-surface">
       {rows.map((r) => (
         <li class="flex items-center gap-4 px-4 py-3">
@@ -68,16 +68,29 @@ const rows = [
         </li>
       )}
     </ol>
-    <aside>
+    {/* A card like the list beside it, each event with its date tile (it was loose links). */}
+    <aside class="self-start rounded-2xl border border-border-soft bg-surface p-5">
       <h2 class="font-display text-lg font-bold">{L("الفعاليات القادمة", "Upcoming events")}</h2>
-      <ul class="mt-3 space-y-2 text-sm">
+      <ul class="mt-3 divide-y divide-border-soft">
         {upcoming.slice(0, 5).map((e) => (
           <li>
-            <a href={href(lang, `events/${e.slug}/`)} class="tap-44 text-primary hover:underline">
-              {fmtDate(lang, e.starts_at, { day: "numeric", month: "short" })} · {e.title}
+            <a
+              href={href(lang, `events/${e.slug}/`)}
+              class="flex items-center gap-3 py-2.5 text-sm hover:text-primary"
+            >
+              <span class="grid size-11 shrink-0 place-items-center rounded-xl bg-primary-soft text-center leading-tight text-primary-700">
+                <b class="text-base">{fmtDate(lang, e.starts_at, { day: "numeric" })}</b>
+                <span class="text-[11px]">{fmtDate(lang, e.starts_at, { month: "short" })}</span>
+              </span>
+              <span class="min-w-0 font-semibold">{e.title}</span>
             </a>
           </li>
         ))}
+        {!upcoming.length && (
+          <li class="py-2.5 text-sm text-text-muted">
+            {L("لا فعاليات قادمة الآن.", "No upcoming events right now.")}
+          </li>
+        )}
       </ul>
       <a
         href={href(lang, "events/")}

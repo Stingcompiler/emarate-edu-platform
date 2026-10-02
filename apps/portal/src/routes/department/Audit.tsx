@@ -3,6 +3,7 @@ import { useState } from "react";
 
 import { PortalShell } from "../../components/PortalShell";
 import { FilterBar, Button, Card, WithSide } from "../../components/ui";
+import { isWide } from "../../lib/media";
 import { api, ok } from "../../lib/api";
 import { useMe } from "../../lib/auth";
 import { useDepartment } from "../../lib/department";
@@ -305,6 +306,8 @@ export function Audit() {
       ) ?? null,
   });
   const rows = list.data?.results ?? [];
+  // Large screens show the newest entry beside the list until another is chosen.
+  const shown = rows.find((r) => r.id === picked) ?? (isWide() ? rows[0] : undefined);
   const groups: [string, typeof rows][] = [];
   for (const r of rows) {
     const k = dayKey(r.at);
@@ -355,8 +358,8 @@ export function Audit() {
       <WithSide
         side={
           <Card className="hidden p-4 lg:block">
-            {rows.find((r) => r.id === picked) ? (
-              <AuditDetail r={rows.find((r) => r.id === picked)! as Entry} />
+            {shown ? (
+              <AuditDetail r={shown as Entry} />
             ) : (
               <p className="text-sm text-text-muted">
                 اختر عملية لترى تفاصيلها وقيمها قبل التغيير وبعده.
@@ -369,6 +372,18 @@ export function Audit() {
         }
       >
         <div className="mt-4 space-y-4">
+          {/* Large screens: a table — time, who, what, on what (board DesktopDeptOperations). */}
+          {rows.length > 0 && (
+            <div
+              aria-hidden="true"
+              className="hidden grid-cols-[4rem_10rem_11rem_minmax(0,1fr)] gap-3 px-4 text-xs text-text-muted lg:grid"
+            >
+              <span>الوقت</span>
+              <span>المنفّذ</span>
+              <span>العملية</span>
+              <span>الهدف</span>
+            </div>
+          )}
           {groups.map(([day, items]) => (
             <section key={day}>
               <p className="mb-2 text-xs font-semibold text-text-muted">{day}</p>
@@ -379,17 +394,20 @@ export function Audit() {
                       type="button"
                       aria-expanded={picked === r.id}
                       onClick={() => setPicked(picked === r.id ? null : r.id)}
-                      className={`flex w-full gap-3 px-4 py-3 text-start text-sm hover:bg-surface-alt ${picked === r.id ? "bg-primary-soft/40" : ""}`}
+                      className={`flex w-full gap-3 px-4 py-3 text-start text-sm hover:bg-surface-alt lg:grid lg:grid-cols-[4rem_10rem_11rem_minmax(0,1fr)] lg:items-center ${picked === r.id ? "bg-primary-soft/40" : shown?.id === r.id ? "lg:bg-primary-soft/40" : ""}`}
                     >
-                      <span className="w-12 shrink-0 text-xs text-text-muted">
+                      <span className="w-12 shrink-0 text-xs text-text-muted lg:w-auto">
                         {new Date(r.at).toLocaleTimeString("ar-u-nu-latn", {
                           hour: "numeric",
                           minute: "2-digit",
                         })}
                       </span>
-                      <span className="min-w-0 flex-1">
-                        <b className="text-text">{r.actor || "النظام"}</b>{" "}
-                        <span className="text-text-muted">· {actionLabel(r.action)}</span>
+                      <span className="min-w-0 flex-1 lg:contents">
+                        <b className="text-text lg:truncate">{r.actor || "النظام"}</b>{" "}
+                        <span className="text-text-muted lg:truncate">
+                          <span className="lg:hidden">· </span>
+                          {actionLabel(r.action)}
+                        </span>
                         <span className="block truncate text-text">{r.target_repr}</span>
                       </span>
                     </button>
