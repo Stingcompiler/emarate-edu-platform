@@ -529,7 +529,10 @@ function SiteSettingsForm() {
               أرقام موثّقة تحددها الكلية، مثل: الخريجون، البرامج المعتمدة، الشركاء.
             </p>
             {figures.map((f, i) => (
-              <div key={i} className="grid grid-cols-[90px_1fr_1fr_auto] items-center gap-2">
+              <div
+                key={i}
+                className="grid grid-cols-[90px_minmax(0,1fr)_minmax(0,1fr)_auto] items-center gap-2"
+              >
                 <input
                   aria-label={`الرقم ${i + 1}`}
                   dir="ltr"

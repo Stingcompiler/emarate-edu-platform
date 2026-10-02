@@ -216,7 +216,7 @@ export function Teachers() {
           {rows.map((t) => (
             <div
               key={t.public_id}
-              className={`grid grid-cols-[auto_1fr_auto] items-center gap-x-3 gap-y-1 px-4 py-3 text-sm xl:grid-cols-[minmax(0,1.6fr)_70px_90px_60px_60px_60px_60px_70px_70px_110px] xl:gap-2 ${t.status === "below" ? "bg-danger-soft/30" : ""}`}
+              className={`grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1 px-4 py-3 text-sm xl:grid-cols-[minmax(0,1.6fr)_70px_90px_60px_60px_60px_60px_70px_70px_110px] xl:gap-2 ${t.status === "below" ? "bg-danger-soft/30" : ""}`}
             >
               <Link
                 to={`/hr/teachers/${t.public_id}`}

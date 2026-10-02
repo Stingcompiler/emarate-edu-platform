@@ -135,7 +135,8 @@ export function Structure() {
     },
   });
   const err = setCurrent.error ?? addDept.error ?? addProgram.error ?? addTerm.error;
-  const input = "min-h-10 rounded-lg border border-border bg-surface px-3 text-sm";
+  // min-w-0 w-full: a field never sets its row's width (a text field's default is ~200px).
+  const input = "min-h-10 w-full min-w-0 rounded-lg border border-border bg-surface px-3 text-sm";
   return (
     <PortalShell
       title="الهيكل الأكاديمي"
@@ -147,8 +148,10 @@ export function Structure() {
           <Notice>{problemMessage(err)}</Notice>
         </div>
       ) : null}
-      <div className="grid gap-6 lg:grid-cols-[320px_minmax(0,1fr)] lg:items-start">
-        <aside className="space-y-4">
+      {/* One column on phones that keeps to the screen: an implicit grid column is «auto» and
+          grows to its widest child, which pushed the page past a 320–360px Android screen. */}
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-[320px_minmax(0,1fr)] lg:items-start">
+        <aside className="min-w-0 space-y-4">
           <SectionLabel>الأقسام</SectionLabel>
           <Card className="divide-y divide-border-soft">
             {(departments.data ?? []).map((d) => (
@@ -170,7 +173,7 @@ export function Structure() {
           </Card>
           <Card className="space-y-2 p-3">
             <p className="text-sm font-semibold">+ قسم</p>
-            <div className="grid grid-cols-[96px_1fr] gap-2">
+            <div className="grid grid-cols-[96px_minmax(0,1fr)] gap-2">
               <input
                 dir="ltr"
                 value={dForm.code}
@@ -250,7 +253,7 @@ export function Structure() {
                 </option>
               ))}
             </select>
-            <div className="grid grid-cols-[1fr_70px] gap-2">
+            <div className="grid grid-cols-[minmax(0,1fr)_70px] gap-2">
               <input
                 value={tForm.name_ar}
                 onChange={(e) => setT({ ...tForm, name_ar: e.target.value })}

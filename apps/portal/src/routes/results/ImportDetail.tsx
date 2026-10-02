@@ -201,7 +201,7 @@ export function ResultImportDetail() {
                 </Chip>
               </div>
               <Card className="mt-2 divide-y divide-border-soft overflow-hidden">
-                <div className="hidden grid-cols-[48px_140px_110px_70px_70px_1fr] gap-3 bg-surface-alt px-4 py-2 text-xs text-text-muted lg:grid">
+                <div className="hidden grid-cols-[48px_140px_110px_70px_70px_minmax(0,1fr)] gap-3 bg-surface-alt px-4 py-2 text-xs text-text-muted lg:grid">
                   <span>#</span>
                   <span>الرقم الجامعي</span>
                   <span>المقرر</span>
@@ -222,7 +222,7 @@ export function ResultImportDetail() {
                   return (
                     <div
                       key={row.row_no}
-                      className="grid grid-cols-[40px_1fr_auto] gap-x-3 gap-y-1 px-4 py-3 text-sm lg:grid-cols-[48px_140px_110px_70px_70px_1fr] lg:items-center"
+                      className="grid grid-cols-[40px_minmax(0,1fr)_auto] gap-x-3 gap-y-1 px-4 py-3 text-sm lg:grid-cols-[48px_140px_110px_70px_70px_minmax(0,1fr)] lg:items-center"
                     >
                       <span className="text-text-muted">{row.row_no}</span>
                       <span className="font-medium text-text" dir="ltr">
