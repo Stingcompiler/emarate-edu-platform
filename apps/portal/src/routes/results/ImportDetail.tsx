@@ -1,7 +1,8 @@
+import { fileName } from "../../lib/format";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Check } from "lucide-react";
 import { useState } from "react";
-import { useNavigate, useParams } from "react-router";
+import { Link, useNavigate, useParams } from "react-router";
 
 import { PortalShell } from "../../components/PortalShell";
 import {
@@ -14,6 +15,7 @@ import {
   problemMessage,
 } from "../../components/ui";
 import { api, ok } from "../../lib/api";
+import { num } from "../../lib/reports";
 import { Pager, useServerPages } from "../../components/Pager";
 import { useConfirm } from "../../components/Confirm";
 import { useToast } from "../../components/Toast";
@@ -93,7 +95,7 @@ export function ResultImportDetail() {
 
   return (
     <PortalShell
-      title={b?.file_name ?? "دفعة نتائج"}
+      title={b ? fileName(b.file_name) : "دفعة نتائج"}
       subtitle={b ? `${b.term_name} · ${b.department_name ?? "الكلية"}` : undefined}
       back={{ label: "رفع النتائج", to: "/result-imports" }}
     >
@@ -191,65 +193,89 @@ export function ResultImportDetail() {
               )}
             </aside>
             <section className="mt-6 min-w-0 xl:col-start-1 xl:row-start-1 xl:mt-0">
-              <div className="flex items-center gap-2">
-                <h2 className="text-xs font-semibold text-text-muted">معاينة الصفوف</h2>
-                <Chip active={only === "all"} onClick={() => setOnly("all")}>
-                  الكل
-                </Chip>
-                <Chip active={only === "error"} onClick={() => setOnly("error")}>
-                  الأخطاء فقط ({summary.error ?? 0})
-                </Chip>
-              </div>
-              <Card className="mt-2 divide-y divide-border-soft overflow-hidden">
-                <div className="hidden grid-cols-[48px_140px_110px_70px_70px_minmax(0,1fr)] gap-3 bg-surface-alt px-4 py-2 text-xs text-text-muted lg:grid">
-                  <span>#</span>
-                  <span>الرقم الجامعي</span>
-                  <span>المقرر</span>
-                  <span>الدرجة</span>
-                  <span>التقدير</span>
-                  <span>الحالة</span>
-                </div>
-                {!rows.query.isPending && !rows.items.length && (
-                  <p className="px-4 py-5 text-sm text-text-muted">
-                    {only === "error"
-                      ? "لا أخطاء في هذا الملف."
-                      : "لا صفوف للمعاينة — نتائج الدفعة المعتمدة في سجل النتائج."}
+              {/* An approved batch's preview rows are gone (its results are in the record): say
+                  so plainly instead of an empty table under «60 صالحة» (review 2026-10-02). */}
+              {committed && !rows.query.isPending && !rows.items.length && only === "all" ? (
+                <Card className="p-5 text-sm leading-relaxed">
+                  <b className="block text-base text-text">
+                    اعتُمدت الدفعة: سُجّلت{" "}
+                    {num(summary.committed ?? summary.create ?? summary.rows ?? 0)} نتيجة في سجل
+                    النتائج
+                  </b>
+                  <p className="mt-1 text-text-muted">
+                    صفوف المعاينة تُحذف بعد الاعتماد؛ النتائج نفسها في السجل، ويُعدَّل أيٌّ منها
+                    بطلب تعديل.
                   </p>
-                )}
-                {rows.items.map((row) => {
-                  const n = row.normalized as Record<string, string | null>;
-                  const matched = row.action === "create";
-                  return (
-                    <div
-                      key={row.row_no}
-                      className="grid grid-cols-[40px_minmax(0,1fr)_auto] gap-x-3 gap-y-1 px-4 py-3 text-sm lg:grid-cols-[48px_140px_110px_70px_70px_minmax(0,1fr)] lg:items-center"
-                    >
-                      <span className="text-text-muted">{row.row_no}</span>
-                      <span className="font-medium text-text" dir="ltr">
-                        {n.university_number}
-                      </span>
-                      <span className="text-text-muted lg:text-text">{n.course_code}</span>
-                      <span className="hidden lg:block">{n.score ?? "—"}</span>
-                      <span className="hidden font-bold lg:block" dir="ltr">
-                        {n.letter || "—"}
-                      </span>
-                      <span
-                        className={`col-span-3 text-xs lg:col-span-1 ${matched ? "text-success-strong" : "text-danger-strong"}`}
-                      >
-                        {matched
-                          ? `مطابق · ${n.score ?? ""} \u2066${n.letter ?? ""}\u2069`
-                          : (row.errors as string[]).join(" · ")}
-                      </span>
+                  <Link
+                    to="/results/search"
+                    className="mt-3 inline-flex min-h-11 items-center font-semibold text-primary"
+                  >
+                    البحث في النتائج ←
+                  </Link>
+                </Card>
+              ) : (
+                <>
+                  <div className="flex items-center gap-2">
+                    <h2 className="text-xs font-semibold text-text-muted">معاينة الصفوف</h2>
+                    <Chip active={only === "all"} onClick={() => setOnly("all")}>
+                      الكل
+                    </Chip>
+                    <Chip active={only === "error"} onClick={() => setOnly("error")}>
+                      الأخطاء فقط ({summary.error ?? 0})
+                    </Chip>
+                  </div>
+                  <Card className="mt-2 divide-y divide-border-soft overflow-hidden">
+                    <div className="hidden grid-cols-[48px_140px_110px_70px_70px_minmax(0,1fr)] gap-3 bg-surface-alt px-4 py-2 text-xs text-text-muted lg:grid">
+                      <span>#</span>
+                      <span>الرقم الجامعي</span>
+                      <span>المقرر</span>
+                      <span>الدرجة</span>
+                      <span>التقدير</span>
+                      <span>الحالة</span>
                     </div>
-                  );
-                })}
-              </Card>
-              <Pager
-                page={rows.page}
-                count={rows.count}
-                onPage={rows.setPage}
-                label="صفحات الصفوف"
-              />
+                    {!rows.query.isPending && !rows.items.length && (
+                      <p className="px-4 py-5 text-sm text-text-muted">
+                        {only === "error"
+                          ? "لا أخطاء في هذا الملف."
+                          : "لا صفوف للمعاينة — نتائج الدفعة المعتمدة في سجل النتائج."}
+                      </p>
+                    )}
+                    {rows.items.map((row) => {
+                      const n = row.normalized as Record<string, string | null>;
+                      const matched = row.action === "create";
+                      return (
+                        <div
+                          key={row.row_no}
+                          className="grid grid-cols-[40px_minmax(0,1fr)_auto] gap-x-3 gap-y-1 px-4 py-3 text-sm lg:grid-cols-[48px_140px_110px_70px_70px_minmax(0,1fr)] lg:items-center"
+                        >
+                          <span className="text-text-muted">{row.row_no}</span>
+                          <span className="font-medium text-text" dir="ltr">
+                            {n.university_number}
+                          </span>
+                          <span className="text-text-muted lg:text-text">{n.course_code}</span>
+                          <span className="hidden lg:block">{n.score ?? "—"}</span>
+                          <span className="hidden font-bold lg:block" dir="ltr">
+                            {n.letter || "—"}
+                          </span>
+                          <span
+                            className={`col-span-3 text-xs lg:col-span-1 ${matched ? "text-success-strong" : "text-danger-strong"}`}
+                          >
+                            {matched
+                              ? `مطابق · ${n.score ?? ""} \u2066${n.letter ?? ""}\u2069`
+                              : (row.errors as string[]).join(" · ")}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </Card>
+                  <Pager
+                    page={rows.page}
+                    count={rows.count}
+                    onPage={rows.setPage}
+                    label="صفحات الصفوف"
+                  />
+                </>
+              )}
             </section>
           </div>
         </>

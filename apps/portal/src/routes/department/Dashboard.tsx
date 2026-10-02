@@ -20,7 +20,7 @@ import { useMe } from "../../lib/auth";
 import { useCurrentTerm, useDepartment, useOfferings } from "../../lib/department";
 import { days, initials, num } from "../../lib/reports";
 import { ALL } from "../../components/Pager";
-import { count, N } from "../../lib/format";
+import { count, N, fileName } from "../../lib/format";
 
 /** Boards: DesktopDeptDashboard (desktop), AdminHome (phone). The section list is fixed (docs/02 §4.15). */
 export function DepartmentDashboard() {
@@ -76,7 +76,7 @@ export function DepartmentDashboard() {
       n: batches.data.length,
       title: "دفعات نتائج جاهزة للاعتماد",
       meta: batches.data
-        .map((b) => b.file_name)
+        .map((b) => fileName(b.file_name))
         .slice(0, 2)
         .join(" · "),
       to: "/result-imports",

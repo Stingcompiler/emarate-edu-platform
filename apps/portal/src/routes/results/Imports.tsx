@@ -17,7 +17,7 @@ import {
 } from "../../components/ui";
 import { api, ok } from "../../lib/api";
 import { useMe } from "../../lib/auth";
-import { when, count, N } from "../../lib/format";
+import { when, count, N, fileName } from "../../lib/format";
 import { asForm, formData } from "../../lib/upload";
 import { ALL, Pager, useServerPages } from "../../components/Pager";
 
@@ -153,7 +153,9 @@ export function ResultImports() {
                   >
                     <CodeTile top={b.department_name?.slice(0, 3) ?? "كل"} />
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-semibold text-text">{b.file_name}</p>
+                      <p className="truncate text-sm font-semibold text-text">
+                        {fileName(b.file_name)}
+                      </p>
                       <p className="text-xs text-text-muted">
                         {b.term_name} · {count((b.summary as { rows?: number }).rows ?? 0, N.row)} ·{" "}
                         {b.uploaded_by} · {when(b.created_at)}

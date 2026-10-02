@@ -23,6 +23,12 @@ export function ok<T>(result: { data?: T; error?: unknown; response: Response })
   throw new ApiError(result.response.status, result.error);
 }
 
+/** Like ok(), for something that may simply not exist yet (no submission so far): a 404 is
+ *  `null`, not an error — so the page shows its empty state, not «لم نجد بعض ما تطلبه». */
+export function okOrNone<T>(result: { data?: T; error?: unknown; response: Response }): T | null {
+  return result.response.status === 404 ? null : ok(result);
+}
+
 /**
  * Open a link fetched after a click (a signed file URL, a meeting link). The tab opens during
  * the click — browsers, iOS in particular, block tabs opened after an `await` — and is sent to
