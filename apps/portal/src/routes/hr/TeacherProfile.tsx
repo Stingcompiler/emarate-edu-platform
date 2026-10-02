@@ -104,41 +104,55 @@ export function TeacherProfile() {
                 </Card>
               ))}
             </div>
-            <SectionLabel>المؤشرات مقابل حدود الكلية — {p.term.name}</SectionLabel>
-            <Card className="space-y-3 p-4">
-              {bars.map((b) => (
-                <div key={b.label}>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-text-muted">{b.label}</span>
-                    <b className={b.bad ? "text-danger-strong" : "text-text"}>{b.value}</b>
-                  </div>
-                  <div className="mt-1 h-2 overflow-hidden rounded-full bg-surface-alt">
-                    <div
-                      className={`motion-grow h-full ${b.bad ? "bg-danger" : "bg-success"}`}
-                      style={{ width: `${Math.round(b.ratio * 100)}%` }}
-                    />
-                  </div>
-                </div>
-              ))}
-            </Card>
-            <SectionLabel>المواد هذا الفصل</SectionLabel>
-            <Card className="divide-y divide-border-soft">
-              {p.offerings.map((o) => (
-                <div key={o.public_id} className="px-4 py-3 text-sm">
-                  <p className="font-semibold text-text">
-                    <bdi className="font-mono text-xs text-text-muted">{o.code}</bdi> {o.name}
-                    {o.role === "ta" ? " · معيد" : ""}
-                  </p>
-                  <p className="text-xs text-text-muted">
-                    {count(o.students, N.student)} · {num(o.lectures)}/{num(o.planned)} محاضرات ·{" "}
-                    غير المصحح {num(o.ungraded)}
-                  </p>
-                </div>
-              ))}
-              {!p.offerings.length && (
-                <p className="px-4 py-4 text-sm text-text-muted">لا مواد هذا الفصل.</p>
-              )}
-            </Card>
+            {/* Without the HR side column (a department viewer), the indicators and the courses
+                sit side by side on large screens instead of two bands across the page. */}
+            <div
+              className={
+                p.notices || can(me.data, "hr.notify")
+                  ? "pt-2"
+                  : "pt-2 lg:grid lg:grid-cols-2 lg:items-start lg:gap-6"
+              }
+            >
+              <div>
+                <SectionLabel>المؤشرات مقابل حدود الكلية — {p.term.name}</SectionLabel>
+                <Card className="space-y-3 p-4">
+                  {bars.map((b) => (
+                    <div key={b.label}>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-text-muted">{b.label}</span>
+                        <b className={b.bad ? "text-danger-strong" : "text-text"}>{b.value}</b>
+                      </div>
+                      <div className="mt-1 h-2 overflow-hidden rounded-full bg-surface-alt">
+                        <div
+                          className={`motion-grow h-full ${b.bad ? "bg-danger" : "bg-success"}`}
+                          style={{ width: `${Math.round(b.ratio * 100)}%` }}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </Card>
+              </div>
+              <div className={p.notices || can(me.data, "hr.notify") ? "mt-6" : "mt-6 lg:mt-0"}>
+                <SectionLabel>المواد هذا الفصل</SectionLabel>
+                <Card className="divide-y divide-border-soft">
+                  {p.offerings.map((o) => (
+                    <div key={o.public_id} className="px-4 py-3 text-sm">
+                      <p className="font-semibold text-text">
+                        <bdi className="font-mono text-xs text-text-muted">{o.code}</bdi> {o.name}
+                        {o.role === "ta" ? " · معيد" : ""}
+                      </p>
+                      <p className="text-xs text-text-muted">
+                        {count(o.students, N.student)} · {num(o.lectures)}/{num(o.planned)} محاضرات
+                        · غير المصحح {num(o.ungraded)}
+                      </p>
+                    </div>
+                  ))}
+                  {!p.offerings.length && (
+                    <p className="px-4 py-4 text-sm text-text-muted">لا مواد هذا الفصل.</p>
+                  )}
+                </Card>
+              </div>
+            </div>
           </div>
           <aside className="mt-6 space-y-4 lg:mt-0">
             {p.notices && (
