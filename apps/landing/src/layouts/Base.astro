@@ -77,6 +77,8 @@ const ext = (external: boolean) => (external ? { rel: "noopener", target: "_blan
     <title>{fullTitle}</title>
     <meta name="description" content={desc} />
     <link rel="canonical" href={canonical} />
+    {/* A demo or test copy (SITE_NOINDEX=1) is kept out of search results. */}
+    {import.meta.env.SITE_NOINDEX === "1" && <meta name="robots" content="noindex, nofollow" />}
     <link
       rel="alternate"
       type="application/rss+xml"
