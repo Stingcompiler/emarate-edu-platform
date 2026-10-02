@@ -6,7 +6,7 @@ import { PortalShell } from "../../components/PortalShell";
 import { Card, SectionLabel, StatusBadge, STATUS_LABELS } from "../../components/ui";
 import { api, ok } from "../../lib/api";
 import { useMe } from "../../lib/auth";
-import { when } from "../../lib/format";
+import { when, fileName } from "../../lib/format";
 import { num } from "../../lib/reports";
 import { Inbox } from "./Inbox";
 import { ALL } from "../../components/Pager";
@@ -69,7 +69,7 @@ export function ResultsHome() {
                 title: "دفعات بها أخطاء",
                 meta: list
                   .filter((b) => b.status === "has_errors")
-                  .map((b) => b.file_name)
+                  .map((b) => fileName(b.file_name))
                   .join(" · "),
                 to: "/result-imports",
                 tone: "danger",
@@ -102,7 +102,7 @@ export function ResultsHome() {
                 className="flex items-center gap-3 px-4 py-3 hover:bg-surface-alt"
               >
                 <span className="min-w-0 flex-1">
-                  <b className="block truncate text-sm text-text">{b.file_name}</b>
+                  <b className="block truncate text-sm text-text">{fileName(b.file_name)}</b>
                   <span className="text-xs text-text-muted">
                     {b.department_name || "الكلية"} · {b.term_name} · {b.uploaded_by} ·{" "}
                     {when(b.created_at)}

@@ -76,8 +76,7 @@ export function Registrars() {
           <Card key={d.id} className={`p-3 text-sm ${who.length ? "" : "bg-danger-soft/40"}`}>
             <b className="block text-text">{d.name_ar}</b>
             <span className={who.length ? "text-text-muted" : "font-semibold text-danger-strong"}>
-              {who.map((u) => u.full_name_ar).join(" · ") ||
-                "بلا مسجل — الطلبات تذهب لمسؤول المسجلين"}
+              {who.map((u) => u.full_name_ar).join(" · ") || "بلا مسجل — لمسؤول المسجلين"}
             </span>
           </Card>
         ))}
@@ -96,11 +95,16 @@ export function Registrars() {
               </span>
               <span className="min-w-0 flex-1">
                 <b className="block text-text">{u.full_name_ar}</b>
-                <span className="text-xs text-text-muted">
-                  <bdi>{u.email}</bdi> · {count(load.data?.[u.public_id] ?? 0, N.application)}
+                <bdi className="block truncate text-xs text-text-muted" dir="ltr">
+                  {u.email}
+                </bdi>
+                <span className="block text-xs text-text-muted">
+                  {count(load.data?.[u.public_id] ?? 0, N.application)}
                 </span>
               </span>
-              <span className="flex flex-wrap items-center gap-1.5">
+              {/* Phones: the departments on their own line under the name (they squeezed the
+                  name and the email into a sliver beside them). */}
+              <span className="flex w-full flex-wrap items-center gap-1.5 ps-13 sm:w-auto sm:ps-0">
                 {links.map((r) => (
                   <span
                     key={r.id}
@@ -133,7 +137,7 @@ export function Registrars() {
                     e.target.value &&
                     link.mutate({ user: u.public_id, department: Number(e.target.value) })
                   }
-                  className="min-h-8 rounded-full border border-dashed border-border px-2 text-xs text-primary"
+                  className="min-h-10 rounded-full border border-dashed border-border px-3 text-xs text-primary sm:min-h-8"
                 >
                   <option value="">+ قسم</option>
                   {missing.map((d) => (

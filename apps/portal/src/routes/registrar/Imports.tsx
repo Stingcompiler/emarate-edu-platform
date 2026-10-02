@@ -14,7 +14,7 @@ import {
   WithSide,
 } from "../../components/ui";
 import { api, ok } from "../../lib/api";
-import { when, count, N } from "../../lib/format";
+import { when, count, N, fileName } from "../../lib/format";
 import { downloadCsv, num } from "../../lib/reports";
 import { asForm, formData } from "../../lib/upload";
 import { Pager, useServerPages } from "../../components/Pager";
@@ -158,7 +158,7 @@ export function StudentImports() {
                 className="flex items-center gap-3 px-4 py-3 hover:bg-surface-alt"
               >
                 <span className="min-w-0 flex-1">
-                  <b className="block truncate text-sm text-text">{b.file_name}</b>
+                  <b className="block truncate text-sm text-text">{fileName(b.file_name)}</b>
                   <span className="text-xs text-text-muted">
                     {b.uploaded_by} · {when(b.created_at)} · {count(s.rows ?? 0, N.row)} · إنشاء{" "}
                     {num(s.create ?? 0)} · تحديث {num(s.update ?? 0)} · أخطاء {num(s.error ?? 0)}
@@ -230,7 +230,7 @@ function ImportDetailBody({ id }: { id: string }) {
   const shown = (rows.data ?? []).filter((r) => !filter || r.action === filter);
   return (
     <PortalShell
-      title={b ? b.file_name : "دفعة استيراد"}
+      title={b ? fileName(b.file_name) : "دفعة استيراد"}
       subtitle={
         b ? `${IMPORT_STATUS[b.status] ?? b.status} · ${count(s.rows ?? 0, N.row)}` : undefined
       }

@@ -12,7 +12,7 @@ import {
   StatusBadge,
   problemMessage,
 } from "../../components/ui";
-import { api, ok } from "../../lib/api";
+import { api, ok, okOrNone } from "../../lib/api";
 import { when, count, N, score } from "../../lib/format";
 import { dueLabel, fmtSize, openFile, useCourse, isCourseStaff } from "../../lib/learning";
 import { asForm, formData } from "../../lib/upload";
@@ -77,7 +77,8 @@ function StudentView({ a }: { a: A }) {
   const mine = useQuery({
     queryKey: ["assignment", a.public_id, "mine"],
     queryFn: async () =>
-      ok(await api.GET("/api/v1/assignments/{public_id}/my-submission", path)) ?? null,
+      // Not handed in yet is a 404 from the API: an empty state here, not an error.
+      okOrNone(await api.GET("/api/v1/assignments/{public_id}/my-submission", path)),
   });
   const s = mine.data;
   const now = Date.now();

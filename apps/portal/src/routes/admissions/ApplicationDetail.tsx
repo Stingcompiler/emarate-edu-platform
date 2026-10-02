@@ -192,42 +192,46 @@ export function ApplicationDetail() {
                           </span>
                         </span>
                       </button>
-                      <StatusBadge
-                        status={
-                          d.status === "accepted"
-                            ? "approved"
-                            : d.status === "rejected"
-                              ? "rejected"
-                              : "pending"
-                        }
-                        label={
-                          d.status === "accepted"
-                            ? "مقبول"
-                            : d.status === "rejected"
-                              ? "مرفوض"
-                              : "للمراجعة"
-                        }
-                      />
-                      {open && d.status !== "accepted" && (
-                        <Button
-                          variant="secondary"
-                          className="min-h-8 px-3 text-xs"
-                          onClick={() => review.mutate({ doc: d.public_id, status: "accepted" })}
-                          disabled={!canAct || review.isPending}
-                        >
-                          قبول
-                        </Button>
-                      )}
-                      {open && d.status !== "rejected" && (
-                        <Button
-                          variant="secondary"
-                          className="min-h-8 px-3 text-xs text-danger-strong"
-                          onClick={() => review.mutate({ doc: d.public_id, status: "rejected" })}
-                          disabled={!canAct || review.isPending}
-                        >
-                          رفض
-                        </Button>
-                      )}
+                      {/* Phones: status and decisions on their own line (they squeezed the
+                          document's name into three short lines). */}
+                      <span className="flex w-full items-center justify-end gap-2 sm:w-auto">
+                        <StatusBadge
+                          status={
+                            d.status === "accepted"
+                              ? "approved"
+                              : d.status === "rejected"
+                                ? "rejected"
+                                : "pending"
+                          }
+                          label={
+                            d.status === "accepted"
+                              ? "مقبول"
+                              : d.status === "rejected"
+                                ? "مرفوض"
+                                : "للمراجعة"
+                          }
+                        />
+                        {open && d.status !== "accepted" && (
+                          <Button
+                            variant="secondary"
+                            className="min-h-10 px-3 text-xs sm:min-h-8"
+                            onClick={() => review.mutate({ doc: d.public_id, status: "accepted" })}
+                            disabled={!canAct || review.isPending}
+                          >
+                            قبول
+                          </Button>
+                        )}
+                        {open && d.status !== "rejected" && (
+                          <Button
+                            variant="secondary"
+                            className="min-h-10 px-3 text-xs text-danger-strong sm:min-h-8"
+                            onClick={() => review.mutate({ doc: d.public_id, status: "rejected" })}
+                            disabled={!canAct || review.isPending}
+                          >
+                            رفض
+                          </Button>
+                        )}
+                      </span>
                     </div>
                   ))}
                 </Card>

@@ -134,6 +134,19 @@ export function ltr(text: string | null | undefined): string {
   return text ? `\u2066${text}\u2069` : "";
 }
 
+/**
+ * A file name inside Arabic text (owner review 2026-10-02: «csv.المستوى الأول»). An Arabic
+ * name keeps its own direction and only the extension is isolated left-to-right, so it reads
+ * «…المستوى الأول.csv»; isolating the whole name LTR would reorder words around a dash. A
+ * Latin name is isolated whole.
+ */
+export function fileName(name: string | null | undefined): string {
+  if (!name) return "";
+  const dot = name.lastIndexOf(".");
+  if (!/[\u0600-\u06FF]/.test(name) || dot <= 0) return `\u2066${name}\u2069`;
+  return `\u2068${name.slice(0, dot)}\u2069\u2066${name.slice(dot)}\u2069`;
+}
+
 /** URL slug from a title — Arabic letters are kept (the server's SlugField allows Unicode). */
 export function slugify(title: string, max = 100): string {
   return title
