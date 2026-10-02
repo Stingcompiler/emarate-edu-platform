@@ -11,6 +11,7 @@ import {
   PasswordField,
 } from "../components/ui";
 import { api } from "../lib/api";
+import { OtpInput } from "../components/OtpInput";
 
 type Step = "details" | "code" | "password" | "done";
 
@@ -144,15 +145,11 @@ export function Register() {
             </>
           )}
           {step === "code" && (
-            <Field
+            <OtpInput
               label="رمز التحقق"
-              inputMode="numeric"
-              autoComplete="one-time-code"
-              dir="ltr"
-              className="text-center tracking-[0.5em]"
-              maxLength={6}
+              hint="6 أرقام وصلت إلى بريدك"
               value={code}
-              onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))}
+              onChange={setCode}
               required
               autoFocus
             />

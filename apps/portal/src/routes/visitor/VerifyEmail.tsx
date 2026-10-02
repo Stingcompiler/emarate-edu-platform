@@ -3,6 +3,7 @@ import { useState } from "react";
 
 import { Button, Card, Field, Notice, problemMessage } from "../../components/ui";
 import { saveSession, type VisitorSession, visitorApi } from "../../lib/visitor";
+import { OtpInput } from "../../components/OtpInput";
 
 /** Board: VisitorApplyVerify — email → 6-digit code → a 30-minute visitor session. */
 export function VerifyEmail({
@@ -59,15 +60,11 @@ export function VerifyEmail({
           autoComplete="email"
         />
         {sent && (
-          <Field
+          <OtpInput
             label="رمز التحقق"
-            inputMode="numeric"
-            autoComplete="one-time-code"
-            dir="ltr"
-            className="text-center tracking-[0.5em]"
-            maxLength={6}
+            hint="6 أرقام وصلت إلى بريدك"
             value={code}
-            onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))}
+            onChange={setCode}
             autoFocus
           />
         )}
