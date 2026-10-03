@@ -122,6 +122,8 @@ CAPABILITIES: dict[str, frozenset[Role]] = {
     "results.manage": frozenset(
         {R.SYSTEM_ADMIN, R.RESULTS_OFFICER, R.DEPARTMENT_MANAGER, R.DEPARTMENT_SUPERVISOR}
     ),
+    # Removing an uncommitted batch: the supervisor deletes nothing (docs/03 §3.7, §7 «الحذف»).
+    "results.delete": frozenset({R.SYSTEM_ADMIN, R.RESULTS_OFFICER, R.DEPARTMENT_MANAGER}),
     "results.view": frozenset(
         {
             R.SYSTEM_ADMIN,

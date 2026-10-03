@@ -1,7 +1,9 @@
 from django.db import transaction
+from django.db.models import F
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.utils.decorators import method_decorator
+from django.utils.translation import gettext
 from django.views.decorators.cache import cache_control
 from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework import mixins, status, viewsets
@@ -286,8 +288,16 @@ class AnnouncementViewSet(viewsets.ModelViewSet):
         obj = serializer.save()
         record(_meta(self.request), "announcement.update", obj, old=old, new=snapshot(obj))
 
+    def _still_allowed(self, obj):
+        """Publishing or archiving re-checks the author's authority today: a revoked role or a
+        teacher taken off the course cannot publish an old draft."""
+        self._owned(obj)
+        services.require_announce(self.request.user, obj.scope, obj.scope_id, obj.audience)
+
     def perform_destroy(self, instance):
         self._owned(instance)
+        if not services.may_delete_announcement(self.request.user, instance):
+            raise PermissionDenied(gettext("You may not delete this announcement."))
         record(_meta(self.request), "announcement.delete", instance, old=snapshot(instance))
         instance.delete()
 
@@ -295,7 +305,7 @@ class AnnouncementViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=["post"])
     def publish(self, request, public_id=None):
         obj = self.get_object()
-        self._owned(obj)
+        self._still_allowed(obj)
         obj.status = Status.PUBLISHED
         obj.publish_at = obj.publish_at or timezone.now()
         obj.save(update_fields=["status", "publish_at", "updated_at"])
@@ -308,7 +318,7 @@ class AnnouncementViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=["post"])
     def archive(self, request, public_id=None):
         obj = self.get_object()
-        self._owned(obj)
+        self._still_allowed(obj)
         obj.status = Status.ARCHIVED
         obj.save(update_fields=["status", "updated_at"])
         record(_meta(request), "announcement.archive", obj)
@@ -430,5 +440,5 @@ class PublicRedirectView(_PublicRead):
     )
     def get(self, request):
         redirect = get_object_or_404(Redirect, from_path=request.query_params.get("path", ""))
-        Redirect.objects.filter(pk=redirect.pk).update(hits=redirect.hits + 1)
+        Redirect.objects.filter(pk=redirect.pk).update(hits=F("hits") + 1)
         return Response(RedirectSerializer(redirect).data, status=status.HTTP_200_OK)

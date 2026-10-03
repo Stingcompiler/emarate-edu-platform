@@ -47,3 +47,12 @@ def test_no_operation_fails_with_a_server_error(case, admin_headers):
     cache.clear()  # throttle history lives in the cache; thousands of calls must get through
     response = case.call(headers=admin_headers)
     case.validate_response(response, checks=(not_a_server_error,))
+
+
+def test_a_nul_byte_in_the_address_is_a_400_not_a_500(client, db):
+    """Found by the contract run on Postgres: /api/public/redirects?path=…%00… was a 500."""
+    response = client.get("/api/public/redirects?path=%2Fold%00page")
+    assert response.status_code == 400
+    assert response["Content-Type"] == "application/problem+json"
+    assert response.json()["code"] == "invalid_character"
+    assert client.get("/api/public/redirects?path=%2Fnothing").status_code == 404

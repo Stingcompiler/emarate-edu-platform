@@ -90,6 +90,37 @@ def may_announce(user, scope: str, scope_id: int | None, audience: str) -> bool:
     return False
 
 
+# College-wide roles that address a department through their own branch of may_announce.
+_COLLEGE_ANNOUNCERS = frozenset(
+    {
+        Role.SYSTEM_ADMIN,
+        Role.SITE_MANAGER,
+        Role.EVENTS_MANAGER,
+        Role.HEAD_REGISTRAR,
+        Role.ACADEMIC_AFFAIRS,
+    }
+)
+
+
+def may_delete_announcement(user, announcement) -> bool:
+    """Deleting is narrower than announcing (docs/03 §3.7, §3.9, §7 «الحذف»): a supervisor or a
+    TA never deletes; a teacher removes only their own course announcement."""
+    if not may_announce(user, announcement.scope, announcement.scope_id, announcement.audience):
+        return False
+    department = _department_of(announcement.scope, announcement.scope_id)
+    if department is None or rbac.roles_of(user) & _COLLEGE_ANNOUNCERS:
+        return True
+    if rbac.can(user, "learning.delete", department):
+        return True
+    return (
+        announcement.scope == A.Scope.OFFERING
+        and announcement.created_by_id == user.pk
+        and OfferingInstructor.objects.filter(
+            offering=announcement.scope_id, user=user, role="teacher"
+        ).exists()
+    )
+
+
 def require_announce(user, scope, scope_id, audience) -> None:
     if not may_announce(user, scope, scope_id, audience):
         raise PermissionDenied(
