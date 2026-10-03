@@ -115,6 +115,13 @@ def test_cases(
     )
     assert decided.data["status"] == "decided"
     assert [e["kind"] for e in decided.data["events"]] == ["opened", "note", "decided"]
+    from audit.models import AuditLog
+
+    note = AuditLog.objects.get(action="case.note")
+    assert (
+        "اتصلنا" not in str(note.new)
+        and note.department_id == classroom.offering.course.department_id
+    )
 
     manager = make_user(Role.DEPARTMENT_MANAGER, department=it_dept)
     assert api(manager).get(url).status_code == 200

@@ -259,8 +259,13 @@ class MyPublicProfileView(APIView):
     def get(self, request):
         return Response(PublicProfileSerializer(request.user).data)
 
+    # Who appears on a department's public page (docs/03 §3.10: a student cannot edit their name).
+    MEMBERS = frozenset({Role.TEACHER, Role.TA, Role.DEPARTMENT_MANAGER})
+
     @extend_schema(request=PublicProfileSerializer, responses=PublicProfileSerializer, tags=["me"])
     def patch(self, request):
+        if not rbac.roles_of(request.user) & self.MEMBERS:
+            raise PermissionDenied(gettext("Only teaching staff appear on the public pages."))
         serializer = PublicProfileSerializer(request.user, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         old = snapshot(request.user, self.FIELDS)

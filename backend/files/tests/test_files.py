@@ -142,6 +142,9 @@ def test_local_video_flow(api, classroom, client):
     )
     assert uploaded.status_code == 200, uploaded.data
     assert uploaded.data["status"] == "ready"
+    from audit.models import AuditLog
+
+    assert AuditLog.objects.filter(action="video.upload").count() == 1
     # Students reach it only through a published lecture.
     playback = f"/api/v1/videos/{video}/playback"
     assert api(classroom.student).get(playback).status_code == 404

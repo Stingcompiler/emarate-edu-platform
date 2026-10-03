@@ -327,6 +327,9 @@ def test_reorder_questions(api, classroom):
         == 204
     )
     assert [q["id"] for q in teacher.get(f"{URL}/{exam}/questions").data] == list(reversed(ids))
+    from audit.models import AuditLog
+
+    assert AuditLog.objects.filter(action="exam.reorder").count() == 1  # the refused one is not
 
 
 def test_the_monitor_counts_who_has_not_started(api, classroom, exam):
