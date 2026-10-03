@@ -402,3 +402,34 @@ def test_image_layout_is_chosen_by_the_page_editors(api, site, make_user):
     assert api(events).patch(url, {"image_layout": "grid"}, format="json").status_code == 403
     # The gallery's system draft starts as a grid.
     assert Page.objects.get(slug="gallery").image_layout == "grid"
+
+
+def test_deleting_announcements_is_narrower_than_writing_them(api, classroom, make_user, it_dept):
+    """docs/03 §3.7, §3.9: a supervisor or a TA never deletes; a teacher deletes their own
+    course announcement; publishing re-checks the author's authority today."""
+    from academic.models import OfferingInstructor
+
+    dept = {"scope": "department", "scope_id": it_dept.pk, "audience": "all_internal"}
+    supervisor = make_user(Role.DEPARTMENT_SUPERVISOR, department=it_dept)
+    manager = make_user(Role.DEPARTMENT_MANAGER, department=it_dept)
+    made = api(supervisor).post(A, {**dept, "title": "t", "body": "b"}, format="json").data
+    assert api(supervisor).delete(f"{A}/{made['public_id']}").status_code == 403
+    api(supervisor).post(f"{A}/{made['public_id']}/publish")  # the manager sees it once published
+    assert api(manager).delete(f"{A}/{made['public_id']}").status_code == 204
+
+    classroom.offering.ta_can_notify = True
+    classroom.offering.save(update_fields=["ta_can_notify"])
+    course = {"scope": "offering", "scope_id": classroom.offering.pk, "audience": "students"}
+    by_ta = api(classroom.ta).post(A, {**course, "title": "t", "body": "b"}, format="json").data
+    assert api(classroom.ta).delete(f"{A}/{by_ta['public_id']}").status_code == 403
+    by_teacher = api(classroom.teacher).post(
+        A, {**course, "title": "t", "body": "b"}, format="json"
+    )
+    assert api(classroom.teacher).delete(f"{A}/{by_teacher.data['public_id']}").status_code == 204
+
+    draft = (
+        api(classroom.teacher).post(A, {**course, "title": "t", "body": "b"}, format="json").data
+    )
+    OfferingInstructor.objects.filter(offering=classroom.offering, user=classroom.teacher).delete()
+    assert api(classroom.teacher).post(f"{A}/{draft['public_id']}/publish").status_code == 403
+    assert Announcement.objects.get(public_id=draft["public_id"]).status == "draft"

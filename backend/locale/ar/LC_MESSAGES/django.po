@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ecst-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-28 15:41+0200\n"
+"POT-Creation-Date: 2026-10-03 17:27+0200\n"
 "Language: ar\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -41,6 +41,9 @@ msgstr "أضف هذا الشخص إلى القسم أولًا."
 
 msgid "Already assigned to this course."
 msgstr "مُعيَّن على هذه المادة بالفعل."
+
+msgid "This student belongs to another department."
+msgstr "هذا الطالب من قسم آخر؛ يسجّله مسؤول المسجلين."
 
 msgid "Only active students can be enrolled."
 msgstr "لا يُسجَّل في المواد إلا الطلاب المنتظمون."
@@ -111,6 +114,12 @@ msgstr "لا يمكنك منح هذا الدور."
 
 msgid "Students get their role by registering."
 msgstr "يحصل الطلاب على دورهم عند التسجيل."
+
+msgid "You cannot grant a role to yourself."
+msgstr "لا يمكنك منح نفسك دورًا."
+
+msgid "A student account cannot hold a staff role."
+msgstr "حساب الطالب لا يحمل دورًا إداريًا."
 
 msgid "The user already has this role."
 msgstr "المستخدم يحمل هذا الدور بالفعل."
@@ -257,8 +266,23 @@ msgstr "الرابط يحتاج عنوانًا، والمجموعة تحتاج �
 msgid "Start with /."
 msgstr "ابدأ بـ /."
 
+msgid "Enter a year between 1800 and 2100."
+msgstr "أدخل سنة بين 1800 و2100."
+
+msgid "Use a portal path (/...) or an https:// link."
+msgstr "استخدم مسارًا في البوابة (/...) أو رابط https://."
+
+msgid "A list of figures."
+msgstr "قائمة أرقام."
+
+msgid "At most six figures."
+msgstr "ستة أرقام على الأكثر."
+
 msgid "This scope or audience is outside what you may announce to."
 msgstr "هذا النطاق أو الجمهور خارج ما يحق لك الإعلان له."
+
+msgid "You may not delete this announcement."
+msgstr "لا يمكنك حذف هذا الإعلان."
 
 msgid "The request conflicts with the current state."
 msgstr "الطلب يتعارض مع الحالة الحالية."
@@ -450,6 +474,9 @@ msgstr "يجب أن يكون قبل موعد التسليم."
 msgid "Pick a lecture of the same course."
 msgstr "اختر محاضرة من المادة نفسها."
 
+msgid "The list must name every lecture of the course once."
+msgstr "يجب أن تضم القائمة كل محاضرات المادة، كل محاضرة مرة واحدة."
+
 msgid "You cannot delete this lecture."
 msgstr "لا يمكنك حذف هذه المحاضرة."
 
@@ -596,11 +623,11 @@ msgstr "roles: قائمة أدوار غير فارغة."
 msgid "This audience is outside what you may notify."
 msgstr "هذا الجمهور خارج ما يحق لك إشعاره."
 
-msgid "Use a portal path (/...) or an https:// link."
-msgstr "استخدم مسارًا في البوابة (/...) أو رابط https://."
-
 msgid "Push endpoints are https URLs."
 msgstr "عناوين Push يجب أن تكون https."
+
+msgid "Not a browser push service."
+msgstr "هذا ليس عنوان خدمة إشعارات لمتصفح."
 
 #, python-format
 msgid "Choose from %(values)s."
@@ -700,6 +727,9 @@ msgstr "لهذه النتيجة طلب تعديل معلّق بالفعل."
 
 msgid "Already decided."
 msgstr "بُتّ فيه من قبل."
+
+msgid "Give the reason for rejecting."
+msgstr "اكتب سبب الرفض."
 
 msgid "Choose your department."
 msgstr "اختر قسمك."
@@ -825,6 +855,9 @@ msgstr "تاريخ الميلاد: استخدم YYYY-MM-DD أو DD/MM/YYYY"
 msgid "university_number: duplicated in this file"
 msgstr "الرقم الجامعي: مكرر في هذا الملف"
 
+msgid "This field is required."
+msgstr "هذا الحقل مطلوب."
+
 msgid "This number is already in use."
 msgstr "هذا الرقم الجامعي مستخدم لطالب آخر."
 
@@ -832,32 +865,8 @@ msgid "The student has activated an account with it."
 msgstr "فعّل الطالب حسابه بهذا الرقم؛ لا يتغير بعد التفعيل."
 
 msgid ""
-"This student has an account or academic history; it cannot be deleted. "
-"Ask student affairs to change the status instead."
+"This student has an account or academic history; it cannot be deleted. Ask "
+"student affairs to change the status instead."
 msgstr ""
 "لهذا الطالب حساب أو سجل أكاديمي فلا يُحذف. اطلب من شؤون الطلاب تغيير حالته "
 "بدلًا من ذلك."
-
-msgid "Not a browser push service."
-msgstr "هذا ليس عنوان خدمة إشعارات لمتصفح."
-
-msgid "You cannot grant a role to yourself."
-msgstr "لا يمكنك منح نفسك دورًا."
-
-msgid "A student account cannot hold a staff role."
-msgstr "حساب الطالب لا يحمل دورًا إداريًا."
-
-msgid "This student belongs to another department."
-msgstr "هذا الطالب من قسم آخر؛ يسجّله مسؤول المسجلين."
-
-msgid "Give the reason for rejecting."
-msgstr "اكتب سبب الرفض."
-
-msgid "Enter a year between 1800 and 2100."
-msgstr "أدخل سنة بين 1800 و2100."
-
-msgid "A list of figures."
-msgstr "قائمة أرقام."
-
-msgid "At most six figures."
-msgstr "ستة أرقام على الأكثر."
