@@ -18,7 +18,9 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         if options["list"] or not options["name"]:
-            for name in backups.existing():
+            for name in sorted(
+                backups.existing(backups.DB_SUFFIX) + backups.existing(backups.MEDIA_SUFFIX)
+            ):
                 self.stdout.write(name)
             return
         if not options["out"]:
@@ -26,6 +28,9 @@ class Command(BaseCommand):
         out = Path(options["out"])
         out.write_bytes(backups.decrypt(options["name"]))
         self.stdout.write(self.style.SUCCESS(f"Decrypted to {out}"))
+        if options["name"].endswith(backups.MEDIA_SUFFIX):
+            self.stdout.write(f"Unpack into MEDIA_ROOT with: tar -xzf {out} -C <MEDIA_ROOT>")
+            return
         self.stdout.write(
             "Restore with: pg_restore --clean --if-exists --no-owner --no-privileges "
             f'--dbname "$DATABASE_URL" {out}'

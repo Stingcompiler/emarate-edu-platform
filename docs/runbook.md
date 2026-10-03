@@ -67,6 +67,23 @@ uv run python manage.py restore_database --list
 uv run python manage.py restore_database --name backups/ecst-20261002T010000Z.dump.enc --out /tmp/ecst.dump
 ```
 
+**على خادم خاص (VPS، مثل نسخة العرض الحالية):**
+- المؤقِّت `ecst-backup.timer` يشغّل `backup_database` يوميًا الساعة 03:15، ويحتفظ بآخر `BACKUP_KEEP` نسخة (14).
+- لأن الملفات المرفوعة على قرص الخادم (`MEDIA_BACKEND=local`)، تُحفظ معها نسخة مشفّرة `ecst-media-<وقت>.tar.gz.enc`.
+- المكان: `/opt/ecst/media/private/backups/`، وهو مجلد خاص لا يقدّمه Caddy.
+- **هذه النسخ على قرص الخادم نفسه.** فقدان الخادم يُفقدها معه، فلا بد من نسخة خارجه (Bunny أو تخزين آخر يختاره المالك).
+- **المفتاح:**
+  - `BACKUP_ENCRYPTION_KEY` في `/opt/ecst/env`؛
+  - يقرؤه المالك وحده: `sudo grep '^BACKUP_ENCRYPTION_KEY=' /opt/ecst/env`؛
+  - ويحفظه في مدير كلمات المرور؛
+  - بدونه لا تُقرأ أي نسخة.
+
+```bash
+systemctl list-timers ecst-backup.timer        # الموعد القادم
+sudo systemctl start ecst-backup.service      # نسخة الآن
+journalctl -u ecst-backup -n 5                # نتيجة آخر نسخة
+```
+
 **تدريب الاستعادة (كل ربع سنة) — على قاعدة مؤقتة لا الإنتاج:**
 ```bash
 createdb ecst_drill
@@ -75,6 +92,10 @@ psql -d ecst_drill -c "select count(*) from students_studentrecord"
 dropdb ecst_drill
 ```
 دوّن التاريخ والمدة وعدد الصفوف في سجل التدريبات.
+
+| التاريخ | البيئة | النتيجة |
+|---|---|---|
+| 2026-10-03 | VPS (نسخة العرض) | 89 جدولًا، والأعداد مطابقة للإنتاج. المدة 5 ثوانٍ. سجل التدقيق يزيد صفًا في الإنتاج: صف النسخة نفسها. |
 
 **استعادة حقيقية:** أوقف `ecst-worker` و`ecst-beat` وضع `ecst-api` في وضع صيانة (Suspend)، ثم:
 ```bash
