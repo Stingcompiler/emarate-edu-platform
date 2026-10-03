@@ -24,7 +24,7 @@ log = logging.getLogger(__name__)
 A = Announcement
 
 
-def _department_of(scope: str, scope_id: int | None) -> int | None:
+def department_of(scope: str, scope_id: int | None) -> int | None:
     if scope == A.Scope.DEPARTMENT:
         return scope_id
     if scope == A.Scope.PROGRAM:
@@ -64,7 +64,7 @@ def may_announce(user, scope: str, scope_id: int | None, audience: str) -> bool:
         and scope in (A.Scope.COLLEGE, A.Scope.DEPARTMENT)
     ):
         return True
-    department = _department_of(scope, scope_id)
+    department = department_of(scope, scope_id)
     if (
         department
         and audience != A.Audience.PUBLIC
@@ -107,7 +107,7 @@ def may_delete_announcement(user, announcement) -> bool:
     TA never deletes; a teacher removes only their own course announcement."""
     if not may_announce(user, announcement.scope, announcement.scope_id, announcement.audience):
         return False
-    department = _department_of(announcement.scope, announcement.scope_id)
+    department = department_of(announcement.scope, announcement.scope_id)
     if department is None or rbac.roles_of(user) & _COLLEGE_ANNOUNCERS:
         return True
     if rbac.can(user, "learning.delete", department):

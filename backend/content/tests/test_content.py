@@ -433,3 +433,14 @@ def test_deleting_announcements_is_narrower_than_writing_them(api, classroom, ma
     OfferingInstructor.objects.filter(offering=classroom.offering, user=classroom.teacher).delete()
     assert api(classroom.teacher).post(f"{A}/{draft['public_id']}/publish").status_code == 403
     assert Announcement.objects.get(public_id=draft["public_id"]).status == "draft"
+
+
+def test_department_announcements_reach_the_departments_log(api, make_user, it_dept):
+    from audit.models import AuditLog
+
+    manager = make_user(Role.DEPARTMENT_MANAGER, department=it_dept)
+    body = {"scope": "department", "scope_id": it_dept.pk, "audience": "students"}
+    made = api(manager).post(A, {**body, "title": "t", "body": "b"}, format="json").data
+    api(manager).post(f"{A}/{made['public_id']}/publish")
+    rows = AuditLog.objects.filter(action__startswith="announcement.")
+    assert {r.department_id for r in rows} == {it_dept.pk} and rows.count() == 2

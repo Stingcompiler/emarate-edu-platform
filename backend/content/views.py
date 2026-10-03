@@ -224,6 +224,11 @@ class SiteSettingsView(APIView):
         return Response(data.data)
 
 
+def _department(announcement) -> int | None:
+    """The department an announcement is addressed within, for that department's log."""
+    return services.department_of(announcement.scope, announcement.scope_id)
+
+
 @extend_schema(tags=["announcements"])
 class AnnouncementViewSet(viewsets.ModelViewSet):
     """Everyone reads the announcements meant for them; authors manage their own
@@ -264,7 +269,13 @@ class AnnouncementViewSet(viewsets.ModelViewSet):
             }
         )
         obj = serializer.save(created_by=self.request.user)
-        record(_meta(self.request), "announcement.create", obj, new=snapshot(obj))
+        record(
+            _meta(self.request),
+            "announcement.create",
+            obj,
+            new=snapshot(obj),
+            department_id=_department(obj),
+        )
 
     def _owned(self, obj):
         user = self.request.user
@@ -286,7 +297,14 @@ class AnnouncementViewSet(viewsets.ModelViewSet):
         )
         old = snapshot(obj)
         obj = serializer.save()
-        record(_meta(self.request), "announcement.update", obj, old=old, new=snapshot(obj))
+        record(
+            _meta(self.request),
+            "announcement.update",
+            obj,
+            old=old,
+            new=snapshot(obj),
+            department_id=_department(obj),
+        )
 
     def _still_allowed(self, obj):
         """Publishing or archiving re-checks the author's authority today: a revoked role or a
@@ -298,7 +316,13 @@ class AnnouncementViewSet(viewsets.ModelViewSet):
         self._owned(instance)
         if not services.may_delete_announcement(self.request.user, instance):
             raise PermissionDenied(gettext("You may not delete this announcement."))
-        record(_meta(self.request), "announcement.delete", instance, old=snapshot(instance))
+        record(
+            _meta(self.request),
+            "announcement.delete",
+            instance,
+            old=snapshot(instance),
+            department_id=_department(instance),
+        )
         instance.delete()
 
     @extend_schema(request=None, responses=AnnouncementSerializer)
@@ -309,7 +333,7 @@ class AnnouncementViewSet(viewsets.ModelViewSet):
         obj.status = Status.PUBLISHED
         obj.publish_at = obj.publish_at or timezone.now()
         obj.save(update_fields=["status", "publish_at", "updated_at"])
-        record(_meta(request), "announcement.publish", obj)
+        record(_meta(request), "announcement.publish", obj, department_id=_department(obj))
         if obj.audience == Announcement.Audience.PUBLIC:
             services.request_site_rebuild()
         return Response(self.get_serializer(obj).data)
@@ -321,7 +345,7 @@ class AnnouncementViewSet(viewsets.ModelViewSet):
         self._still_allowed(obj)
         obj.status = Status.ARCHIVED
         obj.save(update_fields=["status", "updated_at"])
-        record(_meta(request), "announcement.archive", obj)
+        record(_meta(request), "announcement.archive", obj, department_id=_department(obj))
         return Response(self.get_serializer(obj).data)
 
 
