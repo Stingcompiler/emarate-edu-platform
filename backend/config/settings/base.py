@@ -53,6 +53,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "core.middleware.NulByteMiddleware",
     "core.middleware.PublicCorsMiddleware",
     "core.middleware.PermissionsPolicyMiddleware",
     "django.middleware.csp.ContentSecurityPolicyMiddleware",

@@ -49,3 +49,34 @@ class PermissionsPolicyMiddleware:
         if policy:
             response.headers.setdefault("Permissions-Policy", policy)
         return response
+
+
+class NulByteMiddleware:
+    """Refuse a NUL byte in the path or query with a 400 (docs/05 §7 problem+json).
+
+    PostgreSQL text cannot hold NUL, so a value carrying one reached a query as a 500 (found
+    by the contract tests on /api/public/redirects); no real link ever contains it.
+    """
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        query = request.META.get("QUERY_STRING", "")
+        if "\x00" in request.path_info or "%00" in query.lower() or "\x00" in query:
+            from django.http import JsonResponse
+            from django.utils.translation import gettext
+
+            from core.exceptions import PROBLEM_CONTENT_TYPE, problem
+
+            return JsonResponse(
+                problem(
+                    400,
+                    detail=gettext("The address contains an invalid character."),
+                    code="invalid_character",
+                ),
+                status=400,
+                content_type=PROBLEM_CONTENT_TYPE,
+                json_dumps_params={"ensure_ascii": False},
+            )
+        return self.get_response(request)

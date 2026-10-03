@@ -1,4 +1,5 @@
 from django.db import transaction
+from django.db.models import F
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.utils.decorators import method_decorator
@@ -439,5 +440,5 @@ class PublicRedirectView(_PublicRead):
     )
     def get(self, request):
         redirect = get_object_or_404(Redirect, from_path=request.query_params.get("path", ""))
-        Redirect.objects.filter(pk=redirect.pk).update(hits=redirect.hits + 1)
+        Redirect.objects.filter(pk=redirect.pk).update(hits=F("hits") + 1)
         return Response(RedirectSerializer(redirect).data, status=status.HTTP_200_OK)
