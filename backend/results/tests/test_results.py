@@ -120,12 +120,14 @@ def test_department_uploads_stay_in_the_department(
     other = make_user(Role.DEPARTMENT_MANAGER, department=ba_dept)
     assert api(other).get(f"{URL}/{batch['public_id']}").status_code == 404
     assert api(other).post(f"{URL}/{batch['public_id']}/commit").status_code == 404
+    # The supervisor deletes nothing (docs/03 §3.7); the manager removes the uncommitted batch.
     assert (
         api(make_user(Role.DEPARTMENT_SUPERVISOR, department=it_dept))
         .delete(f"{URL}/{batch['public_id']}")
         .status_code
-        == 204
+        == 403
     )
+    assert api(manager).delete(f"{URL}/{batch['public_id']}").status_code == 204
 
 
 def test_corrections_need_academic_affairs(

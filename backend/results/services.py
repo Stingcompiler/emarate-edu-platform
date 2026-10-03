@@ -33,8 +33,8 @@ def _dept(batch: ResultImportBatch) -> int | None:
     return batch.department_id
 
 
-def require_batch_scope(user, batch: ResultImportBatch) -> None:
-    scope = rbac.scope_for(user, "results.manage")
+def require_batch_scope(user, batch: ResultImportBatch, capability: str = "results.manage") -> None:
+    scope = rbac.scope_for(user, capability)
     allowed = scope.everything if batch.department_id is None else scope.allows(batch.department_id)
     if not allowed:
         raise PermissionDenied(gettext("Outside your results scope."))
@@ -123,8 +123,8 @@ def set_published(
 
 
 def reject(meta: RequestMeta, batch: ResultImportBatch) -> None:
-    """Only an uncommitted batch can be removed (docs/03 §3.4)."""
-    require_batch_scope(meta.actor, batch)
+    """Only an uncommitted batch can be removed (docs/03 §3.4), and not by a supervisor."""
+    require_batch_scope(meta.actor, batch, "results.delete")
     if batch.status not in (B.VALIDATED, B.HAS_ERRORS):
         raise Conflict(
             gettext("A committed batch cannot be deleted; unpublish it instead."), code="committed"
