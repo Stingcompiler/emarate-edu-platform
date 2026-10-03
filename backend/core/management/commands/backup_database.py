@@ -5,17 +5,24 @@ from core import backups
 
 
 class Command(BaseCommand):
-    help = "Encrypted pg_dump to private storage (backups/); keeps the newest --keep copies."
+    help = (
+        "Encrypted pg_dump (and, on a local disk, the uploaded files) to private storage "
+        "(backups/); keeps the newest --keep copies of each."
+    )
 
     def add_arguments(self, parser):
         parser.add_argument("--keep", type=int, default=getattr(settings, "BACKUP_KEEP", 8))
 
     def handle(self, *args, **options):
-        name = backups.create(options["keep"])
+        names = backups.create(options["keep"])
         from audit.models import AuditLog
 
         # A plain log row (no model instance to point at).
         AuditLog.objects.create(
-            action="backup.create", target_type="backup", target_id=name, target_repr=name
+            action="backup.create",
+            target_type="backup",
+            target_id=names[0],
+            target_repr=" + ".join(names),
         )
-        self.stdout.write(self.style.SUCCESS(f"Backup stored: {name}"))
+        for name in names:
+            self.stdout.write(self.style.SUCCESS(f"Backup stored: {name}"))

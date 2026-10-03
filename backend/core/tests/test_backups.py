@@ -48,3 +48,36 @@ def test_backup_needs_a_key_and_postgres(settings, db):
     if "sqlite" in settings.DATABASES["default"]["ENGINE"]:
         with pytest.raises(ImproperlyConfigured):
             backups._pg_env_and_args()
+
+
+def test_local_media_is_archived_beside_the_dump(fake_dump, db, settings, tmp_path):
+    """On a single server the uploaded files are part of the backup (not the backups folder)."""
+    import io
+    import tarfile
+
+    settings.MEDIA_BACKEND = "local"
+    settings.MEDIA_ROOT = tmp_path / "media"
+    (tmp_path / "media/public").mkdir(parents=True)
+    (tmp_path / "media/private/submissions").mkdir(parents=True)
+    (tmp_path / "media/private/backups").mkdir(parents=True)
+    (tmp_path / "media/public/cover.jpg").write_bytes(b"jpg")
+    (tmp_path / "media/private/submissions/a.pdf").write_bytes(b"pdf")
+    (tmp_path / "media/private/backups/old.dump.enc").write_bytes(b"old")
+
+    for _ in range(3):
+        call_command("backup_database", keep=2)
+    media = backups.existing(backups.MEDIA_SUFFIX)
+    assert len(media) == 2 and len(backups.existing()) == 2  # each pruned on its own
+    with tarfile.open(fileobj=io.BytesIO(backups.decrypt(media[-1])), mode="r:gz") as archive:
+        names = sorted(archive.getnames())
+    assert names == ["private/submissions/a.pdf", "public/cover.jpg"]
+
+    out = tmp_path / "media.tar.gz"
+    call_command("restore_database", name=media[-1], out=str(out))
+    with tarfile.open(out) as unpacked:
+        assert unpacked.getnames()
+
+
+def test_media_on_bunny_is_not_archived(fake_dump, db, settings):
+    settings.MEDIA_BACKEND = "bunny"
+    assert backups.media_archive() is None
