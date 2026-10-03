@@ -47,6 +47,24 @@
   ```
 - الموقع العام: إن فشل بناؤه (`LANDING_STRICT=1` يوقفه عند تعطّل الـ API) تبقى النسخة المنشورة السابقة كما هي؛ أعد البناء من Deploy Hook بعد إصلاح الـ API.
 
+### على خادم خاص (VPS)
+
+Render لا يُستعمل هنا. النشر بسكربت واحد من جهاز المطوّر، يبني `origin/main` بالضبط لا ملفات العمل المحلية:
+
+```bash
+export ECST_SSH=user@host ECST_SSH_KEY=~/.ssh/<key>     # عنوان الخادم لا يُكتب في المستودع (عام)
+export VITE_SITE_URL=https://<الموقع>/ar/                # للبوابة فقط
+scripts/deploy-vps.sh all          # أو backend | portal | site
+scripts/deploy-vps.sh status       # الإصدار المنشور وحالة الخدمات والمؤقتات
+scripts/deploy-vps.sh rollback backend   # أو portal | site | all
+```
+
+- قبل كل نشر تُحفظ النسخة الحالية في `/opt/ecst/previous/`، ويُكتب الإصدار في `/opt/ecst/DEPLOYED`.
+- `rollback` يعيدها في خطوة واحدة.
+- **الترحيلات لا تُعكس تلقائيًا:**
+  - اعكسها بـ `migrate <app> <previous>` قبل التراجع؛
+  - أو استعد نسخة احتياطية (§5) إن حذف الترحيل بيانات.
+
 ## 4. التحقق بعد النشر
 
 - `https://api.ecst.edu.sd/api/public/health` → `status: ok`.
