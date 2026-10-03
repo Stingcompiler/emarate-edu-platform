@@ -188,6 +188,11 @@ def test_department_page_lists_faculty_only_with_their_consent(api, it_dept, mak
         ("أ. أستاذ", "teacher", "أستاذ مشارك"),
         ("م. معيد", "ta", "معيد"),
     ]
+    # A student cannot rename themselves through it (docs/03 §3.10).
+    student = make_user(Role.STUDENT)
+    assert (
+        api(student).patch("/api/v1/me/public-profile", {"full_name_en": "X"}, format="json")
+    ).status_code == 403
     # Turning it off removes them; nobody else can switch it for them.
     api(teacher).patch("/api/v1/me/public-profile", {"public_profile": False}, format="json")
     assert "أ. أستاذ" not in [f["name_ar"] for f in api().get(url).data["faculty"]]

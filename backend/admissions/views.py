@@ -63,8 +63,21 @@ class _Audited(viewsets.ModelViewSet):
     def get_permissions(self):
         return [IsAuthenticated(), capability("admissions.view", "admissions.manage")()]
 
+    @staticmethod
+    def _department(obj) -> int | None:
+        """An intake belongs to its programme's department (shown in that department's log);
+        a cycle is college-wide."""
+        program = getattr(obj, "program", None)
+        return program.department_id if program else None
+
     def perform_create(self, serializer):
-        record(_meta(self.request), f"admissions.{self.audit_name}_create", serializer.save())
+        obj = serializer.save()
+        record(
+            _meta(self.request),
+            f"admissions.{self.audit_name}_create",
+            obj,
+            department_id=self._department(obj),
+        )
 
     def perform_update(self, serializer):
         old = snapshot(serializer.instance)
@@ -75,6 +88,7 @@ class _Audited(viewsets.ModelViewSet):
             obj,
             old=old,
             new=snapshot(obj),
+            department_id=self._department(obj),
         )
 
     def perform_destroy(self, instance):
@@ -82,7 +96,12 @@ class _Audited(viewsets.ModelViewSet):
             from core.errors import Conflict
 
             raise Conflict(gettext("Applications exist; close the intake instead."), code="in_use")
-        record(_meta(self.request), f"admissions.{self.audit_name}_delete", instance)
+        record(
+            _meta(self.request),
+            f"admissions.{self.audit_name}_delete",
+            instance,
+            department_id=self._department(instance),
+        )
         instance.delete()
 
 

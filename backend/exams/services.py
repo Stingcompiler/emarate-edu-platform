@@ -112,6 +112,7 @@ def reorder(meta: RequestMeta, exam: Exam, ids: list[int]) -> None:
     with transaction.atomic():
         for position, pk in enumerate(ids, start=1):
             Question.objects.filter(pk=pk).update(order=position)
+        record(meta, "exam.reorder", exam, new={"order": ids}, department_id=_dept(exam))
 
 
 def problems(exam: Exam) -> list[str]:

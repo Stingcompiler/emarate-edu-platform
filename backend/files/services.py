@@ -180,7 +180,15 @@ def local_video_upload(meta: RequestMeta, video: VideoAsset, uploaded) -> VideoA
     video.file = uploaded
     video.size = uploaded.size
     video.status = VideoAsset.Status.READY
-    video.save(update_fields=["file", "size", "status", "updated_at"])
+    with transaction.atomic():
+        video.save(update_fields=["file", "size", "status", "updated_at"])
+        record(
+            meta,
+            "video.upload",
+            video,
+            new={"size": video.size},
+            department_id=video.offering.course.department_id if video.offering_id else None,
+        )
     return video
 
 

@@ -419,3 +419,14 @@ def test_claim_and_assign(
     listed = api(head).get("/api/v1/users", {"role": "registrar"}).data["results"]
     assert str(registrar.public_id) in {u["public_id"] for u in listed}
     assert all(any(r["role"] == "registrar" for r in u["roles"]) for u in listed)
+
+
+def test_intake_changes_reach_the_departments_log(api, intake, make_user):
+    """An intake belongs to its programme's department, so its log shows the change."""
+    from audit.models import AuditLog
+
+    head = make_user(Role.HEAD_REGISTRAR)
+    saved = api(head).patch(f"/api/v1/intakes/{intake.pk}", {"capacity": 90}, format="json")
+    assert saved.status_code == 200, saved.data
+    entry = AuditLog.objects.get(action="admissions.intake_update")
+    assert entry.department_id == intake.program.department_id

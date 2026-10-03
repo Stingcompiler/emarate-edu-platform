@@ -171,7 +171,10 @@ def add_note(meta: RequestMeta, case: StudentCase, note: str) -> StudentCase:
     _require(meta.actor, "cases.manage")
     if not note.strip():
         raise ValidationError({"note": [gettext("Write the note.")]})
-    _event(case, StudentCaseEvent.Kind.NOTE, meta.actor, note)
+    with transaction.atomic():
+        _event(case, StudentCaseEvent.Kind.NOTE, meta.actor, note)
+        # The note itself stays in the case; the log only says one was added.
+        record(meta, "case.note", case, department_id=case.student_record.department_id)
     return case
 
 
