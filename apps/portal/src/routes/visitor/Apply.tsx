@@ -12,6 +12,7 @@ import {
   SectionLabel,
   problemMessage,
 } from "../../components/ui";
+import { useConfirm } from "../../components/Confirm";
 import { SuccessMark } from "../../components/motion";
 import { asForm, formData } from "../../lib/upload";
 import {
@@ -60,8 +61,12 @@ export function Apply() {
   useEffect(() => {
     document.title = "التقديم — كلية الإمارات";
   }, []);
+  // Opening a link with ?app= resumes at the form; while the visitor is changing programme
+  // the old ?app= is still in the URL for a render, so it must not pull them back.
+  const changingProgram = useRef(false);
   useEffect(() => {
-    if (appId && session && step < 3) setStep(3);
+    if (!appId) changingProgram.current = false;
+    else if (session && step < 3 && !changingProgram.current) setStep(3);
   }, [appId, session, step]);
 
   const application = useQuery({
@@ -132,6 +137,11 @@ export function Apply() {
           onNext={async () => {
             await refresh();
             setStep(4);
+          }}
+          onChangeProgram={() => {
+            changingProgram.current = true;
+            setParams({});
+            setStep(2);
           }}
         />
       )}
@@ -338,7 +348,29 @@ function FieldInput({
 
 const draftClock = new Intl.DateTimeFormat("ar-u-nu-latn", { hour: "numeric", minute: "2-digit" });
 
-function FormStep({ app, onNext }: { app: Application; onNext: () => void }) {
+function FormStep({
+  app,
+  onNext,
+  onChangeProgram,
+}: {
+  app: Application;
+  onNext: () => void;
+  onChangeProgram: () => void;
+}) {
+  const confirm = useConfirm();
+  // Another programme means another form (its own template): the draft is withdrawn so it
+  // does not count against the per-cycle limit, and the visitor starts the new one (review
+  // 2026-10-04 UX10).
+  const change = useMutation({
+    mutationFn: async () => {
+      const { data, error } = await visitorApi.POST(
+        "/api/visitor/applications/{public_id}/withdraw",
+        { params: { path: { public_id: app.public_id } } },
+      );
+      if (!data) throw error;
+    },
+    onSuccess: onChangeProgram,
+  });
   const [fullName, setFullName] = useState(app.full_name);
   const [phone, setPhone] = useState(app.phone_e164);
   const [answers, setAnswers] = useState<Record<string, unknown>>(app.answers ?? {});
@@ -389,7 +421,25 @@ function FormStep({ app, onNext }: { app: Application; onNext: () => void }) {
     };
   return (
     <div className="space-y-4">
-      <SectionLabel>{app.program_name}</SectionLabel>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <SectionLabel>{app.program_name}</SectionLabel>
+        <button
+          type="button"
+          disabled={change.isPending}
+          onClick={async () =>
+            (await confirm({
+              title: "تغيير البرنامج؟",
+              body: "لكل برنامج نموذجه؛ سيُسحب هذا الطلب وتبدأ طلبًا جديدًا للبرنامج الذي تختاره، وتعيد إدخال بياناته.",
+              confirm: "سحب الطلب واختيار برنامج آخر",
+              tone: "primary",
+            })) && change.mutate()
+          }
+          className="tap-44 text-sm font-semibold text-primary hover:underline"
+        >
+          تغيير البرنامج
+        </button>
+      </div>
+      {change.isError && <Notice>{problemMessage(change.error)}</Notice>}
       <Card>
         <Field
           label="الاسم الكامل *"
