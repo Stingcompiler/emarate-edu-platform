@@ -190,7 +190,7 @@ export function AuthLayout({
           <a href={SITE_URL} className="font-semibold hover:text-text">
             العودة إلى موقع الكلية
           </a>
-          <span>كلية الإمارات للعلوم والتقنية</span>
+          <span>كلية الإمارات للعلوم والتكنولوجيا</span>
         </footer>
       </main>
       <aside className="relative hidden overflow-hidden bg-header p-12 text-text-inverse lg:flex lg:flex-col lg:justify-between">
@@ -208,7 +208,9 @@ export function AuthLayout({
           <ellipse cx="200" cy="200" rx="190" ry="80" transform="rotate(-60 200 200)" />
           <circle cx="200" cy="200" r="34" />
         </svg>
-        <p className="relative text-sm font-semibold opacity-80">كلية الإمارات للعلوم والتقنية</p>
+        <p className="relative text-sm font-semibold opacity-80">
+          كلية الإمارات للعلوم والتكنولوجيا
+        </p>
         <div className="relative max-w-md">
           <p className="text-3xl font-bold leading-snug">
             بوابتك إلى الكلية —

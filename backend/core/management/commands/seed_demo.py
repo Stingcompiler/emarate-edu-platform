@@ -183,7 +183,7 @@ class Command(BaseCommand):
         college, _ = College.objects.get_or_create(
             code="ECST",
             defaults={
-                "name_ar": "كلية الإمارات للعلوم والتقنية",
+                "name_ar": "كلية الإمارات للعلوم والتكنولوجيا",
                 "name_en": "Emirates College of Science and Technology",
             },
         )

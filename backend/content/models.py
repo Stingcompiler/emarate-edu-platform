@@ -20,7 +20,7 @@ class Status(models.TextChoices):
 
 
 class SiteSettings(SingletonModel):
-    name_ar = models.CharField(max_length=200, default="كلية الإمارات للعلوم والتقنية")
+    name_ar = models.CharField(max_length=200, default="كلية الإمارات للعلوم والتكنولوجيا")
     name_en = models.CharField(max_length=200, default="Emirates College of Science and Technology")
     tagline = models.CharField(max_length=300, blank=True)
     email = models.EmailField(blank=True)
