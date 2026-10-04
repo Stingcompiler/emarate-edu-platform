@@ -57,34 +57,45 @@ export function formatClock(ms: number): string {
 /** Answers not yet confirmed by the server survive reloads and outages here. */
 export function pendingStore(attemptId: string) {
   const key = `exam:${attemptId}:pending`;
-  const read = (): Record<string, AnswerValue> => {
+  // The queue lives in memory and is mirrored to the device when the browser allows it: with
+  // storage blocked or full, sync still works from memory and the page can warn that a reload
+  // would lose what has not reached the server (review 2026-10-04, C7).
+  let memory: Record<string, AnswerValue> = {};
+  let persisted = true;
+  try {
+    memory = JSON.parse(localStorage.getItem(key) || "{}") as Record<string, AnswerValue>;
+  } catch {
+    memory = {};
+  }
+  const write = () => {
     try {
-      return JSON.parse(localStorage.getItem(key) || "{}") as Record<string, AnswerValue>;
-    } catch {
-      return {};
-    }
-  };
-  const write = (value: Record<string, AnswerValue>) => {
-    try {
-      if (Object.keys(value).length) localStorage.setItem(key, JSON.stringify(value));
+      if (Object.keys(memory).length) localStorage.setItem(key, JSON.stringify(memory));
       else localStorage.removeItem(key);
+      persisted = true;
     } catch {
-      /* storage full or blocked: the in-memory copy still syncs */
+      persisted = false;
     }
   };
   return {
-    read,
+    read: (): Record<string, AnswerValue> => ({ ...memory }),
     put(qid: number, value: AnswerValue) {
-      write({ ...read(), [qid]: value });
+      memory = { ...memory, [qid]: value };
+      write();
     },
     done(qid: number, value: AnswerValue) {
-      const current = read();
-      if (JSON.stringify(current[qid]) === JSON.stringify(value)) {
-        delete current[qid];
-        write(current);
+      if (JSON.stringify(memory[qid]) === JSON.stringify(value)) {
+        const next = { ...memory };
+        delete next[qid];
+        memory = next;
+        write();
       }
     },
-    clear: () => write({}),
+    clear() {
+      memory = {};
+      write();
+    },
+    /** False while the device refuses to keep the queue: it lives in this tab only. */
+    persisted: () => persisted,
   };
 }
 

@@ -1,11 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
 import { Check, Hourglass, X } from "lucide-react";
-import { Link, useParams } from "react-router";
+import { Link, useLocation, useParams } from "react-router";
 
 import { PortalShell } from "../../components/PortalShell";
-import { Button, Card, EmptyState, StatusBadge } from "../../components/ui";
+import { Button, Card, EmptyState, Notice, StatusBadge } from "../../components/ui";
 import { api } from "../../lib/api";
 import { formatClock, textParts } from "../../lib/exam";
+import { count, N } from "../../lib/format";
 
 type Review = {
   order: number;
@@ -38,9 +39,19 @@ export function ExamResult() {
     },
   });
   const r = result.data;
+  // Answers the page could not deliver before the deadline (TakeExam, review C6).
+  const unsent = (useLocation().state as { unsent?: number } | null)?.unsent ?? 0;
 
   return (
     <PortalShell title="نتيجة الاختبار" back={{ label: "الاختبارات", to: "/exams" }}>
+      {unsent > 0 && (
+        <div className="mb-4">
+          <Notice tone="warning">
+            انتهى الوقت قبل أن تصل {count(unsent, N.answer)} إلى الخادم بسبب الاتصال؛ لم تُحتسب.
+            راجع أستاذ المادة إن كان الانقطاع خارجًا عن إرادتك.
+          </Notice>
+        </div>
+      )}
       {result.isPending ? null : !r ? (
         <Card>
           <EmptyState icon={<Hourglass size={24} aria-hidden />} title="أُرسل اختبارك">
