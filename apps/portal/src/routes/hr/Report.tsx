@@ -26,7 +26,7 @@ export function HRReport() {
             <>
               <p className="text-lg font-bold text-text">تقرير أداء هيئة التدريس — {r.term.name}</p>
               <p className="text-xs text-text-muted">
-                كلية الإمارات للعلوم والتقنية · الموارد البشرية · حتى الأسبوع {num(r.term.week)}
+                كلية الإمارات للعلوم والتكنولوجيا · الموارد البشرية · حتى الأسبوع {num(r.term.week)}
               </p>
               <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
                 {[

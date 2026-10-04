@@ -219,7 +219,7 @@ export type Stats = { students: number; teachers: number; programs: number; depa
 
 export const site = () =>
   get<Site>("site", {
-    name_ar: "كلية الإمارات للعلوم والتقنية",
+    name_ar: "كلية الإمارات للعلوم والتكنولوجيا",
     name_en: "Emirates College of Science and Technology",
     tagline: "",
     email: "",

@@ -203,10 +203,14 @@ function TermSummary({ term, cumulative }: { term: Term; cumulative: string | nu
     { label: "ناجح", value: `${passed}/${term.results.length}` },
   ];
   return (
-    <Card className="mt-4 grid grid-cols-4 divide-x divide-border-soft">
+    // The column minimum is in rem, so enlarged text wraps the figures into two rows instead of
+    // pressing «15» against «3.40» (review 2026-10-04 UX4); the 1px gaps draw the dividers.
+    <Card className="mt-4 grid grid-cols-[repeat(auto-fit,minmax(4.5rem,1fr))] gap-px overflow-hidden bg-border-soft">
       {stats.map((s) => (
-        <div key={s.label} className="px-2 py-3 text-center">
-          <p className="text-lg font-bold text-text">{s.value}</p>
+        <div key={s.label} className="bg-surface px-2 py-3 text-center">
+          <p className="text-lg font-bold break-words text-text tabular-nums">
+            <bdi>{s.value}</bdi>
+          </p>
           <p className="text-xs text-text-muted">{s.label}</p>
         </div>
       ))}

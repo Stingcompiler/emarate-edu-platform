@@ -415,3 +415,20 @@ def test_the_student_exam_list_does_not_query_per_exam(api, classroom):
     assert response.status_code == 200 and response.data["count"] == 20
     assert len(large) == len(small)
     assert all(row["my_attempts"] == [] for row in response.data["results"])
+
+
+def test_a_suspended_student_cannot_start_or_keep_answering(api, classroom, exam, make_user):
+    """Owner decision 2026-10-04 (review C2): suspension closes exams; saved answers stay."""
+    student = api(classroom.student)
+    attempt = student.post(f"{URL}/{exam.public_id}/start").data
+    question = exam.questions.get(type="true_false").pk
+    answers = f"/api/v1/exam-attempts/{attempt['public_id']}/answers/{question}"
+    assert student.put(answers, {"answer": True}, format="json").status_code == 204
+    affairs = api(make_user(Role.STUDENT_AFFAIRS))
+    status = f"/api/v1/students/{classroom.record.public_id}/status"
+    assert affairs.post(status, {"status": "suspended", "reason": "قرار لجنة"}).status_code == 200
+    assert student.put(answers, {"answer": False}, format="json").status_code == 403
+    stored = ExamAttempt.objects.get(public_id=attempt["public_id"]).answers.get(
+        question_id=question
+    )
+    assert stored.answer is True

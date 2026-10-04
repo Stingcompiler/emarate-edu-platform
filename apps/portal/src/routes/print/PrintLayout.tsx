@@ -40,7 +40,7 @@ export function PrintLayout({
       <article className="mx-auto max-w-[210mm] bg-white px-[14mm] py-[12mm] text-[13px] text-n900 shadow-sm print:max-w-none print:p-0 print:shadow-none">
         <header className="flex items-start justify-between gap-4 border-b-2 border-navy-800 pb-3">
           <div>
-            <p className="text-xs font-semibold text-navy-700">كلية الإمارات للعلوم والتقنية</p>
+            <p className="text-xs font-semibold text-navy-700">كلية الإمارات للعلوم والتكنولوجيا</p>
             <h1 className="mt-1 text-xl font-bold text-navy-900">{title}</h1>
           </div>
           <div className="text-end text-[11px] leading-5 text-n600">{meta}</div>

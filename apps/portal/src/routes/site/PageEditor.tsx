@@ -448,7 +448,7 @@ export function PageEditor() {
                   ecst.edu.sd › {page.data?.path ?? (slug ? `p/${slug}` : "…")}
                 </p>
                 <p className="truncate text-base text-primary">
-                  {title || "عنوان الصفحة"} | كلية الإمارات للعلوم والتقنية
+                  {title || "عنوان الصفحة"} | كلية الإمارات للعلوم والتكنولوجيا
                 </p>
                 <p className="line-clamp-2 text-xs text-text-muted">
                   {searchText || "اكتب وصفًا أو فقرة أولى تعرّف بالصفحة."}

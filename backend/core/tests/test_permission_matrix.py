@@ -884,3 +884,28 @@ def test_audit_log_is_scoped_and_read_only(api, users, it_dept, ba_dept):
     for method in ("put", "patch", "delete"):
         response = getattr(api(users[R.SYSTEM_ADMIN]), method)(f"/api/v1/audit-logs/{entry.pk}")
         assert response.status_code == 405, method
+
+
+# Write gates for endpoints whose READS row says nothing about writing (review 2026-10-04
+# B7). An empty body is enough: a role without the write capability is refused (403) before
+# validation; a writer gets past the gate (400 for the empty body, never 403).
+WRITE_GATES: dict[str, tuple[str, frozenset]] = {
+    "admission cycles": ("/api/v1/admission-cycles", frozenset({R.SYSTEM_ADMIN, R.HEAD_REGISTRAR})),
+    "intakes": ("/api/v1/intakes", frozenset({R.SYSTEM_ADMIN, R.HEAD_REGISTRAR})),
+    "grading scales": (
+        "/api/v1/results/grading-scales",
+        frozenset({R.SYSTEM_ADMIN, R.RESULTS_OFFICER}),
+    ),
+}
+
+
+@pytest.mark.parametrize("name", sorted(WRITE_GATES))
+def test_write_gate(name, api, users):
+    path, writers = WRITE_GATES[name]
+    wrong = []
+    for role in Role:
+        got = api(users[role]).post(path, {}, format="json").status_code
+        allowed = got != 403
+        if allowed != (role in writers):
+            wrong.append(f"{role.value}: {got}")
+    assert not wrong, f"{name}: " + ", ".join(wrong)

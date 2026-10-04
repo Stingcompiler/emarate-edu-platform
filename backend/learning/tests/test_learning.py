@@ -478,3 +478,29 @@ def test_lecture_views_are_counted_for_staff_only(api, classroom, make_user):
     # Students don't see how many classmates opened it.
     assert student.get(f"/api/v1/lectures/{lecture}").data["views_count"] is None
     assert api(make_user(Role.STUDENT)).post(view).status_code == 404
+
+
+def test_suspension_closes_the_learning_space_and_reinstatement_reopens_it(
+    api, classroom, make_user
+):
+    """docs/03 §3.14, owner decision 2026-10-04 (review C2): a suspended student loses
+    lectures and submissions, keeps their record; reinstating restores access."""
+    lecture = _lecture(api, classroom)
+    assignment = _assignment(api, classroom)
+    student = api(classroom.student)
+    affairs = api(make_user(Role.STUDENT_AFFAIRS))
+    status = f"/api/v1/students/{classroom.record.public_id}/status"
+    assert affairs.post(status, {"status": "suspended", "reason": "قرار لجنة"}).status_code == 200
+
+    assert student.get(f"/api/v1/lectures/{lecture}").status_code in (403, 404)
+    assert student.post(
+        f"/api/v1/assignments/{assignment}/submit", {"content": "x"}
+    ).status_code in (403, 404)
+    assert student.get("/api/v1/lectures").data["count"] == 0
+
+    assert affairs.post(status, {"status": "active", "reason": "انتهت المدة"}).status_code == 200
+    assert student.get(f"/api/v1/lectures/{lecture}").status_code == 200
+    assert (
+        student.post(f"/api/v1/assignments/{assignment}/submit", {"content": "x"}).status_code
+        == 201
+    )
