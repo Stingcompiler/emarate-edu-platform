@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Copy, FileUp } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router";
 
 import {
@@ -105,8 +105,7 @@ export function Apply() {
       </ol>
       {session && step > 1 && (
         <p className="mb-4 text-xs text-text-muted">
-          ✓ البريد مُتحقق: <span dir="ltr">{maskEmail(session.email)}</span> · المسودة تُحفظ
-          تلقائيًا
+          ✓ البريد مُتحقق: <span dir="ltr">{maskEmail(session.email)}</span>
         </p>
       )}
       {step === 1 && (
@@ -337,22 +336,57 @@ function FieldInput({
   );
 }
 
+const draftClock = new Intl.DateTimeFormat("ar-u-nu-latn", { hour: "numeric", minute: "2-digit" });
+
 function FormStep({ app, onNext }: { app: Application; onNext: () => void }) {
   const [fullName, setFullName] = useState(app.full_name);
   const [phone, setPhone] = useState(app.phone_e164);
   const [answers, setAnswers] = useState<Record<string, unknown>>(app.answers ?? {});
   const fields = fieldsOf(app.form?.schema).filter((f) => f.type !== "file");
   const visible = (f: FormField) => !f.show_if || answers[f.show_if.key] === f.show_if.equals;
-  const save = useMutation({
-    mutationFn: async () => {
-      const { data, error } = await visitorApi.PATCH("/api/visitor/applications/{public_id}", {
-        params: { path: { public_id: app.public_id } },
-        body: { full_name: fullName, phone_e164: phone, answers },
-      });
-      if (!data) throw error;
+  const patch = async () => {
+    const { data, error } = await visitorApi.PATCH("/api/visitor/applications/{public_id}", {
+      params: { path: { public_id: app.public_id } },
+      body: { full_name: fullName, phone_e164: phone, answers },
+    });
+    if (!data) throw error;
+  };
+  const save = useMutation({ mutationFn: patch, onSuccess: onNext });
+  // The page promises «the draft is saved automatically» (review 2026-10-04 UX1): a change is
+  // saved 1.5 s after the last keystroke, the state is shown, and leaving with unsaved changes
+  // asks first. The server checks completeness only at submission.
+  const dirty = useRef(false);
+  const [draft, setDraft] = useState<"saved" | "saving" | "error" | null>(null);
+  const [draftAt, setDraftAt] = useState<Date | null>(null);
+  const autosave = useMutation({
+    mutationFn: patch,
+    onMutate: () => setDraft("saving"),
+    onSuccess: () => {
+      dirty.current = false;
+      setDraft("saved");
+      setDraftAt(new Date());
     },
-    onSuccess: onNext,
+    onError: () => setDraft("error"),
   });
+  const { mutate: saveDraft } = autosave;
+  useEffect(() => {
+    if (!dirty.current || !fullName.trim()) return;
+    const timer = window.setTimeout(() => saveDraft(), 1500);
+    return () => window.clearTimeout(timer);
+  }, [fullName, phone, answers, saveDraft]);
+  useEffect(() => {
+    const warn = (event: BeforeUnloadEvent) => {
+      if (dirty.current) event.preventDefault();
+    };
+    window.addEventListener("beforeunload", warn);
+    return () => window.removeEventListener("beforeunload", warn);
+  }, []);
+  const edited =
+    <T,>(set: (value: T) => void) =>
+    (value: T) => {
+      dirty.current = true;
+      set(value);
+    };
   return (
     <div className="space-y-4">
       <SectionLabel>{app.program_name}</SectionLabel>
@@ -360,14 +394,14 @@ function FormStep({ app, onNext }: { app: Application; onNext: () => void }) {
         <Field
           label="الاسم الكامل *"
           value={fullName}
-          onChange={(e) => setFullName(e.target.value)}
+          onChange={(e) => edited(setFullName)(e.target.value)}
         />
         <Field
           label="الهاتف"
           type="tel"
           dir="ltr"
           value={phone}
-          onChange={(e) => setPhone(e.target.value)}
+          onChange={(e) => edited(setPhone)(e.target.value)}
           placeholder="+249…"
         />
       </Card>
@@ -378,11 +412,23 @@ function FormStep({ app, onNext }: { app: Application; onNext: () => void }) {
               key={f.key}
               field={f}
               value={answers[f.key]}
-              onChange={(v) => setAnswers((a) => ({ ...a, [f.key]: v }))}
+              onChange={(v) => {
+                dirty.current = true;
+                setAnswers((a) => ({ ...a, [f.key]: v }));
+              }}
             />
           ))}
         </Card>
       )}
+      <p className="text-xs text-text-muted" role="status" aria-live="polite">
+        {draft === "saving"
+          ? "جارٍ حفظ المسودة…"
+          : draft === "error"
+            ? "تعذّر حفظ المسودة الآن — تحقّق من الاتصال؛ ما كتبته باقٍ في هذه الصفحة."
+            : draft === "saved" && draftAt
+              ? `حُفظت المسودة ${draftClock.format(draftAt)}`
+              : "تُحفظ المسودة تلقائيًا أثناء الكتابة."}
+      </p>
       {save.isError && <Notice>{problemMessage(save.error)}</Notice>}
       <Button
         className="w-full"

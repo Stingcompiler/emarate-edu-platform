@@ -13,6 +13,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 
 import { Button, Notice } from "../../components/ui";
+import { useDialogFocus } from "../../components/useDialogFocus";
 import { ApiError, api, ok } from "../../lib/api";
 import {
   answered,
@@ -262,6 +263,14 @@ function ExamRunner({ attempt }: { attempt: AttemptPayload }) {
     flagStore.write(next);
   }
 
+  // Keyboard: focus moves into the open dialog, stays there, Escape closes it (review G1).
+  const confirmPanel = useRef<HTMLDivElement>(null);
+  const sheetPanel = useRef<HTMLDivElement>(null);
+  const closeConfirm = useCallback(() => setConfirm(false), []);
+  const closeSheet = useCallback(() => setSheet(false), []);
+  useDialogFocus(confirm, confirmPanel, closeConfirm);
+  useDialogFocus(sheet && !confirm, sheetPanel, closeSheet);
+
   const lowTime = remaining < 5 * 60_000;
   const saveLine = !online
     ? "بلا اتصال · محفوظ على الجهاز"
@@ -414,7 +423,10 @@ function ExamRunner({ attempt }: { attempt: AttemptPayload }) {
             className="absolute inset-0 bg-black/40"
             onClick={() => setSheet(false)}
           />
-          <div className="absolute inset-x-0 bottom-0 rounded-t-3xl bg-surface p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
+          <div
+            ref={sheetPanel}
+            className="absolute inset-x-0 bottom-0 rounded-t-3xl bg-surface p-4 pb-[max(1rem,env(safe-area-inset-bottom))]"
+          >
             <div className="mb-3 flex items-center justify-between">
               <p className="font-semibold text-text">الأسئلة</p>
               <button
@@ -448,7 +460,10 @@ function ExamRunner({ attempt }: { attempt: AttemptPayload }) {
           aria-labelledby="confirm-title"
         >
           <div className="absolute inset-0 bg-black/40" />
-          <div className="relative w-full rounded-t-3xl bg-surface p-5 sm:max-w-md sm:rounded-2xl">
+          <div
+            ref={confirmPanel}
+            className="relative w-full rounded-t-3xl bg-surface p-5 sm:max-w-md sm:rounded-2xl"
+          >
             <p id="confirm-title" className="text-lg font-bold text-text">
               تسليم الاختبار؟
             </p>

@@ -64,12 +64,12 @@ export function Field({
   ...props
 }: InputHTMLAttributes<HTMLInputElement> & { label: string; hint?: string; error?: string }) {
   return (
-    <label className="block border-b border-border-soft px-4 py-2.5 last:border-b-0">
+    <label className="block border-b border-border-soft px-4 py-2.5 last:border-b-0 focus-within:bg-primary-soft/30 focus-within:shadow-[inset_0_-2px_0_var(--focus-ring)]">
       <span className="block text-xs text-text-muted">{label}</span>
       <input
         {...props}
         aria-invalid={error ? true : undefined}
-        className="mt-0.5 block w-full bg-transparent text-base text-text outline-none placeholder:text-n400"
+        className="mt-0.5 block w-full bg-transparent text-base text-text outline-none placeholder:text-n500"
       />
       {hint && !error && <span className="mt-1 block text-xs text-text-muted">{hint}</span>}
       {error && <span className="mt-1 block text-xs text-danger-strong">{error}</span>}
@@ -83,7 +83,7 @@ export function TextArea({
   ...props
 }: TextareaHTMLAttributes<HTMLTextAreaElement> & { label: string; error?: string }) {
   return (
-    <label className="block border-b border-border-soft px-4 py-2.5 last:border-b-0">
+    <label className="block border-b border-border-soft px-4 py-2.5 last:border-b-0 focus-within:bg-primary-soft/30 focus-within:shadow-[inset_0_-2px_0_var(--focus-ring)]">
       <span className="block text-xs text-text-muted">{label}</span>
       <textarea
         {...props}
@@ -248,13 +248,13 @@ export function PasswordField({
 }: Omit<InputHTMLAttributes<HTMLInputElement>, "type"> & { label: string; hint?: string }) {
   const [shown, setShown] = useState(false);
   return (
-    <label className="block border-b border-border-soft px-4 py-2.5 last:border-b-0">
+    <label className="block border-b border-border-soft px-4 py-2.5 last:border-b-0 focus-within:bg-primary-soft/30 focus-within:shadow-[inset_0_-2px_0_var(--focus-ring)]">
       <span className="block text-xs text-text-muted">{label}</span>
       <span className="mt-0.5 flex items-center gap-2">
         <input
           {...props}
           type={shown ? "text" : "password"}
-          className="block min-w-0 flex-1 bg-transparent text-base text-text outline-none placeholder:text-n400"
+          className="block min-w-0 flex-1 bg-transparent text-base text-text outline-none placeholder:text-n500"
         />
         <button
           type="button"
