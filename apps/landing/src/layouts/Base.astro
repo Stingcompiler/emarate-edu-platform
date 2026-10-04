@@ -227,7 +227,7 @@ const ext = (external: boolean) => (external ? { rel: "noopener", target: "_blan
         <a
           href={`${PORTAL}/login`}
           class:list={[
-            "whitespace-nowrap rounded-md px-3 py-2 text-xs font-semibold text-text hover:bg-surface-alt sm:text-sm",
+            "tap-44 whitespace-nowrap rounded-md px-3 py-2 text-xs font-semibold text-text hover:bg-surface-alt sm:text-sm",
             applying ? "hidden sm:inline-block" : "ms-auto bg-surface-alt sm:ms-0",
           ]}
         >
@@ -236,14 +236,14 @@ const ext = (external: boolean) => (external ? { rel: "noopener", target: "_blan
         {applying && (
           <a
             href={`${PORTAL}/apply`}
-            class="ms-auto whitespace-nowrap rounded-md bg-accent px-3 py-2 text-xs font-bold text-on-primary hover:bg-accent-hover sm:ms-0 sm:text-sm"
+            class="tap-44 ms-auto whitespace-nowrap rounded-md bg-accent px-3 py-2 text-xs font-bold text-on-primary hover:bg-accent-hover sm:ms-0 sm:text-sm"
           >
             {t(lang, "apply")}
           </a>
         )}
         <details data-menu class="lg:hidden">
           <summary
-            class="grid size-10 cursor-pointer list-none place-items-center rounded-md hover:bg-surface-alt"
+            class="grid size-11 cursor-pointer list-none place-items-center rounded-md hover:bg-surface-alt"
             aria-label={lang === "ar" ? "القائمة" : "Menu"}
           >
             <svg
