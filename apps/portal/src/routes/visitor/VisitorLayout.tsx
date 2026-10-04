@@ -28,7 +28,7 @@ export function VisitorLayout({
           <a href={SITE_URL} className="flex min-w-0 items-center gap-2 hover:opacity-80">
             <img src="/favicon.svg" alt="" width={28} height={28} />
             <span className="truncate text-sm font-bold text-text">
-              كلية الإمارات للعلوم والتقنية
+              كلية الإمارات للعلوم والتكنولوجيا
             </span>
           </a>
           <span className="ms-auto flex shrink-0 gap-4 text-sm">

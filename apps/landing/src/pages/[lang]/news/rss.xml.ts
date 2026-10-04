@@ -16,7 +16,7 @@ export const GET: APIRoute = async ({ params, site }) => {
   const lang = params.lang as Lang;
   const items = await news();
   const link = (path: string) => new URL(href(lang, path), site).toString();
-  const title = lang === "ar" ? "أخبار كلية الإمارات للعلوم والتقنية" : "Emirates College news";
+  const title = lang === "ar" ? "أخبار كلية الإمارات للعلوم والتكنولوجيا" : "Emirates College news";
   const body = items
     .map(
       (n) =>
