@@ -1,6 +1,30 @@
-# Handoff — design / UX review — 2026-10-04
+# Handoff — review fixes, round 2 — 2026-10-04 (evening)
 
-## Where things stand
+## Now
+- The owner chose «كلية الإمارات للعلوم والتكنولوجيا» and said «نفّذ توصياتك في الباقي» (carry out your recommendations for the rest).
+- The review report has merged (#99). Each fix has its own PR, and the merged ones are in `main`:
+  - #100: exam integrity (C1, C6, C7, C8).
+  - #101: decision locks (C3, C4).
+  - #102: deploy-script safety and dependencies (A12, A13, B11, B12).
+  - #103: honest draft saving, focus, results states, dialog keyboard (UX1–UX3, G1).
+  - #104: the official name. Migration `content` 0007 renames stored copies of the old default.
+  - #105: suspension closes learning (C2).
+  - #106: results at 200% text, 44px header targets, change programme (UX4, UX8, UX10).
+  - #107: matrix write gates (B7).
+  - #108: exam list N+1 and lazy route chunks (D1, D2).
+- The status table is in `docs/qa/project-review-2026-10.md`, under «حالة الإصلاح».
+- **Not deployed yet.** The SSH key isn't loaded. When the owner runs `ssh-add --apple-use-keychain ~/.ssh/ovh_vps_ed25519`:
+  1. Run `ECST_SSH=ubuntu@<host> ECST_SSH_KEY=~/.ssh/ovh_vps_ed25519 VITE_SITE_URL=https://ecst.stingdev.pro/ar/ scripts/deploy-vps.sh all`. This is the first run of the new uv-sync and health steps; a failure there rolls back by itself.
+  2. Close `/admin` in Caddy (the owner approved it).
+  3. Check `deploy-vps.sh status`.
+- **Still open:**
+  - for the owner: A3, A4, A8, A9, B9, B10;
+  - in code: C5, C9, G2, UX5, UX7, UX9, UX11, UX12, A14;
+  - needing an environment: D3 (isolated load test) and H (real devices).
+- The e2e ports here are `E2E_API_PORT=8011 E2E_PORTAL_PORT=5184 E2E_SITE_PORT=4332`. A second stack in another worktree can use 8021, 5194 and 4342.
+
+## Earlier — design / UX review (Codex, 2026-10-04 morning)
+
 
 - Branch: `codex/design-ux-review`, started from local `255ca23` on `codex/project-review`. Application code remains `811f1a1`, equal to `origin/main` at the original review start.
 - Owner asked: «قم بمراجعه المشروع». This phase delivers a review and remediation plan, with no application fixes or production deployment.
