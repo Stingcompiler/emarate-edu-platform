@@ -383,3 +383,35 @@ def test_teacher_actions_recheck_the_attempt_they_act_on(api, classroom, exam, m
     with pytest.raises(Conflict):
         services.reopen(teacher, stale, 10, "مرة ثانية")  # stale copy says "submitted"
     assert ExamAttempt.objects.get(pk=reopened.pk).status == "in_progress"
+
+
+def test_the_student_exam_list_does_not_query_per_exam(api, classroom):
+    """Review 2026-10-04 D1: 5 exams took 9 queries and 20 took 24 (one per exam)."""
+    from django.db import connection
+    from django.test.utils import CaptureQueriesContext
+
+    now = timezone.now()
+
+    def add(n):
+        for i in range(n):
+            Exam.objects.create(
+                offering=classroom.offering,
+                title=f"اختبار {i}",
+                opens_at=now - timedelta(hours=1),
+                closes_at=now + timedelta(hours=1),
+                duration_minutes=30,
+                status="published",
+                created_by=classroom.teacher,
+            )
+
+    student = api(classroom.student)
+    add(5)
+    student.get(URL, {"page_size": 100})
+    with CaptureQueriesContext(connection) as small:
+        assert student.get(URL, {"page_size": 100}).status_code == 200
+    add(15)
+    with CaptureQueriesContext(connection) as large:
+        response = student.get(URL, {"page_size": 100})
+    assert response.status_code == 200 and response.data["count"] == 20
+    assert len(large) == len(small)
+    assert all(row["my_attempts"] == [] for row in response.data["results"])
