@@ -383,3 +383,20 @@ def test_teacher_actions_recheck_the_attempt_they_act_on(api, classroom, exam, m
     with pytest.raises(Conflict):
         services.reopen(teacher, stale, 10, "مرة ثانية")  # stale copy says "submitted"
     assert ExamAttempt.objects.get(pk=reopened.pk).status == "in_progress"
+
+
+def test_a_suspended_student_cannot_start_or_keep_answering(api, classroom, exam, make_user):
+    """Owner decision 2026-10-04 (review C2): suspension closes exams; saved answers stay."""
+    student = api(classroom.student)
+    attempt = student.post(f"{URL}/{exam.public_id}/start").data
+    question = exam.questions.get(type="true_false").pk
+    answers = f"/api/v1/exam-attempts/{attempt['public_id']}/answers/{question}"
+    assert student.put(answers, {"answer": True}, format="json").status_code == 204
+    affairs = api(make_user(Role.STUDENT_AFFAIRS))
+    status = f"/api/v1/students/{classroom.record.public_id}/status"
+    assert affairs.post(status, {"status": "suspended", "reason": "قرار لجنة"}).status_code == 200
+    assert student.put(answers, {"answer": False}, format="json").status_code == 403
+    stored = ExamAttempt.objects.get(public_id=attempt["public_id"]).answers.get(
+        question_id=question
+    )
+    assert stored.answer is True
