@@ -1,4 +1,4 @@
-from django.db.models import Q
+from django.db.models import Prefetch, Q
 from django.shortcuts import get_object_or_404
 from django.utils.translation import gettext
 from drf_spectacular.utils import OpenApiParameter, extend_schema
@@ -65,11 +65,25 @@ class ExamViewSet(viewsets.ModelViewSet):
             access.student_offerings_q(user)
             & Q(status__in=[Exam.Status.PUBLISHED, Exam.Status.CLOSED])
         )
-        return (
+        queryset = (
             Exam.objects.filter(visible)
             .select_related("offering__course")
             .prefetch_related("questions")
         )
+        record_ = StudentRecord.objects.filter(user=user).first()
+        if record_ is not None:
+            # A student's own attempts in one query for the whole page, not one per exam
+            # (review 2026-10-04 D1); ExamSerializer.get_my_attempts reads this list.
+            queryset = queryset.prefetch_related(
+                Prefetch(
+                    "attempts",
+                    queryset=ExamAttempt.objects.filter(student_record=record_).order_by(
+                        "attempt_no"
+                    ),
+                    to_attr="my_attempts_list",
+                )
+            )
+        return queryset
 
     def get_serializer_context(self):
         context = super().get_serializer_context()

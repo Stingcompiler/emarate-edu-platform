@@ -5,107 +5,186 @@ import "@fontsource/ibm-plex-sans-arabic/700.css";
 import "./app.css";
 
 import { QueryClientProvider } from "@tanstack/react-query";
-import { StrictMode } from "react";
+import { type ComponentType, lazy, StrictMode, Suspense } from "react";
 import { createRoot } from "react-dom/client";
 import { createBrowserRouter, RouterProvider } from "react-router";
 
 import { RequireAuth } from "./lib/auth";
-import { ApplicationDetail } from "./routes/admissions/ApplicationDetail";
-import { Applications } from "./routes/admissions/Applications";
-import { Cycles } from "./routes/admissions/Cycles";
-import { FormBuilder } from "./routes/admissions/FormBuilder";
-import { Apply } from "./routes/visitor/Apply";
-import { Track } from "./routes/visitor/Track";
-import { CaseDetail } from "./routes/affairs/CaseDetail";
-import { CaseNew } from "./routes/affairs/CaseNew";
-import { Cases } from "./routes/affairs/Cases";
-import { RegulationDetail } from "./routes/affairs/RegulationDetail";
-import { RegulationNew } from "./routes/affairs/RegulationNew";
-import { Regulations } from "./routes/affairs/Regulations";
-import { AnnouncementNew } from "./routes/announcements/AnnouncementNew";
-import { Announcements } from "./routes/announcements/Announcements";
-import { ExamDetail } from "./routes/exams/ExamDetail";
-import { Inquiries } from "./routes/inquiries/Inquiries";
-import { LiveList } from "./routes/live/LiveList";
-import { LiveNew } from "./routes/live/LiveNew";
-import { EventEditor, Events } from "./routes/site/Events";
-import { NewsEditor } from "./routes/site/NewsEditor";
-import { PageEditor } from "./routes/site/PageEditor";
-import { Redirects } from "./routes/site/Redirects";
-import { SiteHome } from "./routes/site/SiteHome";
-import { SiteMedia } from "./routes/site/SiteMedia";
-import { ExamEditor } from "./routes/exams/ExamEditor";
-import { ExamMonitor } from "./routes/exams/ExamMonitor";
-import { ExamResult } from "./routes/exams/ExamResult";
-import { Exams } from "./routes/exams/Exams";
-import { ExamStats } from "./routes/exams/ExamStats";
-import { TakeExam } from "./routes/exams/TakeExam";
-import { Corrections } from "./routes/results/Corrections";
-import { ResultImportDetail } from "./routes/results/ImportDetail";
-import { ResultImports } from "./routes/results/Imports";
-import { MyResults } from "./routes/results/MyResults";
-import { AdminHome } from "./routes/admin/Home";
-import { AdminSettings } from "./routes/admin/Settings";
-import { Roles } from "./routes/admin/RolesMatrix";
-import { Structure } from "./routes/admin/Structure";
-import { AdminUser } from "./routes/admin/User";
-import { AdminUsers } from "./routes/admin/Users";
-import { Activate } from "./routes/Activate";
-import { Home } from "./routes/Home";
-import { AcademicHome } from "./routes/homes/AcademicHome";
-import { AffairsHome } from "./routes/homes/AffairsHome";
-import { ResultsHome } from "./routes/homes/ResultsHome";
-import { Me, MyStatus } from "./routes/learning/Me";
-import { RegistrarHome } from "./routes/registrar/Home";
-import { StudentImportDetail, StudentImports } from "./routes/registrar/Imports";
-import { Registrars } from "./routes/registrar/Registrars";
-import { StudentRecord } from "./routes/registrar/StudentRecord";
-import { StudentRecords } from "./routes/registrar/StudentRecords";
-import { Approvals } from "./routes/department/Approvals";
-import { Audit } from "./routes/department/Audit";
-import { DepartmentDashboard } from "./routes/department/Dashboard";
-import { DepartmentLectures } from "./routes/department/Lectures";
-import { Members } from "./routes/department/Members";
-import { Offerings } from "./routes/department/Offerings";
-import { DepartmentStudents } from "./routes/department/Students";
-import { Assignment } from "./routes/learning/Assignment";
-import { AssignmentEditor } from "./routes/learning/AssignmentEditor";
-import { Grade } from "./routes/learning/Grade";
-import { Grading } from "./routes/learning/Grading";
-import { LectureEditor } from "./routes/learning/LectureEditor";
-import { Students } from "./routes/learning/Students";
-import { Course } from "./routes/learning/Course";
-import { Courses } from "./routes/learning/Courses";
-import { Lecture } from "./routes/learning/Lecture";
-import { Tasks } from "./routes/learning/Tasks";
-import { HRHome } from "./routes/hr/Home";
-import { MyNotice } from "./routes/hr/MyNotice";
-import { NoticeNew } from "./routes/hr/NoticeNew";
-import { HRReport } from "./routes/hr/Report";
-import { TeacherProfile } from "./routes/hr/TeacherProfile";
-import { Teachers } from "./routes/hr/Teachers";
-import { PrintReport } from "./routes/print/PrintReport";
-import { PrintMyResults, PrintTranscript } from "./routes/print/PrintTranscript";
-import { AdmissionsReport } from "./routes/reports/AdmissionsReport";
-import { AffairsReport } from "./routes/reports/AffairsReport";
-import { DepartmentReport } from "./routes/reports/DepartmentReport";
-import { TranscriptLookup } from "./routes/reports/TranscriptLookup";
-import { ResultSettings } from "./routes/results/ResultSettings";
-import { ResultSearch } from "./routes/results/Search";
-import { Compose } from "./routes/Compose";
-import { ForgotPassword } from "./routes/ForgotPassword";
-import { Install } from "./routes/Install";
 import { Login } from "./routes/Login";
-import { NotFound } from "./routes/NotFound";
 import { ConfirmProvider } from "./components/Confirm";
 import { ToastProvider } from "./components/Toast";
 import { NoAccess } from "./components/NoAccess";
 import { QueryErrorBanner } from "./components/QueryErrorBanner";
 import { ROUTE_ACCESS } from "./lib/access";
 import { queryClient } from "./lib/queryClient";
-import { Notifications } from "./routes/Notifications";
-import { Register } from "./routes/Register";
-import { Settings } from "./routes/Settings";
+
+/**
+ * Pages load on demand, one chunk each (review 2026-10-04 D2: one 1 MB bundle held every
+ * page). After a deploy the old chunk names are gone; a page that fails to load reloads the
+ * app once to pick up the new ones instead of showing an error.
+ */
+const RELOADED = "chunk-reload";
+function remember(set: boolean): boolean {
+  // sessionStorage can be blocked; then the page simply shows the error instead of looping.
+  try {
+    if (set) sessionStorage.setItem(RELOADED, "1");
+    else sessionStorage.removeItem(RELOADED);
+    return true;
+  } catch {
+    return false;
+  }
+}
+function reloadedOnce(): boolean {
+  try {
+    return sessionStorage.getItem(RELOADED) !== null;
+  } catch {
+    return true;
+  }
+}
+function page<M, K extends keyof M>(load: () => Promise<M>, name: K) {
+  return lazy(async () => {
+    try {
+      const module = await load();
+      remember(false);
+      return { default: module[name] as ComponentType };
+    } catch (error) {
+      if (!reloadedOnce() && remember(true)) {
+        window.location.reload();
+        return new Promise<never>(() => {});
+      }
+      throw error;
+    }
+  });
+}
+
+function RouteLoading() {
+  return (
+    <p role="status" className="grid min-h-dvh place-items-center text-sm text-text-muted">
+      جارٍ التحميل…
+    </p>
+  );
+}
+
+const ApplicationDetail = page(
+  () => import("./routes/admissions/ApplicationDetail"),
+  "ApplicationDetail",
+);
+const Applications = page(() => import("./routes/admissions/Applications"), "Applications");
+const Cycles = page(() => import("./routes/admissions/Cycles"), "Cycles");
+const FormBuilder = page(() => import("./routes/admissions/FormBuilder"), "FormBuilder");
+const Apply = page(() => import("./routes/visitor/Apply"), "Apply");
+const Track = page(() => import("./routes/visitor/Track"), "Track");
+const CaseDetail = page(() => import("./routes/affairs/CaseDetail"), "CaseDetail");
+const CaseNew = page(() => import("./routes/affairs/CaseNew"), "CaseNew");
+const Cases = page(() => import("./routes/affairs/Cases"), "Cases");
+const RegulationDetail = page(
+  () => import("./routes/affairs/RegulationDetail"),
+  "RegulationDetail",
+);
+const RegulationNew = page(() => import("./routes/affairs/RegulationNew"), "RegulationNew");
+const Regulations = page(() => import("./routes/affairs/Regulations"), "Regulations");
+const AnnouncementNew = page(
+  () => import("./routes/announcements/AnnouncementNew"),
+  "AnnouncementNew",
+);
+const Announcements = page(() => import("./routes/announcements/Announcements"), "Announcements");
+const ExamDetail = page(() => import("./routes/exams/ExamDetail"), "ExamDetail");
+const Inquiries = page(() => import("./routes/inquiries/Inquiries"), "Inquiries");
+const LiveList = page(() => import("./routes/live/LiveList"), "LiveList");
+const LiveNew = page(() => import("./routes/live/LiveNew"), "LiveNew");
+const EventEditor = page(() => import("./routes/site/Events"), "EventEditor");
+const Events = page(() => import("./routes/site/Events"), "Events");
+const NewsEditor = page(() => import("./routes/site/NewsEditor"), "NewsEditor");
+const PageEditor = page(() => import("./routes/site/PageEditor"), "PageEditor");
+const Redirects = page(() => import("./routes/site/Redirects"), "Redirects");
+const SiteHome = page(() => import("./routes/site/SiteHome"), "SiteHome");
+const SiteMedia = page(() => import("./routes/site/SiteMedia"), "SiteMedia");
+const ExamEditor = page(() => import("./routes/exams/ExamEditor"), "ExamEditor");
+const ExamMonitor = page(() => import("./routes/exams/ExamMonitor"), "ExamMonitor");
+const ExamResult = page(() => import("./routes/exams/ExamResult"), "ExamResult");
+const Exams = page(() => import("./routes/exams/Exams"), "Exams");
+const ExamStats = page(() => import("./routes/exams/ExamStats"), "ExamStats");
+const TakeExam = page(() => import("./routes/exams/TakeExam"), "TakeExam");
+const Corrections = page(() => import("./routes/results/Corrections"), "Corrections");
+const ResultImportDetail = page(
+  () => import("./routes/results/ImportDetail"),
+  "ResultImportDetail",
+);
+const ResultImports = page(() => import("./routes/results/Imports"), "ResultImports");
+const MyResults = page(() => import("./routes/results/MyResults"), "MyResults");
+const AdminHome = page(() => import("./routes/admin/Home"), "AdminHome");
+const AdminSettings = page(() => import("./routes/admin/Settings"), "AdminSettings");
+const Roles = page(() => import("./routes/admin/RolesMatrix"), "Roles");
+const Structure = page(() => import("./routes/admin/Structure"), "Structure");
+const AdminUser = page(() => import("./routes/admin/User"), "AdminUser");
+const AdminUsers = page(() => import("./routes/admin/Users"), "AdminUsers");
+const Activate = page(() => import("./routes/Activate"), "Activate");
+const Home = page(() => import("./routes/Home"), "Home");
+const AcademicHome = page(() => import("./routes/homes/AcademicHome"), "AcademicHome");
+const AffairsHome = page(() => import("./routes/homes/AffairsHome"), "AffairsHome");
+const ResultsHome = page(() => import("./routes/homes/ResultsHome"), "ResultsHome");
+const Me = page(() => import("./routes/learning/Me"), "Me");
+const MyStatus = page(() => import("./routes/learning/Me"), "MyStatus");
+const RegistrarHome = page(() => import("./routes/registrar/Home"), "RegistrarHome");
+const StudentImportDetail = page(() => import("./routes/registrar/Imports"), "StudentImportDetail");
+const StudentImports = page(() => import("./routes/registrar/Imports"), "StudentImports");
+const Registrars = page(() => import("./routes/registrar/Registrars"), "Registrars");
+const StudentRecord = page(() => import("./routes/registrar/StudentRecord"), "StudentRecord");
+const StudentRecords = page(() => import("./routes/registrar/StudentRecords"), "StudentRecords");
+const Approvals = page(() => import("./routes/department/Approvals"), "Approvals");
+const Audit = page(() => import("./routes/department/Audit"), "Audit");
+const DepartmentDashboard = page(
+  () => import("./routes/department/Dashboard"),
+  "DepartmentDashboard",
+);
+const DepartmentLectures = page(() => import("./routes/department/Lectures"), "DepartmentLectures");
+const Members = page(() => import("./routes/department/Members"), "Members");
+const Offerings = page(() => import("./routes/department/Offerings"), "Offerings");
+const DepartmentStudents = page(() => import("./routes/department/Students"), "DepartmentStudents");
+const Assignment = page(() => import("./routes/learning/Assignment"), "Assignment");
+const AssignmentEditor = page(
+  () => import("./routes/learning/AssignmentEditor"),
+  "AssignmentEditor",
+);
+const Grade = page(() => import("./routes/learning/Grade"), "Grade");
+const Grading = page(() => import("./routes/learning/Grading"), "Grading");
+const LectureEditor = page(() => import("./routes/learning/LectureEditor"), "LectureEditor");
+const Students = page(() => import("./routes/learning/Students"), "Students");
+const Course = page(() => import("./routes/learning/Course"), "Course");
+const Courses = page(() => import("./routes/learning/Courses"), "Courses");
+const Lecture = page(() => import("./routes/learning/Lecture"), "Lecture");
+const Tasks = page(() => import("./routes/learning/Tasks"), "Tasks");
+const HRHome = page(() => import("./routes/hr/Home"), "HRHome");
+const MyNotice = page(() => import("./routes/hr/MyNotice"), "MyNotice");
+const NoticeNew = page(() => import("./routes/hr/NoticeNew"), "NoticeNew");
+const HRReport = page(() => import("./routes/hr/Report"), "HRReport");
+const TeacherProfile = page(() => import("./routes/hr/TeacherProfile"), "TeacherProfile");
+const Teachers = page(() => import("./routes/hr/Teachers"), "Teachers");
+const PrintReport = page(() => import("./routes/print/PrintReport"), "PrintReport");
+const PrintMyResults = page(() => import("./routes/print/PrintTranscript"), "PrintMyResults");
+const PrintTranscript = page(() => import("./routes/print/PrintTranscript"), "PrintTranscript");
+const AdmissionsReport = page(
+  () => import("./routes/reports/AdmissionsReport"),
+  "AdmissionsReport",
+);
+const AffairsReport = page(() => import("./routes/reports/AffairsReport"), "AffairsReport");
+const DepartmentReport = page(
+  () => import("./routes/reports/DepartmentReport"),
+  "DepartmentReport",
+);
+const TranscriptLookup = page(
+  () => import("./routes/reports/TranscriptLookup"),
+  "TranscriptLookup",
+);
+const ResultSettings = page(() => import("./routes/results/ResultSettings"), "ResultSettings");
+const ResultSearch = page(() => import("./routes/results/Search"), "ResultSearch");
+const Compose = page(() => import("./routes/Compose"), "Compose");
+const ForgotPassword = page(() => import("./routes/ForgotPassword"), "ForgotPassword");
+const Install = page(() => import("./routes/Install"), "Install");
+const NotFound = page(() => import("./routes/NotFound"), "NotFound");
+const Notifications = page(() => import("./routes/Notifications"), "Notifications");
+const Register = page(() => import("./routes/Register"), "Register");
+const Settings = page(() => import("./routes/Settings"), "Settings");
 
 const signedIn = (element: React.ReactNode, path: string) => (
   <RequireAuth allow={ROUTE_ACCESS[path]} denied={<NoAccess />}>
@@ -244,7 +323,9 @@ createRoot(root).render(
     <QueryClientProvider client={queryClient}>
       <ConfirmProvider>
         <ToastProvider>
-          <RouterProvider router={router} />
+          <Suspense fallback={<RouteLoading />}>
+            <RouterProvider router={router} />
+          </Suspense>
         </ToastProvider>
       </ConfirmProvider>
       <QueryErrorBanner />

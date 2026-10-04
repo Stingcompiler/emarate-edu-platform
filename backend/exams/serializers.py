@@ -85,9 +85,12 @@ class ExamSerializer(serializers.ModelSerializer):
         record_ = self.context.get("student_record")
         if record_ is None:
             return None
+        attempts = getattr(obj, "my_attempts_list", None)
+        if attempts is None:  # a single exam fetched outside the list
+            attempts = obj.attempts.filter(student_record=record_).order_by("attempt_no")
         return [
             {"public_id": str(a.public_id), "status": a.status, "attempt_no": a.attempt_no}
-            for a in obj.attempts.filter(student_record=record_).order_by("attempt_no")
+            for a in attempts
         ]
 
 
