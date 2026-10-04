@@ -309,3 +309,30 @@ def test_plan_progress_is_null_without_courses(api, make_user, make_student, ba_
     student = make_user(Role.STUDENT)
     make_student(ba_program, "26-BA-0001", user=student)
     assert api(student).get("/api/v1/me/results").data["plan"] is None
+
+
+def test_a_second_decision_on_a_correction_cannot_reverse_the_first(
+    api, officer, classroom, term, make_user
+):
+    """Review 2026-10-04 C4: an approval then a stale rejection left the correction "rejected"
+    while the result kept the approved score."""
+    from audit.services import RequestMeta
+    from core.errors import Conflict
+    from results import services
+    from results.models import ResultCorrection
+
+    batch = _upload(api(officer), term, "26-IT-0100,IT101,58,,").data["public_id"]
+    assert api(officer).post(f"/api/v1/result-imports/{batch}/commit").status_code == 200
+    result = AcademicResult.objects.get()
+    correction = services.request_correction(
+        RequestMeta(actor=officer), result, score=62, reason="خطأ إدخال"
+    )
+    stale = ResultCorrection.objects.get(pk=correction.pk)
+    meta = RequestMeta(actor=make_user(Role.ACADEMIC_AFFAIRS))
+    services.decide_correction(meta, correction, approve=True)
+    with pytest.raises(Conflict):
+        services.decide_correction(meta, stale, approve=False, note="طلب ثانٍ")
+    correction.refresh_from_db()
+    result.refresh_from_db()
+    assert correction.status == "approved" and result.score == Decimal("62")
+    assert result.version == 2  # one new version, not two

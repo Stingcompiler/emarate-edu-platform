@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ecst-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-03 18:13+0200\n"
+"POT-Creation-Date: 2026-10-04 16:54+0200\n"
 "Language: ar\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -207,6 +207,9 @@ msgstr "لا يمكن نقل الطلب من %(status)s إلى %(to)s."
 
 msgid "Tell the applicant what is missing."
 msgstr "أخبر المتقدم بما ينقصه."
+
+msgid "This application changed meanwhile; reload it and decide again."
+msgstr "تغيّر هذا الطلب في الأثناء؛ أعد تحميله ثم اتخذ القرار."
 
 msgid "Email the applicant or add an internal note."
 msgstr "راسل المتقدم بالبريد أو أضف ملاحظة داخلية."

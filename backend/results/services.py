@@ -195,8 +195,18 @@ def decide_correction(
     if not approve and not note.strip():
         # The results officer must learn why (review 2026-09-29).
         raise ValidationError({"note": [gettext("Give the reason for rejecting.")]})
-    result = correction.result
     with transaction.atomic():
+        # Re-read under a lock: a decision made meanwhile wins and this one gets 409 instead
+        # of marking an applied correction "rejected" (review 2026-10-04, C4). The result row
+        # is locked too, so one version and one notice come out of it.
+        correction = (
+            ResultCorrection.objects.select_for_update()
+            .select_related("result")
+            .get(pk=correction.pk)
+        )
+        if correction.status != ResultCorrection.Status.PENDING:
+            raise Conflict(gettext("Already decided."), code="already_decided")
+        result = AcademicResult.objects.select_for_update().get(pk=correction.result_id)
         correction.status = (
             ResultCorrection.Status.APPROVED if approve else ResultCorrection.Status.REJECTED
         )
