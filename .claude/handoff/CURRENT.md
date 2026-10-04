@@ -8,11 +8,13 @@
 - `docs/qa/evidence/project-review-2026-10/`: six backend probes confirmed on SQLite and Postgres, two frontend probes, statement coverage summary, focus measurements and 390/1440 screenshots. Probes assert observed faulty behavior; they are deliberately outside CI tests.
 - `docs/runbook.md`: actual VPS vs alternative Render clarified, load-test claim corrected, media restore drill and monitoring notes added.
 - SQLite 735 passed; PostgreSQL 734 passed and one SQLite-only skip. Vitest 71 passed. Typecheck, backend lint/format, migration check and OpenAPI validation passed. Statement coverage 94%. Strict landing build produced 104 pages.
-- Playwright full run is being finalized; its final result and any stable rerun belong in the evidence README.
+- Playwright full run: 77 passed, 2 failed, 1 intentional desktop-exam skip (44.3 minutes). Both phone sweep failures passed a stable `--last-failed` rerun (56.3 seconds): 79 distinct tests passed across runs. Do not describe this as a clean full first run.
+- Local review commit: `1852d82`, with a final validation follow-up commit. No remote branch or PR was created; no CI was run for this review branch.
 
-## In progress
+## Publication and verification limits
 
-- Final browser results, formatting, report PR and required CI.
+- Review and evidence completed locally. Automatic approval review rejected the push because this security/operations report would leave the workspace for a GitHub repository whose public visibility and publication authorization had not been established. Read-only lookup then confirmed `Stingcompiler/emarate-edu-platform` is PUBLIC. Await explicit owner approval to publish this report and evidence there; do not bypass the rejection with another tool.
+- If approved: push `codex/project-review`, create and attach the report PR, then required green CI and merge under the standing repository rules. The prepared body is `/tmp/ecst-review-pr-body.md` if still available.
 - No SSH access: agent has no loaded identities. Asked owner to unlock the key; do not handle its passphrase.
 - No changes to production or other projects.
 
@@ -39,7 +41,7 @@
 
 - Sandbox blocks uv's default cache and local sockets. Use the existing `.venv/bin/python` for ordinary checks; approved local network runs for PostgreSQL/browser tests. Temporary uv tools used `/tmp/ecst-review-uv-cache`.
 - Coverage tools must use Python 3.13 (the project version); system Python 3.12 cannot import native dependencies. Coverage excludes .venv, tests, migrations, config, conftest and management commands; not branch coverage.
-- Never modify portal source files during an E2E run: Vite reloads can destroy axe's execution context. Initial student sweep failed during a reload; rerun stably before diagnosing product behavior.
+- Never modify portal source files during an E2E run: Vite reloads can destroy axe's execution context. Initial student sweep lost axe's context while source probes were being moved; both initial sweep failures passed a stable rerun. This does not establish that the suite has no flakes.
 - `pnpm build` without the API succeeds with partial landing content; use LANDING_STRICT=1 with test API for a full build.
 - Lighthouse/Chrome hung and was stopped with no result. No valid current LCP/CLS/INP or VPS load figures.
 
