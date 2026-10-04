@@ -24,7 +24,8 @@
   --accent-hover: var(--color-accent-600);
   --accent-soft: var(--color-accent-100);
   --header-bg: var(--color-navy-500);
-  --focus-ring: var(--color-primary-300);
+  /* 6:1 on white (primary-300 gave 2.2:1, review 2026-10-04 UX2); dark keeps the light blue. */
+  --focus-ring: var(--color-primary-500);
 
   /* Typography rules (§3): secondary text never below 12px (11px is for
      chips/badges only); Arabic line height at least 1.6. */
@@ -46,6 +47,7 @@
   --text: #f1f2f3;
   --text-muted: #c0c3cb;
   --primary: #96b1d3;
+  --focus-ring: #96b1d3;
   --primary-hover: #c4d3e6;
   --primary-soft: #18375b;
   --on-primary: #0c111c;
@@ -81,6 +83,7 @@
     --text: #f1f2f3;
     --text-muted: #c0c3cb;
     --primary: #96b1d3;
+    --focus-ring: #96b1d3;
     --primary-hover: #c4d3e6;
     --primary-soft: #18375b;
     --on-primary: #0c111c;

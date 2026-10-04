@@ -7,6 +7,7 @@ import { Link } from "react-router";
 
 import { PortalShell } from "../../components/PortalShell";
 import {
+  Button,
   Card,
   Chip,
   CodeTile,
@@ -70,7 +71,24 @@ export function MyResults() {
         ) : undefined
       }
     >
-      {results.isPending ? null : !term ? (
+      {/* Loading, failure and «no results yet» are three different things (review UX3): a
+          failed request said «no results published». */}
+      {results.isPending ? (
+        <Card className="p-6 text-center text-sm text-text-muted" aria-busy="true">
+          جارٍ تحميل نتائجك…
+        </Card>
+      ) : results.isError ? (
+        <Card>
+          <EmptyState icon={<Award size={24} aria-hidden />} title="تعذّر تحميل نتائجك الآن">
+            لم تفقد شيئًا؛ تحقّق من الاتصال ثم أعد المحاولة.
+          </EmptyState>
+          <div className="flex justify-center pb-6">
+            <Button variant="secondary" onClick={() => void results.refetch()}>
+              أعد المحاولة
+            </Button>
+          </div>
+        </Card>
+      ) : !term ? (
         <Card>
           <EmptyState icon={<Award size={24} aria-hidden />} title="لا نتائج منشورة بعد">
             ستظهر نتائجك هنا فور نشرها، وسيصلك إشعار.
