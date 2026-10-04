@@ -59,7 +59,13 @@ scripts/deploy-vps.sh status       # الإصدار المنشور وحالة ا
 scripts/deploy-vps.sh rollback backend   # أو portal | site | all
 ```
 
-- قبل كل نشر تُحفظ النسخة الحالية في `/opt/ecst/previous/`، ويُكتب الإصدار في `/opt/ecst/DEPLOYED`.
+- قبل كل نشر تُحفظ النسخة الحالية في `/opt/ecst/previous/`.
+- يُكتب إصدار كل جزء في `/opt/ecst/deployed/<backend|portal|site>`.
+- **نشر الخادم:**
+  - يزامن المكتبات من `uv.lock` (`uv sync --frozen`)، ثم الترحيلات والملفات الثابتة؛
+  - ثم إعادة التشغيل وفحص `/api/public/health`.
+  - إن فشل أيٌّ منها أُعيد الإصدار السابق تلقائيًا، وخرج السكربت بخطأ دون تسجيل.
+- **الموقع:** لا يُسجَّل إلا إذا نجح بناؤه.
 - `rollback` يعيدها في خطوة واحدة.
 - **الترحيلات لا تُعكس تلقائيًا:**
   - اعكسها بـ `migrate <app> <previous>` قبل التراجع؛
