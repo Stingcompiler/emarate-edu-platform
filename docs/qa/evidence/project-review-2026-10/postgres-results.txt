@@ -1,0 +1,7 @@
+C1: submitted answer changed to False; awarded mark stayed 1
+C2: suspended student lecture/assignment/exam HTTP statuses = [200, 201, 204]
+C3: eligible snapshots accepted then rejected; final state rejected
+C4: correction says rejected while result retains approved score 62
+C5: failed HTTP request changed results settings without its audit entry
+D1: student exam list 5 exams=9 queries, 20 exams=24 queries
+6 passed in 8.57s

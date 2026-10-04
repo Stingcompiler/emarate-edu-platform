@@ -1,0 +1,194 @@
+[
+  {
+    "group": "student",
+    "route": "/",
+    "width": 390,
+    "dark": false,
+    "settleMs": 400,
+    "violations": []
+  },
+  {
+    "group": "student",
+    "route": "/",
+    "width": 390,
+    "dark": true,
+    "settleMs": 400,
+    "violations": []
+  },
+  {
+    "group": "student",
+    "route": "/",
+    "width": 1440,
+    "dark": false,
+    "settleMs": 400,
+    "violations": []
+  },
+  {
+    "group": "student",
+    "route": "/",
+    "width": 1440,
+    "dark": true,
+    "settleMs": 400,
+    "violations": []
+  },
+  {
+    "group": "teacher",
+    "route": "/",
+    "width": 390,
+    "dark": false,
+    "settleMs": 400,
+    "violations": []
+  },
+  {
+    "group": "teacher",
+    "route": "/",
+    "width": 390,
+    "dark": true,
+    "settleMs": 400,
+    "violations": []
+  },
+  {
+    "group": "teacher",
+    "route": "/",
+    "width": 1440,
+    "dark": false,
+    "settleMs": 400,
+    "violations": []
+  },
+  {
+    "group": "teacher",
+    "route": "/",
+    "width": 1440,
+    "dark": true,
+    "settleMs": 400,
+    "violations": []
+  },
+  {
+    "group": "department",
+    "route": "/department",
+    "width": 390,
+    "dark": false,
+    "settleMs": 400,
+    "violations": []
+  },
+  {
+    "group": "department",
+    "route": "/department",
+    "width": 390,
+    "dark": true,
+    "settleMs": 400,
+    "violations": []
+  },
+  {
+    "group": "department",
+    "route": "/department",
+    "width": 1440,
+    "dark": false,
+    "settleMs": 400,
+    "violations": []
+  },
+  {
+    "group": "department",
+    "route": "/department",
+    "width": 1440,
+    "dark": true,
+    "settleMs": 400,
+    "violations": []
+  },
+  {
+    "group": "head-registrar",
+    "route": "/registrar",
+    "width": 390,
+    "dark": false,
+    "settleMs": 400,
+    "violations": []
+  },
+  {
+    "group": "head-registrar",
+    "route": "/registrar",
+    "width": 390,
+    "dark": true,
+    "settleMs": 400,
+    "violations": []
+  },
+  {
+    "group": "head-registrar",
+    "route": "/registrar",
+    "width": 1440,
+    "dark": false,
+    "settleMs": 400,
+    "violations": []
+  },
+  {
+    "group": "head-registrar",
+    "route": "/registrar",
+    "width": 1440,
+    "dark": true,
+    "settleMs": 400,
+    "violations": []
+  },
+  {
+    "group": "admin",
+    "route": "/system",
+    "width": 390,
+    "dark": false,
+    "settleMs": 400,
+    "violations": []
+  },
+  {
+    "group": "admin",
+    "route": "/system",
+    "width": 390,
+    "dark": true,
+    "settleMs": 400,
+    "violations": []
+  },
+  {
+    "group": "admin",
+    "route": "/system",
+    "width": 1440,
+    "dark": false,
+    "settleMs": 400,
+    "violations": []
+  },
+  {
+    "group": "admin",
+    "route": "/system",
+    "width": 1440,
+    "dark": true,
+    "settleMs": 400,
+    "violations": []
+  },
+  {
+    "group": "admin",
+    "route": "/system/users",
+    "width": 390,
+    "dark": false,
+    "settleMs": 400,
+    "violations": []
+  },
+  {
+    "group": "admin",
+    "route": "/system/users",
+    "width": 390,
+    "dark": true,
+    "settleMs": 400,
+    "violations": []
+  },
+  {
+    "group": "admin",
+    "route": "/system/users",
+    "width": 1440,
+    "dark": false,
+    "settleMs": 400,
+    "violations": []
+  },
+  {
+    "group": "admin",
+    "route": "/system/users",
+    "width": 1440,
+    "dark": true,
+    "settleMs": 400,
+    "violations": []
+  }
+]

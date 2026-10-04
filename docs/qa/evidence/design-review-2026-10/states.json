@@ -1,0 +1,908 @@
+{
+  "focus": [
+    {
+      "name": "username",
+      "label": "الرقم الجامعي أو البريد",
+      "focusVisible": true,
+      "outlineStyle": "none",
+      "outlineWidth": "2px",
+      "boxShadow": "none",
+      "border": "0px solid rgb(31, 43, 71)",
+      "background": "rgba(0, 0, 0, 0)",
+      "labelOutline": "rgb(31, 43, 71) none 3px",
+      "describedBy": null
+    },
+    {
+      "name": "password",
+      "label": "كلمة المرور",
+      "focusVisible": true,
+      "outlineStyle": "none",
+      "outlineWidth": "3px",
+      "boxShadow": "none",
+      "border": "0px solid rgb(31, 43, 71)",
+      "background": "rgba(0, 0, 0, 0)",
+      "labelOutline": "rgb(31, 43, 71) none 3px",
+      "describedBy": null
+    }
+  ],
+  "publicAxe": [
+    {
+      "route": "/ar/",
+      "width": 390,
+      "dark": false,
+      "violations": []
+    },
+    {
+      "route": "/ar/",
+      "width": 390,
+      "dark": true,
+      "violations": []
+    },
+    {
+      "route": "/ar/",
+      "width": 1440,
+      "dark": false,
+      "violations": []
+    },
+    {
+      "route": "/ar/",
+      "width": 1440,
+      "dark": true,
+      "violations": []
+    },
+    {
+      "route": "/ar/programs/BIT/",
+      "width": 390,
+      "dark": false,
+      "violations": []
+    },
+    {
+      "route": "/ar/programs/BIT/",
+      "width": 390,
+      "dark": true,
+      "violations": []
+    },
+    {
+      "route": "/ar/programs/BIT/",
+      "width": 1440,
+      "dark": false,
+      "violations": []
+    },
+    {
+      "route": "/ar/programs/BIT/",
+      "width": 1440,
+      "dark": true,
+      "violations": []
+    },
+    {
+      "route": "/ar/contact/",
+      "width": 390,
+      "dark": false,
+      "violations": []
+    },
+    {
+      "route": "/ar/contact/",
+      "width": 390,
+      "dark": true,
+      "violations": []
+    },
+    {
+      "route": "/ar/contact/",
+      "width": 1440,
+      "dark": false,
+      "violations": []
+    },
+    {
+      "route": "/ar/contact/",
+      "width": 1440,
+      "dark": true,
+      "violations": []
+    },
+    {
+      "route": "/en/",
+      "width": 390,
+      "dark": false,
+      "violations": []
+    },
+    {
+      "route": "/en/",
+      "width": 390,
+      "dark": true,
+      "violations": []
+    },
+    {
+      "route": "/en/",
+      "width": 1440,
+      "dark": false,
+      "violations": []
+    },
+    {
+      "route": "/en/",
+      "width": 1440,
+      "dark": true,
+      "violations": []
+    }
+  ],
+  "type": [
+    {
+      "route": "/ar/",
+      "width": 390,
+      "headings": [
+        {
+          "text": "تعليم تقنييبدأ من هنا.",
+          "font": "\"Noto Kufi Arabic\", \"IBM Plex Sans Arabic\", system-ui, sans-serif",
+          "size": "36px",
+          "line": "49.5px",
+          "weight": "700"
+        },
+        {
+          "text": "1,200+",
+          "font": "\"Noto Kufi Arabic\", \"IBM Plex Sans Arabic\", system-ui, sans-serif",
+          "size": "24px",
+          "line": "32px",
+          "weight": "700"
+        },
+        {
+          "text": "35",
+          "font": "\"Noto Kufi Arabic\", \"IBM Plex Sans Arabic\", system-ui, sans-serif",
+          "size": "24px",
+          "line": "32px",
+          "weight": "700"
+        },
+        {
+          "text": "12",
+          "font": "\"Noto Kufi Arabic\", \"IBM Plex Sans Arabic\", system-ui, sans-serif",
+          "size": "24px",
+          "line": "32px",
+          "weight": "700"
+        },
+        {
+          "text": "11",
+          "font": "\"Noto Kufi Arabic\", \"IBM Plex Sans Arabic\", system-ui, sans-serif",
+          "size": "24px",
+          "line": "32px",
+          "weight": "700"
+        },
+        {
+          "text": "4",
+          "font": "\"Noto Kufi Arabic\", \"IBM Plex Sans Arabic\", system-ui, sans-serif",
+          "size": "24px",
+          "line": "32px",
+          "weight": "700"
+        },
+        {
+          "text": "للمتقدمين",
+          "font": "\"Noto Kufi Arabic\", \"IBM Plex Sans Arabic\", system-ui, sans-serif",
+          "size": "18px",
+          "line": "28px",
+          "weight": "700"
+        },
+        {
+          "text": "لطلاب الكلية",
+          "font": "\"Noto Kufi Arabic\", \"IBM Plex Sans Arabic\", system-ui, sans-serif",
+          "size": "18px",
+          "line": "28px",
+          "weight": "700"
+        },
+        {
+          "text": "لأولياء الأمور",
+          "font": "\"Noto Kufi Arabic\", \"IBM Plex Sans Arabic\", system-ui, sans-serif",
+          "size": "18px",
+          "line": "28px",
+          "weight": "700"
+        },
+        {
+          "text": "الأقسام",
+          "font": "\"Noto Kufi Arabic\", \"IBM Plex Sans Arabic\", system-ui, sans-serif",
+          "size": "24px",
+          "line": "32px",
+          "weight": "700"
+        },
+        {
+          "text": "البرامج المفتوحة",
+          "font": "\"Noto Kufi Arabic\", \"IBM Plex Sans Arabic\", system-ui, sans-serif",
+          "size": "24px",
+          "line": "32px",
+          "weight": "700"
+        },
+        {
+          "text": "كلمة العميد",
+          "font": "\"Noto Kufi Arabic\", \"IBM Plex Sans Arabic\", system-ui, sans-serif",
+          "size": "20px",
+          "line": "28px",
+          "weight": "700"
+        },
+        {
+          "text": "الفعالية القادمة",
+          "font": "\"Noto Kufi Arabic\", \"IBM Plex Sans Arabic\", system-ui, sans-serif",
+          "size": "20px",
+          "line": "28px",
+          "weight": "700"
+        },
+        {
+          "text": "الأخبار",
+          "font": "\"Noto Kufi Arabic\", \"IBM Plex Sans Arabic\", system-ui, sans-serif",
+          "size": "20px",
+          "line": "28px",
+          "weight": "700"
+        }
+      ]
+    },
+    {
+      "route": "/ar/",
+      "width": 1440,
+      "headings": [
+        {
+          "text": "تعليم تقنييبدأ من هنا.",
+          "font": "\"Noto Kufi Arabic\", \"IBM Plex Sans Arabic\", system-ui, sans-serif",
+          "size": "48px",
+          "line": "66px",
+          "weight": "700"
+        },
+        {
+          "text": "1,200+",
+          "font": "\"Noto Kufi Arabic\", \"IBM Plex Sans Arabic\", system-ui, sans-serif",
+          "size": "24px",
+          "line": "32px",
+          "weight": "700"
+        },
+        {
+          "text": "35",
+          "font": "\"Noto Kufi Arabic\", \"IBM Plex Sans Arabic\", system-ui, sans-serif",
+          "size": "24px",
+          "line": "32px",
+          "weight": "700"
+        },
+        {
+          "text": "12",
+          "font": "\"Noto Kufi Arabic\", \"IBM Plex Sans Arabic\", system-ui, sans-serif",
+          "size": "24px",
+          "line": "32px",
+          "weight": "700"
+        },
+        {
+          "text": "11",
+          "font": "\"Noto Kufi Arabic\", \"IBM Plex Sans Arabic\", system-ui, sans-serif",
+          "size": "24px",
+          "line": "32px",
+          "weight": "700"
+        },
+        {
+          "text": "4",
+          "font": "\"Noto Kufi Arabic\", \"IBM Plex Sans Arabic\", system-ui, sans-serif",
+          "size": "24px",
+          "line": "32px",
+          "weight": "700"
+        },
+        {
+          "text": "للمتقدمين",
+          "font": "\"Noto Kufi Arabic\", \"IBM Plex Sans Arabic\", system-ui, sans-serif",
+          "size": "18px",
+          "line": "28px",
+          "weight": "700"
+        },
+        {
+          "text": "لطلاب الكلية",
+          "font": "\"Noto Kufi Arabic\", \"IBM Plex Sans Arabic\", system-ui, sans-serif",
+          "size": "18px",
+          "line": "28px",
+          "weight": "700"
+        },
+        {
+          "text": "لأولياء الأمور",
+          "font": "\"Noto Kufi Arabic\", \"IBM Plex Sans Arabic\", system-ui, sans-serif",
+          "size": "18px",
+          "line": "28px",
+          "weight": "700"
+        },
+        {
+          "text": "الأقسام",
+          "font": "\"Noto Kufi Arabic\", \"IBM Plex Sans Arabic\", system-ui, sans-serif",
+          "size": "24px",
+          "line": "32px",
+          "weight": "700"
+        },
+        {
+          "text": "البرامج المفتوحة",
+          "font": "\"Noto Kufi Arabic\", \"IBM Plex Sans Arabic\", system-ui, sans-serif",
+          "size": "24px",
+          "line": "32px",
+          "weight": "700"
+        },
+        {
+          "text": "كلمة العميد",
+          "font": "\"Noto Kufi Arabic\", \"IBM Plex Sans Arabic\", system-ui, sans-serif",
+          "size": "20px",
+          "line": "28px",
+          "weight": "700"
+        },
+        {
+          "text": "الفعالية القادمة",
+          "font": "\"Noto Kufi Arabic\", \"IBM Plex Sans Arabic\", system-ui, sans-serif",
+          "size": "20px",
+          "line": "28px",
+          "weight": "700"
+        },
+        {
+          "text": "الأخبار",
+          "font": "\"Noto Kufi Arabic\", \"IBM Plex Sans Arabic\", system-ui, sans-serif",
+          "size": "20px",
+          "line": "28px",
+          "weight": "700"
+        }
+      ]
+    },
+    {
+      "route": "/ar/programs/BIT/",
+      "width": 390,
+      "headings": [
+        {
+          "text": "بكالوريوس تقنية المعلومات",
+          "font": "\"Noto Kufi Arabic\", \"IBM Plex Sans Arabic\", system-ui, sans-serif",
+          "size": "30px",
+          "line": "41.25px",
+          "weight": "700"
+        },
+        {
+          "text": "أساسيات المتقدم",
+          "font": "\"Noto Kufi Arabic\", \"IBM Plex Sans Arabic\", system-ui, sans-serif",
+          "size": "18px",
+          "line": "28px",
+          "weight": "700"
+        },
+        {
+          "text": "ماذا ستتعلم",
+          "font": "\"Noto Kufi Arabic\", \"IBM Plex Sans Arabic\", system-ui, sans-serif",
+          "size": "20px",
+          "line": "28px",
+          "weight": "700"
+        },
+        {
+          "text": "أين يعمل الخريجون",
+          "font": "\"Noto Kufi Arabic\", \"IBM Plex Sans Arabic\", system-ui, sans-serif",
+          "size": "20px",
+          "line": "28px",
+          "weight": "700"
+        },
+        {
+          "text": "القبول",
+          "font": "\"Noto Kufi Arabic\", \"IBM Plex Sans Arabic\", system-ui, sans-serif",
+          "size": "20px",
+          "line": "28px",
+          "weight": "700"
+        },
+        {
+          "text": "الخطة الدراسية",
+          "font": "\"Noto Kufi Arabic\", \"IBM Plex Sans Arabic\", system-ui, sans-serif",
+          "size": "20px",
+          "line": "28px",
+          "weight": "700"
+        },
+        {
+          "text": "أسئلة شائعة",
+          "font": "\"Noto Kufi Arabic\", \"IBM Plex Sans Arabic\", system-ui, sans-serif",
+          "size": "20px",
+          "line": "28px",
+          "weight": "700"
+        }
+      ]
+    },
+    {
+      "route": "/ar/programs/BIT/",
+      "width": 1440,
+      "headings": [
+        {
+          "text": "بكالوريوس تقنية المعلومات",
+          "font": "\"Noto Kufi Arabic\", \"IBM Plex Sans Arabic\", system-ui, sans-serif",
+          "size": "48px",
+          "line": "66px",
+          "weight": "700"
+        },
+        {
+          "text": "أساسيات المتقدم",
+          "font": "\"Noto Kufi Arabic\", \"IBM Plex Sans Arabic\", system-ui, sans-serif",
+          "size": "18px",
+          "line": "28px",
+          "weight": "700"
+        },
+        {
+          "text": "ماذا ستتعلم",
+          "font": "\"Noto Kufi Arabic\", \"IBM Plex Sans Arabic\", system-ui, sans-serif",
+          "size": "20px",
+          "line": "28px",
+          "weight": "700"
+        },
+        {
+          "text": "أين يعمل الخريجون",
+          "font": "\"Noto Kufi Arabic\", \"IBM Plex Sans Arabic\", system-ui, sans-serif",
+          "size": "20px",
+          "line": "28px",
+          "weight": "700"
+        },
+        {
+          "text": "القبول",
+          "font": "\"Noto Kufi Arabic\", \"IBM Plex Sans Arabic\", system-ui, sans-serif",
+          "size": "20px",
+          "line": "28px",
+          "weight": "700"
+        },
+        {
+          "text": "الخطة الدراسية",
+          "font": "\"Noto Kufi Arabic\", \"IBM Plex Sans Arabic\", system-ui, sans-serif",
+          "size": "20px",
+          "line": "28px",
+          "weight": "700"
+        },
+        {
+          "text": "أسئلة شائعة",
+          "font": "\"Noto Kufi Arabic\", \"IBM Plex Sans Arabic\", system-ui, sans-serif",
+          "size": "20px",
+          "line": "28px",
+          "weight": "700"
+        }
+      ]
+    },
+    {
+      "route": "/ar/contact/",
+      "width": 390,
+      "headings": [
+        {
+          "text": "تواصل معنا",
+          "font": "\"Noto Kufi Arabic\", \"IBM Plex Sans Arabic\", system-ui, sans-serif",
+          "size": "30px",
+          "line": "41.25px",
+          "weight": "700"
+        }
+      ]
+    },
+    {
+      "route": "/ar/contact/",
+      "width": 1440,
+      "headings": [
+        {
+          "text": "تواصل معنا",
+          "font": "\"Noto Kufi Arabic\", \"IBM Plex Sans Arabic\", system-ui, sans-serif",
+          "size": "36px",
+          "line": "49.5px",
+          "weight": "700"
+        }
+      ]
+    },
+    {
+      "route": "/en/",
+      "width": 390,
+      "headings": [
+        {
+          "text": "Technical educationstarts here.",
+          "font": "\"Noto Kufi Arabic\", \"IBM Plex Sans Arabic\", system-ui, sans-serif",
+          "size": "36px",
+          "line": "49.5px",
+          "weight": "700"
+        },
+        {
+          "text": "1,200+",
+          "font": "\"Noto Kufi Arabic\", \"IBM Plex Sans Arabic\", system-ui, sans-serif",
+          "size": "24px",
+          "line": "32px",
+          "weight": "700"
+        },
+        {
+          "text": "35",
+          "font": "\"Noto Kufi Arabic\", \"IBM Plex Sans Arabic\", system-ui, sans-serif",
+          "size": "24px",
+          "line": "32px",
+          "weight": "700"
+        },
+        {
+          "text": "12",
+          "font": "\"Noto Kufi Arabic\", \"IBM Plex Sans Arabic\", system-ui, sans-serif",
+          "size": "24px",
+          "line": "32px",
+          "weight": "700"
+        },
+        {
+          "text": "11",
+          "font": "\"Noto Kufi Arabic\", \"IBM Plex Sans Arabic\", system-ui, sans-serif",
+          "size": "24px",
+          "line": "32px",
+          "weight": "700"
+        },
+        {
+          "text": "4",
+          "font": "\"Noto Kufi Arabic\", \"IBM Plex Sans Arabic\", system-ui, sans-serif",
+          "size": "24px",
+          "line": "32px",
+          "weight": "700"
+        },
+        {
+          "text": "Applicants",
+          "font": "\"Noto Kufi Arabic\", \"IBM Plex Sans Arabic\", system-ui, sans-serif",
+          "size": "18px",
+          "line": "28px",
+          "weight": "700"
+        },
+        {
+          "text": "Current students",
+          "font": "\"Noto Kufi Arabic\", \"IBM Plex Sans Arabic\", system-ui, sans-serif",
+          "size": "18px",
+          "line": "28px",
+          "weight": "700"
+        },
+        {
+          "text": "Parents",
+          "font": "\"Noto Kufi Arabic\", \"IBM Plex Sans Arabic\", system-ui, sans-serif",
+          "size": "18px",
+          "line": "28px",
+          "weight": "700"
+        },
+        {
+          "text": "Departments",
+          "font": "\"Noto Kufi Arabic\", \"IBM Plex Sans Arabic\", system-ui, sans-serif",
+          "size": "24px",
+          "line": "32px",
+          "weight": "700"
+        },
+        {
+          "text": "Open programmes",
+          "font": "\"Noto Kufi Arabic\", \"IBM Plex Sans Arabic\", system-ui, sans-serif",
+          "size": "24px",
+          "line": "32px",
+          "weight": "700"
+        },
+        {
+          "text": "Dean's welcome",
+          "font": "\"Noto Kufi Arabic\", \"IBM Plex Sans Arabic\", system-ui, sans-serif",
+          "size": "20px",
+          "line": "28px",
+          "weight": "700"
+        },
+        {
+          "text": "Next event",
+          "font": "\"Noto Kufi Arabic\", \"IBM Plex Sans Arabic\", system-ui, sans-serif",
+          "size": "20px",
+          "line": "28px",
+          "weight": "700"
+        },
+        {
+          "text": "News",
+          "font": "\"Noto Kufi Arabic\", \"IBM Plex Sans Arabic\", system-ui, sans-serif",
+          "size": "20px",
+          "line": "28px",
+          "weight": "700"
+        }
+      ]
+    },
+    {
+      "route": "/en/",
+      "width": 1440,
+      "headings": [
+        {
+          "text": "Technical educationstarts here.",
+          "font": "\"Noto Kufi Arabic\", \"IBM Plex Sans Arabic\", system-ui, sans-serif",
+          "size": "48px",
+          "line": "66px",
+          "weight": "700"
+        },
+        {
+          "text": "1,200+",
+          "font": "\"Noto Kufi Arabic\", \"IBM Plex Sans Arabic\", system-ui, sans-serif",
+          "size": "24px",
+          "line": "32px",
+          "weight": "700"
+        },
+        {
+          "text": "35",
+          "font": "\"Noto Kufi Arabic\", \"IBM Plex Sans Arabic\", system-ui, sans-serif",
+          "size": "24px",
+          "line": "32px",
+          "weight": "700"
+        },
+        {
+          "text": "12",
+          "font": "\"Noto Kufi Arabic\", \"IBM Plex Sans Arabic\", system-ui, sans-serif",
+          "size": "24px",
+          "line": "32px",
+          "weight": "700"
+        },
+        {
+          "text": "11",
+          "font": "\"Noto Kufi Arabic\", \"IBM Plex Sans Arabic\", system-ui, sans-serif",
+          "size": "24px",
+          "line": "32px",
+          "weight": "700"
+        },
+        {
+          "text": "4",
+          "font": "\"Noto Kufi Arabic\", \"IBM Plex Sans Arabic\", system-ui, sans-serif",
+          "size": "24px",
+          "line": "32px",
+          "weight": "700"
+        },
+        {
+          "text": "Applicants",
+          "font": "\"Noto Kufi Arabic\", \"IBM Plex Sans Arabic\", system-ui, sans-serif",
+          "size": "18px",
+          "line": "28px",
+          "weight": "700"
+        },
+        {
+          "text": "Current students",
+          "font": "\"Noto Kufi Arabic\", \"IBM Plex Sans Arabic\", system-ui, sans-serif",
+          "size": "18px",
+          "line": "28px",
+          "weight": "700"
+        },
+        {
+          "text": "Parents",
+          "font": "\"Noto Kufi Arabic\", \"IBM Plex Sans Arabic\", system-ui, sans-serif",
+          "size": "18px",
+          "line": "28px",
+          "weight": "700"
+        },
+        {
+          "text": "Departments",
+          "font": "\"Noto Kufi Arabic\", \"IBM Plex Sans Arabic\", system-ui, sans-serif",
+          "size": "24px",
+          "line": "32px",
+          "weight": "700"
+        },
+        {
+          "text": "Open programmes",
+          "font": "\"Noto Kufi Arabic\", \"IBM Plex Sans Arabic\", system-ui, sans-serif",
+          "size": "24px",
+          "line": "32px",
+          "weight": "700"
+        },
+        {
+          "text": "Dean's welcome",
+          "font": "\"Noto Kufi Arabic\", \"IBM Plex Sans Arabic\", system-ui, sans-serif",
+          "size": "20px",
+          "line": "28px",
+          "weight": "700"
+        },
+        {
+          "text": "Next event",
+          "font": "\"Noto Kufi Arabic\", \"IBM Plex Sans Arabic\", system-ui, sans-serif",
+          "size": "20px",
+          "line": "28px",
+          "weight": "700"
+        },
+        {
+          "text": "News",
+          "font": "\"Noto Kufi Arabic\", \"IBM Plex Sans Arabic\", system-ui, sans-serif",
+          "size": "20px",
+          "line": "28px",
+          "weight": "700"
+        }
+      ]
+    }
+  ],
+  "readStates": [
+    {
+      "kind": "loading",
+      "text": "",
+      "busy": 0
+    },
+    {
+      "kind": "503",
+      "text": "لا نتائج منشورة بعد\n\nستظهر نتائجك هنا فور نشرها، وسيصلك إشعار.",
+      "alerts": ["تعذّر تحميل بعض البيانات. أعد المحاولة بعد لحظات.أعد المحاولة"]
+    }
+  ],
+  "enlargement": [
+    {
+      "group": "student",
+      "route": "/results",
+      "width": 320,
+      "height": 844,
+      "kind": "root font-size 200%; not browser zoom",
+      "before": {
+        "overflow": 0,
+        "height": 1013
+      },
+      "after": {
+        "overflow": 0,
+        "height": 2490,
+        "head": "النتائج"
+      }
+    },
+    {
+      "group": "student",
+      "route": "/results",
+      "width": 375,
+      "height": 844,
+      "kind": "root font-size 200%; not browser zoom",
+      "before": {
+        "overflow": 0,
+        "height": 993
+      },
+      "after": {
+        "overflow": 0,
+        "height": 2258,
+        "head": "النتائج"
+      }
+    },
+    {
+      "group": "student",
+      "route": "/results",
+      "width": 844,
+      "height": 390,
+      "kind": "root font-size 200%; not browser zoom",
+      "before": {
+        "overflow": 0,
+        "height": 977
+      },
+      "after": {
+        "overflow": 0,
+        "height": 1914,
+        "head": "النتائج"
+      }
+    },
+    {
+      "group": "student",
+      "route": "/courses",
+      "width": 320,
+      "height": 844,
+      "kind": "root font-size 200%; not browser zoom",
+      "before": {
+        "overflow": 0,
+        "height": 1339
+      },
+      "after": {
+        "overflow": 0,
+        "height": 4298,
+        "head": "موادي"
+      }
+    },
+    {
+      "group": "student",
+      "route": "/courses",
+      "width": 375,
+      "height": 844,
+      "kind": "root font-size 200%; not browser zoom",
+      "before": {
+        "overflow": 0,
+        "height": 1259
+      },
+      "after": {
+        "overflow": 0,
+        "height": 3639,
+        "head": "موادي"
+      }
+    },
+    {
+      "group": "student",
+      "route": "/courses",
+      "width": 844,
+      "height": 390,
+      "kind": "root font-size 200%; not browser zoom",
+      "before": {
+        "overflow": 0,
+        "height": 851
+      },
+      "after": {
+        "overflow": 0,
+        "height": 2056,
+        "head": "موادي"
+      }
+    },
+    {
+      "group": "public",
+      "route": "/ar/",
+      "width": 320,
+      "height": 844,
+      "kind": "root font-size 200%; not browser zoom",
+      "before": {
+        "overflow": 0,
+        "height": 5139
+      },
+      "after": {
+        "overflow": 4,
+        "height": 14864,
+        "head": "تعليم تقني\nيبدأ من هنا."
+      }
+    },
+    {
+      "group": "public",
+      "route": "/ar/",
+      "width": 375,
+      "height": 844,
+      "kind": "root font-size 200%; not browser zoom",
+      "before": {
+        "overflow": 0,
+        "height": 5031
+      },
+      "after": {
+        "overflow": 0,
+        "height": 13712,
+        "head": "تعليم تقني\nيبدأ من هنا."
+      }
+    },
+    {
+      "group": "public",
+      "route": "/ar/",
+      "width": 844,
+      "height": 390,
+      "kind": "root font-size 200%; not browser zoom",
+      "before": {
+        "overflow": 0,
+        "height": 3775
+      },
+      "after": {
+        "overflow": 0,
+        "height": 7710,
+        "head": "تعليم تقني\nيبدأ من هنا."
+      }
+    },
+    {
+      "group": "guest",
+      "route": "/apply",
+      "width": 320,
+      "height": 844,
+      "kind": "root font-size 200%; not browser zoom",
+      "before": {
+        "overflow": 0,
+        "height": 844
+      },
+      "after": {
+        "overflow": 0,
+        "height": 1549,
+        "head": "التحقق من البريد"
+      }
+    },
+    {
+      "group": "guest",
+      "route": "/apply",
+      "width": 375,
+      "height": 844,
+      "kind": "root font-size 200%; not browser zoom",
+      "before": {
+        "overflow": 0,
+        "height": 844
+      },
+      "after": {
+        "overflow": 0,
+        "height": 1504,
+        "head": "التحقق من البريد"
+      }
+    },
+    {
+      "group": "guest",
+      "route": "/apply",
+      "width": 844,
+      "height": 390,
+      "kind": "root font-size 200%; not browser zoom",
+      "before": {
+        "overflow": 0,
+        "height": 577
+      },
+      "after": {
+        "overflow": 0,
+        "height": 1202,
+        "head": "التحقق من البريد"
+      }
+    }
+  ],
+  "bottom": [
+    {
+      "group": "student",
+      "route": "/results",
+      "overflow": 0
+    },
+    {
+      "group": "student",
+      "route": "/courses",
+      "overflow": 0
+    },
+    {
+      "group": "public",
+      "route": "/ar/",
+      "overflow": 0
+    },
+    {
+      "group": "guest",
+      "route": "/apply",
+      "overflow": 0
+    }
+  ]
+}
