@@ -8,6 +8,7 @@ from django.utils import timezone
 from rest_framework.test import APIClient
 
 from accounts.rbac import Role
+from admissions import services as admissions_services
 from admissions.models import AdmissionCycle, Application, ApplicationFormTemplate, ProgramIntake
 from admissions.services import expire_closed
 from conftest import PASSWORD, last_code, pdf_upload
@@ -430,3 +431,26 @@ def test_intake_changes_reach_the_departments_log(api, intake, make_user):
     assert saved.status_code == 200, saved.data
     entry = AuditLog.objects.get(action="admissions.intake_update")
     assert entry.department_id == intake.program.department_id
+
+
+def test_a_stale_decision_cannot_overwrite_a_final_one(intake, make_user):
+    """Review 2026-10-04 C3: two requests read "eligible"; the second must get 409, not turn the
+    acceptance into a rejection."""
+    from audit.services import RequestMeta
+    from contacts.models import Contact
+    from core.errors import Conflict
+
+    head = make_user(Role.HEAD_REGISTRAR)
+    application = Application.objects.create(
+        reference_no="APP-RACE",
+        contact=Contact.objects.create(name="متقدم", email="race@example.test"),
+        intake=intake,
+        full_name="متقدم",
+        status="eligible",
+    )
+    stale = Application.objects.get(pk=application.pk)
+    admissions_services.transition(RequestMeta(actor=head), application, to="accepted")
+    with pytest.raises(Conflict):
+        admissions_services.transition(RequestMeta(actor=head), stale, to="rejected", note="x")
+    application.refresh_from_db()
+    assert application.status == "accepted"

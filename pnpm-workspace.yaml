@@ -4,3 +4,9 @@ packages:
 # Dependency install scripts are blocked by default (pnpm 12); approve only known ones.
 allowBuilds:
   esbuild: true
+# GHSA-ch52-4w7c-c8xp (via astro, build time only): the fixed release until astro picks it up
+# (review 2026-10-04, B11).
+minimumReleaseAgeExclude:
+  - http-cache-semantics@4.3.0
+overrides:
+  http-cache-semantics: ">=4.3.0"

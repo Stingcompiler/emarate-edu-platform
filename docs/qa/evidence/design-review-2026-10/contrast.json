@@ -1,0 +1,53 @@
+{
+  "method": "WCAG sRGB relative luminance; opaque token pairs only, not a page-wide contrast certificate",
+  "pairs": [
+    {
+      "name": "primary",
+      "foreground": "#2D64A7",
+      "background": "#FFFFFF",
+      "ratio": 6.012970219279989
+    },
+    {
+      "name": "navy",
+      "foreground": "#1F2B47",
+      "background": "#FFFFFF",
+      "ratio": 14.048716291871775
+    },
+    {
+      "name": "accent",
+      "foreground": "#B02544",
+      "background": "#FFFFFF",
+      "ratio": 6.574581922383505
+    },
+    {
+      "name": "muted",
+      "foreground": "#576075",
+      "background": "#FFFFFF",
+      "ratio": 6.296348144999787
+    },
+    {
+      "name": "placeholder-n400",
+      "foreground": "#8F95A3",
+      "background": "#FFFFFF",
+      "ratio": 3.0018117588182536
+    },
+    {
+      "name": "focus-ring",
+      "foreground": "#96B1D3",
+      "background": "#FFFFFF",
+      "ratio": 2.2044253911259677
+    },
+    {
+      "name": "dark-link",
+      "foreground": "#96B1D3",
+      "background": "#151E31",
+      "ratio": 7.548894015330979
+    },
+    {
+      "name": "dark-muted",
+      "foreground": "#C0C3CB",
+      "background": "#151E31",
+      "ratio": 9.437568116194182
+    }
+  ]
+}

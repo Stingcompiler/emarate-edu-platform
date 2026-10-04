@@ -346,3 +346,40 @@ def test_the_monitor_counts_who_has_not_started(api, classroom, exam):
     )
     assert listed["students_count"] is None
     assert api(classroom.student).get(f"{URL}/{exam.public_id}").data["students_count"] is None
+
+
+def test_a_save_that_loses_the_race_to_submit_is_refused(classroom, exam):
+    """Review 2026-10-04 C1: an autosave read before the submit committed must not change the
+    graded answer afterwards (it was saved, while the mark stayed on the old answer)."""
+    from audit.services import RequestMeta
+    from core.errors import Conflict
+
+    meta = RequestMeta(actor=classroom.student)
+    attempt = services.start(meta, exam)
+    stale = ExamAttempt.objects.get(pk=attempt.pk)  # the autosave request's copy
+    question = exam.questions.get(type="true_false")
+    services.save_answer(meta, attempt, question.pk, True)
+    done = services.submit(meta, attempt)
+    with pytest.raises(Conflict):
+        services.save_answer(meta, stale, question.pk, False)
+    answer = done.answers.get(question=question)
+    assert answer.answer is True and answer.marks_awarded == Decimal("1")
+
+
+def test_teacher_actions_recheck_the_attempt_they_act_on(api, classroom, exam, make_user):
+    """Extend and reopen re-read the attempt under the lock (C8): a stale copy cannot extend a
+    submitted attempt or reopen one twice."""
+    from audit.services import RequestMeta
+    from core.errors import Conflict
+
+    meta = RequestMeta(actor=classroom.student)
+    attempt = services.start(meta, exam)
+    stale = ExamAttempt.objects.get(pk=attempt.pk)
+    services.submit(meta, attempt)
+    teacher = RequestMeta(actor=classroom.teacher)
+    with pytest.raises(Conflict):
+        services.extend(teacher, stale, 10)  # still "in progress" in the stale copy
+    reopened = services.reopen(teacher, ExamAttempt.objects.get(pk=attempt.pk), 10, "انقطاع")
+    with pytest.raises(Conflict):
+        services.reopen(teacher, stale, 10, "مرة ثانية")  # stale copy says "submitted"
+    assert ExamAttempt.objects.get(pk=reopened.pk).status == "in_progress"

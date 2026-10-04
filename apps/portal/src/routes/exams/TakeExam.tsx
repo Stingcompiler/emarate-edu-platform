@@ -176,18 +176,42 @@ function ExamRunner({ attempt }: { attempt: AttemptPayload }) {
   const submit = useCallback(async () => {
     if (submitting.current) return;
     submitting.current = true;
-    await sync();
-    const { response } = await api.POST("/api/v1/exam-attempts/{public_id}/submit", {
-      params: { path: { public_id: attempt.public_id } },
-    });
-    if (response.ok || response.status === 409) {
-      pending.clear();
-      navigate(`/exam-attempts/${attempt.public_id}/result`, { replace: true });
-    } else {
-      submitting.current = false;
+    let leaving = false;
+    try {
+      await sync();
+      const unsent = Object.keys(pending.read()).length;
+      setUnsynced(unsent);
+      // While there is time, never submit over answers the server has not confirmed: the
+      // student submits again once the connection is back (review 2026-10-04, C6). At the
+      // deadline the server closes the attempt anyway, so it goes and the result page says
+      // how many answers did not arrive.
+      const timeUp = deadline - (Date.now() + offset) <= 0;
+      if (unsent > 0 && !timeUp) {
+        setError(
+          `لم تصل ${count(unsent, N.answer)} إلى الخادم بعد. تحقّق من الاتصال ثم اضغط «تسليم» مرة أخرى؛ إجاباتك محفوظة على هذه الصفحة.`,
+        );
+        return;
+      }
+      const { response } = await api.POST("/api/v1/exam-attempts/{public_id}/submit", {
+        params: { path: { public_id: attempt.public_id } },
+      });
+      if (response.ok || response.status === 409) {
+        pending.clear();
+        leaving = true;
+        navigate(`/exam-attempts/${attempt.public_id}/result`, {
+          replace: true,
+          state: { unsent },
+        });
+        return;
+      }
       setError("تعذّر الإرسال الآن. إجاباتك محفوظة على جهازك وسنعيد المحاولة تلقائيًا.");
+    } catch {
+      // fetch itself failed (no connection): the page stays usable and retries.
+      setError("انقطع الاتصال أثناء الإرسال. إجاباتك محفوظة، وسنعيد المحاولة عند عودة الاتصال.");
+    } finally {
+      if (!leaving) submitting.current = false;
     }
-  }, [attempt.public_id, navigate, pending, sync]);
+  }, [attempt.public_id, deadline, navigate, offset, pending, sync]);
 
   // Clock, periodic sync, and auto-submit when the server's time is up.
   useEffect(() => {
@@ -263,6 +287,8 @@ function ExamRunner({ attempt }: { attempt: AttemptPayload }) {
   }
 
   const lowTime = remaining < 5 * 60_000;
+  // The browser refused to keep the queue on the device (private mode, full storage).
+  const memoryOnly = unsynced > 0 && !pending.persisted();
   const saveLine = !online
     ? "بلا اتصال · محفوظ على الجهاز"
     : unsynced
@@ -356,6 +382,14 @@ function ExamRunner({ attempt }: { attempt: AttemptPayload }) {
               التالي <ChevronLeft size={18} aria-hidden className="ltr:rotate-180" />
             </Button>
           </div>
+          {memoryOnly && (
+            <div className="mt-4">
+              <Notice tone="warning">
+                المتصفح لا يسمح بحفظ إجاباتك على الجهاز. لا تُعد تحميل الصفحة ولا تغلقها حتى يظهر
+                «حُفظ».
+              </Notice>
+            </div>
+          )}
           {error && (
             <div className="mt-4">
               <Notice>{error}</Notice>

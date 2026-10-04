@@ -261,8 +261,25 @@ def _open_for_writing(attempt: ExamAttempt, now) -> None:
         raise Invalid({"detail": [gettext("Time is up.")]}, code="time_up")
 
 
+def _locked(attempt: ExamAttempt) -> ExamAttempt:
+    """The attempt row, locked for this transaction and re-read: every writer (save, submit,
+    close, extend, reopen) takes this lock, so none acts on a state another just changed
+    (review 2026-10-04, C1/C8)."""
+    return (
+        ExamAttempt.objects.select_for_update()
+        .select_related("exam", "student_record")
+        .get(pk=attempt.pk)
+    )
+
+
 def save_answer(meta: RequestMeta, attempt: ExamAttempt, question_id: int, answer) -> StudentAnswer:
+    with transaction.atomic():
+        return _save_answer(_locked(attempt), question_id, answer)
+
+
+def _save_answer(attempt: ExamAttempt, question_id: int, answer) -> StudentAnswer:
     now = timezone.now()
+    # Checked after the lock: a submit that committed first wins and this save is refused.
     _open_for_writing(attempt, now)
     if question_id not in attempt.question_order:
         raise NotFound()
@@ -365,7 +382,13 @@ def close_expired() -> int:
     for attempt in ExamAttempt.objects.filter(status=A.IN_PROGRESS).select_related("exam"):
         if now > attempt.deadline_at + timedelta(seconds=attempt.exam.grace_seconds):
             with transaction.atomic():
-                _finish(attempt, A.AUTO_SUBMITTED)
+                locked = _locked(attempt)
+                # Re-checked under the lock: the student may have submitted, or the teacher
+                # extended the time, since the list was read.
+                grace = timedelta(seconds=locked.exam.grace_seconds)
+                if locked.status != A.IN_PROGRESS or now <= locked.deadline_at + grace:
+                    continue
+                _finish(locked, A.AUTO_SUBMITTED)
             count += 1
     Exam.objects.filter(
         status=Exam.Status.PUBLISHED, closes_at__lt=now - timedelta(minutes=5)
@@ -378,17 +401,19 @@ def close_expired() -> int:
 
 def extend(meta: RequestMeta, attempt: ExamAttempt, minutes: int) -> ExamAttempt:
     require(meta.actor, attempt.exam.offering, "edit")
-    if attempt.status != A.IN_PROGRESS:
-        raise Conflict(gettext("Only a running attempt can be extended."), code="not_running")
-    attempt.deadline_at += timedelta(minutes=minutes)
-    attempt.save(update_fields=["deadline_at", "updated_at"])
-    record(
-        meta,
-        "exam.attempt_extend",
-        attempt,
-        new={"minutes": minutes},
-        department_id=_dept(attempt.exam),
-    )
+    with transaction.atomic():
+        attempt = _locked(attempt)
+        if attempt.status != A.IN_PROGRESS:
+            raise Conflict(gettext("Only a running attempt can be extended."), code="not_running")
+        attempt.deadline_at += timedelta(minutes=minutes)
+        attempt.save(update_fields=["deadline_at", "updated_at"])
+        record(
+            meta,
+            "exam.attempt_extend",
+            attempt,
+            new={"minutes": minutes},
+            department_id=_dept(attempt.exam),
+        )
     return attempt
 
 
@@ -396,13 +421,16 @@ def reopen(meta: RequestMeta, attempt: ExamAttempt, minutes: int, reason: str) -
     require(meta.actor, attempt.exam.offering, "publish")
     if not reason.strip():
         raise ValidationError({"reason": [gettext("A reason is required.")]})
-    if attempt.status not in DONE_STATES:
-        raise Conflict(gettext("Only a submitted attempt can be reopened."), code="not_submitted")
-    if ExamAttempt.objects.filter(
-        exam=attempt.exam, student_record=attempt.student_record, status=A.IN_PROGRESS
-    ).exists():
-        raise Conflict(gettext("The student has another attempt running."), code="running")
     with transaction.atomic():
+        attempt = _locked(attempt)
+        if attempt.status not in DONE_STATES:
+            raise Conflict(
+                gettext("Only a submitted attempt can be reopened."), code="not_submitted"
+            )
+        if ExamAttempt.objects.filter(
+            exam=attempt.exam, student_record=attempt.student_record, status=A.IN_PROGRESS
+        ).exists():
+            raise Conflict(gettext("The student has another attempt running."), code="running")
         attempt.status = A.IN_PROGRESS
         attempt.submitted_at = None
         attempt.deadline_at = timezone.now() + timedelta(minutes=minutes)

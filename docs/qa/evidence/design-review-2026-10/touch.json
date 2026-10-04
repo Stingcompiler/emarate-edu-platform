@@ -1,0 +1,58 @@
+{
+  "method": "Chrome isMobile+hasTouch 390x844, pointer coarse; not Safari or real touch hardware",
+  "rows": [
+    {
+      "route": "/ar/",
+      "coarse": true,
+      "innerWidth": 390,
+      "overflow": 0,
+      "inputSizes": []
+    },
+    {
+      "route": "/ar/contact/",
+      "coarse": true,
+      "innerWidth": 390,
+      "overflow": 0,
+      "inputSizes": [
+        "16px",
+        "16px",
+        "16px",
+        "16px",
+        "16px",
+        "16px",
+        "16px",
+        "16px",
+        "16px",
+        "16px",
+        "16px",
+        "16px",
+        "16px",
+        "16px"
+      ]
+    },
+    {
+      "route": "/login",
+      "coarse": true,
+      "innerWidth": 390,
+      "overflow": 0,
+      "inputSizes": ["16px", "16px"]
+    },
+    {
+      "route": "/apply",
+      "coarse": true,
+      "innerWidth": 390,
+      "overflow": 0,
+      "inputSizes": ["16px", "16px"]
+    },
+    {
+      "route": "/",
+      "coarse": true,
+      "overflow": 0
+    },
+    {
+      "route": "/results",
+      "coarse": true,
+      "overflow": 0
+    }
+  ]
+}

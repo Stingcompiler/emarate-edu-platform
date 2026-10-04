@@ -534,6 +534,17 @@ def transition(
     if to == S.MISSING_DOCUMENTS and not note.strip():
         raise ValidationError({"note": [gettext("Tell the applicant what is missing.")]})
     with transaction.atomic():
+        # Re-read under a lock: a move made meanwhile (say, accepted) wins and this request
+        # gets 409 instead of overwriting a final decision (review 2026-10-04, C3).
+        current = Application.objects.select_for_update().get(pk=application.pk)
+        if current.status != application.status or to not in allowed_transitions(
+            meta.actor, current
+        ):
+            raise Conflict(
+                gettext("This application changed meanwhile; reload it and decide again."),
+                code="stale",
+            )
+        application = current
         source = application.status
         application.status = to
         if to in (S.ACCEPTED, S.REJECTED, S.WAITLISTED):

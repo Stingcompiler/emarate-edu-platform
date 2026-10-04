@@ -91,6 +91,7 @@ const noun = (one: string, two: string, few: string, many: string): Noun => ({
 export const N = {
   application: noun("طلب", "طلبان", "طلبات", "طلبًا"),
   acknowledgement: noun("إقرار", "إقراران", "إقرارات", "إقرارًا"),
+  answer: noun("إجابة", "إجابتان", "إجابات", "إجابة"),
   case: noun("حالة", "حالتان", "حالات", "حالة"),
   change: noun("تغيير", "تغييران", "تغييرات", "تغييرًا"),
   course: noun("مادة", "مادتان", "مواد", "مادة"),

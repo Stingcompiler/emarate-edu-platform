@@ -1,0 +1,32 @@
+[
+  {
+    "route": "/lectures/e442b70c-be65-4ebf-b05b-977e7bb1169a",
+    "width": 390,
+    "height": 844,
+    "overflow": 0
+  },
+  {
+    "route": "/lectures/e442b70c-be65-4ebf-b05b-977e7bb1169a",
+    "width": 768,
+    "height": 1024,
+    "overflow": 0
+  },
+  {
+    "route": "/lectures/e442b70c-be65-4ebf-b05b-977e7bb1169a",
+    "width": 1280,
+    "height": 800,
+    "overflow": 0
+  },
+  {
+    "route": "/lectures/e442b70c-be65-4ebf-b05b-977e7bb1169a",
+    "width": 1440,
+    "height": 900,
+    "overflow": 0
+  },
+  {
+    "route": "/lectures/e442b70c-be65-4ebf-b05b-977e7bb1169a",
+    "width": 1920,
+    "height": 1080,
+    "overflow": 0
+  }
+]
