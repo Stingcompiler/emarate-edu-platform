@@ -19,6 +19,12 @@ from django.db.models import Q
 
 from academic.models import Enrollment, OfferingInstructor
 from accounts import rbac
+from students.models import StudentRecord
+
+# A suspended (or withdrawn, graduated) student keeps their record, results, cases and
+# notifications, but not the learning space: lectures, assignments, exams, files and live
+# sessions (docs/03 §3.14; owner decision 2026-10-04, review C2).
+_STUDYING = StudentRecord.Status.ACTIVE
 
 
 @dataclass(frozen=True)
@@ -53,7 +59,10 @@ def for_offering(user, offering) -> OfferingAccess:
         .first()
     )
     enrolled = Enrollment.objects.filter(
-        offering=offering, student_record__user=user, status=Enrollment.Status.ACTIVE
+        offering=offering,
+        student_record__user=user,
+        student_record__status=_STUDYING,
+        status=Enrollment.Status.ACTIVE,
     ).exists()
     return OfferingAccess(
         view_all=view or teaching is not None,
@@ -82,7 +91,9 @@ def staff_offerings_q(user, field: str = "offering") -> Q:
 
 def student_offerings_q(user, field: str = "offering") -> Q:
     enrolled = Enrollment.objects.filter(
-        student_record__user=user, status=Enrollment.Status.ACTIVE
+        student_record__user=user,
+        student_record__status=_STUDYING,
+        status=Enrollment.Status.ACTIVE,
     ).values("offering_id")
     return Q(**{f"{field}_id__in": enrolled})
 

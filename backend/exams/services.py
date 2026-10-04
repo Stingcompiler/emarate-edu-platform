@@ -279,6 +279,9 @@ def save_answer(meta: RequestMeta, attempt: ExamAttempt, question_id: int, answe
 
 def _save_answer(attempt: ExamAttempt, question_id: int, answer) -> StudentAnswer:
     now = timezone.now()
+    if attempt.student_record.status != StudentRecord.Status.ACTIVE:
+        # Suspended mid-exam: no more answers (review C2); what was saved stays.
+        raise PermissionDenied(gettext("Your student record is suspended."))
     # Checked after the lock: a submit that committed first wins and this save is refused.
     _open_for_writing(attempt, now)
     if question_id not in attempt.question_order:

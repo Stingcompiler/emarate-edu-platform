@@ -9,6 +9,7 @@ import { navFor } from "../lib/nav";
 import { AppShell, Badge } from "./AppShell";
 import { InstallHint } from "./InstallHint";
 import { PushPrompt } from "./PushPrompt";
+import { Notice } from "./ui";
 import { ThemeToggle } from "./ThemeToggle";
 
 type Props = Omit<ComponentProps<typeof AppShell>, "nav" | "actions" | "eyebrow">;
@@ -55,6 +56,16 @@ export function PortalShell(props: Props) {
       // Students and teachers benefit most from push + offline: nudge them to install on phones.
       children={
         <>
+          {/* A suspended student's courses, exams and sessions close (review C2): say why on
+              every page instead of showing empty lists. */}
+          {me.data?.student?.status === "suspended" && (
+            <div className="mb-4">
+              <Notice tone="warning">
+                قيدك موقوف حاليًا: المواد والاختبارات وجلسات البث غير متاحة حتى رفع الإيقاف. نتائجك
+                وإشعاراتك وحالتك تبقى متاحة؛ للاستفسار راجع شؤون الطلاب.
+              </Notice>
+            </div>
+          )}
           {/* Only on the home screens (review 2026-09-29): not above exams, grading or forms. */}
           {(me.data?.student || hasRole(me.data, "teacher", "ta")) &&
             (pathname === "/" || pathname === "/me") && <InstallHint />}
