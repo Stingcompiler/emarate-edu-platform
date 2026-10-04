@@ -1,0 +1,245 @@
+{
+  "source": "local synthetic application only",
+  "rows": [
+    {
+      "step": 2,
+      "width": 390,
+      "height": 844,
+      "overflow": 0,
+      "title": "اختيار البرنامج",
+      "fields": 1
+    },
+    {
+      "step": 2,
+      "width": 768,
+      "height": 1024,
+      "overflow": 0,
+      "title": "اختيار البرنامج",
+      "fields": 1
+    },
+    {
+      "step": 2,
+      "width": 1280,
+      "height": 800,
+      "overflow": 0,
+      "title": "اختيار البرنامج",
+      "fields": 1
+    },
+    {
+      "step": 2,
+      "width": 1440,
+      "height": 900,
+      "overflow": 0,
+      "title": "اختيار البرنامج",
+      "fields": 1
+    },
+    {
+      "step": 2,
+      "width": 1920,
+      "height": 1080,
+      "overflow": 0,
+      "title": "اختيار البرنامج",
+      "fields": 1
+    },
+    {
+      "step": 3,
+      "width": 390,
+      "height": 844,
+      "overflow": 0,
+      "title": "المؤهل والبيانات",
+      "fields": 6
+    },
+    {
+      "step": 3,
+      "width": 768,
+      "height": 1024,
+      "overflow": 0,
+      "title": "المؤهل والبيانات",
+      "fields": 6
+    },
+    {
+      "step": 3,
+      "width": 1280,
+      "height": 800,
+      "overflow": 0,
+      "title": "المؤهل والبيانات",
+      "fields": 6
+    },
+    {
+      "step": 3,
+      "width": 1440,
+      "height": 900,
+      "overflow": 0,
+      "title": "المؤهل والبيانات",
+      "fields": 6
+    },
+    {
+      "step": 3,
+      "width": 1920,
+      "height": 1080,
+      "overflow": 0,
+      "title": "المؤهل والبيانات",
+      "fields": 6
+    },
+    {
+      "step": 4,
+      "width": 390,
+      "height": 844,
+      "overflow": 0,
+      "title": "المستندات",
+      "fields": 3
+    },
+    {
+      "step": 4,
+      "width": 768,
+      "height": 1024,
+      "overflow": 0,
+      "title": "المستندات",
+      "fields": 3
+    },
+    {
+      "step": 4,
+      "width": 1280,
+      "height": 800,
+      "overflow": 0,
+      "title": "المستندات",
+      "fields": 3
+    },
+    {
+      "step": 4,
+      "width": 1440,
+      "height": 900,
+      "overflow": 0,
+      "title": "المستندات",
+      "fields": 3
+    },
+    {
+      "step": 4,
+      "width": 1920,
+      "height": 1080,
+      "overflow": 0,
+      "title": "المستندات",
+      "fields": 3
+    },
+    {
+      "step": 5,
+      "width": 390,
+      "height": 844,
+      "overflow": 0,
+      "title": "المراجعة والإرسال",
+      "fields": 0
+    },
+    {
+      "step": 5,
+      "width": 768,
+      "height": 1024,
+      "overflow": 0,
+      "title": "المراجعة والإرسال",
+      "fields": 0
+    },
+    {
+      "step": 5,
+      "width": 1280,
+      "height": 800,
+      "overflow": 0,
+      "title": "المراجعة والإرسال",
+      "fields": 0
+    },
+    {
+      "step": 5,
+      "width": 1440,
+      "height": 900,
+      "overflow": 0,
+      "title": "المراجعة والإرسال",
+      "fields": 0
+    },
+    {
+      "step": 5,
+      "width": 1920,
+      "height": 1080,
+      "overflow": 0,
+      "title": "المراجعة والإرسال",
+      "fields": 0
+    },
+    {
+      "step": "success",
+      "width": 390,
+      "height": 844,
+      "overflow": 0,
+      "title": "وصل طلبك، متقدم",
+      "fields": 0
+    },
+    {
+      "step": "success",
+      "width": 768,
+      "height": 1024,
+      "overflow": 0,
+      "title": "وصل طلبك، متقدم",
+      "fields": 0
+    },
+    {
+      "step": "success",
+      "width": 1280,
+      "height": 800,
+      "overflow": 0,
+      "title": "وصل طلبك، متقدم",
+      "fields": 0
+    },
+    {
+      "step": "success",
+      "width": 1440,
+      "height": 900,
+      "overflow": 0,
+      "title": "وصل طلبك، متقدم",
+      "fields": 0
+    },
+    {
+      "step": "success",
+      "width": 1920,
+      "height": 1080,
+      "overflow": 0,
+      "title": "وصل طلبك، متقدم",
+      "fields": 0
+    },
+    {
+      "step": "track",
+      "width": 390,
+      "height": 844,
+      "overflow": 0,
+      "title": "طلباتي",
+      "fields": 1
+    },
+    {
+      "step": "track",
+      "width": 768,
+      "height": 1024,
+      "overflow": 0,
+      "title": "طلباتي",
+      "fields": 1
+    },
+    {
+      "step": "track",
+      "width": 1280,
+      "height": 800,
+      "overflow": 0,
+      "title": "طلباتي",
+      "fields": 1
+    },
+    {
+      "step": "track",
+      "width": 1440,
+      "height": 900,
+      "overflow": 0,
+      "title": "طلباتي",
+      "fields": 1
+    },
+    {
+      "step": "track",
+      "width": 1920,
+      "height": 1080,
+      "overflow": 0,
+      "title": "طلباتي",
+      "fields": 1
+    }
+  ]
+}

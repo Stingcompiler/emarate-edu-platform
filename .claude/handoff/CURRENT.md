@@ -1,8 +1,8 @@
-# Handoff — project review — 2026-10-04
+# Handoff — design / UX review — 2026-10-04
 
 ## Where things stand
 
-- Branch: `codex/project-review`; reviewed `811f1a1`, equal to `origin/main` at session start.
+- Branch: `codex/design-ux-review`, started from local `255ca23` on `codex/project-review`. Application code remains `811f1a1`, equal to `origin/main` at the original review start.
 - Owner asked: «قم بمراجعه المشروع». This phase delivers a review and remediation plan, with no application fixes or production deployment.
 - `docs/qa/project-review-2026-10.md`: current summary, preserved Oct 3 operations/security evidence, new C–I axes (Arabic ج–ط), prioritized PR plan and owner checklist.
 - `docs/qa/evidence/project-review-2026-10/`: six backend probes confirmed on SQLite and Postgres, two frontend probes, statement coverage summary, focus measurements and 390/1440 screenshots. Probes assert observed faulty behavior; they are deliberately outside CI tests.
@@ -10,24 +10,30 @@
 - SQLite 735 passed; PostgreSQL 734 passed and one SQLite-only skip. Vitest 71 passed. Typecheck, backend lint/format, migration check and OpenAPI validation passed. Statement coverage 94%. Strict landing build produced 104 pages.
 - Playwright full run: 77 passed, 2 failed, 1 intentional desktop-exam skip (44.3 minutes). Both phone sweep failures passed a stable `--last-failed` rerun (56.3 seconds): 79 distinct tests passed across runs. Do not describe this as a clean full first run.
 - Local review commit: `1852d82`, with a final validation follow-up commit. No remote branch or PR was created; no CI was run for this review branch.
+- Owner's latest request: review design, colours/fonts for a university institution, UX and pages across screen sizes, write a report and integrate it into the existing document. Completed in section ي of `docs/qa/project-review-2026-10.md`;12 UX findings, palette/type assessment, page-family matrix, five viewport sizes and remediation acceptance criteria. No UI changes.
+- `docs/qa/evidence/design-review-2026-10/`:450 core viewport checks (14-role navigation inventory; common pages deduplicated),70 representative detail/editor checks,5 lecture checks and30 admission-state checks:555 without ordinary horizontal overflow. Text-size200% exposes internal results-summary overlap and4px home overflow at320. Root font enlargement is not browser zoom.
+- Confirmed UX1: application screen promises autosave; school-field edit disappears after blur +1500ms +reload without Next. Isolated synthetic local draft. UX2: login inputs focus-visible but outline:none/no shadow. UX3: delayed results body blank;503 displays no-published-results empty state plus generic banner. UX4: result summary numbers overlap under text enlargement.
+- Stable axe:16 public +24 portal light/dark cases without violations;initial intermediate theme-transition hit disappeared after400ms settling. Not WCAG certification.41 selected screenshots stored;physical iOS/Android, assistive tech and user study remain owner follow-up.
+- Final document validation passed:explicit Prettier check, all JSON parsed, all5 CJS scripts passed `node --check`,41 images verified with Pillow, relative report/evidence links resolved, and `git diff --check`. Six extra pointer-coarse mobile checks had zero overflow and fields16px. No application suite rerun was needed for this documentation-only phase;earlier baseline results remain historical evidence.
 
 ## Publication and verification limits
 
 - Review and evidence completed locally. Automatic approval review rejected the push because this security/operations report would leave the workspace for a GitHub repository whose public visibility and publication authorization had not been established. Read-only lookup then confirmed `Stingcompiler/emarate-edu-platform` is PUBLIC. Await explicit owner approval to publish this report and evidence there; do not bypass the rejection with another tool.
-- If approved: push `codex/project-review`, create and attach the report PR, then required green CI and merge under the standing repository rules. The prepared body is `/tmp/ecst-review-pr-body.md` if still available.
+- The latest request authorizes local document integration, not public GitHub publication. If publication is explicitly approved: inspect both local branches, create/attach a PR including the intended reports, then required green CI and merge under repository rules. Do not use the old PR body unchanged;scope now includes design/UX review.
 - No SSH access: agent has no loaded identities. Asked owner to unlock the key; do not handle its passphrase.
 - No changes to production or other projects.
 
 ## Next steps (ordered)
 
-1. Read the report and evidence README for final validation/PR status before repeating checks.
-2. Fix C2: suspended students still open lectures, submit assignments and save exam answers.
-3. Fix C1: stale answer save changes a submitted answer without recalculating its mark; share attempt locks across all writers.
-4. Fix C6/C7: submit can clear unsent answers after PUT503; pendingStore loses its queue when storage is blocked. Include rejected fetch, deadline and reconnection cases.
-5. Fix C3/C4: stale admissions and result-correction decisions overwrite terminal decisions. Lock/recheck within the transaction.
-6. Fix C5 and B7: atomic business write+audit and permission tests for write methods.
-7. Follow the report's remaining small PR groups: deployment/dependencies, N+1, route bundles, keyboard dialogs, dependency updates and demo cleanup.
-8. Owner: off-server backups and keys, final hosting choice, Sentry/uptime, domain/email/content/policies, real iPhone/Android and isolated VPS-sized load test.
+1. Review phase completed. Read the integrated report and both evidence READMEs before implementing requested fixes or considering approved publication;do not repeat finished review checks by default.
+2. Prioritize UX1 alongside exam queue integrity: persist application drafts or provide truthful explicit-save messaging and leave warning;then keyboard focus, read-error/loading states and text enlargement UX2–UX4. Application fixes are future work unless owner requests implementation.
+3. Fix C2: suspended students still open lectures, submit assignments and save exam answers.
+4. Fix C1: stale answer save changes a submitted answer without recalculating its mark; share attempt locks across all writers.
+5. Fix C6/C7: submit can clear unsent answers after PUT503; pendingStore loses its queue when storage is blocked. Include rejected fetch, deadline and reconnection cases.
+6. Fix C3/C4: stale admissions and result-correction decisions overwrite terminal decisions. Lock/recheck within the transaction.
+7. Fix C5 and B7: atomic business write+audit and permission tests for write methods.
+8. Follow the report's remaining small PR groups: deployment/dependencies, N+1, route bundles, keyboard dialogs, dependency updates and demo cleanup.
+9. Owner: off-server backups and keys, final hosting choice, Sentry/uptime, domain/email/content/policies, real iPhone/Android and isolated VPS-sized load test.
 
 ## Decisions made (don't revisit)
 

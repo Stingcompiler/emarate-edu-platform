@@ -1,0 +1,702 @@
+[
+  {
+    "group": "teacher",
+    "route": "/exams",
+    "width": 390,
+    "height": 844,
+    "overflow": 0,
+    "title": "الاختبارات — بوابة كلية الإمارات",
+    "h1": "الاختبارات",
+    "denied": false
+  },
+  {
+    "group": "teacher",
+    "route": "/exams",
+    "width": 768,
+    "height": 1024,
+    "overflow": 0,
+    "title": "الاختبارات — بوابة كلية الإمارات",
+    "h1": "الاختبارات",
+    "denied": false
+  },
+  {
+    "group": "teacher",
+    "route": "/exams",
+    "width": 1280,
+    "height": 800,
+    "overflow": 0,
+    "title": "الاختبارات — بوابة كلية الإمارات",
+    "h1": "الاختبارات",
+    "denied": false
+  },
+  {
+    "group": "teacher",
+    "route": "/exams",
+    "width": 1440,
+    "height": 900,
+    "overflow": 0,
+    "title": "الاختبارات — بوابة كلية الإمارات",
+    "h1": "الاختبارات",
+    "denied": false
+  },
+  {
+    "group": "teacher",
+    "route": "/exams",
+    "width": 1920,
+    "height": 1080,
+    "overflow": 0,
+    "title": "الاختبارات — بوابة كلية الإمارات",
+    "h1": "الاختبارات",
+    "denied": false
+  },
+  {
+    "group": "teacher",
+    "route": "/exams/new",
+    "width": 390,
+    "height": 844,
+    "overflow": 0,
+    "title": "اختبار جديد — بوابة كلية الإمارات",
+    "h1": "اختبار جديد",
+    "denied": false
+  },
+  {
+    "group": "teacher",
+    "route": "/exams/new",
+    "width": 768,
+    "height": 1024,
+    "overflow": 0,
+    "title": "اختبار جديد — بوابة كلية الإمارات",
+    "h1": "اختبار جديد",
+    "denied": false
+  },
+  {
+    "group": "teacher",
+    "route": "/exams/new",
+    "width": 1280,
+    "height": 800,
+    "overflow": 0,
+    "title": "اختبار جديد — بوابة كلية الإمارات",
+    "h1": "اختبار جديد",
+    "denied": false
+  },
+  {
+    "group": "teacher",
+    "route": "/exams/new",
+    "width": 1440,
+    "height": 900,
+    "overflow": 0,
+    "title": "اختبار جديد — بوابة كلية الإمارات",
+    "h1": "اختبار جديد",
+    "denied": false
+  },
+  {
+    "group": "teacher",
+    "route": "/exams/new",
+    "width": 1920,
+    "height": 1080,
+    "overflow": 0,
+    "title": "اختبار جديد — بوابة كلية الإمارات",
+    "h1": "اختبار جديد",
+    "denied": false
+  },
+  {
+    "group": "teacher",
+    "route": "/lectures/new",
+    "width": 390,
+    "height": 844,
+    "overflow": 0,
+    "title": "محاضرة جديدة — بوابة كلية الإمارات",
+    "h1": "محاضرة جديدة",
+    "denied": false
+  },
+  {
+    "group": "teacher",
+    "route": "/lectures/new",
+    "width": 768,
+    "height": 1024,
+    "overflow": 0,
+    "title": "محاضرة جديدة — بوابة كلية الإمارات",
+    "h1": "محاضرة جديدة",
+    "denied": false
+  },
+  {
+    "group": "teacher",
+    "route": "/lectures/new",
+    "width": 1280,
+    "height": 800,
+    "overflow": 0,
+    "title": "محاضرة جديدة — بوابة كلية الإمارات",
+    "h1": "محاضرة جديدة",
+    "denied": false
+  },
+  {
+    "group": "teacher",
+    "route": "/lectures/new",
+    "width": 1440,
+    "height": 900,
+    "overflow": 0,
+    "title": "محاضرة جديدة — بوابة كلية الإمارات",
+    "h1": "محاضرة جديدة",
+    "denied": false
+  },
+  {
+    "group": "teacher",
+    "route": "/lectures/new",
+    "width": 1920,
+    "height": 1080,
+    "overflow": 0,
+    "title": "محاضرة جديدة — بوابة كلية الإمارات",
+    "h1": "محاضرة جديدة",
+    "denied": false
+  },
+  {
+    "group": "teacher",
+    "route": "/assignments/new",
+    "width": 390,
+    "height": 844,
+    "overflow": 0,
+    "title": "واجب جديد — بوابة كلية الإمارات",
+    "h1": "واجب جديد",
+    "denied": false
+  },
+  {
+    "group": "teacher",
+    "route": "/assignments/new",
+    "width": 768,
+    "height": 1024,
+    "overflow": 0,
+    "title": "واجب جديد — بوابة كلية الإمارات",
+    "h1": "واجب جديد",
+    "denied": false
+  },
+  {
+    "group": "teacher",
+    "route": "/assignments/new",
+    "width": 1280,
+    "height": 800,
+    "overflow": 0,
+    "title": "واجب جديد — بوابة كلية الإمارات",
+    "h1": "واجب جديد",
+    "denied": false
+  },
+  {
+    "group": "teacher",
+    "route": "/assignments/new",
+    "width": 1440,
+    "height": 900,
+    "overflow": 0,
+    "title": "واجب جديد — بوابة كلية الإمارات",
+    "h1": "واجب جديد",
+    "denied": false
+  },
+  {
+    "group": "teacher",
+    "route": "/assignments/new",
+    "width": 1920,
+    "height": 1080,
+    "overflow": 0,
+    "title": "واجب جديد — بوابة كلية الإمارات",
+    "h1": "واجب جديد",
+    "denied": false
+  },
+  {
+    "group": "teacher",
+    "route": "/submissions/b8c3bc9d-730a-4d27-8874-ae1ea208e7d1",
+    "width": 390,
+    "height": 844,
+    "overflow": 0,
+    "title": "هبة الطيب موسى — بوابة كلية الإمارات",
+    "h1": "هبة الطيب موسى",
+    "denied": false
+  },
+  {
+    "group": "teacher",
+    "route": "/submissions/b8c3bc9d-730a-4d27-8874-ae1ea208e7d1",
+    "width": 768,
+    "height": 1024,
+    "overflow": 0,
+    "title": "هبة الطيب موسى — بوابة كلية الإمارات",
+    "h1": "هبة الطيب موسى",
+    "denied": false
+  },
+  {
+    "group": "teacher",
+    "route": "/submissions/b8c3bc9d-730a-4d27-8874-ae1ea208e7d1",
+    "width": 1280,
+    "height": 800,
+    "overflow": 0,
+    "title": "هبة الطيب موسى — بوابة كلية الإمارات",
+    "h1": "هبة الطيب موسى",
+    "denied": false
+  },
+  {
+    "group": "teacher",
+    "route": "/submissions/b8c3bc9d-730a-4d27-8874-ae1ea208e7d1",
+    "width": 1440,
+    "height": 900,
+    "overflow": 0,
+    "title": "هبة الطيب موسى — بوابة كلية الإمارات",
+    "h1": "هبة الطيب موسى",
+    "denied": false
+  },
+  {
+    "group": "teacher",
+    "route": "/submissions/b8c3bc9d-730a-4d27-8874-ae1ea208e7d1",
+    "width": 1920,
+    "height": 1080,
+    "overflow": 0,
+    "title": "هبة الطيب موسى — بوابة كلية الإمارات",
+    "h1": "هبة الطيب موسى",
+    "denied": false
+  },
+  {
+    "group": "teacher",
+    "route": "/lectures/new?offering=3",
+    "width": 390,
+    "height": 844,
+    "overflow": 0,
+    "title": "محاضرة جديدة — بوابة كلية الإمارات",
+    "h1": "محاضرة جديدة",
+    "denied": false
+  },
+  {
+    "group": "teacher",
+    "route": "/lectures/new?offering=3",
+    "width": 768,
+    "height": 1024,
+    "overflow": 0,
+    "title": "محاضرة جديدة — بوابة كلية الإمارات",
+    "h1": "محاضرة جديدة",
+    "denied": false
+  },
+  {
+    "group": "teacher",
+    "route": "/lectures/new?offering=3",
+    "width": 1280,
+    "height": 800,
+    "overflow": 0,
+    "title": "محاضرة جديدة — بوابة كلية الإمارات",
+    "h1": "محاضرة جديدة",
+    "denied": false
+  },
+  {
+    "group": "teacher",
+    "route": "/lectures/new?offering=3",
+    "width": 1440,
+    "height": 900,
+    "overflow": 0,
+    "title": "محاضرة جديدة — بوابة كلية الإمارات",
+    "h1": "محاضرة جديدة",
+    "denied": false
+  },
+  {
+    "group": "teacher",
+    "route": "/lectures/new?offering=3",
+    "width": 1920,
+    "height": 1080,
+    "overflow": 0,
+    "title": "محاضرة جديدة — بوابة كلية الإمارات",
+    "h1": "محاضرة جديدة",
+    "denied": false
+  },
+  {
+    "group": "registrar",
+    "route": "/applications/e4e6426c-973e-4344-aa55-82a55bab78a8",
+    "width": 390,
+    "height": 844,
+    "overflow": 0,
+    "title": "متقدم مراجعة التصميم — بوابة كلية الإمارات",
+    "h1": "متقدم مراجعة التصميم",
+    "denied": false
+  },
+  {
+    "group": "registrar",
+    "route": "/applications/e4e6426c-973e-4344-aa55-82a55bab78a8",
+    "width": 768,
+    "height": 1024,
+    "overflow": 0,
+    "title": "متقدم مراجعة التصميم — بوابة كلية الإمارات",
+    "h1": "متقدم مراجعة التصميم",
+    "denied": false
+  },
+  {
+    "group": "registrar",
+    "route": "/applications/e4e6426c-973e-4344-aa55-82a55bab78a8",
+    "width": 1280,
+    "height": 800,
+    "overflow": 0,
+    "title": "متقدم مراجعة التصميم — بوابة كلية الإمارات",
+    "h1": "متقدم مراجعة التصميم",
+    "denied": false
+  },
+  {
+    "group": "registrar",
+    "route": "/applications/e4e6426c-973e-4344-aa55-82a55bab78a8",
+    "width": 1440,
+    "height": 900,
+    "overflow": 0,
+    "title": "متقدم مراجعة التصميم — بوابة كلية الإمارات",
+    "h1": "متقدم مراجعة التصميم",
+    "denied": false
+  },
+  {
+    "group": "registrar",
+    "route": "/applications/e4e6426c-973e-4344-aa55-82a55bab78a8",
+    "width": 1920,
+    "height": 1080,
+    "overflow": 0,
+    "title": "متقدم مراجعة التصميم — بوابة كلية الإمارات",
+    "h1": "متقدم مراجعة التصميم",
+    "denied": false
+  },
+  {
+    "group": "registrar",
+    "route": "/students/d17b1de1-05b2-4357-b616-25ae9fff32fe",
+    "width": 390,
+    "height": 844,
+    "overflow": 0,
+    "title": "يوسف الأمين الفكي — بوابة كلية الإمارات",
+    "h1": "يوسف الأمين الفكي",
+    "denied": false
+  },
+  {
+    "group": "registrar",
+    "route": "/students/d17b1de1-05b2-4357-b616-25ae9fff32fe",
+    "width": 768,
+    "height": 1024,
+    "overflow": 0,
+    "title": "يوسف الأمين الفكي — بوابة كلية الإمارات",
+    "h1": "يوسف الأمين الفكي",
+    "denied": false
+  },
+  {
+    "group": "registrar",
+    "route": "/students/d17b1de1-05b2-4357-b616-25ae9fff32fe",
+    "width": 1280,
+    "height": 800,
+    "overflow": 0,
+    "title": "يوسف الأمين الفكي — بوابة كلية الإمارات",
+    "h1": "يوسف الأمين الفكي",
+    "denied": false
+  },
+  {
+    "group": "registrar",
+    "route": "/students/d17b1de1-05b2-4357-b616-25ae9fff32fe",
+    "width": 1440,
+    "height": 900,
+    "overflow": 0,
+    "title": "يوسف الأمين الفكي — بوابة كلية الإمارات",
+    "h1": "يوسف الأمين الفكي",
+    "denied": false
+  },
+  {
+    "group": "registrar",
+    "route": "/students/d17b1de1-05b2-4357-b616-25ae9fff32fe",
+    "width": 1920,
+    "height": 1080,
+    "overflow": 0,
+    "title": "يوسف الأمين الفكي — بوابة كلية الإمارات",
+    "h1": "يوسف الأمين الفكي",
+    "denied": false
+  },
+  {
+    "group": "affairs",
+    "route": "/cases/new",
+    "width": 390,
+    "height": 844,
+    "overflow": 0,
+    "title": "فتح حالة — بوابة كلية الإمارات",
+    "h1": "فتح حالة",
+    "denied": false
+  },
+  {
+    "group": "affairs",
+    "route": "/cases/new",
+    "width": 768,
+    "height": 1024,
+    "overflow": 0,
+    "title": "فتح حالة — بوابة كلية الإمارات",
+    "h1": "فتح حالة",
+    "denied": false
+  },
+  {
+    "group": "affairs",
+    "route": "/cases/new",
+    "width": 1280,
+    "height": 800,
+    "overflow": 0,
+    "title": "فتح حالة — بوابة كلية الإمارات",
+    "h1": "فتح حالة",
+    "denied": false
+  },
+  {
+    "group": "affairs",
+    "route": "/cases/new",
+    "width": 1440,
+    "height": 900,
+    "overflow": 0,
+    "title": "فتح حالة — بوابة كلية الإمارات",
+    "h1": "فتح حالة",
+    "denied": false
+  },
+  {
+    "group": "affairs",
+    "route": "/cases/new",
+    "width": 1920,
+    "height": 1080,
+    "overflow": 0,
+    "title": "فتح حالة — بوابة كلية الإمارات",
+    "h1": "فتح حالة",
+    "denied": false
+  },
+  {
+    "group": "affairs",
+    "route": "/cases/728953e4-fd40-4693-a8b8-33969b55c0c0",
+    "width": 390,
+    "height": 844,
+    "overflow": 0,
+    "title": "إنذار أكاديمي — غياب متكرر — بوابة كلية الإمارات",
+    "h1": "إنذار أكاديمي — غياب متكرر",
+    "denied": false
+  },
+  {
+    "group": "affairs",
+    "route": "/cases/728953e4-fd40-4693-a8b8-33969b55c0c0",
+    "width": 768,
+    "height": 1024,
+    "overflow": 0,
+    "title": "إنذار أكاديمي — غياب متكرر — بوابة كلية الإمارات",
+    "h1": "إنذار أكاديمي — غياب متكرر",
+    "denied": false
+  },
+  {
+    "group": "affairs",
+    "route": "/cases/728953e4-fd40-4693-a8b8-33969b55c0c0",
+    "width": 1280,
+    "height": 800,
+    "overflow": 0,
+    "title": "إنذار أكاديمي — غياب متكرر — بوابة كلية الإمارات",
+    "h1": "إنذار أكاديمي — غياب متكرر",
+    "denied": false
+  },
+  {
+    "group": "affairs",
+    "route": "/cases/728953e4-fd40-4693-a8b8-33969b55c0c0",
+    "width": 1440,
+    "height": 900,
+    "overflow": 0,
+    "title": "إنذار أكاديمي — غياب متكرر — بوابة كلية الإمارات",
+    "h1": "إنذار أكاديمي — غياب متكرر",
+    "denied": false
+  },
+  {
+    "group": "affairs",
+    "route": "/cases/728953e4-fd40-4693-a8b8-33969b55c0c0",
+    "width": 1920,
+    "height": 1080,
+    "overflow": 0,
+    "title": "إنذار أكاديمي — غياب متكرر — بوابة كلية الإمارات",
+    "h1": "إنذار أكاديمي — غياب متكرر",
+    "denied": false
+  },
+  {
+    "group": "admin",
+    "route": "/site/media",
+    "width": 390,
+    "height": 844,
+    "overflow": 0,
+    "title": "الوسائط والقوائم والإعدادات — بوابة كلية الإمارات",
+    "h1": "الوسائط والقوائم والإعدادات",
+    "denied": false
+  },
+  {
+    "group": "admin",
+    "route": "/site/media",
+    "width": 768,
+    "height": 1024,
+    "overflow": 0,
+    "title": "الوسائط والقوائم والإعدادات — بوابة كلية الإمارات",
+    "h1": "الوسائط والقوائم والإعدادات",
+    "denied": false
+  },
+  {
+    "group": "admin",
+    "route": "/site/media",
+    "width": 1280,
+    "height": 800,
+    "overflow": 0,
+    "title": "الوسائط والقوائم والإعدادات — بوابة كلية الإمارات",
+    "h1": "الوسائط والقوائم والإعدادات",
+    "denied": false
+  },
+  {
+    "group": "admin",
+    "route": "/site/media",
+    "width": 1440,
+    "height": 900,
+    "overflow": 0,
+    "title": "الوسائط والقوائم والإعدادات — بوابة كلية الإمارات",
+    "h1": "الوسائط والقوائم والإعدادات",
+    "denied": false
+  },
+  {
+    "group": "admin",
+    "route": "/site/media",
+    "width": 1920,
+    "height": 1080,
+    "overflow": 0,
+    "title": "الوسائط والقوائم والإعدادات — بوابة كلية الإمارات",
+    "h1": "الوسائط والقوائم والإعدادات",
+    "denied": false
+  },
+  {
+    "group": "admin",
+    "route": "/site/redirects",
+    "width": 390,
+    "height": 844,
+    "overflow": 0,
+    "title": "التحويلات — بوابة كلية الإمارات",
+    "h1": "التحويلات",
+    "denied": false
+  },
+  {
+    "group": "admin",
+    "route": "/site/redirects",
+    "width": 768,
+    "height": 1024,
+    "overflow": 0,
+    "title": "التحويلات — بوابة كلية الإمارات",
+    "h1": "التحويلات",
+    "denied": false
+  },
+  {
+    "group": "admin",
+    "route": "/site/redirects",
+    "width": 1280,
+    "height": 800,
+    "overflow": 0,
+    "title": "التحويلات — بوابة كلية الإمارات",
+    "h1": "التحويلات",
+    "denied": false
+  },
+  {
+    "group": "admin",
+    "route": "/site/redirects",
+    "width": 1440,
+    "height": 900,
+    "overflow": 0,
+    "title": "التحويلات — بوابة كلية الإمارات",
+    "h1": "التحويلات",
+    "denied": false
+  },
+  {
+    "group": "admin",
+    "route": "/site/redirects",
+    "width": 1920,
+    "height": 1080,
+    "overflow": 0,
+    "title": "التحويلات — بوابة كلية الإمارات",
+    "h1": "التحويلات",
+    "denied": false
+  },
+  {
+    "group": "admin",
+    "route": "/system/users/c6745564-2e21-4788-8a5e-c3d83b678e66",
+    "width": 390,
+    "height": 844,
+    "overflow": 0,
+    "title": "د. عبد الله الحسن — بوابة كلية الإمارات",
+    "h1": "د. عبد الله الحسن",
+    "denied": false
+  },
+  {
+    "group": "admin",
+    "route": "/system/users/c6745564-2e21-4788-8a5e-c3d83b678e66",
+    "width": 768,
+    "height": 1024,
+    "overflow": 0,
+    "title": "د. عبد الله الحسن — بوابة كلية الإمارات",
+    "h1": "د. عبد الله الحسن",
+    "denied": false
+  },
+  {
+    "group": "admin",
+    "route": "/system/users/c6745564-2e21-4788-8a5e-c3d83b678e66",
+    "width": 1280,
+    "height": 800,
+    "overflow": 0,
+    "title": "د. عبد الله الحسن — بوابة كلية الإمارات",
+    "h1": "د. عبد الله الحسن",
+    "denied": false
+  },
+  {
+    "group": "admin",
+    "route": "/system/users/c6745564-2e21-4788-8a5e-c3d83b678e66",
+    "width": 1440,
+    "height": 900,
+    "overflow": 0,
+    "title": "د. عبد الله الحسن — بوابة كلية الإمارات",
+    "h1": "د. عبد الله الحسن",
+    "denied": false
+  },
+  {
+    "group": "admin",
+    "route": "/system/users/c6745564-2e21-4788-8a5e-c3d83b678e66",
+    "width": 1920,
+    "height": 1080,
+    "overflow": 0,
+    "title": "د. عبد الله الحسن — بوابة كلية الإمارات",
+    "h1": "د. عبد الله الحسن",
+    "denied": false
+  },
+  {
+    "group": "admin",
+    "route": "/site/pages/1adff0fc-e85f-4460-8db0-2b6201c9eddf",
+    "width": 390,
+    "height": 844,
+    "overflow": 0,
+    "title": "عن الكلية — بوابة كلية الإمارات",
+    "h1": "عن الكلية",
+    "denied": false
+  },
+  {
+    "group": "admin",
+    "route": "/site/pages/1adff0fc-e85f-4460-8db0-2b6201c9eddf",
+    "width": 768,
+    "height": 1024,
+    "overflow": 0,
+    "title": "عن الكلية — بوابة كلية الإمارات",
+    "h1": "عن الكلية",
+    "denied": false
+  },
+  {
+    "group": "admin",
+    "route": "/site/pages/1adff0fc-e85f-4460-8db0-2b6201c9eddf",
+    "width": 1280,
+    "height": 800,
+    "overflow": 0,
+    "title": "عن الكلية — بوابة كلية الإمارات",
+    "h1": "عن الكلية",
+    "denied": false
+  },
+  {
+    "group": "admin",
+    "route": "/site/pages/1adff0fc-e85f-4460-8db0-2b6201c9eddf",
+    "width": 1440,
+    "height": 900,
+    "overflow": 0,
+    "title": "عن الكلية — بوابة كلية الإمارات",
+    "h1": "عن الكلية",
+    "denied": false
+  },
+  {
+    "group": "admin",
+    "route": "/site/pages/1adff0fc-e85f-4460-8db0-2b6201c9eddf",
+    "width": 1920,
+    "height": 1080,
+    "overflow": 0,
+    "title": "عن الكلية — بوابة كلية الإمارات",
+    "h1": "عن الكلية",
+    "denied": false
+  }
+]
