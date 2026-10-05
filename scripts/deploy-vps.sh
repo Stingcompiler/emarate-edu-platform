@@ -11,7 +11,8 @@
 # goes in this public repository.
 # Layout on the server: /opt/ecst/{app,portal,src} live, /opt/ecst/previous/* the last
 # release, /opt/ecst/deployed/<part> the commit each part runs. The backend step syncs the
-# Python libraries from uv.lock, restarts, and checks /api/public/health; if any of that
+# Python libraries from uv.lock (with the `prod` extra: gunicorn, psycopg, redis, …),
+# restarts, and checks /api/public/health for a 200; if any of that
 # fails it puts the previous release back and records nothing (review 2026-10-04, A12/A13).
 # Database migrations are not undone by a rollback; a migration that removes data needs a
 # restore (runbook §5).
@@ -51,9 +52,10 @@ back() { [ -d "/opt/ecst/previous/$1" ] || { echo "no previous $1"; return 0; }
          echo "$2 rolled back to $(cat /opt/ecst/deployed/$2 2>/dev/null || echo '?')"; }
 case "$part" in backend|all)
   back app backend; ln -sfn /opt/ecst/media /opt/ecst/app/backend/media
-  UV=$(command -v uv || ls /usr/local/bin/uv /opt/ecst/.local/bin/uv 2>/dev/null | head -1)
+  UV=$(ls /opt/ecst/tools/bin/uv 2>/dev/null || command -v uv)
   sudo -u ecst env UV_PROJECT_ENVIRONMENT=/opt/ecst/venv UV_CACHE_DIR=/var/tmp/ecst-uv-cache \
-    "$UV" sync --frozen --no-dev --project /opt/ecst/app/backend -q
+    UV_PYTHON_INSTALL_DIR=/opt/ecst/.uv-python UV_PYTHON_DOWNLOADS=never \
+    "$UV" sync --frozen --no-dev --extra prod --project /opt/ecst/app/backend -q
   systemctl restart ecst-api ecst-worker;; esac
 case "$part" in portal|all) back portal portal;; esac
 case "$part" in site|all) back src site; systemctl start ecst-site-build.service;; esac
@@ -97,18 +99,22 @@ keep() { [ ! -d "/opt/ecst/$1" ] || rsync -a --delete --exclude media --exclude 
 mark() { echo "$sha $(date -Is)" > "/opt/ecst/deployed/$1"; }
 unpack() { rm -rf "/tmp/ecst-$1" && mkdir "/tmp/ecst-$1" && tar -xzf "/tmp/ecst-$1.tgz" -C "/tmp/ecst-$1" 2>/dev/null && rm -f "/tmp/ecst-$1.tgz"; }
 run() { sudo -u ecst bash -c 'set -a; . /opt/ecst/env; set +a; cd /opt/ecst/app/backend; exec /opt/ecst/venv/bin/python manage.py "$@"' _ "$@"; }
-UV=$(command -v uv || ls /usr/local/bin/uv /opt/ecst/.local/bin/uv 2>/dev/null | head -1 || true)
+# The install keeps its own uv and Python under /opt/ecst (never another project's copy).
+UV=$(ls /opt/ecst/tools/bin/uv 2>/dev/null || command -v uv || true)
 sync_libraries() {
   [ -n "$UV" ] || { echo "uv not found on the server"; return 1; }
   sudo -u ecst env UV_PROJECT_ENVIRONMENT=/opt/ecst/venv UV_CACHE_DIR=/var/tmp/ecst-uv-cache \
-    "$UV" sync --frozen --no-dev --project /opt/ecst/app/backend -q
+    UV_PYTHON_INSTALL_DIR=/opt/ecst/.uv-python UV_PYTHON_DOWNLOADS=never \
+    "$UV" sync --frozen --no-dev --extra prod --project /opt/ecst/app/backend -q
 }
 healthy() {
   # The API answers only to its own host names (DJANGO_ALLOWED_HOSTS).
   local host
   host=$(grep '^DJANGO_ALLOWED_HOSTS=' /opt/ecst/env | cut -d= -f2- | tr -d '"' | cut -d, -f1)
   for _ in $(seq 1 20); do
-    curl -fsS -o /dev/null -m 5 -H "Host: $host" http://127.0.0.1:8100/api/public/health && return 0
+    # As Caddy sends it (HTTPS), or Django answers 301 and a redirect is not "healthy".
+    [ "$(curl -s -o /dev/null -w '%{http_code}' -m 5 -H "Host: $host" \
+      -H 'X-Forwarded-Proto: https' http://127.0.0.1:8100/api/public/health)" = 200 ] && return 0
     sleep 2
   done
   return 1
