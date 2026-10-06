@@ -26,7 +26,7 @@ class Command(BaseCommand):
         if not options["out"]:
             raise CommandError("--out is required with --name.")
         out = Path(options["out"])
-        out.write_bytes(backups.decrypt(options["name"]))
+        backups.decrypt_to(options["name"], out)
         self.stdout.write(self.style.SUCCESS(f"Decrypted to {out}"))
         if options["name"].endswith(backups.MEDIA_SUFFIX):
             self.stdout.write(f"Unpack into MEDIA_ROOT with: tar -xzf {out} -C <MEDIA_ROOT>")
