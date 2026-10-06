@@ -197,7 +197,7 @@ const jsonLd = [programLd, faqLd(faq)];
         aria-labelledby="facts"
         class="rounded-2xl border border-border-soft bg-surface p-4 shadow-sm lg:p-5"
       >
-        <h2 id="facts" class="font-display text-lg font-bold">
+        <h2 id="facts" class="text-lg font-bold">
           {L("أساسيات المتقدم", "At a glance")}
         </h2>
         <div
@@ -338,7 +338,7 @@ const jsonLd = [programLd, faqLd(faq)];
     <div class="lg:col-start-1 lg:row-start-1">
       {outcomes.length > 0 && (
         <section aria-labelledby="outcomes">
-          <h2 id="outcomes" class="font-display text-xl font-bold">
+          <h2 id="outcomes" class="font-display text-2xl font-bold">
             {L("ماذا ستتعلم", "What you will learn")}
           </h2>
           <ul class="mt-4 grid gap-2 sm:grid-cols-2 sm:[&>li:last-child:nth-child(odd)]:col-span-2">
@@ -364,7 +364,7 @@ const jsonLd = [programLd, faqLd(faq)];
       )}
       {careers.length > 0 && (
         <section aria-labelledby="careers" class="mt-10 first:mt-0">
-          <h2 id="careers" class="font-display text-xl font-bold">
+          <h2 id="careers" class="font-display text-2xl font-bold">
             {L("أين يعمل الخريجون", "Where graduates work")}
           </h2>
           <ul class="mt-4 flex flex-wrap gap-2">
@@ -379,7 +379,7 @@ const jsonLd = [programLd, faqLd(faq)];
       {/* Requirements and documents come before the plan: what an applicant needs first (W7). */}
       {(p.requirements_ar || p.required_documents.length > 0) && (
         <section aria-labelledby="admission" class="mt-10 first:mt-0">
-          <h2 id="admission" class="font-display text-xl font-bold">
+          <h2 id="admission" class="font-display text-2xl font-bold">
             {L("القبول", "Admission")}
           </h2>
           <div class="mt-4 grid gap-3 sm:grid-cols-2 sm:[&>div:last-child:nth-child(odd)]:col-span-2">
@@ -411,7 +411,7 @@ const jsonLd = [programLd, faqLd(faq)];
         </section>
       )}
       <section aria-labelledby="plan" class="mt-10 first:mt-0">
-        <h2 id="plan" class="font-display text-xl font-bold">
+        <h2 id="plan" class="font-display text-2xl font-bold">
           {t(lang, "plan")}
         </h2>
         <ol class="mt-4 space-y-3">

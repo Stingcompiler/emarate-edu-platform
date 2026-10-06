@@ -341,7 +341,7 @@ export function Grade() {
                   </div>
                 )}
               </div>
-              <p className="hidden text-center text-[11px] text-text-muted lg:block">
+              <p className="hidden text-center text-xs text-text-muted lg:block">
                 <kbd className="rounded border border-border-soft px-1">J</kbd> التالي ·{" "}
                 <kbd className="rounded border border-border-soft px-1">K</kbd> السابق
               </p>

@@ -171,7 +171,7 @@ export function DepartmentDashboard() {
           <Card key={l} className="px-4 py-3">
             <p className="text-2xl font-bold text-text">{v}</p>
             <p className="text-xs text-text-muted">{l}</p>
-            <p className="mt-1 text-[11px] text-text-muted">{n}</p>
+            <p className="mt-1 text-xs text-text-muted">{n}</p>
           </Card>
         ))}
       </div>

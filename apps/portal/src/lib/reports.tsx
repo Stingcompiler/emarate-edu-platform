@@ -70,7 +70,7 @@ export function Kpi({
         {typeof value === "number" ? <CountUp value={value} format={(n) => num(n)} /> : value}
       </p>
       <p className="text-xs text-text-muted">{label}</p>
-      {note != null && <p className="mt-1 text-[11px] text-text-muted">{note}</p>}
+      {note != null && <p className="mt-1 text-xs text-text-muted">{note}</p>}
     </Card>
   );
 }

@@ -322,7 +322,7 @@ function Bubble({
       <p className="whitespace-pre-line leading-relaxed" dir="auto">
         {text}
       </p>
-      <p className="mt-1 text-[11px] text-text-muted">
+      <p className="mt-1 text-xs text-text-muted">
         {who} · {when(at)}
         {note ? ` · ${note}` : ""}
       </p>

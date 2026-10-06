@@ -66,12 +66,18 @@ export function PortalShell(props: Props) {
               </Notice>
             </div>
           )}
-          {/* Only on the home screens (review 2026-09-29): not above exams, grading or forms. */}
-          {(me.data?.student || hasRole(me.data, "teacher", "ta")) &&
-            (pathname === "/" || pathname === "/me") && <InstallHint />}
-          {/* Every role: the invitation to turn notifications on (home and notifications). */}
-          {me.data && (pathname === "/" || pathname === "/notifications") && <PushPrompt />}
+          {/* On the notification centre the invitation to turn them on comes first. */}
+          {me.data && pathname === "/notifications" && <PushPrompt />}
           {props.children}
+          {/* On the home screens the optional set-up (install, notifications) comes after the
+              day's work, not before it (review 2026-10-04 UX5; 2026-09-29: never above exams,
+              grading or forms). */}
+          {me.data && (pathname === "/" || pathname === "/me") && (
+            <div className="mt-6 space-y-3">
+              {pathname === "/" && <PushPrompt />}
+              {(me.data.student || hasRole(me.data, "teacher", "ta")) && <InstallHint />}
+            </div>
+          )}
         </>
       }
       nav={navFor(me.data, count)}

@@ -145,7 +145,7 @@ export function AdmissionsReport() {
                     </div>
                   </div>
                 ))}
-                <div className="flex flex-wrap gap-3 pt-1 text-[11px] text-text-muted">
+                <div className="flex flex-wrap gap-3 pt-1 text-xs text-text-muted">
                   {STAGES.map((s) => (
                     <span key={s} className="flex items-center gap-1">
                       <span className={`size-2 rounded-full ${STAGE_TONE[s]}`} />

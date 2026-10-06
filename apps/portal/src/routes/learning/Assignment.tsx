@@ -335,7 +335,7 @@ function SubmitForm({ a, again, onDone }: { a: A; again: boolean; onDone: () => 
       >
         {submit.isPending ? "جارٍ الإرسال…" : "إرسال التسليم"}
       </Button>
-      <p className="text-center text-[11px] text-text-muted">يُحفظ كل إصدار.</p>
+      <p className="text-center text-xs text-text-muted">يُحفظ كل إصدار.</p>
     </Card>
   );
 }

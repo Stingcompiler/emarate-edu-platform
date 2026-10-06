@@ -24,7 +24,7 @@ const upcoming = evs
   >
     {items.length > 0 && (
       <section>
-        <h2 class="font-display text-xl font-bold">{t(lang, "latestNews")}</h2>
+        <h2 class="font-display text-2xl font-bold">{t(lang, "latestNews")}</h2>
         {/* An odd count: the newest leads across both columns (wider picture) so the last
             card is not left alone in half a row. */}
         <div class="mt-4 grid gap-4 sm:grid-cols-2 sm:[&>a:first-child:nth-last-child(odd)]:col-span-2 sm:[&>a:first-child:nth-last-child(odd)_img]:aspect-[21/9]">
@@ -57,7 +57,7 @@ const upcoming = evs
     )}
     <aside class:list={[items.length ? "space-y-8" : "grid gap-10 lg:grid-cols-2"]}>
       <section>
-        <h2 class="font-display text-xl font-bold">
+        <h2 class="font-display text-2xl font-bold">
           {lang === "ar" ? "الفعاليات القادمة" : "Upcoming events"}
         </h2>
         <ul class="mt-4 space-y-3">
@@ -100,7 +100,7 @@ const upcoming = evs
       </section>
       {notes.length > 0 && (
         <section>
-          <h2 class="font-display text-xl font-bold">{t(lang, "announcements")}</h2>
+          <h2 class="font-display text-2xl font-bold">{t(lang, "announcements")}</h2>
           <ul class="mt-4 space-y-3">
             {notes.slice(0, 6).map((a) => (
               <li>

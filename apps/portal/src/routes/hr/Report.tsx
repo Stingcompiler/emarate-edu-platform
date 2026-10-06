@@ -42,7 +42,7 @@ export function HRReport() {
                   <div key={l} className="rounded-lg bg-surface-alt p-3">
                     <p className="text-xl font-bold">{v}</p>
                     <p className="text-xs text-text-muted">{l}</p>
-                    {n && <p className="text-[11px] text-text-muted">{n}</p>}
+                    {n && <p className="text-xs text-text-muted">{n}</p>}
                   </div>
                 ))}
               </div>
@@ -137,7 +137,7 @@ export function HRReport() {
               />
             </label>
             <ExportBar snapshot={{ kind: "teachers", term: term ?? r?.term.id, notes }} />
-            <p className="text-[11px] text-text-muted">
+            <p className="text-xs text-text-muted">
               يُحفظ كل تقرير مُصدَّر بنسخته في سجل التقارير ولا يُعدّل بعد الإصدار.
             </p>
           </Card>
