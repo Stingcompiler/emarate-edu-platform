@@ -1,4 +1,23 @@
-# Handoff — review fixes, round 2 — 2026-10-04 (evening)
+# Handoff — review fixes complete and deployed — 2026-10-06
+
+## Now
+- `main` = `79cf8a1`, **deployed** with `scripts/deploy-vps.sh all`. Backend, portal and site are all recorded in `/opt/ecst/deployed/`.
+- **Incident on 2026-10-04:** the API was down 18:38–07:23 because the deploy script synced without `--extra prod`. Fixed in #110, and the memory note `ecst-vps-deployment` has the rules.
+- **Server alerts are installed:**
+  - `ecst-healthcheck.timer`, every 5 minutes;
+  - `OnFailure=ecst-alert@%n` on `ecst-backup` and `ecst-site-build`;
+  - `/admin` is 404 in Caddy.
+  - `OPS_ALERT_EMAIL` is not set, so the owner should set it.
+- **Merged on 2026-10-05/06:**
+  - #110: deploy script;
+  - #111: atomic writes (C5) and alerts (A9);
+  - #112: `purge_demo` (C9);
+  - #113: exam arrow keys (G2);
+  - #114: streaming backups (A14);
+  - #115: UX5, UX7, UX12.
+- **What's left is the owner's** (A3, A4, A8, A9 external, B9, B10, UX11 content) or needs an environment or devices (D3, H). UX9 was left out on purpose. The status table is in `docs/qa/project-review-2026-10.md`.
+
+## Earlier — review fixes, round 2 — 2026-10-04 (evening)
 
 ## Now
 - The owner chose «كلية الإمارات للعلوم والتكنولوجيا» and said «نفّذ توصياتك في الباقي» (carry out your recommendations for the rest).
