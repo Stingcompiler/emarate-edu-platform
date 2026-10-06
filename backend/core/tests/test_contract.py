@@ -56,3 +56,24 @@ def test_a_nul_byte_in_the_address_is_a_400_not_a_500(client, db):
     assert response["Content-Type"] == "application/problem+json"
     assert response.json()["code"] == "invalid_character"
     assert client.get("/api/public/redirects?path=%2Fnothing").status_code == 404
+
+
+def test_a_write_and_its_audit_entry_commit_together(api, make_user, monkeypatch):
+    """Review 2026-10-04 C5: when record() failed, the 500 left the settings changed with no
+    audit entry. A write request is one transaction now."""
+    import pytest
+
+    import results.views
+    from accounts.rbac import Role
+    from results.models import ResultDisplaySettings
+
+    before = ResultDisplaySettings.load().show_score
+
+    def fail(*args, **kwargs):
+        raise RuntimeError("audit unavailable")
+
+    monkeypatch.setattr(results.views, "record", fail)
+    officer = make_user(Role.RESULTS_OFFICER)
+    with pytest.raises(RuntimeError):
+        api(officer).patch("/api/v1/results/settings", {"show_score": not before})
+    assert ResultDisplaySettings.load().show_score is before

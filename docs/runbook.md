@@ -163,7 +163,14 @@ uv run python manage.py migrate --noinput
 - **البريد:** طابور `Outbox` في لوحة Django (`/admin/notifications/outbox/`): الحالة `failed` بعد إعادة المحاولات تعني مشكلة مزود.
 - **Beat:** إن توقفت التذكيرات فتحقق من أن `ecst-beat` يعمل (خدمة واحدة فقط).
 
-على VPS، بحسب سجل التشغيل الحالي، Beat يعمل داخل `ecst-worker --beat`، وليس خدمة `ecst-beat` منفصلة. استخدم `systemctl is-active ecst-api ecst-worker` و`journalctl -u ecst-api -u ecst-worker --since -1h --no-pager`، و`systemctl list-timers ecst-backup.timer ecst-site-build.timer`. لا تطبع `/opt/ecst/env` أو كلمات مرور العرض. لا تُغيّر Redis أو Caddy أو منافذ المشاريع الأخرى على الخادم المشترك. يبقى إعداد التنبيهات للتوفر والقرص وفشل النسخ مطلوبًا؛ وجود السجلات ليس تنبيهًا.
+على VPS، بحسب سجل التشغيل الحالي، Beat يعمل داخل `ecst-worker --beat`، وليس خدمة `ecst-beat` منفصلة. استخدم `systemctl is-active ecst-api ecst-worker` و`journalctl -u ecst-api -u ecst-worker --since -1h --no-pager`، و`systemctl list-timers ecst-backup.timer ecst-site-build.timer`. لا تطبع `/opt/ecst/env` أو كلمات مرور العرض. لا تُغيّر Redis أو Caddy أو منافذ المشاريع الأخرى على الخادم المشترك. وجود السجلات ليس تنبيهًا.
+
+**التنبيهات على VPS** (بعد عطل 4 أكتوبر الذي دام 12 ساعة دون أن يعلم أحد):
+- `ecst-healthcheck.timer` يشغّل `scripts/ops/healthcheck.sh` كل 5 دقائق بصفة `ecst`. يفحص `/api/public/health` (يجب أن يعيد 200) و`ecst-api` و`ecst-worker`.
+- `ecst-backup.service` و`ecst-site-build.service` لهما `OnFailure=ecst-alert@%n.service`.
+- **المسار العادي:** يُرسل `manage.py notify_ops` بريدًا مباشرًا (لا عبر العامل) إلى كل مدير نظام نشط وإلى `OPS_ALERT_EMAIL`، مع إشعار داخل البوابة، وتنبيه واحد لكل وحدة في الساعة.
+- **إن تعذّر تشغيل Django نفسه:** يرسل السكربت البريد عبر SMTP بـ `curl` إلى `OPS_ALERT_EMAIL` فقط. لذلك **اضبط `OPS_ALERT_EMAIL` في `/opt/ecst/env`**، وإلا فلا تنبيه في هذه الحالة.
+- **هذا لا يغني عن مراقبة خارجية** (UptimeRobot أو غيرها): إن تعطّل الخادم كله فلن يرسل شيئًا.
 
 ## 8. أيام الاختبارات
 

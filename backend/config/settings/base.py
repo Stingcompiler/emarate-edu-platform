@@ -64,6 +64,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "core.middleware.AtomicWritesMiddleware",
 ]
 
 ROOT_URLCONF = "config.urls"
@@ -322,6 +323,9 @@ SITE_BUILD_TOKEN = env("SITE_BUILD_TOKEN", "")
 # Encrypted weekly database dumps (core.backups): keep this key offline too.
 BACKUP_ENCRYPTION_KEY = env("BACKUP_ENCRYPTION_KEY", "")
 BACKUP_KEEP = int(env("BACKUP_KEEP", "8"))
+# Who hears about a failed backup, site build or health check besides the system admins
+# (core notify_ops; review 2026-10-04 A9).
+OPS_ALERT_EMAIL = env("OPS_ALERT_EMAIL", "")
 
 # ─── Logging ──────────────────────────────────────────────────────────────
 LOG_LEVEL = env("DJANGO_LOG_LEVEL", "INFO")
