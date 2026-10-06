@@ -90,3 +90,37 @@ it("stays usable when the connection drops during submit", async () => {
   fireEvent.click(screen.getByRole("button", { name: "تسليم الآن" }));
   expect(await screen.findByText("submitted")).toBeTruthy(); // the retry went through
 });
+
+it("moves through a single-choice question with the arrow keys (review G2)", async () => {
+  const single = attempt(10);
+  single.questions = [
+    {
+      id: 1,
+      type: "single",
+      text: "سؤال",
+      marks: "1",
+      is_required: false,
+      choices: [
+        { id: 11, text: "أ" },
+        { id: 12, text: "ب" },
+        { id: 13, text: "ج" },
+      ],
+    } as never,
+  ];
+  vi.mocked(api.GET).mockResolvedValue({
+    data: single,
+    response: new Response(null, { status: 200 }),
+  } as never);
+  vi.mocked(api.PUT).mockResolvedValue({ response: new Response(null, { status: 204 }) } as never);
+  mount();
+  const radios = await screen.findAllByRole("radio");
+  expect(radios.map((r) => r.tabIndex)).toEqual([0, -1, -1]); // one Tab stop
+  radios[0]!.focus();
+  fireEvent.keyDown(radios[0]!, { key: "ArrowDown" });
+  expect(radios[1]!.getAttribute("aria-checked")).toBe("true");
+  expect(document.activeElement).toBe(radios[1]);
+  fireEvent.keyDown(radios[1]!, { key: "ArrowUp" });
+  fireEvent.keyDown(radios[0]!, { key: "ArrowUp" }); // wraps to the last
+  expect(radios[2]!.getAttribute("aria-checked")).toBe("true");
+  expect(radios.map((r) => r.tabIndex)).toEqual([-1, -1, 0]);
+});

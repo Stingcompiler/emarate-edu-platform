@@ -549,6 +549,31 @@ function QuestionText({ text }: { text: string }) {
   );
 }
 
+/**
+ * Arrow keys in a radio group (WAI-ARIA radio pattern, review 2026-10-04 G2): Up/Down move
+ * to the previous/next choice and select it; Left/Right follow the reading direction, so in
+ * Arabic Left is «next». Tab reaches the group once, on the chosen (or first) choice.
+ */
+function radioKeys(event: React.KeyboardEvent<HTMLButtonElement>, select: (index: number) => void) {
+  const rtl = getComputedStyle(event.currentTarget).direction === "rtl";
+  const step =
+    event.key === "ArrowDown" || event.key === (rtl ? "ArrowLeft" : "ArrowRight")
+      ? 1
+      : event.key === "ArrowUp" || event.key === (rtl ? "ArrowRight" : "ArrowLeft")
+        ? -1
+        : 0;
+  if (!step) return;
+  event.preventDefault();
+  const radios = Array.from(
+    event.currentTarget
+      .closest('[role="radiogroup"]')
+      ?.querySelectorAll<HTMLButtonElement>('[role="radio"]') ?? [],
+  );
+  const next = (radios.indexOf(event.currentTarget) + step + radios.length) % radios.length;
+  select(next);
+  radios[next]?.focus();
+}
+
 function AnswerInput({
   question,
   value,
@@ -573,6 +598,13 @@ function AnswerInput({
               type="button"
               role={multiple ? "checkbox" : "radio"}
               aria-checked={on}
+              // One Tab stop for a radio group: the chosen choice, or the first.
+              tabIndex={multiple || on || (picked == null && i === 0) ? 0 : -1}
+              onKeyDown={
+                multiple
+                  ? undefined
+                  : (event) => radioKeys(event, (n) => onChange(question.choices[n]!.id))
+              }
               className={card(on)}
               onClick={() =>
                 onChange(
@@ -605,12 +637,14 @@ function AnswerInput({
         {[
           { v: true, label: "صح" },
           { v: false, label: "خطأ" },
-        ].map((o) => (
+        ].map((o, i, all) => (
           <button
             key={o.label}
             type="button"
             role="radio"
             aria-checked={value === o.v}
+            tabIndex={value === o.v || (value == null && i === 0) ? 0 : -1}
+            onKeyDown={(event) => radioKeys(event, (n) => onChange(all[n]!.v))}
             className={`${card(value === o.v)} justify-center text-lg font-bold`}
             onClick={() => onChange(o.v)}
           >
