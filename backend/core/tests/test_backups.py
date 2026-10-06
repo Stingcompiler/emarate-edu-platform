@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import pytest
 from django.core.exceptions import ImproperlyConfigured
 from django.core.management import call_command
@@ -9,7 +11,7 @@ from core import backups
 def fake_dump(monkeypatch, settings):
     settings.BACKUP_ENCRYPTION_KEY = "offline-backup-secret"
     counter = iter(range(100))
-    monkeypatch.setattr(backups, "dump", lambda: b"PGDMP-fake-dump")
+    monkeypatch.setattr(backups, "dump_to", lambda path: path.write_bytes(b"PGDMP-fake-dump"))
     # Distinct names within the same second.
     real = backups.datetime
 
@@ -80,4 +82,27 @@ def test_local_media_is_archived_beside_the_dump(fake_dump, db, settings, tmp_pa
 
 def test_media_on_bunny_is_not_archived(fake_dump, db, settings):
     settings.MEDIA_BACKEND = "bunny"
-    assert backups.media_archive() is None
+    assert backups.media_archive_to(Path("/nonexistent/media.tar.gz")) is False
+
+
+def test_large_backups_stream_in_chunks_and_old_ones_still_read(
+    fake_dump, db, monkeypatch, tmp_path
+):
+    """Review 2026-10-04 A14: the dump was held in memory and encrypted in one piece."""
+    from django.core.files.base import ContentFile
+    from django.core.files.storage import default_storage
+
+    monkeypatch.setattr(backups, "CHUNK", 5)  # many chunks from a small fake dump
+    name = backups.create(keep=8)[0]
+    with default_storage.open(name, "rb") as handle:
+        stored = handle.read()
+    assert stored.startswith(backups.MAGIC) and b"PGDMP" not in stored
+    assert backups.decrypt(name) == b"PGDMP-fake-dump"
+
+    old = default_storage.save(
+        "backups/ecst-20200101T000000Z.dump.enc",
+        ContentFile(backups.fernet().encrypt(b"PGDMP-old-format")),
+    )
+    out = tmp_path / "old.dump"
+    backups.decrypt_to(old, out)
+    assert out.read_bytes() == b"PGDMP-old-format"

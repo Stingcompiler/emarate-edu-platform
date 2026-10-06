@@ -16,11 +16,11 @@ already live off the server, so only the database is dumped.
 from __future__ import annotations
 
 import base64
-import io
 import os
 import shutil
 import subprocess
 import tarfile
+import tempfile
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -29,7 +29,7 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.hkdf import HKDF
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
-from django.core.files.base import ContentFile
+from django.core.files import File
 from django.core.files.storage import default_storage
 
 PREFIX = "backups"
@@ -62,55 +62,74 @@ def _pg_env_and_args() -> tuple[dict, list[str]]:
     return env, [*args, str(db["NAME"])]
 
 
-def dump() -> bytes:
+# Streamed format (review 2026-10-04 A14): the magic, then for each chunk of the plain file
+# a 4-byte big-endian length and a Fernet token. Memory stays at one chunk whatever the size
+# of the database or the uploaded files. Backups made before this (a single Fernet token)
+# are still read by decrypt()/decrypt_to().
+MAGIC = b"ECSTBAK1"
+CHUNK = 8 * 1024 * 1024
+
+
+def dump_to(path: Path) -> None:
     binary = shutil.which("pg_dump")
     if binary is None:
         raise ImproperlyConfigured("pg_dump is not installed on this machine.")
     env, args = _pg_env_and_args()
     result = subprocess.run(  # noqa: S603  (fixed binary, arguments from settings)
-        [binary, "--format=custom", "--no-owner", "--no-privileges", *args],
+        [binary, "--format=custom", "--no-owner", "--no-privileges", f"--file={path}", *args],
         env=env,
         check=False,
         capture_output=True,
     )
     if result.returncode != 0:
         raise RuntimeError(f"pg_dump failed: {result.stderr.decode(errors='replace').strip()}")
-    return result.stdout
 
 
-def media_archive() -> bytes | None:
-    """The uploaded files (public and private) as a .tar.gz, or None when they are not on this
-    disk. The backups folder itself is left out."""
+def media_archive_to(path: Path) -> bool:
+    """The uploaded files (public and private) as a .tar.gz at ``path``; False when they are
+    not on this disk. The backups folder itself is left out."""
     if getattr(settings, "MEDIA_BACKEND", "local") != "local":
-        return None
+        return False
     root = Path(settings.MEDIA_ROOT).resolve()
     if not root.is_dir():
-        return None
-    buffer = io.BytesIO()
-    with tarfile.open(fileobj=buffer, mode="w:gz") as tar:
-        for path in sorted(root.rglob("*")):
-            relative = path.relative_to(root)
-            if relative.parts[:2] == ("private", PREFIX) or not path.is_file():
+        return False
+    with tarfile.open(path, mode="w:gz") as tar:
+        for item in sorted(root.rglob("*")):
+            relative = item.relative_to(root)
+            if relative.parts[:2] == ("private", PREFIX) or not item.is_file():
                 continue
-            tar.add(path, arcname=str(relative))
-    return buffer.getvalue()
+            tar.add(item, arcname=str(relative))
+    return True
+
+
+def _encrypt_file(source: Path, target: Path, box: Fernet) -> None:
+    with source.open("rb") as plain, target.open("wb") as sealed:
+        sealed.write(MAGIC)
+        while chunk := plain.read(CHUNK):
+            token = box.encrypt(chunk)
+            sealed.write(len(token).to_bytes(4, "big"))
+            sealed.write(token)
 
 
 def create(keep: int) -> list[str]:
     """Dump, encrypt, store (plus the uploaded files on a local disk); keep the newest ``keep``
-    of each. Returns the stored names."""
+    of each. Returns the stored names. Works through temporary files, chunk by chunk."""
     stamp = datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ")
     box = fernet()
-    stored = [
-        default_storage.save(f"{PREFIX}/ecst-{stamp}{DB_SUFFIX}", ContentFile(box.encrypt(dump())))
-    ]
-    media = media_archive()
-    if media is not None:
-        stored.append(
-            default_storage.save(
-                f"{PREFIX}/ecst-media-{stamp}{MEDIA_SUFFIX}", ContentFile(box.encrypt(media))
-            )
-        )
+    stored = []
+    with tempfile.TemporaryDirectory(prefix="ecst-backup-") as work:
+        work = Path(work)
+        parts = [(work / "db.dump", f"{PREFIX}/ecst-{stamp}{DB_SUFFIX}")]
+        dump_to(parts[0][0])
+        if media_archive_to(work / "media.tar.gz"):
+            parts.append((work / "media.tar.gz", f"{PREFIX}/ecst-media-{stamp}{MEDIA_SUFFIX}"))
+        for plain, name in parts:
+            sealed = plain.with_suffix(plain.suffix + ".enc")
+            _encrypt_file(plain, sealed, box)
+            plain.unlink()
+            with sealed.open("rb") as handle:
+                stored.append(default_storage.save(name, File(handle)))
+            sealed.unlink()
     prune(keep)
     return stored
 
@@ -133,6 +152,20 @@ def prune(keep: int) -> list[str]:
     return stale
 
 
+def decrypt_to(name: str, out: Path) -> None:
+    """Decrypt a stored backup to ``out``, chunk by chunk (or whole, for an older backup)."""
+    box = fernet()
+    with default_storage.open(name, "rb") as handle, Path(out).open("wb") as plain:
+        head = handle.read(len(MAGIC))
+        if head != MAGIC:  # a backup from before the streamed format
+            plain.write(box.decrypt(head + handle.read()))
+            return
+        while size := handle.read(4):
+            plain.write(box.decrypt(handle.read(int.from_bytes(size, "big"))))
+
+
 def decrypt(name: str) -> bytes:
-    with default_storage.open(name, "rb") as handle:
-        return fernet().decrypt(handle.read())
+    with tempfile.TemporaryDirectory() as work:
+        out = Path(work) / "plain"
+        decrypt_to(name, out)
+        return out.read_bytes()
