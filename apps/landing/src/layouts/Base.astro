@@ -1,6 +1,8 @@
 ---
 import "@fontsource/ibm-plex-sans-arabic/400.css";
 import "@fontsource/ibm-plex-sans-arabic/600.css";
+// Bold body text is common (64 uses): load the real 700 instead of a synthesized bold.
+import "@fontsource/ibm-plex-sans-arabic/700.css";
 import "@fontsource/noto-kufi-arabic/700.css";
 import "../styles/global.css";
 import { PORTAL, site as loadSite, pages, programs as loadPrograms } from "../lib/api";

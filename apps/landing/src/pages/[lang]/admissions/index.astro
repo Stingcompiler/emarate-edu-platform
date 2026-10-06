@@ -180,7 +180,7 @@ const lead = L(
     )}
 
     <section>
-      <h2 class="font-display text-xl font-bold">{L("الخطوات", "Steps")}</h2>
+      <h2 class="font-display text-2xl font-bold">{L("الخطوات", "Steps")}</h2>
       {/* Desktop: a line draws across the four steps, which then appear in order. */}
       <div
         class="mt-4 hidden h-1 overflow-hidden rounded-full bg-border-soft lg:block"
@@ -213,7 +213,7 @@ const lead = L(
 
     <div class="grid gap-10 lg:grid-cols-[2fr_1fr]">
       <section>
-        <h2 class="font-display text-xl font-bold">
+        <h2 class="font-display text-2xl font-bold">
           {t(lang, "openPrograms")}{" "}
           <span class="text-base font-normal text-text-muted">· {num(lang, accepting.length)}</span>
         </h2>
@@ -250,7 +250,7 @@ const lead = L(
       {general.length > 0 && (
         // Stays in view beside the long programme list on wide screens.
         <section class="lg:sticky lg:top-24 lg:self-start">
-          <h2 class="font-display text-xl font-bold">
+          <h2 class="font-display text-2xl font-bold">
             {L("المستندات العامة", "General documents")}
           </h2>
           <ul class="mt-4 space-y-2 rounded-2xl border border-border-soft bg-surface p-4 text-sm">

@@ -23,7 +23,7 @@ const anyUsd = priced.some((p) => p.fee_usd);
 
 {groups.length > 0 && (
   <section aria-labelledby="fees-table" class="mt-10">
-    <h2 id="fees-table" class="font-display text-xl font-bold">
+    <h2 id="fees-table" class="font-display text-2xl font-bold">
       {L("الرسوم السنوية لكل برنامج", "Yearly fees by programme")}
     </h2>
     {groups.map((g) => (
@@ -65,17 +65,17 @@ const anyUsd = priced.some((p) => p.fee_usd);
           <table class="w-full text-sm">
             <thead class="bg-surface-alt text-xs text-text-muted">
               <tr>
-                <th scope="col" class="px-4 py-2 text-start font-medium">
+                <th scope="col" class="px-4 py-2 text-start font-semibold">
                   {L("البرنامج", "Programme")}
                 </th>
-                <th scope="col" class="px-4 py-2 text-start font-medium">
+                <th scope="col" class="px-4 py-2 text-start font-semibold">
                   {L("المدة", "Duration")}
                 </th>
-                <th scope="col" class="px-4 py-2 text-end font-medium">
+                <th scope="col" class="px-4 py-2 text-end font-semibold">
                   {L("سنويًا", "Yearly")}
                 </th>
                 {anyUsd && (
-                  <th scope="col" class="px-4 py-2 text-end font-medium">
+                  <th scope="col" class="px-4 py-2 text-end font-semibold">
                     {L("للوافدين", "International")}
                   </th>
                 )}

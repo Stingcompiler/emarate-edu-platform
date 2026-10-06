@@ -80,7 +80,7 @@ function ApplicantPreview({ fields }: { fields: Field[] }) {
                   ))}
                 </div>
               ) : f.type === "file" ? (
-                <div className="mt-1 rounded-lg border border-dashed border-border px-3 py-2 text-center text-[11px] text-text-muted">
+                <div className="mt-1 rounded-lg border border-dashed border-border px-3 py-2 text-center text-xs text-text-muted">
                   رفع مستند
                 </div>
               ) : (
@@ -88,7 +88,7 @@ function ApplicantPreview({ fields }: { fields: Field[] }) {
                   className={`mt-1 rounded-lg border border-border-soft bg-surface-alt/50 ${f.type === "textarea" ? "h-12" : "h-8"}`}
                 />
               )}
-              {f.help && <p className="mt-0.5 text-[11px] text-text-muted">{f.help}</p>}
+              {f.help && <p className="mt-0.5 text-xs text-text-muted">{f.help}</p>}
             </div>
           ),
         )}

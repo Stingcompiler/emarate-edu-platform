@@ -36,7 +36,7 @@ for (const b of blocks) {
         ))}
       </div>
     ) : b.type === "heading" ? (
-      <h2 class="pt-2 font-display text-xl font-bold">{b.text}</h2>
+      <h2 class="pt-2 font-display text-2xl font-bold">{b.text}</h2>
     ) : b.type === "paragraph" ? (
       <p class="whitespace-pre-line">{b.text}</p>
     ) : b.type === "note" ? (

@@ -202,7 +202,7 @@ export function Members() {
                   </Button>
                 )}
               </div>
-              <p className="text-[11px] text-text-muted">
+              <p className="text-xs text-text-muted">
                 الإزالة تفكّ ارتباطه بالقسم فقط؛ لا تحذف حسابه.
               </p>
               {remove.isError && <Notice>{problemMessage(remove.error)}</Notice>}
@@ -274,9 +274,7 @@ function AddMember({ department }: { department: number }) {
         </button>
       ))}
       {add.isError && <Notice>{problemMessage(add.error)}</Notice>}
-      <p className="text-[11px] text-text-muted">
-        حسابات الأساتذة الجدد ينشئها أمين الشؤون العلمية.
-      </p>
+      <p className="text-xs text-text-muted">حسابات الأساتذة الجدد ينشئها أمين الشؤون العلمية.</p>
     </Card>
   );
 }

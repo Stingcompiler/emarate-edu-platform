@@ -29,7 +29,7 @@ const more = await related(lang, ["guide", "calendar", "affairs", "contact"]);
   <WithAside>
     {groups.map(([key, label]) => (
       <section id={`c-${key}`} class="mb-10 scroll-mt-24">
-        <h2 class="font-display text-xl font-bold">{label}</h2>
+        <h2 class="font-display text-2xl font-bold">{label}</h2>
         <ul
           class:list={[
             "mt-3 grid items-start gap-3",

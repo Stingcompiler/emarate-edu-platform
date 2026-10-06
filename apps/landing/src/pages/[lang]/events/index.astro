@@ -25,7 +25,7 @@ const more = await related(lang, ["calendar", "news", "announcements"]);
   />
   <WithAside>
     <section>
-      <h2 class="font-display text-xl font-bold">{L("القادمة", "Upcoming")}</h2>
+      <h2 class="font-display text-2xl font-bold">{L("القادمة", "Upcoming")}</h2>
       <ul class="mt-4 grid gap-3 xl:grid-cols-2 xl:[&>li:last-child:nth-child(odd)]:col-span-2">
         {upcoming.map((e) => (
           <EventRow lang={lang} event={e} />
@@ -39,7 +39,7 @@ const more = await related(lang, ["calendar", "news", "announcements"]);
     </section>
     {past.length > 0 && (
       <section class="mt-10">
-        <h2 class="font-display text-xl font-bold">{L("فعاليات سابقة", "Past events")}</h2>
+        <h2 class="font-display text-2xl font-bold">{L("فعاليات سابقة", "Past events")}</h2>
         <ul class="mt-4 grid gap-3 xl:grid-cols-2 xl:[&>li:last-child:nth-child(odd)]:col-span-2">
           {past.map((e) => (
             <EventRow lang={lang} event={e} />

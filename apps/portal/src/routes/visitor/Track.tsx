@@ -192,7 +192,7 @@ function ApplicationCard({ app }: { app: App }) {
               <span
                 className={`block h-1.5 rounded-full ${i <= stage ? (app.status === "rejected" && i === stage ? "bg-danger" : "bg-primary") : "bg-surface-alt"}`}
               />
-              <span className="mt-1 block text-[11px] text-text-muted">{label}</span>
+              <span className="mt-1 block text-xs text-text-muted">{label}</span>
             </li>
           ))}
         </ol>
