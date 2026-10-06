@@ -80,3 +80,32 @@ class NulByteMiddleware:
                 json_dumps_params={"ensure_ascii": False},
             )
         return self.get_response(request)
+
+
+class AtomicWritesMiddleware:
+    """A write request runs in one transaction (review 2026-10-04 C5): when anything raises
+    after a business change, the change and its audit entry go away together instead of
+    leaving a change nobody can trace.
+
+    Only a server error (an unhandled exception, answered 5xx) rolls back. Answers DRF
+    already turned into 4xx stay committed on purpose: a wrong one-time code must still
+    count against its attempts.
+    Tasks are queued with ``transaction.on_commit`` and so run after the commit.
+    """
+
+    SAFE = frozenset({"GET", "HEAD", "OPTIONS", "TRACE"})
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        if request.method in self.SAFE:
+            return self.get_response(request)
+        from django.db import transaction
+
+        with transaction.atomic():
+            response = self.get_response(request)
+            # Django has already turned an exception into a 500 by now.
+            if response.status_code >= 500:
+                transaction.set_rollback(True)
+            return response
