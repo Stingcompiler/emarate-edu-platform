@@ -5,6 +5,8 @@ import "@fontsource/ibm-plex-sans-arabic/600.css";
 import "@fontsource/ibm-plex-sans-arabic/700.css";
 import "@fontsource/noto-kufi-arabic/700.css";
 import "../styles/global.css";
+import WhatsAppIcon from "../components/WhatsAppIcon.astro";
+import { askAbout, whatsappUrl } from "../lib/whatsapp";
 import { PORTAL, site as loadSite, pages, programs as loadPrograms } from "../lib/api";
 import { type Lang, dir, href, pick, t } from "../lib/i18n";
 import { navigation } from "../lib/menus";
@@ -373,9 +375,12 @@ const ext = (external: boolean) => (external ? { rel: "noopener", target: "_blan
             {s.whatsapp_e164 && (
               <p>
                 <a
-                  href={`https://wa.me/${s.whatsapp_e164.replace("+", "")}`}
-                  class="hover:text-white"
+                  href={whatsappUrl(s.whatsapp_e164)}
+                  rel="noopener"
+                  target="_blank"
+                  class="inline-flex items-center gap-1.5 hover:text-white"
                 >
+                  <WhatsAppIcon size={16} />
                   WhatsApp
                 </a>
               </p>
@@ -446,31 +451,36 @@ const ext = (external: boolean) => (external ? { rel: "noopener", target: "_blan
         one tap from every page. On a page with its own bottom bar the phone uses that. */}
     {s.whatsapp_e164 && path !== "contact/" && (
       <a
-        href={`https://wa.me/${s.whatsapp_e164.replace(/\D/g, "")}`}
+        href={whatsappUrl(s.whatsapp_e164, askAbout(lang, title))}
         rel="noopener"
         target="_blank"
         data-no-print
         data-whatsapp-float
-        aria-label={lang === "ar" ? "تواصل عبر واتساب" : "Chat on WhatsApp"}
+        aria-label={lang === "ar" ? "اسألنا على واتساب" : "Ask us on WhatsApp"}
         class:list={[
-          "fixed end-3 bottom-3 z-10 size-12 place-items-center rounded-full bg-success text-white shadow-lg hover:bg-success-strong mb-[env(safe-area-inset-bottom)] lg:end-4 lg:bottom-4 lg:size-14",
-          bottomBar ? "hidden lg:grid" : "grid",
+          "fixed end-4 bottom-4 z-20 mb-[env(safe-area-inset-bottom)] items-center justify-center gap-2.5 rounded-full bg-whatsapp text-white shadow-[0_6px_20px_rgb(15_122_58/0.35)] ring-2 ring-surface transition-[background-color,opacity,translate] duration-200 hover:bg-whatsapp-hover",
+          // Phones: a 56px round button; large screens: the mark and its label.
+          "size-14 lg:size-auto lg:h-14 lg:ps-4 lg:pe-5",
+          bottomBar ? "hidden lg:inline-flex" : "inline-flex",
         ]}
       >
-        <svg
-          width="26"
-          height="26"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="1.8"
-          aria-hidden="true"
-        >
-          <path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-5A8 8 0 1 1 21 12z" />
-          <path d="M9 9.5c0 3 2.5 5.5 5.5 5.5l1-1.5-2-1-1 1c-1-.5-2-1.5-2.5-2.5l1-1-1-2z" />
-        </svg>
+        <WhatsAppIcon size={28} class="shrink-0" />
+        <span class="hidden text-[15px] font-semibold lg:inline">
+          {lang === "ar" ? "اسألنا على واتساب" : "Ask us on WhatsApp"}
+        </span>
       </a>
     )}
+    <script>
+      // The floating WhatsApp button steps aside while the footer is on screen: the footer
+      // has its own WhatsApp link, and the button would cover its last lines on a phone.
+      const float = document.querySelector<HTMLElement>("[data-whatsapp-float]");
+      const footer = document.querySelector("footer");
+      if (float && footer && "IntersectionObserver" in window) {
+        new IntersectionObserver(([entry]) => {
+          float.toggleAttribute("data-away", Boolean(entry?.isIntersecting));
+        }).observe(footer);
+      }
+    </script>
     <script>
       // Motion (packages/ui/src/motion.css): reveal what scrolls into view and count figures
       // up once. Nothing is hidden before this runs, and «reduce motion» turns it off.
