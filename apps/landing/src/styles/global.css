@@ -34,3 +34,36 @@ html[lang="en"] :where(p, li, dd, dt, h1, h2, h3, h4, td, th, blockquote, figcap
 :root[data-theme="dark"] .theme-when-light {
   display: none;
 }
+
+/* The floating WhatsApp button (Base.astro): it arrives once, a moment after the page, and
+   steps aside over the footer, which has its own WhatsApp link. No pulsing. */
+[data-whatsapp-float] {
+  transition:
+    background-color 0.2s,
+    opacity 0.2s,
+    translate 0.2s,
+    visibility 0s;
+}
+/* Hidden for everyone while away, not only faded: a transparent button still read as
+   white text on nothing to the accessibility check (and to screen readers as present). */
+[data-whatsapp-float][data-away] {
+  opacity: 0;
+  translate: 0 1rem;
+  visibility: hidden;
+  pointer-events: none;
+  transition:
+    opacity 0.2s,
+    translate 0.2s,
+    visibility 0s linear 0.2s;
+}
+/* The arrival scales only: its colours are never half-transparent. */
+@media (prefers-reduced-motion: no-preference) {
+  [data-whatsapp-float] {
+    animation: whatsapp-arrive 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) 0.6s backwards;
+  }
+}
+@keyframes whatsapp-arrive {
+  from {
+    scale: 0.4;
+  }
+}

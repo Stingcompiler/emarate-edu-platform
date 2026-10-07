@@ -77,6 +77,11 @@
   --color-info: #2d64a7;
   --color-info-soft: #e5ecf4;
   --color-info-strong: #1f4674;
+
+  /* WhatsApp buttons on the public site: a deep green of WhatsApp's own family, so the
+     white mark and label keep 5.4:1 (the bright #25D366 gives 2:1). Same in dark mode. */
+  --color-whatsapp: #0f7a3a;
+  --color-whatsapp-hover: #0b6430;
   --color-neutral: #576075;
   --color-neutral-soft: #eef0f3;
   --color-neutral-strong: #3b4459;

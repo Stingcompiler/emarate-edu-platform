@@ -1,4 +1,5 @@
 ---
+import { whatsappUrl } from "../../lib/whatsapp";
 import PageHead from "../../components/PageHead.astro";
 import SideLinks from "../../components/SideLinks.astro";
 import Base from "../../layouts/Base.astro";
@@ -29,7 +30,7 @@ const quick = [
         {
           label: "WhatsApp",
           value: s.whatsapp_e164,
-          href: `https://wa.me/${s.whatsapp_e164.replace(/\D/g, "")}`,
+          href: whatsappUrl(s.whatsapp_e164),
           external: true,
         },
       ]

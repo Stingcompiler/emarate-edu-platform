@@ -130,9 +130,11 @@ test("the programme finder narrows by name, spelling-tolerant, and by department
 test("WhatsApp is one tap away, and parents have their own page", async ({ page }) => {
   // The demo sets a (fake) WhatsApp number and office hours (seed_demo).
   await page.goto(`${SITE}/ar/`);
-  await expect(page.getByRole("link", { name: "تواصل عبر واتساب" })).toHaveAttribute(
-    "href",
-    /^https:\/\/wa\.me\/\d+$/,
+  // The chat opens with a first message naming the page the visitor asks from.
+  const float = page.getByRole("link", { name: "اسألنا على واتساب" });
+  await expect(float).toHaveAttribute("href", /^https:\/\/wa\.me\/\d+\?text=/);
+  expect(decodeURIComponent((await float.getAttribute("href")) ?? "")).toContain(
+    "مرحبًا، أستفسر عن:",
   );
   await page.getByRole("link", { name: "دليل وليّ الأمر" }).click();
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("لأولياء الأمور");
@@ -140,7 +142,7 @@ test("WhatsApp is one tap away, and parents have their own page", async ({ page 
   await page.goto(`${SITE}/ar/contact/`);
   await expect(page.getByText("ساعات العمل:")).toBeVisible();
   // The contact page shows WhatsApp in its quick row, so no floating button there.
-  await expect(page.getByRole("link", { name: "تواصل عبر واتساب" })).toHaveCount(0);
+  await expect(page.locator("[data-whatsapp-float]")).toHaveCount(0);
 });
 
 test("an event can be added to a calendar, with directions to the college", async ({

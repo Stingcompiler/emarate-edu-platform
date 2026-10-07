@@ -1,4 +1,6 @@
 ---
+import WhatsAppIcon from "../../../components/WhatsAppIcon.astro";
+import { whatsappUrl } from "../../../lib/whatsapp";
 import Faq from "../../../components/Faq.astro";
 import PageHead from "../../../components/PageHead.astro";
 import Base from "../../../layouts/Base.astro";
@@ -51,9 +53,10 @@ const fees = [
 ];
 // «Ask on WhatsApp» opens a chat that already names the programme.
 const whatsapp = s.whatsapp_e164
-  ? `https://wa.me/${s.whatsapp_e164.replace(/\D/g, "")}?text=${encodeURIComponent(
+  ? whatsappUrl(
+      s.whatsapp_e164,
       L(`السلام عليكم، أستفسر عن برنامج ${p.name_ar}.`, `Hello, I have a question about ${name}.`),
-    )}`
+    )
   : null;
 // Search results need a description of their own even before the department writes one:
 // built only from the programme's data, never invented.
@@ -288,18 +291,7 @@ const jsonLd = [programLd, faqLd(faq)];
               target="_blank"
               class="flex min-h-11 items-center justify-center gap-2 rounded-xl border border-border bg-surface px-4 text-sm font-semibold text-text hover:bg-surface-alt"
             >
-              <svg
-                width="18"
-                height="18"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.8"
-                aria-hidden="true"
-                class="text-success"
-              >
-                <path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-5A8 8 0 1 1 21 12z" />
-              </svg>
+              <WhatsAppIcon size={18} class="text-whatsapp" />
               {L("اسأل عبر واتساب", "Ask on WhatsApp")}
             </a>
           ) : (
@@ -487,19 +479,28 @@ const jsonLd = [programLd, faqLd(faq)];
           aria-label={
             whatsapp ? L("اسأل عبر واتساب", "Ask on WhatsApp") : L("تواصل معنا", "Contact us")
           }
-          class="grid size-12 shrink-0 place-items-center rounded-xl border border-border bg-surface text-primary hover:bg-surface-alt"
+          class:list={[
+            "grid size-12 shrink-0 place-items-center rounded-xl",
+            whatsapp
+              ? "bg-whatsapp text-white hover:bg-whatsapp-hover"
+              : "border border-border bg-surface text-primary hover:bg-surface-alt",
+          ]}
         >
-          <svg
-            width="22"
-            height="22"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="1.8"
-            aria-hidden="true"
-          >
-            <path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-5A8 8 0 1 1 21 12z" />
-          </svg>
+          {whatsapp ? (
+            <WhatsAppIcon size={24} />
+          ) : (
+            <svg
+              width="22"
+              height="22"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              aria-hidden="true"
+            >
+              <path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-5A8 8 0 1 1 21 12z" />
+            </svg>
+          )}
         </a>
       </div>
     </>
