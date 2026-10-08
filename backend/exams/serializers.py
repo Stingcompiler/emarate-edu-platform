@@ -144,6 +144,20 @@ class StudentQuestionSerializer(serializers.Serializer):
     choices = serializers.ListField(child=serializers.DictField())
 
 
+class AttemptClockSerializer(serializers.ModelSerializer):
+    """What a running exam page polls: the attempt's state and the server's clock."""
+
+    server_time = serializers.SerializerMethodField()
+
+    class Meta:
+        model = ExamAttempt
+        fields = ["status", "deadline_at", "server_time"]
+        read_only_fields = fields
+
+    def get_server_time(self, obj) -> str:
+        return timezone.now().isoformat()
+
+
 class AttemptSerializer(serializers.ModelSerializer):
     """The student's running attempt: questions in their shuffled order + saved answers."""
 

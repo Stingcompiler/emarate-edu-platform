@@ -236,6 +236,11 @@ READS: dict[str, tuple[str, frozenset, frozenset]] = {
         ONLY_STUDENT,
         EVERYONE - ONLY_STUDENT,
     ),
+    "exam-attempt-clock": (
+        "/api/v1/exam-attempts/{attempt}/clock",
+        ONLY_STUDENT,
+        EVERYONE - ONLY_STUDENT,
+    ),
     # Live, content, inquiries
     "live-session-list": ("/api/v1/live-sessions", EVERYONE, frozenset()),
     "live-session-detail": ("/api/v1/live-sessions/{live}", LEARNING, OUTSIDERS),
