@@ -454,3 +454,29 @@ def test_a_stale_decision_cannot_overwrite_a_final_one(intake, make_user):
         admissions_services.transition(RequestMeta(actor=head), stale, to="rejected", note="x")
     application.refresh_from_db()
     assert application.status == "accepted"
+
+
+def test_a_late_autosave_cannot_reopen_a_submitted_application(
+    api, intake, django_capture_on_commit_callbacks
+):
+    """Review 2026-10-08 R01: an autosave that read the draft before the submission committed
+    gets 409 and leaves the submitted application as it is."""
+    from core.errors import Conflict
+
+    client = visitor(django_capture_on_commit_callbacks)
+    created = client.post("/api/visitor/applications", {"intake": intake.pk})
+    application_id = created.data["public_id"]
+    _complete(client, application_id)
+    stale = Application.objects.get(public_id=application_id)  # the autosave's copy
+    with django_capture_on_commit_callbacks(execute=True):
+        submitted = client.post(f"/api/visitor/applications/{application_id}/submit")
+    assert submitted.status_code == 200, submitted.data
+    with pytest.raises(Conflict):
+        admissions_services.update(stale.contact, stale, full_name="حفظ متأخر")
+    late = client.patch(
+        f"/api/visitor/applications/{application_id}", {"full_name": "حفظ متأخر"}, format="json"
+    )
+    assert late.status_code == 409 and late.data["code"] == "locked"
+    current = Application.objects.get(public_id=application_id)
+    assert current.status == "submitted" and current.submitted_at is not None
+    assert current.full_name != "حفظ متأخر"

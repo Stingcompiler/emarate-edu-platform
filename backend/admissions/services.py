@@ -337,25 +337,43 @@ def own(contact, public_id) -> Application:
     return application
 
 
+def _locked(application: Application) -> Application:
+    """Locks the application row for this transaction and re-reads it into the same object: a
+    save that arrives after a submission (an autosave in flight) sees the new status, never
+    the state it was handed (review 2026-10-08, R01). Callers keep using their object."""
+    list(Application.objects.select_for_update().filter(pk=application.pk).values_list("pk"))
+    application.refresh_from_db()
+    return application
+
+
 def update(
     contact, application: Application, *, full_name=None, phone_e164=None, answers=None
 ) -> Application:
-    if application.status not in OPEN_FOR_APPLICANT:
-        raise Conflict(
-            gettext("The application can only change while it is a draft or missing documents."),
-            code="locked",
-        )
-    if full_name is not None:
-        application.full_name = full_name.strip()[:200]
-    if phone_e164 is not None:
-        from inquiries.services import normalize_phone
+    if answers is not None and not isinstance(answers, dict):
+        raise ValidationError({"answers": [gettext("Send an object of answers.")]})
+    with transaction.atomic():
+        application = _locked(application)
+        if application.status not in OPEN_FOR_APPLICANT:
+            raise Conflict(
+                gettext(
+                    "The application can only change while it is a draft or missing documents."
+                ),
+                code="locked",
+            )
+        changed = ["updated_at"]
+        if full_name is not None:
+            application.full_name = full_name.strip()[:200]
+            changed.append("full_name")
+        if phone_e164 is not None:
+            from inquiries.services import normalize_phone
 
-        application.phone_e164 = normalize_phone(phone_e164) or ""
-    if answers is not None:
-        if not isinstance(answers, dict):
-            raise ValidationError({"answers": [gettext("Send an object of answers.")]})
-        application.answers = {**application.answers, **answers}
-    application.save()
+            application.phone_e164 = normalize_phone(phone_e164) or ""
+            changed.append("phone_e164")
+        if answers is not None:
+            application.answers = {**application.answers, **answers}
+            changed.append("answers")
+        # Only what the applicant edits: never status or submitted_at.
+        application.save(update_fields=changed)
     return application
 
 
@@ -386,6 +404,11 @@ def add_document(contact, application: Application, doc_type: str, upload) -> Ap
 
 def submit(contact, application: Application) -> Application:
     """Idempotent: an already-submitted application is returned unchanged."""
+    with transaction.atomic():
+        return _submit(_locked(application))
+
+
+def _submit(application: Application) -> Application:
     if application.status not in OPEN_FOR_APPLICANT:
         return application
     errors = {}
