@@ -1,0 +1,8 @@
+
+ RUN  v5.0.2 /Users/macbookairm1/Desktop/emarate-edu-platform/apps/portal
+
+
+ Test Files  1 passed (1)
+      Tests  3 passed (3)
+   Start at  17:53:20
+   Duration  4.63s (environment 49%, import 23%, tests 17%, transform 11%)
