@@ -24,6 +24,9 @@ import {
   flagsStore,
   formatClock,
   pendingStore,
+  REJECT_LABEL,
+  rejectedStore,
+  rejectReason,
   textParts,
   TYPE_LABEL,
 } from "../../lib/exam";
@@ -106,9 +109,29 @@ export function TakeExam() {
 function ExamRunner({ attempt }: { attempt: AttemptPayload }) {
   const navigate = useNavigate();
   const pending = useMemo(() => pendingStore(attempt.public_id), [attempt.public_id]);
+  const rejectedAnswers = useMemo(() => rejectedStore(attempt.public_id), [attempt.public_id]);
   const flagStore = useMemo(() => flagsStore(attempt.public_id), [attempt.public_id]);
-  const offset = useMemo(() => clockOffset(attempt.server_time), [attempt.server_time]);
-  const deadline = new Date(attempt.deadline_at).getTime();
+  // The deadline can move while the page is open (a teacher's extension) and the attempt can
+  // be closed by the teacher: the page polls the attempt's clock (review 2026-10-08, R10).
+  const clockQuery = useQuery({
+    queryKey: ["attempt", attempt.public_id, "clock"],
+    queryFn: async () =>
+      ok(
+        await api.GET("/api/v1/exam-attempts/{public_id}/clock", {
+          params: { path: { public_id: attempt.public_id } },
+        }),
+      ),
+    refetchInterval: 30_000,
+    refetchIntervalInBackground: true,
+    refetchOnWindowFocus: true,
+    retry: false,
+    meta: { silent: true },
+  });
+  const clockData = clockQuery.data;
+  const refetchClock = clockQuery.refetch; // stable across renders
+  const serverTime = clockData?.server_time ?? attempt.server_time;
+  const offset = useMemo(() => clockOffset(serverTime), [serverTime]);
+  const deadline = new Date(clockData?.deadline_at ?? attempt.deadline_at).getTime();
   const questions = attempt.questions;
 
   const [answers, setAnswers] = useState<Record<string, AnswerValue>>(() => ({
@@ -121,6 +144,7 @@ function ExamRunner({ attempt }: { attempt: AttemptPayload }) {
   const [online, setOnline] = useState(navigator.onLine);
   const [savedAt, setSavedAt] = useState<string | null>(attempt.last_saved_at);
   const [unsynced, setUnsynced] = useState(Object.keys(pending.read()).length);
+  const [rejected, setRejected] = useState(rejectedAnswers.read);
   const [sheet, setSheet] = useState(false);
   const [confirm, setConfirm] = useState(false);
   const [error, setError] = useState("");
@@ -136,10 +160,14 @@ function ExamRunner({ attempt }: { attempt: AttemptPayload }) {
   const syncing = useRef<Promise<void> | null>(null);
   const again = useRef(false);
   const syncOnce = useCallback(async () => {
-    for (const qid of Object.keys(pending.read())) {
+    // In the attempt's own (possibly shuffled) order, never the queue's: with «no going back»
+    // the server refuses a question placed before one it already has (review 2026-10-08, R11).
+    const queued = Object.keys(pending.read());
+    const order = questions.map((q) => String(q.id)).filter((qid) => queued.includes(qid));
+    for (const qid of [...order, ...queued.filter((qid) => !order.includes(qid))]) {
       const value = pending.read()[qid];
       if (value === undefined) continue; // already confirmed meanwhile
-      const { response } = await api.PUT(
+      const { response, error: problem } = await api.PUT(
         "/api/v1/exam-attempts/{public_id}/answers/{question_id}",
         {
           params: { path: { public_id: attempt.public_id, question_id: qid } },
@@ -148,16 +176,32 @@ function ExamRunner({ attempt }: { attempt: AttemptPayload }) {
       );
       if (response.ok) {
         pending.done(Number(qid), value);
+        rejectedAnswers.remove(qid);
         setSavedAt(new Date().toISOString());
-      } else if (response.status === 400 || response.status === 409) {
-        pending.done(Number(qid), value); // rejected for good (time up / no backtrack): stop retrying
-        if (response.status === 409) break;
+      } else if ([400, 403, 409].includes(response.status)) {
+        // Refused for good: stop retrying, but keep it to tell the student (R09).
+        const reason = rejectReason(
+          response.status,
+          (problem as { code?: unknown } | undefined)?.code,
+        );
+        pending.done(Number(qid), value);
+        rejectedAnswers.add(qid, reason);
+        if (reason === "time_up" || reason === "closed" || reason === "not_allowed") {
+          // Nothing else in the queue can land either.
+          for (const [rest, v] of Object.entries(pending.read())) {
+            pending.done(Number(rest), v);
+            rejectedAnswers.add(rest, reason);
+          }
+          if (reason === "closed") void refetchClock(); // the page then leaves
+          break;
+        }
       } else {
         break; // network or server trouble: keep the queue and retry later
       }
     }
     setUnsynced(Object.keys(pending.read()).length);
-  }, [attempt.public_id, pending]);
+    setRejected(rejectedAnswers.read());
+  }, [attempt.public_id, pending, questions, refetchClock, rejectedAnswers]);
   const sync = useCallback(async (): Promise<void> => {
     if (syncing.current) {
       again.current = true;
@@ -181,6 +225,7 @@ function ExamRunner({ attempt }: { attempt: AttemptPayload }) {
     try {
       await sync();
       const unsent = Object.keys(pending.read()).length;
+      const refused = Object.keys(rejectedAnswers.read()).length;
       setUnsynced(unsent);
       // While there is time, never submit over answers the server has not confirmed: the
       // student submits again once the connection is back (review 2026-10-04, C6). At the
@@ -198,10 +243,11 @@ function ExamRunner({ attempt }: { attempt: AttemptPayload }) {
       });
       if (response.ok || response.status === 409) {
         pending.clear();
+        rejectedAnswers.clear();
         leaving = true;
         navigate(`/exam-attempts/${attempt.public_id}/result`, {
           replace: true,
-          state: { unsent },
+          state: { unsent, rejected: refused },
         });
         return;
       }
@@ -212,10 +258,11 @@ function ExamRunner({ attempt }: { attempt: AttemptPayload }) {
     } finally {
       if (!leaving) submitting.current = false;
     }
-  }, [attempt.public_id, deadline, navigate, offset, pending, sync]);
+  }, [attempt.public_id, deadline, navigate, offset, pending, rejectedAnswers, sync]);
 
   // Clock, periodic sync, and auto-submit when the server's time is up.
   useEffect(() => {
+    void sync(); // answers queued before a reload go now, not in 10 s
     const tick = window.setInterval(() => setNow(Date.now()), 500);
     const save = window.setInterval(() => void sync(), 10_000);
     return () => {
@@ -223,9 +270,33 @@ function ExamRunner({ attempt }: { attempt: AttemptPayload }) {
       window.clearInterval(save);
     };
   }, [sync]);
+  // At the deadline, ask the server first: a teacher may have just extended the time.
+  const checking = useRef(false);
   useEffect(() => {
-    if (remaining <= 0) void submit();
-  }, [remaining, submit]);
+    if (remaining > 0 || checking.current) return;
+    checking.current = true;
+    void refetchClock().then(({ data }) => {
+      checking.current = false;
+      const later =
+        data?.status === "in_progress" &&
+        new Date(data.deadline_at).getTime() > Date.now() + clockOffset(data.server_time);
+      if (!later) void submit();
+    });
+  }, [refetchClock, remaining, submit]);
+
+  // The teacher closed or invalidated the attempt: what is still queued cannot count.
+  useEffect(() => {
+    if (!clockData || clockData.status === "in_progress" || submitting.current) return;
+    submitting.current = true;
+    const unsent = Object.keys(pending.read()).length;
+    const refused = Object.keys(rejectedAnswers.read()).length;
+    pending.clear();
+    rejectedAnswers.clear();
+    navigate(`/exam-attempts/${attempt.public_id}/result`, {
+      replace: true,
+      state: { unsent, rejected: refused },
+    });
+  }, [attempt.public_id, clockData, navigate, pending, rejectedAnswers]);
 
   // Network state and focus signals (the server records how often the student left).
   useEffect(() => {
@@ -296,6 +367,11 @@ function ExamRunner({ attempt }: { attempt: AttemptPayload }) {
   useDialogFocus(sheet && !confirm, sheetPanel, closeSheet);
 
   const lowTime = remaining < 5 * 60_000;
+  const refusedCount = Object.keys(rejected).length;
+  const refusedLine =
+    refusedCount === 1 ? "لم يقبل الخادم إجابة واحدة" : `لم تُقبل ${count(refusedCount, N.answer)}`;
+  const position = (qid: string) =>
+    questions.findIndex((q) => String(q.id) === qid) + 1 || Number(qid);
   // The browser refused to keep the queue on the device (private mode, full storage).
   const memoryOnly = unsynced > 0 && !pending.persisted();
   const saveLine = !online
@@ -396,6 +472,23 @@ function ExamRunner({ attempt }: { attempt: AttemptPayload }) {
               <Notice tone="warning">
                 المتصفح لا يسمح بحفظ إجاباتك على الجهاز. لا تُعد تحميل الصفحة ولا تغلقها حتى يظهر
                 «حُفظ».
+              </Notice>
+            </div>
+          )}
+          {refusedCount > 0 && (
+            <div className="mt-4" role="status">
+              <Notice tone="warning">
+                <p className="font-semibold">{refusedLine} ولن تُحتسب:</p>
+                <ul className="mt-1 list-inside list-disc">
+                  {Object.entries(rejected)
+                    .sort(([a], [b]) => position(a) - position(b))
+                    .map(([qid, reason]) => (
+                      <li key={qid}>
+                        السؤال {position(qid).toLocaleString("ar-u-nu-latn")}:{" "}
+                        {REJECT_LABEL[reason]}
+                      </li>
+                    ))}
+                </ul>
               </Notice>
             </div>
           )}
@@ -508,6 +601,11 @@ function ExamRunner({ attempt }: { attempt: AttemptPayload }) {
                 ` بقي ${(questions.length - answeredCount).toLocaleString("ar-u-nu-latn")} بلا إجابة.`}{" "}
               لا يمكن التعديل بعد التسليم.
             </p>
+            {refusedCount > 0 && (
+              <p className="mt-2 text-sm font-semibold leading-relaxed text-warning-strong">
+                {refusedLine} ولن تُحتسب؛ السبب مذكور أسفل السؤال.
+              </p>
+            )}
             <div className="mt-5 flex gap-2">
               <Button variant="secondary" className="flex-1" onClick={() => setConfirm(false)}>
                 متابعة الحل

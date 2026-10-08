@@ -1,0 +1,28 @@
+Review date: 2026-10-08 (Africa/Khartoum)
+Reviewed application commit: d2f0368
+Original source checks:
+- Backend SQLite: 752 passed, 230.42s.
+- Backend PostgreSQL 16 isolated local instance: 751 passed, 1 SQLite-specific skip, 297.13s.
+- Frontend Vitest: 77 passed across 12 files, 8.10s.
+- pnpm typecheck: passed.
+- Ruff check backend + scripts: All checks passed.
+- Ruff format --check backend + scripts: 249 files already formatted.
+- makemigrations --check --dry-run: No changes detected.
+- spectacular --fail-on-warn --validate: exit 0.
+- pnpm build: exit 0; fallback landing build contained 26 pages while API was unavailable.
+- Strict landing build with local test API: exit 0, 104 pages, 12.37s.
+- Selected E2E: 11 passed, 1 intentional desktop exam skip, 2.9m.
+- pnpm format:check after removing temporary probes: passed.
+Review probes:
+- SQLite: 9 passed (faults reproduced), 5.86s.
+- PostgreSQL: 9 passed (faults reproduced), 11.00s.
+- Frontend: 3 passed (faults reproduced), 4.63s.
+Dependency checks:
+- pnpm audit --prod: two High advisories, exact output in pnpm-audit.json.
+- pip-audit installed environment: 79 packages, no skipped entries, no known vulnerabilities.
+Notes:
+- The first browser-server attempt was blocked by sandbox local-socket restrictions; approved local execution passed.
+- An initial R11 probe assertion referenced .code instead of .problem_code; corrected probe passed on both engines.
+- An initial formatting check flagged only the temporary, newly authored frontend probe; final application formatting passed after cleanup.
+- No application source was changed. No production access, deploy, load test, full visual audit, or physical-device check.
+- No external publication of report/evidence.

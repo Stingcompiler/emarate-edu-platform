@@ -461,3 +461,57 @@ def test_closing_the_exam_keeps_an_invalidated_attempt(classroom, exam):
     attempt.refresh_from_db()
     assert attempt.status == "invalidated" and attempt.passed is False
     assert attempt.invalidation_reason == "غش"
+
+
+def test_a_withdrawn_student_cannot_keep_answering(api, classroom, exam):
+    """Review 2026-10-08, R04: dropping the course closes the exam like a suspension."""
+    student = api(classroom.student)
+    attempt = student.post(f"{URL}/{exam.public_id}/start").data
+    question = exam.questions.get(type="true_false").pk
+    answers = f"{ATT}/{attempt['public_id']}/answers/{question}"
+    assert student.put(answers, {"answer": True}, format="json").status_code == 204
+    classroom.record.enrollments.filter(offering=classroom.offering).update(status="dropped")
+    assert student.put(answers, {"answer": False}, format="json").status_code == 403
+    stored = ExamAttempt.objects.get(public_id=attempt["public_id"]).answers.get(
+        question_id=question
+    )
+    assert stored.answer is True  # what was saved stays
+
+
+def test_a_replay_in_the_attempts_order_passes_no_backtrack(api, classroom, exam):
+    """Review 2026-10-08, R11: answers queued offline replay in the attempt's shuffled order,
+    so «no going back» accepts every one of them."""
+    Exam.objects.filter(pk=exam.pk).update(allow_backtrack=False, shuffle_questions=True)
+    student = api(classroom.student)
+    attempt = student.post(f"{URL}/{exam.public_id}/start").data
+    order = [q["id"] for q in attempt["questions"]]
+    ExamAttempt.objects.filter(public_id=attempt["public_id"]).update(
+        question_order=sorted(order, reverse=True)  # never the numeric order
+    )
+    attempt = student.get(f"{ATT}/{attempt['public_id']}").data
+    url = f"{ATT}/{attempt['public_id']}/answers"
+    for question in attempt["questions"]:
+        assert (
+            student.put(f"{url}/{question['id']}", {"answer": None}, format="json").status_code
+            == 204
+        )
+
+
+def test_the_exam_page_sees_an_extension_and_a_close(api, classroom, exam, make_user):
+    """Review 2026-10-08, R10: the clock the exam page polls follows the teacher's actions."""
+    student = api(classroom.student)
+    attempt = student.post(f"{URL}/{exam.public_id}/start").data
+    clock = f"{ATT}/{attempt['public_id']}/clock"
+    first = student.get(clock).data
+    assert first["status"] == "in_progress" and set(first) == {
+        "status",
+        "deadline_at",
+        "server_time",
+    }
+    teacher = api(classroom.teacher)
+    assert teacher.post(f"{ATT}/{attempt['public_id']}/extend", {"minutes": 5}).status_code == 200
+    later = student.get(clock).data
+    assert later["deadline_at"] != first["deadline_at"]
+    assert teacher.post(f"{URL}/{exam.public_id}/close").status_code == 200
+    assert student.get(clock).data["status"] == "auto_submitted"
+    assert api(make_user(Role.STUDENT)).get(clock).status_code == 404  # only the owner
