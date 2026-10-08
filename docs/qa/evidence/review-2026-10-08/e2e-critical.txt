@@ -1,0 +1,23 @@
+$ playwright test -c e2e/playwright.config.ts e2e/tests/sign-in.spec.ts e2e/tests/exam.spec.ts e2e/tests/apply.spec.ts e2e/tests/access.spec.ts
+
+Running 12 tests using 1 worker
+
+(node:20629) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   1 [phone] › e2e/tests/access.spec.ts:7:5 › a student opening staff pages sees «غير مسموح», not empty dashboards (21.2s)
+  ✓   2 [phone] › e2e/tests/apply.spec.ts:7:5 › a visitor verifies the email, fills the application, uploads documents and submits (13.8s)
+  ✓   3 [phone] › e2e/tests/exam.spec.ts:9:5 › a student takes the open quiz, submits it and sees the auto-graded result (10.8s)
+  ✓   4 [phone] › e2e/tests/sign-in.spec.ts:5:5 › a student signs in with the university number and lands on Today (5.4s)
+  ✓   5 [phone] › e2e/tests/sign-in.spec.ts:12:5 › a wrong password shows an Arabic error and stays on login (4.1s)
+  ✓   6 [phone] › e2e/tests/sign-in.spec.ts:21:5 › staff land on their role's home (4.5s)
+(node:21283) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   7 [desktop] › e2e/tests/access.spec.ts:7:5 › a student opening staff pages sees «غير مسموح», not empty dashboards (13.0s)
+  ✓   8 [desktop] › e2e/tests/apply.spec.ts:7:5 › a visitor verifies the email, fills the application, uploads documents and submits (10.1s)
+  -   9 [desktop] › e2e/tests/exam.spec.ts:9:5 › a student takes the open quiz, submits it and sees the auto-graded result
+  ✓  10 [desktop] › e2e/tests/sign-in.spec.ts:5:5 › a student signs in with the university number and lands on Today (4.5s)
+  ✓  11 [desktop] › e2e/tests/sign-in.spec.ts:12:5 › a wrong password shows an Arabic error and stays on login (3.9s)
+  ✓  12 [desktop] › e2e/tests/sign-in.spec.ts:21:5 › staff land on their role's home (6.0s)
+
+  1 skipped
+  11 passed (2.9m)

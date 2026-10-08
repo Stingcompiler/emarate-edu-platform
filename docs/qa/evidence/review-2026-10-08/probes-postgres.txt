@@ -1,0 +1,12 @@
+R01: submitted -> draft; submitted_at erased by stale autosave
+.R02: stale rejection deleted an already approved account
+.R03: close overwrote invalidated with auto_submitted/passed=True
+.R04: dropped enrollment still writes exam answer via HTTP 204
+.2026-10-08 17:55:04,610 WARNING django.request Unauthorized: /api/v1/auth/refresh
+R05: password reset revoked refresh but old access cookie still authenticates
+.R06: two default scales accepted, second ignored by for_program
+.R07: decrypt accepted a truncated backup (4 of 12 original bytes)
+.R08: database rollback restored document row but original file was deleted
+.R11: shuffled first question rejected after numeric-ID replay advanced furthest position
+.
+9 passed in 11.00s
