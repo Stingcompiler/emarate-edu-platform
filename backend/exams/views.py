@@ -18,6 +18,7 @@ from .models import Exam, ExamAttempt, Question, StudentAnswer
 from .question_types import REGISTRY
 from .serializers import (
     AnswerInputSerializer,
+    AttemptClockSerializer,
     AttemptSerializer,
     AttemptSummarySerializer,
     ExamResultSerializer,
@@ -267,6 +268,13 @@ class AttemptViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
             _meta(request), self._own(), int(question_id), data.validated_data["answer"]
         )
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @extend_schema(responses=AttemptClockSerializer)
+    @action(detail=True, methods=["get"])
+    def clock(self, request, public_id=None):
+        """Status and deadline only: the exam page polls it, so a teacher's extension or a
+        close reaches a running attempt (review 2026-10-08, R10)."""
+        return Response(AttemptClockSerializer(self._own()).data)
 
     @extend_schema(request=None, responses=AttemptSerializer)
     @action(detail=True, methods=["post"])

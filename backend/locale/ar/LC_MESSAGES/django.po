@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ecst-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-04 17:29+0200\n"
+"POT-Creation-Date: 2026-10-08 23:22+0200\n"
 "Language: ar\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -389,6 +389,9 @@ msgstr "انتهى الوقت."
 
 msgid "Your student record is suspended."
 msgstr "قيدك موقوف حاليًا؛ لا يمكن متابعة الاختبار."
+
+msgid "You are no longer enrolled in this course."
+msgstr "لم تعد مسجلًا في هذه المادة."
 
 msgid "Going back is not allowed in this exam."
 msgstr "الرجوع إلى الأسئلة السابقة غير مسموح في هذا الاختبار."

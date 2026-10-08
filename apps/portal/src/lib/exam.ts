@@ -99,6 +99,67 @@ export function pendingStore(attemptId: string) {
   };
 }
 
+/** Why the server refused an answer for good (a retry cannot change it). */
+export type RejectReason = "time_up" | "no_backtrack" | "closed" | "not_allowed" | "invalid";
+
+/**
+ * Answers the server refused for good (review 2026-10-08, R09): they leave the send queue,
+ * but the page keeps them here so the student is told, before and after submitting, that
+ * they did not count. A later accepted save of the same question removes it.
+ */
+export function rejectedStore(attemptId: string) {
+  const key = `exam:${attemptId}:rejected`;
+  let memory: Record<string, RejectReason> = {};
+  try {
+    memory = JSON.parse(localStorage.getItem(key) || "{}") as Record<string, RejectReason>;
+  } catch {
+    memory = {};
+  }
+  const write = () => {
+    try {
+      if (Object.keys(memory).length) localStorage.setItem(key, JSON.stringify(memory));
+      else localStorage.removeItem(key);
+    } catch {
+      /* the page still shows them from memory */
+    }
+  };
+  return {
+    read: (): Record<string, RejectReason> => ({ ...memory }),
+    add(qid: number | string, reason: RejectReason) {
+      memory = { ...memory, [qid]: reason };
+      write();
+    },
+    remove(qid: number | string) {
+      if (!(qid in memory)) return;
+      const next = { ...memory };
+      delete next[qid];
+      memory = next;
+      write();
+    },
+    clear() {
+      memory = {};
+      write();
+    },
+  };
+}
+
+/** The server's reason code for a refused save, as the page explains it. */
+export function rejectReason(status: number, code: unknown): RejectReason {
+  if (status === 409) return "closed";
+  if (status === 403) return "not_allowed";
+  if (code === "time_up") return "time_up";
+  if (code === "no_backtrack") return "no_backtrack";
+  return "invalid";
+}
+
+export const REJECT_LABEL: Record<RejectReason, string> = {
+  time_up: "وصلت بعد انتهاء الوقت",
+  no_backtrack: "لا يُسمح بالرجوع إلى سؤال سابق في هذا الاختبار",
+  closed: "أُغلقت المحاولة قبل وصولها",
+  not_allowed: "لم يعد بإمكانك الإجابة في هذا الاختبار",
+  invalid: "لم يقبلها الخادم",
+};
+
 export function flagsStore(attemptId: string) {
   const key = `exam:${attemptId}:flags`;
   return {

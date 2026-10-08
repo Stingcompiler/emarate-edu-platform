@@ -13,6 +13,7 @@ from django.utils import timezone
 from django.utils.translation import gettext
 from rest_framework.exceptions import NotFound, PermissionDenied, ValidationError
 
+from academic.models import Enrollment
 from audit.services import RequestMeta, record, snapshot
 from core.errors import Conflict, Invalid
 from learning.services import require
@@ -282,6 +283,13 @@ def _save_answer(attempt: ExamAttempt, question_id: int, answer) -> StudentAnswe
     if attempt.student_record.status != StudentRecord.Status.ACTIVE:
         # Suspended mid-exam: no more answers (review C2); what was saved stays.
         raise PermissionDenied(gettext("Your student record is suspended."))
+    if not Enrollment.objects.filter(
+        offering_id=attempt.exam.offering_id,
+        student_record=attempt.student_record,
+        status=Enrollment.Status.ACTIVE,
+    ).exists():
+        # Withdrawn from the course mid-exam: same rule as a suspension (review 2026-10-08, R04).
+        raise PermissionDenied(gettext("You are no longer enrolled in this course."))
     # Checked after the lock: a submit that committed first wins and this save is refused.
     _open_for_writing(attempt, now)
     if question_id not in attempt.question_order:

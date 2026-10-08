@@ -40,7 +40,10 @@ export function ExamResult() {
   });
   const r = result.data;
   // Answers the page could not deliver before the deadline (TakeExam, review C6).
-  const unsent = (useLocation().state as { unsent?: number } | null)?.unsent ?? 0;
+  const state = useLocation().state as { unsent?: number; rejected?: number } | null;
+  const unsent = state?.unsent ?? 0;
+  // Answers the server refused for good (late, no going back, attempt closed; review R09).
+  const rejected = state?.rejected ?? 0;
 
   return (
     <PortalShell title="نتيجة الاختبار" back={{ label: "الاختبارات", to: "/exams" }}>
@@ -49,6 +52,17 @@ export function ExamResult() {
           <Notice tone="warning">
             انتهى الوقت قبل أن تصل {count(unsent, N.answer)} إلى الخادم بسبب الاتصال؛ لم تُحتسب.
             راجع أستاذ المادة إن كان الانقطاع خارجًا عن إرادتك.
+          </Notice>
+        </div>
+      )}
+      {rejected > 0 && (
+        <div className="mb-4">
+          <Notice tone="warning">
+            {rejected === 1
+              ? "لم يقبل الخادم إجابة واحدة"
+              : `لم تُقبل ${count(rejected, N.answer)}`}{" "}
+            من إجاباتك (وصلت بعد انتهاء الوقت أو بعد تجاوز السؤال أو بعد إغلاق المحاولة)؛ لم تُحتسب.
+            راجع أستاذ المادة إن رأيت ذلك خطأ.
           </Notice>
         </div>
       )}
