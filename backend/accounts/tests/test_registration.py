@@ -159,3 +159,26 @@ def test_registered_student_cannot_register_twice(api, django_capture_on_commit_
     mail.outbox.clear()
     _start(api, django_capture_on_commit_callbacks, "26-IT-0001", "أحمد محمد علي", "new@x.test")
     assert mail.outbox == []
+
+
+def test_a_stale_rejection_cannot_delete_an_approved_account(make_user, make_student, it_program):
+    """Review 2026-10-08 R02: a rejection decided on a page read before the approval gets 409;
+    the approved account stays."""
+    from accounts import services
+    from audit.services import RequestMeta
+    from core.errors import Conflict
+
+    manager = make_user(Role.HEAD_REGISTRAR)
+    pending = make_user(is_active=False)
+    record_ = make_student(it_program, "R02-0001", user=pending)
+    request = RegistrationRequest.objects.create(
+        student_record=record_, email=pending.email, status="pending_approval"
+    )
+    stale = RegistrationRequest.objects.select_related("student_record__user").get(pk=request.pk)
+    services.decide_registration(RequestMeta(actor=manager), request, True)
+    with pytest.raises(Conflict):
+        services.decide_registration(RequestMeta(actor=manager), stale, False, "رفض متأخر")
+    pending.refresh_from_db()
+    record_.refresh_from_db()
+    assert pending.is_active and record_.user_id == pending.pk
+    assert RegistrationRequest.objects.get(pk=request.pk).status == "approved"

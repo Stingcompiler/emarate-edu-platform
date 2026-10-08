@@ -432,3 +432,32 @@ def test_a_suspended_student_cannot_start_or_keep_answering(api, classroom, exam
         question_id=question
     )
     assert stored.answer is True
+
+
+def test_closing_the_exam_keeps_an_invalidated_attempt(classroom, exam):
+    """Review 2026-10-08 R03: an attempt invalidated after the close read its list stays
+    invalidated (and failed); the close no longer finishes it from a stale copy."""
+    from unittest.mock import patch
+
+    from audit.services import RequestMeta
+
+    attempt = services.start(RequestMeta(actor=classroom.student), exam)
+    question = exam.questions.get(type="true_false")
+    services.save_answer(RequestMeta(actor=classroom.student), attempt, question.pk, True)
+    real_locked = services._locked
+    invalidated = []
+
+    def invalidate_first(row):
+        # The teacher's invalidation commits between the close's list and its write.
+        if not invalidated:
+            invalidated.append(row.pk)
+            services.invalidate(
+                RequestMeta(actor=classroom.teacher), ExamAttempt.objects.get(pk=row.pk), "غش"
+            )
+        return real_locked(row)
+
+    with patch.object(services, "_locked", side_effect=invalidate_first):
+        services.close(RequestMeta(actor=classroom.teacher), exam)
+    attempt.refresh_from_db()
+    assert attempt.status == "invalidated" and attempt.passed is False
+    assert attempt.invalidation_reason == "غش"
