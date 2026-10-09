@@ -17,6 +17,7 @@ from django.contrib.auth import authenticate, password_validation
 from django.contrib.auth.hashers import make_password
 from django.core.cache import cache
 from django.db import IntegrityError, transaction
+from django.db.models import F
 from django.utils import timezone
 from django.utils.translation import gettext
 from rest_framework.exceptions import PermissionDenied, ValidationError
@@ -302,12 +303,29 @@ def end_refresh_grace(user_id) -> None:
     cache.set(REFRESH_CUT.format(user_id), time.time(), timeout=120)
 
 
+def issue_tokens(user: User):
+    """A refresh token (and through it the access token) stamped with the account's token
+    version, so raising the version ends both."""
+    from rest_framework_simplejwt.tokens import RefreshToken
+
+    refresh = RefreshToken.for_user(user)
+    refresh[TOKEN_VERSION_CLAIM] = user.token_version
+    return refresh
+
+
+TOKEN_VERSION_CLAIM = "tv"  # noqa: S105 (a claim name, not a secret)
+
+
 def _revoke_refresh_tokens(user: User) -> None:
-    """Sign the user out everywhere (after a password change)."""
+    """Sign the user out everywhere (after a password change, or when disabled): refresh tokens
+    are blacklisted and the token version goes up, which also ends the access tokens still
+    open (review 2026-10-08, R05)."""
     from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken, OutstandingToken
 
     for token in OutstandingToken.objects.filter(user=user):
         BlacklistedToken.objects.get_or_create(token=token)
+    User.objects.filter(pk=user.pk).update(token_version=F("token_version") + 1)
+    user.refresh_from_db(fields=["token_version"])
     end_refresh_grace(user.pk)
 
 

@@ -164,6 +164,25 @@ class GradingScaleSerializer(serializers.ModelSerializer):
         fields = ["id", "program", "ranges"]
         read_only_fields = ["id"]
 
+    def validate(self, attrs):
+        # One scale per programme and one default (program empty), checked here so a second
+        # one is a clear 400, not a database error (review 2026-10-08, R06).
+        program = attrs.get("program", self.instance.program if self.instance else None)
+        others = GradingScale.objects.filter(program=program)
+        if self.instance is not None:
+            others = others.exclude(pk=self.instance.pk)
+        if others.exists():
+            raise serializers.ValidationError(
+                {
+                    "program": [
+                        gettext("This programme already has a scale; edit it instead.")
+                        if program is not None
+                        else gettext("A default scale exists already; edit it instead.")
+                    ]
+                }
+            )
+        return attrs
+
     def validate_ranges(self, value):
         if not any(band["min"] == 0 for band in value):
             raise serializers.ValidationError(gettext("Include a band starting at 0."))

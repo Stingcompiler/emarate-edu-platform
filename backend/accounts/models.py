@@ -59,6 +59,9 @@ class User(PublicIdModel, AbstractUser):
     academic_title_ar = models.CharField(max_length=100, blank=True)
     academic_title_en = models.CharField(max_length=100, blank=True)
     last_seen = models.DateTimeField(null=True, blank=True)
+    # Carried in every token as «tv»; raising it (password reset, account disabled) ends the
+    # sessions at once, open access tokens included (review 2026-10-08, R05).
+    token_version = models.PositiveIntegerField(default=0)
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ["full_name_ar"]
