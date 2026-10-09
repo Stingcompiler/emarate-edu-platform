@@ -8,6 +8,27 @@
 
 **المرجع الوظيفي:** `docs/03-roles-and-permissions.md`، ثم تعليمات المشروع وتصميم النظام والمراجعات السابقة.
 
+## حالة الإصلاح — 9 أكتوبر 2026
+
+تحقّقنا من كل البنود قبل إصلاحها: نجحت مجسات الخادم الـ 9 على SQLite وPostgreSQL، ومجسات الواجهة الـ 3، أي أن الأخطاء ثابتة. ثم أصبح كل مجس اختبارًا دائمًا يتوقع السلوك الصحيح، ويفشل على النسخة القديمة.
+
+| البند | الإصلاح | طلب الدمج | اختبار الانحدار |
+|---|---|---|---|
+| R11 | المزامنة بترتيب أسئلة المحاولة | #119 | `TakeExam.test.tsx` (R11)، `test_a_replay_in_the_attempts_order_passes_no_backtrack` |
+| R09 | الإجابة المرفوضة تُحفظ وتظهر للطالب تحت السؤال وفي نافذة التسليم وصفحة النتيجة | #119 | `TakeExam.test.tsx` (R09) |
+| R10 | نقطة `clock` خفيفة تُستطلع كل 30 ثانية، وتُسأل قبل التسليم التلقائي | #119 | `TakeExam.test.tsx` (R10 ×2)، `test_the_exam_page_sees_an_extension_and_a_close` |
+| R04 | حفظ الإجابة يتطلب تسجيلًا نشطًا في المادة | #119 | `test_a_withdrawn_student_cannot_keep_answering` |
+| R01 | قفل الصف وإعادة قراءته في `update`/`submit`؛ الحفظ المتأخر يأخذ 409 | #120 | `test_a_late_autosave_cannot_reopen_a_submitted_application` |
+| R02 | قفل طلب التسجيل؛ لا يُحذف حساب مفعّل | #121 | `test_a_stale_rejection_cannot_delete_an_approved_account` |
+| R03 | `invalidate` والإغلاق اليدوي تحت قفل المحاولة نفسه | #121 | `test_closing_the_exam_keeps_an_invalidated_attempt` |
+| R08 | الملف الجديد يُخزَّن أولًا ويُحذف القديم بعد الالتزام | #122 | `test_replacing_a_document_keeps_the_original_until_the_new_one_is_saved` |
+| R07 | الصيغة `ECSTBAK2`: سجلات مرقّمة بمعرّف الملف وسجل ختام بالطول | #122 | `test_a_cut_or_changed_backup_is_refused` |
+| R05 | `token_version` في كل رمز؛ إعادة التعيين والتعطيل يرفعانه | #123 | `test_password_reset_signs_out_everywhere`، `test_disabling_an_account_ends_its_open_session` |
+| R06 | فهرس فريد على `COALESCE(program, 0)` ورسالة 400 | #123 | `test_only_one_default_grading_scale` |
+| الاعتماديات | `source-map-js` 1.2.2 و`sharp` 0.35.5 (overrides)؛ `pnpm audit` نظيف | #124 | — |
+
+ما يبقى على المالك أو على بيئة التشغيل (البند 7 من الخطة): تدريب استعادة من نسخة `ECSTBAK2`، ونسخة خارج الخادم، واختبار حمل معزول، والأجهزة الحقيقية.
+
 ## النتيجة التنفيذية
 
 المسارات المعتادة تعمل في الاختبارات، لكن توجد **11 مشكلة سلوكية مثبتة** خارج تغطية الاختبارات الأصلية، منها خمس ذات أولوية عالية تؤثر في طلبات القبول أو صلاحية كتابة إجابات الاختبار أو حفظها ووقتها. كذلك أعاد فحص اعتماديات الواجهة **تنبيهين أمنيين بتصنيف High**؛ وجود الحزمتين مثبت، أما استغلالهما في المنصة فلم يُثبت.
