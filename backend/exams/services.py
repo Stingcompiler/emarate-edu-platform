@@ -161,7 +161,11 @@ def close(meta: RequestMeta, exam: Exam) -> Exam:
         raise Conflict(gettext("Only a published exam can be closed."), code="not_published")
     with transaction.atomic():
         for attempt in exam.attempts.filter(status=A.IN_PROGRESS):
-            _finish(attempt, A.AUTO_SUBMITTED)
+            # Re-checked under the lock: an attempt invalidated or submitted since the list
+            # was read keeps its state (review 2026-10-08, R03).
+            locked = _locked(attempt)
+            if locked.status == A.IN_PROGRESS:
+                _finish(locked, A.AUTO_SUBMITTED)
         exam.status = Exam.Status.CLOSED
         exam.save(update_fields=["status", "updated_at"])
         record(meta, "exam.close", exam, department_id=_dept(exam))
@@ -461,6 +465,7 @@ def invalidate(meta: RequestMeta, attempt: ExamAttempt, reason: str) -> ExamAtte
     if not reason.strip():
         raise ValidationError({"reason": [gettext("A reason is required.")]})
     with transaction.atomic():
+        attempt = _locked(attempt)  # the same lock as save, submit, close and extend (R03)
         attempt.status = A.INVALIDATED
         attempt.invalidation_reason = reason
         attempt.passed = False
