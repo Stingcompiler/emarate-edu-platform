@@ -1,0 +1,11 @@
+# Installed as /etc/systemd/system/ecst-autodeploy.timer; `systemctl enable --now` it.
+[Unit]
+Description=ECST: look for a new main that passed CI every two minutes
+
+[Timer]
+OnBootSec=5min
+OnUnitInactiveSec=2min
+Persistent=false
+
+[Install]
+WantedBy=timers.target

@@ -1,0 +1,16 @@
+# Installed as /etc/systemd/system/ecst-autodeploy.service (docs/runbook.md §3, "Auto-deploy").
+[Unit]
+Description=ECST: deploy main once CI has passed on it
+After=network-online.target
+Wants=network-online.target
+OnFailure=ecst-alert@%n.service
+
+[Service]
+Type=oneshot
+ExecStart=/opt/ecst/bin/autodeploy
+# Builds share the machine with other projects: lower priority, at most two of the cores.
+Nice=10
+IOSchedulingClass=best-effort
+IOSchedulingPriority=7
+CPUQuota=200%
+TimeoutStartSec=40min
