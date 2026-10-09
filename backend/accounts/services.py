@@ -153,10 +153,23 @@ def decide_registration(
     student = request.student_record
     if not rbac.can(meta.actor, "registration.approve", student.department_id):
         raise PermissionDenied()
+    already = Conflict(gettext("This request was already decided."), code="already_decided")
     if request.status != RegistrationRequest.Status.PENDING_APPROVAL:
-        raise Conflict(gettext("This request was already decided."), code="already_decided")
+        raise already
     with transaction.atomic():
+        # Locked and re-read: two managers deciding the same request at once, or a stale page,
+        # must not turn an approval into a rejection that deletes a working account
+        # (review 2026-10-08, R02).
+        list(
+            RegistrationRequest.objects.select_for_update().filter(pk=request.pk).values_list("pk")
+        )
+        request.refresh_from_db()
+        student.refresh_from_db()
+        if request.status != RegistrationRequest.Status.PENDING_APPROVAL:
+            raise already
         user = student.user
+        if user is None or user.is_active:
+            raise already  # the account was approved or removed meanwhile
         request.decided_by = meta.actor
         request.decided_at = timezone.now()
         request.reason = reason
