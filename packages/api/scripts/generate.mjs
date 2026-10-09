@@ -18,11 +18,13 @@ mkdirSync(outDir, { recursive: true });
 
 const run = (cmd, args, cwd) => execFileSync(cmd, args, { cwd, stdio: "inherit" });
 
+// API_SCHEMA_PYTHON runs the schema with a given interpreter instead of `uv run` (the server's
+// auto-deploy builds the portal with a throwaway environment of the release being deployed).
+const python = process.env.API_SCHEMA_PYTHON;
 run(
-  "uv",
+  python ?? "uv",
   [
-    "run",
-    "python",
+    ...(python ? [] : ["run", "python"]),
     "manage.py",
     "spectacular",
     "--format",

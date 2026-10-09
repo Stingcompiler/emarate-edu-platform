@@ -53,7 +53,7 @@
 
 ### على خادم خاص (VPS)
 
-Render لا يُستعمل هنا. النشر بسكربت واحد من جهاز المطوّر، يبني `origin/main` بالضبط لا ملفات العمل المحلية:
+Render لا يُستعمل هنا. **كل دمج في `main` يُنشر تلقائيًا** بعد نجاح CI عليه (القسم التالي). السكربت اليدوي يبقى للنشر عند الحاجة وللتراجع، ويبني `origin/main` بالضبط لا ملفات العمل المحلية:
 
 ```bash
 export ECST_SSH=user@host ECST_SSH_KEY=~/.ssh/<key>     # عنوان الخادم لا يُكتب في المستودع (عام)
@@ -71,10 +71,34 @@ scripts/deploy-vps.sh rollback backend   # أو portal | site | all
   - إن فشل أيٌّ منها أُعيد الإصدار السابق تلقائيًا، وخرج السكربت بخطأ دون تسجيل.
 - **الموقع:** لا يُسجَّل إلا إذا نجح بناؤه.
 - `rollback` يعيدها في خطوة واحدة.
-- السكربت الحالي لا يثبت الاعتماديات الجديدة في venv ولا يجعل فحص HTTP شرطًا لنجاح النشر (تقرير المراجعة A12/A13). قبل نشر تغيير اعتماديات يلزم مزامنة بيئة staging واختبار النشر والتراجع فيها؛ لا يُعد ملف `DEPLOYED` وحده دليلًا على سلامة الخدمة.
 - **الترحيلات لا تُعكس تلقائيًا:**
   - اعكسها بـ `migrate <app> <previous>` قبل التراجع؛
   - أو استعد نسخة احتياطية (§5) إن حذف الترحيل بيانات.
+
+### النشر التلقائي على الـ VPS
+
+الخادم هو من يسحب: يقرأ المستودع العام فقط، فلا مفتاح ولا سر في GitHub يصل إليه.
+
+- **المؤقّت** `ecst-autodeploy.timer` يشغّل `/opt/ecst/bin/autodeploy` (نسخة من `scripts/vps/autodeploy.sh`) كل دقيقتين.
+- **متى ينشر:** حين يكون في `main` إيداع غير المنشور، ونجحت عليه وظائف CI الأربع (يسأل GitHub عن check runs). ما دامت تعمل ينتظر؛ وإن فشلت إحداها يتخطى الإيداع.
+- **كيف:**
+  1. يبني كل شيء أولًا في مجلد مؤقت: أرشيفا الخادم والموقع، والبوابة ببيئة Python مؤقتة من الإيداع نفسه (لمخطط الـ API).
+  2. ثم يطلق `scripts/vps/release.sh` من ذلك الإيداع، وهي الخطوة نفسها في النشر اليدوي: الترحيلات وفحص الصحة وإعادة الإصدار السابق إن فشل الخادم.
+  3. ثم يحدّث نفسه.
+- **مرة واحدة لكل إيداع:** النتيجة في `/opt/ecst/deployed/autodeploy` (`deployed` أو `failed <الخطوة>` أو `ci-failed`). الفشل يرسل تنبيهًا (`ecst-alert@`)، ولا يُعاد مع الإيداع نفسه: ادمج إصلاحًا، أو انشر يدويًا بعد الإصلاح.
+- **لا يتزاحمان:** النشر اليدوي والتلقائي يتناوبان على قفل واحد (`/run/ecst-release.lock`).
+- **حصة الخادم المشترك:** البناء بأولوية منخفضة وبحد نواتين (`CPUQuota=200%`).
+- **الإعدادات:** في `/opt/ecst/autodeploy.env` على الخادم (`VITE_SITE_URL`)، لا في المستودع.
+
+```bash
+systemctl list-timers ecst-autodeploy.timer        # موعد الفحص القادم
+cat /opt/ecst/deployed/autodeploy                  # آخر محاولة ونتيجتها
+journalctl -u ecst-autodeploy -n 50 --no-pager     # تفاصيلها
+sudo systemctl stop ecst-autodeploy.timer          # إيقاف مؤقت (start لإعادته)
+sudo AUTODEPLOY_DRY_RUN=1 AUTODEPLOY_REF=<branch> /opt/ecst/bin/autodeploy   # هل يُبنى فرع؟ بلا نشر
+```
+
+**التثبيت** (مرة واحدة، بصلاحية root): انسخ `scripts/vps/autodeploy.sh` إلى `/opt/ecst/bin/autodeploy`، ووحدتي `scripts/vps/systemd/` إلى `/etc/systemd/system/`، واكتب `/opt/ecst/autodeploy.env`، ثم `systemctl daemon-reload && systemctl enable --now ecst-autodeploy.timer`.
 
 ## 4. التحقق بعد النشر
 
