@@ -388,6 +388,7 @@ function SiteSettingsForm() {
     map_url: "",
     hero_image: "",
     share_image: "",
+    logo: "",
   });
   const [figures, setFigures] = useState<Figure[]>([]);
   useEffect(() => {
@@ -409,11 +410,13 @@ function SiteSettingsForm() {
         map_url: s.map_url ?? "",
         hero_image: s.hero_image ?? "",
         share_image: s.share_image ?? "",
+        logo: s.logo ?? "",
       });
       setFigures(((s.figures as Figure[] | undefined) ?? []).map((f) => ({ ...f })));
     }
   }, [settings.data]);
   const toast = useToast();
+  const client = useQueryClient();
   const save = useMutation({
     mutationFn: async () => {
       const body = {
@@ -421,14 +424,20 @@ function SiteSettingsForm() {
         founded_year: form.founded_year ? Number(form.founded_year) : null,
         hero_image: form.hero_image || null,
         share_image: form.share_image || null,
+        logo: form.logo || null,
         figures,
       };
       const { data, error } = await api.PATCH("/api/v1/content/site-settings", {
         body: body as never,
       });
       if (!data) throw error;
+      return data;
     },
-    onSuccess: () => toast("حُفظت إعدادات الموقع"),
+    onSuccess: (saved) => {
+      // The portal's logo follows at once (the public copy may be cached for a minute).
+      client.setQueryData(["public", "site"], saved);
+      toast("حُفظت إعدادات الموقع");
+    },
   });
   const set = (patch: Partial<typeof form>) => setForm((f) => ({ ...f, ...patch }));
   return (
@@ -600,6 +609,7 @@ function SiteSettingsForm() {
           <Card>
             {(
               [
+                ["logo", "الشعار — في الموقع والبوابة ونتائج البحث؛ صورة مربعة (PNG بخلفية شفافة)"],
                 ["hero_image", "صورة الصفحة الرئيسية (الحرم أو الطلاب)"],
                 ["share_image", "صورة المشاركة (واتساب وفيسبوك)؛ الشعار إن تُركت"],
               ] as const
@@ -616,7 +626,7 @@ function SiteSettingsForm() {
                       <img
                         src={picked.url}
                         alt=""
-                        className="size-12 shrink-0 rounded-lg object-cover"
+                        className={`size-12 shrink-0 rounded-lg ${key === "logo" ? "bg-surface-alt object-contain p-1" : "object-cover"}`}
                       />
                     )}
                     <select
@@ -624,7 +634,7 @@ function SiteSettingsForm() {
                       onChange={(e) => set({ [key]: e.target.value })}
                       className="min-h-11 w-full rounded-lg border border-border bg-surface px-3 text-sm"
                     >
-                      <option value="">بلا صورة</option>
+                      <option value="">{key === "logo" ? "الشعار الافتراضي" : "بلا صورة"}</option>
                       {(media.data ?? []).map((m) => (
                         <option key={m.public_id} value={m.public_id}>
                           {m.alt_ar || m.url.split("/").pop()}

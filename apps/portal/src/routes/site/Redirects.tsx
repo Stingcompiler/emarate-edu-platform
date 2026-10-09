@@ -63,29 +63,47 @@ export function Redirects() {
           </SideNote>
         }
       >
-        <Card className="flex flex-wrap items-center gap-2 p-3">
-          <input
-            dir="ltr"
-            value={from}
-            onChange={(e) => setFrom(e.target.value)}
-            placeholder="/old-path"
-            aria-label="من المسار"
-            className="min-h-10 flex-1 rounded-lg border border-border bg-surface px-3 text-sm"
-          />
-          <span className="text-text-muted" aria-hidden>
-            ←
-          </span>
-          <input
-            dir="ltr"
-            value={to}
-            onChange={(e) => setTo(e.target.value)}
-            placeholder="/new-path"
-            aria-label="إلى المسار"
-            className="min-h-10 flex-1 rounded-lg border border-border bg-surface px-3 text-sm"
-          />
-          <Button onClick={() => add.mutate()} disabled={!from || !to || add.isPending}>
-            + تحويل
-          </Button>
+        {/* Phones: the two paths stacked with their labels, the button full width.
+            Desktop (board DesktopSiteRedirects): one row, old → new. */}
+        <Card className="p-3">
+          <form
+            className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)_auto] lg:items-end"
+            onSubmit={(event) => {
+              event.preventDefault();
+              if (from && to && !add.isPending) add.mutate();
+            }}
+          >
+            <label className="block min-w-0">
+              <span className="mb-1 block text-xs text-text-muted">من (الرابط القديم)</span>
+              <input
+                dir="ltr"
+                value={from}
+                onChange={(e) => setFrom(e.target.value)}
+                placeholder="/old-path"
+                className="min-h-11 w-full rounded-lg border border-border bg-surface px-3 text-sm"
+              />
+            </label>
+            <span aria-hidden className="hidden pb-3 text-text-muted lg:block">
+              ←
+            </span>
+            <label className="block min-w-0">
+              <span className="mb-1 block text-xs text-text-muted">إلى (الرابط الجديد)</span>
+              <input
+                dir="ltr"
+                value={to}
+                onChange={(e) => setTo(e.target.value)}
+                placeholder="/new-path"
+                className="min-h-11 w-full rounded-lg border border-border bg-surface px-3 text-sm"
+              />
+            </label>
+            <Button
+              type="submit"
+              className="min-h-11 w-full lg:w-auto"
+              disabled={!from || !to || add.isPending}
+            >
+              + تحويل
+            </Button>
+          </form>
         </Card>
         {add.isError && (
           <div className="mt-3">
@@ -94,11 +112,25 @@ export function Redirects() {
         )}
         <Card className="mt-4 divide-y divide-border-soft">
           {paged.shown.map((r) => (
-            <div key={r.id} className="flex items-center gap-3 px-4 py-3 text-sm" dir="ltr">
-              <span className="min-w-0 flex-1 truncate font-mono text-text">
-                {r.from_path} → {r.to_path}
+            <div key={r.id} className="flex items-start gap-3 px-4 py-3 text-sm lg:items-center">
+              {/* Both paths in full (they wrap): on a phone the destination used to be cut off. */}
+              <div
+                className="min-w-0 flex-1 font-mono lg:flex lg:items-baseline lg:gap-2"
+                dir="ltr"
+              >
+                <p className="break-all text-text">
+                  <span className="sr-only">من </span>
+                  {r.from_path}
+                </p>
+                <p className="mt-1 flex gap-1.5 text-text-muted lg:mt-0">
+                  <span aria-hidden>→</span>
+                  <span className="sr-only">إلى </span>
+                  <span className="min-w-0 break-all">{r.to_path}</span>
+                </p>
+              </div>
+              <span className="shrink-0 pt-3 text-xs text-text-muted lg:pt-0">
+                {count(r.hits, N.time)}
               </span>
-              <span className="text-xs text-text-muted">{count(r.hits, N.time)}</span>
               <button
                 type="button"
                 aria-label="حذف"

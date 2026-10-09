@@ -92,6 +92,8 @@ export type Site = {
   hero_image_url?: string | null;
   hero_image_alt_ar?: string;
   share_image_url?: string | null;
+  /** The college's logo from the site settings; the built-in mark when unset. */
+  logo_url?: string | null;
 };
 export type Intake = {
   id: number;

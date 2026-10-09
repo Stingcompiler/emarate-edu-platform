@@ -45,6 +45,11 @@ class SiteSettings(SingletonModel):
     hero_image = models.ForeignKey(
         "MediaAsset", on_delete=models.SET_NULL, null=True, blank=True, related_name="+"
     )
+    # The college's logo in the site header and footer, the portal and search results; the
+    # built-in mark (/favicon.svg) while unset. A square image reads best.
+    logo = models.ForeignKey(
+        "MediaAsset", on_delete=models.SET_NULL, null=True, blank=True, related_name="+"
+    )
     # The picture shown when a page is shared (WhatsApp, Facebook…); the logo if unset.
     share_image = models.ForeignKey(
         "MediaAsset", on_delete=models.SET_NULL, null=True, blank=True, related_name="+"
