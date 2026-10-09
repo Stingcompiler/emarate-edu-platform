@@ -10,3 +10,7 @@ minimumReleaseAgeExclude:
   - http-cache-semantics@4.3.0
 overrides:
   http-cache-semantics: ">=4.3.0"
+  # GHSA-68fv-2mgg-jv7q (source maps, build time) and GHSA-wq5f-xc86-pv6w (sharp's librsvg,
+  # image builds): the fixed releases (review 2026-10-08, dependencies).
+  source-map-js: ">=1.2.2"
+  sharp: ">=0.35.5"
