@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ecst-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-08 23:22+0200\n"
+"POT-Creation-Date: 2026-10-09 10:50+0200\n"
 "Language: ar\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -59,6 +59,9 @@ msgstr "هذا التسجيل غير نشط."
 
 msgid "User is inactive."
 msgstr "الحساب معطَّل."
+
+msgid "Session expired."
+msgstr "انتهت الجلسة."
 
 #, python-format
 msgid "CSRF failed: %(reason)s"
@@ -139,9 +142,6 @@ msgstr "تم"
 msgid "No session."
 msgstr "لا توجد جلسة."
 
-msgid "Session expired."
-msgstr "انتهت الجلسة."
-
 msgid "Only teaching staff appear on the public pages."
 msgstr "الظهور في صفحات الأقسام العامة لأعضاء هيئة التدريس فقط."
 
@@ -176,12 +176,12 @@ msgstr "الحد الأقصى %(limit)s طلبات في دورة القبول."
 msgid "Please try again."
 msgstr "أعد المحاولة."
 
+msgid "Send an object of answers."
+msgstr "أرسل الإجابات في كائن."
+
 msgid ""
 "The application can only change while it is a draft or missing documents."
 msgstr "لا يتغير الطلب إلا وهو مسودة أو بمستندات ناقصة."
-
-msgid "Send an object of answers."
-msgstr "أرسل الإجابات في كائن."
 
 msgid "Documents can be added while the application is open."
 msgstr "تُضاف المستندات ما دام الطلب مفتوحًا."
@@ -716,6 +716,12 @@ msgstr "له نتيجة بالفعل؛ اطلب تعديلًا بدلًا من �
 
 msgid "Give a new score or status."
 msgstr "أدخل درجة أو حالة جديدة."
+
+msgid "This programme already has a scale; edit it instead."
+msgstr "لهذا البرنامج سلّم تقديرات بالفعل؛ عدّله بدل إضافة سلّم جديد."
+
+msgid "A default scale exists already; edit it instead."
+msgstr "يوجد سلّم تقديرات افتراضي بالفعل؛ عدّله بدل إضافة سلّم جديد."
 
 msgid "Include a band starting at 0."
 msgstr "أضف فئة تبدأ من 0."

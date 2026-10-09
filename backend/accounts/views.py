@@ -110,7 +110,7 @@ class LoginView(APIView):
         user.last_login = timezone.now()
         user.save(update_fields=["last_login"])
         response = Response(MeSerializer(user).data)
-        _set_auth_cookies(response, RefreshToken.for_user(user))
+        _set_auth_cookies(response, services.issue_tokens(user))
         return response
 
 
@@ -128,6 +128,8 @@ class RefreshView(APIView):
         try:
             old = RefreshToken(raw)
             user = User.objects.get(pk=old["user_id"], is_active=True)
+            if old.get(services.TOKEN_VERSION_CLAIM, 0) != user.token_version:
+                raise TokenError("revoked")  # signed out everywhere since it was issued
             old.blacklist()
             cache.set(_ROTATED.format(old["jti"]), (user.pk, time.time()), REFRESH_REUSE_GRACE)
         except (TokenError, User.DoesNotExist):
@@ -139,7 +141,7 @@ class RefreshView(APIView):
                 _clear_auth_cookies(response)
                 return response
         response = Response({"detail": gettext("ok")})
-        _set_auth_cookies(response, RefreshToken.for_user(user))
+        _set_auth_cookies(response, services.issue_tokens(user))
         return response
 
 
@@ -169,7 +171,10 @@ def _just_rotated(raw: str) -> User | None:
     cut = cache.get(services.REFRESH_CUT.format(user_id))
     if cut is not None and cut >= rotated_at:
         return None
-    return User.objects.filter(pk=user_id, is_active=True).first()
+    user = User.objects.filter(pk=user_id, is_active=True).first()
+    if user is None or payload.get(services.TOKEN_VERSION_CLAIM, 0) != user.token_version:
+        return None
+    return user
 
 
 class LogoutView(APIView):

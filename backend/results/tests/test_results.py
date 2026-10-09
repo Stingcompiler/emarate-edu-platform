@@ -336,3 +336,28 @@ def test_a_second_decision_on_a_correction_cannot_reverse_the_first(
     result.refresh_from_db()
     assert correction.status == "approved" and result.score == Decimal("62")
     assert result.version == 2  # one new version, not two
+
+
+def test_only_one_default_grading_scale(api, make_user, it_program):
+    """Review 2026-10-08 R06: a second default (program empty) was accepted and ignored."""
+    from django.db import IntegrityError, transaction
+
+    client = api(make_user(Role.SYSTEM_ADMIN))
+    url = "/api/v1/results/grading-scales"
+    body = {"program": None, "ranges": [{"min": "0", "letter": "F", "points": "0"}]}
+    first = client.post(url, body, format="json")
+    assert first.status_code == 201, first.data
+    again = client.post(
+        url, {"ranges": [{"min": "0", "letter": "A", "points": "4"}]}, format="json"
+    )
+    assert again.status_code == 400 and "program" in again.data["errors"]
+    assert GradingScale.objects.filter(program__isnull=True).count() == 1
+    # Editing the default itself is fine; a programme gets its own scale once.
+    edited = client.put(f"{url}/{first.data['id']}", body, format="json")
+    assert edited.status_code == 200, edited.data
+    own = {**body, "program": it_program.pk}
+    assert client.post(url, own, format="json").status_code == 201
+    assert client.post(url, own, format="json").status_code == 400
+    # The database refuses a second default too, whatever writes it.
+    with pytest.raises(IntegrityError), transaction.atomic():
+        GradingScale.objects.create(program=None, ranges=[])

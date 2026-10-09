@@ -9,6 +9,7 @@ from decimal import Decimal
 from django.conf import settings
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
+from django.db.models.functions import Coalesce
 
 from core.models import PublicIdModel, SingletonModel, TimestampedModel
 
@@ -37,10 +38,11 @@ class GradingScale(TimestampedModel):
     class Meta:
         ordering = ["id"]
         constraints = [
+            # A plain unique on a NULL column never fires (NULLs differ), so a second default
+            # was accepted and silently ignored (review 2026-10-08, R06). COALESCE makes the
+            # default rows collide, on SQLite and PostgreSQL alike.
             models.UniqueConstraint(
-                fields=["program"],
-                condition=models.Q(program__isnull=True),
-                name="one_default_grading_scale",
+                Coalesce("program", models.Value(0)), name="one_scale_per_program_or_default"
             )
         ]
 

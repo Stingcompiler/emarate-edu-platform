@@ -135,7 +135,14 @@ def test_password_reset_signs_out_everywhere(staff, django_capture_on_commit_cal
     replay = APIClient()
     replay.cookies[REFRESH_COOKIE] = old_refresh
     assert replay.post(REFRESH).status_code == 401
-    assert _login(APIClient(), password=new_password).status_code == 200
+    # The access cookie still open in the old browser ends too (review 2026-10-08, R05).
+    gone = client.get("/api/v1/me")
+    assert gone.status_code == 401 and gone.data["code"] == "token_revoked"
+    fresh = APIClient()
+    assert _login(fresh, password=new_password).status_code == 200
+    assert fresh.get("/api/v1/me").status_code == 200  # a new sign-in works at once
+    assert fresh.post(REFRESH).status_code == 200
+    assert fresh.get("/api/v1/me").status_code == 200  # and so does its refreshed token
     # The code is single-use.
     again = APIClient().post(
         "/api/public/password/reset",
@@ -194,3 +201,18 @@ def test_a_non_object_body_is_a_bad_request_not_a_crash(db):
     for path in ("/api/public/password/forgot", "/api/public/registration/start"):
         response = APIClient().post(path, [None, None], format="json")
         assert response.status_code == 400, (path, response.status_code)
+
+
+def test_disabling_an_account_ends_its_open_session(staff, make_user):
+    """Review 2026-10-08 R05: a disabled account's access cookie stopped working only because
+    of is_active; the token version now ends it whatever the account's state."""
+    from accounts import services
+    from audit.services import RequestMeta
+
+    client = APIClient()
+    _login(client)
+    assert client.get("/api/v1/me").status_code == 200
+    admin = make_user(Role.SYSTEM_ADMIN)
+    services.set_active(RequestMeta(actor=admin), staff, False)
+    services.set_active(RequestMeta(actor=admin), staff, True)  # back on: the old cookie stays dead
+    assert client.get("/api/v1/me").status_code == 401
