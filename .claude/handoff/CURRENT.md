@@ -1,4 +1,4 @@
-# Handoff — review 2026-10-08 fixed (R01–R11 + dependencies) — 2026-10-09
+# Handoff — review 2026-10-08 fixed; main auto-deploys — 2026-10-09
 
 ## Where things stand
 
@@ -22,6 +22,14 @@
   2026-10-09: health 200, `/clock` answers 401 without a session, migrations
   `accounts/0006_user_token_version` and `results/0002_one_default_grading_scale` applied
   (production had no grading scales, so the R06 cleanup removed nothing), api and worker active.
+
+- **Auto-deploy (#126, owner request «when it's merged it must be auto deployed»):** the VPS
+  pulls. `ecst-autodeploy.timer` (every 2 min) runs `/opt/ecst/bin/autodeploy`; once the four
+  CI jobs pass on a new `main` commit it builds everything in a temp folder, then runs that
+  commit's `scripts/vps/release.sh` (shared with `deploy-vps.sh`). State in
+  `/opt/ecst/deployed/autodeploy`; failures alert via `ecst-alert@`; settings in
+  `/opt/ecst/autodeploy.env`. Installed and enabled 2026-10-09 (runbook §3).
+  **So: never deploy by hand after a merge; just merge and check the state file.**
 
 ## In progress
 
