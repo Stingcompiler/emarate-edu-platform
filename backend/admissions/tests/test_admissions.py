@@ -480,3 +480,49 @@ def test_a_late_autosave_cannot_reopen_a_submitted_application(
     current = Application.objects.get(public_id=application_id)
     assert current.status == "submitted" and current.submitted_at is not None
     assert current.full_name != "حفظ متأخر"
+
+
+def test_replacing_a_document_keeps_the_original_until_the_new_one_is_saved(
+    api, intake, django_capture_on_commit_callbacks
+):
+    """Review 2026-10-08 R08: the old file was deleted before the new row was created, so a
+    failure in between left the original row pointing at nothing."""
+    from unittest.mock import patch
+
+    from django.core.files.storage import default_storage
+    from django.db import transaction
+
+    from admissions.models import ApplicationDocument
+
+    client = visitor(django_capture_on_commit_callbacks)
+    application_id = client.post("/api/visitor/applications", {"intake": intake.pk}).data[
+        "public_id"
+    ]
+    application = Application.objects.get(public_id=application_id)
+    original = admissions_services.add_document(
+        application.contact, application, "certificate", pdf_upload("original.pdf")
+    )
+    kept = original.file.name
+    with (
+        pytest.raises(RuntimeError),
+        transaction.atomic(),
+        patch.object(
+            ApplicationDocument.objects, "create", side_effect=RuntimeError("storage down")
+        ),
+    ):
+        admissions_services.add_document(
+            application.contact, application, "certificate", pdf_upload("new.pdf")
+        )
+    assert ApplicationDocument.objects.filter(pk=original.pk).exists()
+    assert default_storage.exists(kept)  # the original survived the failure
+
+    # A replacement that succeeds removes the old file only after the commit.
+    with django_capture_on_commit_callbacks(execute=False) as pending:
+        replacement = admissions_services.add_document(
+            application.contact, application, "certificate", pdf_upload("new.pdf")
+        )
+    assert default_storage.exists(kept) and default_storage.exists(replacement.file.name)
+    for callback in pending:
+        callback()
+    assert not default_storage.exists(kept)
+    assert list(application.documents.values_list("pk", flat=True)) == [replacement.pk]

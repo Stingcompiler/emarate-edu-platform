@@ -386,19 +386,35 @@ def add_document(contact, application: Application, doc_type: str, upload) -> Ap
         kind = validation.check(upload, allowed={"pdf", "jpg", "jpeg", "png"}, max_mb=10)
     except validation.UploadError as error:
         raise ValidationError({"file": [str(error)]}) from None
-    with transaction.atomic():
-        # One file per document type: a new upload replaces the old one.
-        for old in application.documents.filter(doc_type=doc_type):
-            old.file.delete(save=False)
-            old.delete()
-        document = ApplicationDocument.objects.create(
-            application=application,
-            doc_type=doc_type[:50],
-            file=upload,
-            name=upload.name[:255],
-            size=upload.size,
-            mime=kind.mime,
-        )
+    document = None
+    try:
+        with transaction.atomic():
+            _locked(application)
+            if application.status not in OPEN_FOR_APPLICANT:
+                raise Conflict(
+                    gettext("Documents can be added while the application is open."),
+                    code="locked",
+                )
+            # One file per document type: a new upload replaces the old one. The new file is
+            # stored first and the old one leaves the disk only once the database change has
+            # committed, so a failure on the way never loses the applicant's original
+            # (review 2026-10-08, R08).
+            replaced = list(application.documents.filter(doc_type=doc_type))
+            document = ApplicationDocument.objects.create(
+                application=application,
+                doc_type=doc_type[:50],
+                file=upload,
+                name=upload.name[:255],
+                size=upload.size,
+                mime=kind.mime,
+            )
+            ApplicationDocument.objects.filter(pk__in=[d.pk for d in replaced]).delete()
+            old_files = [(d.file.storage, d.file.name) for d in replaced if d.file]
+            transaction.on_commit(lambda: [storage.delete(name) for storage, name in old_files])
+    except BaseException:
+        if document is not None and document.file:
+            document.file.storage.delete(document.file.name)  # not kept: no row points at it
+        raise
     return document
 
 

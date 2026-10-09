@@ -2,9 +2,10 @@ from pathlib import Path
 
 import pytest
 from django.core.exceptions import ImproperlyConfigured
-from django.core.management import call_command
+from django.core.management import CommandError, call_command
 
 from core import backups
+from core.backups import DB_SUFFIX
 
 
 @pytest.fixture
@@ -106,3 +107,70 @@ def test_large_backups_stream_in_chunks_and_old_ones_still_read(
     out = tmp_path / "old.dump"
     backups.decrypt_to(old, out)
     assert out.read_bytes() == b"PGDMP-old-format"
+
+
+def test_a_cut_or_changed_backup_is_refused(fake_dump, db, monkeypatch, tmp_path):
+    """Review 2026-10-08 R07: a backup cut after a whole record decrypted «successfully» to a
+    shorter dump. Now every record is numbered and the last one seals the total."""
+    from django.core.files.base import ContentFile
+    from django.core.files.storage import default_storage
+
+    monkeypatch.setattr(backups, "CHUNK", 4)
+    monkeypatch.setattr(backups, "media_archive_to", lambda path: False)  # the dump is enough
+    name = backups.create(keep=8)[0]
+    with default_storage.open(name, "rb") as handle:
+        stored = handle.read()
+    assert backups.decrypt(name) == b"PGDMP-fake-dump"
+
+    def records(data):
+        at, out = len(backups.MAGIC), []
+        while at < len(data):
+            size = int.from_bytes(data[at : at + 4], "big")
+            out.append(data[at : at + 4 + size])
+            at += 4 + size
+        return out
+
+    parts = records(stored)
+    assert len(parts) == 5  # 4 data records of 4 bytes or fewer, and the end record
+    broken = {
+        "cut after a record": backups.MAGIC + parts[0],
+        "end record missing": backups.MAGIC + b"".join(parts[:-1]),
+        "cut inside a record": stored[:-7],
+        "a record dropped": backups.MAGIC + b"".join(parts[:1] + parts[2:]),
+        "records swapped": backups.MAGIC + b"".join([parts[1], parts[0], *parts[2:]]),
+        "data after the end": stored + parts[0],
+    }
+    for label, data in broken.items():
+        saved = default_storage.save(f"backups/broken{DB_SUFFIX}", ContentFile(data))
+        out = tmp_path / "plain"
+        with pytest.raises(backups.BackupCorrupt):
+            backups.decrypt_to(saved, out)
+        assert not out.exists(), label  # nothing half-written to restore by mistake
+        default_storage.delete(saved)
+
+    # Another backup's record cannot be spliced in: each file has its own id.
+    other = backups.create(keep=8)[-1]
+    with default_storage.open(other, "rb") as handle:
+        foreign = records(handle.read())
+    saved = default_storage.save(
+        f"backups/spliced{DB_SUFFIX}",
+        ContentFile(backups.MAGIC + b"".join([parts[0], foreign[1], *parts[2:]])),
+    )
+    with pytest.raises(backups.BackupCorrupt):
+        backups.decrypt(saved)
+    with pytest.raises(CommandError, match="cannot be restored"):
+        call_command("restore_database", name=saved, out=str(tmp_path / "x.dump"))
+
+
+def test_streamed_backups_from_before_the_seal_still_read(fake_dump, db, tmp_path):
+    """Backups made by the first streamed format (ECSTBAK1, no numbers) stay restorable."""
+    from django.core.files.base import ContentFile
+    from django.core.files.storage import default_storage
+
+    box = backups.fernet()
+    data = backups.MAGIC_V1
+    for chunk in (b"PGDMP-", b"v1"):
+        token = box.encrypt(chunk)
+        data += len(token).to_bytes(4, "big") + token
+    name = default_storage.save(f"backups/ecst-v1{DB_SUFFIX}", ContentFile(data))
+    assert backups.decrypt(name) == b"PGDMP-v1"
