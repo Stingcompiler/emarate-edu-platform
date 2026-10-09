@@ -303,12 +303,14 @@ class _MediaRef(serializers.SlugRelatedField):
 
 class SiteSettingsSerializer(serializers.ModelSerializer):
     hero_image = _MediaRef()
+    logo = _MediaRef()
     share_image = _MediaRef()
     hero_image_url = serializers.SerializerMethodField()
     hero_image_alt_ar = serializers.CharField(
         source="hero_image.alt_ar", read_only=True, default=""
     )
     share_image_url = serializers.SerializerMethodField()
+    logo_url = serializers.SerializerMethodField()
 
     class Meta:
         model = SiteSettings
@@ -335,6 +337,8 @@ class SiteSettingsSerializer(serializers.ModelSerializer):
             "hero_image_alt_ar",
             "share_image",
             "share_image_url",
+            "logo",
+            "logo_url",
         ]
 
     def _url(self, asset) -> str | None:
@@ -349,6 +353,9 @@ class SiteSettingsSerializer(serializers.ModelSerializer):
 
     def get_share_image_url(self, obj) -> str | None:
         return self._url(obj.share_image)
+
+    def get_logo_url(self, obj) -> str | None:
+        return self._url(obj.logo)
 
     def validate_founded_year(self, value):
         if value is not None and not 1800 <= value <= 2100:

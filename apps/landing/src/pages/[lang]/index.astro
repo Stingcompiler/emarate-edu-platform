@@ -136,7 +136,7 @@ const jsonLd = {
   },
   sameAs: Object.values(s.social ?? {}).filter(Boolean),
   // Richer identity for search engines (review 2026-09-30).
-  logo: new URL("/favicon.svg", Astro.site).toString(),
+  logo: s.logo_url || new URL("/favicon.svg", Astro.site).toString(),
   image: s.share_image_url || s.hero_image_url || undefined,
   foundingDate: s.founded_year ? String(s.founded_year) : undefined,
   description: s.seo?.description || s.tagline || lead,

@@ -1,6 +1,8 @@
 import { ChevronRight, type LucideIcon, Menu } from "lucide-react";
 import { type ReactNode, useEffect, useRef, useState } from "react";
 import { NavLink } from "react-router";
+
+import { useSiteLogo } from "../lib/site";
 import { ThemeRow, ThemeToggle } from "./ThemeToggle";
 
 export type NavItem = {
@@ -183,9 +185,16 @@ function useScrolledPast(offset: number): boolean {
 }
 
 function Brand() {
+  const logo = useSiteLogo();
   return (
     <span className="flex items-center gap-2.5 text-sm font-bold">
-      <img src="/favicon.svg" alt="" width={30} height={30} className="rounded-md bg-white" />
+      <img
+        src={logo}
+        alt=""
+        width={30}
+        height={30}
+        className="size-[30px] rounded-md bg-white object-contain"
+      />
       بوابة الكلية
     </span>
   );

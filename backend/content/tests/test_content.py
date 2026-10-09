@@ -342,7 +342,9 @@ def test_trust_signals_in_site_settings(api, site):
         "office_hours_ar": "الأحد–الخميس 8:00–15:00",
         "hero_image": image.data["public_id"],
         "share_image": image.data["public_id"],
+        "logo": image.data["public_id"],
     }
+    assert api().get("/api/public/site").data["logo_url"] is None  # the built-in mark until set
     saved = api(site).patch("/api/v1/content/site-settings", body, format="json")
     assert saved.status_code == 200, saved.data
     public = api().get("/api/public/site").data
@@ -350,6 +352,10 @@ def test_trust_signals_in_site_settings(api, site):
     assert public["figures"] == [{"value": "1,200+", "label_ar": "خريج", "label_en": "graduates"}]
     assert public["hero_image_url"].startswith("http") and public["hero_image_alt_ar"] == "الحرم"
     assert public["share_image_url"]
+    # The logo is the owner's to change (2026-10-09): the site and the portal read logo_url.
+    assert public["logo_url"].startswith("http") and public["logo_url"] == public["hero_image_url"]
+    cleared = api(site).patch("/api/v1/content/site-settings", {"logo": None}, format="json")
+    assert cleared.status_code == 200 and cleared.data["logo_url"] is None
     for bad in (
         {"founded_year": 1500},
         {"licence_url": "//evil.example"},

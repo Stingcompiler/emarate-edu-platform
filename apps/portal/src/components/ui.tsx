@@ -10,7 +10,7 @@ import type {
 import { Eye, EyeOff } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
-import { SITE_URL } from "../lib/site";
+import { SITE_URL, useSiteLogo } from "../lib/site";
 import { CountUp } from "./motion";
 
 /** Small shared primitives for portal pages; tokens only (docs/06). */
@@ -177,11 +177,12 @@ export function AuthLayout({
   subtitle?: string;
   children: ReactNode;
 }) {
+  const logo = useSiteLogo();
   return (
     <div className="min-h-dvh bg-bg lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)]">
       <main className="flex min-h-dvh flex-col px-5 pb-6 pt-[max(3rem,env(safe-area-inset-top))] sm:px-8 lg:px-16 lg:pt-10">
         <div className="mx-auto flex w-full max-w-[400px] flex-1 flex-col lg:justify-center">
-          <img src="/favicon.svg" alt="" width={56} height={56} />
+          <img src={logo} alt="" width={56} height={56} className="size-14 object-contain" />
           <h1 className="mt-5 text-2xl font-bold text-text">{title}</h1>
           {subtitle && <p className="mt-1 text-sm leading-6 text-text-muted">{subtitle}</p>}
           <div className="mt-7">{children}</div>

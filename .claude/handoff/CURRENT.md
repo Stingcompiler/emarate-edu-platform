@@ -31,6 +31,12 @@
   `/opt/ecst/autodeploy.env`. Installed and enabled 2026-10-09 (runbook §3).
   **So: never deploy by hand after a merge; just merge and check the state file.**
 
+- **Site logo and redirects page (owner, 2026-10-09):** `SiteSettings.logo` (media library
+  image, migration `content/0008_site_logo`), `logo_url` in the public settings; the site
+  header, footer, favicon, schema.org logo and the share-image fallback use it, the portal top
+  bar and sign-in screen too (`useSiteLogo`, `lib/site.ts`); chosen in «إعدادات الموقع». The
+  redirects page stacks its form on phones and shows both paths in full.
+
 ## In progress
 
 - Nothing. This docs PR (README, report status, this handoff) is the last of the round.
@@ -65,7 +71,11 @@
 - `core/tests/test_backups.py`: stub `media_archive_to` when shrinking `CHUNK`, or the local
   media folder is encrypted in 4-byte records.
 - E2E on ports 8011/5184/4332 (8001 belongs to another project). Playwright screenshot paths
-  are relative to `e2e/`.
+  are relative to the repository root (`.scratch/shots/x.png`). Temporary visual specs: keep the
+  source in `.scratch/` and copy it into `e2e/tests/` only for the run. When the Mac is loaded
+  (load average ~20), sign-in can exceed 5 s; rerun before suspecting the code.
+- `/api/public/*` answers carry `Cache-Control: max-age=60`: the portal fetches the site
+  settings with `cache: "no-cache"` so a new logo shows after a reload.
 - macOS has no `timeout`; use pytest `-o faulthandler_timeout=…` to locate hangs.
 
 ## Verify

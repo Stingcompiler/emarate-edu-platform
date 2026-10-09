@@ -42,8 +42,11 @@ const desc =
   (title !== siteName
     ? `${title} — ${siteName}${s.tagline ? `. ${s.tagline}` : ""}`
     : s.seo?.description || s.tagline || siteName);
-// A picture for WhatsApp/Facebook previews: the page's own, else the college's share image.
-const shareImage = image || s.share_image_url || null;
+// The logo the owner chose in the site settings, else the built-in mark.
+const logo = s.logo_url || "/favicon.svg";
+// A picture for WhatsApp/Facebook previews: the page's own, else the college's share image,
+// else its logo.
+const shareImage = image || s.share_image_url || s.logo_url || null;
 // «قدّم الآن» sits in the header whenever an intake is open (review W1).
 const applying = (await loadPrograms()).some((p) => p.intake?.accepting);
 const fullTitle = title === siteName ? title : `${title} — ${siteName}`;
@@ -101,7 +104,11 @@ const ext = (external: boolean) => (external ? { rel: "noopener", target: "_blan
     {shareImage && <meta property="og:image" content={shareImage} />}
     <meta name="twitter:card" content={shareImage ? "summary_large_image" : "summary"} />
     <meta name="theme-color" content="#0b2447" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    {s.logo_url ? (
+      <link rel="icon" href={s.logo_url} />
+    ) : (
+      <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    )}
     {jsonLd && (
       // "<" escaped: a title containing "</script>" must not close the tag (stored XSS).
       <script
@@ -120,7 +127,7 @@ const ext = (external: boolean) => (external ? { rel: "noopener", target: "_blan
     <header class="motion-header sticky top-0 z-20 border-b border-border-soft bg-surface/90 backdrop-blur">
       <div class="mx-auto flex h-16 max-w-6xl items-center gap-4 px-4 lg:px-8">
         <a href={href(lang)} class="flex min-w-0 items-center gap-2 text-sm font-bold text-text">
-          <img src="/favicon.svg" alt="" width="32" height="32" class="rounded-md" />
+          <img src={logo} alt="" width="32" height="32" class="size-8 rounded-md object-contain" />
           <span class="truncate sm:hidden">{shortName}</span>
           <span class="hidden truncate sm:inline">{siteName}</span>
         </a>
@@ -354,7 +361,17 @@ const ext = (external: boolean) => (external ? { rel: "noopener", target: "_blan
         style={`--footer-cols: 1.5fr repeat(${Math.max(footerColumns.length, 1)}, 1fr)`}
       >
         <div class="col-span-2 lg:col-span-1">
-          <p class="font-bold text-white">{siteName}</p>
+          <p class="flex items-center gap-2.5 font-bold text-white">
+            <img
+              src={logo}
+              alt=""
+              width="36"
+              height="36"
+              loading="lazy"
+              class="size-9 rounded-md bg-white object-contain p-0.5"
+            />
+            {siteName}
+          </p>
           {s.tagline && <p class="mt-2 leading-6">{s.tagline}</p>}
           <address class="mt-4 space-y-1 not-italic leading-6">
             {s.address && <p>{s.address}</p>}
