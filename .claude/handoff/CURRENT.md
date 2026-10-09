@@ -1,55 +1,75 @@
-# Handoff — comprehensive review complete — 2026-10-08
+# Handoff — review 2026-10-08 fixed (R01–R11 + dependencies) — 2026-10-09
 
 ## Where things stand
 
-- Current local branch: `codex/comprehensive-review-2026-10-08`, based on `d2f0368` (main at review start; no fresh remote synchronization claimed).
-- User asked in Arabic to read the project, perform a comprehensive review, identify errors and write a report, then twice said to continue. This is a review, not authorization to implement fixes or deploy.
-- Report: `docs/qa/comprehensive-review-2026-10-08.md`.
-- Evidence and reproduction instructions: `docs/qa/evidence/review-2026-10-08/README.md`.
-- Eleven demonstrated behavioral defects R01–R11: five P1, six P2. Two additional High npm dependency advisories (source-map-js 1.2.1 and sharp 0.35.4); exploitability in this application was not demonstrated.
-- Original checks: SQLite 752 passed; isolated PostgreSQL 16 751 passed / 1 SQLite-only skip; Vitest 77 passed; typecheck, lint, Python formatting, migrations, schema and builds passed. Strict landing build: 104 pages. Selected E2E: 11 passed / 1 intentional desktop-exam skip. Final Prettier passed.
-- Additional probes: 9 backend probes on each database and 3 frontend probes. These assert the faulty behavior, not acceptance of correct behavior. They are outside CI in evidence files. Temporary copies under backend/core/tests and portal source were removed.
-- No application source changes, deployment, production access, public push or PR. Existing untracked `.scratch/` belongs to prior work and was untouched.
-- Temporary PostgreSQL was shut down; test browser servers are no longer listening.
+- The 8 October review (`docs/qa/comprehensive-review-2026-10-08.md`, PR #118) was verified
+  first: its probes reproduced every finding on SQLite and PostgreSQL (9/9) and in Vitest (3/3).
+- Every finding is fixed, one PR per group, each probe turned into a permanent regression test
+  that fails on the old code:
+  - #119 exam integrity: R11 sync in the attempt's order, R09 refused answers kept and shown
+    (`rejectedStore`), R10 `GET /exam-attempts/{id}/clock` polled every 30 s and asked again
+    at the deadline, R04 active enrollment needed to save an answer.
+  - #120 R01 admissions `update`/`submit` lock and re-read the row (`_locked`, in place).
+  - #121 R02 registration decision locks the request; R03 `invalidate` and manual close use
+    the attempt lock.
+  - #122 R08 new document stored first, old file deleted on commit; R07 backup format
+    `ECSTBAK2` (numbered records with a file id + sealed end), `BackupCorrupt`.
+  - #123 R05 `User.token_version` («tv» claim; reset/disable raise it), R06 unique index on
+    `COALESCE(program, 0)` + 400 + migration keeping the default in use.
+  - #124 `source-map-js` 1.2.2, `sharp` 0.35.5 via pnpm overrides; `pnpm audit` clean.
+- README phase table and the report's «حالة الإصلاح» section updated (docs PR).
+- #118–#124 all merged with green CI. Deployed `4d558e6` (backend, portal, site) on
+  2026-10-09: health 200, `/clock` answers 401 without a session, migrations
+  `accounts/0006_user_token_version` and `results/0002_one_default_grading_scale` applied
+  (production had no grading scales, so the R06 cleanup removed nothing), api and worker active.
 
 ## In progress
 
-- Review is complete. Only report/evidence and this handoff are authored deliverables.
+- Nothing. This docs PR (README, report status, this handoff) is the last of the round.
 
 ## Next steps (ordered)
 
-1. Read the new report and reproduction README before implementing anything. User has requested a review only in this session.
-2. If fixes are requested: R11/R09 (offline exam order and rejected answers), R10 (server time extensions), R04 (dropped enrollment), R01 (stale applicant writes).
-3. Then R02/R03 (decision and attempt races), R08/R07 (file replacement and backup integrity), R05/R06 (access-token revocation and default grading scale).
-4. Update affected frontend dependencies with compatible patched versions and rerun audit/build/critical journeys.
-5. Production restore drill, off-server backup verification, isolated load and real-device/accessibility checks remain unverified by this review.
+1. After the next nightly backup (03:15), run a restore drill with that `ECSTBAK2` file
+   (`restore_database --name … --out …`, then `pg_restore` into a scratch database).
+2. Owner items still open: off-server backup copy (A3), the backup key kept offline (A4),
+   external monitoring and `OPS_ALERT_EMAIL` (A9), hosting choice (A8), permission
+   differences B9/B10, the college's content (UX11), load test (D3), real devices (H).
 
 ## Decisions made (don't revisit)
 
-- Official college name: كلية الإمارات للعلوم والتكنولوجيا.
-- docs/03 is authoritative for permissions. Keep the department dashboard workflows (D20); no Docker or Zustand.
-- Suspended students retain record/results/cases/notifications, not the learning space (prior owner decision).
-- Do not re-list historical repaired findings as open without new evidence. R02 is self-registration approval; R01 is applicant autosave; neither is the previously fixed admissions staff transition.
-- Stale-object probes demonstrate an allowed interleaving, not a measured concurrent load rate.
-- Public repository publication of security/operations findings requires explicit current authorization; no report was published in this session.
+- Official college name: كلية الإمارات للعلوم والتكنولوجيا. docs/03 wins conflicts; D20 (the
+  department dashboard takes additions only); no Docker, no Zustand.
+- A withdrawn enrollment closes a running exam like a suspension: saved answers stay.
+- Refused answers do not block submission (they can never be accepted); the student is told
+  under the question, in the submit dialog and on the result page.
+- Tokens without «tv» count as version 0, so the R05 deploy signs nobody out.
+- R06 migration keeps the oldest default scale (the one `for_program` applied).
+- `ECSTBAK1` and single-token backups remain readable.
 
 ## Gotchas found
 
-- Local socket/shared-memory creation was restricted in the sandbox; isolated PostgreSQL and Playwright required approved local execution.
-- Use backend/.venv/bin/python for installed checks. Temporary uv cache/tool directories were under /tmp, not application dependency changes.
-- Don't edit portal files during E2E; Vite reloads can invalidate browser tests.
-- Non-strict landing builds can succeed without API with partial content. Use LANDING_STRICT=1 and a test API.
-- The iPhone Playwright profile uses Chromium, not real Safari/iOS.
-- Previous deployment state (not reverified): October 6 handoff recorded 79cf8a1 deployed, health timers installed, and OPS_ALERT_EMAIL still needing owner configuration. See prior review and runbook; do not treat this as current production evidence.
+- `admissions._locked` refreshes the caller's object in place: callers such as `seed_demo`
+  keep using their instance after `submit`.
+- Polling hooks: depend on `query.refetch` (stable), never the query object, or intervals reset
+  every render.
+- Vitest + fake timers: advance a second at a time inside separate `act` calls so React renders
+  between steps.
+- `core/tests/test_backups.py`: stub `media_archive_to` when shrinking `CHUNK`, or the local
+  media folder is encrypted in 4-byte records.
+- E2E on ports 8011/5184/4332 (8001 belongs to another project). Playwright screenshot paths
+  are relative to `e2e/`.
+- macOS has no `timeout`; use pytest `-o faulthandler_timeout=…` to locate hangs.
 
 ## Verify
 
-- See `docs/qa/evidence/review-2026-10-08/README.md` for exact commands, logs, and safe reproduction instructions.
-- Review probes must not be used as passing acceptance tests: a successful fix should reverse their expectations.
-- No need to rerun unchanged full application suites for report-only edits.
+- Backend: `cd backend && uv run pytest` and `DATABASE_URL=postgres:///ecst uv run pytest --create-db`.
+- Portal: `pnpm typecheck && pnpm test && pnpm build`; `pnpm format:check`; `pnpm audit`.
+- E2E: `E2E_API_PORT=8011 E2E_PORTAL_PORT=5184 E2E_SITE_PORT=4332 pnpm e2e exam.spec.ts`.
 
 ## Owner's standing rules
 
-- See CLAUDE.md: scoped RBAC, audited writes, permission-matrix coverage, no Docker/Zustand, responsive verification for UI changes.
-- One branch/PR per implementation change, green checks before merge; never force-push/rebase.
-- Never expose secrets or affect other projects; no load or penetration tests on shared production.
+- One branch/PR per change, merge with `gh pr merge --merge` when CI is green; never
+  force-push or rebase. Tests on SQLite and Postgres. Verify UI at 390 and 1440.
+- RBAC in `accounts/rbac.py`; every new endpoint gets a permission-matrix row; writes audited.
+- Never read or repeat the demo password, `/opt/ecst/env` values or the SMTP key; never touch
+  other projects on the shared VPS; no server address in this public repository.
