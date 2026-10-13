@@ -37,6 +37,15 @@
   bar and sign-in screen too (`useSiteLogo`, `lib/site.ts`); chosen in «إعدادات الموقع». The
   redirects page stacks its form on phones and shows both paths in full.
 
+- **Admin password reset (owner, 2026-10-13):** `POST /users/{id}/reset-password` (system admin only,
+  capability `users.reset_password`) returns a random 12-character temporary password once
+  (`no-store`, never logged), sets `must_change_password`, ends the account's sessions
+  (`token_version`). `POST /auth/change-password` is the account's own change (also the forced
+  step); `RequireAuth` holds such accounts at `/change-password`. Portal: button + one-time panel
+  on the admin user page, «تغيير كلمة المرور» in Settings. `core/exceptions.py` now turns a stray
+  Django `ValidationError` into a 400. Gotcha: port 8000 may belong to another project on this
+  Mac: build the site with `PUBLIC_API_URL=http://127.0.0.1:1 pnpm build`.
+
 ## In progress
 
 - Nothing. This docs PR (README, report status, this handoff) is the last of the round.

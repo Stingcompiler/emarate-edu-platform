@@ -463,6 +463,8 @@ COVERED_ELSEWHERE = {
     "auth-login": "accounts.tests.test_auth::test_login_sets_httponly_cookies",
     "auth-refresh": "accounts.tests.test_auth::test_refresh_rotates_and_old_token_dies",
     "auth-logout": "accounts.tests.test_auth::test_logout_revokes_refresh",
+    "auth-change-password": "accounts.tests.test_auth::test_a_user_changes_their_own_password",
+    "user-reset-password": "accounts.tests.test_auth::test_the_admin_resets_a_users_password",
     "department-member-detail": "academic.tests.test_enrollment::test_members_and_instructors",
     "offering-add-instructor": "academic.tests.test_enrollment::test_members_and_instructors",
     "offering-remove-instructor": "academic.tests.test_enrollment::test_members_and_instructors",

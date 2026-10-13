@@ -186,6 +186,8 @@ CAPABILITIES: dict[str, frozenset[Role]] = {
     "events.manage": frozenset({R.SYSTEM_ADMIN, R.SITE_MANAGER, R.EVENTS_MANAGER}),
     # Users and roles
     "users.view": frozenset({R.SYSTEM_ADMIN, R.ACADEMIC_AFFAIRS, R.HEAD_REGISTRAR}),
+    # Sets a temporary password for another account (the owner's request, 2026-10-13).
+    "users.reset_password": frozenset({R.SYSTEM_ADMIN}),
     # Audit log: system admin sees everything; department roles their department.
     "audit.view": frozenset({R.SYSTEM_ADMIN, R.DEPARTMENT_MANAGER, R.DEPARTMENT_SUPERVISOR}),
 }

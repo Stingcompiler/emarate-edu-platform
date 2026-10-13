@@ -180,6 +180,7 @@ const ResultSettings = page(() => import("./routes/results/ResultSettings"), "Re
 const ResultSearch = page(() => import("./routes/results/Search"), "ResultSearch");
 const Compose = page(() => import("./routes/Compose"), "Compose");
 const ForgotPassword = page(() => import("./routes/ForgotPassword"), "ForgotPassword");
+const ChangePassword = page(() => import("./routes/ChangePassword"), "ChangePassword");
 const Install = page(() => import("./routes/Install"), "Install");
 const NotFound = page(() => import("./routes/NotFound"), "NotFound");
 const Notifications = page(() => import("./routes/Notifications"), "Notifications");
@@ -197,6 +198,7 @@ const router = createBrowserRouter([
   { path: "/register", element: <Register /> },
   { path: "/forgot-password", element: <ForgotPassword /> },
   { path: "/activate/:token", element: <Activate /> },
+  { path: "/change-password", element: <ChangePassword /> },
   // Visitors (no account): apply and track — the public site links here (docs/03 §4).
   { path: "/apply", element: <Apply /> },
   { path: "/track", element: <Track /> },

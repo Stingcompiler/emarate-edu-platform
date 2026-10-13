@@ -59,6 +59,30 @@ describe("RequireAuth", () => {
     ).toBeTruthy();
   });
 
+  it("holds an account with a temporary password at the change-password page", async () => {
+    get.mockResolvedValue(reply(200, { roles: [], must_change_password: true }));
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    render(
+      <QueryClientProvider client={client}>
+        <MemoryRouter initialEntries={["/grading"]}>
+          <Routes>
+            <Route
+              path="/grading"
+              element={
+                <RequireAuth>
+                  <p>secret page</p>
+                </RequireAuth>
+              }
+            />
+            <Route path="/change-password" element={<p>change it</p>} />
+          </Routes>
+        </MemoryRouter>
+      </QueryClientProvider>,
+    );
+    expect(await screen.findByText("change it")).toBeTruthy();
+    expect(screen.queryByText("secret page")).toBeNull();
+  });
+
   it("keeps the session on a rate limit and offers a retry instead of signing out", async () => {
     get.mockResolvedValueOnce(reply(429));
     renderGuarded();

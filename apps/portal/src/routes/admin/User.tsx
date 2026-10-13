@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { X } from "lucide-react";
+import { Copy, KeyRound, X } from "lucide-react";
 import { useState } from "react";
 import { useParams } from "react-router";
 
@@ -76,8 +76,28 @@ export function AdminUser() {
     },
     onSuccess: refresh,
   });
+  // The temporary password is shown once, here only, and never kept in the query cache.
+  const [temporary, setTemporary] = useState<string | null>(null);
+  const reset = useMutation({
+    mutationFn: async () => {
+      const { data, error } = await api.POST("/api/v1/users/{public_id}/reset-password", {
+        params: { path: { public_id: id } },
+      });
+      if (!data) throw error;
+      return data.temporary_password;
+    },
+    onSuccess: (password) => setTemporary(password),
+  });
+  const copyTemporary = async () => {
+    try {
+      await navigator.clipboard.writeText(temporary ?? "");
+      toast("نُسخت كلمة المرور المؤقتة");
+    } catch {
+      toast("تعذّر النسخ؛ انسخها يدويًا");
+    }
+  };
   const u = user.data;
-  const err = grant.error ?? revoke.error ?? active.error;
+  const err = grant.error ?? revoke.error ?? active.error ?? reset.error;
   return (
     <PortalShell
       title={u?.full_name_ar ?? "مستخدم"}
@@ -137,6 +157,52 @@ export function AdminUser() {
             <p className="text-xs text-text-muted">
               التعطيل يُنهي كل جلساته فورًا ولا يحذف شيئًا من سجلاته.
             </p>
+            {u.is_active && (
+              <>
+                <Button
+                  variant="secondary"
+                  className="min-h-11 w-full"
+                  disabled={reset.isPending}
+                  onClick={async () =>
+                    (await confirm({
+                      title: `إعادة تعيين كلمة مرور ${u.full_name_ar}؟`,
+                      body: "تُنشأ كلمة مرور مؤقتة تظهر لك مرة واحدة فقط، وتنتهي جلساته على كل أجهزته فورًا، ويُطلب منه تغييرها عند دخوله التالي.",
+                      confirm: "إعادة التعيين",
+                    })) && reset.mutate()
+                  }
+                >
+                  <KeyRound size={18} aria-hidden />
+                  إعادة تعيين كلمة المرور
+                </Button>
+                {temporary && (
+                  <Card className="space-y-3 border-warning-strong p-4" role="status">
+                    <p className="text-sm font-semibold text-text">
+                      كلمة المرور المؤقتة لـ {u.full_name_ar}
+                    </p>
+                    <div className="flex items-center gap-2">
+                      <bdi className="min-w-0 flex-1 select-all break-all rounded-lg bg-surface-alt px-3 py-2 font-mono text-lg tracking-wide text-text">
+                        {temporary}
+                      </bdi>
+                      <Button
+                        variant="secondary"
+                        className="min-h-11 shrink-0"
+                        onClick={() => void copyTemporary()}
+                        aria-label="نسخ كلمة المرور المؤقتة"
+                      >
+                        <Copy size={16} aria-hidden />
+                      </Button>
+                    </div>
+                    <p className="text-xs leading-relaxed text-text-muted">
+                      لا تظهر هذه الكلمة مرة أخرى ولا تُحفظ في أي سجل. أعطِها له مباشرة أو بقناة
+                      آمنة؛ سيُطلب منه اختيار كلمة مرور خاصة عند أول دخول.
+                    </p>
+                    <Button variant="ghost" className="min-h-11" onClick={() => setTemporary(null)}>
+                      تم، أخفِ الكلمة
+                    </Button>
+                  </Card>
+                )}
+              </>
+            )}
           </div>
           <div className="mt-6 space-y-4 lg:mt-0">
             <SectionLabel>الأدوار والنطاقات</SectionLabel>

@@ -31,6 +31,7 @@ from .models import RegistrationRequest, RoleAssignment, User
 from .rbac import Role
 from .serializers import (
     ActivateSerializer,
+    ChangePasswordSerializer,
     DetailSerializer,
     LoginSerializer,
     MeSerializer,
@@ -46,6 +47,7 @@ from .serializers import (
     RegistrationVerifySerializer,
     RoleAssignmentDetailSerializer,
     RoleGrantSerializer,
+    TemporaryPasswordSerializer,
     UserActiveSerializer,
     UserCreateSerializer,
     UserSerializer,
@@ -385,6 +387,29 @@ class PasswordResetView(APIView):
         return Response({"detail": gettext("Password changed. Sign in with the new password.")})
 
 
+class ChangePasswordView(APIView):
+    """A signed-in user changes their own password (also the first step after an admin reset)."""
+
+    permission_classes = [IsAuthenticated]
+    throttle_classes = [LoginThrottle]
+
+    @extend_schema(
+        request=ChangePasswordSerializer, responses={200: DetailSerializer}, tags=["auth"]
+    )
+    def post(self, request):
+        data = ChangePasswordSerializer(data=request.data)
+        data.is_valid(raise_exception=True)
+        user = services.change_password(
+            request.user,
+            data.validated_data["current_password"],
+            data.validated_data["new_password"],
+        )
+        # The old tokens just ended; this browser gets fresh ones.
+        response = Response({"detail": gettext("Password changed.")})
+        _set_auth_cookies(response, services.issue_tokens(user))
+        return response
+
+
 class ActivateView(APIView):
     permission_classes = [AllowAny]
     authentication_classes = []
@@ -446,10 +471,20 @@ class UserViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.Gen
         return Response(UserSerializer(user).data, status=status.HTTP_201_CREATED)
 
     def get_permissions(self):
-        if self.action in ("create", "set_active"):
+        if self.action in ("create", "set_active", "reset_password"):
             # Governed by rbac.CREATABLE_ACCOUNTS (checked in the service).
             return [IsAuthenticated()]
         return super().get_permissions()
+
+    @extend_schema(request=None, responses=TemporaryPasswordSerializer)
+    @action(detail=True, methods=["post"], url_path="reset-password")
+    def reset_password(self, request, public_id=None):
+        """The system admin sets a temporary password; it is shown once and must be changed."""
+        target = get_object_or_404(User, public_id=public_id)
+        temporary = services.admin_reset_password(RequestMeta.from_request(request), target)
+        response = Response({"temporary_password": temporary})
+        response["Cache-Control"] = "no-store"
+        return response
 
     @extend_schema(request=UserActiveSerializer, responses=UserSerializer)
     @action(detail=True, methods=["post"], url_path="set-active")

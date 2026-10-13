@@ -74,6 +74,9 @@ urlpatterns = [
     path("auth/login", accounts.LoginView.as_view(), name="auth-login"),
     path("auth/refresh", accounts.RefreshView.as_view(), name="auth-refresh"),
     path("auth/logout", accounts.LogoutView.as_view(), name="auth-logout"),
+    path(
+        "auth/change-password", accounts.ChangePasswordView.as_view(), name="auth-change-password"
+    ),
     path("me", accounts.MeView.as_view(), name="me"),
     path("me/public-profile", accounts.MyPublicProfileView.as_view(), name="me-public-profile"),
     path("roles", accounts.RolesView.as_view(), name="roles"),

@@ -6,6 +6,7 @@ names to lists of messages and is present only for validation failures.
 
 from typing import Any
 
+from django.core.exceptions import ValidationError as DjangoValidationError
 from django.utils.translation import gettext_lazy as _
 from rest_framework import exceptions, status
 from rest_framework.response import Response
@@ -52,6 +53,9 @@ def _flatten(detail: Any) -> dict[str, list[str]]:
 
 
 def problem_exception_handler(exc: Exception, context: dict[str, Any]) -> Response | None:
+    if isinstance(exc, DjangoValidationError):
+        # A password validator (or model.clean) raised outside a serializer: still a 400.
+        exc = exceptions.ValidationError({"non_field_errors": list(exc.messages)})
     response = exception_handler(exc, context)
     if response is None:
         return None  # unhandled: Django's handler500 returns a problem body

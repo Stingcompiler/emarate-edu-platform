@@ -16,6 +16,7 @@ from django.conf import settings
 from django.contrib.auth import authenticate, password_validation
 from django.contrib.auth.hashers import make_password
 from django.core.cache import cache
+from django.core.exceptions import ValidationError as DjangoValidationError
 from django.db import IntegrityError, transaction
 from django.db.models import F
 from django.utils import timezone
@@ -291,6 +292,78 @@ def reset_password(email: str, code: str, new_password: str) -> None:
         user.save(update_fields=["password", "must_change_password"])
         _revoke_refresh_tokens(user)
         record(SYSTEM, "account.password_reset", user, actor=user)
+
+
+TEMP_PASSWORD_LENGTH = 12
+_TEMP_ALPHABET = "abcdefghjkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789"  # no look-alikes
+
+
+def _temporary_password(user: User) -> str:
+    """A random password that passes the validators: letters of both cases and a digit."""
+    while True:
+        candidate = "".join(secrets.choice(_TEMP_ALPHABET) for _ in range(TEMP_PASSWORD_LENGTH))
+        if (
+            any(c.islower() for c in candidate)
+            and any(c.isupper() for c in candidate)
+            and any(c.isdigit() for c in candidate)
+        ):
+            try:
+                password_validation.validate_password(candidate, user)
+            except DjangoValidationError:
+                continue
+            return candidate
+
+
+def admin_reset_password(meta: RequestMeta, user: User) -> str:
+    """The system admin gives an account a temporary password (returned once, never stored in
+    the clear or in the log). The account must change it at the next sign-in, and every open
+    session of it ends now (review 2026-10-08 R05's token version)."""
+    if not rbac.can(meta.actor, "users.reset_password"):
+        raise PermissionDenied()
+    if user.pk == meta.actor.pk:
+        raise PermissionDenied(gettext("Change your own password from your settings."))
+    if not user.is_active:
+        raise Conflict(
+            gettext(
+                "Enable the account first: a disabled or not yet activated account has no password."
+            ),
+            code="inactive",
+        )
+    temporary = _temporary_password(user)
+    with transaction.atomic():
+        user.set_password(temporary)
+        user.must_change_password = True
+        user.save(update_fields=["password", "must_change_password"])
+        _revoke_refresh_tokens(user)
+        # An unused invitation must not let someone set another password behind the admin's back.
+        ActivationToken.objects.filter(user=user, used_at__isnull=True).update(
+            used_at=timezone.now(), updated_at=timezone.now()
+        )
+        record(meta, "account.password_admin_reset", user, new={"must_change_password": True})
+    return temporary
+
+
+def change_password(user: User, current: str, new: str) -> User:
+    """A signed-in user changes their own password; other sessions end."""
+    if not user.check_password(current):
+        raise Invalid(
+            {"current_password": [gettext("The current password is wrong.")]}, code="wrong_password"
+        )
+    if current == new:
+        raise Invalid(
+            {"new_password": [gettext("Choose a different password.")]}, code="same_password"
+        )
+    try:
+        password_validation.validate_password(new, user)
+    except DjangoValidationError as error:
+        raise ValidationError({"new_password": list(error.messages)}) from None
+    with transaction.atomic():
+        user.set_password(new)
+        user.must_change_password = False
+        user.save(update_fields=["password", "must_change_password"])
+        _revoke_refresh_tokens(user)
+        record(SYSTEM, "account.password_change", user, actor=user)
+    return user
 
 
 # A refresh token rotated in the last seconds is accepted once more (two tabs refreshing
