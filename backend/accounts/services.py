@@ -18,7 +18,7 @@ from django.contrib.auth.hashers import make_password
 from django.core.cache import cache
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.db import IntegrityError, transaction
-from django.db.models import F
+from django.db.models import F, ProtectedError, RestrictedError
 from django.utils import timezone
 from django.utils.translation import gettext
 from rest_framework.exceptions import PermissionDenied, ValidationError
@@ -544,6 +544,36 @@ def revoke_role(meta: RequestMeta, assignment: RoleAssignment) -> None:
         )
         assignment.delete()
         rbac.clear_cache(user)
+
+
+def delete_account(meta: RequestMeta, user: User) -> None:
+    """Delete an account that never did anything: an invitation sent by mistake, a duplicate, a
+    test. An account anything points at (the audit log, content, grades…) cannot go, because
+    those records must keep their author: it is disabled instead (docs/03: nothing with a
+    history is deleted)."""
+    if not rbac.can(meta.actor, "users.delete"):
+        raise PermissionDenied()
+    if user.pk == meta.actor.pk:
+        raise PermissionDenied(gettext("You cannot delete your own account."))
+    snapshot = {
+        "email": user.email,
+        "name": user.full_name_ar,
+        "roles": sorted(rbac.roles_of(user)),
+    }
+    try:
+        with transaction.atomic():
+            # The log entry first: it is a plain record (the target is text, not a link), so
+            # it survives the account it names; it rolls back with the delete if that fails.
+            record(meta, "account.delete", user, old=snapshot)
+            user.delete()
+    except (ProtectedError, RestrictedError):
+        raise Conflict(
+            gettext(
+                "This account has a history (records, grades or log entries): "
+                "disable it instead of deleting it."
+            ),
+            code="has_history",
+        ) from None
 
 
 def set_active(meta: RequestMeta, user: User, active: bool) -> User:

@@ -46,6 +46,11 @@
   Django `ValidationError` into a 400. Gotcha: port 8000 may belong to another project on this
   Mac: build the site with `PUBLIC_API_URL=http://127.0.0.1:1 pnpm build`.
 
+- **Delete account (owner, 2026-10-13):** `DELETE /users/{id}` (system admin, `users.delete`) deletes
+  only an account nothing points at; `ProtectedError` (audit log actor, content, grades…) → 409
+  `has_history`, disable instead. Never one's own account. Logged as `account.delete`. Button
+  at the bottom of the admin user page.
+
 ## In progress
 
 - Nothing. This docs PR (README, report status, this handoff) is the last of the round.
