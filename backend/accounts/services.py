@@ -576,6 +576,30 @@ def delete_account(meta: RequestMeta, user: User) -> None:
         ) from None
 
 
+def rename_account(
+    meta: RequestMeta, user: User, *, full_name_ar: str, full_name_en: str | None = None
+) -> User:
+    """The system admin corrects a staff member's name. A student's name belongs to the student
+    record (the registrar edits it), so a student account is refused here."""
+    if not rbac.can(meta.actor, "users.rename"):
+        raise PermissionDenied()
+    if StudentRecord.objects.filter(user=user).exists():
+        raise Conflict(
+            gettext("A student's name is edited from the student record."), code="student_account"
+        )
+    old = {"full_name_ar": user.full_name_ar, "full_name_en": user.full_name_en}
+    user.full_name_ar = full_name_ar
+    if full_name_en is not None:
+        user.full_name_en = full_name_en
+    new = {"full_name_ar": user.full_name_ar, "full_name_en": user.full_name_en}
+    if new == old:
+        return user
+    with transaction.atomic():
+        user.save(update_fields=["full_name_ar", "full_name_en"])
+        record(meta, "account.rename", user, old=old, new=new)
+    return user
+
+
 def set_active(meta: RequestMeta, user: User, active: bool) -> User:
     """Disable or re-enable a staff account (docs/03 §3.5, §7).
 

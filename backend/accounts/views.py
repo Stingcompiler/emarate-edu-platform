@@ -50,6 +50,7 @@ from .serializers import (
     TemporaryPasswordSerializer,
     UserActiveSerializer,
     UserCreateSerializer,
+    UserNameSerializer,
     UserSerializer,
 )
 from .throttles import LoginThrottle, OTPIPThrottle, OTPTargetThrottle
@@ -476,10 +477,21 @@ class UserViewSet(
         return Response(UserSerializer(user).data, status=status.HTTP_201_CREATED)
 
     def get_permissions(self):
-        if self.action in ("create", "set_active", "reset_password", "destroy"):
+        if self.action in ("create", "set_active", "reset_password", "destroy", "partial_update"):
             # Governed by rbac.CREATABLE_ACCOUNTS (checked in the service).
             return [IsAuthenticated()]
         return super().get_permissions()
+
+    @extend_schema(request=UserNameSerializer, responses=UserSerializer)
+    def partial_update(self, request, public_id=None):
+        """The system admin changes a staff member's name."""
+        target = get_object_or_404(User, public_id=public_id)
+        data = UserNameSerializer(data=request.data)
+        data.is_valid(raise_exception=True)
+        user = services.rename_account(
+            RequestMeta.from_request(request), target, **data.validated_data
+        )
+        return Response(UserSerializer(user).data)
 
     def destroy(self, request, public_id=None):
         """Delete an account that never did anything; one with history is disabled instead."""

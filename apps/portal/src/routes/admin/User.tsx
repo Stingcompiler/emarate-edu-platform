@@ -7,6 +7,7 @@ import { PortalShell } from "../../components/PortalShell";
 import {
   Button,
   Card,
+  Field,
   Notice,
   SectionLabel,
   StatusBadge,
@@ -136,6 +137,15 @@ export function AdminUser() {
                 label={u.is_active ? (u.last_login ? "نشط" : "دعوة معلّقة") : "معطّل"}
               />
             </Card>
+            {!u.roles.some((r) => r.role === "student") && (
+              <NameCard
+                key={`${u.public_id}:${u.full_name_ar}:${u.full_name_en}`}
+                id={id}
+                nameAr={u.full_name_ar}
+                nameEn={u.full_name_en ?? ""}
+                onSaved={refresh}
+              />
+            )}
             <SectionLabel>الحساب</SectionLabel>
             <Card className="divide-y divide-border-soft text-sm">
               {[
@@ -320,5 +330,73 @@ export function AdminUser() {
         </div>
       )}
     </PortalShell>
+  );
+}
+
+/** The system admin corrects a staff member's name (a student's belongs to the student record). */
+function NameCard({
+  id,
+  nameAr,
+  nameEn,
+  onSaved,
+}: {
+  id: string;
+  nameAr: string;
+  nameEn: string;
+  onSaved: () => void;
+}) {
+  const toast = useToast();
+  const [ar, setAr] = useState(nameAr);
+  const [en, setEn] = useState(nameEn);
+  const save = useMutation({
+    mutationFn: async () => {
+      const { data, error } = await api.PATCH("/api/v1/users/{public_id}", {
+        params: { path: { public_id: id } },
+        body: { full_name_ar: ar, full_name_en: en },
+      });
+      if (!data) throw error;
+    },
+    onSuccess: () => {
+      toast("حُفظ الاسم");
+      onSaved();
+    },
+  });
+  const changed = ar.trim() !== nameAr || en.trim() !== nameEn;
+  return (
+    <>
+      <SectionLabel>الاسم</SectionLabel>
+      <form
+        onSubmit={(event) => {
+          event.preventDefault();
+          if (changed && ar.trim()) save.mutate();
+        }}
+        className="space-y-3"
+      >
+        <Card>
+          <Field
+            label="الاسم بالعربية"
+            value={ar}
+            onChange={(e) => setAr(e.target.value)}
+            maxLength={200}
+            required
+          />
+          <Field
+            label="الاسم بالإنجليزية (اختياري)"
+            dir="ltr"
+            value={en}
+            onChange={(e) => setEn(e.target.value)}
+            maxLength={200}
+          />
+        </Card>
+        {save.isError && <Notice>{problemMessage(save.error)}</Notice>}
+        <Button
+          type="submit"
+          className="min-h-11 w-full"
+          disabled={!changed || !ar.trim() || save.isPending}
+        >
+          حفظ الاسم
+        </Button>
+      </form>
+    </>
   );
 }
