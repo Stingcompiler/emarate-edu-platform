@@ -188,6 +188,9 @@ CAPABILITIES: dict[str, frozenset[Role]] = {
     "users.view": frozenset({R.SYSTEM_ADMIN, R.ACADEMIC_AFFAIRS, R.HEAD_REGISTRAR}),
     # Sets a temporary password for another account (the owner's request, 2026-10-13).
     "users.reset_password": frozenset({R.SYSTEM_ADMIN}),
+    # Deletes an account that never did anything (owner request 2026-10-13); one with history
+    # is disabled instead, because the audit log keeps its actors for good (docs/03).
+    "users.delete": frozenset({R.SYSTEM_ADMIN}),
     # Audit log: system admin sees everything; department roles their department.
     "audit.view": frozenset({R.SYSTEM_ADMIN, R.DEPARTMENT_MANAGER, R.DEPARTMENT_SUPERVISOR}),
 }

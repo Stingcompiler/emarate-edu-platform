@@ -426,7 +426,12 @@ class ActivateView(APIView):
 # ─── Staff: users and roles ───────────────────────────────────────────────
 
 
-class UserViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
+class UserViewSet(
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.DestroyModelMixin,
+    viewsets.GenericViewSet,
+):
     """Staff accounts. System admin sees everyone; academic affairs sees teachers
     and TAs; the head registrar sees registrars (docs/03 §7 «المستخدمون»)."""
 
@@ -471,10 +476,16 @@ class UserViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.Gen
         return Response(UserSerializer(user).data, status=status.HTTP_201_CREATED)
 
     def get_permissions(self):
-        if self.action in ("create", "set_active", "reset_password"):
+        if self.action in ("create", "set_active", "reset_password", "destroy"):
             # Governed by rbac.CREATABLE_ACCOUNTS (checked in the service).
             return [IsAuthenticated()]
         return super().get_permissions()
+
+    def destroy(self, request, public_id=None):
+        """Delete an account that never did anything; one with history is disabled instead."""
+        target = get_object_or_404(User, public_id=public_id)
+        services.delete_account(RequestMeta.from_request(request), target)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     @extend_schema(request=None, responses=TemporaryPasswordSerializer)
     @action(detail=True, methods=["post"], url_path="reset-password")

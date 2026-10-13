@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Copy, KeyRound, X } from "lucide-react";
+import { Copy, KeyRound, Trash2, X } from "lucide-react";
 import { useState } from "react";
-import { useParams } from "react-router";
+import { useNavigate, useParams } from "react-router";
 
 import { PortalShell } from "../../components/PortalShell";
 import {
@@ -22,6 +22,7 @@ import { useToast } from "../../components/Toast";
 /** Board: SystemAdminUser (phone); desktop derived — account beside roles and scopes. */
 export function AdminUser() {
   const confirm = useConfirm();
+  const navigate = useNavigate();
   const { id = "" } = useParams();
   const client = useQueryClient();
   const departments = useDepartments();
@@ -76,6 +77,21 @@ export function AdminUser() {
     },
     onSuccess: refresh,
   });
+  // Only an account nothing points at can go; one with a history is refused (409) and is
+  // disabled instead, because its records keep their author.
+  const remove = useMutation({
+    mutationFn: async () => {
+      const { response, error } = await api.DELETE("/api/v1/users/{public_id}", {
+        params: { path: { public_id: id } },
+      });
+      if (!response.ok) throw error;
+    },
+    onSuccess: () => {
+      void client.invalidateQueries({ queryKey: ["users"] });
+      toast("حُذف الحساب");
+      navigate("/system/users", { replace: true });
+    },
+  });
   // The temporary password is shown once, here only, and never kept in the query cache.
   const [temporary, setTemporary] = useState<string | null>(null);
   const reset = useMutation({
@@ -97,7 +113,7 @@ export function AdminUser() {
     }
   };
   const u = user.data;
-  const err = grant.error ?? revoke.error ?? active.error ?? reset.error;
+  const err = grant.error ?? revoke.error ?? active.error ?? reset.error ?? remove.error;
   return (
     <PortalShell
       title={u?.full_name_ar ?? "مستخدم"}
@@ -203,6 +219,21 @@ export function AdminUser() {
                 )}
               </>
             )}
+            <Button
+              variant="secondary"
+              className="min-h-11 w-full text-danger-strong"
+              disabled={remove.isPending}
+              onClick={async () =>
+                (await confirm({
+                  title: `حذف حساب ${u.full_name_ar} نهائيًا؟`,
+                  body: "يُحذف الحساب ولا يمكن التراجع. يصلح هذا لحساب أُنشئ بالخطأ ولم يُستعمل؛ أما الحساب الذي له سجل (عمليات أو درجات أو محتوى) فيرفض النظام حذفه ويُعطَّل بدل ذلك.",
+                  confirm: "حذف الحساب",
+                })) && remove.mutate()
+              }
+            >
+              <Trash2 size={18} aria-hidden />
+              حذف الحساب
+            </Button>
           </div>
           <div className="mt-6 space-y-4 lg:mt-0">
             <SectionLabel>الأدوار والنطاقات</SectionLabel>
