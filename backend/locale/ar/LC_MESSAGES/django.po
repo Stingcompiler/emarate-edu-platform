@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ecst-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-13 15:33+0200\n"
+"POT-Creation-Date: 2026-10-13 16:50+0200\n"
 "Language: ar\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -69,6 +69,9 @@ msgstr "فشل التحقق من CSRF: %(reason)s"
 
 msgid "Give a reason when rejecting."
 msgstr "اذكر سبب الرفض."
+
+msgid "The Arabic name cannot be empty."
+msgstr "الاسم بالعربية مطلوب."
 
 msgid "Invalid or expired code."
 msgstr "الرمز غير صحيح أو منتهي الصلاحية."
@@ -154,6 +157,9 @@ msgid ""
 "This account has a history (records, grades or log entries): disable it "
 "instead of deleting it."
 msgstr "لهذا الحساب سجل (عمليات أو درجات أو محتوى): عطّله بدل حذفه."
+
+msgid "A student's name is edited from the student record."
+msgstr "اسم الطالب يُعدَّل من سجل الطالب."
 
 msgid "You cannot disable your own account."
 msgstr "لا يمكنك تعطيل حسابك."

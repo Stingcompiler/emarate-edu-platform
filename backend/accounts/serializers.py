@@ -242,6 +242,20 @@ class UserActiveSerializer(serializers.Serializer):
     is_active = serializers.BooleanField()
 
 
+class UserNameSerializer(serializers.Serializer):
+    full_name_ar = serializers.CharField(max_length=200)
+    full_name_en = serializers.CharField(max_length=200, required=False, allow_blank=True)
+
+    def validate_full_name_ar(self, value):
+        value = " ".join(value.split())
+        if not value:
+            raise serializers.ValidationError(gettext("The Arabic name cannot be empty."))
+        return value
+
+    def validate_full_name_en(self, value):
+        return " ".join(value.split())
+
+
 class TemporaryPasswordSerializer(serializers.Serializer):
     temporary_password = serializers.CharField(read_only=True)
 

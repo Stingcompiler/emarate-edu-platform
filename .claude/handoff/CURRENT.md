@@ -51,6 +51,8 @@
   `has_history`, disable instead. Never one's own account. Logged as `account.delete`. Button
   at the bottom of the admin user page.
 
+- **Rename users (owner, 2026-10-13):** `PATCH /users/{id}` (system admin, `users.rename`): Arabic name required, English optional, logged as `account.rename`; student accounts refused (name lives on the student record). «الاسم» card on the admin user page.
+
 ## In progress
 
 - Nothing. This docs PR (README, report status, this handoff) is the last of the round.

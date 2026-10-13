@@ -93,3 +93,37 @@ def test_the_admin_deletes_an_unused_account(api, users, make_user):
     spare = make_user(Role.SYSTEM_ADMIN)
     assert api(second).delete(f"/api/v1/users/{spare.public_id}").status_code == 204
     assert api(second).delete(f"/api/v1/users/{admin.public_id}").status_code == 409
+
+
+def test_the_admin_renames_a_staff_account(api, users, make_user, make_student, it_program):
+    """Owner request 2026-10-13: the system admin corrects a staff member's name; a student's
+    name stays with the student record."""
+    from accounts.rbac import Role
+    from audit.models import AuditLog
+
+    admin = users[Role.SYSTEM_ADMIN]
+    teacher = make_user(Role.TEACHER)
+    url = f"/api/v1/users/{teacher.public_id}"
+    body = {"full_name_ar": "  د.  سلمى   عثمان ", "full_name_en": "Dr Salma Osman"}
+
+    assert api(users[Role.ACADEMIC_AFFAIRS]).patch(url, body, format="json").status_code == 403
+    assert api(teacher).patch(url, body, format="json").status_code in (403, 404)
+    done = api(admin).patch(url, body, format="json")
+    assert done.status_code == 200, done.data
+    teacher.refresh_from_db()
+    assert teacher.full_name_ar == "د. سلمى عثمان" and teacher.full_name_en == "Dr Salma Osman"
+    entry = AuditLog.objects.get(action="account.rename")
+    assert entry.actor_id == admin.pk and entry.new["full_name_ar"] == "د. سلمى عثمان"
+
+    # The same name again writes no second log entry; an empty Arabic name is refused.
+    api(admin).patch(url, body, format="json")
+    assert AuditLog.objects.filter(action="account.rename").count() == 1
+    assert api(admin).patch(url, {"full_name_ar": "   "}, format="json").status_code == 400
+
+    # A student account is renamed from the student record, not here.
+    student_user = make_user(Role.STUDENT)
+    make_student(it_program, "RN-0001", user=student_user)
+    refused = api(admin).patch(
+        f"/api/v1/users/{student_user.public_id}", {"full_name_ar": "اسم"}, format="json"
+    )
+    assert refused.status_code == 409 and refused.data["code"] == "student_account"
