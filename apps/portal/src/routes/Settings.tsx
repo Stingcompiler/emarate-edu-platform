@@ -84,6 +84,12 @@ export function Settings() {
                 {me.data?.email}
               </p>
             </Card>
+            <Link
+              to="/change-password"
+              className="mt-3 flex min-h-11 w-full items-center justify-center rounded-xl border border-border bg-surface px-4 text-sm font-semibold text-text hover:bg-surface-alt"
+            >
+              تغيير كلمة المرور
+            </Link>
             <Button
               variant="secondary"
               className="mt-4 w-full text-danger-strong lg:hidden"

@@ -242,6 +242,15 @@ class UserActiveSerializer(serializers.Serializer):
     is_active = serializers.BooleanField()
 
 
+class TemporaryPasswordSerializer(serializers.Serializer):
+    temporary_password = serializers.CharField(read_only=True)
+
+
+class ChangePasswordSerializer(serializers.Serializer):
+    current_password = serializers.CharField(write_only=True, trim_whitespace=False)
+    new_password = serializers.CharField(write_only=True, trim_whitespace=False, max_length=128)
+
+
 class PublicProfileSerializer(serializers.ModelSerializer):
     """What a member shows on their department's public page — only with their own consent."""
 

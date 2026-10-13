@@ -58,6 +58,8 @@ export function RequireAuth({
     const next = encodeURIComponent(location.pathname + location.search);
     return <Navigate to={`/login?next=${next}`} replace />;
   }
+  // An administrator gave this account a temporary password: nothing else until it is changed.
+  if (me.data.must_change_password) return <Navigate to="/change-password" replace />;
   if (allow && !allow(me.data)) return denied;
   return children;
 }

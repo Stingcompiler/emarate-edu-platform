@@ -216,3 +216,67 @@ def test_disabling_an_account_ends_its_open_session(staff, make_user):
     services.set_active(RequestMeta(actor=admin), staff, False)
     services.set_active(RequestMeta(actor=admin), staff, True)  # back on: the old cookie stays dead
     assert client.get("/api/v1/me").status_code == 401
+
+
+def test_the_admin_resets_a_users_password(staff, make_user, api, settings):
+    """A system admin gives an account a temporary password: shown once, must be changed, and
+    the account's open sessions end at once."""
+    from audit.models import AuditLog
+
+    admin = make_user(Role.SYSTEM_ADMIN)
+    old = APIClient()
+    _login(old)
+    assert old.get("/api/v1/me").status_code == 200
+
+    client = api(admin)
+    url = f"/api/v1/users/{staff.public_id}/reset-password"
+    reply = client.post(url)
+    assert reply.status_code == 200, reply.data
+    temporary = reply.data["temporary_password"]
+    assert len(temporary) == 12 and reply["Cache-Control"] == "no-store"
+
+    assert old.get("/api/v1/me").status_code == 401  # the open session ended
+    assert _login(APIClient(), password=PASSWORD).status_code == 400  # the old password is gone
+    fresh = APIClient()
+    signed = _login(fresh, password=temporary)
+    assert signed.status_code == 200 and signed.data["must_change_password"] is True
+
+    entry = AuditLog.objects.filter(action="account.password_admin_reset").get()
+    assert temporary not in str(entry.new) and entry.actor_id == admin.pk
+
+    # Only a system admin, never one's own account, and only an active account.
+    assert api(staff).post(f"/api/v1/users/{admin.public_id}/reset-password").status_code in (
+        403,
+        404,
+    )
+    assert client.post(f"/api/v1/users/{admin.public_id}/reset-password").status_code == 403
+    staff.is_active = False
+    staff.save(update_fields=["is_active"])
+    assert client.post(url).status_code == 409
+
+
+def test_a_user_changes_their_own_password(staff):
+    """Review-less owner request 2026-10-13: the account that was reset changes its password,
+    the flag clears, and the browser keeps working with fresh cookies."""
+    staff.must_change_password = True
+    staff.save(update_fields=["must_change_password"])
+    client = APIClient()
+    _login(client)
+    url = "/api/v1/auth/change-password"
+    new = "A-Brand-New-Str0ng-Pass-2026"
+    assert client.post(url, {"current_password": "wrong", "new_password": new}).status_code == 400
+    assert (
+        client.post(url, {"current_password": PASSWORD, "new_password": PASSWORD}).status_code
+        == 400
+    )
+    assert (
+        client.post(url, {"current_password": PASSWORD, "new_password": "12345678"}).status_code
+        == 400
+    )
+    done = client.post(url, {"current_password": PASSWORD, "new_password": new})
+    assert done.status_code == 200, done.data
+    me = client.get("/api/v1/me")
+    assert me.status_code == 200 and me.data["must_change_password"] is False
+    assert _login(APIClient(), password=PASSWORD).status_code == 400
+    assert _login(APIClient(), password=new).status_code == 200
+    assert APIClient().post(url, {"current_password": "x", "new_password": new}).status_code == 401
