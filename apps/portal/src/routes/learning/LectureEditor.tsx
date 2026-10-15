@@ -281,7 +281,7 @@ function Resources({
       <Card className="divide-y divide-border-soft">
         {lecture.resources.map((r) => (
           <div key={r.id} className="flex items-center gap-3 px-4 py-3 text-sm">
-            <span className="grid size-9 place-items-center rounded-lg bg-primary-soft text-primary-700">
+            <span className="grid size-9 shrink-0 place-items-center text-primary">
               {r.kind === "video" ? (
                 <Video size={16} aria-hidden />
               ) : r.kind === "link" ? (

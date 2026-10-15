@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Link } from "react-router";
 
 import { PortalShell } from "../../components/PortalShell";
-import { FilterBar, Card, Chip, StatusBadge } from "../../components/ui";
+import { Avatar, Card, Chip, FilterBar, StatusBadge } from "../../components/ui";
 import { api, ok } from "../../lib/api";
 import { Picker, initials, num, useDepartments } from "../../lib/reports";
 import { Pager } from "../../components/Pager";
@@ -100,9 +100,7 @@ export function StudentRecords() {
                     to={`/students/${r.public_id}`}
                     className="flex items-center gap-3 font-semibold text-text hover:text-primary"
                   >
-                    <span className="grid size-8 shrink-0 place-items-center rounded-full bg-primary-soft text-xs text-primary-700">
-                      {initials(r.full_name_ar)}
-                    </span>
+                    <Avatar text={initials(r.full_name_ar)} size="sm" tone="primary" />
                     {r.full_name_ar}
                   </Link>
                 </th>
@@ -141,9 +139,7 @@ export function StudentRecords() {
             to={`/students/${r.public_id}`}
             className="flex items-center gap-3 px-4 py-3 hover:bg-surface-alt"
           >
-            <span className="grid size-9 shrink-0 place-items-center rounded-full bg-primary-soft text-xs font-semibold text-primary-700">
-              {initials(r.full_name_ar)}
-            </span>
+            <Avatar text={initials(r.full_name_ar)} size="md" tone="primary" />
             <span className="min-w-0 flex-1">
               <b className="block truncate text-sm text-text">{r.full_name_ar}</b>
               <span className="text-xs text-text-muted">

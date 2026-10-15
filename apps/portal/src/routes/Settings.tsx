@@ -336,9 +336,7 @@ function PushCard() {
 
   return (
     <Card className="flex flex-wrap items-center gap-3 p-4">
-      <span className="grid size-10 place-items-center rounded-full bg-primary-soft text-primary-700">
-        <BellRing size={20} aria-hidden />
-      </span>
+      <BellRing size={22} className="shrink-0 text-primary" aria-hidden />
       <div className="min-w-0 flex-1">
         <p className="text-sm font-semibold text-text">الإشعارات على هذا الجهاز</p>
         <p className="text-sm leading-relaxed text-text-muted">{PUSH_TEXT[state]}</p>

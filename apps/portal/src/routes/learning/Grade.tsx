@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 
 import { PortalShell } from "../../components/PortalShell";
-import { Button, Card, Notice, SectionLabel, problemMessage } from "../../components/ui";
+import { Avatar, Button, Card, Notice, problemMessage, SectionLabel } from "../../components/ui";
 import { api, ok } from "../../lib/api";
 import { when, score as markOf } from "../../lib/format";
 import { initials } from "../../lib/reports";
@@ -160,11 +160,9 @@ export function Grade() {
                         type="button"
                         aria-current={current ? "page" : undefined}
                         onClick={() => navigate(`/submissions/${x.public_id}`)}
-                        className={`flex w-full items-center gap-2 px-3 py-2.5 text-start hover:bg-surface-alt ${current ? "border-s-2 border-primary bg-primary-soft/40" : ""}`}
+                        className={`flex w-full items-center gap-2 px-3 py-2.5 text-start hover:bg-surface-alt ${current ? "bg-primary-soft/50" : ""}`}
                       >
-                        <span className="grid size-8 shrink-0 place-items-center rounded-full bg-surface-alt text-xs font-semibold text-text-muted">
-                          {initials(x.student.full_name_ar)}
-                        </span>
+                        <Avatar text={initials(x.student.full_name_ar)} size="sm" tone="neutral" />
                         <span className="min-w-0 flex-1">
                           <b className="block truncate text-sm text-text">
                             {x.student.full_name_ar}
@@ -201,9 +199,7 @@ export function Grade() {
           {/* Keyed by the submission: the next one slides in (review §2.6, sequential grading). */}
           <div key={id} className="motion-next space-y-4">
             <Card className="flex items-center gap-3 p-4">
-              <span className="grid size-11 place-items-center rounded-full bg-primary-soft text-sm font-semibold text-primary-700">
-                {initials(s.student.full_name_ar)}
-              </span>
+              <Avatar text={initials(s.student.full_name_ar)} size="lg" tone="primary" />
               <span className="min-w-0 flex-1">
                 <b className="block text-text">{s.student.full_name_ar}</b>
                 <span className="text-xs text-text-muted">

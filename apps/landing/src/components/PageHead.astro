@@ -38,7 +38,8 @@ const breadcrumbLd = {
 <div
   class:list={[
     feature
-      ? // Muted text inside a featured head (slots included) stays readable on navy.
+      ? // ui-allow: the featured page head band (brand navy depth, no gradient text or buttons)
+        // Muted text inside a featured head (slots included) stays readable on navy.
         "relative overflow-hidden bg-gradient-to-bl from-navy-800 via-navy-700 to-navy-500 text-white [&_.text-text]:text-white [&_.text-text-muted]:text-navy-200"
       : "border-b border-border-soft bg-bg-subtle",
   ]}

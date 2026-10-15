@@ -1,19 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  Activity,
-  Building2,
-  Mail,
-  Settings2,
-  Users,
-  Database,
-  Zap,
-  HardDrive,
-  UserCheck,
-} from "lucide-react";
+import { Activity, Building2, Mail, Settings2, Users } from "lucide-react";
 import { Link } from "react-router";
 
 import { PortalShell } from "../../components/PortalShell";
-import { Card, SectionLabel, Switch } from "../../components/ui";
+import { Card, SectionLabel, Summary, Switch } from "../../components/ui";
 import { api, ok } from "../../lib/api";
 import { actionLabel } from "../department/Audit";
 import { useMe } from "../../lib/auth";
@@ -112,31 +102,29 @@ export function AdminHome() {
       title="إدارة النظام"
       subtitle={`${me.data?.full_name_ar ?? ""} · مدير النظام${health.data?.version ? ` · الإصدار ${health.data.version}` : ""}`}
     >
-      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 xl:grid-cols-6">
-        {(
+      <Summary
+        wide
+        title="حالة النظام"
+        rows={(
           [
-            [Activity, "الخدمة", healthy ? "سليمة" : "تحقق", healthy],
+            ["الخدمة", healthy ? "سليمة" : "تحقق", healthy],
             [
-              Database,
               "قاعدة البيانات",
               checks.database === "ok" ? "متصلة" : (checks.database ?? "—"),
               checks.database === "ok",
             ],
             [
-              Zap,
               "الذاكرة المؤقتة",
               checks.cache === "ok" ? "تعمل" : (checks.cache ?? "—"),
               checks.cache === "ok",
             ],
             [
-              HardDrive,
               "آخر نسخة احتياطية",
               status.data?.backups.latest ? when(status.data.backups.latest) : "لا نسخ بعد",
               !!status.data?.backups.latest &&
                 Date.now() - new Date(status.data.backups.latest).getTime() < 8 * 86_400_000,
             ],
             [
-              Mail,
               "البريد",
               status.data
                 ? status.data.email.sends_real_mail
@@ -146,28 +134,20 @@ export function AdminHome() {
               !!status.data?.email.sends_real_mail,
             ],
             [
-              UserCheck,
               "حسابات الطلاب من السجلات",
               status.data
                 ? `${num(status.data.students.accounts)} / ${num(status.data.students.records)}`
                 : "—",
               true,
             ],
-          ] as [typeof Activity, string, string, boolean][]
-        ).map(([Icon, l, v, good]) => (
-          <Card key={l} className="flex items-center gap-3 p-3">
-            <span
-              className={`grid size-9 shrink-0 place-items-center rounded-full ${good ? "bg-success-soft text-success-strong" : "bg-warning-soft text-warning-strong"}`}
-            >
-              <Icon size={17} aria-hidden />
-            </span>
-            <span className="min-w-0">
-              <b className="block truncate text-sm text-text">{v}</b>
-              <span className="text-[11px] text-text-muted">{l}</span>
-            </span>
-          </Card>
-        ))}
-      </div>
+          ] as [string, string, boolean][]
+        ).map(([label, value, good]) => ({
+          label,
+          value,
+          note: good ? "" : "يحتاج نظرة",
+          tone: "warn" as const,
+        }))}
+      />
       <Link
         to="/system/roles"
         className="tap-44 mt-3 inline-flex items-center gap-1 text-sm font-semibold text-primary hover:underline"

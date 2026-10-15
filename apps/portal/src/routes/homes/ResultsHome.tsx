@@ -1,9 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
-import { FileUp, Search, SlidersHorizontal } from "lucide-react";
 import { Link } from "react-router";
 
 import { PortalShell } from "../../components/PortalShell";
-import { Card, SectionLabel, StatusBadge, STATUS_LABELS } from "../../components/ui";
+import { ActionLinks, Card, SectionLabel, StatusBadge, STATUS_LABELS } from "../../components/ui";
 import { api, ok } from "../../lib/api";
 import { useMe } from "../../lib/auth";
 import { when, fileName } from "../../lib/format";
@@ -43,23 +42,7 @@ export function ResultsHome() {
       title="النتائج"
       subtitle={`${me.data?.full_name_ar ?? ""} · مسؤول النتائج · الرفع بملف جاهز فقط`}
     >
-      <div className="grid grid-cols-3 gap-2">
-        {[
-          { to: "/result-imports", label: "رفع ملف نتائج", icon: FileUp },
-          { to: "/results/search", label: "بحث نتيجة", icon: Search },
-          { to: "/results/settings", label: "إعدادات العرض", icon: SlidersHorizontal },
-        ].map((a) => (
-          <Link
-            key={a.to}
-            to={a.to}
-            className="rounded-2xl bg-surface p-3 text-center text-xs font-semibold shadow-sm hover:bg-surface-alt"
-          >
-            <a.icon size={20} className="mx-auto mb-1 text-primary" aria-hidden />
-            {a.label}
-          </Link>
-        ))}
-      </div>
-      <div className="mt-6 lg:grid lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start lg:gap-6">
+      <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start lg:gap-6">
         <div className="space-y-4">
           <SectionLabel>يحتاج إجراءً</SectionLabel>
           <Inbox
@@ -91,6 +74,14 @@ export function ResultsHome() {
                 to: "/result-corrections",
                 tone: "info",
               },
+            ]}
+          />
+          <SectionLabel>الإجراءات</SectionLabel>
+          <ActionLinks
+            items={[
+              { to: "/result-imports", label: "رفع ملف نتائج", hint: "ملف جاهز فقط" },
+              { to: "/results/search", label: "بحث نتيجة" },
+              { to: "/results/settings", label: "إعدادات العرض" },
             ]}
           />
           <SectionLabel>الدفعات</SectionLabel>

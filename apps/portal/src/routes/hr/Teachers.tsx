@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Link } from "react-router";
 
 import { PortalShell } from "../../components/PortalShell";
-import { FilterBar, Card, Chip, EmptyState } from "../../components/ui";
+import { Avatar, Card, Chip, EmptyState, FilterBar } from "../../components/ui";
 import { api } from "../../lib/api";
 import { useMe } from "../../lib/auth";
 import { can } from "../../lib/nav";
@@ -222,9 +222,7 @@ export function Teachers() {
                 to={`/hr/teachers/${t.public_id}`}
                 className="col-span-2 flex min-w-0 items-center gap-3 xl:col-span-1"
               >
-                <span className="grid size-9 shrink-0 place-items-center rounded-full bg-primary-soft text-xs font-semibold text-primary-700">
-                  {initials(t.name)}
-                </span>
+                <Avatar text={initials(t.name)} size="md" tone="primary" />
                 <span className="min-w-0">
                   <span className="block truncate font-semibold text-text">{t.name}</span>
                   <span className="block truncate text-xs text-text-muted">{ROLE_LINE(t)}</span>

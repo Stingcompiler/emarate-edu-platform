@@ -16,7 +16,7 @@ import type { ReactNode } from "react";
 import { Link, useNavigate } from "react-router";
 
 import { PortalShell } from "../../components/PortalShell";
-import { Button, Card, SectionLabel } from "../../components/ui";
+import { Avatar, Button, Card, SectionLabel } from "../../components/ui";
 import { api, ok } from "../../lib/api";
 import { useMe, useSignOut } from "../../lib/auth";
 import { initials, num } from "../../lib/reports";
@@ -72,9 +72,7 @@ export function Me() {
   return (
     <PortalShell title="أنا">
       <Card className="flex items-center gap-4 p-4">
-        <span className="grid size-14 place-items-center rounded-full bg-primary-soft text-lg font-semibold text-primary-700">
-          {initials(me.data?.full_name_ar ?? "")}
-        </span>
+        <Avatar text={initials(me.data?.full_name_ar ?? "")} size="2xl" tone="primary" />
         <span className="min-w-0 flex-1">
           <b className="block text-lg text-text">{me.data?.full_name_ar}</b>
           {s && (

@@ -19,7 +19,8 @@ export function LiveBanner({
       className="flex items-center gap-3 rounded-2xl bg-header p-4 text-white shadow-sm hover:opacity-95"
     >
       <span className="relative grid size-3 shrink-0 place-items-center" aria-hidden>
-        <span className="absolute size-3 animate-ping rounded-full bg-danger opacity-60" />
+        {/* ui-allow: the live indicator, the only moving dot on a page */}
+        <span className="absolute size-3 motion-safe:animate-ping rounded-full bg-danger opacity-60" />
         <span className="relative size-2.5 rounded-full bg-danger" />
       </span>
       <span className="min-w-0 flex-1">

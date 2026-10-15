@@ -1,3 +1,5 @@
+import { existsSync } from "node:fs";
+
 import { test } from "@playwright/test";
 
 import { signIn } from "./helpers";
@@ -7,7 +9,6 @@ import { signIn } from "./helpers";
 // unless SHOTS is set, so CI never runs it. Motion is reduced and the clock is fixed.
 const LABEL = process.env.SHOTS;
 test.skip(!LABEL, "set SHOTS=<label> (pnpm shots <label>)");
-test.describe.configure({ mode: "serial" });
 
 const WIDTHS = [
   { name: "390", width: 390, height: 844 },
@@ -29,27 +30,31 @@ const SCREENS: [string, string, string][] = [
   ["site-home", "site@demo.ecst.test", "/"],
 ];
 
-test("screens", async ({ browser, isMobile }) => {
-  test.skip(isMobile, "one browser; viewports are set below");
-  test.setTimeout(30 * 60_000);
-  for (const [name, account, path] of SCREENS) {
-    const context = await browser.newContext({ reducedMotion: "reduce", locale: "ar" });
-    const page = await context.newPage();
-    await signIn(page, account);
-    for (const scheme of SCHEMES) {
-      await page.emulateMedia({ colorScheme: scheme, reducedMotion: "reduce" });
+// One test per screen and scheme, so a browser that dies on a busy machine costs one screen,
+// and a rerun skips what is already captured.
+for (const [name, account, path] of SCREENS) {
+  for (const scheme of SCHEMES) {
+    test(`${name} (${scheme})`, async ({ browser, isMobile }) => {
+      test.skip(isMobile, "one browser; viewports are set below");
+      test.setTimeout(10 * 60_000);
+      const files = WIDTHS.map((w) => `shots/${LABEL}/${name}--${w.name}--${scheme}.png`);
+      test.skip(
+        files.every((f) => existsSync(f)),
+        "already captured",
+      );
+      const context = await browser.newContext({ reducedMotion: "reduce", locale: "ar" });
+      const page = await context.newPage();
       await page.addInitScript((value) => localStorage.setItem("ecst-theme", value), scheme);
-      for (const size of WIDTHS) {
+      await signIn(page, account);
+      await page.emulateMedia({ colorScheme: scheme, reducedMotion: "reduce" });
+      for (const [i, size] of WIDTHS.entries()) {
         await page.setViewportSize({ width: size.width, height: size.height });
         await page.goto(path);
         await page.waitForLoadState("networkidle");
-        await page.waitForTimeout(500);
-        await page.screenshot({
-          path: `shots/${LABEL}/${name}--${size.name}--${scheme}.png`,
-          fullPage: true,
-        });
+        await page.waitForTimeout(2000);
+        await page.screenshot({ path: files[i]!, fullPage: true });
       }
-    }
-    await context.close();
+      await context.close();
+    });
   }
-});
+}

@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { X } from "lucide-react";
 
 import { PortalShell } from "../../components/PortalShell";
-import { Card, Notice, SectionLabel, problemMessage } from "../../components/ui";
+import { Avatar, Card, Notice, problemMessage, SectionLabel } from "../../components/ui";
 import { api, ok } from "../../lib/api";
 import { initials, num, useDepartments } from "../../lib/reports";
 import { count, N } from "../../lib/format";
@@ -90,9 +90,7 @@ export function Registrars() {
           );
           return (
             <div key={u.public_id} className="flex flex-wrap items-center gap-3 px-4 py-3">
-              <span className="grid size-10 place-items-center rounded-full bg-primary-soft text-sm font-semibold text-primary-700">
-                {initials(u.full_name_ar)}
-              </span>
+              <Avatar text={initials(u.full_name_ar)} size="lg" tone="primary" />
               <span className="min-w-0 flex-1">
                 <b className="block text-text">{u.full_name_ar}</b>
                 <bdi className="block truncate text-xs text-text-muted" dir="ltr">

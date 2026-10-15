@@ -1,9 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
-import { Bell, FolderPlus, ScrollText } from "lucide-react";
 import { Link } from "react-router";
 
 import { PortalShell } from "../../components/PortalShell";
-import { Card, SectionLabel } from "../../components/ui";
+import { ActionLinks, Avatar, Card, SectionLabel } from "../../components/ui";
 import { api, ok } from "../../lib/api";
 import { useMe } from "../../lib/auth";
 import { when, count, N } from "../../lib/format";
@@ -106,22 +105,13 @@ export function AffairsHome() {
             );
           })}
           <SectionLabel>الإجراءات</SectionLabel>
-          <div className="grid grid-cols-3 gap-2 text-center text-xs">
-            {[
-              { to: "/regulations/new", label: "نشر لائحة أو ضابط", icon: ScrollText },
-              { to: "/notifications/new", label: "إشعار تنظيمي للطلاب", icon: Bell },
-              { to: "/cases/new", label: "فتح حالة جديدة", icon: FolderPlus },
-            ].map((a) => (
-              <Link
-                key={a.to}
-                to={a.to}
-                className="rounded-2xl bg-surface p-3 font-semibold shadow-sm hover:bg-surface-alt"
-              >
-                <a.icon size={20} className="mx-auto mb-1 text-primary" aria-hidden />
-                {a.label}
-              </Link>
-            ))}
-          </div>
+          <ActionLinks
+            items={[
+              { to: "/regulations/new", label: "نشر لائحة أو ضابط" },
+              { to: "/notifications/new", label: "إشعار تنظيمي للطلاب" },
+              { to: "/cases/new", label: "فتح حالة جديدة" },
+            ]}
+          />
         </div>
         <aside className="mt-6 lg:mt-0">
           <SectionLabel>الحالات المفتوحة · {num(open.data?.count ?? 0)}</SectionLabel>
@@ -132,9 +122,7 @@ export function AffairsHome() {
                 to={`/cases/${c.public_id}`}
                 className="flex items-center gap-3 px-4 py-3 hover:bg-surface-alt"
               >
-                <span className="grid size-9 shrink-0 place-items-center rounded-full bg-warning-soft text-xs font-semibold text-warning-strong">
-                  {KIND[c.kind] ?? "؟"}
-                </span>
+                <Avatar text={KIND[c.kind] ?? "؟"} tone="warning" />
                 <span className="min-w-0">
                   <b className="block truncate text-sm text-text">{c.title}</b>
                   <span className="text-xs text-text-muted">فُتحت {when(c.created_at)}</span>

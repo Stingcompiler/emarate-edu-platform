@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router";
 
 import { PortalShell } from "../../components/PortalShell";
-import { Button, Card, SectionLabel } from "../../components/ui";
+import { Avatar, Button, Card, SectionLabel } from "../../components/ui";
 import { api, ok } from "../../lib/api";
 import { useMe } from "../../lib/auth";
 import { can } from "../../lib/nav";
@@ -70,9 +70,7 @@ export function HRHome() {
                     to={`/hr/teachers/${t.public_id}`}
                     className="flex items-center gap-3 px-4 py-3 hover:bg-surface-alt"
                   >
-                    <span className="grid size-9 shrink-0 place-items-center rounded-full bg-danger-soft text-xs font-semibold text-danger-strong">
-                      {initials(t.name)}
-                    </span>
+                    <Avatar text={initials(t.name)} size="md" tone="danger" />
                     <span className="min-w-0 flex-1">
                       <span className="block truncate text-sm font-semibold text-text">
                         {t.name}

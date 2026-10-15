@@ -199,7 +199,7 @@ function Menus() {
               <li key={i}>
                 <span className="font-semibold text-text">{it.label_ar || "—"}</span>
                 {it.children.length > 0 && (
-                  <ul className="mt-1 space-y-0.5 border-s-2 border-border-soft ps-3 text-text-muted">
+                  <ul className="mt-1 space-y-0.5 border-s border-border ps-3 text-text-muted">
                     {it.children.map((c, j) => (
                       <li key={j}>{c.label_ar || "—"}</li>
                     ))}
@@ -234,7 +234,7 @@ function Menus() {
               onRemove={() => setItems((xs) => xs.filter((_, j) => j !== i))}
             />
             {it.children.length > 0 && (
-              <div className="mt-2 space-y-2 border-s-2 border-border-soft ps-3">
+              <div className="mt-2 space-y-2 border-s border-border ps-3">
                 {it.children.map((c, ci) => (
                   <MenuRow
                     key={ci}

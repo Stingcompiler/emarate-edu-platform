@@ -11,6 +11,7 @@ import {
   Notice,
   SectionLabel,
   problemMessage,
+  CodeTile,
 } from "../../components/ui";
 import { useConfirm } from "../../components/Confirm";
 import { SuccessMark } from "../../components/motion";
@@ -211,9 +212,7 @@ function ChooseProgram({
               i.program_code === preferred ? "bg-primary-soft/50" : ""
             }`}
           >
-            <span className="grid size-11 shrink-0 place-items-center rounded-lg bg-primary-soft text-[11px] font-bold leading-tight text-primary-700">
-              {i.program_code}
-            </span>
+            <CodeTile top={i.program_code} />
             <span className="min-w-0 flex-1">
               <span className="block text-sm font-semibold text-text">{i.program_name}</span>
               {i.program_code === preferred && (

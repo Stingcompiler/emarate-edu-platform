@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Link, useParams } from "react-router";
 
 import { PortalShell } from "../../components/PortalShell";
-import { Card, SectionLabel, StatusBadge } from "../../components/ui";
+import { Avatar, Card, SectionLabel, StatusBadge } from "../../components/ui";
 import { api, ok } from "../../lib/api";
 import { useMe } from "../../lib/auth";
 import { can } from "../../lib/nav";
@@ -59,9 +59,7 @@ export function StudentRecord() {
         <div className="lg:grid lg:grid-cols-2 lg:items-start lg:gap-6">
           <div className="space-y-4">
             <Card className="flex items-center gap-3 p-4">
-              <span className="grid size-12 place-items-center rounded-full bg-primary-soft font-semibold text-primary-700">
-                {initials(s.full_name_ar)}
-              </span>
+              <Avatar text={initials(s.full_name_ar)} size="xl" tone="primary" />
               <span className="min-w-0 flex-1">
                 <b className="block text-text">{s.full_name_ar}</b>
                 {s.full_name_en && (

@@ -4,12 +4,13 @@ import { useNavigate, useSearchParams } from "react-router";
 
 import { PortalShell } from "../../components/PortalShell";
 import {
+  Avatar,
   Button,
   Card,
   Chip,
   Notice,
-  SectionLabel,
   problemMessage,
+  SectionLabel,
   SideNote,
 } from "../../components/ui";
 import { api, ok } from "../../lib/api";
@@ -87,9 +88,7 @@ export function NoticeNew() {
           <SectionLabel>المستلم</SectionLabel>
           {teacher ? (
             <Card className="flex items-center gap-3 p-4">
-              <span className="grid size-10 place-items-center rounded-full bg-primary-soft text-sm font-semibold text-primary-700">
-                {initials(teacher.name)}
-              </span>
+              <Avatar text={initials(teacher.name)} size="lg" tone="primary" />
               <span className="flex-1">
                 <b className="block text-sm text-text">{teacher.name}</b>
                 <span className="text-xs text-text-muted">{ROLE_LINE(teacher)}</span>
