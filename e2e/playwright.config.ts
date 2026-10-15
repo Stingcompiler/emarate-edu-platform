@@ -10,6 +10,8 @@ import { defineConfig, devices } from "@playwright/test";
 const CI = !!process.env.CI;
 // Ports can move (E2E_API_PORT, E2E_PORTAL_PORT, E2E_SITE_PORT) when another project on the
 // machine already uses the defaults. Set here so the servers and the tests agree.
+// A busy machine needs longer to start the three servers (E2E_BOOT_MS).
+const BOOT_MS = Number(process.env.E2E_BOOT_MS ?? 120_000);
 const API_PORT = (process.env.E2E_API_PORT ??= "8001");
 const PORTAL_PORT = (process.env.E2E_PORTAL_PORT ??= "5174");
 const SITE_PORT = (process.env.E2E_SITE_PORT ??= "4322");
@@ -42,7 +44,7 @@ export default defineConfig({
       command: "bash e2e/serve-api.sh",
       cwd: "..",
       url: `${API}/api/public/health`,
-      timeout: 120_000,
+      timeout: BOOT_MS,
       reuseExistingServer: false,
       stdout: "ignore",
       stderr: "ignore",
@@ -57,7 +59,7 @@ export default defineConfig({
         PUBLIC_PORTAL_URL: PORTAL,
         ECST_E2E: "1",
       },
-      timeout: 120_000,
+      timeout: BOOT_MS,
       reuseExistingServer: false,
       stdout: "ignore",
       stderr: "ignore",
@@ -67,7 +69,7 @@ export default defineConfig({
       cwd: "..",
       url: PORTAL,
       env: { ECST_API_ORIGIN: API },
-      timeout: 120_000,
+      timeout: BOOT_MS,
       reuseExistingServer: false,
       stdout: "ignore",
       stderr: "ignore",

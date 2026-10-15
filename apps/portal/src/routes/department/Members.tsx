@@ -5,13 +5,14 @@ import { Link } from "react-router";
 import { DepartmentSwitch } from "../../components/DepartmentSwitch";
 import { PortalShell } from "../../components/PortalShell";
 import {
-  FilterBar,
+  Avatar,
   Button,
   Card,
   Chip,
+  FilterBar,
   Notice,
-  SectionLabel,
   problemMessage,
+  SectionLabel,
 } from "../../components/ui";
 import { isWide } from "../../lib/media";
 import { api, ok } from "../../lib/api";
@@ -112,9 +113,7 @@ export function Members() {
                 onClick={() => setPicked(m.user.public_id)}
                 className={`flex w-full items-center gap-3 px-4 py-3 text-start hover:bg-surface-alt ${selected?.user.public_id === m.user.public_id ? "bg-primary-soft/40" : ""}`}
               >
-                <span className="grid size-9 shrink-0 place-items-center rounded-full bg-primary-soft text-xs font-semibold text-primary-700">
-                  {initials(m.user.full_name_ar)}
-                </span>
+                <Avatar text={initials(m.user.full_name_ar)} size="md" tone="primary" />
                 <span className="min-w-0 flex-1">
                   <b className="block truncate text-sm text-text">{m.user.full_name_ar}</b>
                   {/* Course codes wrap on phones instead of being cut after the first one. */}
@@ -133,9 +132,7 @@ export function Members() {
           {selected ? (
             <Card className="space-y-3 p-4">
               <div className="flex items-center gap-3">
-                <span className="grid size-11 place-items-center rounded-full bg-primary-soft font-semibold text-primary-700">
-                  {initials(selected.user.full_name_ar)}
-                </span>
+                <Avatar text={initials(selected.user.full_name_ar)} size="lg" tone="primary" />
                 <span className="min-w-0">
                   <b className="block text-text">{selected.user.full_name_ar}</b>
                   <span className="text-xs text-text-muted">

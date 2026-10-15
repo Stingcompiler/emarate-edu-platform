@@ -7,8 +7,9 @@ import type {
   TextareaHTMLAttributes,
 } from "react";
 
-import { Eye, EyeOff } from "lucide-react";
+import { ChevronLeft, Eye, EyeOff } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { Link } from "react-router";
 
 import { SITE_URL, useSiteLogo } from "../lib/site";
 import { CountUp } from "./motion";
@@ -472,6 +473,131 @@ export function SideFigures({ title, rows }: { title?: string; rows: [string, Re
               {typeof value === "number" ? <CountUp value={value} /> : value}
             </dd>
             <dt className="text-xs text-text-muted">{label}</dt>
+          </div>
+        ))}
+      </dl>
+    </Card>
+  );
+}
+
+/** A loading placeholder (the only place a pulse is allowed: it says "still loading"). */
+export function Skeleton({ className = "" }: { className?: string }) {
+  // ui-allow: loading placeholder
+  return <div className={`motion-safe:animate-pulse bg-surface-alt ${className}`} aria-hidden />;
+}
+
+/** A page's actions as one quiet list (label, optional hint, chevron), not a row of equal tiles. */
+export function ActionLinks({ items }: { items: { to: string; label: string; hint?: string }[] }) {
+  return (
+    <Card className="divide-y divide-border-soft">
+      {items.map((a) => (
+        <Link
+          key={a.to}
+          to={a.to}
+          className="flex min-h-12 items-center gap-3 px-4 py-2.5 text-sm hover:bg-surface-alt"
+        >
+          <span className="min-w-0 flex-1">
+            <b className="block text-text">{a.label}</b>
+            {a.hint && <span className="block text-xs text-text-muted">{a.hint}</span>}
+          </span>
+          <ChevronLeft size={16} className="text-text-muted" aria-hidden />
+        </Link>
+      ))}
+    </Card>
+  );
+}
+
+/**
+ * The one initials avatar (ui-profile: the only tinted circle allowed). Sizes follow the
+ * lists that use it; `tone` only changes the colour pair.
+ */
+export function Avatar({
+  text,
+  size = "md",
+  tone = "primary",
+}: {
+  text: string;
+  size?: "sm" | "md" | "lg" | "xl" | "2xl";
+  tone?: "primary" | "danger" | "warning" | "neutral";
+}) {
+  const sizes = {
+    sm: "size-8 text-xs",
+    md: "size-9 text-xs",
+    lg: "size-11 text-sm",
+    xl: "size-12 text-sm",
+    "2xl": "size-14 text-lg",
+  }[size];
+  const tones = {
+    primary: "bg-primary-soft text-primary-700",
+    danger: "bg-danger-soft text-danger-strong",
+    warning: "bg-warning-soft text-warning-strong",
+    neutral: "bg-surface-alt text-text-muted",
+  }[tone];
+  return (
+    // ui-allow: initials avatar, the one shared component
+    <span
+      aria-hidden
+      className={`grid shrink-0 place-items-center rounded-full font-semibold ${sizes} ${tones}`}
+    >
+      {text}
+    </span>
+  );
+}
+
+/**
+ * A page's key figures as one flat list: label on one side, value on the other, status in
+ * words (`note`, `tone`) instead of a coloured tile per number. Use instead of a row of
+ * equal stat cards.
+ */
+export function Summary({
+  title,
+  rows,
+  wide = false,
+}: {
+  title?: string;
+  /** Two columns from `lg`, for a full-width block (an even number of rows). */
+  wide?: boolean;
+  rows: {
+    label: string;
+    value: ReactNode;
+    note?: string;
+    tone?: "good" | "warn" | "bad";
+    to?: string;
+  }[];
+}) {
+  const noteTone = {
+    good: "text-success-strong",
+    warn: "text-warning-strong",
+    bad: "text-danger-strong",
+  };
+  return (
+    <Card className="p-4">
+      {title && <h2 className="mb-1 text-sm font-bold text-text">{title}</h2>}
+      <dl
+        className={
+          wide
+            ? "lg:grid lg:grid-cols-2 lg:gap-x-10 lg:[&>:nth-last-child(-n+2)]:border-b-0 [&>:last-child]:border-b-0"
+            : "[&>:last-child]:border-b-0"
+        }
+      >
+        {rows.map((r) => (
+          <div
+            key={r.label}
+            className="flex items-baseline justify-between gap-3 border-b border-border-soft py-2.5"
+          >
+            <dt className="text-sm text-text-muted">{r.label}</dt>
+            <dd className="flex flex-wrap items-baseline justify-end gap-x-2 text-end">
+              <b className="text-base font-bold text-text">
+                {typeof r.value === "number" ? <CountUp value={r.value} /> : r.value}
+              </b>
+              {r.note && (
+                <span
+                  className={`text-xs font-semibold ${r.tone ? noteTone[r.tone] : "text-text-muted"}`}
+                >
+                  {r.note}
+                </span>
+              )}
+            </dd>
           </div>
         ))}
       </dl>

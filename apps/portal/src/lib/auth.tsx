@@ -85,7 +85,7 @@ function Unavailable({ onRetry }: { onRetry: () => void }) {
 export function Splash() {
   return (
     <div className="grid min-h-dvh place-items-center bg-bg-subtle" aria-busy="true">
-      <img src="/favicon.svg" alt="" width={56} height={56} className="animate-pulse" />
+      <img src="/favicon.svg" alt="" width={56} height={56} />
     </div>
   );
 }

@@ -85,7 +85,7 @@ export function StudentImports() {
                 {["رفع الملف", "الأعمدة المكتشفة", "المعاينة: إنشاء وتحديث وأخطاء", "الاعتماد"].map(
                   (step, i) => (
                     <li key={step} className="flex items-center gap-2">
-                      <span className="grid size-6 shrink-0 place-items-center rounded-full bg-primary-soft text-xs font-bold text-primary-700">
+                      <span className="w-5 shrink-0 text-center text-sm font-bold text-primary-700">
                         {num(i + 1)}
                       </span>
                       {step}

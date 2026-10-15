@@ -48,3 +48,6 @@ backend/.vapid-dev.json
 
 # Hypothesis example database (contract tests)
 .hypothesis/
+
+# review screenshots (pnpm shots)
+/shots/

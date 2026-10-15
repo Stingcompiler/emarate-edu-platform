@@ -13,7 +13,9 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "pnpm -r --if-present test",
-    "e2e": "playwright test -c e2e/playwright.config.ts"
+    "e2e": "playwright test -c e2e/playwright.config.ts",
+    "shots": "SHOTS=${SHOTS:-current} pnpm e2e shots.spec.ts",
+    "lint:ui": "bash scripts/lint-ui.sh"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.13.0",

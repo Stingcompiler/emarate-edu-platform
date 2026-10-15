@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 
 import { PortalShell } from "../../components/PortalShell";
-import { Button, Card, Notice, problemMessage } from "../../components/ui";
+import { Avatar, Button, Card, Notice, problemMessage } from "../../components/ui";
 import { api, ok } from "../../lib/api";
 import { when, count, N } from "../../lib/format";
 import { initials, num } from "../../lib/reports";
@@ -80,9 +80,7 @@ export function Approvals() {
             className={`space-y-3 p-4 ${leaving.has(r.public_id) ? "motion-leave" : ""}`}
           >
             <div className="flex items-center gap-3">
-              <span className="grid size-10 place-items-center rounded-full bg-primary-soft text-sm font-semibold text-primary-700">
-                {initials(r.full_name_ar)}
-              </span>
+              <Avatar text={initials(r.full_name_ar)} size="lg" tone="primary" />
               <span className="min-w-0 flex-1">
                 <b className="block text-text">{r.full_name_ar}</b>
                 <span className="text-xs text-text-muted">

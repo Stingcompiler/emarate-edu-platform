@@ -1,4 +1,4 @@
-# Handoff — review 2026-10-08 fixed; main auto-deploys — 2026-10-09
+# Handoff — UI cards review (direction C+A) — 2026-10-15
 
 ## Where things stand
 
@@ -52,6 +52,17 @@
   at the bottom of the admin user page.
 
 - **Rename users (owner, 2026-10-13):** `PATCH /users/{id}` (system admin, `users.rename`): Arabic name required, English optional, logged as `account.rename`; student accounts refused (name lives on the student record). «الاسم» card on the admin user page.
+
+- **UI cards review (owner, 2026-10-15; guide `ui-cards-review-guide`):** direction «الأولوية أولًا» (C) with
+  quiet list rows (A), recorded in `docs/ui-profile.md`. Shared: `Inbox` (big plain count + action button;
+  first row primary), `Summary` (flat figures, status in words, `wide` = 2 columns on lg), `ActionLinks`
+  (list instead of 3 equal tiles), `Avatar` (the one initials avatar), `Skeleton`. Migrated: admin,
+  department (D20: all sections kept, the 12-tile «اللوحة» became a quiet link list «صفحات القسم»),
+  registrar, results, affairs, academic homes. `pnpm lint:ui` now runs in CI; exceptions need a
+  `ui-allow: <reason>` comment on the line or within 3 lines above. Screens: `SHOTS=<label> pnpm e2e
+  shots.spec.ts` (resumable; `E2E_BOOT_MS=300000` and ports 8011/5184/4332 on a busy Mac).
+  Not redone: AcademicHome has no screenshot (typecheck only); the public site keeps its date/code tiles
+  and gradient page head as documented exceptions; inner pages (lists, forms) were not restyled.
 
 ## In progress
 

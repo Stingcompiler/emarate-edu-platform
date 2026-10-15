@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Link, useParams } from "react-router";
 
 import { PortalShell } from "../../components/PortalShell";
-import { FilterBar, Button, Card, Chip, ScrollRegion } from "../../components/ui";
+import { Avatar, Button, Card, Chip, FilterBar, ScrollRegion } from "../../components/ui";
 import { api, ok } from "../../lib/api";
 import { useCourse } from "../../lib/learning";
 import { downloadCsv, initials } from "../../lib/reports";
@@ -154,9 +154,7 @@ export function Students() {
                     <tr key={s.public_id}>
                       <th scope="row" className="px-4 py-2.5 text-start font-normal">
                         <span className="flex items-center gap-3">
-                          <span className="grid size-8 shrink-0 place-items-center rounded-full bg-primary-soft text-xs font-semibold text-primary-700">
-                            {initials(s.full_name_ar)}
-                          </span>
+                          <Avatar text={initials(s.full_name_ar)} size="sm" tone="primary" />
                           <span>
                             <b className="block text-text">{s.full_name_ar}</b>
                             <bdi className="text-xs text-text-muted">{s.university_number}</bdi>
@@ -209,9 +207,7 @@ export function Students() {
           <Card className="mt-3 divide-y divide-border-soft lg:hidden">
             {rows.map((s) => (
               <div key={s.public_id} className="flex items-center gap-3 px-4 py-3">
-                <span className="grid size-9 shrink-0 place-items-center rounded-full bg-primary-soft text-xs font-semibold text-primary-700">
-                  {initials(s.full_name_ar)}
-                </span>
+                <Avatar text={initials(s.full_name_ar)} size="md" tone="primary" />
                 <span className="min-w-0 flex-1">
                   <b className="block truncate text-sm text-text">{s.full_name_ar}</b>
                   <bdi className="text-xs text-text-muted">{s.university_number}</bdi>

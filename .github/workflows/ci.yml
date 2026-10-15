@@ -73,6 +73,8 @@ jobs:
       - name: Generate the API client from the backend schema
         run: pnpm api:generate
       - run: pnpm format:check
+      - name: UI text scan (card patterns banned by docs/ui-profile.md)
+        run: pnpm lint:ui
       - run: pnpm typecheck
       - name: Unit and component tests (Vitest)
         run: pnpm test

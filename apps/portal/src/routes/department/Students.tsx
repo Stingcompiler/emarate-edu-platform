@@ -6,14 +6,15 @@ import { type FormEvent, useRef, useState } from "react";
 import { DepartmentSwitch } from "../../components/DepartmentSwitch";
 import { PortalShell } from "../../components/PortalShell";
 import {
+  Avatar,
   Button,
   Card,
   Chip,
   Field,
   FilterBar,
   Notice,
-  StatusBadge,
   problemMessage,
+  StatusBadge,
 } from "../../components/ui";
 import { api, ok } from "../../lib/api";
 import { isWide } from "../../lib/media";
@@ -162,9 +163,7 @@ export function DepartmentStudents() {
                 }}
                 className={`flex w-full items-center gap-3 px-4 py-3 text-start hover:bg-surface-alt ${s?.public_id === r.public_id ? "lg:bg-primary-soft/40" : ""}`}
               >
-                <span className="grid size-9 shrink-0 place-items-center rounded-full bg-primary-soft text-xs font-semibold text-primary-700">
-                  {initials(r.full_name_ar)}
-                </span>
+                <Avatar text={initials(r.full_name_ar)} size="md" tone="primary" />
                 <span className="min-w-0 flex-1">
                   <b className="block truncate text-sm text-text">{r.full_name_ar}</b>
                   <span className="text-xs text-text-muted">

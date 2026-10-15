@@ -5,7 +5,15 @@ import { Link } from "react-router";
 
 import { PortalShell } from "../../components/PortalShell";
 import { ProgressRing } from "../../components/motion";
-import { FilterBar, Card, Chip, EmptyState, SectionLabel, StatusBadge } from "../../components/ui";
+import {
+  Avatar,
+  Card,
+  Chip,
+  EmptyState,
+  FilterBar,
+  SectionLabel,
+  StatusBadge,
+} from "../../components/ui";
 import { api, ok } from "../../lib/api";
 import { score, when } from "../../lib/format";
 import { initials } from "../../lib/reports";
@@ -98,9 +106,7 @@ export function Grading() {
                   to={`/submissions/${r.public_id}`}
                   className="flex items-center gap-3 px-4 py-3 hover:bg-surface-alt"
                 >
-                  <span className="grid size-9 shrink-0 place-items-center rounded-full bg-primary-soft text-xs font-semibold text-primary-700">
-                    {initials(r.student.full_name_ar)}
-                  </span>
+                  <Avatar text={initials(r.student.full_name_ar)} size="md" tone="primary" />
                   <span className="min-w-0 flex-1">
                     <b className="block truncate text-sm text-text">{r.student.full_name_ar}</b>
                     <span className="text-xs text-text-muted">

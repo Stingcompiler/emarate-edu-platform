@@ -257,7 +257,7 @@ export function Cases() {
                       </div>
                     ))}
                   </dl>
-                  <ol className="mt-3 space-y-3 border-s-2 border-border-soft ps-4">
+                  <ol className="mt-3 space-y-3 border-s border-border ps-4">
                     {preview.events.map((e, i) => (
                       <li key={i} className="relative">
                         <span

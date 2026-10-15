@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Link, useParams } from "react-router";
 
 import { PortalShell } from "../../components/PortalShell";
-import { Button, Card, SectionLabel } from "../../components/ui";
+import { Avatar, Button, Card, SectionLabel } from "../../components/ui";
 import { api, ok } from "../../lib/api";
 import { useMe } from "../../lib/auth";
 import { can } from "../../lib/nav";
@@ -75,9 +75,7 @@ export function TeacherProfile() {
         >
           <div className="space-y-4">
             <Card className="flex items-center gap-3 p-4">
-              <span className="grid size-12 place-items-center rounded-full bg-primary-soft font-semibold text-primary-700">
-                {initials(t.name)}
-              </span>
+              <Avatar text={initials(t.name)} size="xl" tone="primary" />
               <span className="flex-1 text-sm text-text-muted">
                 {p.term.name}
                 {p.previous

@@ -5,13 +5,14 @@ import { useNavigate, useParams } from "react-router";
 
 import { PortalShell } from "../../components/PortalShell";
 import {
+  Avatar,
   Button,
   Card,
   Field,
   Notice,
+  problemMessage,
   SectionLabel,
   StatusBadge,
-  problemMessage,
 } from "../../components/ui";
 import { api, ok } from "../../lib/api";
 import { useMe } from "../../lib/auth";
@@ -125,9 +126,7 @@ export function AdminUser() {
         <div className="lg:grid lg:grid-cols-2 lg:items-start lg:gap-6">
           <div className="space-y-4">
             <Card className="flex items-center gap-3 p-4">
-              <span className="grid size-12 place-items-center rounded-full bg-primary-soft font-semibold text-primary-700">
-                {initials(u.full_name_ar)}
-              </span>
+              <Avatar text={initials(u.full_name_ar)} size="xl" tone="primary" />
               <span className="min-w-0 flex-1">
                 <b className="block text-text">{u.full_name_ar}</b>
                 <bdi className="text-xs text-text-muted">{u.email}</bdi>

@@ -134,6 +134,7 @@ export function Events() {
                     to={`/events/${e.public_id}`}
                     className="flex items-center gap-3 px-4 py-3 hover:bg-surface-alt"
                   >
+                    {/* ui-allow: the date block holds the date itself */}
                     <span className="grid w-14 shrink-0 place-items-center rounded-lg bg-accent-soft py-1 text-accent">
                       <span className="text-lg font-bold leading-tight">
                         {day.format(new Date(e.starts_at))}
@@ -370,6 +371,7 @@ export function EventEditor() {
           <aside className="mt-6 lg:sticky lg:top-20 lg:mt-0">
             <SectionLabel>المعاينة</SectionLabel>
             <Card className="flex gap-3 p-4">
+              {/* ui-allow: the date block holds the date itself */}
               <span className="grid w-14 shrink-0 place-items-center rounded-lg bg-accent-soft py-1 text-accent">
                 <span className="text-lg font-bold">{day.format(s)}</span>
                 <span className="text-[11px]">{month.format(s)}</span>

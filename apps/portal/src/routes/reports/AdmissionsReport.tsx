@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 
 import { PortalShell } from "../../components/PortalShell";
-import { Card, SectionLabel } from "../../components/ui";
+import { Avatar, Card, SectionLabel } from "../../components/ui";
 import { api, ok } from "../../lib/api";
 import {
   Bars,
@@ -192,9 +192,7 @@ export function AdmissionsReport() {
                   className="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-x-3 gap-y-0.5 px-4 py-3 text-sm lg:grid-cols-[minmax(0,1fr)_90px_70px_70px_90px_70px]"
                 >
                   <span className="flex items-center gap-3 lg:col-span-1">
-                    <span className="grid size-8 place-items-center rounded-full bg-primary-soft text-xs font-semibold text-primary-700">
-                      {initials(g.name)}
-                    </span>
+                    <Avatar text={initials(g.name)} size="sm" tone="primary" />
                     <span className="font-semibold text-text">{g.name}</span>
                   </span>
                   <span className="text-xs text-text-muted lg:hidden">

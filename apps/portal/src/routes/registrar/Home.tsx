@@ -3,7 +3,7 @@ import { CalendarRange, FileUp, LayoutTemplate, Users } from "lucide-react";
 import { Link } from "react-router";
 
 import { PortalShell } from "../../components/PortalShell";
-import { Button, Card, SectionLabel } from "../../components/ui";
+import { Avatar, Button, Card, SectionLabel } from "../../components/ui";
 import { api, ok } from "../../lib/api";
 import { useMe } from "../../lib/auth";
 import { when } from "../../lib/format";
@@ -11,6 +11,7 @@ import { can } from "../../lib/nav";
 import { initials, num } from "../../lib/reports";
 import { STATUS_LABEL } from "../../lib/visitor";
 import { ALL } from "../../components/Pager";
+import { Inbox } from "../homes/Inbox";
 
 /** Boards: HeadRegistrarHome and RegistrarHome (phone), DesktopHeadRegistrar — the applications'
  *  path as one bar, the action inbox, and (for the head) each registrar's load. */
@@ -109,18 +110,21 @@ export function RegistrarHome() {
       title: "طلبات غير موزعة",
       meta: head ? "تولَّها أو وزّعها على مسجلي الأقسام" : "تولَّ ما يخص أقسامك لتراجعه",
       to: "/applications?who=unassigned",
+      action: "تولّي",
     },
     {
       n: s.eligible ?? 0,
       title: "مؤهلة بانتظار القرار النهائي",
       meta: head ? "القرار لك أو للمسجلين إن فُوّض" : "يقررها مسؤول المسجلين",
       to: "/applications?status=eligible",
+      action: "قرار",
     },
     {
       n: accepted,
       title: "مقبولون لم يُحوَّلوا إلى طلاب",
       meta: "تحويل + رقم جامعي + رابط تفعيل",
       to: "/applications?status=accepted",
+      action: "تحويل",
     },
     ...(head
       ? [
@@ -129,6 +133,7 @@ export function RegistrarHome() {
             title: "طلبات تسجيل طلاب حاليين",
             meta: "يعتمدها مديرو الأقسام؛ أنت بديل",
             to: "/department/approvals",
+            action: "اعتماد",
           },
         ]
       : []),
@@ -137,6 +142,7 @@ export function RegistrarHome() {
       title: "استفسارات بلا رد",
       meta: "قبول وبرامج أقسامك · رد بريدي أو WhatsApp",
       to: "/inquiries",
+      action: "رد",
     },
   ].filter((x) => x.n);
   return (
@@ -179,31 +185,12 @@ export function RegistrarHome() {
       <div className="mt-6 lg:grid lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start lg:gap-6">
         <div className="space-y-4">
           <SectionLabel>يحتاج إجراءك</SectionLabel>
-          <Card className="divide-y divide-border-soft">
-            {inbox.map((i) => (
-              <Link
-                key={i.title}
-                to={i.to}
-                className="flex items-center gap-3 px-4 py-3 hover:bg-surface-alt"
-              >
-                <span className="grid size-10 shrink-0 place-items-center rounded-full bg-warning-soft font-bold text-warning-strong">
-                  {num(i.n)}
-                </span>
-                <span className="min-w-0">
-                  <b className="block text-sm text-text">{i.title}</b>
-                  <span className="text-xs text-text-muted">{i.meta}</span>
-                </span>
-              </Link>
-            ))}
-            {!inbox.length && <p className="px-4 py-4 text-sm text-text-muted">لا شيء بانتظارك.</p>}
-          </Card>
+          <Inbox items={inbox} />
           <SectionLabel>غير مُتولّى · {num(unassigned.data?.count ?? 0)}</SectionLabel>
           <Card className="divide-y divide-border-soft">
             {(unassigned.data?.results ?? []).map((a) => (
               <div key={a.public_id} className="flex items-center gap-3 px-4 py-3">
-                <span className="grid size-9 shrink-0 place-items-center rounded-full bg-primary-soft text-xs font-semibold text-primary-700">
-                  {initials(a.full_name)}
-                </span>
+                <Avatar text={initials(a.full_name)} size="md" tone="primary" />
                 <Link to={`/applications/${a.public_id}`} className="min-w-0 flex-1">
                   <b className="block truncate text-sm text-text">{a.full_name}</b>
                   <span className="text-xs text-text-muted">
@@ -265,9 +252,7 @@ export function RegistrarHome() {
                     .map((r) => r.department_name);
                   return (
                     <div key={u.public_id} className="flex items-center gap-3 px-4 py-2.5">
-                      <span className="grid size-8 shrink-0 place-items-center rounded-full bg-primary-soft text-xs font-semibold text-primary-700">
-                        {initials(u.full_name_ar)}
-                      </span>
+                      <Avatar text={initials(u.full_name_ar)} size="sm" tone="primary" />
                       <span className="min-w-0 flex-1">
                         <b className="block truncate text-text">{u.full_name_ar}</b>
                         <span

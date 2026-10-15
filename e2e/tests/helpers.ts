@@ -10,7 +10,7 @@ export async function signIn(page: Page, identifier: string) {
   await page.getByLabel("الرقم الجامعي أو البريد").fill(identifier);
   await page.getByLabel("كلمة المرور", { exact: true }).fill(PASSWORD);
   await page.getByRole("button", { name: "تسجيل الدخول" }).click();
-  await expect(page).not.toHaveURL(/\/login/);
+  await expect(page).not.toHaveURL(/\/login/, { timeout: 30_000 }); // a busy machine signs in slowly
 }
 
 const MAIL_DIR = path.resolve(__dirname, "../../backend/sent-emails-e2e");

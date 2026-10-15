@@ -78,6 +78,7 @@ const rows = [
               href={href(lang, `events/${e.slug}/`)}
               class="flex items-center gap-3 py-2.5 text-sm hover:text-primary"
             >
+              <!-- ui-allow: date block -->
               <span class="grid size-11 shrink-0 place-items-center rounded-xl bg-primary-soft text-center leading-tight text-primary-700">
                 <b class="text-base">{fmtDate(lang, e.starts_at, { day: "numeric" })}</b>
                 <span class="text-[11px]">{fmtDate(lang, e.starts_at, { month: "short" })}</span>

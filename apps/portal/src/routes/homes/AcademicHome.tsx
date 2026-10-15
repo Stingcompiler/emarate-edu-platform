@@ -3,7 +3,7 @@ import { BarChart3, UserPlus } from "lucide-react";
 import { Link } from "react-router";
 
 import { PortalShell } from "../../components/PortalShell";
-import { Card, SectionLabel } from "../../components/ui";
+import { Avatar, Card, SectionLabel } from "../../components/ui";
 import { api, ok } from "../../lib/api";
 import { useMe } from "../../lib/auth";
 import { useCurrentTerm } from "../../lib/department";
@@ -84,9 +84,7 @@ export function AcademicHome() {
               <b className="block text-text">{d.name_ar}</b>
               {heads.map((r) => (
                 <p key={r.id} className="mt-1 flex items-center gap-2 text-xs">
-                  <span className="grid size-7 shrink-0 place-items-center rounded-full bg-primary-soft text-[11px] font-semibold text-primary-700">
-                    {initials(r.user_name)}
-                  </span>
+                  <Avatar text={initials(r.user_name)} size="sm" tone="primary" />
                   {r.role === "department_manager" ? "مدير القسم" : "مشرف القسم"}: {r.user_name}
                 </p>
               ))}

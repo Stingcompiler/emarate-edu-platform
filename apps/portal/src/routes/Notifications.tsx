@@ -14,6 +14,7 @@ import {
   SideFigures,
   SideNote,
   WithSide,
+  Skeleton,
 } from "../components/ui";
 import { api } from "../lib/api";
 import { DAY_LABELS, type DayGroup, dayGroup, when } from "../lib/format";
@@ -227,10 +228,10 @@ function ListSkeleton() {
     <Card className="mt-5 divide-y divide-border-soft">
       {[0, 1, 2].map((i) => (
         <div key={i} className="flex gap-3 px-4 py-4" aria-hidden>
-          <div className="size-10 animate-pulse rounded-full bg-surface-alt" />
+          <Skeleton className="size-10 rounded-full" />
           <div className="flex-1 space-y-2">
-            <div className="h-3.5 w-2/3 animate-pulse rounded bg-surface-alt" />
-            <div className="h-3 w-1/2 animate-pulse rounded bg-surface-alt" />
+            <Skeleton className="h-3.5 w-2/3 rounded" />
+            <Skeleton className="h-3 w-1/2 rounded" />
           </div>
         </div>
       ))}

@@ -387,6 +387,7 @@ const jsonLd = [programLd, faqLd(faq)];
                 <ol class="mt-3 space-y-2 text-sm">
                   {p.required_documents.map((doc, i) => (
                     <li class="flex gap-2">
+                      <!-- ui-allow: list number -->
                       <span class="grid size-6 shrink-0 place-items-center rounded-full bg-primary-soft text-xs font-bold text-primary-700">
                         {num(lang, i + 1)}
                       </span>

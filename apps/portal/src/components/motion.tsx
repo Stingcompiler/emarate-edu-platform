@@ -116,6 +116,7 @@ const CONFETTI = ["#2d64a7", "#c8102e", "#1f9d61", "#e0a526", "#618abd", "#e05a6
 export function SuccessMark({ confetti = false }: { confetti?: boolean }) {
   return (
     <span className="relative mx-auto grid size-16 place-items-center">
+      {/* ui-allow: the one-off "done" mark, not a card decoration */}
       <span className="motion-check grid size-16 place-items-center rounded-full bg-success-soft text-success-strong">
         <svg width="30" height="30" viewBox="0 0 24 24" fill="none" aria-hidden="true">
           <path

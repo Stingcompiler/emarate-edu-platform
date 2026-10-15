@@ -14,6 +14,7 @@ const { lang, event: e } = Astro.props;
     href={href(lang, `events/${e.slug}/`)}
     class="flex gap-3 rounded-2xl border border-border-soft bg-surface p-3 hover:shadow-sm"
   >
+    <!-- ui-allow: the date block holds the date itself -->
     <span class="grid w-14 shrink-0 place-items-center rounded-xl bg-primary-soft py-1.5 text-center text-primary-700">
       <b class="block text-xl">{fmtDate(lang, e.starts_at, { day: "numeric" })}</b>
       <span class="text-[11px]">{fmtDate(lang, e.starts_at, { month: "short" })}</span>
