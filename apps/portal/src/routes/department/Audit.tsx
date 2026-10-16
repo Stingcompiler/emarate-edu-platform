@@ -125,6 +125,7 @@ const ACTIONS: Record<string, string> = {
   "inquiry.reroute": "حوّل استفسارًا",
   "inquiry.status": "غيّر حالة استفسار",
   "media.upload": "رفع ملف وسائط",
+  "media.update": "تعديل وصف صورة",
   "media.delete": "حذف ملف وسائط",
   "menu.update": "عدّل قائمة الموقع",
   "redirect.create": "أنشأ تحويل رابط",

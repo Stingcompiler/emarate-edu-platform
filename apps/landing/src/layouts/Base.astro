@@ -307,9 +307,28 @@ const ext = (external: boolean) => (external ? { rel: "noopener", target: "_blan
               </div>
               {header.map((e) =>
                 e.children.length ? (
-                  <section class="border-t border-border-soft py-2">
-                    <p class="px-3 pb-1 pt-2 text-xs font-semibold text-text-muted">{e.label}</p>
-                    <div class="grid sm:grid-cols-2">
+                  // Groups are folded on phones (review U05): every group title shows at once, the
+                  // one holding the current page is open.
+                  <details
+                    class="group border-t border-border-soft py-1"
+                    open={e.children.some((c) => c.active)}
+                  >
+                    <summary class="flex min-h-11 cursor-pointer list-none items-center justify-between rounded-md px-3 text-sm font-bold text-text hover:bg-surface-alt">
+                      {e.label}
+                      <svg
+                        class="text-text-muted transition-transform group-open:rotate-180"
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        aria-hidden="true"
+                      >
+                        <path d="m6 9 6 6 6-6" />
+                      </svg>
+                    </summary>
+                    <div class="grid pb-2 sm:grid-cols-2">
                       {e.children.map((c) => (
                         <a
                           href={c.href}
@@ -324,7 +343,7 @@ const ext = (external: boolean) => (external ? { rel: "noopener", target: "_blan
                         </a>
                       ))}
                     </div>
-                  </section>
+                  </details>
                 ) : (
                   <a
                     href={e.href}

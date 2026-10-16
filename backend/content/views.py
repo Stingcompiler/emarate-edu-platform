@@ -35,6 +35,7 @@ from .models import (
 from .serializers import (
     AnnouncementSerializer,
     EventSerializer,
+    MediaAltSerializer,
     MediaAssetSerializer,
     MenuItemSerializer,
     MenuSerializer,
@@ -130,6 +131,7 @@ class EventViewSet(_Managed):
 class MediaAssetViewSet(
     mixins.ListModelMixin,
     mixins.CreateModelMixin,
+    mixins.UpdateModelMixin,
     mixins.DestroyModelMixin,
     viewsets.GenericViewSet,
 ):
@@ -137,6 +139,11 @@ class MediaAssetViewSet(
     queryset = MediaAsset.objects.all()
     lookup_field = "public_id"
     parser_classes = [MultiPartParser, JSONParser]
+    # The picture itself is never replaced: only its description (alt text) is edited (U04).
+    http_method_names = ["get", "post", "patch", "delete", "head", "options"]
+
+    def get_serializer_class(self):
+        return MediaAltSerializer if self.action == "partial_update" else MediaAssetSerializer
 
     def get_permissions(self):
         return [IsAuthenticated(), capability("events.manage")()]
@@ -145,6 +152,16 @@ class MediaAssetViewSet(
         upload = serializer.validated_data["file"]
         asset = serializer.save(uploaded_by=self.request.user, size=upload.size)
         record(_meta(self.request), "media.upload", asset)
+
+    def perform_update(self, serializer):
+        asset = serializer.save()
+        record(_meta(self.request), "media.update", asset)
+
+    @extend_schema(request=MediaAltSerializer, responses=MediaAssetSerializer)
+    def partial_update(self, request, *args, **kwargs):
+        super().partial_update(request, *args, **kwargs)
+        # Answer with the whole asset (url, size…), as the list does.
+        return Response(MediaAssetSerializer(self.get_object(), context={"request": request}).data)
 
     def perform_destroy(self, instance):
         record(_meta(self.request), "media.delete", instance)

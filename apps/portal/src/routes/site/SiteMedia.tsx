@@ -16,6 +16,7 @@ import {
   EmptyState,
 } from "../../components/ui";
 import { api, ok } from "../../lib/api";
+import { altNeedsWork } from "../../lib/media";
 import { asForm, formData } from "../../lib/upload";
 import { Pager, useServerPages } from "../../components/Pager";
 import { useConfirm } from "../../components/Confirm";
@@ -58,12 +59,26 @@ function Media() {
   const upload = useMutation({
     mutationFn: async (file: File) => {
       const { data, error } = await api.POST("/api/v1/content/media", {
-        body: formData({ file, alt_ar: file.name.replace(/\.[^.]+$/, "") }) as never,
+        body: formData({ file }) as never,
         ...asForm,
       });
       if (!data) throw error;
     },
     onSuccess: () => client.invalidateQueries({ queryKey: ["site", "media"] }),
+  });
+  const [editing, setEditing] = useState<{ id: string; alt: string } | null>(null);
+  const describe = useMutation({
+    mutationFn: async ({ id, alt }: { id: string; alt: string }) => {
+      const { data, error } = await api.PATCH("/api/v1/content/media/{public_id}", {
+        params: { path: { public_id: id } },
+        body: { alt_ar: alt.trim() },
+      });
+      if (!data) throw error;
+    },
+    onSuccess: () => {
+      setEditing(null);
+      return client.invalidateQueries({ queryKey: ["site", "media"] });
+    },
   });
   const remove = useMutation({
     mutationFn: async (id: string) => {
@@ -103,9 +118,59 @@ function Media() {
             <img src={m.url} alt={m.alt_ar ?? ""} className="aspect-video w-full object-cover" />
             {/* The name on its own lines; the size and delete under it (two cards a row on
                 phones left the name a few letters). */}
-            <p className="line-clamp-2 px-2 pt-2 text-xs break-words text-text">
-              {m.alt_ar || "بلا alt"}
-            </p>
+            {editing?.id === m.public_id ? (
+              <div className="space-y-2 px-2 pt-2">
+                <label className="block text-xs text-text-muted">
+                  وصف الصورة (يقرؤه من لا يرى الصورة)
+                  <input
+                    autoFocus
+                    value={editing.alt}
+                    onChange={(e) => setEditing({ id: m.public_id, alt: e.target.value })}
+                    className="mt-1 block min-h-10 w-full rounded-lg border border-border bg-surface px-2 text-sm text-text"
+                  />
+                </label>
+                {describe.isError && <Notice>{problemMessage(describe.error)}</Notice>}
+                <div className="flex gap-2">
+                  <Button
+                    className="min-h-9 px-3 text-xs"
+                    disabled={!editing.alt.trim() || describe.isPending}
+                    onClick={() => describe.mutate({ id: m.public_id, alt: editing.alt })}
+                  >
+                    حفظ
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    className="min-h-9 px-3 text-xs"
+                    onClick={() => setEditing(null)}
+                  >
+                    إلغاء
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <p className="line-clamp-2 px-2 pt-2 text-xs break-words text-text">
+                {altNeedsWork(m.alt_ar) ? (
+                  <button
+                    type="button"
+                    onClick={() => setEditing({ id: m.public_id, alt: "" })}
+                    className="text-start font-semibold text-warning-strong hover:underline"
+                  >
+                    بلا وصف مفيد، أضِف وصفًا
+                  </button>
+                ) : (
+                  <>
+                    {m.alt_ar}{" "}
+                    <button
+                      type="button"
+                      onClick={() => setEditing({ id: m.public_id, alt: m.alt_ar ?? "" })}
+                      className="font-semibold text-primary hover:underline"
+                    >
+                      تعديل
+                    </button>
+                  </>
+                )}
+              </p>
+            )}
             <div className="mt-auto flex items-center justify-between gap-2 px-2 pb-1 text-xs">
               <span className="text-text-muted" dir="ltr">
                 {m.width}×{m.height}
@@ -642,6 +707,15 @@ function SiteSettingsForm() {
                       ))}
                     </select>
                   </span>
+                  {key === "hero_image" && picked && altNeedsWork(picked.alt_ar) && (
+                    <span
+                      role="status"
+                      className="mt-1 block text-xs font-semibold text-warning-strong"
+                    >
+                      هذه الصورة بلا وصف مفيد: أضِف وصفًا من تبويب «الوسائط» ليقرأه من لا يرى
+                      الصورة.
+                    </span>
+                  )}
                 </label>
               );
             })}
