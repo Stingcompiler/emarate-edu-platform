@@ -16,6 +16,7 @@ import {
 import {
   arrow,
   cycleName,
+  degree,
   fmtDate,
   href,
   type Lang,
@@ -60,6 +61,24 @@ const lead =
   lang === "ar"
     ? `${count(lang, st.programs || all.length, N.program)} في ${count(lang, st.departments, N.department)} — تقديم إلكتروني بالكامل ومتابعة للطلب من هاتفك.`
     : `${count(lang, st.programs || all.length, N.program)} in ${count(lang, st.departments, N.department)} — apply online and follow your application from your phone.`;
+// What search results show for the home (review: the name alone, and a 55-character
+// description, left the page's subject to guesswork): the degrees offered, and the owner's
+// own description completed with the programme and department counts when it is short.
+const degrees = [
+  ...new Set(all.map((p) => degree(lang, p.degree, p.degree_label)).filter(Boolean)),
+];
+const seoTitle = degrees.length
+  ? lang === "ar"
+    ? `${name} — برامج ${degrees.join(" و")}`
+    : `${name} — ${degrees.join(" and ")} programmes`
+  : undefined;
+const ownDescription = s.seo?.description || s.tagline || "";
+const homeDescription =
+  ownDescription.length >= 80
+    ? ownDescription
+    : ownDescription
+      ? `${ownDescription.replace(/[.،]+$/, "")}. ${lead}`
+      : `${name} — ${lead}`;
 const audiences =
   lang === "ar"
     ? [
@@ -139,7 +158,7 @@ const jsonLd = {
   logo: s.logo_url || new URL("/favicon.svg", Astro.site).toString(),
   image: s.share_image_url || s.hero_image_url || undefined,
   foundingDate: s.founded_year ? String(s.founded_year) : undefined,
-  description: s.seo?.description || s.tagline || lead,
+  description: homeDescription,
   contactPoint:
     s.phone || s.email
       ? {
@@ -153,12 +172,7 @@ const jsonLd = {
 };
 ---
 
-<Base
-  lang={lang}
-  title={name}
-  description={s.seo?.description || s.tagline || `${name} — ${lead}`}
-  jsonLd={jsonLd}
->
+<Base lang={lang} title={name} seoTitle={seoTitle} description={homeDescription} jsonLd={jsonLd}>
   <section class="bg-bg-subtle">
     <div class="mx-auto grid max-w-6xl gap-8 px-4 py-10 lg:grid-cols-[1.2fr_1fr] lg:items-center lg:px-8 lg:py-16">
       <div>

@@ -21,9 +21,20 @@ interface Props {
   image?: string | null;
   /** The page shows a fixed bar at the bottom on phones; keep the footer clear of it. */
   bottomBar?: boolean;
+  /** The text of <title> and og:title when the page's own title is only its name (the home). */
+  seoTitle?: string;
 }
 
-const { lang, title, description, path = "", jsonLd, image, bottomBar = false } = Astro.props;
+const {
+  lang,
+  title,
+  description,
+  path = "",
+  jsonLd,
+  image,
+  bottomBar = false,
+  seoTitle,
+} = Astro.props;
 const s = await loadSite();
 // Legal pages sit in the footer's bottom bar, once published — never a link to a 404.
 const published = await pages();
@@ -49,7 +60,7 @@ const logo = s.logo_url || "/favicon.svg";
 const shareImage = image || s.share_image_url || s.logo_url || null;
 // «قدّم الآن» sits in the header whenever an intake is open (review W1).
 const applying = (await loadPrograms()).some((p) => p.intake?.accepting);
-const fullTitle = title === siteName ? title : `${title} — ${siteName}`;
+const fullTitle = seoTitle ?? (title === siteName ? title : `${title} — ${siteName}`);
 const current = Astro.url.pathname;
 const header = await navigation(lang, "header", current);
 const footer = await navigation(lang, "footer", current);
@@ -104,11 +115,10 @@ const ext = (external: boolean) => (external ? { rel: "noopener", target: "_blan
     {shareImage && <meta property="og:image" content={shareImage} />}
     <meta name="twitter:card" content={shareImage ? "summary_large_image" : "summary"} />
     <meta name="theme-color" content="#0b2447" />
-    {s.logo_url ? (
-      <link rel="icon" href={s.logo_url} />
-    ) : (
-      <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    )}
+    {/* The icon is served from this site (src/pages/site-icon.png.ts), not from the portal. */}
+    <link rel="icon" type="image/png" sizes="192x192" href="/site-icon.png" />
+    {!s.logo_url && <link rel="icon" type="image/svg+xml" href="/favicon.svg" />}
+    <link rel="apple-touch-icon" href="/site-icon.png" />
     {jsonLd && (
       // "<" escaped: a title containing "</script>" must not close the tag (stored XSS).
       <script
