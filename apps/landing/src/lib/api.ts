@@ -4,6 +4,8 @@
  * failing. Production builds set LANDING_STRICT=1 so an API outage fails the
  * deploy instead of publishing an empty site. A 404 is never an error.
  */
+import { hideSample, sampleHidden } from "./sample.mjs";
+
 const STRICT = import.meta.env.LANDING_STRICT === "1";
 // Build-time only (never shipped to the browser): lets the build skip the API's read throttle.
 const BUILD_HEADERS: Record<string, string> = import.meta.env.SITE_BUILD_TOKEN
@@ -16,6 +18,7 @@ export const PORTAL = (import.meta.env.PUBLIC_PORTAL_URL ?? "http://localhost:51
 );
 
 const cache = new Map<string, Promise<unknown>>();
+const HIDE_SAMPLE = sampleHidden(import.meta.env);
 
 // A build reads dozens of pages at once; the dev API (runserver) drops connections when
 // flooded, so at most a few requests run together and a transient failure is retried.
@@ -67,7 +70,10 @@ export function get<T>(path: string, fallback: T): Promise<T> {
       }),
     );
   }
-  return cache.get(path)!.then((data) => (data ?? fallback) as T);
+  return cache.get(path)!.then((data) => {
+    const shown = HIDE_SAMPLE && data != null ? hideSample(data) : data;
+    return (shown ?? fallback) as T;
+  });
 }
 
 export type Site = {
@@ -271,7 +277,14 @@ export type PageRef = {
   title_en: string;
   updated_at: string;
 };
-export const pages = () => get<PageRef[]>("pages", []);
+export const pages = async () => {
+  const refs = await get<PageRef[]>("pages", []);
+  if (!HIDE_SAMPLE) return refs;
+  // A page made only of sample content is hidden (see lib/sample.mjs): drop it from the list too,
+  // so menus, the sitemap and the about page never link to it.
+  const shown = await Promise.all(refs.map(async (ref) => ((await page(ref.slug)) ? ref : null)));
+  return shown.filter((ref): ref is PageRef => ref !== null);
+};
 /** One published page by slug (official slugs keep their "/"). */
 export const page = (slug: string) =>
   get<Page | null>(`pages/${slug.split("/").map(encodeURIComponent).join("/")}`, null);

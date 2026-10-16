@@ -12,7 +12,10 @@ import { readFile, readdir } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-const SAMPLE = /\(\s*مثال\s*\)|\(\s*example\s*\)/i;
+// The same marks the site hides from visitors (apps/landing/src/lib/sample.mjs): anything still
+// on a built page after the hiding is real content that merely looks like a sample.
+const SAMPLE =
+  /\(\s*مثال\s*\)|\(\s*example\s*\)|\(\s*نص تجريبي\s*\)|نص تجريبي للعرض فقط|مسودة أنشأها النظام/i;
 
 const tag = (html, pattern) => pattern.exec(html)?.[1];
 const metaContent = (html, attr, name) =>
