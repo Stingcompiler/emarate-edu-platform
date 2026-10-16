@@ -58,6 +58,9 @@ export default defineConfig({
         PUBLIC_API_URL: API,
         PUBLIC_PORTAL_URL: PORTAL,
         ECST_E2E: "1",
+        // The tests read the demo's sample texts, which visitors never see (apps/landing/src/lib/
+        // sample.mjs). `E2E_HIDE_SAMPLE=1` runs the site as visitors see it (hidden-sample.spec.ts).
+        SITE_SHOW_SAMPLE: process.env.E2E_HIDE_SAMPLE === "1" ? "0" : "1",
       },
       timeout: BOOT_MS,
       reuseExistingServer: false,

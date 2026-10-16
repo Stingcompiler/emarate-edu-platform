@@ -100,6 +100,8 @@ jobs:
       - run: pnpm exec playwright install --with-deps chromium
       - name: Critical flows on phone and desktop (sign-in, exam, application, layout)
         run: pnpm e2e
+      - name: The public site without the demo's sample texts
+        run: E2E_HIDE_SAMPLE=1 pnpm e2e hidden-sample.spec.ts
       - if: failure()
         uses: actions/upload-artifact@v4
         with:
