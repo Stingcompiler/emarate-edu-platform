@@ -1,5 +1,5 @@
 import AxeBuilder from "@axe-core/playwright";
-import { expect, test } from "@playwright/test";
+import { type Page, expect, test } from "@playwright/test";
 
 // The public site (docs/02 §6): every page reachable from /ar/ and /en/ loads, links nowhere
 // broken, fits the screen, is accessible (WCAG AA) and carries its SEO basics.
@@ -199,6 +199,25 @@ test("a department page shows the members who chose to appear, and its own news"
   await expect(page.getByRole("region", { name: "هيئة التدريس" })).toHaveCount(0);
 });
 
+// The widest gap between the controls of the phone's top bar: «outside» the open menu, not a
+// link (the bar holds the logo, the sign-in link, «apply» and the menu button).
+async function emptyTopBarX(page: Page): Promise<number> {
+  return page.evaluate(() => {
+    const boxes = [...document.querySelectorAll("header a, header summary, header button")]
+      .map((el) => el.getBoundingClientRect())
+      .filter((r) => r.top < 64 && r.width > 0 && r.height > 0)
+      .sort((a, b) => a.left - b.left);
+    let best = { width: 0, x: 8 };
+    let edge = 0;
+    for (const r of [...boxes, { left: innerWidth, right: innerWidth }]) {
+      if (r.left - edge > best.width)
+        best = { width: r.left - edge, x: edge + (r.left - edge) / 2 };
+      edge = Math.max(edge, r.right);
+    }
+    return best.x;
+  });
+}
+
 test("the site menus come from the CMS and behave like menus", async ({ page, isMobile }) => {
   await page.goto(`${SITE}/ar/`);
   const header = page.locator("header");
@@ -215,7 +234,7 @@ test("the site menus come from the CMS and behave like menus", async ({ page, is
   await expect(calendar).toBeHidden();
   await toggle.click();
   // A tap outside closes it (on the phone the panel fills the screen: tap the empty top bar).
-  if (isMobile) await page.mouse.click(200, 32);
+  if (isMobile) await page.mouse.click(await emptyTopBarX(page), 32);
   else await page.mouse.click(8, page.viewportSize()!.height - 8);
   await expect(calendar).toBeHidden();
   if (isMobile) {
