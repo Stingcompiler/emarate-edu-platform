@@ -41,6 +41,10 @@ const description = pick(lang, p.description_ar, p.description_en);
 const open = !!p.intake?.accepting;
 const L = (ar: string, en: string) => (lang === "ar" ? ar : en);
 const dept = pick(lang, p.department_name, p.department_name_en);
+const planHours = p.plan.reduce(
+  (sum, level) => sum + level.courses.reduce((n, c) => n + (c.credit_hours || 0), 0),
+  0,
+);
 const kind = degree(lang, p.degree, p.degree_label);
 const closes = open ? fmtDate(lang, p.intake!.closes_at) : "";
 const outcomes = (lang === "en" && p.outcomes_en?.length ? p.outcomes_en : p.outcomes_ar) ?? [];
@@ -441,6 +445,18 @@ const jsonLd = [programLd, faqLd(faq)];
             <li class="text-sm text-text-muted">{L("تُنشر الخطة قريبًا.", "Plan coming soon.")}</li>
           )}
         </ol>
+        {
+          // A plan that does not add up to the programme's credit hours is a sample, not the
+          // plan (design review U03): say so rather than let it stand for the whole degree.
+          planHours > 0 && p.credit_hours && planHours < p.credit_hours && (
+            <p class="mt-3 rounded-xl border border-border-soft bg-surface-alt px-4 py-3 text-sm text-text-muted">
+              {L(
+                `الخطة المعروضة جزئية: ${num(lang, planHours)} من ${num(lang, p.credit_hours)} ساعة معتمدة. تُنشر النسخة المعتمدة الكاملة عند استكمالها.`,
+                `The plan shown is partial: ${planHours} of ${p.credit_hours} credit hours. The full approved plan will be published when it is complete.`,
+              )}
+            </p>
+          )
+        }
         {p.plan.length > 0 && (
           <p class="mt-2 text-xs text-text-muted">
             {L(
