@@ -24,6 +24,8 @@ test("a page hidden from search, or still carrying sample text, fails", () => {
   assert.deepEqual(checkPage(hidden, { allowNoindex: true }), []);
   const sample = good.replace("برنامج بكالوريوس", "(مثال) برنامج بكالوريوس");
   assert.match(checkPage(sample).join("\n"), /sample text/);
+  const placeholder = good.replace("برنامج بكالوريوس", "(نص تجريبي) برنامج بكالوريوس");
+  assert.match(checkPage(placeholder).join("\n"), /sample text/);
 });
 
 test("missing or badly sized basics are reported", () => {
