@@ -229,6 +229,18 @@ test("the site menus come from the CMS and behave like menus", async ({ page, is
     : header.locator("nav summary", { hasText: "الأكاديمية" });
   await toggle.click();
   const calendar = header.getByRole("link", { name: "التقويم الأكاديمي" });
+  // On phones the groups are folded (review U05): every title shows, a tap opens one.
+  // The phone menu's folded groups (the desktop dropdowns have no nested <details>).
+  const group = (name: string) =>
+    header.locator("details[data-menu] details > summary", { hasText: name });
+  if (isMobile) {
+    await expect(group("القبول")).toBeVisible();
+    await expect(calendar).toBeHidden();
+    await group("الأكاديمية").click();
+    // The floating WhatsApp button steps aside while the menu is open.
+    await expect(page.locator("[data-whatsapp-float]")).toBeAttached();
+    await expect(page.locator("[data-whatsapp-float]")).toBeHidden();
+  }
   await expect(calendar).toBeVisible();
   await page.keyboard.press("Escape");
   await expect(calendar).toBeHidden();

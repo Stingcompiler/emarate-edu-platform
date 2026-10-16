@@ -56,6 +56,13 @@ html[lang="en"] :where(p, li, dd, dt, h1, h2, h3, h4, td, th, blockquote, figcap
     translate 0.2s,
     visibility 0s linear 0.2s;
 }
+/* Over the open phone menu it would cover the links at the bottom of the list; the menu has
+   its own contact rows. (:has is in every current browser; an older one just keeps the button.) */
+body:has(details[data-menu][open]) [data-whatsapp-float] {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
 /* The arrival scales only: its colours are never half-transparent. */
 @media (prefers-reduced-motion: no-preference) {
   [data-whatsapp-float] {
