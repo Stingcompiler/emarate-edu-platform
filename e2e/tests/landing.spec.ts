@@ -100,6 +100,21 @@ test("a plan that does not add up to the credit hours says it is partial", async
   await expect(page.getByText(/من 132 ساعة معتمدة/)).toBeVisible();
 });
 
+test("search engines get a dated sitemap and a site-hosted icon", async ({ request }) => {
+  const sitemap = await (await request.get(`${SITE}/sitemap.xml`)).text();
+  expect(sitemap).toContain("<loc>");
+  expect(sitemap).toMatch(/<lastmod>\d{4}-\d{2}-\d{2}<\/lastmod>/);
+  expect(sitemap).toContain('hreflang="en"');
+  const icon = await request.get(`${SITE}/site-icon.png`);
+  expect(icon.status()).toBe(200);
+  expect(icon.headers()["content-type"]).toBe("image/png");
+  expect((await icon.body()).subarray(1, 4).toString()).toBe("PNG");
+  // The page head points at it, and the home says what the college offers, not only its name.
+  const html = await (await request.get(`${SITE}/ar/`)).text();
+  expect(html).toContain('href="/site-icon.png"');
+  expect(html).toMatch(/<title>[^<]*—[^<]*<\/title>/);
+});
+
 test("the programme page states its fees, and the fees page lists every programme", async ({
   page,
 }) => {
