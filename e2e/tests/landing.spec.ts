@@ -93,6 +93,13 @@ test("the programme page keeps «apply to this programme» in reach", async ({ p
   }
 });
 
+test("a plan that does not add up to the credit hours says it is partial", async ({ page }) => {
+  // Demo data: BIT lists 18 of its 132 hours (design review U03).
+  await page.goto(`${SITE}/ar/programs/BIT/`);
+  await expect(page.getByText("الخطة المعروضة جزئية")).toBeVisible();
+  await expect(page.getByText(/من 132 ساعة معتمدة/)).toBeVisible();
+});
+
 test("the programme page states its fees, and the fees page lists every programme", async ({
   page,
 }) => {
