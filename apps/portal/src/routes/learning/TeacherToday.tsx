@@ -3,7 +3,7 @@ import { BookPlus, ClipboardPlus, Megaphone, Radio } from "lucide-react";
 import { Link } from "react-router";
 
 import { PortalShell } from "../../components/PortalShell";
-import { COURSE_TONES, Card, CodeTile, SectionLabel } from "../../components/ui";
+import { COURSE_TONES, Card, CodeTile, ListStatus, SectionLabel } from "../../components/ui";
 import { api, ok } from "../../lib/api";
 import { useMe } from "../../lib/auth";
 import {
@@ -58,6 +58,8 @@ export function TeacherToday() {
     queryFn: async () =>
       ok(await api.GET("/api/v1/hr-notices", { params: { query: ALL } }))?.results ?? [],
   });
+  const dueSources = [assignments, live, exams];
+  const retryDue = () => dueSources.filter((q) => q.isError).forEach((q) => void q.refetch());
   const now = Date.now();
   const horizon = now + DAY;
   const students = teaching.length;
@@ -170,11 +172,13 @@ export function TeacherToday() {
                 <span className="shrink-0 text-xs font-semibold text-warning-strong">{i.tag}</span>
               </Link>
             ))}
-            {!agenda.length && (
-              <p className="px-4 py-5 text-sm text-text-muted">
-                لا شيء مجدول في الأربع والعشرين ساعة القادمة.
-              </p>
-            )}
+            <ListStatus
+              hasItems={agenda.length > 0}
+              loading={dueSources.some((q) => q.isLoading)}
+              failed={dueSources.some((q) => q.isError)}
+              onRetry={retryDue}
+              empty="لا شيء مجدول في الأربع والعشرين ساعة القادمة."
+            />
           </Card>
           <SectionLabel>إجراءات سريعة</SectionLabel>
           <div className="grid auto-cols-fr grid-flow-col gap-2 text-center text-xs">
@@ -223,9 +227,13 @@ export function TeacherToday() {
                   {pending.toLocaleString("ar-u-nu-latn")}
                 </span>
                 <span className="text-sm text-text-muted">
-                  {pending
-                    ? `بانتظار تصحيحك${oldest ? ` · أقدمها ${when(at(oldest))}` : ""}`
-                    : "لا شيء بانتظار تصحيحك ✓"}
+                  {queue.isLoading
+                    ? "جارٍ التحميل…"
+                    : queue.isError
+                      ? "تعذّر تحميل طابور التصحيح"
+                      : pending
+                        ? `بانتظار تصحيحك${oldest ? ` · أقدمها ${when(at(oldest))}` : ""}`
+                        : "لا شيء بانتظار تصحيحك ✓"}
                 </span>
               </div>
               {pending > 0 && (

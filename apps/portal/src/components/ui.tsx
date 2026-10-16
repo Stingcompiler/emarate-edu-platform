@@ -552,6 +552,55 @@ export function Skeleton({ className = "" }: { className?: string }) {
   return <div className={`motion-safe:animate-pulse bg-surface-alt ${className}`} aria-hidden />;
 }
 
+/**
+ * What a list shows besides its rows. An empty message only appears once every source has
+ * loaded: before that it is a placeholder, and a failed source says so (with a retry) instead
+ * of telling the person nothing is there. With rows already shown, a failed source adds one
+ * line saying some may be missing.
+ */
+export function ListStatus({
+  hasItems,
+  loading,
+  failed,
+  onRetry,
+  empty,
+}: {
+  hasItems: boolean;
+  loading: boolean;
+  failed: boolean;
+  onRetry?: () => void;
+  empty: string;
+}) {
+  if (loading && !hasItems) {
+    return (
+      <div className="space-y-2 px-4 py-4" role="status" aria-label="جارٍ التحميل">
+        <Skeleton className="h-3.5 w-2/3 rounded" />
+        <Skeleton className="h-3 w-1/2 rounded" />
+      </div>
+    );
+  }
+  if (failed && !loading) {
+    return (
+      <p role="alert" className="flex items-center justify-between gap-3 px-4 py-3 text-sm">
+        <span className="text-danger-strong">
+          {hasItems ? "قد تنقص بعض العناصر: تعذّر تحميل جزء منها." : "تعذّر تحميل هذا القسم."}
+        </span>
+        {onRetry && (
+          <button
+            type="button"
+            onClick={onRetry}
+            className="tap-44 shrink-0 font-semibold text-primary hover:underline"
+          >
+            أعد المحاولة
+          </button>
+        )}
+      </p>
+    );
+  }
+  if (hasItems) return null;
+  return <p className="px-4 py-4 text-sm text-text-muted">{empty}</p>;
+}
+
 /** A page's actions as one quiet list (label, optional hint, chevron), not a row of equal tiles. */
 export function ActionLinks({ items }: { items: { to: string; label: string; hint?: string }[] }) {
   return (

@@ -239,15 +239,26 @@ const ext = (external: boolean) => (external ? { rel: "noopener", target: "_blan
           href={`${PORTAL}/login`}
           class:list={[
             "tap-44 whitespace-nowrap rounded-md px-3 py-2 text-xs font-semibold text-text hover:bg-surface-alt sm:text-sm",
-            applying ? "hidden sm:inline-block" : "ms-auto bg-surface-alt sm:ms-0",
+            applying ? "ms-auto sm:ms-0" : "ms-auto bg-surface-alt sm:ms-0",
           ]}
         >
-          {t(lang, "portal")}
+          {
+            // The sign-in link stays on phones even while admissions are open (review U02),
+            // shortened to fit beside «Apply».
+            applying ? (
+              <>
+                <span class="sm:hidden">{t(lang, "portalShort")}</span>
+                <span class="hidden sm:inline">{t(lang, "portal")}</span>
+              </>
+            ) : (
+              t(lang, "portal")
+            )
+          }
         </a>
         {applying && (
           <a
             href={`${PORTAL}/apply`}
-            class="tap-44 ms-auto whitespace-nowrap rounded-md bg-accent px-3 py-2 text-xs font-bold text-on-primary hover:bg-accent-hover sm:ms-0 sm:text-sm"
+            class="tap-44 whitespace-nowrap rounded-md bg-accent px-3 py-2 text-xs font-bold text-on-primary hover:bg-accent-hover sm:text-sm"
           >
             {t(lang, "apply")}
           </a>
@@ -286,6 +297,12 @@ const ext = (external: boolean) => (external ? { rel: "noopener", target: "_blan
                   class="rounded-lg border border-border px-3 py-3 text-center text-sm font-semibold text-text"
                 >
                   {t(lang, "track")}
+                </a>
+                <a
+                  href={`${PORTAL}/login`}
+                  class="col-span-2 rounded-lg border border-border px-3 py-3 text-center text-sm font-semibold text-text"
+                >
+                  {t(lang, "portalFull")}
                 </a>
               </div>
               {header.map((e) =>

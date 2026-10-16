@@ -2,12 +2,12 @@ import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router";
 
 import { PortalShell } from "../../components/PortalShell";
-import { ActionLinks, Avatar, Card, SectionLabel } from "../../components/ui";
+import { ActionLinks, Avatar, Card, ListStatus, SectionLabel } from "../../components/ui";
 import { api, ok } from "../../lib/api";
 import { useMe } from "../../lib/auth";
 import { when, count, N } from "../../lib/format";
 import { num } from "../../lib/reports";
-import { Inbox } from "./Inbox";
+import { Inbox, inboxState } from "./Inbox";
 import { ALL } from "../../components/Pager";
 
 const KIND: Record<string, string> = {
@@ -69,6 +69,7 @@ export function AffairsHome() {
         <div className="space-y-4">
           <SectionLabel>يحتاج إجراءً</SectionLabel>
           <Inbox
+            {...inboxState(reports, open, drafts)}
             items={[
               {
                 n: reports.data?.length ?? 0,
@@ -129,7 +130,13 @@ export function AffairsHome() {
                 </span>
               </Link>
             ))}
-            {!cases.length && <p className="px-4 py-4 text-sm text-text-muted">لا حالات مفتوحة.</p>}
+            <ListStatus
+              hasItems={cases.length > 0}
+              loading={open.isLoading}
+              failed={open.isError}
+              onRetry={() => void open.refetch()}
+              empty="لا حالات مفتوحة."
+            />
           </Card>
         </aside>
       </div>

@@ -1,0 +1,151 @@
+Browser tab: 1, Title: "كلية الإمارات للعلوم والتكنولوجيا", URL: "https://ecst.stingdev.pro/ar/".
+1 AXWebArea كلية الإمارات للعلوم والتكنولوجيا, URL: ecst.stingdev.pro/ar/
+	2 link Description: تخطَّ إلى المحتوى, Value: ecst.stingdev.pro/ar/#main
+	3 container
+		4 link Description: كلية الإمارات, Value: ecst.stingdev.pro/ar/
+		5 link Description: قدّم الآن, Value: portal.ecst.stingdev.pro/apply
+		6 button (collapsed) Description: القائمة, Secondary Actions: Expand
+	7 container main
+		8 container
+			9 text القبول مفتوح · قبول 2026/2027
+			10 heading تعليم تقني يبدأ من هنا., Value: 1
+				11 text تعليم تقني يبدأ من هنا.
+			12 text 11 برنامجًا في 4 أقسام — تقديم إلكتروني بالكامل ومتابعة للطلب من هاتفك.
+			13 link Description: استكشف البرامج, Value: ecst.stingdev.pro/ar/programs/
+			14 link Description: تابع طلبك, Value: portal.ecst.stingdev.pro/track
+			15 text يُغلق التقديم بعد 46 يومًا · 30 نوفمبر 11 برنامجًا تقبل الآن
+			16 link Description: قدّم الآن ←, Value: portal.ecst.stingdev.pro/apply
+			17 link Description: كيف تلتحق, Value: ecst.stingdev.pro/ar/admissions/
+			18 image photo_2026-10-13 17.13.54
+			19 link Description: (مثال) مرخّصة من وزارة التعليم العالي — قرار رقم 000/0000, Value: ecst.stingdev.pro/ar/about/accreditation/
+			20 definition list
+				21 container خريج
+					22 text خريج
+				23 text 1,200+
+				24 container عضو هيئة تدريس
+					25 text عضو هيئة تدريس
+				26 text 35
+				27 container معملًا
+					28 text معملًا
+				29 text 12
+				30 container البرامج
+					31 text البرامج
+				32 text 11
+				33 container الأقسام
+					34 text الأقسام
+				35 text 4
+		36 container الإعلانات
+			37 content list
+				38 link Description: إعلان فتح باب القبول لخريف 2026 ←, Value: ecst.stingdev.pro/ar/announcements/1ab439cc-f077-40aa-99a5-62373e64ac8e/
+		39 container طرق مختصرة
+			40 heading للمتقدمين, Value: 2
+				41 text للمتقدمين
+			42 content list
+				43 link Description: خطوات القبول ومواعيده, Value: ecst.stingdev.pro/ar/admissions/
+				44 link Description: البرامج وشروطها, Value: ecst.stingdev.pro/ar/programs/
+				45 link Description: الرسوم والمنح, Value: ecst.stingdev.pro/ar/admissions/fees/
+				46 link Description: تابع طلبك, Value: portal.ecst.stingdev.pro/track
+			47 heading لطلاب الكلية, Value: 2
+				48 text لطلاب الكلية
+			49 content list
+				50 link Description: دخول المنصة, Value: portal.ecst.stingdev.pro/login
+				51 link Description: التقويم الأكاديمي, Value: ecst.stingdev.pro/ar/calendar/
+				52 link Description: اللوائح والأنظمة, Value: ecst.stingdev.pro/ar/regulations/
+				53 link Description: الإعلانات, Value: ecst.stingdev.pro/ar/announcements/
+			54 heading لأولياء الأمور, Value: 2
+				55 text لأولياء الأمور
+			56 content list
+				57 link Description: دليل وليّ الأمر, Value: ecst.stingdev.pro/ar/parents/
+				58 link Description: الاعتماد والاعتراف, Value: ecst.stingdev.pro/ar/about/accreditation/
+				59 link Description: الرسوم والمنح, Value: ecst.stingdev.pro/ar/admissions/fees/
+				60 link Description: تواصل معنا, Value: ecst.stingdev.pro/ar/contact/
+		61 container
+			62 heading الأقسام, Value: 2
+				63 text الأقسام
+			64 link Description: الكل · 4, Value: ecst.stingdev.pro/ar/departments/
+			65 link Description: إدارة الأعمال 3 برامج, Value: ecst.stingdev.pro/ar/departments/BA/
+			66 link Description: الهندسة 3 برامج, Value: ecst.stingdev.pro/ar/departments/ENG/
+			67 link Description: تقنية المعلومات 3 برامج, Value: ecst.stingdev.pro/ar/departments/IT/
+			68 link Description: علوم الحاسوب برنامجان, Value: ecst.stingdev.pro/ar/departments/CS/
+		69 container
+			70 heading البرامج المفتوحة, Value: 2
+				71 text البرامج المفتوحة
+			72 link Description: الكل · 11, Value: ecst.stingdev.pro/ar/programs/
+			73 text إدارة الأعمال
+			74 heading بكالوريوس إدارة الأعمال, Value: 3
+				75 link Description: بكالوريوس إدارة الأعمال, Value: ecst.stingdev.pro/ar/programs/BBA/
+			76 text 4 سنوات · 132 ساعة · بكالوريوس
+			77 text يقبل الآن · 30 نوفمبر
+			78 link Description: قدّم الآن ←, Value: portal.ecst.stingdev.pro/apply?program=BBA
+			79 text إدارة الأعمال
+			80 heading دبلوم إدارة الأعمال, Value: 3
+				81 link Description: دبلوم إدارة الأعمال, Value: ecst.stingdev.pro/ar/programs/DBA/
+			82 text سنتان · 68 ساعة · دبلوم
+			83 text يقبل الآن · 30 نوفمبر
+			84 link Description: قدّم الآن ←, Value: portal.ecst.stingdev.pro/apply?program=DBA
+			85 text إدارة الأعمال
+			86 heading دبلوم المحاسبة, Value: 3
+				87 link Description: دبلوم المحاسبة, Value: ecst.stingdev.pro/ar/programs/DACC/
+			88 text سنتان · 68 ساعة · دبلوم
+			89 text يقبل الآن · 30 نوفمبر
+			90 link Description: قدّم الآن ←, Value: portal.ecst.stingdev.pro/apply?program=DACC
+			91 text الهندسة
+			92 heading بكالوريوس الهندسة الكهربائية, Value: 3
+				93 link Description: بكالوريوس الهندسة الكهربائية, Value: ecst.stingdev.pro/ar/programs/BEE/
+			94 text 5 سنوات · 160 ساعة · بكالوريوس
+			95 text يقبل الآن · 30 نوفمبر
+			96 link Description: قدّم الآن ←, Value: portal.ecst.stingdev.pro/apply?program=BEE
+		97 container
+			98 image (مثال) صورة تجريبية — صورة العميد
+			99 heading كلمة العميد, Value: 2
+				100 text كلمة العميد
+			101 text (نص تجريبي) الكلمة بنص العميد، ثم الاسم والصفة. أضف صورة رسمية بنص بديل.
+			102 link Description: اقرأ الكلمة كاملة ←, Value: ecst.stingdev.pro/ar/about/dean/
+		103 container
+			104 heading الأخبار, Value: 2
+				105 text الأخبار
+			106 link Description: الكل, Value: ecst.stingdev.pro/ar/news/
+			107 content list
+				108 link Value: ecst.stingdev.pro/ar/news/sample-graduation/, Description: 28 سبتمبر 2026 (مثال) حفل تخريج الدفعة الخامسة (مثال) احتفلت الكلية بتخريج طلابها بحضور أولياء الأمور.
+				109 link Value: ecst.stingdev.pro/ar/news/sample-network-lab/, Description: 19 سبتمبر 2026 (مثال) افتتاح معمل الشبكات الجديد (مثال) معمل مجهّز لتدريب طلاب تقنية المعلومات على الشبكات.
+				110 link Description: 10 سبتمبر 2026 (مثال) شراكة تدريب مع شركات تقنية (مثال) فرص تدريب صيفي لطلاب المستوى الثالث., Value: ecst.stingdev.pro/ar/news/sample-partnership/
+	111 container
+		112 text كلية الإمارات للعلوم والتكنولوجيا (مثال) تعليم تقني يُعدّ الخريج لسوق العمل من يومه الأول عنوان تجريبي — الخرطوم، السودان
+		113 link Description: +249 000 000 000, Value: tel:+249000000000
+		114 link Description: info@demo.ecst.test, Value: mailto:info@demo.ecst.test
+		115 link Description: WhatsApp, Value: wa.me/249000000000
+		116 link Description: قدّم الآن, Value: portal.ecst.stingdev.pro/apply
+		117 link Description: تابع طلبك, Value: portal.ecst.stingdev.pro/track
+		118 container الكلية
+			119 text الكلية
+			120 content list
+				121 link Description: عن الكلية, Value: ecst.stingdev.pro/ar/about/
+				122 link Description: القيادة, Value: ecst.stingdev.pro/ar/about/leadership/
+				123 link Description: الاعتماد, Value: ecst.stingdev.pro/ar/about/accreditation/
+				124 link Description: الوظائف, Value: ecst.stingdev.pro/ar/about/careers/
+				125 link Description: تواصل, Value: ecst.stingdev.pro/ar/contact/
+		126 container الدراسة
+			127 text الدراسة
+			128 content list
+				129 link Description: الأقسام, Value: ecst.stingdev.pro/ar/departments/
+				130 link Description: البرامج, Value: ecst.stingdev.pro/ar/programs/
+				131 link Description: التقويم الأكاديمي, Value: ecst.stingdev.pro/ar/calendar/
+				132 link Description: اللوائح, Value: ecst.stingdev.pro/ar/regulations/
+				133 link Description: دليل الطالب, Value: ecst.stingdev.pro/ar/academics/student-guide/
+		134 container القبول والإعلام
+			135 text القبول والإعلام
+			136 content list
+				137 link Description: القبول, Value: ecst.stingdev.pro/ar/admissions/
+				138 link Description: الرسوم والمنح, Value: ecst.stingdev.pro/ar/admissions/fees/
+				139 link Description: الأخبار, Value: ecst.stingdev.pro/ar/news/
+				140 link Description: الإعلانات, Value: ecst.stingdev.pro/ar/announcements/
+				141 link Description: الفعاليات, Value: ecst.stingdev.pro/ar/events/
+		142 text © 2026 كلية الإمارات للعلوم والتكنولوجيا
+		143 link Description: مدعوم من ستينج سيستم (يفتح في تبويب جديد), Value: stingdev.pro/
+		144 container السياسات
+			145 link Description: سياسة الخصوصية, Value: ecst.stingdev.pro/ar/privacy/
+			146 link Description: شروط الاستخدام, Value: ecst.stingdev.pro/ar/terms/
+			147 link Description: بيان إمكانية الوصول, Value: ecst.stingdev.pro/ar/accessibility/
+	148 link Description: اسألنا على واتساب, Value: wa.me/249000000000?text=%D9%85%D8%B1%D8%AD%D8%A8%D9%8B%D8%A7%D8%8C%20%D8%A3%D8%B3%D8%AA%D9%81%D8%B3%D8%B1%20%D8%B9%D9%86%3A%20%D9%83%D9%84%D9%8A%D8%A9%20%D8%A7%D9%84%D8%A5%D9%85%D8%A7%D8%B1%D8%A7%D8%AA%20%D9%84%D9%84%D8%B9%D9%84%D9%88%D9%85%20%D9%88%D8%A7%D9%84%D8%AA%D9%83%D9%86%D9%88%D9%84%D9%88%D8%AC%D9%8A%D8%A7
+
+The focused UI element is 1 AXWebArea كلية الإمارات للعلوم والتكنولوجيا, URL: ecst.stingdev.pro/ar/

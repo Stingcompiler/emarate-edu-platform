@@ -7,7 +7,7 @@ import { api, ok } from "../../lib/api";
 import { useMe } from "../../lib/auth";
 import { when, fileName } from "../../lib/format";
 import { num } from "../../lib/reports";
-import { Inbox } from "./Inbox";
+import { Inbox, inboxState } from "./Inbox";
 import { ALL } from "../../components/Pager";
 
 /** Board: ResultsOfficerHome (phone); desktop derived — actions and batches beside display settings. */
@@ -46,6 +46,7 @@ export function ResultsHome() {
         <div className="space-y-4">
           <SectionLabel>يحتاج إجراءً</SectionLabel>
           <Inbox
+            {...inboxState(batches, corrections)}
             items={[
               {
                 n: list.filter((b) => b.status === "has_errors").length,

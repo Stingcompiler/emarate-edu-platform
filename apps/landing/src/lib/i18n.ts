@@ -10,6 +10,9 @@ const T = {
   news: { ar: "الأخبار والفعاليات", en: "News & events" },
   contact: { ar: "تواصل", en: "Contact" },
   portal: { ar: "دخول المنصة", en: "Sign in" },
+  // Phone header while admissions are open, beside «Apply»; and the menu's first rows.
+  portalShort: { ar: "البوابة", en: "Portal" },
+  portalFull: { ar: "بوابة الطلاب والموظفين", en: "Students & staff portal" },
   apply: { ar: "قدّم الآن", en: "Apply now" },
   track: { ar: "تابع طلبك", en: "Track your application" },
   explore: { ar: "استكشف البرامج", en: "Explore programmes" },

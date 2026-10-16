@@ -3,7 +3,7 @@ import { CalendarRange, FileUp, LayoutTemplate, Users } from "lucide-react";
 import { Link } from "react-router";
 
 import { PortalShell } from "../../components/PortalShell";
-import { Avatar, Button, Card, SectionLabel } from "../../components/ui";
+import { Avatar, Button, Card, ListStatus, SectionLabel } from "../../components/ui";
 import { api, ok } from "../../lib/api";
 import { useMe } from "../../lib/auth";
 import { when } from "../../lib/format";
@@ -11,7 +11,7 @@ import { can } from "../../lib/nav";
 import { initials, num } from "../../lib/reports";
 import { STATUS_LABEL } from "../../lib/visitor";
 import { ALL } from "../../components/Pager";
-import { Inbox } from "../homes/Inbox";
+import { Inbox, inboxState } from "../homes/Inbox";
 
 /** Boards: HeadRegistrarHome and RegistrarHome (phone), DesktopHeadRegistrar — the applications'
  *  path as one bar, the action inbox, and (for the head) each registrar's load. */
@@ -185,7 +185,7 @@ export function RegistrarHome() {
       <div className="mt-6 lg:grid lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start lg:gap-6">
         <div className="space-y-4">
           <SectionLabel>يحتاج إجراءك</SectionLabel>
-          <Inbox items={inbox} />
+          <Inbox {...inboxState(summary, registrations, inquiries)} items={inbox} />
           <SectionLabel>غير مُتولّى · {num(unassigned.data?.count ?? 0)}</SectionLabel>
           <Card className="divide-y divide-border-soft">
             {(unassigned.data?.results ?? []).map((a) => (
@@ -208,9 +208,13 @@ export function RegistrarHome() {
                 </Button>
               </div>
             ))}
-            {!unassigned.data?.count && (
-              <p className="px-4 py-4 text-sm text-text-muted">كل الطلبات موزعة.</p>
-            )}
+            <ListStatus
+              hasItems={!!unassigned.data?.count}
+              loading={unassigned.isLoading}
+              failed={unassigned.isError}
+              onRetry={() => void unassigned.refetch()}
+              empty="كل الطلبات موزعة."
+            />
           </Card>
         </div>
         <aside className="mt-6 space-y-4 lg:mt-0">
