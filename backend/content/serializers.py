@@ -19,6 +19,14 @@ from .sanitize import clean_blocks, clean_html
 MAX_IMAGE_MB = 5
 
 
+class MediaAltSerializer(serializers.ModelSerializer):
+    """The editable part of a media asset: its description for people who do not see it."""
+
+    class Meta:
+        model = MediaAsset
+        fields = ["alt_ar", "alt_en"]
+
+
 class MediaAssetSerializer(serializers.ModelSerializer):
     url = serializers.SerializerMethodField()
 

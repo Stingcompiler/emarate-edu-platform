@@ -5,6 +5,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.utils import timezone
 
 from accounts.rbac import Role
+from audit.models import AuditLog
 from content.models import Announcement
 
 A = "/api/v1/announcements"
@@ -133,6 +134,22 @@ def test_events_media_menus_redirects_settings(api, site, make_user, settings):
     )
     assert cover.status_code == 201, cover.data
     assert cover.data["width"] == 8 and cover.data["url"]
+    # Its description can be corrected later (U04): only the alt text, and it is audited.
+    fixed = api(events).patch(
+        f"/api/v1/content/media/{cover.data['public_id']}",
+        {"alt_ar": "طلاب في المعمل", "alt_en": "Students in the lab", "size": 1},
+        format="json",
+    )
+    assert fixed.status_code == 200, fixed.data
+    assert fixed.data["alt_ar"] == "طلاب في المعمل" and fixed.data["url"]
+    assert fixed.data["size"] == cover.data["size"]  # the other fields are not editable
+    assert AuditLog.objects.filter(action="media.update").exists()
+    assert (
+        api(events)
+        .put(f"/api/v1/content/media/{cover.data['public_id']}", {}, format="json")
+        .status_code
+        == 405
+    )
     bad = api(events).post(
         "/api/v1/content/media", {"file": SimpleUploadedFile("x.exe", b"MZ")}, format="multipart"
     )
