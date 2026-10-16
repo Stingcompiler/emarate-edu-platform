@@ -17,7 +17,7 @@
     "shots": "SHOTS=${SHOTS:-current} pnpm e2e shots.spec.ts",
     "lint:ui": "bash scripts/lint-ui.sh",
     "seo:check": "node scripts/seo-check.mjs apps/landing/dist",
-    "test:scripts": "node --test scripts/"
+    "test:scripts": "node --test \"scripts/*.test.mjs\""
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.13.0",
