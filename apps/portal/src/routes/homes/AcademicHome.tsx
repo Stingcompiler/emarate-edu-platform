@@ -1,9 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
-import { BarChart3, UserPlus } from "lucide-react";
-import { Link } from "react-router";
 
 import { PortalShell } from "../../components/PortalShell";
-import { Avatar, Card, SectionLabel } from "../../components/ui";
+import { ActionLinks, Avatar, Card, SectionLabel } from "../../components/ui";
 import { api, ok } from "../../lib/api";
 import { useMe } from "../../lib/auth";
 import { useCurrentTerm } from "../../lib/department";
@@ -72,102 +70,96 @@ export function AcademicHome() {
     >
       {/* Board DesktopAcademicAffairs: the departments and their leadership first, as cards;
           then what needs a decision. */}
-      <SectionLabel>
-        الأقسام وقياداتها · {count(departments.data?.length ?? 0, N.department)}
-      </SectionLabel>
-      {/* One card per line on phones: two side by side cut the leaders' names. */}
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        {(departments.data ?? []).map((d) => {
-          const heads = (leaders.data ?? []).filter((r) => r.department === d.id);
-          return (
-            <Card key={d.id} className="px-4 py-3 text-sm">
-              <b className="block text-text">{d.name_ar}</b>
-              {heads.map((r) => (
-                <p key={r.id} className="mt-1 flex items-center gap-2 text-xs">
-                  <Avatar text={initials(r.user_name)} size="sm" tone="primary" />
-                  {r.role === "department_manager" ? "مدير القسم" : "مشرف القسم"}: {r.user_name}
-                </p>
-              ))}
-              {!has(d.id, "department_manager") && (
-                <p className="mt-1 text-xs font-semibold text-danger-strong">بلا مدير</p>
-              )}
-              {!has(d.id, "department_supervisor") && (
-                <p className="mt-1 text-xs font-semibold text-danger-strong">بلا مشرف</p>
-              )}
-            </Card>
-          );
-        })}
-      </div>
-      {/* Large screens: the decisions beside the shortcuts (a 3xl column left half the row
-          empty). */}
-      <div className="mt-6 lg:grid lg:grid-cols-[minmax(0,1fr)_300px] lg:items-start lg:gap-6">
-        <div>
-          <SectionLabel>يحتاج قرارك</SectionLabel>
-          <Inbox
-            items={[
-              {
-                n: corrections.data ?? 0,
-                title: "طلبات تعديل نتائج بانتظار موافقتك",
-                meta: "من مسؤول النتائج",
-                to: "/result-corrections",
-              },
-              {
-                n: unled.length,
-                title: "أقسام تنقصها قيادة",
-                meta: unled
-                  .map(
-                    (d) =>
-                      `${d.name_ar} (${[
-                        !has(d.id, "department_manager") && "مدير",
-                        !has(d.id, "department_supervisor") && "مشرف",
-                      ]
-                        .filter(Boolean)
-                        .join(" و")})`,
-                  )
-                  .join(" · "),
-                to: "/system/users",
-                tone: "danger",
-              },
-              {
-                n: slow.length,
-                title: "أساتذة تجاوزوا حد زمن التصحيح",
-                meta: slow
-                  .slice(0, 3)
-                  .map((t) => t.name)
-                  .join(" · "),
-                to: "/hr/teachers",
-              },
-              {
-                n: noTeacher.length,
-                title: "مواد بلا أستاذ في الكلية",
-                meta: noTeacher
-                  .slice(0, 5)
-                  .map((o) => o.course_detail.code)
-                  .join(" · "),
-                // Filtered; the department switch on that page moves between departments.
-                to: "/department/courses?filter=teacher",
-                tone: "info",
-              },
-            ]}
-          />
+      <div className="flex flex-col">
+        <div className="order-2 lg:order-1">
+          <SectionLabel>
+            الأقسام وقياداتها · {count(departments.data?.length ?? 0, N.department)}
+          </SectionLabel>
+          {/* One card per line on phones: two side by side cut the leaders' names. */}
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            {(departments.data ?? []).map((d) => {
+              const heads = (leaders.data ?? []).filter((r) => r.department === d.id);
+              return (
+                <Card key={d.id} className="px-4 py-3 text-sm">
+                  <b className="block text-text">{d.name_ar}</b>
+                  {heads.map((r) => (
+                    <p key={r.id} className="mt-1 flex items-center gap-2 text-xs">
+                      <Avatar text={initials(r.user_name)} size="sm" tone="primary" />
+                      {r.role === "department_manager" ? "مدير القسم" : "مشرف القسم"}: {r.user_name}
+                    </p>
+                  ))}
+                  {!has(d.id, "department_manager") && (
+                    <p className="mt-1 text-xs font-semibold text-danger-strong">بلا مدير</p>
+                  )}
+                  {!has(d.id, "department_supervisor") && (
+                    <p className="mt-1 text-xs font-semibold text-danger-strong">بلا مشرف</p>
+                  )}
+                </Card>
+              );
+            })}
+          </div>
         </div>
-        <div className="mt-6 lg:mt-0">
-          <SectionLabel>اختصارات</SectionLabel>
-          <div className="grid grid-cols-2 gap-2 lg:grid-cols-1">
-            <Link
-              to="/hr/teachers"
-              className="flex items-center gap-2 rounded-2xl bg-surface p-3 text-sm font-semibold shadow-sm hover:bg-surface-alt"
-            >
-              <BarChart3 size={18} className="text-primary" aria-hidden />
-              تقارير الأداء
-            </Link>
-            <Link
-              to="/system/users"
-              className="flex items-center gap-2 rounded-2xl bg-surface p-3 text-sm font-semibold shadow-sm hover:bg-surface-alt"
-            >
-              <UserPlus size={18} className="text-primary" aria-hidden />
-              حساب أستاذ / معيد
-            </Link>
+        {/* Large screens: the decisions beside the shortcuts (a 3xl column left half the row
+          empty). */}
+        <div className="order-1 mb-6 lg:order-2 lg:mb-0 lg:mt-6 lg:grid lg:grid-cols-[minmax(0,1fr)_300px] lg:items-start lg:gap-6">
+          <div>
+            <SectionLabel>يحتاج قرارك</SectionLabel>
+            <Inbox
+              items={[
+                {
+                  n: corrections.data ?? 0,
+                  title: "طلبات تعديل نتائج بانتظار موافقتك",
+                  meta: "من مسؤول النتائج",
+                  to: "/result-corrections",
+                },
+                {
+                  n: unled.length,
+                  title: "أقسام تنقصها قيادة",
+                  meta: unled
+                    .map(
+                      (d) =>
+                        `${d.name_ar} (${[
+                          !has(d.id, "department_manager") && "مدير",
+                          !has(d.id, "department_supervisor") && "مشرف",
+                        ]
+                          .filter(Boolean)
+                          .join(" و")})`,
+                    )
+                    .join(" · "),
+                  to: "/system/users",
+                  tone: "danger",
+                },
+                {
+                  n: slow.length,
+                  title: "أساتذة تجاوزوا حد زمن التصحيح",
+                  meta: slow
+                    .slice(0, 3)
+                    .map((t) => t.name)
+                    .join(" · "),
+                  to: "/hr/teachers",
+                },
+                {
+                  n: noTeacher.length,
+                  title: "مواد بلا أستاذ في الكلية",
+                  meta: noTeacher
+                    .slice(0, 5)
+                    .map((o) => o.course_detail.code)
+                    .join(" · "),
+                  // Filtered; the department switch on that page moves between departments.
+                  to: "/department/courses?filter=teacher",
+                  tone: "info",
+                },
+              ]}
+            />
+          </div>
+          <div className="mt-6 lg:mt-0">
+            <SectionLabel>اختصارات</SectionLabel>
+            <ActionLinks
+              items={[
+                { to: "/hr/teachers", label: "تقارير الأداء" },
+                { to: "/system/users", label: "حساب أستاذ / معيد" },
+              ]}
+            />
           </div>
         </div>
       </div>
