@@ -27,6 +27,7 @@ const SCREENS: [string, string, string][] = [
   ["admin-users", "admin@demo.ecst.test", "/system/users"],
   ["results-home", "results@demo.ecst.test", "/"],
   ["affairs-home", "student.affairs@demo.ecst.test", "/"],
+  ["academic-home", "academic@demo.ecst.test", "/"],
   ["site-home", "site@demo.ecst.test", "/"],
 ];
 
