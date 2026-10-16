@@ -12,9 +12,10 @@ import {
   Chip,
   CodeTile,
   FilterBar,
+  Labeled,
   Notice,
-  SectionLabel,
   problemMessage,
+  SectionLabel,
   splitCode,
 } from "../../components/ui";
 import { api, ok } from "../../lib/api";
@@ -438,19 +439,21 @@ function EditOffering({
       }}
       className="col-span-full grid gap-2 rounded-xl bg-surface-alt p-3 sm:grid-cols-[110px_minmax(0,1fr)_90px_90px_70px_auto]"
     >
-      <input
-        dir="ltr"
-        value={f.code}
-        onChange={(e) => setF({ ...f, code: e.target.value })}
-        aria-label="رمز المادة"
-        className={input}
-      />
-      <input
-        value={f.name_ar}
-        onChange={(e) => setF({ ...f, name_ar: e.target.value })}
-        aria-label="اسم المادة"
-        className={input}
-      />
+      <Labeled label="رمز المادة">
+        <input
+          dir="ltr"
+          value={f.code}
+          onChange={(e) => setF({ ...f, code: e.target.value })}
+          className={input}
+        />
+      </Labeled>
+      <Labeled label="اسم المادة">
+        <input
+          value={f.name_ar}
+          onChange={(e) => setF({ ...f, name_ar: e.target.value })}
+          className={input}
+        />
+      </Labeled>
       <label className="flex items-center gap-1 text-xs text-text-muted">
         ساعات
         <input
@@ -473,13 +476,14 @@ function EditOffering({
           className="w-12 rounded border border-border bg-surface px-1 py-1"
         />
       </label>
-      <input
-        dir="ltr"
-        value={f.section}
-        onChange={(e) => setF({ ...f, section: e.target.value })}
-        aria-label="الشعبة"
-        className={input}
-      />
+      <Labeled label="الشعبة">
+        <input
+          dir="ltr"
+          value={f.section}
+          onChange={(e) => setF({ ...f, section: e.target.value })}
+          className={input}
+        />
+      </Labeled>
       <Button type="submit" disabled={!f.code.trim() || !f.name_ar.trim() || save.isPending}>
         حفظ
       </Button>
@@ -558,19 +562,20 @@ function NewOffering({
           aria-label="اسم المادة"
           className={input}
         />
-        <select
-          value={f.program}
-          onChange={(e) => setF({ ...f, program: e.target.value })}
-          aria-label="البرنامج"
-          className={input}
-        >
-          <option value="">كل البرامج</option>
-          {(programs.data ?? []).map((p) => (
-            <option key={p.id} value={p.id}>
-              {p.name_ar}
-            </option>
-          ))}
-        </select>
+        <Labeled label="البرنامج">
+          <select
+            value={f.program}
+            onChange={(e) => setF({ ...f, program: e.target.value })}
+            className={input}
+          >
+            <option value="">كل البرامج</option>
+            {(programs.data ?? []).map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.name_ar}
+              </option>
+            ))}
+          </select>
+        </Labeled>
         <label className="flex items-center gap-1 text-xs text-text-muted">
           ساعات
           <input

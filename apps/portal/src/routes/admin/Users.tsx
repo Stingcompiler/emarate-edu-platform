@@ -8,10 +8,12 @@ import {
   Button,
   Card,
   Chip,
+  Field,
   FilterBar,
   Notice,
   problemMessage,
   SectionLabel,
+  SelectField,
   StatusBadge,
 } from "../../components/ui";
 import { api, ok } from "../../lib/api";
@@ -201,34 +203,36 @@ function NewUser() {
       void client.invalidateQueries({ queryKey: ["users"] });
     },
   });
-  const input = "block min-h-10 w-full rounded-lg border border-border bg-surface px-3 text-sm";
   return (
     <>
       <SectionLabel>
         {allowed.includes("system_admin") ? "مستخدم إداري جديد" : "حساب أستاذ / معيد جديد"}
       </SectionLabel>
-      <Card className="space-y-2 p-4">
-        <input
+      <Card className="overflow-hidden">
+        <Field
+          label="الاسم الكامل"
+          requiredMark
           value={f.full_name_ar}
           onChange={(e) => setF({ ...f, full_name_ar: e.target.value })}
-          placeholder="الاسم الكامل"
-          aria-label="الاسم الكامل"
-          className={input}
+          placeholder="مثال: أحمد محمد علي"
+          autoComplete="off"
         />
-        <input
+        <Field
+          label="البريد الإلكتروني"
+          requiredMark
           dir="ltr"
           type="email"
           value={f.email}
           onChange={(e) => setF({ ...f, email: e.target.value })}
           placeholder="name@ecst.edu.sd"
-          aria-label="البريد الإلكتروني"
-          className={input}
+          autoComplete="off"
+          hint="يصله رابط التفعيل عليه"
         />
-        <select
+        <SelectField
+          label="الدور"
+          requiredMark
           value={role}
           onChange={(e) => setF({ ...f, role: e.target.value })}
-          className={input}
-          aria-label="الدور"
         >
           {Object.entries(ROLE_LABEL)
             .filter(([k]) => allowed.includes(k))
@@ -237,13 +241,13 @@ function NewUser() {
                 {l}
               </option>
             ))}
-        </select>
+        </SelectField>
         {DEPARTMENT_ROLES.has(role) && (
-          <select
+          <SelectField
+            label="القسم"
+            requiredMark
             value={f.department}
             onChange={(e) => setF({ ...f, department: e.target.value })}
-            className={input}
-            aria-label="القسم"
           >
             <option value="">اختر القسم</option>
             {(departments.data ?? []).map((d) => (
@@ -251,24 +255,28 @@ function NewUser() {
                 {d.name_ar}
               </option>
             ))}
-          </select>
+          </SelectField>
         )}
-        {create.isError && <Notice>{problemMessage(create.error)}</Notice>}
-        {create.isSuccess && (
-          <Notice tone="success">أُنشئ الحساب وأُرسل رابط التفعيل (صالح 7 أيام) إلى بريده.</Notice>
-        )}
-        <Button
-          className="w-full"
-          disabled={
-            !f.full_name_ar.trim() ||
-            !f.email.includes("@") ||
-            (DEPARTMENT_ROLES.has(role) && !f.department) ||
-            create.isPending
-          }
-          onClick={() => create.mutate()}
-        >
-          إنشاء وإرسال رابط التفعيل
-        </Button>
+        <div className="space-y-2 p-4">
+          {create.isError && <Notice>{problemMessage(create.error)}</Notice>}
+          {create.isSuccess && (
+            <Notice tone="success">
+              أُنشئ الحساب وأُرسل رابط التفعيل (صالح 7 أيام) إلى بريده.
+            </Notice>
+          )}
+          <Button
+            className="w-full"
+            disabled={
+              !f.full_name_ar.trim() ||
+              !f.email.includes("@") ||
+              (DEPARTMENT_ROLES.has(role) && !f.department) ||
+              create.isPending
+            }
+            onClick={() => create.mutate()}
+          >
+            إنشاء وإرسال رابط التفعيل
+          </Button>
+        </div>
       </Card>
     </>
   );

@@ -8,11 +8,12 @@ import {
   Card,
   Chip,
   Field,
+  Labeled,
   Notice,
+  problemMessage,
   SectionLabel,
   StatusBadge,
   TextArea,
-  problemMessage,
 } from "../../components/ui";
 import { api, ok } from "../../lib/api";
 import { num } from "../../lib/reports";
@@ -175,30 +176,33 @@ export function Structure() {
           <Card className="space-y-2 p-3">
             <p className="text-sm font-semibold">+ قسم</p>
             <div className="grid grid-cols-[96px_minmax(0,1fr)] gap-2">
+              <Labeled label="رمز القسم">
+                <input
+                  dir="ltr"
+                  value={dForm.code}
+                  onChange={(e) => setD({ ...dForm, code: e.target.value.toUpperCase() })}
+                  placeholder="IT"
+                  className={input}
+                />
+              </Labeled>
+              <Labeled label="اسم القسم">
+                <input
+                  value={dForm.name_ar}
+                  onChange={(e) => setD({ ...dForm, name_ar: e.target.value })}
+                  placeholder="اسم القسم"
+                  className={input}
+                />
+              </Labeled>
+            </div>
+            <Labeled label="الاسم بالإنجليزية">
               <input
                 dir="ltr"
-                value={dForm.code}
-                onChange={(e) => setD({ ...dForm, code: e.target.value.toUpperCase() })}
-                placeholder="IT"
-                aria-label="رمز القسم"
-                className={input}
+                value={dForm.name_en}
+                onChange={(e) => setD({ ...dForm, name_en: e.target.value })}
+                placeholder="الاسم بالإنجليزية"
+                className={`${input} w-full`}
               />
-              <input
-                value={dForm.name_ar}
-                onChange={(e) => setD({ ...dForm, name_ar: e.target.value })}
-                placeholder="اسم القسم"
-                aria-label="اسم القسم"
-                className={input}
-              />
-            </div>
-            <input
-              dir="ltr"
-              value={dForm.name_en}
-              onChange={(e) => setD({ ...dForm, name_en: e.target.value })}
-              placeholder="الاسم بالإنجليزية"
-              aria-label="الاسم بالإنجليزية"
-              className={`${input} w-full`}
-            />
+            </Labeled>
             <Button
               className="w-full"
               disabled={!dForm.code || !dForm.name_ar || !colleges.data?.length}
@@ -255,38 +259,42 @@ export function Structure() {
               ))}
             </select>
             <div className="grid grid-cols-[minmax(0,1fr)_70px] gap-2">
-              <input
-                value={tForm.name_ar}
-                onChange={(e) => setT({ ...tForm, name_ar: e.target.value })}
-                placeholder="ربيع 2027"
-                aria-label="اسم الفصل"
-                className={input}
-              />
-              <input
-                type="number"
-                min={1}
-                max={3}
-                value={tForm.order}
-                onChange={(e) => setT({ ...tForm, order: Number(e.target.value) })}
-                aria-label="الترتيب"
-                className={input}
-              />
+              <Labeled label="اسم الفصل">
+                <input
+                  value={tForm.name_ar}
+                  onChange={(e) => setT({ ...tForm, name_ar: e.target.value })}
+                  placeholder="ربيع 2027"
+                  className={input}
+                />
+              </Labeled>
+              <Labeled label="الترتيب">
+                <input
+                  type="number"
+                  min={1}
+                  max={3}
+                  value={tForm.order}
+                  onChange={(e) => setT({ ...tForm, order: Number(e.target.value) })}
+                  className={input}
+                />
+              </Labeled>
             </div>
             <div className="grid grid-cols-2 gap-2">
-              <input
-                type="date"
-                value={tForm.starts_on}
-                onChange={(e) => setT({ ...tForm, starts_on: e.target.value })}
-                aria-label="البداية"
-                className={input}
-              />
-              <input
-                type="date"
-                value={tForm.ends_on}
-                onChange={(e) => setT({ ...tForm, ends_on: e.target.value })}
-                aria-label="النهاية"
-                className={input}
-              />
+              <Labeled label="البداية">
+                <input
+                  type="date"
+                  value={tForm.starts_on}
+                  onChange={(e) => setT({ ...tForm, starts_on: e.target.value })}
+                  className={input}
+                />
+              </Labeled>
+              <Labeled label="النهاية">
+                <input
+                  type="date"
+                  value={tForm.ends_on}
+                  onChange={(e) => setT({ ...tForm, ends_on: e.target.value })}
+                  className={input}
+                />
+              </Labeled>
             </div>
             <Button
               className="w-full"

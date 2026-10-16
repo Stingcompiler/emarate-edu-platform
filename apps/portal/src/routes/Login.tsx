@@ -52,7 +52,10 @@ export function Login() {
   }
 
   return (
-    <AuthLayout title="مرحبًا بك في بوابة الكلية" subtitle="ادخل برقمك الجامعي أو بريدك">
+    <AuthLayout
+      title="مرحبًا بك في بوابة الكلية"
+      subtitle="الطلاب برقمهم الجامعي، والأساتذة والموظفون ببريدهم"
+    >
       <form onSubmit={submit} className="space-y-4" noValidate>
         <Card>
           <Field
@@ -79,7 +82,7 @@ export function Login() {
         </Card>
         <div className="flex items-center justify-between px-1 text-sm">
           <Link to="/register" className="font-semibold text-primary">
-            طالب جديد؟ أنشئ حسابك
+            لديك رقم جامعي؟ أنشئ حساب البوابة
           </Link>
           <Link to="/forgot-password" className="text-text-muted">
             نسيت كلمة المرور

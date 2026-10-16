@@ -6,10 +6,11 @@ import {
   Button,
   Card,
   Chip,
+  Labeled,
   Notice,
+  problemMessage,
   SectionLabel,
   StatusBadge,
-  problemMessage,
 } from "../../components/ui";
 import { api, ok } from "../../lib/api";
 import { count, N, fmtDate } from "../../lib/format";
@@ -107,13 +108,14 @@ export function Cycles() {
           دورة جديدة
         </summary>
         <div className="mt-3 grid gap-2 sm:grid-cols-[minmax(0,1fr)_180px_180px_auto]">
-          <input
-            value={draft.name}
-            onChange={(e) => setDraft({ ...draft, name: e.target.value })}
-            placeholder="الاسم، مثل: قبول 2027/2028"
-            aria-label="اسم الدورة"
-            className="min-h-10 rounded-lg border border-border bg-surface px-3"
-          />
+          <Labeled label="اسم الدورة">
+            <input
+              value={draft.name}
+              onChange={(e) => setDraft({ ...draft, name: e.target.value })}
+              placeholder="الاسم، مثل: قبول 2027/2028"
+              className="min-h-10 rounded-lg border border-border bg-surface px-3"
+            />
+          </Labeled>
           <label className="flex items-center gap-2 text-xs text-text-muted">
             يفتح
             <input
