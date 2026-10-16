@@ -4,6 +4,7 @@ import type {
   HTMLAttributes,
   InputHTMLAttributes,
   ReactNode,
+  SelectHTMLAttributes,
   TextareaHTMLAttributes,
 } from "react";
 
@@ -62,11 +63,25 @@ export function Field({
   label,
   hint,
   error,
+  requiredMark = false,
   ...props
-}: InputHTMLAttributes<HTMLInputElement> & { label: string; hint?: string; error?: string }) {
+}: InputHTMLAttributes<HTMLInputElement> & {
+  label: string;
+  hint?: string;
+  error?: string;
+  /** Marks the label with «*» (the input still carries `required` for the browser). */
+  requiredMark?: boolean;
+}) {
   return (
     <label className="block border-b border-border-soft px-4 py-2.5 last:border-b-0 focus-within:bg-primary-soft/30 focus-within:shadow-[inset_0_-2px_0_var(--focus-ring)]">
-      <span className="block text-xs text-text-muted">{label}</span>
+      <span className="block text-xs text-text-muted">
+        {label}
+        {requiredMark && (
+          <span aria-hidden className="ms-0.5 text-danger-strong">
+            *
+          </span>
+        )}
+      </span>
       <input
         {...props}
         aria-invalid={error ? true : undefined}
@@ -74,6 +89,57 @@ export function Field({
       />
       {hint && !error && <span className="mt-1 block text-xs text-text-muted">{hint}</span>}
       {error && <span className="mt-1 block text-xs text-danger-strong">{error}</span>}
+    </label>
+  );
+}
+
+/** A visible label above a bare input or select (add-rows laid out in a grid, not a grouped Card). */
+export function Labeled({
+  label,
+  children,
+  className = "",
+}: {
+  label: string;
+  children: ReactNode;
+  className?: string;
+}) {
+  return (
+    <label className={`block min-w-0 ${className}`}>
+      <span className="mb-1 block text-xs text-text-muted">{label}</span>
+      {children}
+    </label>
+  );
+}
+
+/** A select with the same always-visible label as `Field`, to stack in one Card with fields. */
+export function SelectField({
+  label,
+  hint,
+  requiredMark = false,
+  children,
+  ...props
+}: SelectHTMLAttributes<HTMLSelectElement> & {
+  label: string;
+  hint?: string;
+  requiredMark?: boolean;
+}) {
+  return (
+    <label className="block border-b border-border-soft px-4 py-2.5 last:border-b-0 focus-within:bg-primary-soft/30 focus-within:shadow-[inset_0_-2px_0_var(--focus-ring)]">
+      <span className="block text-xs text-text-muted">
+        {label}
+        {requiredMark && (
+          <span aria-hidden className="ms-0.5 text-danger-strong">
+            *
+          </span>
+        )}
+      </span>
+      <select
+        {...props}
+        className="mt-0.5 block min-h-9 w-full bg-transparent text-base text-text outline-none"
+      >
+        {children}
+      </select>
+      {hint && <span className="mt-1 block text-xs text-text-muted">{hint}</span>}
     </label>
   );
 }

@@ -103,7 +103,7 @@ export function Register() {
       title="إنشاء حساب طالب"
       subtitle={
         step === "details"
-          ? "أدخل بياناتك كما في سجل الكلية"
+          ? "لطلاب الكلية المقيدين: أدخل بياناتك كما في سجل الكلية"
           : step === "code"
             ? `أرسلنا رمزًا من 6 أرقام إلى ${email}`
             : "اختر كلمة مرور لحسابك"
@@ -180,6 +180,15 @@ export function Register() {
         <Link to="/login" className="block text-center text-sm text-text-muted">
           لديك حساب؟ الدخول
         </Link>
+        {step === "details" && (
+          <p className="border-t border-border-soft pt-4 text-center text-sm text-text-muted">
+            تريد الالتحاق بالكلية؟{" "}
+            <Link to="/apply" className="font-semibold text-primary">
+              قدّم من هنا
+            </Link>{" "}
+            — بلا حساب.
+          </p>
+        )}
       </form>
     </AuthLayout>
   );
