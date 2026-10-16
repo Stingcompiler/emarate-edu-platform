@@ -10,7 +10,7 @@ import { useCurrentTerm, useDepartment, useOfferings } from "../../lib/departmen
 import { days, initials, num } from "../../lib/reports";
 import { ALL } from "../../components/Pager";
 import { count, N, fileName } from "../../lib/format";
-import { Inbox, type InboxItem } from "../homes/Inbox";
+import { Inbox, inboxState, type InboxItem } from "../homes/Inbox";
 
 /** Boards: DesktopDeptDashboard (desktop), AdminHome (phone). The section list is fixed (docs/02 §4.15). */
 export function DepartmentDashboard() {
@@ -136,7 +136,10 @@ export function DepartmentDashboard() {
       <div className="flex flex-col gap-6 lg:grid lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start">
         <section className="order-1 lg:col-start-1 lg:row-start-1">
           <SectionLabel>يحتاج قرارك · {num(inbox.length)}</SectionLabel>
-          <Inbox items={inbox} />
+          <Inbox
+            {...inboxState(term, offerings, report, teachers, approvals, batches)}
+            items={inbox}
+          />
         </section>
         <aside className="order-2 space-y-4 lg:col-start-2 lg:row-span-2 lg:row-start-1">
           <Summary

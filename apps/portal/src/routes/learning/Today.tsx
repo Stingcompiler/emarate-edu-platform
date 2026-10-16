@@ -3,7 +3,7 @@ import { Link } from "react-router";
 
 import { LiveBanner } from "../../components/LiveBanner";
 import { PortalShell } from "../../components/PortalShell";
-import { Card, CodeTile, SectionLabel } from "../../components/ui";
+import { Card, CodeTile, ListStatus, SectionLabel } from "../../components/ui";
 import { api, ok } from "../../lib/api";
 import { useMe } from "../../lib/auth";
 import { when, count, N, score } from "../../lib/format";
@@ -47,6 +47,14 @@ export function Today() {
     queryFn: async () =>
       ok(await api.GET("/api/v1/regulations", { params: { query: ALL } }))?.results ?? [],
   });
+  const dueSources = [assignments, live, exams];
+  const dueLoading = dueSources.some((q) => q.isLoading);
+  const dueFailed = dueSources.some((q) => q.isError);
+  const freshSources = [lectures, assignments];
+  const freshLoading = freshSources.some((q) => q.isLoading);
+  const freshFailed = freshSources.some((q) => q.isError);
+  const retry = (sources: { isError: boolean; refetch: () => unknown }[]) => () =>
+    sources.filter((q) => q.isError).forEach((q) => void q.refetch());
   const now = Date.now();
   const first = me.data?.full_name_ar?.split(" ")[0] ?? "";
   const sessions = (live.data ?? []).filter((s) => s.status !== "cancelled");
@@ -196,7 +204,7 @@ export function Today() {
                   })}
                 </span>
                 <span className="min-w-0 flex-1">
-                  <span className="block truncate font-semibold text-text">{item.title}</span>
+                  <span className="line-clamp-2 font-semibold text-text">{item.title}</span>
                   <span className="block truncate text-xs text-text-muted">{item.meta}</span>
                 </span>
                 {item.tag && (
@@ -206,9 +214,13 @@ export function Today() {
                 )}
               </Link>
             ))}
-            {!agenda.length && (
-              <p className="px-4 py-5 text-sm text-text-muted">لا شيء مجدول اليوم وغدًا.</p>
-            )}
+            <ListStatus
+              hasItems={agenda.length > 0}
+              loading={dueLoading}
+              failed={dueFailed}
+              onRetry={retry(dueSources)}
+              empty="لا شيء مجدول اليوم وغدًا."
+            />
           </Card>
           {later.length > 0 && (
             <>
@@ -222,7 +234,7 @@ export function Today() {
                       to={item.to}
                       className="flex items-center gap-3 px-4 py-3 hover:bg-surface-alt"
                     >
-                      <span className="w-16 shrink-0 text-center text-xs leading-tight text-text-muted">
+                      <span className="w-14 shrink-0 text-center text-xs leading-tight text-text-muted">
                         <b className="block text-sm text-text">
                           {new Date(item.at).toLocaleDateString("ar-u-nu-latn", {
                             day: "numeric",
@@ -235,7 +247,7 @@ export function Today() {
                         <CodeTile top={top} bottom={bottom} tone={courseTone(item.code)} />
                       ) : null}
                       <span className="min-w-0 flex-1">
-                        <span className="block truncate font-semibold text-text">{item.title}</span>
+                        <span className="line-clamp-2 font-semibold text-text">{item.title}</span>
                         <span className="block truncate text-xs text-text-muted">{item.meta}</span>
                       </span>
                     </Link>
@@ -281,9 +293,13 @@ export function Today() {
                 </b>
               </Link>
             ))}
-            {!fresh.length && !graded.length && (
-              <p className="px-4 py-4 text-sm text-text-muted">لا جديد هذا الأسبوع.</p>
-            )}
+            <ListStatus
+              hasItems={fresh.length > 0 || graded.length > 0}
+              loading={freshLoading}
+              failed={freshFailed}
+              onRetry={retry(freshSources)}
+              empty="لا جديد هذا الأسبوع."
+            />
           </Card>
           {week.length > 0 && (
             <>

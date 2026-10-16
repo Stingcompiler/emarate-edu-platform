@@ -1,0 +1,158 @@
+Browser tab: 1, Title: "بكالوريوس إدارة الأعمال — كلية الإمارات للعلوم والتكنولوجيا", URL: "https://ecst.stingdev.pro/ar/programs/BBA/".
+1 AXWebArea بكالوريوس إدارة الأعمال — كلية الإمارات للعلوم والتكنولوجيا, URL: ecst.stingdev.pro/ar/programs/BBA/
+	2 link Description: تخطَّ إلى المحتوى, Value: ecst.stingdev.pro/ar/programs/BBA/#main
+	3 container
+		4 link Description: كلية الإمارات للعلوم والتكنولوجيا, Value: ecst.stingdev.pro/ar/
+		5 container الرئيسية
+			6 button (collapsed) عن الكلية, Secondary Actions: Expand
+				7 text عن الكلية
+			8 button (collapsed) الأكاديمية, Secondary Actions: Expand
+				9 text الأكاديمية
+			10 button (collapsed) القبول, Secondary Actions: Expand
+				11 text القبول
+			12 button (collapsed) الحياة الطلابية, Secondary Actions: Expand
+				13 text الحياة الطلابية
+			14 button (collapsed) المركز الإعلامي, Secondary Actions: Expand
+				15 text المركز الإعلامي
+			16 link Description: تواصل, Value: ecst.stingdev.pro/ar/contact/
+		17 checkbox الوضع الداكن, Value: 0
+		18 link Description: English, Value: ecst.stingdev.pro/en/programs/BBA/
+		19 link Description: دخول المنصة, Value: portal.ecst.stingdev.pro/login
+		20 link Description: قدّم الآن, Value: portal.ecst.stingdev.pro/apply
+	21 container main
+		22 container
+			23 container مسار الصفحة
+				24 link Description: الرئيسية, Value: ecst.stingdev.pro/ar/
+				25 link Description: البرامج, Value: ecst.stingdev.pro/ar/programs/
+				26 link Description: إدارة الأعمال, Value: ecst.stingdev.pro/ar/departments/BA/
+				27 text بكالوريوس إدارة الأعمال
+			28 heading بكالوريوس إدارة الأعمال, Value: 1
+				29 text بكالوريوس إدارة الأعمال
+			30 text (مثال) برنامج بكالوريوس إدارة الأعمال يجمع بين الأساس النظري والتطبيق في المعامل، ويُعدّ الطالب للعمل أو لمواصلة الدراسة. التقديم مفتوح حتى 30 نوفمبر 2026  · المقاعد المتبقية: 119
+			31 link Description: قدّم الآن, Value: portal.ecst.stingdev.pro/apply?program=BBA
+		32 container
+			33 container أساسيات المتقدم
+				34 heading أساسيات المتقدم, Value: 2, ID: facts
+					35 text أساسيات المتقدم
+				36 text 8
+				37 text الفصول الدراسية
+				38 text 132
+				39 text الساعات المعتمدة
+				40 text 4
+				41 text المستويات
+				42 definition list
+					43 container الدرجة
+						44 text الدرجة
+					45 text بكالوريوس
+					46 container المدة
+						47 text المدة
+					48 text 4 سنوات
+					49 container القسم
+						50 text القسم
+					51 link Description: إدارة الأعمال, Value: ecst.stingdev.pro/ar/departments/BA/
+					52 container الرسوم السنوية
+						53 text الرسوم السنوية
+					54 container
+						55 text 1,600,000 جنيه 1,200 دولار للوافدين
+					56 container التقديم
+						57 text التقديم
+					58 text مفتوح حتى 30 نوفمبر 2026
+				59 link Description: قدّم لهذا البرنامج, Value: portal.ecst.stingdev.pro/apply?program=BBA
+				60 link Description: اسأل عبر واتساب, Value: wa.me/249000000000?text=%D8%A7%D9%84%D8%B3%D9%84%D8%A7%D9%85%20%D8%B9%D9%84%D9%8A%D9%83%D9%85%D8%8C%20%D8%A3%D8%B3%D8%AA%D9%81%D8%B3%D8%B1%20%D8%B9%D9%86%20%D8%A8%D8%B1%D9%86%D8%A7%D9%85%D8%AC%20%D8%A8%D9%83%D8%A7%D9%84%D9%88%D8%B1%D9%8A%D9%88%D8%B3%20%D8%A5%D8%AF%D8%A7%D8%B1%D8%A9%20%D8%A7%D9%84%D8%A3%D8%B9%D9%85%D8%A7%D9%84.
+				61 link Description: الرسوم والمنح ←, Value: ecst.stingdev.pro/ar/admissions/fees/
+				62 button اطبع صفحة البرنامج
+			63 link Description: تابع طلبك ←, Value: portal.ecst.stingdev.pro/track
+		64 container ماذا ستتعلم
+			65 heading ماذا ستتعلم, Value: 2, ID: outcomes
+				66 text ماذا ستتعلم
+			67 content list
+				68 text (مثال) يطبّق أساسيات بكالوريوس إدارة الأعمال في مشروعات حقيقية
+				69 text (مثال) يعمل ضمن فريق ويكتب تقارير مهنية
+				70 text (مثال) يستخدم الأدوات الحديثة في مجاله
+		71 container أين يعمل الخريجون
+			72 heading أين يعمل الخريجون, Value: 2, ID: careers
+				73 text أين يعمل الخريجون
+			74 content list
+				75 text (مثال) القطاع الحكومي
+				76 text (مثال) الشركات الخاصة
+				77 text (مثال) العمل الحر
+		78 container القبول
+			79 heading القبول, Value: 2, ID: admission
+				80 text القبول
+			81 heading شروط القبول, Value: 3
+				82 text شروط القبول
+			83 text الشهادة الثانوية بنسبة لا تقل عن 60٪.
+			84 heading المستندات المطلوبة, Value: 3
+				85 text المستندات المطلوبة
+			86 content list
+				87 container
+					88 text 1 الشهادة الثانوية
+				89 container
+					90 text 2 الرقم الوطني أو الجواز
+				91 container
+					92 text 3 صورة شخصية (اختياري)
+		93 container الخطة الدراسية
+			94 heading الخطة الدراسية, Value: 2, ID: plan
+				95 text الخطة الدراسية
+			96 content list
+				97 container
+					98 text المستوى 2 3 ساعات
+					99 content list
+						100 container
+							101 text السلوك التنظيمي · 3
+			102 text الرقم بجانب المادة ساعاتها المعتمدة.
+		103 container
+			104 heading أسئلة شائعة, Value: 2
+				105 text أسئلة شائعة
+			106 button (collapsed) ما مدة الدراسة؟, Secondary Actions: Expand
+				107 text ما مدة الدراسة؟
+			108 button (collapsed) كم الرسوم الدراسية؟, Secondary Actions: Expand
+				109 text كم الرسوم الدراسية؟
+			110 button (collapsed) ما شروط القبول؟, Secondary Actions: Expand
+				111 text ما شروط القبول؟
+			112 button (collapsed) ما المستندات المطلوبة؟, Secondary Actions: Expand
+				113 text ما المستندات المطلوبة؟
+			114 button (collapsed) متى يُغلق التقديم؟, Secondary Actions: Expand
+				115 text متى يُغلق التقديم؟
+			116 button (collapsed) كيف أقدّم وأتابع طلبي؟, Secondary Actions: Expand
+				117 text كيف أقدّم وأتابع طلبي؟
+	118 container
+		119 text كلية الإمارات للعلوم والتكنولوجيا (مثال) تعليم تقني يُعدّ الخريج لسوق العمل من يومه الأول عنوان تجريبي — الخرطوم، السودان
+		120 link Description: +249 000 000 000, Value: tel:+249000000000
+		121 link Description: info@demo.ecst.test, Value: mailto:info@demo.ecst.test
+		122 link Description: WhatsApp, Value: wa.me/249000000000
+		123 link Description: قدّم الآن, Value: portal.ecst.stingdev.pro/apply
+		124 link Description: تابع طلبك, Value: portal.ecst.stingdev.pro/track
+		125 container الكلية
+			126 text الكلية
+			127 content list
+				128 link Description: عن الكلية, Value: ecst.stingdev.pro/ar/about/
+				129 link Description: القيادة, Value: ecst.stingdev.pro/ar/about/leadership/
+				130 link Description: الاعتماد, Value: ecst.stingdev.pro/ar/about/accreditation/
+				131 link Description: الوظائف, Value: ecst.stingdev.pro/ar/about/careers/
+				132 link Description: تواصل, Value: ecst.stingdev.pro/ar/contact/
+		133 container الدراسة
+			134 text الدراسة
+			135 content list
+				136 link Description: الأقسام, Value: ecst.stingdev.pro/ar/departments/
+				137 link Description: البرامج, Value: ecst.stingdev.pro/ar/programs/
+				138 link Description: التقويم الأكاديمي, Value: ecst.stingdev.pro/ar/calendar/
+				139 link Description: اللوائح, Value: ecst.stingdev.pro/ar/regulations/
+				140 link Description: دليل الطالب, Value: ecst.stingdev.pro/ar/academics/student-guide/
+		141 container القبول والإعلام
+			142 text القبول والإعلام
+			143 content list
+				144 link Description: القبول, Value: ecst.stingdev.pro/ar/admissions/
+				145 link Description: الرسوم والمنح, Value: ecst.stingdev.pro/ar/admissions/fees/
+				146 link Description: الأخبار, Value: ecst.stingdev.pro/ar/news/
+				147 link Description: الإعلانات, Value: ecst.stingdev.pro/ar/announcements/
+				148 link Description: الفعاليات, Value: ecst.stingdev.pro/ar/events/
+		149 text © 2026 كلية الإمارات للعلوم والتكنولوجيا
+		150 link Description: مدعوم من ستينج سيستم (يفتح في تبويب جديد), Value: stingdev.pro/
+		151 container السياسات
+			152 link Description: سياسة الخصوصية, Value: ecst.stingdev.pro/ar/privacy/
+			153 link Description: شروط الاستخدام, Value: ecst.stingdev.pro/ar/terms/
+			154 link Description: بيان إمكانية الوصول, Value: ecst.stingdev.pro/ar/accessibility/
+	155 link Description: اسألنا على واتساب, Value: wa.me/249000000000?text=%D9%85%D8%B1%D8%AD%D8%A8%D9%8B%D8%A7%D8%8C%20%D8%A3%D8%B3%D8%AA%D9%81%D8%B3%D8%B1%20%D8%B9%D9%86%3A%20%D8%A8%D9%83%D8%A7%D9%84%D9%88%D8%B1%D9%8A%D9%88%D8%B3%20%D8%A5%D8%AF%D8%A7%D8%B1%D8%A9%20%D8%A7%D9%84%D8%A3%D8%B9%D9%85%D8%A7%D9%84
+
+The focused UI element is 1 AXWebArea بكالوريوس إدارة الأعمال — كلية الإمارات للعلوم والتكنولوجيا, URL: ecst.stingdev.pro/ar/programs/BBA/

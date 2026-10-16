@@ -1,7 +1,7 @@
 import { ChevronLeft } from "lucide-react";
 import { Link } from "react-router";
 
-import { Card } from "../../components/ui";
+import { Card, Skeleton } from "../../components/ui";
 import { num } from "../../lib/reports";
 
 export type InboxItem = {
@@ -14,6 +14,21 @@ export type InboxItem = {
   action?: string;
 };
 
+type Source = { isLoading: boolean; isError: boolean; refetch: () => unknown };
+
+/**
+ * What the sources an inbox is built from are doing, for its `loading`/`failed` props:
+ * spread it (`<Inbox {...inboxState(a, b)} items={…} />`). An empty list is only «nothing
+ * waits for you» once every source has loaded; before that it is loading, or failed.
+ */
+export function inboxState(...sources: Source[]) {
+  return {
+    loading: sources.some((q) => q.isLoading),
+    failed: sources.some((q) => q.isError),
+    onRetry: () => sources.filter((q) => q.isError).forEach((q) => void q.refetch()),
+  };
+}
+
 /**
  * «يحتاج إجراءً / قرارك»: what waits on the person, by priority. The count is a plain big
  * number (colour only for urgency), each row ends in a button; the first row's is the
@@ -22,9 +37,15 @@ export type InboxItem = {
 export function Inbox({
   items,
   empty = "لا شيء بانتظارك.",
+  loading = false,
+  failed = false,
+  onRetry,
 }: {
   items: InboxItem[];
   empty?: string;
+  loading?: boolean;
+  failed?: boolean;
+  onRetry?: () => void;
 }) {
   const shown = items.filter((i) => i.n > 0);
   const tone = {
@@ -59,7 +80,38 @@ export function Inbox({
           </span>
         </Link>
       ))}
-      {!shown.length && <p className="px-4 py-4 text-sm text-text-muted">{empty}</p>}
+      {loading && (
+        <div className="space-y-3 px-4 py-4" role="status" aria-label="جارٍ التحميل">
+          {(shown.length ? [0] : [0, 1, 2]).map((i) => (
+            <div key={i} className="flex items-center gap-4">
+              <Skeleton className="h-8 w-12 rounded" />
+              <div className="flex-1 space-y-2">
+                <Skeleton className="h-3.5 w-2/3 rounded" />
+                <Skeleton className="h-3 w-1/2 rounded" />
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+      {!loading && failed && (
+        <p role="alert" className="flex items-center justify-between gap-3 px-4 py-3 text-sm">
+          <span className="text-danger-strong">
+            {shown.length ? "قد تنقص بعض العناصر: تعذّر تحميل جزء منها." : "تعذّر تحميل ما ينتظرك."}
+          </span>
+          {onRetry && (
+            <button
+              type="button"
+              onClick={onRetry}
+              className="tap-44 shrink-0 font-semibold text-primary hover:underline"
+            >
+              أعد المحاولة
+            </button>
+          )}
+        </p>
+      )}
+      {!loading && !failed && !shown.length && (
+        <p className="px-4 py-4 text-sm text-text-muted">{empty}</p>
+      )}
     </Card>
   );
 }

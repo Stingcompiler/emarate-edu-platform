@@ -6,7 +6,7 @@ import { api, ok } from "../../lib/api";
 import { useMe } from "../../lib/auth";
 import { useCurrentTerm } from "../../lib/department";
 import { initials, useDepartments } from "../../lib/reports";
-import { Inbox } from "./Inbox";
+import { Inbox, inboxState } from "./Inbox";
 import { count, N } from "../../lib/format";
 import { ALL } from "../../components/Pager";
 
@@ -105,6 +105,7 @@ export function AcademicHome() {
           <div>
             <SectionLabel>يحتاج قرارك</SectionLabel>
             <Inbox
+              {...inboxState(departments, term, corrections, leaders, teachers, offerings)}
               items={[
                 {
                   n: corrections.data ?? 0,
