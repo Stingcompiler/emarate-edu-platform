@@ -75,6 +75,8 @@ jobs:
       - run: pnpm format:check
       - name: UI text scan (card patterns banned by docs/ui-profile.md)
         run: pnpm lint:ui
+      - name: Script tests (the search-readiness check)
+        run: pnpm test:scripts
       - run: pnpm typecheck
       - name: Unit and component tests (Vitest)
         run: pnpm test

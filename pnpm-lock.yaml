@@ -201,6 +201,9 @@ importers:
       astro:
         specifier: ^7.3.5
         version: 7.3.5(@types/node@22.20.4)(jiti@2.7.0)
+      sharp:
+        specifier: '>=0.35.5'
+        version: 0.35.5(@types/node@22.20.4)
     devDependencies:
       '@tailwindcss/vite':
         specifier: ^4.3.3
@@ -2851,8 +2854,7 @@ snapshots:
 
   '@fontsource/noto-kufi-arabic@5.3.0': {}
 
-  '@img/colour@1.1.0':
-    optional: true
+  '@img/colour@1.1.0': {}
 
   '@img/sharp-darwin-arm64@0.35.5':
     optionalDependencies:
@@ -4088,8 +4090,7 @@ snapshots:
 
   scheduler@0.28.0: {}
 
-  semver@7.8.5:
-    optional: true
+  semver@7.8.5: {}
 
   sharp@0.35.5(@types/node@22.20.4):
     dependencies:
@@ -4123,7 +4124,6 @@ snapshots:
       '@img/sharp-win32-ia32': 0.35.5
       '@img/sharp-win32-x64': 0.35.5
       '@types/node': 22.20.4
-    optional: true
 
   shiki@4.4.3:
     dependencies:
