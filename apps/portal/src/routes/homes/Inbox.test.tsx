@@ -60,4 +60,8 @@ it("ListStatus: loading placeholder, failure, empty text, and nothing when rows 
   expect(screen.getByText("لا شيء مجدول")).toBeTruthy();
   rerender(<ListStatus hasItems loading={false} failed={false} empty="لا شيء مجدول" />);
   expect(screen.queryByText("لا شيء مجدول")).toBeNull();
+  expect(screen.queryByRole("status")).toBeNull();
+  // Rows showing while a source is still loading: the list says it is not complete yet.
+  rerender(<ListStatus hasItems loading failed={false} empty="لا شيء مجدول" />);
+  expect(screen.getByRole("status").textContent).toContain("جارٍ تحميل");
 });

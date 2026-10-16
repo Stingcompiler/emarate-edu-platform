@@ -555,8 +555,8 @@ export function Skeleton({ className = "" }: { className?: string }) {
 /**
  * What a list shows besides its rows. An empty message only appears once every source has
  * loaded: before that it is a placeholder, and a failed source says so (with a retry) instead
- * of telling the person nothing is there. With rows already shown, a failed source adds one
- * line saying some may be missing.
+ * of telling the person nothing is there. With rows already shown, a source still loading or
+ * failed adds one line saying the list may be incomplete.
  */
 export function ListStatus({
   hasItems,
@@ -571,7 +571,15 @@ export function ListStatus({
   onRetry?: () => void;
   empty: string;
 }) {
-  if (loading && !hasItems) {
+  if (loading && hasItems) {
+    // Rows are showing but a source is still on its way: say the list is not complete yet.
+    return (
+      <p role="status" aria-label="جارٍ التحميل" className="px-4 py-2.5 text-xs text-text-muted">
+        جارٍ تحميل المزيد…
+      </p>
+    );
+  }
+  if (loading) {
     return (
       <div className="space-y-2 px-4 py-4" role="status" aria-label="جارٍ التحميل">
         <Skeleton className="h-3.5 w-2/3 rounded" />

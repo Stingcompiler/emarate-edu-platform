@@ -1,4 +1,4 @@
-# Handoff — UI cards review (direction C+A) — 2026-10-15
+# Handoff — UI design review 2026-10-16 in progress — 2026-10-16
 
 ## Where things stand
 
@@ -52,6 +52,19 @@
   at the bottom of the admin user page.
 
 - **Rename users (owner, 2026-10-13):** `PATCH /users/{id}` (system admin, `users.rename`): Arabic name required, English optional, logged as `account.rename`; student accounts refused (name lives on the student record). «الاسم» card on the admin user page.
+
+- **Design review 2026-10-16 (`docs/qa/ui-design-review-2026-10-16.md`, plan `…-plan-2026-10-16.md`):**
+  PR-1 #134 (empty/loading/failed states: `Inbox`+`inboxState`, `ListStatus`; header portal link on phones;
+  two-line task titles), PR-2 #135 (visible labels: `Field`/`SelectField`/`Labeled`; login wording),
+  PR-3 #136 (media alt editing `PATCH /content/media/{id}` + `media.update` audit; folded phone menu;
+  WhatsApp steps aside), PR-4 #137 (partial-plan notice + the `ListStatus` «loading more» line).
+  Not done: U01 (hide «(مثال)» content; needs the owner's answer to Q2), U03/U04 content (real plans,
+  photo, contacts: the college), U10 (user tasks), PR-5 journeys spec. Open questions Q1–Q5 are in the plan
+  (Q1 and Q5 used the plan's defaults).
+  Gotchas: CI cancels the previous run of `main` on every merge (concurrency), and the server deploys only a
+  commit whose CI passed: merge one PR, wait for main's CI, then the next. The phone menu e2e taps the widest gap
+  of the top bar (`emptyTopBarX`), not a fixed point. Restore drill from the 2026-10-16 backup is still not run:
+  the production-read command was refused by the permission classifier (needs a Bash rule from the owner).
 
 - **UI cards review (owner, 2026-10-15; guide `ui-cards-review-guide`):** direction «الأولوية أولًا» (C) with
   quiet list rows (A), recorded in `docs/ui-profile.md`. Shared: `Inbox` (big plain count + action button;
