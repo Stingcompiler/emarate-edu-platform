@@ -383,6 +383,65 @@ def test_trust_signals_in_site_settings(api, site):
         )
 
 
+def test_portal_icons_follow_the_logo(api, site, make_user, settings, tmp_path):
+    """The installed portal app's icons are cut from the current logo (owner, 2026-10-17)."""
+    import io
+
+    from django.core.cache import cache
+    from PIL import Image
+
+    cache.clear()
+    kinds = {
+        "192": (192, "RGBA"),
+        "512": (512, "RGBA"),
+        "maskable-512": (512, "RGB"),
+        "apple-touch": (180, "RGB"),
+    }
+    # No logo yet: the built-in icon, by redirect.
+    for kind in kinds:
+        response = api().get(f"/api/public/portal-icon/{kind}.png")
+        assert response.status_code == 302 and response["Location"].startswith("/icons/")
+    assert api().get("/api/public/portal-icon/64.png").status_code == 404
+
+    owner = make_user(Role.SITE_MANAGER)
+
+    def logo(colour):
+        buffer = io.BytesIO()
+        Image.new("RGB", (40, 20), colour).save(buffer, "PNG")  # a wide logo
+        uploaded = api(owner).post(
+            "/api/v1/content/media",
+            {"file": SimpleUploadedFile("logo.png", buffer.getvalue(), "image/png")},
+            format="multipart",
+        )
+        assert uploaded.status_code == 201, uploaded.data
+        saved = api(owner).patch(
+            "/api/v1/content/site-settings", {"logo": uploaded.data["public_id"]}, format="json"
+        )
+        assert saved.status_code == 200, saved.data
+
+    def icon(kind):
+        response = api().get(f"/api/public/portal-icon/{kind}.png")
+        assert response.status_code == 200 and response["Content-Type"] == "image/png"
+        assert "max-age=3600" in response["Cache-Control"]
+        return Image.open(io.BytesIO(response.content))
+
+    logo("red")
+    for kind, (size, mode) in kinds.items():
+        image = icon(kind)
+        assert image.size == (size, size) and image.mode == mode
+    centre = icon("512").convert("RGBA").getpixel((256, 256))
+    assert centre[0] > 200 and centre[1] < 60 and centre[3] == 255  # the red logo
+    assert icon("192").convert("RGBA").getpixel((0, 0))[3] == 0  # transparent around a wide logo
+    assert icon("apple-touch").convert("RGB").getpixel((0, 0)) == (255, 255, 255)
+    # The maskable icon keeps the logo inside its safe zone, on white.
+    assert icon("maskable-512").convert("RGB").getpixel((10, 256)) == (255, 255, 255)
+
+    # A new logo is a new icon at once: nothing to invalidate.
+    logo("blue")
+    centre = icon("512").convert("RGBA").getpixel((256, 256))
+    assert centre[2] > 200 and centre[0] < 60
+
+
 def test_image_blocks_accept_our_public_media_only(settings):
     """The image picker links the public media storage; other http hosts are dropped."""
     from content.sanitize import clean_blocks
