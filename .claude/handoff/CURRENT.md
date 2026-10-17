@@ -1,4 +1,4 @@
-# Handoff — UI design review 2026-10-16 in progress — 2026-10-16
+# Handoff — UI design review 2026-10-16 done except owner items — 2026-10-17
 
 ## Where things stand
 
@@ -53,18 +53,27 @@
 
 - **Rename users (owner, 2026-10-13):** `PATCH /users/{id}` (system admin, `users.rename`): Arabic name required, English optional, logged as `account.rename`; student accounts refused (name lives on the student record). «الاسم» card on the admin user page.
 
-- **Design review 2026-10-16 (`docs/qa/ui-design-review-2026-10-16.md`, plan `…-plan-2026-10-16.md`):**
-  PR-1 #134 (empty/loading/failed states: `Inbox`+`inboxState`, `ListStatus`; header portal link on phones;
-  two-line task titles), PR-2 #135 (visible labels: `Field`/`SelectField`/`Labeled`; login wording),
-  PR-3 #136 (media alt editing `PATCH /content/media/{id}` + `media.update` audit; folded phone menu;
-  WhatsApp steps aside), PR-4 #137 (partial-plan notice + the `ListStatus` «loading more» line).
-  Not done: U01 (hide «(مثال)» content; needs the owner's answer to Q2), U03/U04 content (real plans,
-  photo, contacts: the college), U10 (user tasks), PR-5 journeys spec. Open questions Q1–Q5 are in the plan
-  (Q1 and Q5 used the plan's defaults).
-  Gotchas: CI cancels the previous run of `main` on every merge (concurrency), and the server deploys only a
-  commit whose CI passed: merge one PR, wait for main's CI, then the next. The phone menu e2e taps the widest gap
-  of the top bar (`emptyTopBarX`), not a fixed point. Restore drill from the 2026-10-16 backup is still not run:
-  the production-read command was refused by the permission classifier (needs a Bash rule from the owner).
+- **Design review 2026-10-16 (`docs/qa/ui-design-review-2026-10-16.md`, plan `…-plan-2026-10-16.md`):** all
+  deployed (production on `53a324a` at 2026-10-17). PR-1 #134 empty/loading/failed states (`Inbox`+`inboxState`,
+  `ListStatus` incl. «جارٍ تحميل المزيد…»), portal link on phones, two-line task titles; PR-2 #135 visible labels
+  (`Field`/`SelectField`/`Labeled`) and login wording; PR-3 #136 media alt editing (`PATCH /content/media/{id}`,
+  audit `media.update`), folded phone menu, WhatsApp steps aside; PR-4 #137 partial-plan notice; SEO #138
+  (dated sitemap, `/site-icon.png` via `sharp`, home title/description, `pnpm seo:check`, runbook §11);
+  #139 **sample content hidden from visitors** (`apps/landing/src/lib/sample.mjs`: marks «(مثال)», «(نص تجريبي)»,
+  demo note; `SITE_SHOW_SAMPLE=1` shows it; CI runs `E2E_HIDE_SAMPLE=1 pnpm e2e hidden-sample.spec.ts`);
+  `journeys.spec.ts` (visitor/student/teacher/registrar, phone + desktop).
+  Still open: U03/U04 real content (plans, photo, contacts, dean text: the college), U10 (task sessions with real
+  staff before any table view), label-less add-rows left alone in PR-2 (form builder, site media, page editor,
+  lecture/assignment link rows), the search launch when the college's domain is ready (runbook §11: domain first,
+  drop `SITE_NOINDEX`, `pnpm seo:check`, Search Console).
+  Gotchas: CI cancels the previous `main` run on every merge, and the server deploys only a commit whose CI passed
+  (a failed one is recorded `ci-failed` and skipped): merge one PR, wait for main's CI, then the next. Two `astro dev`
+  servers on one project break the full crawl: never add a second site server to the e2e config. The phone menu
+  e2e taps the widest gap of the top bar (`emptyTopBarX`). `node --test` needs a glob on Node 22.
+  **DNS (2026-10-17):** a Brevo «branded links» CNAME on host `ecst` next to the `A ecst` record took the site down on
+  some resolvers; the owner deleted it. Never add a CNAME on `ecst`. Restore drill from the 2026-10-16 backup is still
+  not run: the production-read command was refused by the permission classifier (needs a Bash rule), and the SSH key
+  must be re-added each day (`ssh-add --apple-use-keychain ~/.ssh/ovh_vps_ed25519`).
 
 - **UI cards review (owner, 2026-10-15; guide `ui-cards-review-guide`):** direction «الأولوية أولًا» (C) with
   quiet list rows (A), recorded in `docs/ui-profile.md`. Shared: `Inbox` (big plain count + action button;
