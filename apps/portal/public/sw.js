@@ -2,7 +2,7 @@
  * small offline layer. Hand-written on purpose: no build plugin, nothing cached
  * from /api (always live data), hashed /assets cached forever. */
 
-const VERSION = "v1";
+const VERSION = "v2";
 const SHELL = `shell-${VERSION}`;
 const ASSETS = `assets-${VERSION}`;
 const DEV = new URL(self.location.href).searchParams.has("dev");
@@ -77,7 +77,7 @@ self.addEventListener("push", (event) => {
     Promise.all([
       self.registration.showNotification(title, {
         body: data.body || "",
-        icon: "/icons/icon-192.png",
+        icon: "/api/public/portal-icon/192.png",
         badge: "/icons/icon-192.png",
         tag: data.tag,
         lang: "ar",

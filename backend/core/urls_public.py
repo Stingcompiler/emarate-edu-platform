@@ -28,6 +28,11 @@ urlpatterns = [
     path("files/<str:token>", files.FileDownloadView.as_view(), name="file-download"),
     path("inquiries", inquiries.PublicInquiryView.as_view(), name="public-inquiry"),
     path("site", content.PublicSiteSettingsView.as_view(), name="public-site"),
+    path(
+        "portal-icon/<str:kind>.png",
+        content.PublicPortalIconView.as_view(),
+        name="public-portal-icon",
+    ),
     path("intakes", admissions.PublicIntakesView.as_view(), name="public-intakes"),
     path("intakes/<int:pk>", admissions.PublicIntakeView.as_view(), name="public-intake"),
     path("visitor/otp", admissions.VisitorOTPView.as_view(), name="visitor-otp"),

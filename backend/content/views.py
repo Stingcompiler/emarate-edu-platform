@@ -1,10 +1,12 @@
 from django.db import transaction
 from django.db.models import F
+from django.http import Http404, HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.utils.translation import gettext
 from django.views.decorators.cache import cache_control
+from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
@@ -19,7 +21,7 @@ from audit.services import RequestMeta, record, snapshot
 from core.permissions import capability
 from core.throttles import PublicReadThrottle
 
-from . import services
+from . import portal_icons, services
 from .models import (
     Announcement,
     Event,
@@ -464,6 +466,30 @@ class PublicSiteSettingsView(_PublicRead):
         return Response(
             SiteSettingsSerializer(SiteSettings.load(), context={"request": request}).data
         )
+
+
+@extend_schema(tags=["public"], responses={200: OpenApiTypes.BINARY, 302: None})
+class PublicPortalIconView(_PublicRead):
+    """The portal app's icon for `kind` (192, 512, maskable-512, apple-touch), cut from the logo
+    in the site settings; the built-in icon (a redirect) while no logo is set. An installed app
+    and the browser's tab read it, so the app follows the logo (owner, 2026-10-17)."""
+
+    def get(self, request, kind):
+        spec = portal_icons.ICONS.get(kind)
+        if spec is None:
+            raise Http404
+        logo = SiteSettings.load().logo
+        if logo is None:
+            return HttpResponseRedirect(spec.fallback)
+        try:
+            png = portal_icons.icon_png(logo, kind)
+        except (OSError, ValueError):  # the file is gone or not an image: the built-in icon
+            return HttpResponseRedirect(spec.fallback)
+        response = HttpResponse(png, content_type="image/png")
+        # An hour: a new logo reaches installed apps and tabs within it (the browsers re-read the
+        # icon when they check the manifest), without every visit rendering or fetching it again.
+        response["Cache-Control"] = "public, max-age=3600"
+        return response
 
 
 @PUBLIC_CACHE
