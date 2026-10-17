@@ -1,0 +1,10 @@
+# Installed as /etc/systemd/system/ecst-disk-watch.service (docs/runbook.md §12).
+[Unit]
+Description=ECST: alert when the server's disk is nearly full
+OnFailure=ecst-alert@%n.service
+
+[Service]
+Type=oneshot
+User=ecst
+Group=ecst
+ExecStart=/opt/ecst/bin/disk-watch

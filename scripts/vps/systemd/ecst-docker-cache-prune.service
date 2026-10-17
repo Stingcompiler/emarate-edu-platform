@@ -1,0 +1,12 @@
+# Installed as /etc/systemd/system/ecst-docker-cache-prune.service (docs/runbook.md §12).
+# The server is shared: every project's image build adds ~2 GB of Docker build cache and nothing
+# removed it (45 GB of the disk on 2026-10-17). Only the cache unused for 72 hours goes; images,
+# containers and volumes are never touched (rollback tags such as `previous` stay).
+[Unit]
+Description=ECST: remove Docker build cache unused for 72 hours (shared server)
+OnFailure=ecst-alert@%n.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/docker builder prune --force --filter until=72h
+Nice=10

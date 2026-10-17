@@ -271,3 +271,24 @@ uv run python manage.py migrate --noinput
 6. **بعد أسبوعين:** راجع تقرير «الصفحات» في Search Console لأي صفحة مستبعدة، وقِس الأداء بـPageSpeed Insights على الهاتف.
 
 ما يغطيه الكود سلفًا: عنوان ووصف وcanonical وhreflang لكل صفحة، وOpen Graph، وJSON-LD (الكلية والبرنامج والأسئلة الشائعة ومسار التنقل)، وsitemap بـ`lastmod` للأخبار والصفحات، وأيقونة PNG من الدومين نفسه (`/site-icon.png`) من شعار الكلية.
+
+## 12. القرص: تنظيف ذاكرة البناء وتنبيه الامتلاء
+
+القرص على الخادم **مشترك مع مشاريع أخرى**، وكل بناء لصورة Docker عندهم يضيف نحو 2 GB من ذاكرة البناء المؤقتة (Build Cache) ولا شيء يزيلها. في 17 أكتوبر 2026 بلغ القرص 80% (نحو 26 GB ذاكرة بناء من 45 GB في `containerd`، ومشروع الكلية كله 1.6 GB)، فنُظّف يدويًا ثم أُضيف مؤقّتان (`scripts/vps/systemd/`):
+
+| المؤقّت | متى | ماذا يفعل |
+|---|---|---|
+| `ecst-docker-cache-prune.timer` | الأحد 04:30 | `docker builder prune --filter until=72h`: يزيل ذاكرة البناء التي لم تُستعمل 72 ساعة فأكثر. **لا يمسّ** الصور ولا الحاويات ولا الأقراص (وسوم التراجع مثل `previous` باقية) |
+| `ecst-disk-watch.timer` | كل 6 ساعات | `/opt/ecst/bin/disk-watch` يفشل حين يبلغ القرص 85%، فيصل التنبيه عبر `ecst-alert@` إلى `OPS_ALERT_EMAIL` |
+
+**التثبيت** (مرة واحدة؛ ملفات الوحدات تُنسخ إلى `/etc/systemd/system/` والسكربت إلى `/opt/ecst/bin/disk-watch` بملكية root ووضع 755):
+
+```bash
+sudo install -m 755 -o root -g root scripts/vps/disk-watch.sh /opt/ecst/bin/disk-watch
+sudo install -m 644 scripts/vps/systemd/ecst-disk-watch.* scripts/vps/systemd/ecst-docker-cache-prune.* /etc/systemd/system/
+sudo systemctl daemon-reload && sudo systemctl enable --now ecst-disk-watch.timer ecst-docker-cache-prune.timer
+```
+
+**إن وصل التنبيه:** `docker system df` أولًا؛ المساحة غالبًا ذاكرة بناء أو صور قديمة لمشاريع أخرى. حذف الذاكرة آمن (`docker builder prune -f --filter until=24h`)؛ أما الصور فلا `prune -a` على خادم مشترك لأنه يزيل وسوم التراجع (`previous`) عند غيرنا. العتبة تتغير بالمتغير `DISK_ALERT_PERCENT`.
+
+**ملاحظة:** التنبيه بالبريد يصل فقط بعد ضبط `OPS_ALERT_EMAIL` على بريد حقيقي (ما زال `you@example.com`).
