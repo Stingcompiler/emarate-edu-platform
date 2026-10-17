@@ -1,0 +1,11 @@
+# Installed as /etc/systemd/system/ecst-docker-cache-prune.timer; `systemctl enable --now` it.
+[Unit]
+Description=ECST: weekly Docker build-cache clean-up (Sunday 04:30)
+
+[Timer]
+OnCalendar=Sun 04:30
+RandomizedDelaySec=10min
+Persistent=true
+
+[Install]
+WantedBy=timers.target

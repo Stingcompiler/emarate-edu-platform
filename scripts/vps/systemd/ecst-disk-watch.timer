@@ -1,0 +1,11 @@
+# Installed as /etc/systemd/system/ecst-disk-watch.timer; `systemctl enable --now` it.
+[Unit]
+Description=ECST: check the disk every six hours
+
+[Timer]
+OnBootSec=10min
+OnUnitActiveSec=6h
+Persistent=false
+
+[Install]
+WantedBy=timers.target
