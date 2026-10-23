@@ -167,7 +167,8 @@ export function DepartmentStudents() {
                 <span className="min-w-0 flex-1">
                   <b className="block truncate text-sm text-text">{r.full_name_ar}</b>
                   <span className="text-xs text-text-muted">
-                    <bdi>{r.university_number}</bdi> · {r.program_name} · المستوى {num(r.level)}
+                    <bdi className="num">{r.university_number}</bdi> · {r.program_name} · المستوى{" "}
+                    {num(r.level)}
                   </span>
                 </span>
                 <StatusBadge
@@ -220,7 +221,12 @@ export function DepartmentStudents() {
                 </p>
               )}
               {[
-                ["الرقم الجامعي", <bdi key="n">{s.university_number}</bdi>],
+                [
+                  "الرقم الجامعي",
+                  <bdi key="n" className="num">
+                    {s.university_number}
+                  </bdi>,
+                ],
                 ["البرنامج", s.program_name],
                 ["المستوى", num(s.level)],
                 ["الحالة", STATUS[s.status] ?? s.status],

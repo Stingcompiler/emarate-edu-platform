@@ -175,3 +175,13 @@
     inset: max(-12px, calc((100% - 44px) / 2)) max(-8px, calc((100% - 44px) / 2));
   }
 }
+
+/* A figure in a table or a row: tabular digits, always read left to right even inside Arabic text,
+   aligned to the end of its column (design review B7). */
+.num,
+[data-num] {
+  font-variant-numeric: tabular-nums;
+  direction: ltr;
+  unicode-bidi: isolate;
+  text-align: end;
+}

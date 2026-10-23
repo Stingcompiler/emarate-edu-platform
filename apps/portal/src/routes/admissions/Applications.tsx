@@ -3,6 +3,7 @@ import { FileText } from "lucide-react";
 import { useState } from "react";
 import { Link, useSearchParams } from "react-router";
 
+import { DataTable, type Sort, orderingOf } from "../../components/DataTable";
 import { Pager, useServerPages } from "../../components/Pager";
 import { PortalShell } from "../../components/PortalShell";
 import {
@@ -47,6 +48,7 @@ export function Applications() {
   };
   const setStatus = (value: string) => setFilter("status", value);
   const [search, setSearch] = useState("");
+  const [sort, setSort] = useState<Sort>(null);
   const [picked, setPicked] = useState<Set<string>>(new Set());
   const [target, setTarget] = useState("");
   const summary = useQuery({
@@ -61,22 +63,25 @@ export function Applications() {
         | undefined,
   });
   // 10 per page from the server; the filters go with the request.
-  const list = useServerPages(["applications", status, who, search], async (page) =>
-    ok(
-      await api.GET("/api/v1/applications", {
-        params: {
-          query: {
-            ...(status ? { status: status as never } : {}),
-            ...(who === "unassigned" ? { assigned_registrar__isnull: true } : {}),
-            ...(who === "mine" && me.data
-              ? { assigned_registrar__public_id: me.data.public_id }
-              : {}),
-            ...(search ? { search } : {}),
-            page,
+  const list = useServerPages(
+    ["applications", status, who, search, orderingOf(sort)],
+    async (page) =>
+      ok(
+        await api.GET("/api/v1/applications", {
+          params: {
+            query: {
+              ...(status ? { status: status as never } : {}),
+              ...(who === "unassigned" ? { assigned_registrar__isnull: true } : {}),
+              ...(who === "mine" && me.data
+                ? { assigned_registrar__public_id: me.data.public_id }
+                : {}),
+              ...(search ? { search } : {}),
+              ...(sort ? { ordering: orderingOf(sort) } : {}),
+              page,
+            },
           },
-        },
-      }),
-    ),
+        }),
+      ),
   );
   // Distributing several at once (head registrar; board DesktopHeadRegistrar).
   const registrars = useQuery({
@@ -116,6 +121,34 @@ export function Applications() {
       else next.add(id);
       return next;
     });
+  const bulkBar = (
+    <Card className="mt-4 flex flex-wrap items-center gap-2 p-3 text-sm">
+      <span className="font-semibold">{count(picked.size, N.application)} محددة</span>
+      <select
+        aria-label="المسجل"
+        value={target}
+        onChange={(e) => setTarget(e.target.value)}
+        className="min-h-11 rounded-lg border border-border bg-surface px-3"
+      >
+        <option value="">اختر المسجل…</option>
+        {(registrars.data ?? []).map((u) => (
+          <option key={u.public_id} value={u.public_id}>
+            {u.full_name_ar}
+          </option>
+        ))}
+      </select>
+      <Button
+        className="min-h-11 px-4"
+        disabled={!target || distribute.isPending}
+        onClick={() => distribute.mutate()}
+      >
+        {distribute.isPending ? "جارٍ التوزيع…" : "توزيع"}
+      </Button>
+      <Button variant="ghost" className="min-h-11 px-3" onClick={() => setPicked(new Set())}>
+        إلغاء التحديد
+      </Button>
+    </Card>
+  );
   const s = summary.data;
   const total = s ? Object.values(s.by_status).reduce((a, b) => a + b, 0) : 0;
   return (
@@ -173,34 +206,6 @@ export function Applications() {
           />
         </div>
       </FilterBar>
-      {head && picked.size > 0 && (
-        <Card className="mt-4 flex flex-wrap items-center gap-2 p-3 text-sm">
-          <span className="font-semibold">{count(picked.size, N.application)} محددة</span>
-          <select
-            aria-label="المسجل"
-            value={target}
-            onChange={(e) => setTarget(e.target.value)}
-            className="min-h-11 rounded-lg border border-border bg-surface px-3"
-          >
-            <option value="">اختر المسجل…</option>
-            {(registrars.data ?? []).map((u) => (
-              <option key={u.public_id} value={u.public_id}>
-                {u.full_name_ar}
-              </option>
-            ))}
-          </select>
-          <Button
-            className="min-h-11 px-4"
-            disabled={!target || distribute.isPending}
-            onClick={() => distribute.mutate()}
-          >
-            {distribute.isPending ? "جارٍ التوزيع…" : "توزيع"}
-          </Button>
-          <Button variant="ghost" className="min-h-11 px-3" onClick={() => setPicked(new Set())}>
-            إلغاء التحديد
-          </Button>
-        </Card>
-      )}
       {distribute.isError && (
         <div className="mt-2">
           <Notice>{problemMessage(distribute.error)}</Notice>
@@ -211,58 +216,110 @@ export function Applications() {
           <EmptyState icon={<FileText size={24} aria-hidden />} title="لا طلبات هنا" />
         </Card>
       ) : (
-        <Card className="mt-4 divide-y divide-border-soft">
-          <div
-            className={`hidden grid-cols-[140px_minmax(0,1fr)_minmax(0,1fr)_140px_120px] gap-3 bg-surface-alt px-4 py-2 text-xs text-text-muted lg:grid ${head ? "ps-[3.25rem]" : ""}`}
-          >
-            <span>الرقم المرجعي</span>
-            <span>المتقدم</span>
-            <span>البرنامج</span>
-            <span>المسجل</span>
-            <span>الحالة</span>
+        <>
+          <div className="lg:hidden">
+            {head && picked.size > 0 && <div className="mt-4">{bulkBar}</div>}
+            <Card className="mt-4 divide-y divide-border-soft">
+              {list.items.map((a) => (
+                <div key={a.public_id} className="flex items-center">
+                  {head && (
+                    <label className="grid size-11 shrink-0 place-items-center ps-2">
+                      <input
+                        type="checkbox"
+                        aria-label={`تحديد ${a.full_name}`}
+                        checked={picked.has(a.public_id)}
+                        onChange={() => toggle(a.public_id)}
+                        className="size-4"
+                      />
+                    </label>
+                  )}
+                  <Link
+                    to={`/applications/${a.public_id}`}
+                    className={`grid min-w-0 flex-1 grid-cols-[minmax(0,1fr)_auto] gap-x-3 gap-y-0.5 py-3 pe-4 hover:bg-surface-alt ${head ? "ps-1" : "ps-4"}`}
+                  >
+                    <span className="text-xs text-text-muted">
+                      <bdi className="font-mono">{a.reference_no}</bdi> ·{" "}
+                      {when(a.submitted_at ?? a.created_at)}
+                    </span>
+                    <span className="text-sm font-semibold text-text">{a.full_name}</span>
+                    <span className="text-sm text-text-muted">{a.program_name}</span>
+                    <span className="text-xs text-text-muted">
+                      {a.assigned_registrar_name ?? "غير موزع"}
+                    </span>
+                    <span className="col-start-2 row-span-2 row-start-1">
+                      <StatusBadge
+                        status={STATUS_TONE[a.status] ?? "neutral"}
+                        label={STATUS_LABEL[a.status] ?? a.status}
+                      />
+                    </span>
+                  </Link>
+                </div>
+              ))}
+            </Card>
           </div>
-          {list.items.map((a) => (
-            <div key={a.public_id} className="flex items-center">
-              {head && (
-                <label className="grid size-11 shrink-0 place-items-center ps-2">
-                  <input
-                    type="checkbox"
-                    aria-label={`تحديد ${a.full_name}`}
-                    checked={picked.has(a.public_id)}
-                    onChange={() => toggle(a.public_id)}
-                    className="size-4"
-                  />
-                </label>
-              )}
-              <Link
-                to={`/applications/${a.public_id}`}
-                className={`grid min-w-0 flex-1 grid-cols-[minmax(0,1fr)_auto] gap-x-3 gap-y-0.5 py-3 pe-4 hover:bg-surface-alt lg:grid-cols-[140px_minmax(0,1fr)_minmax(0,1fr)_140px_120px] lg:items-center ${head ? "ps-1 lg:ps-4" : "ps-4"}`}
-              >
-                {/* Phones: the status sits at the top beside the reference and the name, not on
-                    a fifth line of its own. */}
-                <span className="col-start-1 text-xs text-text-muted lg:col-start-auto">
-                  <bdi className="font-mono">{a.reference_no}</bdi> ·{" "}
-                  {when(a.submitted_at ?? a.created_at)}
-                </span>
-                <span className="col-start-1 text-sm font-semibold text-text lg:col-start-auto">
-                  {a.full_name}
-                </span>
-                <span className="col-start-1 text-sm text-text-muted lg:col-start-auto">
-                  {a.program_name}
-                </span>
-                <span className="col-start-1 text-xs text-text-muted lg:col-start-auto">
-                  {a.assigned_registrar_name ?? "غير موزع"}
-                </span>
-                <span className="col-start-2 row-span-2 row-start-1 lg:col-start-auto lg:row-auto lg:row-start-auto">
+          {/* Large screens: a table with sortable headers and the bulk bar (design review B7). */}
+          <DataTable
+            caption="الطلبات"
+            rows={list.items}
+            rowId={(a) => a.public_id}
+            sort={sort}
+            onSort={setSort}
+            selection={
+              head
+                ? { picked, onChange: setPicked, label: (a) => `تحديد ${a.full_name}` }
+                : undefined
+            }
+            bulkBar={<div className="mt-4">{bulkBar}</div>}
+            columns={[
+              {
+                key: "ref",
+                header: "الرقم المرجعي",
+                sort: "reference_no",
+                cell: (a) => (
+                  <Link to={`/applications/${a.public_id}`} className="font-mono text-primary">
+                    <bdi dir="ltr">{a.reference_no}</bdi>
+                  </Link>
+                ),
+              },
+              {
+                key: "name",
+                header: "المتقدم",
+                sort: "full_name",
+                cell: (a) => (
+                  <Link
+                    to={`/applications/${a.public_id}`}
+                    className="font-semibold text-text hover:underline"
+                  >
+                    {a.full_name}
+                  </Link>
+                ),
+              },
+              { key: "program", header: "البرنامج", cell: (a) => a.program_name },
+              {
+                key: "registrar",
+                header: "المسجل",
+                cell: (a) => a.assigned_registrar_name ?? "غير موزع",
+              },
+              {
+                key: "date",
+                header: "التقديم",
+                sort: "submitted_at",
+                cell: (a) => when(a.submitted_at ?? a.created_at),
+              },
+              {
+                key: "status",
+                header: "الحالة",
+                sort: "status",
+                cell: (a) => (
                   <StatusBadge
                     status={STATUS_TONE[a.status] ?? "neutral"}
                     label={STATUS_LABEL[a.status] ?? a.status}
                   />
-                </span>
-              </Link>
-            </div>
-          ))}
-        </Card>
+                ),
+              },
+            ]}
+          />
+        </>
       )}
       <Pager page={list.page} count={list.count} onPage={list.setPage} label="صفحات الطلبات" />
     </PortalShell>
