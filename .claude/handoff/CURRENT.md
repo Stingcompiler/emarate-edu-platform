@@ -1,5 +1,24 @@
 # Handoff — UI design review 2026-10-16 done except owner items — 2026-10-17
 
+# Handoff — design-gaps work order B1–B10 — 2026-10-24
+
+## Work order `ecst-design-gaps-work-order.md` (2026-10-23)
+
+- Merged: B1/B2/B3 #144 (offline-first drafts, connectivity bar, email-only OTP), B4 #145 (one
+  red action on the public site, `docs/06 §2.7`), B5 #146 (ops category, demo contact guard).
+- Open PRs, all need green CI then merge **serially** (each merge cancels the previous `main`
+  CI run, and the VPS deploys only a commit whose CI passed — let `main` CI finish first):
+  #147 B8 admissions daily chart, #148 B6 hero AVIF/WebP + logo + `scripts/page-weight.mjs`,
+  #149 B7 sortable desktop tables for bulk-action lists only (`docs/ui-profile.md`),
+  #150 B9/B10 touch targets 44px, compact density (desktop, Settings), folded sidebar groups,
+  color-scheme, no-bounce motion.
+- After deploy: verify production, then `node scripts/page-weight.mjs https://ecst.stingdev.pro/ar/`
+  (baseline 487 KB, target <= 500 KB, expected ~330 KB).
+- Gotchas: macOS has no `sed -i`/`timeout` (use python); local Chrome crashes under load
+  ("Target page ... closed") are not code failures; e2e CI takes ~30 min.
+- Owner items still open: restore-drill result, real `OPS_ALERT_EMAIL`, college content,
+  SEO launch steps after the domain move (runbook §11).
+
 ## Where things stand
 
 - The 8 October review (`docs/qa/comprehensive-review-2026-10-08.md`, PR #118) was verified
