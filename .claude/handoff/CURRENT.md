@@ -6,14 +6,12 @@
 
 - Merged: B1/B2/B3 #144 (offline-first drafts, connectivity bar, email-only OTP), B4 #145 (one
   red action on the public site, `docs/06 §2.7`), B5 #146 (ops category, demo contact guard).
-- Open PRs, all need green CI then merge **serially** (each merge cancels the previous `main`
-  CI run, and the VPS deploys only a commit whose CI passed — let `main` CI finish first):
-  #147 B8 admissions daily chart, #148 B6 hero AVIF/WebP + logo + `scripts/page-weight.mjs`,
-  #149 B7 sortable desktop tables for bulk-action lists only (`docs/ui-profile.md`),
-  #150 B9/B10 touch targets 44px, compact density (desktop, Settings), folded sidebar groups,
-  color-scheme, no-bounce motion.
-- After deploy: verify production, then `node scripts/page-weight.mjs https://ecst.stingdev.pro/ar/`
-  (baseline 487 KB, target <= 500 KB, expected ~330 KB).
+- Also merged on 2026-10-24: #147 B8, #148 B6, #149 B7, #150 B9/B10. The grey "cancelled"
+  CI runs for #147–#149 are by design (each merge cancels the previous `main` run); the run
+  for #150 (`ec03160`) is green and deployed everything.
+- Verified on production: AVIF/WebP hero at 3 widths, `/site-logo.webp`; home page weight
+  326 KB (budget 500 KB, was 487 KB) via `node scripts/page-weight.mjs https://ecst.stingdev.pro/ar/`.
+  Not verified: autodeploy state file (needs `ECST_SSH`), folded sidebar/density toggle by eye.
 - Gotchas: macOS has no `sed -i`/`timeout` (use python); local Chrome crashes under load
   ("Target page ... closed") are not code failures; e2e CI takes ~30 min.
 - Owner items still open: restore-drill result, real `OPS_ALERT_EMAIL`, college content,
