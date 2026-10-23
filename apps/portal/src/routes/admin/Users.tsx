@@ -2,6 +2,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { Link, useSearchParams } from "react-router";
 
+import { useConfirm } from "../../components/Confirm";
+import { DataTable, type Sort, orderingOf } from "../../components/DataTable";
 import { PortalShell } from "../../components/PortalShell";
 import {
   Avatar,
@@ -30,6 +32,10 @@ export function AdminUsers() {
   const [search, setSearch] = useState("");
   const [active, setActive] = useState<boolean | undefined>(true);
   const [page, setPage] = useState(1);
+  const [sort, setSort] = useState<Sort>(null);
+  const [picked, setPicked] = useState<Set<string>>(new Set());
+  const confirm = useConfirm();
+  const client = useQueryClient();
   // The role filter, with each role's count (review 2026-09-29 PR 7); kept in the address so
   // «من يحمل هذا الدور» on the roles page lands here filtered.
   const [params, setParams] = useSearchParams();
@@ -44,7 +50,7 @@ export function AdminUsers() {
       )?.counts ?? {},
   });
   const list = useQuery({
-    queryKey: ["users", search, active, role, page],
+    queryKey: ["users", search, active, role, page, orderingOf(sort)],
     queryFn: async () =>
       ok(
         await api.GET("/api/v1/users", {
@@ -53,6 +59,7 @@ export function AdminUsers() {
               search: search || undefined,
               is_active: active,
               role: role || undefined,
+              ordering: orderingOf(sort),
               page,
             } as never,
           },
@@ -60,6 +67,39 @@ export function AdminUsers() {
       ) ?? null,
   });
   const rows = list.data?.results ?? [];
+  // Enabling or disabling several accounts at once (system admin): the same call as the user's
+  // own page, once per account, each logged; one's own account is never in it.
+  const bulk = useMutation({
+    mutationFn: async (value: boolean) => {
+      const failed: string[] = [];
+      for (const id of picked) {
+        if (id === me.data?.public_id) continue;
+        const { data } = await api.POST("/api/v1/users/{public_id}/set-active", {
+          params: { path: { public_id: id } },
+          body: { is_active: value },
+        });
+        if (!data) failed.push(id);
+      }
+      if (failed.length) throw { detail: `تعذّر تغيير ${failed.length} من الحسابات المحددة.` };
+    },
+    onSettled: () => {
+      setPicked(new Set());
+      void client.invalidateQueries({ queryKey: ["users"] });
+    },
+  });
+  const askBulk = async (value: boolean) => {
+    const mine = picked.has(me.data?.public_id ?? "");
+    const n = picked.size - (mine ? 1 : 0);
+    const ok_ = await confirm({
+      title: value ? `تفعيل ${num(n)} حسابًا؟` : `تعطيل ${num(n)} حسابًا؟`,
+      body: value
+        ? "تعود الحسابات المحددة إلى الدخول."
+        : "لا يستطيع أصحاب الحسابات المحددة الدخول حتى تُفعَّل من جديد. حسابك لا يدخل في التغيير.",
+      confirm: value ? "تفعيل" : "تعطيل",
+      tone: value ? "primary" : "danger",
+    });
+    if (ok_) bulk.mutate(value);
+  };
   return (
     <PortalShell
       title={`المستخدمون · ${num(list.data?.count ?? 0)}`}
@@ -139,34 +179,134 @@ export function AdminUsers() {
               )}
             </div>
           </FilterBar>
-          <Card className="mt-3 divide-y divide-border-soft">
-            {rows.map((u) => (
-              <Link
-                key={u.public_id}
-                to={`/system/users/${u.public_id}`}
-                className="flex items-center gap-3 px-4 py-3 hover:bg-surface-alt"
-              >
-                <Avatar text={initials(u.full_name_ar)} size="md" tone="primary" />
-                <span className="min-w-0 flex-1">
-                  <b className="block truncate text-sm text-text">{u.full_name_ar}</b>
-                  <span className="block truncate text-xs text-text-muted">
-                    {u.roles
-                      .map(
-                        (r) =>
-                          `${ROLE_LABEL[r.role] ?? r.role}${r.department_name ? ` · ${r.department_name}` : ""}`,
-                      )
-                      .join("، ") || "بلا دور"}{" "}
-                    · {u.last_login ? `دخول ${when(u.last_login)}` : "لم يفعّل الحساب"}
+          <div className="lg:hidden">
+            <Card className="mt-3 divide-y divide-border-soft">
+              {rows.map((u) => (
+                <Link
+                  key={u.public_id}
+                  to={`/system/users/${u.public_id}`}
+                  className="flex items-center gap-3 px-4 py-3 hover:bg-surface-alt"
+                >
+                  <Avatar text={initials(u.full_name_ar)} size="md" tone="primary" />
+                  <span className="min-w-0 flex-1">
+                    <b className="block truncate text-sm text-text">{u.full_name_ar}</b>
+                    <span className="block truncate text-xs text-text-muted">
+                      {u.roles
+                        .map(
+                          (r) =>
+                            `${ROLE_LABEL[r.role] ?? r.role}${r.department_name ? ` · ${r.department_name}` : ""}`,
+                        )
+                        .join("، ") || "بلا دور"}{" "}
+                      · {u.last_login ? `دخول ${when(u.last_login)}` : "لم يفعّل الحساب"}
+                    </span>
                   </span>
-                </span>
-                <StatusBadge
-                  status={u.is_active ? (u.last_login ? "approved" : "pending") : "closed"}
-                  label={u.is_active ? (u.last_login ? "نشط" : "دعوة معلّقة") : "معطّل"}
-                />
-              </Link>
-            ))}
-            {!rows.length && <p className="px-4 py-4 text-sm text-text-muted">لا نتائج.</p>}
-          </Card>
+                  <StatusBadge
+                    status={u.is_active ? (u.last_login ? "approved" : "pending") : "closed"}
+                    label={u.is_active ? (u.last_login ? "نشط" : "دعوة معلّقة") : "معطّل"}
+                  />
+                </Link>
+              ))}
+              {!rows.length && <p className="px-4 py-4 text-sm text-text-muted">لا نتائج.</p>}
+            </Card>
+          </div>
+          {/* Large screens: a table, with bulk actions for the system admin (design review B7). */}
+          <DataTable
+            caption="المستخدمون"
+            rows={rows}
+            rowId={(u) => u.public_id}
+            sort={sort}
+            onSort={(next) => {
+              setSort(next);
+              setPage(1);
+            }}
+            selection={
+              admin
+                ? {
+                    picked,
+                    onChange: setPicked,
+                    label: (u) => `تحديد ${u.full_name_ar}`,
+                  }
+                : undefined
+            }
+            bulkBar={
+              <Card className="mt-3 flex flex-wrap items-center gap-2 p-3 text-sm">
+                <span className="font-semibold">{num(picked.size)} محددة</span>
+                <Button
+                  variant="danger"
+                  className="min-h-10 px-4"
+                  onClick={() => askBulk(false)}
+                  disabled={bulk.isPending}
+                >
+                  تعطيل
+                </Button>
+                <Button
+                  variant="secondary"
+                  className="min-h-10 px-4"
+                  onClick={() => askBulk(true)}
+                  disabled={bulk.isPending}
+                >
+                  تفعيل
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="min-h-10 px-3"
+                  onClick={() => setPicked(new Set())}
+                >
+                  إلغاء التحديد
+                </Button>
+              </Card>
+            }
+            columns={[
+              {
+                key: "name",
+                header: "الاسم",
+                sort: "full_name_ar",
+                cell: (u) => (
+                  <Link to={`/system/users/${u.public_id}`} className="flex items-center gap-3">
+                    <Avatar text={initials(u.full_name_ar)} size="md" tone="primary" />
+                    <span className="min-w-0">
+                      <b className="block truncate text-text">{u.full_name_ar}</b>
+                      <span className="block truncate text-xs text-text-muted" dir="ltr">
+                        {u.email}
+                      </span>
+                    </span>
+                  </Link>
+                ),
+              },
+              {
+                key: "roles",
+                header: "الدور",
+                cell: (u) =>
+                  u.roles
+                    .map(
+                      (r) =>
+                        `${ROLE_LABEL[r.role] ?? r.role}${r.department_name ? ` · ${r.department_name}` : ""}`,
+                    )
+                    .join("، ") || "بلا دور",
+              },
+              {
+                key: "status",
+                header: "الحالة",
+                cell: (u) => (
+                  <StatusBadge
+                    status={u.is_active ? (u.last_login ? "approved" : "pending") : "closed"}
+                    label={u.is_active ? (u.last_login ? "نشط" : "دعوة معلّقة") : "معطّل"}
+                  />
+                ),
+              },
+              {
+                key: "login",
+                header: "آخر دخول",
+                sort: "last_login",
+                cell: (u) => (u.last_login ? when(u.last_login) : "لم يفعّل الحساب"),
+              },
+            ]}
+          />
+          {bulk.isError && (
+            <div className="mt-2">
+              <Notice>{problemMessage(bulk.error)}</Notice>
+            </div>
+          )}
           <Pager page={page} count={list.data?.count ?? 0} onPage={setPage} />
         </div>
         <aside className="mt-6 lg:mt-0">

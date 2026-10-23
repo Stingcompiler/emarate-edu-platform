@@ -105,7 +105,7 @@ export function StudentRecords() {
                   </Link>
                 </th>
                 <td className="px-4 py-2.5 text-text-muted">
-                  <bdi>{r.university_number}</bdi>
+                  <bdi className="num">{r.university_number}</bdi>
                 </td>
                 <td className="px-4 py-2.5 text-text-muted">{r.program_name}</td>
                 <td className="px-4 py-2.5">{num(r.level)}</td>
@@ -143,7 +143,8 @@ export function StudentRecords() {
             <span className="min-w-0 flex-1">
               <b className="block truncate text-sm text-text">{r.full_name_ar}</b>
               <span className="text-xs text-text-muted">
-                <bdi>{r.university_number}</bdi> · {r.program_name} · المستوى {num(r.level)}
+                <bdi className="num">{r.university_number}</bdi> · {r.program_name} · المستوى{" "}
+                {num(r.level)}
                 {r.has_account ? "" : " · لم يفعّل حسابه"}
               </span>
             </span>

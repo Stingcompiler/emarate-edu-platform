@@ -127,3 +127,28 @@ def test_the_admin_renames_a_staff_account(api, users, make_user, make_student, 
         f"/api/v1/users/{student_user.public_id}", {"full_name_ar": "اسم"}, format="json"
     )
     assert refused.status_code == 409 and refused.data["code"] == "student_account"
+
+
+def test_the_users_and_applications_lists_sort_by_the_columns_the_tables_offer(
+    api, users, make_user
+):
+    """Design review B7: the desktop tables sort through `?ordering=` (three states: asc, desc,
+    none = the server's own order)."""
+    from accounts.rbac import Role
+
+    make_user(Role.TEACHER, full_name_ar="أحمد")
+    make_user(Role.TEACHER, full_name_ar="يوسف")
+    admin = users[Role.SYSTEM_ADMIN]
+
+    def names(ordering):
+        query = f"?page_size=100&ordering={ordering}" if ordering else "?page_size=100"
+        rows = api(admin).get(f"/api/v1/users{query}").data["results"]
+        return [row["full_name_ar"] for row in rows if row["full_name_ar"] in {"أحمد", "يوسف"}]
+
+    assert names("full_name_ar") == ["أحمد", "يوسف"]
+    assert names("-full_name_ar") == ["يوسف", "أحمد"]
+    assert api(admin).get("/api/v1/users?ordering=-last_login").status_code == 200
+    head = users[Role.HEAD_REGISTRAR]
+    for ordering in ("reference_no", "-full_name", "submitted_at", "status"):
+        response = api(head).get(f"/api/v1/applications?ordering={ordering}")
+        assert response.status_code == 200, ordering
