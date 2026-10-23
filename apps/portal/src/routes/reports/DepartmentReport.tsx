@@ -19,6 +19,7 @@ import {
   pct,
   useDepartments,
   useTerms,
+  weeklyTitle,
 } from "../../lib/reports";
 
 /** Board: DesktopDeptReports (desktop); phone derived — KPIs 2×n, course cards, chart. */
@@ -236,7 +237,7 @@ export function DepartmentReport() {
             <aside className="mt-6 grid gap-4 lg:grid-cols-3 lg:max-[1439px]:items-start min-[1440px]:sticky min-[1440px]:top-20 min-[1440px]:mt-0 min-[1440px]:flex min-[1440px]:flex-col">
               <Card className="p-4">
                 <p className="mb-3 text-sm font-semibold text-text">
-                  الرفع الأسبوعي — آخر 8 أسابيع
+                  {weeklyTitle(r.weekly_uploads)}
                 </p>
                 <Bars
                   values={r.weekly_uploads}

@@ -104,7 +104,7 @@ export function ResultSearch() {
                     key={r.id}
                     type="button"
                     onClick={() => setPicked(r)}
-                    className={`flex w-full items-center gap-3 px-4 py-3 text-start hover:bg-surface-alt ${picked?.id === r.id ? "bg-primary-soft" : ""}`}
+                    className={`flex w-full items-center gap-[var(--d-gap)] px-[var(--d-pad)] py-[var(--d-row)] text-start hover:bg-surface-alt ${picked?.id === r.id ? "bg-primary-soft" : ""}`}
                   >
                     <CodeTile top={top} bottom={bottom} />
                     <span className="min-w-0 flex-1">

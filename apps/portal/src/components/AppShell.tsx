@@ -1,6 +1,6 @@
-import { ChevronRight, type LucideIcon, Menu } from "lucide-react";
+import { ChevronDown, ChevronRight, type LucideIcon, Menu } from "lucide-react";
 import { type ReactNode, useEffect, useRef, useState } from "react";
-import { NavLink } from "react-router";
+import { NavLink, useLocation } from "react-router";
 
 import { useSiteLogo } from "../lib/site";
 import { ThemeRow, ThemeToggle } from "./ThemeToggle";
@@ -118,18 +118,7 @@ export function AppShell({
         {/* Desktop sidebar — first in DOM, so it sits on the right in RTL */}
         <aside className="hidden w-66 shrink-0 border-e border-border-soft bg-surface px-3 py-4 lg:sticky lg:top-14 lg:block lg:h-[calc(100dvh-3.5rem)] lg:self-start lg:overflow-y-auto">
           <nav aria-label="التنقل الرئيسي" className="flex flex-col gap-0.5">
-            {nav.map((item, i) => (
-              <div key={item.to} className="contents">
-                {item.group && item.group !== nav[i - 1]?.group && (
-                  <p
-                    className={`px-3 pb-1 text-[11px] font-semibold text-text-muted ${i ? "mt-4 border-t border-border-soft pt-3" : ""}`}
-                  >
-                    {item.group}
-                  </p>
-                )}
-                <SidebarLink item={item} />
-              </div>
-            ))}
+            <SidebarItems nav={nav} />
             <div className="mt-4 border-t border-border-soft pt-3">
               <ThemeRow
                 className={`${sidebarItem} w-full text-text-muted hover:bg-surface-alt hover:text-text`}
@@ -197,6 +186,72 @@ function Brand() {
       />
       بوابة الكلية
     </span>
+  );
+}
+
+/**
+ * The sidebar's destinations. Roles with long menus (the admin has 45) get their groups folded:
+ * only the group of the page being shown is open, the others open on a tap, so the list reads
+ * as a handful of headings instead of a wall (design review B10).
+ */
+export function SidebarItems({ nav }: { nav: NavItem[] }) {
+  const { pathname } = useLocation();
+  // The group of the page being shown (a detail page counts: /system/users/12 is «المستخدمون»).
+  const currentGroup = nav.find(
+    (item) =>
+      !!item.group &&
+      !item.external &&
+      (pathname === item.to || (item.to !== "/" && pathname.startsWith(`${item.to}/`))),
+  )?.group;
+  const [open, setOpen] = useState<Set<string>>(new Set(currentGroup ? [currentGroup] : []));
+  // Going to a page in another group opens that group too (the others stay as the person left them).
+  useEffect(() => {
+    if (currentGroup)
+      setOpen((prev) => (prev.has(currentGroup) ? prev : new Set(prev).add(currentGroup)));
+  }, [currentGroup]);
+  const segments: { group?: string; items: NavItem[] }[] = [];
+  for (const item of nav) {
+    const last = segments[segments.length - 1];
+    if (last && last.group === item.group) last.items.push(item);
+    else segments.push({ group: item.group, items: [item] });
+  }
+  return (
+    <>
+      {segments.map((segment, i) =>
+        segment.group ? (
+          <details
+            key={segment.group + i}
+            open={open.has(segment.group)}
+            onToggle={(event) => {
+              const isOpen = (event.currentTarget as HTMLDetailsElement).open;
+              setOpen((prev) => {
+                const next = new Set(prev);
+                if (isOpen) next.add(segment.group!);
+                else next.delete(segment.group!);
+                return next;
+              });
+            }}
+            className={`group ${i ? "mt-1 border-t border-border-soft pt-1" : ""}`}
+          >
+            <summary className="flex min-h-9 cursor-pointer list-none items-center justify-between rounded-md px-3 text-[11px] font-semibold text-text-muted hover:bg-surface-alt">
+              {segment.group}
+              <ChevronDown
+                size={14}
+                className="transition-transform group-open:rotate-180"
+                aria-hidden
+              />
+            </summary>
+            <div className="mt-0.5 flex flex-col gap-0.5">
+              {segment.items.map((item) => (
+                <SidebarLink key={item.to} item={item} />
+              ))}
+            </div>
+          </details>
+        ) : (
+          segment.items.map((item) => <SidebarLink key={item.to} item={item} />)
+        ),
+      )}
+    </>
   );
 }
 

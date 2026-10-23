@@ -20,7 +20,7 @@ import { useCurrentTerm, useDepartment, useOfferings } from "../../lib/departmen
 import { when, count, N } from "../../lib/format";
 import { useLectures } from "../../lib/learning";
 import { can } from "../../lib/nav";
-import { Bars, Kpi, num } from "../../lib/reports";
+import { Bars, Kpi, num, weeklyTitle } from "../../lib/reports";
 import { useConfirm } from "../../components/Confirm";
 
 /**
@@ -159,7 +159,7 @@ export function DepartmentLectures() {
         side={
           <>
             <Card className="p-4">
-              <h2 className="mb-3 text-sm font-semibold text-text">اتجاه الرفع — 8 أسابيع</h2>
+              <h2 className="mb-3 text-sm font-semibold text-text">{weeklyTitle(weeks)}</h2>
               <Bars
                 values={weeks}
                 labels={weeks.map((_, i) => num(i + 1))}

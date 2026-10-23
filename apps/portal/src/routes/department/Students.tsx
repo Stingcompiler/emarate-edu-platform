@@ -161,7 +161,7 @@ export function DepartmentStudents() {
                   setPicked(r.public_id);
                   setMode("view");
                 }}
-                className={`flex w-full items-center gap-3 px-4 py-3 text-start hover:bg-surface-alt ${s?.public_id === r.public_id ? "lg:bg-primary-soft/40" : ""}`}
+                className={`flex w-full items-center gap-[var(--d-gap)] px-[var(--d-pad)] py-[var(--d-row)] text-start hover:bg-surface-alt ${s?.public_id === r.public_id ? "lg:bg-primary-soft/40" : ""}`}
               >
                 <Avatar text={initials(r.full_name_ar)} size="md" tone="primary" />
                 <span className="min-w-0 flex-1">
