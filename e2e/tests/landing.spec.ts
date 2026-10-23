@@ -100,6 +100,34 @@ test("a plan that does not add up to the credit hours says it is partial", async
   await expect(page.getByText(/من 132 ساعة معتمدة/)).toBeVisible();
 });
 
+test("the home picture and the logo are served resized, in modern formats (design review B6)", async ({
+  request,
+}) => {
+  const html = await (await request.get(`${SITE}/ar/`)).text();
+  test.skip(!html.includes("<picture"), "this run's home page has no picture");
+  // AVIF and WebP at each width the page offers; the small one is far below the original's weight.
+  for (const [path, type] of [
+    ["/img/hero-480.avif", "image/avif"],
+    ["/img/hero-960.avif", "image/avif"],
+    ["/img/hero-480.webp", "image/webp"],
+    ["/img/hero-1440.webp", "image/webp"],
+  ]) {
+    const response = await request.get(SITE + path);
+    expect(response.status(), path).toBe(200);
+    expect(response.headers()["content-type"], path).toBe(type);
+  }
+  expect((await (await request.get(`${SITE}/img/hero-480.webp`)).body()).length).toBeLessThan(
+    120 * 1024,
+  );
+  expect(html).toMatch(/<source type="image\/avif" srcset="[^"]*hero-480\.avif 480w/);
+  // The logo is served at the size it is shown, never the 800-pixel original.
+  if (html.includes("/site-logo.webp")) {
+    const logo = await request.get(`${SITE}/site-logo.webp`);
+    expect(logo.headers()["content-type"]).toBe("image/webp");
+    expect((await logo.body()).length).toBeLessThan(15 * 1024);
+  }
+});
+
 test("search engines get a dated sitemap and a site-hosted icon", async ({ request }) => {
   const sitemap = await (await request.get(`${SITE}/sitemap.xml`)).text();
   expect(sitemap).toContain("<loc>");

@@ -1,5 +1,6 @@
 ---
 import ProgramCard from "../../components/ProgramCard.astro";
+import { HERO_WIDTHS } from "../../lib/images";
 import TrustStrip from "../../components/TrustStrip.astro";
 import Base from "../../layouts/Base.astro";
 import {
@@ -79,6 +80,9 @@ const homeDescription =
     : ownDescription
       ? `${ownDescription.replace(/[.،]+$/, "")}. ${lead}`
       : `${name} — ${lead}`;
+const heroSet = (format: "avif" | "webp") =>
+  HERO_WIDTHS.map((width) => `/img/hero-${width}.${format} ${width}w`).join(", ");
+const heroSizes = "(min-width: 1280px) 1152px, 100vw";
 const audiences =
   lang === "ar"
     ? [
@@ -254,15 +258,21 @@ const jsonLd = {
     {s.hero_image_url && (
       // The college's own picture (campus, students): the page's priority image.
       <div class="mx-auto max-w-6xl px-4 pb-6 lg:px-8">
-        <img
-          src={s.hero_image_url}
-          alt={s.hero_image_alt_ar ?? ""}
-          width="1200"
-          height="514"
-          fetchpriority="high"
-          decoding="async"
-          class="aspect-[4/3] w-full rounded-3xl object-cover sm:aspect-[21/9]"
-        />
+        {/* AVIF, else WebP, at the width the screen needs; the upload itself is the last resort
+            (design review B6: the original was most of the first screen's weight). */}
+        <picture>
+          <source type="image/avif" srcset={heroSet("avif")} sizes={heroSizes} />
+          <source type="image/webp" srcset={heroSet("webp")} sizes={heroSizes} />
+          <img
+            src={s.hero_image_url}
+            alt={s.hero_image_alt_ar ?? ""}
+            width="1200"
+            height="514"
+            fetchpriority="high"
+            decoding="async"
+            class="aspect-[4/3] w-full rounded-3xl object-cover sm:aspect-[21/9]"
+          />
+        </picture>
       </div>
     )}
     {/* The licence and the college's own figures — not portal account counts (review 2026-09-30). */}

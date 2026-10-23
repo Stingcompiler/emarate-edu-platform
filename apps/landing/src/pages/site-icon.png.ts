@@ -27,7 +27,7 @@ export const GET: APIRoute = async () => {
   source ??= await readFile(path.resolve("public/favicon.svg"));
   const png = await sharp(source)
     .resize(SIZE, SIZE, { fit: "contain", background: { r: 0, g: 0, b: 0, alpha: 0 } })
-    .png()
+    .png({ palette: true, quality: 80, compressionLevel: 9 })
     .toBuffer();
   return new Response(new Uint8Array(png), { headers: { "Content-Type": "image/png" } });
 };
