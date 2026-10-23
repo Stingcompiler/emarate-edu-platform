@@ -64,6 +64,26 @@ def test_apply_removes_the_demo_and_keeps_structure_real_content_and_the_log(see
     settings_ = SiteSettings.load()
     assert "(مثال)" not in settings_.tagline + settings_.licence_ar
     assert not any("(مثال)" in (p.description_ar or "") for p in Program.objects.all())
+    # The demo's fake contact channels go too (design review B5): the public site API shows none.
+    assert (
+        settings_.email,
+        settings_.phone,
+        settings_.address,
+        settings_.whatsapp_e164,
+        settings_.office_hours_ar,
+    ) == ("", "", "", "", "")
+
+
+def test_purge_keeps_contact_details_the_college_entered(seeded):
+    """Only the values seed_demo wrote are cleared, never a real one."""
+    own = SiteSettings.load()
+    own.phone = "+249 91 234 5678"  # real: replaces the demo's
+    own.email = "info@ecst.edu.sd"
+    own.save()
+    _purge("--apply")
+    own.refresh_from_db()
+    assert own.phone == "+249 91 234 5678" and own.email == "info@ecst.edu.sd"
+    assert own.whatsapp_e164 == "" and own.address == ""  # the demo's, still cleared
 
 
 def test_a_bad_date_is_refused(db):

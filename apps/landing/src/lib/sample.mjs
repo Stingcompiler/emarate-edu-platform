@@ -15,8 +15,10 @@
 
 // «(مثال)» / «(Example)» on texts, images and news; «(نص تجريبي)» and the demo note on the
 // official pages' placeholder text, and the system's own draft note (backend content/official.py).
+// and the demo's fake contact details (seed_demo): the demo e-mail domain, a phone or WhatsApp
+// number of zeros, «عنوان تجريبي» (design review B5).
 const MARK =
-  /\(\s*مثال\s*\)|\(\s*example\s*\)|\(\s*نص تجريبي\s*\)|نص تجريبي للعرض فقط|مسودة أنشأها النظام/i;
+  /\(\s*مثال\s*\)|\(\s*example\s*\)|\(\s*نص تجريبي\s*\)|نص تجريبي للعرض فقط|مسودة أنشأها النظام|demo\.ecst\.test|\+?249[\s-]?0{3}[\s-]?0{3}[\s-]?0{3}|عنوان تجريبي/i;
 /** Fields that name an item: a mark here means the whole item is a sample. */
 const IDENTITY = ["title", "title_ar", "title_en", "label_ar", "label_en"];
 const DROP = Symbol("drop");

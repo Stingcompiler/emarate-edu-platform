@@ -163,6 +163,23 @@ COHORTS = [
 ]
 
 
+def site_settings_filled(site_settings) -> bool:
+    """Whether the college has entered anything of its own in «إعدادات الموقع»."""
+    return any(
+        (
+            site_settings.email,
+            site_settings.phone,
+            site_settings.address,
+            site_settings.whatsapp_e164,
+            site_settings.office_hours_ar,
+            site_settings.office_hours_en,
+            site_settings.tagline,
+            site_settings.licence_ar,
+            site_settings.map_url,
+        )
+    )
+
+
 class Command(BaseCommand):
     help = "Load fictional demo data (DEBUG only; password from DEMO_PASSWORD)."
 
@@ -671,12 +688,13 @@ class Command(BaseCommand):
         # Contact details so the footer, contact page and map link have something to show —
         # obviously not real: the college enters its own in «محتوى الموقع ← الإعدادات».
         site_settings = SiteSettings.load()
-        if not (site_settings.email or site_settings.phone or site_settings.address):
+        # Only on an empty settings row: a college that has entered any contact detail, hours or
+        # text keeps every one of them (a half-filled row once got a fake WhatsApp number beside
+        # its real address). Design review B5.
+        if not site_settings_filled(site_settings):
             site_settings.email = "info@demo.ecst.test"
             site_settings.phone = "+249 000 000 000"
             site_settings.address = "عنوان تجريبي — الخرطوم، السودان"
-            site_settings.save()
-        if not (site_settings.whatsapp_e164 or site_settings.office_hours_ar):
             # The WhatsApp button and office hours (landing review PR 6c), equally fake.
             site_settings.whatsapp_e164 = "+249000000000"
             site_settings.office_hours_ar = "(مثال) الأحد–الخميس، 8:00–15:00"

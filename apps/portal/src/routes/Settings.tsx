@@ -29,6 +29,7 @@ const LABELS: Record<Preference["category"], string> = {
   results: "النتائج",
   account: "الحساب والتسجيل",
   hr: "الموارد البشرية",
+  ops: "تنبيهات تشغيل المنصة (الأعطال وامتلاء القرص)",
 };
 const CHANNELS = [
   { key: "inapp", label: "داخل التطبيق" },
