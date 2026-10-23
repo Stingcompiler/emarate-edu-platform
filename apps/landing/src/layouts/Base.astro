@@ -67,7 +67,7 @@ const desc =
     ? `${title} — ${siteName}${s.tagline ? `. ${s.tagline}` : ""}`
     : s.seo?.description || s.tagline || siteName);
 // The logo the owner chose in the site settings, else the built-in mark.
-const logo = s.logo_url || "/favicon.svg";
+const logo = s.logo_url ? "/site-logo.webp" : "/favicon.svg";
 // A picture for WhatsApp/Facebook previews: the page's own, else the college's share image,
 // else its logo.
 const shareImage = image || s.share_image_url || s.logo_url || null;
