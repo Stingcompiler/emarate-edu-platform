@@ -109,18 +109,26 @@ export function Bars({
   caption?: string;
 }) {
   const max = Math.max(1, ...values);
+  // Thirty days do not fit a number over every bar and a label under it: past 14 bars the
+  // numbers go (the title says the total) and the labels thin out to about one in five.
+  const dense = values.length > 14;
+  const showLabel = (i: number) => !dense || i % 5 === 0 || i === values.length - 1;
   return (
     <figure>
       {/* Bars rise from their base in turn (motion.css .motion-bars). */}
       <div className="motion-bars flex h-32 items-end gap-1.5" dir="ltr">
         {values.map((v, i) => (
           <div key={i} className="flex flex-1 flex-col items-center gap-1">
-            <span className="text-[11px] text-text-muted">{num(v)}</span>
+            {!dense && <span className="text-[11px] text-text-muted">{num(v)}</span>}
             <div
               className={`motion-bar w-full rounded-t ${i === values.length - 1 ? "bg-primary" : "bg-primary-soft"}`}
               style={{ height: `${Math.max(4, (v / max) * 96)}px`, ["--i" as string]: i }}
             />
-            {labels && <span className="text-[11px] text-text-muted">{labels[i]}</span>}
+            {labels && (
+              <span className="h-4 text-[11px] text-text-muted">
+                {showLabel(i) ? labels[i] : ""}
+              </span>
+            )}
           </div>
         ))}
       </div>

@@ -263,10 +263,73 @@ def test_admissions_report(api, users, it_program, term, make_user, it_dept):
     assert report.status_code == 200
     data = report.data
     assert (data["total"], data["accepted"], data["converted"], data["unassigned"]) == (4, 2, 1, 1)
-    assert data["programs"][0]["total"] == 4 and data["daily"][-3] == 4
+    assert data["programs"][0]["total"] == 4
+    by_day = {row["date"]: row["count"] for row in data["daily"]}
+    assert by_day[str(timezone.localdate(now - timedelta(days=2)))] == 4
     row = next(r for r in data["registrars"] if r["name"] == registrar.full_name_ar)
     assert row["applications"] == 3 and row["departments"] == ["IT"]
     assert api(users[Role.REGISTRAR]).get("/api/v1/reports/admissions").status_code == 403
+
+
+def test_the_daily_chart_follows_the_chosen_cycle(db, it_program, term):
+    """Design review B8: a fixed «last 10 days» drew zeros for a cycle that was open earlier."""
+    from django.utils import timezone
+
+    from admissions.models import AdmissionCycle, Application, ProgramIntake
+    from contacts.models import Contact
+    from reports.metrics import admissions_report
+
+    now = timezone.now()
+
+    def cycle(name, opens_days_ago, closes_in_days):
+        return AdmissionCycle.objects.create(
+            academic_year=term.academic_year,
+            name=name,
+            opens_at=now - timedelta(days=opens_days_ago),
+            closes_at=now + timedelta(days=closes_in_days),
+        )
+
+    def apply(for_cycle, days_ago, n=1):
+        intake = ProgramIntake.objects.get_or_create(cycle=for_cycle, program=it_program)[0]
+        for i in range(n):
+            Application.objects.create(
+                reference_no=f"APP-{for_cycle.pk}-{days_ago}-{i}",
+                contact=Contact.objects.create(
+                    name="م", email=f"{for_cycle.pk}{days_ago}{i}@x.test"
+                ),
+                intake=intake,
+                full_name="م",
+                status="submitted",
+                submitted_at=now - timedelta(days=days_ago),
+            )
+
+    # Opened 5 days ago, still open: since it opened (6 days, today included).
+    recent = cycle("جارية", 5, 20)
+    apply(recent, 1, 2)
+    report = admissions_report(recent, now=now)
+    assert report["daily_scope"] == "since_open" and len(report["daily"]) == 6
+    assert report["daily"][0]["date"] == str(timezone.localdate(now - timedelta(days=5)))
+    assert sum(day["count"] for day in report["daily"]) == 2
+
+    # Opened 100 days ago: the last 30 days of it.
+    long = cycle("طويلة", 100, 20)
+    apply(long, 40)
+    report = admissions_report(long, now=now)
+    assert report["daily_scope"] == "last_30" and len(report["daily"]) == 30
+    assert sum(day["count"] for day in report["daily"]) == 0  # all earlier than the window...
+    assert report["total"] == 1 and report["last_submitted"] is not None  # ...but they exist
+
+    # Over for 60 days: the window ends the day it closed, not today.
+    over = cycle("منتهية", 90, -60)
+    apply(over, 70, 3)
+    report = admissions_report(over, now=now)
+    assert report["daily"][-1]["date"] == str(timezone.localdate(over.closes_at))
+    assert sum(day["count"] for day in report["daily"]) == 3
+
+    # Not started yet: one day, no applications, nothing to show.
+    soon = cycle("قادمة", -3, 30)
+    report = admissions_report(soon, now=now)
+    assert len(report["daily"]) == 1 and report["total"] == 0 and report["last_submitted"] is None
 
 
 def test_affairs_report_has_no_names(api, users, make_student, it_program, term):

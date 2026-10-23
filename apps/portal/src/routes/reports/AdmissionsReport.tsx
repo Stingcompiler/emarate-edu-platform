@@ -160,17 +160,41 @@ export function AdmissionsReport() {
             </div>
             <aside className="mt-6 space-y-4 lg:mt-0">
               <Card className="p-4">
-                <p className="mb-3 text-sm font-semibold text-text">
-                  الطلبات اليومية · آخر 10 أيام
-                </p>
-                <Bars
-                  values={r.daily}
-                  labels={r.daily.map((_, i) => {
-                    const d = new Date();
-                    d.setDate(d.getDate() - (9 - i));
-                    return num(d.getDate());
-                  })}
-                />
+                {(() => {
+                  // The chart's title is its conclusion, and an empty window says so honestly
+                  // (design review B8): the period follows the chosen cycle.
+                  const inWindow = r.daily.reduce((n, d) => n + d.count, 0);
+                  const lastDay = r.last_submitted
+                    ? new Date(r.last_submitted).toLocaleDateString("ar-u-nu-latn", {
+                        day: "numeric",
+                        month: "long",
+                      })
+                    : null;
+                  const period =
+                    r.daily_scope === "since_open" ? "منذ فتح الدورة" : "في آخر 30 يومًا";
+                  const title = inWindow
+                    ? `${count(inWindow, N.application)} ${period}${lastDay ? `، آخرها ${lastDay}` : ""}`
+                    : r.total
+                      ? `لا طلبات ${period}`
+                      : "لا طلبات في هذه الدورة بعد";
+                  return (
+                    <>
+                      <p className="mb-3 text-sm font-semibold text-text">{title}</p>
+                      {inWindow > 0 ? (
+                        <Bars
+                          values={r.daily.map((d) => d.count)}
+                          labels={r.daily.map((d) => num(new Date(`${d.date}T12:00:00`).getDate()))}
+                        />
+                      ) : (
+                        <p className="text-sm text-text-muted">
+                          {r.total && lastDay
+                            ? `آخر طلب وصل في ${lastDay}. اختر دورة أخرى أو أعد النظر لاحقًا.`
+                            : "ستظهر الطلبات هنا حين تصل."}
+                        </p>
+                      )}
+                    </>
+                  );
+                })()}
               </Card>
               <PastReports kind="admissions" />
             </aside>

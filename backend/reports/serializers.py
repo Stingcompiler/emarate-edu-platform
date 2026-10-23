@@ -183,6 +183,11 @@ class PreviousCycleSerializer(S.Serializer):
     total = S.IntegerField()
 
 
+class DailyCountSerializer(S.Serializer):
+    date = S.DateField()
+    count = S.IntegerField()
+
+
 class AdmissionsReportSerializer(S.Serializer):
     cycle = CycleRefSerializer()
     total = S.IntegerField()
@@ -195,7 +200,9 @@ class AdmissionsReportSerializer(S.Serializer):
     by_status = S.DictField(child=S.IntegerField())
     programs = ProgramStatsSerializer(many=True)
     registrars = RegistrarStatsSerializer(many=True)
-    daily = S.ListField(child=S.IntegerField())
+    daily = DailyCountSerializer(many=True)
+    daily_scope = S.ChoiceField(choices=["since_open", "last_30"])
+    last_submitted = S.DateTimeField(allow_null=True)
     previous = PreviousCycleSerializer(allow_null=True)
 
 
