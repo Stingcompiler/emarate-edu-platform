@@ -137,7 +137,7 @@ export function StudentRecords() {
           <Link
             key={r.public_id}
             to={`/students/${r.public_id}`}
-            className="flex items-center gap-3 px-4 py-3 hover:bg-surface-alt"
+            className="flex items-center gap-[var(--d-gap)] px-[var(--d-pad)] py-[var(--d-row)] hover:bg-surface-alt"
           >
             <Avatar text={initials(r.full_name_ar)} size="md" tone="primary" />
             <span className="min-w-0 flex-1">

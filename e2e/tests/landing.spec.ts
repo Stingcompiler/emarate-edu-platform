@@ -368,3 +368,32 @@ test("motion never leaves content hidden, and «reduce motion» turns it off", a
   );
   expect(anim).toBe(false);
 });
+
+test("on a phone every control in the site header and menu is at least 44 px (design review B9)", async ({
+  page,
+  isMobile,
+}) => {
+  test.skip(!isMobile, "the touch targets are a phone matter");
+  await page.goto(`${SITE}/ar/`, { waitUntil: "domcontentloaded" });
+  // What Playwright itself would tap: visible, with a box, in the header (the open menu included).
+  const small = async () => {
+    const found: string[] = [];
+    for (const el of await page.locator("header a, header summary, header button").all()) {
+      if (!(await el.isVisible())) continue;
+      const box = await el.boundingBox();
+      if (box && (box.height < 43.5 || box.width < 43.5)) {
+        const name = (
+          (await el.textContent()) ||
+          (await el.getAttribute("aria-label")) ||
+          ""
+        ).trim();
+        found.push(`${name.slice(0, 30)} ${Math.round(box.width)}x${Math.round(box.height)}`);
+      }
+    }
+    return found;
+  };
+  expect(await small(), "header controls under 44 px").toEqual([]);
+  await page.getByLabel("القائمة").click();
+  await page.waitForTimeout(400);
+  expect(await small(), "menu controls under 44 px").toEqual([]);
+});

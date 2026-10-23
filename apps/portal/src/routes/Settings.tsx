@@ -19,6 +19,7 @@ import {
 import { api, ok } from "../lib/api";
 import { hasRole, useMe, useSignOut } from "../lib/auth";
 import { disablePush, enablePush, pushState, type PushState } from "../lib/push";
+import { type Density, useDensity } from "../lib/density";
 import { type Theme, useTheme } from "../lib/theme";
 
 type Preference = Schemas["Preference"];
@@ -76,6 +77,11 @@ export function Settings() {
             <Card className="flex min-h-14 items-center justify-between gap-3 px-4 py-2">
               <span className="text-sm font-medium text-text">المظهر</span>
               <ThemeSwitch />
+            </Card>
+            {/* Only on large screens, where the student and results lists can be tighter. */}
+            <Card className="mt-3 hidden min-h-14 items-center justify-between gap-3 px-4 py-2 lg:flex">
+              <span className="text-sm font-medium text-text">كثافة القوائم</span>
+              <DensitySwitch />
             </Card>
 
             <SectionLabel>الحساب</SectionLabel>
@@ -198,6 +204,15 @@ function Dot({ on, label, onClick }: { on: boolean; label: string; onClick: () =
       />
     </button>
   );
+}
+
+function DensitySwitch() {
+  const { density, set } = useDensity();
+  const options: { key: Density; label: string }[] = [
+    { key: "comfortable", label: "مريحة" },
+    { key: "compact", label: "مدمجة" },
+  ];
+  return <Segmented label="كثافة القوائم" options={options} value={density} onChange={set} />;
 }
 
 function ThemeSwitch() {

@@ -5,6 +5,7 @@
  */
 
 :root {
+  color-scheme: light; /* native controls, scrollbars and form fields follow the theme */
   --bg: var(--color-n0);
   --bg-subtle: var(--color-n50);
   --surface: var(--color-n0);
@@ -37,7 +38,13 @@
 }
 
 /* Dark mode (§2.6): explicit choice, or the system preference by default. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+  }
+}
 :root[data-theme="dark"] {
+  color-scheme: dark;
   --bg: #0c111c;
   --bg-subtle: #111727;
   --surface: #151e31;
@@ -112,5 +119,20 @@
     --color-pending: #576075;
     --color-pending-soft: #1c2438;
     --color-pending-strong: #c0c3cb;
+  }
+}
+
+/* List density (design review B9): comfortable is the default everywhere; «compact» is a choice
+   in Settings that only ever applies on large screens, for the student and results lists. */
+:root {
+  --d-row: 0.75rem; /* a list row's vertical padding */
+  --d-pad: 1rem; /* a row's horizontal padding */
+  --d-gap: 0.75rem; /* the gap between a row's parts */
+}
+@media (min-width: 1024px) {
+  :root[data-density="compact"] {
+    --d-row: 0.375rem;
+    --d-pad: 0.75rem;
+    --d-gap: 0.5rem;
   }
 }

@@ -49,6 +49,17 @@ export const initials = (name: string) =>
     .map((w) => w.replace(/^ال(?=.)/, "")[0])
     .join(" ");
 
+/**
+ * The title of an 8-week upload chart, as its conclusion rather than the name of the measure
+ * (design reference §16.3): «12 محاضرة في 8 أسابيع، 3 منها هذا الأسبوع».
+ */
+export function weeklyTitle(weeks: number[]): string {
+  const total = weeks.reduce((n, v) => n + v, 0);
+  if (!total) return "لا محاضرات مرفوعة في آخر 8 أسابيع";
+  const latest = weeks[weeks.length - 1] ?? 0;
+  return `${num(total)} محاضرة في آخر ${num(weeks.length)} أسابيع${latest ? `، ${num(latest)} منها هذا الأسبوع` : "، لا شيء هذا الأسبوع"}`;
+}
+
 /** A headline number with a caption and an optional comparison line. */
 export function Kpi({
   value,
