@@ -77,6 +77,11 @@
   --color-info: #2d64a7;
   --color-info-soft: #e5ecf4;
   --color-info-strong: #1f4674;
+  /* "Waiting to be sent" (offline, a draft kept on the device): neutral grey, not a warning,
+     because nothing is wrong, only not yet delivered (design review B1). */
+  --color-pending: #8f95a3;
+  --color-pending-soft: #eef0f3;
+  --color-pending-strong: #3b4459;
 
   /* WhatsApp buttons on the public site: a deep green of WhatsApp's own family, so the
      white mark and label keep 5.4:1 (the bright #25D366 gives 2:1). Same in dark mode. */

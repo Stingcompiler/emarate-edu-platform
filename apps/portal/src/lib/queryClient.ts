@@ -48,7 +48,13 @@ export const queryClient: QueryClient = new QueryClient({
     onError: (error) => statusOf(error) === 401 && onError(error, true),
   }),
   defaultOptions: {
+    // Offline, a read is tried once and keeps what the cache has; a write fails at once with a
+    // network error (the page says what is kept and sent later) instead of hanging «paused»
+    // with a spinner. TanStack's default pauses both until the connection returns (design
+    // review B1).
+    mutations: { networkMode: "always" },
     queries: {
+      networkMode: "offlineFirst",
       // 4xx won't change on a retry (not allowed, not found); a server hiccup might.
       retry: (count, error) => count < 1 && !(statusOf(error) >= 400 && statusOf(error) < 500),
       // Focus refetches at most every 30 s, so switching windows doesn't re-request every page.

@@ -12,10 +12,16 @@ test("a visitor verifies the email, fills the application, uploads documents and
   await page.goto("/apply?program=BIT");
 
   // 1. Verify the email with a one-time code.
-  await page.getByLabel("الاسم الكامل").fill("سلمى عثمان الأمين");
+  // The first screen asks for the email alone (design review B3); a bad one is explained.
+  await expect(page.getByRole("textbox")).toHaveCount(1);
+  await page.getByLabel("البريد الإلكتروني").fill("salma@");
+  await page.getByRole("button", { name: "إرسال رمز التحقق" }).click();
+  await expect(page.getByText("صيغة البريد غير صحيحة")).toBeVisible();
   await page.getByLabel("البريد الإلكتروني").fill(email);
   await page.getByRole("button", { name: "إرسال رمز التحقق" }).click();
+  // The name is asked beside the code, once it has arrived.
   await page.getByLabel("رمز التحقق").fill(await lastCode(email));
+  await page.getByLabel(/الاسم الكامل/).fill("سلمى عثمان الأمين");
   await page.getByRole("button", { name: "متابعة", exact: true }).click();
 
   // 2. Choose a programme.
@@ -34,7 +40,7 @@ test("a visitor verifies the email, fills the application, uploads documents and
   await page.getByLabel("النسبة المئوية *").fill("82.5");
   await page.getByLabel("المدرسة").fill("مدرسة الخرطوم الثانوية");
   // The draft really is saved as the page says (review 2026-10-04 UX1): it survives a reload.
-  await expect(page.getByText(/حُفظت المسودة/)).toBeVisible({ timeout: 8000 });
+  await expect(page.getByText(/محفوظة على الخادم/)).toBeVisible({ timeout: 8000 });
   await page.reload();
   await expect(page.getByLabel("المدرسة")).toHaveValue("مدرسة الخرطوم الثانوية");
   await expect(page.getByLabel("النسبة المئوية *")).toHaveValue("82.5");

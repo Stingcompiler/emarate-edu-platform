@@ -26,6 +26,8 @@ import {
   visitorApi,
 } from "../../lib/visitor";
 import { VerifyEmail } from "./VerifyEmail";
+import { isNetworkError, useOnline } from "../../lib/online";
+import { markSynced, readDraft, writeDraft } from "../../lib/localDraft";
 import { VisitorLayout } from "./VisitorLayout";
 import { fmtDate } from "../../lib/format";
 
@@ -345,9 +347,10 @@ function FieldInput({
   );
 }
 
+type DraftValue = { fullName: string; phone: string; answers: Record<string, unknown> };
 const draftClock = new Intl.DateTimeFormat("ar-u-nu-latn", { hour: "numeric", minute: "2-digit" });
 
-function FormStep({
+export function FormStep({
   app,
   onNext,
   onChangeProgram,
@@ -370,9 +373,16 @@ function FormStep({
     },
     onSuccess: onChangeProgram,
   });
-  const [fullName, setFullName] = useState(app.full_name);
-  const [phone, setPhone] = useState(app.phone_e164);
-  const [answers, setAnswers] = useState<Record<string, unknown>>(app.answers ?? {});
+  // What was typed here and not yet confirmed by the server survives a lost connection, a
+  // closed tab and a reload: it is kept on this device first (design review B1).
+  const online = useOnline();
+  const kept = useRef(readDraft<DraftValue>(app.public_id));
+  const restored = kept.current?.pending ? kept.current.value : null;
+  const [fullName, setFullName] = useState(restored?.fullName ?? app.full_name);
+  const [phone, setPhone] = useState(restored?.phone ?? app.phone_e164);
+  const [answers, setAnswers] = useState<Record<string, unknown>>(
+    restored?.answers ?? app.answers ?? {},
+  );
   const fields = fieldsOf(app.form?.schema).filter((f) => f.type !== "file");
   const visible = (f: FormField) => !f.show_if || answers[f.show_if.key] === f.show_if.equals;
   const patch = async () => {
@@ -386,25 +396,38 @@ function FormStep({
   // The page promises «the draft is saved automatically» (review 2026-10-04 UX1): a change is
   // saved 1.5 s after the last keystroke, the state is shown, and leaving with unsaved changes
   // asks first. The server checks completeness only at submission.
-  const dirty = useRef(false);
-  const [draft, setDraft] = useState<"saved" | "saving" | "error" | null>(null);
+  const dirty = useRef(!!restored);
+  const [draft, setDraft] = useState<"saved" | "saving" | "device" | "error" | null>(
+    restored ? "device" : null,
+  );
   const [draftAt, setDraftAt] = useState<Date | null>(null);
   const autosave = useMutation({
     mutationFn: patch,
     onMutate: () => setDraft("saving"),
     onSuccess: () => {
       dirty.current = false;
+      markSynced(app.public_id);
       setDraft("saved");
       setDraftAt(new Date());
     },
-    onError: () => setDraft("error"),
+    // No answer from the server: the draft stays on this device and is sent when it can be;
+    // a refusal (anything else) is a real error.
+    onError: (error) => setDraft(isNetworkError(error) ? "device" : "error"),
   });
   const { mutate: saveDraft } = autosave;
+  // Every change is written to the device at once, then sent to the server a moment later (or
+  // when the connection comes back).
   useEffect(() => {
-    if (!dirty.current || !fullName.trim()) return;
+    if (!dirty.current) return;
+    writeDraft<DraftValue>(app.public_id, { fullName, phone, answers }, true);
+    if (!online) {
+      setDraft("device");
+      return;
+    }
+    if (!fullName.trim()) return;
     const timer = window.setTimeout(() => saveDraft(), 1500);
     return () => window.clearTimeout(timer);
-  }, [fullName, phone, answers, saveDraft]);
+  }, [app.public_id, fullName, phone, answers, online, saveDraft]);
   useEffect(() => {
     const warn = (event: BeforeUnloadEvent) => {
       if (dirty.current) event.preventDefault();
@@ -469,20 +492,35 @@ function FormStep({
           ))}
         </Card>
       )}
-      <p className="text-xs text-text-muted" role="status" aria-live="polite">
+      <p
+        className={`text-xs ${
+          draft === "device"
+            ? "inline-block rounded-md border border-dashed border-pending bg-pending-soft px-2.5 py-1 text-pending-strong"
+            : "text-text-muted"
+        }`}
+        role="status"
+        aria-live="polite"
+      >
         {draft === "saving"
           ? "جارٍ حفظ المسودة…"
-          : draft === "error"
-            ? "تعذّر حفظ المسودة الآن — تحقّق من الاتصال؛ ما كتبته باقٍ في هذه الصفحة."
-            : draft === "saved" && draftAt
-              ? `حُفظت المسودة ${draftClock.format(draftAt)}`
-              : "تُحفظ المسودة تلقائيًا أثناء الكتابة."}
+          : draft === "device"
+            ? "محفوظة على الجهاز · بانتظار الإرسال"
+            : draft === "error"
+              ? "تعذّر حفظ المسودة على الخادم — راجع الحقول؛ ما كتبته باقٍ على هذا الجهاز."
+              : draft === "saved" && draftAt
+                ? `محفوظة على الخادم ${draftClock.format(draftAt)}`
+                : "تُحفظ المسودة تلقائيًا أثناء الكتابة."}
       </p>
       {save.isError && <Notice>{problemMessage(save.error)}</Notice>}
       <Button
         className="w-full"
         onClick={() => save.mutate()}
-        disabled={!fullName.trim() || save.isPending}
+        disabled={!fullName.trim() || save.isPending || !online}
+        why={
+          !online
+            ? "يحتاج اتصالًا بالإنترنت: يُحفظ ما كتبته على جهازك ويكتمل عند عودة الاتصال"
+            : "أدخل اسمك الكامل للمتابعة"
+        }
       >
         التالي: المستندات
       </Button>
@@ -519,6 +557,7 @@ function DocumentsStep({
     },
     onSuccess: onChanged,
   });
+  const online = useOnline();
   const have = new Map(app.documents.map((d) => [d.doc_type, d]));
   const missing = needed.filter((n) => n.required && !have.has(n.key)).length;
   return (
@@ -542,11 +581,17 @@ function DocumentsStep({
                     : "لم يُرفع بعد"}
                 </span>
               </span>
-              <label className="inline-flex min-h-10 cursor-pointer items-center gap-1.5 rounded-lg border border-border px-3 text-sm text-primary">
+              <label
+                className={`inline-flex min-h-10 items-center gap-1.5 rounded-lg border border-border px-3 text-sm ${
+                  online ? "cursor-pointer text-primary" : "cursor-not-allowed text-text-muted"
+                }`}
+              >
                 <FileUp size={16} aria-hidden /> {doc ? "استبدال" : "رفع"}
                 <input
                   type="file"
                   accept=".pdf,.jpg,.jpeg,.png"
+                  // ui-allow: the offline note under the list says why uploads are off
+                  disabled={!online}
                   className="sr-only"
                   onChange={(e) =>
                     e.target.files?.[0] && upload.mutate({ key: n.key, file: e.target.files[0] })
@@ -562,6 +607,11 @@ function DocumentsStep({
           </p>
         )}
       </Card>
+      {!online && (
+        <p className="text-xs text-text-muted">
+          رفع المستندات يحتاج اتصالًا بالإنترنت، وبياناتك محفوظة على جهازك حتى يعود.
+        </p>
+      )}
       {upload.isPending && <Notice tone="info">جارٍ الرفع…</Notice>}
       {upload.isError && <Notice>{problemMessage(upload.error)}</Notice>}
       <div className="flex gap-2">
@@ -586,6 +636,7 @@ function ReviewStep({
   onSubmitted: () => void;
 }) {
   const fields = fieldsOf(app.form?.schema).filter((f) => f.type !== "file" && f.type !== "note");
+  const online = useOnline();
   const [key] = useState(() => crypto.randomUUID());
   const submit = useMutation({
     mutationFn: async () => {
@@ -640,7 +691,12 @@ function ReviewStep({
         <Button variant="secondary" onClick={onBack}>
           تعديل
         </Button>
-        <Button className="flex-1" onClick={() => submit.mutate()} disabled={submit.isPending}>
+        <Button
+          className="flex-1"
+          onClick={() => submit.mutate()}
+          disabled={submit.isPending || !online}
+          why="إرسال الطلب يحتاج اتصالًا بالإنترنت"
+        >
           إرسال الطلب
         </Button>
       </div>

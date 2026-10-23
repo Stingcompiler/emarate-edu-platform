@@ -21,6 +21,7 @@ import {
   type VisitorSession,
   visitorApi,
 } from "../../lib/visitor";
+import { QueuedReply } from "../../components/QueuedReply";
 import { VerifyEmail } from "./VerifyEmail";
 import { VisitorLayout } from "./VisitorLayout";
 
@@ -112,7 +113,6 @@ export function Track() {
 
 function ApplicationCard({ app }: { app: App }) {
   const client = useQueryClient();
-  const [reply, setReply] = useState("");
   const refresh = () => client.invalidateQueries({ queryKey: ["visitor", "me"] });
   const upload = useMutation({
     mutationFn: async ({ key, file }: { key: string; file: File }) => {
@@ -138,19 +138,13 @@ function ApplicationCard({ app }: { app: App }) {
     },
     onSuccess: refresh,
   });
-  const send = useMutation({
-    mutationFn: async () => {
-      const { response, error } = await visitorApi.POST(
-        "/api/visitor/applications/{public_id}/messages",
-        { params: { path: { public_id: app.public_id } }, body: { body: reply } },
-      );
-      if (!response.ok) throw error;
-    },
-    onSuccess: () => {
-      setReply("");
-      void refresh();
-    },
-  });
+  const sendReply = async (body: string) => {
+    const { response, error } = await visitorApi.POST(
+      "/api/visitor/applications/{public_id}/messages",
+      { params: { path: { public_id: app.public_id } }, body: { body } },
+    );
+    if (!response.ok) throw error;
+  };
   const stage = STAGES.indexOf(
     app.status === "waitlisted" || app.status === "accepted" || app.status === "rejected"
       ? "accepted"
@@ -235,26 +229,16 @@ function ApplicationCard({ app }: { app: App }) {
         </p>
       )}
       {!["withdrawn", "expired", "rejected", "activated"].includes(app.status) && (
-        <div className="mt-3 flex gap-2">
-          <input
-            value={reply}
-            onChange={(e) => setReply(e.target.value)}
-            placeholder="الرد على المسجل"
-            aria-label="الرد على المسجل"
-            className="min-h-10 flex-1 rounded-lg border border-border bg-surface px-3 text-sm"
-          />
-          <Button
-            variant="secondary"
-            onClick={() => send.mutate()}
-            disabled={!reply.trim() || send.isPending}
-          >
-            إرسال
-          </Button>
-        </div>
+        <QueuedReply
+          storageKey={`queue:reply:${app.public_id}`}
+          send={sendReply}
+          onSent={() => void refresh()}
+          label="الرد على المسجل"
+        />
       )}
-      {(upload.isError || resubmit.isError || send.isError) && (
+      {(upload.isError || resubmit.isError) && (
         <div className="mt-2">
-          <Notice>{problemMessage(upload.error ?? resubmit.error ?? send.error)}</Notice>
+          <Notice>{problemMessage(upload.error ?? resubmit.error)}</Notice>
         </div>
       )}
     </Card>
@@ -263,20 +247,13 @@ function ApplicationCard({ app }: { app: App }) {
 
 function InquiryCard({ inquiry: i }: { inquiry: Inq }) {
   const client = useQueryClient();
-  const [reply, setReply] = useState("");
-  const send = useMutation({
-    mutationFn: async () => {
-      const { response, error } = await visitorApi.POST(
-        "/api/visitor/inquiries/{public_id}/messages",
-        { params: { path: { public_id: i.public_id } }, body: { body: reply } },
-      );
-      if (!response.ok) throw error;
-    },
-    onSuccess: () => {
-      setReply("");
-      void client.invalidateQueries({ queryKey: ["visitor", "me"] });
-    },
-  });
+  const sendReply = async (body: string) => {
+    const { response, error } = await visitorApi.POST(
+      "/api/visitor/inquiries/{public_id}/messages",
+      { params: { path: { public_id: i.public_id } }, body: { body } },
+    );
+    if (!response.ok) throw error;
+  };
   return (
     <Card className="mt-3 p-4">
       <div className="flex items-start justify-between gap-3">
@@ -298,22 +275,12 @@ function InquiryCard({ inquiry: i }: { inquiry: Inq }) {
         </p>
       ))}
       {i.status !== "closed" && (
-        <div className="mt-3 flex gap-2">
-          <input
-            value={reply}
-            onChange={(e) => setReply(e.target.value)}
-            placeholder="ردك"
-            aria-label="ردك"
-            className="min-h-10 flex-1 rounded-lg border border-border bg-surface px-3 text-sm"
-          />
-          <Button
-            variant="secondary"
-            onClick={() => send.mutate()}
-            disabled={!reply.trim() || send.isPending}
-          >
-            إرسال
-          </Button>
-        </div>
+        <QueuedReply
+          storageKey={`queue:reply:${i.public_id}`}
+          send={sendReply}
+          onSent={() => void client.invalidateQueries({ queryKey: ["visitor", "me"] })}
+          label="ردك"
+        />
       )}
     </Card>
   );
