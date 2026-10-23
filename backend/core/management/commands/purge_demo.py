@@ -37,6 +37,13 @@ from django.utils import timezone
 
 DEMO_DOMAIN = "demo.ecst.test"
 EXAMPLE = "(مثال)"
+# What seed_demo writes into the site settings (core/management/commands/seed_demo.py).
+DEMO_CONTACT = {
+    "email": "info@demo.ecst.test",
+    "phone": "+249 000 000 000",
+    "address": "عنوان تجريبي — الخرطوم، السودان",
+    "whatsapp_e164": "+249000000000",
+}
 
 # Records: everything made before the cut-off.
 RECORDS = [
@@ -173,6 +180,18 @@ class Command(BaseCommand):
                 ):
                     setattr(settings_, field, "")
                     changed.append(field)
+            # The contact details seed_demo writes (exactly, never a real one that merely looks like
+            # them): fake channels must not outlive the demo (design review B5).
+            for field, fake in DEMO_CONTACT.items():
+                if (getattr(settings_, field) or "").strip() == fake:
+                    setattr(settings_, field, "")
+                    changed.append(field)
+            if (settings_.office_hours_ar or "").startswith(EXAMPLE):
+                settings_.office_hours_ar = ""
+                changed.append("office_hours_ar")
+            if (settings_.office_hours_en or "").startswith("(Example)"):
+                settings_.office_hours_en = ""
+                changed.append("office_hours_en")
             figures = [
                 f for f in (settings_.figures or []) if EXAMPLE not in str(f.get("label_ar", ""))
             ]

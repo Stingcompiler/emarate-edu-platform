@@ -20,6 +20,28 @@ from django.utils import timezone
 
 QUIET_SECONDS = 3600
 
+# What each unit does, in words an administrator reads (the unit names stay in the e-mail).
+UNIT_LABELS = {
+    "ecst-backup": "النسخ الاحتياطي اليومي",
+    "ecst-site-build": "بناء الموقع العام",
+    "ecst-autodeploy": "النشر التلقائي",
+    "ecst-disk-watch": "مساحة القرص على الخادم (قاربت الامتلاء)",
+    "ecst-docker-cache-prune": "تنظيف ذاكرة Docker الأسبوعي",
+    "ecst-health": "فحص صحة المنصة",
+}
+
+
+def unit_label(unit: str) -> str:
+    name = unit.removesuffix(".service")
+    return UNIT_LABELS.get(name, f"«{unit}»")
+
+
+def detail_ar(detail: str) -> str:
+    """The one line the caller saw, in Arabic where it is a known phrase (systemd's own)."""
+    if detail.startswith("systemd reported"):
+        return "أبلغ النظام أن العملية فشلت."
+    return detail
+
 
 class Command(BaseCommand):
     help = "Email the system admins (and OPS_ALERT_EMAIL) that a service failed."
@@ -46,15 +68,17 @@ class Command(BaseCommand):
             recipients.append(settings.OPS_ALERT_EMAIL)
         when = timezone.localtime().strftime("%Y-%m-%d %H:%M")
         host = socket.gethostname()
-        title = f"تنبيه تشغيل: فشل {unit}"
-        body = (
-            f"فشل {unit} على الخادم {host} في {when}.\n{detail}\n\n"
-            f"راجع السجل: journalctl -u {unit} -n 50"
-        ).strip()
+        label = unit_label(unit)
+        title = f"تنبيه تشغيل: تعثّر {label}"
+        body = f"{label} لم يكتمل على الخادم في {when}. {detail_ar(detail)}".strip()
+        # The unit's own name goes to the e-mail only, for whoever has to look at the server.
+        email_body = (
+            f"{body}\n\nالخادم: {host}\nالوحدة: {unit}\nالتفاصيل في دليل التشغيل (القسم 9)."
+        )
         sent = 0
         if recipients:
-            sent = send_mail(title, body, None, recipients, fail_silently=False)
+            sent = send_mail(title, email_body, None, recipients, fail_silently=False)
         if admins:
-            notify(admins, category=Category.COLLEGE, title=title, body=body, channels=["inapp"])
+            notify(admins, category=Category.OPS, title=title, body=body, channels=["inapp"])
         stamp.touch()
         self.stdout.write(f"alert for {unit}: {sent} email(s) to {len(recipients)} recipient(s)")

@@ -48,9 +48,13 @@ class InboxViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     def get_queryset(self):
         if getattr(self, "swagger_fake_view", False):
             return NotificationRecipient.objects.none()
-        return NotificationRecipient.objects.filter(user=self.request.user).select_related(
+        rows = NotificationRecipient.objects.filter(user=self.request.user).select_related(
             "notification__sender"
         )
+        # Platform alerts are for the people who run it (design review B5).
+        if not rbac.has_role(self.request.user, rbac.Role.SYSTEM_ADMIN):
+            rows = rows.exclude(notification__category=Category.OPS)
+        return rows
 
     @extend_schema(request=None, responses=InboxItemSerializer)
     @action(detail=True, methods=["post"])
@@ -128,6 +132,8 @@ class PreferencesView(APIView):
         saved = {p.category: p for p in NotificationPreference.objects.filter(user=user)}
         rows = []
         for category in Category.values:
+            if category == Category.OPS and not rbac.has_role(user, rbac.Role.SYSTEM_ADMIN):
+                continue
             pref = saved.get(category) or services._default(category)
             rows.append(
                 {"category": category, "inapp": pref.inapp, "push": pref.push, "email": pref.email}

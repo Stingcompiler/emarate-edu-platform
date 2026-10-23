@@ -70,3 +70,28 @@ def test_seed_is_complete_and_idempotent(db, settings, monkeypatch):
     lectures = client.get("/api/v1/lectures").data["count"]
     assignments = client.get("/api/v1/assignments").data["count"]
     assert lectures >= 2 and assignments >= 1
+
+
+def test_seed_never_writes_over_site_settings_the_college_filled(db, settings, monkeypatch):
+    """Design review B5: production once showed a demo WhatsApp number beside the real address."""
+    from content.models import SiteSettings
+
+    settings.DEBUG = True
+    monkeypatch.setenv("DEMO_PASSWORD", PASSWORD)
+    own = SiteSettings.load()
+    own.address = "شارع الجامعة، الخرطوم"
+    own.save()
+    _seed()
+    own.refresh_from_db()
+    assert own.address == "شارع الجامعة، الخرطوم"
+    assert (own.email, own.phone, own.whatsapp_e164, own.office_hours_ar) == ("", "", "", "")
+
+
+def test_seed_fills_only_an_empty_site_settings(db, settings, monkeypatch):
+    from content.models import SiteSettings
+
+    settings.DEBUG = True
+    monkeypatch.setenv("DEMO_PASSWORD", PASSWORD)
+    _seed()
+    filled = SiteSettings.load()
+    assert filled.email == "info@demo.ecst.test" and filled.whatsapp_e164 == "+249000000000"
