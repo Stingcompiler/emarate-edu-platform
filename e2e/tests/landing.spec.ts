@@ -126,6 +126,8 @@ test("the home picture and the logo are served resized, in modern formats (desig
     expect(logo.headers()["content-type"]).toBe("image/webp");
     expect((await logo.body()).length).toBeLessThan(15 * 1024);
   }
+});
+
 test("the public site has one filled action, in the accent colour, and no filled blue button (design review B4)", async ({
   page,
 }) => {
