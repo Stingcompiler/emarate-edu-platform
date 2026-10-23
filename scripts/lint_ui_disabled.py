@@ -95,13 +95,17 @@ def main() -> int:
     for path, items in found.items():
         if len(items) > allowed.get(path, 0):
             if not failed:
-                print("✘ a button disabled by what is not filled in, without a reason (give it why=\"…\")")
+                print(
+                    "✘ a button disabled by what is not filled in, without a reason "
+                    '(give it why="…")'
+                )
             failed = True
             for number, text in items:
                 print(f"    {path}:{number}:{text[:150]}")
     for path, count in allowed.items():
         if len(found.get(path, [])) < count:
-            print(f"note: {path} is below its baseline ({len(found.get(path, []))} < {count}): lower it")
+            now = len(found.get(path, []))
+            print(f"note: {path} is below its baseline ({now} < {count}): lower it")
     return 1 if failed else 0
 
 
