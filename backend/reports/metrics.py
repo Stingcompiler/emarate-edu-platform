@@ -490,6 +490,25 @@ def department_report(term: Term, dept_ids: list[int], now=None) -> dict:
 # ─── Admissions ───────────────────────────────────────────────────────────
 
 
+def _daily_submissions(apps, cycle, now) -> tuple[list[dict], str]:
+    """Applications per day inside the chosen cycle (design review B8).
+
+    The window follows the cycle: from the day it opened (or the last 30 days of it, whichever is
+    shorter) to today, or to the day it closed when it is over, so a past cycle is not drawn as
+    ten empty days. The second value says which: «since_open» or «last_30».
+    """
+    opened = timezone.localdate(cycle.opens_at)
+    end = min(timezone.localdate(now), timezone.localdate(cycle.closes_at))
+    end = max(end, opened)
+    start = max(opened, end - timedelta(days=29))
+    counts: dict = defaultdict(int)
+    for submitted in apps.filter(submitted_at__isnull=False).values_list("submitted_at", flat=True):
+        counts[timezone.localdate(submitted)] += 1
+    days = [start + timedelta(days=i) for i in range((end - start).days + 1)]
+    daily = [{"date": day.isoformat(), "count": counts.get(day, 0)} for day in days]
+    return daily, "since_open" if start == opened else "last_30"
+
+
 def admissions_report(cycle, *, department_id: int | None = None, now=None) -> dict:
     from admissions.models import (
         AdmissionCycle,
@@ -602,14 +621,13 @@ def admissions_report(cycle, *, department_id: int | None = None, now=None) -> d
         if user_id in names
     ]
     registrars.sort(key=lambda r: (-r["applications"], r["name"]))
-    today = timezone.localdate(now)
-    daily = [0] * 10
-    for submitted in apps.filter(submitted_at__gte=now - timedelta(days=10)).values_list(
-        "submitted_at", flat=True
-    ):
-        days_ago = (today - timezone.localdate(submitted)).days
-        if 0 <= days_ago < 10:
-            daily[9 - days_ago] += 1
+    daily, daily_scope = _daily_submissions(apps, cycle, now)
+    last_submitted = (
+        apps.filter(submitted_at__isnull=False)
+        .order_by("-submitted_at")
+        .values_list("submitted_at", flat=True)
+        .first()
+    )
     earlier = (
         AdmissionCycle.objects.filter(opens_at__lt=cycle.opens_at).order_by("-opens_at").first()
     )
@@ -632,6 +650,8 @@ def admissions_report(cycle, *, department_id: int | None = None, now=None) -> d
         "programs": sorted(programs.values(), key=lambda p: -p["total"]),
         "registrars": registrars,
         "daily": daily,
+        "daily_scope": daily_scope,
+        "last_submitted": last_submitted,
         "previous": previous,
     }
 
