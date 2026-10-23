@@ -100,6 +100,53 @@ test("a plan that does not add up to the credit hours says it is partial", async
   await expect(page.getByText(/من 132 ساعة معتمدة/)).toBeVisible();
 });
 
+test("the public site has one filled action, in the accent colour, and no filled blue button (design review B4)", async ({
+  page,
+}) => {
+  const filled = async (path: string) =>
+    page.evaluate(() => {
+      const colour = (token: string) => {
+        const probe = document.createElement("i");
+        probe.style.background = `var(${token})`;
+        document.body.append(probe);
+        const value = getComputedStyle(probe).backgroundColor;
+        probe.remove();
+        return value;
+      };
+      const primary = colour("--primary");
+      const accent = colour("--accent");
+      const clear = "rgba(0, 0, 0, 0)";
+      if (primary === clear || accent === clear) throw new Error("theme colour tokens not found");
+      const paint = (el: Element) => getComputedStyle(el).backgroundColor;
+      const buttons = [...document.querySelectorAll("a, button")].filter(
+        (el) => (el as HTMLElement).offsetParent !== null,
+      );
+      const hero = document.querySelector("main section, section");
+      return {
+        blue: buttons.filter((el) => paint(el) === primary).map((el) => el.textContent?.trim()),
+        heroAccent: hero
+          ? [...hero.querySelectorAll("a")].filter((el) => paint(el) === accent).length
+          : -1,
+      };
+    });
+  for (const path of [
+    "/ar/",
+    "/en/",
+    "/ar/programs/BIT/",
+    "/ar/admissions/",
+    "/ar/contact/",
+    "/ar/missing-page/",
+  ]) {
+    await page.goto(SITE + path, { waitUntil: "domcontentloaded" });
+    const { blue } = await filled(path);
+    expect(blue, `filled blue buttons on ${path}`).toEqual([]);
+  }
+  await page.goto(`${SITE}/ar/`, { waitUntil: "domcontentloaded" });
+  // The hero: exactly one filled button, «قدّم الآن» (the demo has open intakes).
+  expect((await filled("/ar/")).heroAccent).toBe(1);
+  await expect(page.getByRole("heading", { level: 1 })).toContainText("قدّم من هاتفك");
+});
+
 test("search engines get a dated sitemap and a site-hosted icon", async ({ request }) => {
   const sitemap = await (await request.get(`${SITE}/sitemap.xml`)).text();
   expect(sitemap).toContain("<loc>");
