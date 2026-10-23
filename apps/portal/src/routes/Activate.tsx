@@ -94,7 +94,12 @@ export function Activate() {
           ))}
         </ul>
         {error && <Notice>{error}</Notice>}
-        <Button type="submit" className="w-full" disabled={busy || !rules.every((r) => r.ok)}>
+        <Button
+          type="submit"
+          className="w-full"
+          disabled={busy || !rules.every((r) => r.ok)}
+          why="أكمل شروط كلمة المرور أعلاه لتفعيل حسابك"
+        >
           {busy ? "…" : "تفعيل والدخول"}
         </Button>
         <p className="text-center text-xs text-text-muted">

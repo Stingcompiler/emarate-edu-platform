@@ -11,6 +11,12 @@ test("the mark is found in Arabic and English, with or without inner spaces", ()
   assert.equal(hasMark("(نص تجريبي) الكلمة بنص العميد"), true);
   assert.equal(hasMark("نص تجريبي للعرض فقط — تكتب الكلية النص المعتمد لهذه الصفحة."), true);
   assert.equal(hasMark("مسودة أنشأها النظام: استبدل كل إرشاد بالنص المعتمد"), true);
+  assert.equal(hasMark("info@demo.ecst.test"), true);
+  assert.equal(hasMark("+249 000 000 000"), true);
+  assert.equal(hasMark("+249000000000"), true);
+  assert.equal(hasMark("عنوان تجريبي — الخرطوم، السودان"), true);
+  assert.equal(hasMark("+249 91 234 5678"), false); // a real number is never hidden
+  assert.equal(hasMark("info@ecst.edu.sd"), false);
   assert.equal(hasMark("مثال على ذلك"), false); // the word alone is ordinary text
   assert.equal(hasMark("مرخّصة من الوزارة"), false);
   assert.equal(hasMark(undefined), false);
@@ -49,6 +55,22 @@ test("site settings: marked texts are blanked, marked figures dropped, the sampl
   assert.equal(shown.seo.description, "");
   assert.deepEqual(shown.figures, [{ value: "40", label_ar: "برنامجًا" }]);
   assert.equal(shown.hero_image_url, null);
+});
+
+test("the demo's fake contact details are blanked, real ones stay (design review B5)", () => {
+  const fake = {
+    email: "info@demo.ecst.test",
+    phone: "+249 000 000 000",
+    whatsapp_e164: "+249000000000",
+    address: "عنوان تجريبي — الخرطوم، السودان",
+  };
+  assert.deepEqual(hideSample(fake), { email: "", phone: "", whatsapp_e164: "", address: "" });
+  const real = {
+    email: "info@ecst.edu.sd",
+    phone: "+249 91 234 5678",
+    whatsapp_e164: "+249912345678",
+  };
+  assert.deepEqual(hideSample(real), real);
 });
 
 test("a real hero picture stays", () => {

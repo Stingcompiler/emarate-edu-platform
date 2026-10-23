@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { Link } from "react-router";
 
+import { ConnectivityBar } from "../../components/ConnectivityBar";
 import { ProgressRing } from "../../components/motion";
 import { SITE_URL } from "../../lib/site";
 
@@ -42,6 +43,7 @@ export function VisitorLayout({
         </div>
       </header>
       <main className="mx-auto max-w-[800px] px-4 pb-16 pt-5">
+        <ConnectivityBar />
         {back}
         <div className="mt-2 flex items-center gap-3">
           {progress && (

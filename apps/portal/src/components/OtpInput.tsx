@@ -12,6 +12,7 @@ export function OtpInput({
   onChange,
   length = 6,
   hint,
+  error,
   ...props
 }: Omit<InputHTMLAttributes<HTMLInputElement>, "value" | "onChange" | "maxLength"> & {
   label: string;
@@ -19,9 +20,12 @@ export function OtpInput({
   onChange: (code: string) => void;
   length?: number;
   hint?: string;
+  /** What is wrong with the code, under the boxes. */
+  error?: string;
 }) {
   const [focused, setFocused] = useState(false);
   const hintId = useId();
+  const errorId = useId();
   const active = Math.min(value.length, length - 1);
   return (
     <div className="border-b border-border-soft px-4 py-3 last:border-b-0">
@@ -53,7 +57,8 @@ export function OtpInput({
           autoComplete="one-time-code"
           pattern="[0-9]*"
           aria-label={label}
-          aria-describedby={hint ? hintId : undefined}
+          aria-describedby={error ? errorId : hint ? hintId : undefined}
+          aria-invalid={error ? true : undefined}
           value={value}
           // No maxLength: the browser would cut a pasted «98 76 54» before the spaces go.
           onChange={(e) => onChange(e.target.value.replace(/\D/g, "").slice(0, length))}
@@ -71,10 +76,20 @@ export function OtpInput({
           className="absolute inset-0 h-full w-full cursor-text bg-transparent text-transparent caret-transparent outline-none selection:bg-transparent"
         />
       </div>
-      {hint && (
-        <span id={hintId} className="mt-2 block text-center text-xs text-text-muted">
-          {hint}
+      {error ? (
+        <span
+          id={errorId}
+          role="alert"
+          className="mt-2 block text-center text-xs text-danger-strong"
+        >
+          {error}
         </span>
+      ) : (
+        hint && (
+          <span id={hintId} className="mt-2 block text-center text-xs text-text-muted">
+            {hint}
+          </span>
+        )
       )}
     </div>
   );

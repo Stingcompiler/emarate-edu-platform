@@ -12,6 +12,8 @@ class Category(models.TextChoices):
     RESULTS = "results", "النتائج"
     ACCOUNT = "account", "الحساب"
     HR = "hr", "الموارد البشرية"
+    # Alerts about the platform itself (a failed backup, a full disk): for system admins only.
+    OPS = "ops", "تشغيل المنصة"
 
 
 class Channel(models.TextChoices):

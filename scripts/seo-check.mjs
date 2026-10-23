@@ -15,7 +15,7 @@ import { fileURLToPath } from "node:url";
 // The same marks the site hides from visitors (apps/landing/src/lib/sample.mjs): anything still
 // on a built page after the hiding is real content that merely looks like a sample.
 const SAMPLE =
-  /\(\s*مثال\s*\)|\(\s*example\s*\)|\(\s*نص تجريبي\s*\)|نص تجريبي للعرض فقط|مسودة أنشأها النظام/i;
+  /\(\s*مثال\s*\)|\(\s*example\s*\)|\(\s*نص تجريبي\s*\)|نص تجريبي للعرض فقط|مسودة أنشأها النظام|demo\.ecst\.test|\+?249[\s-]?0{3}[\s-]?0{3}[\s-]?0{3}|عنوان تجريبي/i;
 
 const tag = (html, pattern) => pattern.exec(html)?.[1];
 const metaContent = (html, attr, name) =>

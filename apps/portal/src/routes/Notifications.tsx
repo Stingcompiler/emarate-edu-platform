@@ -1,6 +1,6 @@
 import type { Schemas } from "@ecst/api";
 import { useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Award, BellOff, BookOpen, Briefcase, Megaphone, UserCheck } from "lucide-react";
+import { Award, BellOff, BookOpen, Briefcase, Megaphone, Server, UserCheck } from "lucide-react";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router";
 
@@ -17,11 +17,12 @@ import {
   Skeleton,
 } from "../components/ui";
 import { api } from "../lib/api";
+import { hasRole, useMe } from "../lib/auth";
 import { DAY_LABELS, type DayGroup, dayGroup, when } from "../lib/format";
 import { isBuiltPath } from "../lib/links";
 
 type Item = Schemas["InboxItem"];
-type Filter = "all" | "unread" | "course" | "college" | "results";
+type Filter = "all" | "unread" | "course" | "college" | "results" | "ops";
 
 const FILTERS: { key: Filter; label: string }[] = [
   { key: "all", label: "الكل" },
@@ -37,6 +38,8 @@ const CATEGORY = {
   results: { icon: Award, className: "bg-success-soft text-success-strong" },
   account: { icon: UserCheck, className: "bg-neutral-soft text-neutral-strong" },
   hr: { icon: Briefcase, className: "bg-warning-soft text-warning-strong" },
+  // Alerts about the platform itself: only a system admin ever receives them.
+  ops: { icon: Server, className: "bg-neutral-soft text-neutral-strong" },
 } as const;
 
 /**
@@ -45,6 +48,8 @@ const CATEGORY = {
  * (docs/06 §9).
  */
 export function Notifications() {
+  const me = useMe();
+  const isAdmin = hasRole(me.data, "system_admin");
   const [filter, setFilter] = useState<Filter>("all");
   const client = useQueryClient();
   const navigate = useNavigate();
@@ -121,14 +126,16 @@ export function Notifications() {
             role="toolbar"
             aria-label="تصفية"
           >
-            {FILTERS.map(({ key, label }) => (
-              <Chip key={key} active={filter === key} onClick={() => setFilter(key)}>
-                {label}
-                {key === "unread" && unreadCount > 0 && (
-                  <span>{unreadCount.toLocaleString("ar-u-nu-latn")}</span>
-                )}
-              </Chip>
-            ))}
+            {(isAdmin ? [...FILTERS, { key: "ops" as const, label: "تشغيل" }] : FILTERS).map(
+              ({ key, label }) => (
+                <Chip key={key} active={filter === key} onClick={() => setFilter(key)}>
+                  {label}
+                  {key === "unread" && unreadCount > 0 && (
+                    <span>{unreadCount.toLocaleString("ar-u-nu-latn")}</span>
+                  )}
+                </Chip>
+              ),
+            )}
           </div>
         </FilterBar>
 

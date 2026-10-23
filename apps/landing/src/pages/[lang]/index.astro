@@ -60,8 +60,8 @@ const next = upcoming
 const name = pick(lang, s.name_ar, s.name_en);
 const lead =
   lang === "ar"
-    ? `${count(lang, st.programs || all.length, N.program)} في ${count(lang, st.departments, N.department)} — تقديم إلكتروني بالكامل ومتابعة للطلب من هاتفك.`
-    : `${count(lang, st.programs || all.length, N.program)} in ${count(lang, st.departments, N.department)} — apply online and follow your application from your phone.`;
+    ? `تعليم تقني يبدأ من هنا: ${count(lang, st.departments, N.department)}، وتقديم إلكتروني بالكامل ومتابعة للطلب من هاتفك.`
+    : `Technical education starts here: ${count(lang, st.departments, N.department)}, a fully online application you can follow from your phone.`;
 // What search results show for the home (review: the name alone, and a 55-character
 // description, left the page's subject to guesswork): the degrees offered, and the owner's
 // own description completed with the programme and department counts when it is short.
@@ -80,6 +80,20 @@ const homeDescription =
     : ownDescription
       ? `${ownDescription.replace(/[.،]+$/, "")}. ${lead}`
       : `${name} — ${lead}`;
+// «11 برنامجًا بكالوريوس ودبلوم — قدّم من هاتفك في دقائق»: what is offered, to whom, how (design
+// review B4); the numbers and degrees come from the data. «تعليم تقني يبدأ من هنا» stays as the
+// supporting line.
+const programCount = st.programs || all.length;
+const heroLines =
+  lang === "ar"
+    ? [
+        `${count(lang, programCount, N.program)}${degrees.length ? ` ${degrees.join(" و")}` : ""}`,
+        "قدّم من هاتفك في دقائق.",
+      ]
+    : [
+        `${count(lang, programCount, N.program)}${degrees.length ? `: ${degrees.join(" and ")}` : ""}`,
+        "apply from your phone in minutes.",
+      ];
 const heroSet = (format: "avif" | "webp") =>
   HERO_WIDTHS.map((width) => `/img/hero-${width}.${format} ${width}w`).join(", ");
 const heroSizes = "(min-width: 1280px) 1152px, 100vw";
@@ -185,28 +199,43 @@ const jsonLd = {
             {lang === "ar" ? `القبول مفتوح · ${cycle}` : `${cycle} · open`}
           </p>
         )}
-        {/* The two lines rise from behind a mask — line by line, never per letter (Arabic). */}
-        <h1 class="motion-lines mt-4 font-display text-4xl font-bold leading-snug text-text lg:text-5xl">
-          {(lang === "ar"
-            ? ["تعليم تقني", "يبدأ من هنا."]
-            : ["Technical education", "starts here."]
-          ).map((line) => (
+        {/* One action, one colour (design review B4): «قدّم الآن» in the accent red, repeated in the
+            header and the closing call; exploring and tracking are plain text links. */}
+        <h1 class="motion-lines mt-4 font-display text-3xl font-bold leading-snug text-text sm:text-4xl">
+          {heroLines.map((line) => (
             <span>
               <span>{line}</span>
             </span>
           ))}
         </h1>
         <p class="mt-4 max-w-xl text-base leading-7 text-text-muted">{lead}</p>
-        <div class="mt-6 flex flex-wrap gap-3">
-          <a
-            href={href(lang, "programs/")}
-            class="rounded-lg bg-primary px-5 py-3 text-sm font-semibold text-on-primary hover:bg-primary-hover"
-          >
-            {t(lang, "explore")}
-          </a>
+        <div class="mt-6 flex flex-wrap items-center gap-x-6 gap-y-3">
+          {open.length > 0 ? (
+            <a
+              href={`${PORTAL}/apply`}
+              class="tap-44 inline-flex items-center rounded-lg bg-accent px-6 py-3 text-sm font-bold text-on-primary hover:bg-accent-hover"
+            >
+              {t(lang, "apply")} {arrow(lang)}
+            </a>
+          ) : (
+            <a
+              href={href(lang, "programs/")}
+              class="tap-44 inline-flex items-center rounded-lg border-2 border-primary px-6 py-3 text-sm font-bold text-primary hover:bg-primary-soft"
+            >
+              {t(lang, "explore")}
+            </a>
+          )}
+          {open.length > 0 && (
+            <a
+              href={href(lang, "programs/")}
+              class="tap-44 inline-flex items-center text-sm font-semibold text-primary underline-offset-4 hover:underline"
+            >
+              {t(lang, "explore")}
+            </a>
+          )}
           <a
             href={`${PORTAL}/track`}
-            class="rounded-lg border border-border bg-surface px-5 py-3 text-sm font-semibold text-text hover:bg-surface-alt"
+            class="tap-44 inline-flex items-center text-sm font-semibold text-text-muted underline-offset-4 hover:text-text hover:underline"
           >
             {t(lang, "track")}
           </a>
@@ -238,20 +267,12 @@ const jsonLd = {
               </li>
             ))}
           </ol>
-          <div class="mt-6 flex flex-wrap items-center gap-4">
-            <a
-              href={`${PORTAL}/apply`}
-              class="rounded-lg bg-accent px-5 py-3 text-sm font-bold text-on-primary hover:bg-accent-hover"
-            >
-              {t(lang, "apply")} {arrow(lang)}
-            </a>
-            <a
-              href={href(lang, "admissions/")}
-              class="tap-44 text-sm font-semibold text-white underline"
-            >
-              {lang === "ar" ? "كيف تلتحق" : "How to apply"}
-            </a>
-          </div>
+          <a
+            href={href(lang, "admissions/")}
+            class="tap-44 mt-6 inline-flex items-center text-sm font-semibold text-white underline underline-offset-4"
+          >
+            {lang === "ar" ? "كيف تلتحق" : "How to apply"} {arrow(lang)}
+          </a>
         </div>
       )}
     </div>

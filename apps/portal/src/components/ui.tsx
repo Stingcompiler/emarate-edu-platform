@@ -9,7 +9,7 @@ import type {
 } from "react";
 
 import { ChevronLeft, Eye, EyeOff } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { Link } from "react-router";
 
 import { SITE_URL, useSiteLogo } from "../lib/site";
@@ -20,10 +20,17 @@ import { CountUp } from "./motion";
 export function Button({
   variant = "primary",
   className = "",
+  why,
   ...props
 }: ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: "primary" | "secondary" | "ghost" | "danger";
   ref?: Ref<HTMLButtonElement>;
+  /**
+   * What is missing, said under the button while it is disabled («أكمل البريد لإرسال الرمز»).
+   * A button disabled by what the person has not filled in must say why (docs/ui-profile.md):
+   * `pnpm lint:ui` flags a new one that does not.
+   */
+  why?: string;
 }) {
   const styles = {
     primary: "bg-primary text-on-primary hover:bg-primary-hover disabled:opacity-60",
@@ -31,12 +38,24 @@ export function Button({
     secondary: "border border-border bg-surface text-text hover:bg-surface-alt disabled:opacity-60",
     ghost: "text-primary hover:bg-primary-soft disabled:opacity-60",
   }[variant];
-  return (
+  const reason = why && props.disabled ? why : undefined;
+  const id = useId();
+  const button = (
     <button
       type="button"
+      aria-describedby={reason ? id : undefined}
       {...props}
       className={`inline-flex min-h-11 items-center justify-center gap-2 rounded-lg px-4 text-sm font-semibold transition-colors ${styles} ${className}`}
     />
+  );
+  if (!reason) return button;
+  return (
+    <>
+      {button}
+      <span id={id} className="mt-1.5 block text-center text-xs text-text-muted">
+        {reason}
+      </span>
+    </>
   );
 }
 

@@ -89,7 +89,12 @@ export function Login() {
           </Link>
         </div>
         {error && <Notice tone={error.tone}>{error.text}</Notice>}
-        <Button type="submit" className="w-full" disabled={busy || !identifier || !password}>
+        <Button
+          type="submit"
+          className="w-full"
+          disabled={busy || !identifier || !password}
+          why="أدخل الرقم الجامعي أو البريد وكلمة المرور"
+        >
           {busy ? "جارٍ الدخول…" : "تسجيل الدخول"}
         </Button>
       </form>
