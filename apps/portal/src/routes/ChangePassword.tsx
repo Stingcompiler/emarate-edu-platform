@@ -98,6 +98,7 @@ export function ChangePassword() {
           type="submit"
           className="min-h-11 w-full"
           disabled={busy || !current || !rules.every((r) => r.ok)}
+          why="أدخل كلمتك الحالية وأكمل شروط الكلمة الجديدة"
         >
           {busy ? "…" : "حفظ كلمة المرور"}
         </Button>

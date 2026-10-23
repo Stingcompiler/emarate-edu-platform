@@ -18,6 +18,7 @@ import {
 import { api, ok } from "../../lib/api";
 import { when } from "../../lib/format";
 import { ALL, Pager, useLocalPages } from "../../components/Pager";
+import { useOfflineQueue } from "../../lib/offlineQueue";
 
 type Inquiry = Schemas["Inquiry"];
 const STATUS: Record<string, { label: string; tone: string }> = {
@@ -147,6 +148,19 @@ function InquiryDetail({ inquiry: i }: { inquiry: Inquiry }) {
     void client.invalidateQueries({ queryKey: ["inquiries"] });
   };
   const path = { params: { path: { public_id: i.public_id } } };
+  // An internal note is the staff's own: it is kept on the device and sent when the connection
+  // returns (design review B1). An email reply goes out to the visitor, so it needs the server.
+  const notes = useOfflineQueue<string>({
+    storageKey: `queue:note:${i.public_id}`,
+    send: async (text) => {
+      const { data, error } = await api.POST("/api/v1/inquiries/{public_id}/reply", {
+        ...path,
+        body: { body: text, channel: "internal" },
+      });
+      if (!data) throw error;
+      void client.invalidateQueries({ queryKey: ["inquiries"] });
+    },
+  });
   const reply = useMutation({
     mutationFn: async () => {
       const { data, error } = await api.POST("/api/v1/inquiries/{public_id}/reply", {
@@ -228,6 +242,14 @@ function InquiryDetail({ inquiry: i }: { inquiry: Inquiry }) {
           />
         ))}
       </Card>
+      {notes.pending.map((entry) => (
+        <p
+          key={entry.id}
+          className="rounded-lg border border-dashed border-pending bg-pending-soft p-3 text-sm text-pending-strong"
+        >
+          ملاحظة داخلية: «{entry.item}» · بانتظار الإرسال
+        </p>
+      ))}
       <Card className="p-3">
         <textarea
           value={body}
@@ -247,8 +269,20 @@ function InquiryDetail({ inquiry: i }: { inquiry: Inquiry }) {
         </label>
         <div className="mt-3 flex flex-wrap gap-2">
           <Button
-            onClick={() => reply.mutate()}
-            disabled={!body.trim() || reply.isPending || (!internal && !contact.email)}
+            onClick={() => {
+              if (internal) {
+                notes.enqueue(body.trim());
+                setBody("");
+              } else reply.mutate();
+            }}
+            disabled={
+              !body.trim() || reply.isPending || (!internal && (!contact.email || !notes.online))
+            }
+            why={
+              !internal && !notes.online
+                ? "الرد بالبريد يحتاج اتصالًا بالإنترنت؛ الملاحظة الداخلية تُحفظ على جهازك وتُرسل عند عودته"
+                : undefined
+            }
           >
             <Send size={16} aria-hidden className="rtl:-scale-x-100" />
             {internal ? "حفظ الملاحظة" : "رد بالبريد"}

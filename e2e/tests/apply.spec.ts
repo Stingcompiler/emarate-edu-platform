@@ -12,10 +12,16 @@ test("a visitor verifies the email, fills the application, uploads documents and
   await page.goto("/apply?program=BIT");
 
   // 1. Verify the email with a one-time code.
-  await page.getByLabel("الاسم الكامل").fill("سلمى عثمان الأمين");
+  // The first screen asks for the email alone (design review B3); a bad one is explained.
+  await expect(page.getByRole("textbox")).toHaveCount(1);
+  await page.getByLabel("البريد الإلكتروني").fill("salma@");
+  await page.getByRole("button", { name: "إرسال رمز التحقق" }).click();
+  await expect(page.getByText("صيغة البريد غير صحيحة")).toBeVisible();
   await page.getByLabel("البريد الإلكتروني").fill(email);
   await page.getByRole("button", { name: "إرسال رمز التحقق" }).click();
+  // The name is asked beside the code, once it has arrived.
   await page.getByLabel("رمز التحقق").fill(await lastCode(email));
+  await page.getByLabel(/الاسم الكامل/).fill("سلمى عثمان الأمين");
   await page.getByRole("button", { name: "متابعة", exact: true }).click();
 
   // 2. Choose a programme.

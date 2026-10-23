@@ -7,6 +7,7 @@ import { api } from "../lib/api";
 import { hasRole, useMe, useSignOut } from "../lib/auth";
 import { navFor } from "../lib/nav";
 import { AppShell, Badge } from "./AppShell";
+import { ConnectivityBar } from "./ConnectivityBar";
 import { InstallHint } from "./InstallHint";
 import { PushPrompt } from "./PushPrompt";
 import { Notice } from "./ui";
@@ -56,6 +57,7 @@ export function PortalShell(props: Props) {
       // Students and teachers benefit most from push + offline: nudge them to install on phones.
       children={
         <>
+          <ConnectivityBar />
           {/* A suspended student's courses, exams and sessions close (review C2): say why on
               every page instead of showing empty lists. */}
           {me.data?.student?.status === "suspended" && (

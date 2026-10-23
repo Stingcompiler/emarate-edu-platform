@@ -70,6 +70,9 @@
   --color-info-strong: #a9c3e3;
   --color-neutral-soft: #1f2b47;
   --color-neutral-strong: #c0c3cb;
+  --color-pending: #576075;
+  --color-pending-soft: #1c2438;
+  --color-pending-strong: #c0c3cb;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -106,5 +109,8 @@
     --color-info-strong: #a9c3e3;
     --color-neutral-soft: #1f2b47;
     --color-neutral-strong: #c0c3cb;
+    --color-pending: #576075;
+    --color-pending-soft: #1c2438;
+    --color-pending-strong: #c0c3cb;
   }
 }

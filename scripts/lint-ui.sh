@@ -42,4 +42,8 @@ scan "tinted icon circle/square (grid place-items-center rounded-* bg-*-soft)" \
 scan "gradient on buttons, headings or cards" 'bg-gradient-to|from-(primary|accent|navy)|linear-gradient\('
 scan "continuous ambient animation on static content" 'animate-(pulse|ping|bounce)'
 
+# A button disabled by what is not filled in must say why (design review B2): counted per file
+# against scripts/lint-ui-disabled-baseline.txt, so no file gains a new one.
+if ! python3 scripts/lint_ui_disabled.py; then fail=1; fi
+
 exit $fail
