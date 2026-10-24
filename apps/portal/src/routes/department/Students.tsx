@@ -236,7 +236,7 @@ export function DepartmentStudents() {
               ].map(([k, v]) => (
                 <p key={String(k)} className="flex justify-between gap-3">
                   <span className="text-text-muted">{k}</span>
-                  <span className="font-medium">{v}</span>
+                  <span className="min-w-0 break-words font-medium">{v}</span>
                 </p>
               ))}
               {(canManage || canDelete) && (

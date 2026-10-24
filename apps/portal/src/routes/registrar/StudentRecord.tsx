@@ -76,7 +76,16 @@ export function StudentRecord() {
             <SectionLabel>بيانات الاتصال</SectionLabel>
             <Card className="divide-y divide-border-soft text-sm">
               {[
-                ["البريد الرسمي", s.email ? <bdi key="e">{s.email}</bdi> : "—"],
+                [
+                  "البريد الرسمي",
+                  s.email ? (
+                    <bdi key="e" className="break-all">
+                      {s.email}
+                    </bdi>
+                  ) : (
+                    "—"
+                  ),
+                ],
                 ["الهاتف", s.phone_e164 ? <bdi key="p">{s.phone_e164}</bdi> : "—"],
                 [
                   "تاريخ الميلاد",
@@ -93,7 +102,7 @@ export function StudentRecord() {
               ].map(([k, v]) => (
                 <p key={String(k)} className="flex justify-between gap-3 px-4 py-2.5">
                   <span className="text-text-muted">{k}</span>
-                  <span className="font-medium">{v}</span>
+                  <span className="min-w-0 break-words font-medium">{v}</span>
                 </p>
               ))}
             </Card>
