@@ -31,7 +31,7 @@ def test_the_visitor_code_email_has_the_designed_html_with_the_code_as_headline(
     assert 'dir="rtl"' in html
     assert 'class="code" dir="ltr"' in html and f">{code}</p>" in html
     assert "رمز التحقق لمتابعة طلباتك" in html and "صالح لمدة" in html
-    assert "#263C2B" not in html  # no button: there is nothing to open
+    assert "mso-padding-alt:18px 24px" not in html  # no button: there is nothing to open
 
 
 @pytest.mark.django_db
@@ -59,6 +59,10 @@ def test_account_emails_get_a_button_named_for_what_it_does(settings):
     assert 'href="https://portal.ecst.test/activate/tok123"' in html
     assert ">اختيار كلمة المرور</a>" in html
     assert "تفعيل حسابك" in html  # the subject is the headline
+    # The college's colours and fonts (packages/ui, docs/06): primary-500 button, navy text,
+    # IBM Plex Sans Arabic for text and Noto Kufi Arabic for the headline.
+    assert 'bgcolor="#2D64A7"' in html and "color:#1F2B47" in html
+    assert "family=IBM+Plex+Sans+Arabic" in html and "'Noto Kufi Arabic'" in html
 
 
 def test_layout_reads_the_parts_and_drops_the_old_text_signature(settings):
