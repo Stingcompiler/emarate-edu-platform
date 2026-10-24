@@ -1,11 +1,11 @@
 from datetime import timedelta
 
 from celery import shared_task
-from django.core.mail import send_mail
 from django.db import transaction
 from django.utils import timezone
 
 from . import push, services
+from .mail import send_mail
 from .models import Notification, Outbox, PushSubscription
 
 MAX_ATTEMPTS = 5

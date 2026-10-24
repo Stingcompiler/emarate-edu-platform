@@ -2,7 +2,8 @@
 ``backend/sent-emails/``; production sends through Anymail."""
 
 from django.conf import settings
-from django.core.mail import send_mail
+
+from notifications.mail import send_mail
 
 
 def _send(to: str, subject: str, body: str) -> None:
