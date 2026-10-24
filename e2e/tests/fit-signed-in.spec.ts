@@ -37,6 +37,10 @@ for (const account of ACCOUNTS) {
       const check = async (href: string) => {
         await page.goto(href);
         await page.waitForLoadState("networkidle");
+        // What sits in a closed «details» (a new-record form) counts too: open them all.
+        await page.evaluate(() =>
+          document.querySelectorAll("details").forEach((d) => (d.open = true)),
+        );
         if (rem > 16) await page.addStyleTag({ content: `html { font-size: ${rem}px }` });
         for (const line of await offscreen(page)) problems.push(`${href}: ${line}`);
       };
