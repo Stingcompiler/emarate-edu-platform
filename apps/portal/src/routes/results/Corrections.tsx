@@ -61,7 +61,7 @@ export function Corrections() {
         }
       >
         <FilterBar>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             <Chip active={tab === "pending"} onClick={() => setTab("pending")}>
               معلّقة {count("pending")}
             </Chip>

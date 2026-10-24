@@ -71,9 +71,9 @@ export function Me() {
     typeof window !== "undefined" && window.matchMedia?.("(display-mode: standalone)").matches;
   return (
     <PortalShell title="أنا">
-      <Card className="flex items-center gap-4 p-4">
+      <Card className="flex flex-wrap items-center gap-x-4 gap-y-3 p-4">
         <Avatar text={initials(me.data?.full_name_ar ?? "")} size="2xl" tone="primary" />
-        <span className="min-w-0 flex-1">
+        <span className="min-w-36 flex-1">
           <b className="block text-lg text-text">{me.data?.full_name_ar}</b>
           {s && (
             <span className="text-sm text-text-muted">

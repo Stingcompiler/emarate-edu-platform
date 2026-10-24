@@ -30,7 +30,7 @@ export function SiteMedia() {
   return (
     <PortalShell title="الوسائط والقوائم والإعدادات" back={{ label: "محتوى الموقع", to: "/site" }}>
       <FilterBar>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <Chip active={tab === "media"} onClick={() => setTab("media")}>
             الوسائط
           </Chip>

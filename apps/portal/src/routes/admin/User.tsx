@@ -129,7 +129,7 @@ export function AdminUser() {
               <Avatar text={initials(u.full_name_ar)} size="xl" tone="primary" />
               <span className="min-w-0 flex-1">
                 <b className="block text-text">{u.full_name_ar}</b>
-                <bdi className="text-xs text-text-muted">{u.email}</bdi>
+                <bdi className="block break-all text-xs text-text-muted">{u.email}</bdi>
               </span>
               <StatusBadge
                 status={u.is_active ? (u.last_login ? "approved" : "pending") : "closed"}
@@ -158,7 +158,7 @@ export function AdminUser() {
               ].map(([k, v]) => (
                 <p key={String(k)} className="flex justify-between px-4 py-2.5">
                   <span className="text-text-muted">{k}</span>
-                  <span>{v}</span>
+                  <span className="min-w-0 break-words">{v}</span>
                 </p>
               ))}
             </Card>

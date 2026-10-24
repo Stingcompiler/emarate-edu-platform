@@ -137,6 +137,12 @@
   .grid:not([class*="grid-flow-col"]) {
     grid-template-columns: minmax(0, 1fr);
   }
+  /* A field is as wide as its container, never as wide as its default 20 characters: in a row
+     with a button (`flex gap-2` + `flex-1`) the field kept that width and pushed the button out
+     of the card, off a narrow phone (owner, 2026-10-24, «الرد على المسجل»). */
+  :is(input, select, textarea) {
+    min-width: 0;
+  }
   html {
     font-family: var(--font-sans);
     line-height: var(--leading-arabic);

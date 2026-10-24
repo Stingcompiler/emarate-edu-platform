@@ -113,7 +113,7 @@ export function Cycles() {
               value={draft.name}
               onChange={(e) => setDraft({ ...draft, name: e.target.value })}
               placeholder="الاسم، مثل: قبول 2027/2028"
-              className="min-h-10 rounded-lg border border-border bg-surface px-3"
+              className="min-h-10 w-full rounded-lg border border-border bg-surface px-3"
             />
           </Labeled>
           <label className="flex items-center gap-2 text-xs text-text-muted">

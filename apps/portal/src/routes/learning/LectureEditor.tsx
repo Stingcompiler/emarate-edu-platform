@@ -119,7 +119,7 @@ export function LectureEditor() {
                   className="mt-1 block min-h-28 w-full rounded-lg border border-border bg-surface p-3 font-normal"
                 />
               </label>
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 <Chip active={type === "theory"} onClick={() => setType("theory")}>
                   نظري
                 </Chip>

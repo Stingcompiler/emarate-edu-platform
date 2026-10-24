@@ -1,7 +1,7 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 
-import { signIn } from "./helpers";
+import { offscreen, signIn } from "./helpers";
 
 // Every role, every page its navigation offers: nothing overflows sideways, no serious
 // accessibility finding, no script error and no failed API call (docs/05 §11, docs/06 §1).
@@ -33,6 +33,8 @@ for (const account of ACCOUNTS) {
         problems.push(`${current}: ${response.status()} ${new URL(response.url()).pathname}`);
     });
 
+    // A 360px Android phone, narrower than the iPhone 13 profile (390px).
+    if (isMobile) await page.setViewportSize({ width: 360, height: 780 });
     await signIn(page, account);
     // The desktop sidebar lists every destination; on the phone the «المزيد» sheet does.
     // Students have exactly five tabs and no «المزيد».
@@ -68,6 +70,7 @@ for (const account of ACCOUNTS) {
         () => document.documentElement.scrollWidth - window.innerWidth,
       );
       if (overflow > 0) problems.push(`${href}: overflows sideways by ${overflow}px`);
+      for (const line of await offscreen(page)) problems.push(`${href}: sticks out — ${line}`);
       const { violations } = await new AxeBuilder({ page })
         .withTags(["wcag2a", "wcag2aa", "wcag21aa"])
         .analyze();
