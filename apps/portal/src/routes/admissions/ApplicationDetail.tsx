@@ -165,7 +165,7 @@ export function ApplicationDetail() {
                   ].map(([k, v]: string[]) => (
                     <div key={k} className="flex justify-between gap-3 px-4 py-2.5">
                       <span className="text-text-muted">{k}</span>
-                      <bdi className="font-medium text-text">{v}</bdi>
+                      <bdi className="min-w-0 break-words font-medium text-text">{v}</bdi>
                     </div>
                   ))}
                 </Card>
