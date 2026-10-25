@@ -4,6 +4,7 @@ import { useState } from "react";
 import { PortalShell } from "../../components/PortalShell";
 import { Avatar, Card, SectionLabel } from "../../components/ui";
 import { api, ok } from "../../lib/api";
+import { useMe } from "../../lib/auth";
 import {
   Bars,
   ExportBar,
@@ -32,6 +33,11 @@ const STAGE_TONE: Record<string, string> = {
 
 /** Board: DesktopAdmissionsReports; phone derived — KPIs 2×n, stacked program bars, registrar cards. */
 export function AdmissionsReport() {
+  const me = useMe();
+  const scope = me.data?.capabilities?.["reports.admissions"] as
+    { everything?: boolean } | undefined;
+  // A department role reports on its own departments only, never «الكل» (decisions item 7).
+  const collegeWide = !!scope?.everything;
   const departments = useDepartments();
   const cycles = useQuery({
     queryKey: ["admissions", "cycles"],
@@ -39,9 +45,11 @@ export function AdmissionsReport() {
       ok(await api.GET("/api/v1/admission-cycles", { params: { query: ALL } }))?.results ?? [],
   });
   const [cycle, setCycle] = useState<number>();
-  const [department, setDepartment] = useState<number>();
+  const [picked, setDepartment] = useState<number>();
+  const department = picked ?? (collegeWide ? undefined : departments.data?.[0]?.id);
   const report = useQuery({
     queryKey: ["reports", "admissions", cycle, department],
+    enabled: collegeWide || department !== undefined,
     queryFn: async () =>
       ok(
         await api.GET("/api/v1/reports/admissions", { params: { query: { cycle, department } } }),
@@ -73,14 +81,16 @@ export function AdmissionsReport() {
           name={(c) => c.name}
           onChange={setCycle}
         />
-        <Picker
-          label="القسم"
-          value={department}
-          items={departments.data ?? []}
-          name={(d) => d.name_ar}
-          onChange={setDepartment}
-          all="الكل"
-        />
+        {(collegeWide || (departments.data?.length ?? 0) > 1) && (
+          <Picker
+            label="القسم"
+            value={department}
+            items={departments.data ?? []}
+            name={(d) => d.name_ar}
+            onChange={setDepartment}
+            all={collegeWide ? "الكل" : undefined}
+          />
+        )}
         <div className="ms-auto">
           <ExportBar
             onCsv={csv}

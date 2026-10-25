@@ -581,9 +581,12 @@ def admissions_report(cycle, *, department_id: int | None = None, now=None) -> d
         .order_by()
         .values_list("changed_by_id", "n")
     )
-    registrar_ids = set(by_registrar) | set(
-        RoleAssignment.objects.filter(role=Role.REGISTRAR).values_list("user_id", flat=True)
-    )
+    # The registrars of the department reported on (all of them for the college report): a
+    # department's report never lists another department's registrars.
+    registrars_q = RoleAssignment.objects.filter(role=Role.REGISTRAR)
+    if department_id is not None:
+        registrars_q = registrars_q.filter(department_id=department_id)
+    registrar_ids = set(by_registrar) | set(registrars_q.values_list("user_id", flat=True))
     names = dict(
         get_user_model()
         .objects.filter(id__in=registrar_ids, is_active=True)
