@@ -8,7 +8,8 @@ from __future__ import annotations
 
 import re
 import secrets
-from datetime import timedelta
+from datetime import date, timedelta
+from decimal import Decimal, InvalidOperation
 
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError as DjangoValidationError
@@ -176,6 +177,16 @@ def check_schema(schema: dict) -> list[str]:
             problems.append(f"{key}: unknown type {field.get('type')!r}.")
         if field.get("type") in ("select", "multiselect") and not field.get("options"):
             problems.append(f"{key}: add the options.")
+        if field.get("pattern") is not None:
+            try:
+                re.compile(str(field["pattern"]))
+            except re.error:
+                problems.append(f"{key}: the pattern is not a valid regular expression.")
+        accept = field.get("accept")
+        if accept is not None and not (
+            isinstance(accept, list) and accept and set(accept) <= UPLOAD_TYPES
+        ):
+            problems.append(f"{key}: accept must list some of {sorted(UPLOAD_TYPES)}.")
     return problems
 
 
@@ -184,6 +195,38 @@ def _visible(field: dict, answers: dict) -> bool:
     if not condition:
         return True
     return answers.get(condition.get("key")) == condition.get("equals")
+
+
+TEXT_KINDS = {"text", "textarea", "phone", "email", "select"}
+
+
+def _type_problem(kind: str, value) -> str | None:
+    """The value's type, checked before any rule (review 2026-10-25 R20: a regex was skipped for
+    a value that was not text, and dates, booleans and phones were not checked at all)."""
+    if kind in TEXT_KINDS and not isinstance(value, str):
+        return "Must be text."
+    if kind == "boolean" and type(value) is not bool:
+        return "Must be true or false."
+    if kind == "date":
+        if not isinstance(value, str) or not re.fullmatch(r"\d{4}-\d{2}-\d{2}", value):
+            return "Must be a date (YYYY-MM-DD)."
+        try:
+            date.fromisoformat(value)
+        except ValueError:
+            return "Must be a date (YYYY-MM-DD)."
+    if kind == "phone":
+        from inquiries.services import normalize_phone
+
+        try:
+            if normalize_phone(value) is None:
+                return "Invalid phone number."
+        except ValidationError:
+            return "Invalid phone number."
+    if kind == "multiselect" and not (
+        isinstance(value, list) and all(isinstance(v, str) for v in value)
+    ):
+        return "Choose from the options."
+    return None
 
 
 def validate_answers(schema: dict, answers: dict, documents: set[str]) -> dict[str, str]:
@@ -202,14 +245,24 @@ def validate_answers(schema: dict, answers: dict, documents: set[str]) -> dict[s
             if field.get("required"):
                 errors[key] = "Required."
             continue
+        problem = _type_problem(kind, value)
+        if problem:
+            errors[key] = problem
+            continue
         if kind == "number":
-            try:
-                number = float(value)
-            except (TypeError, ValueError):
+            if isinstance(value, bool):
                 errors[key] = "Must be a number."
                 continue
-            if ("min" in field and number < float(field["min"])) or (
-                "max" in field and number > float(field["max"])
+            try:
+                number = Decimal(str(value))
+            except InvalidOperation:
+                errors[key] = "Must be a number."
+                continue
+            if not number.is_finite():
+                errors[key] = "Must be a number."
+                continue
+            if ("min" in field and number < Decimal(str(field["min"]))) or (
+                "max" in field and number > Decimal(str(field["max"]))
             ):
                 errors[key] = "Out of range."
         elif kind == "email":
@@ -233,11 +286,13 @@ def validate_answers(schema: dict, answers: dict, documents: set[str]) -> dict[s
 
 
 def template_for(intake: ProgramIntake) -> ApplicationFormTemplate | None:
-    if intake.form_template_id:
-        return intake.form_template
+    """The published version of the intake's form (or of "default"). Never a draft, which may
+    still change under its version number; a newer published version replaces a retired one.
+    The application keeps the version it started with (review 2026-10-25 R19)."""
+    name = intake.form_template.name if intake.form_template_id else "default"
     return (
         ApplicationFormTemplate.objects.filter(
-            name="default", status=ApplicationFormTemplate.Status.PUBLISHED
+            name=name, status=ApplicationFormTemplate.Status.PUBLISHED
         )
         .order_by("-version")
         .first()
@@ -377,13 +432,31 @@ def update(
     return application
 
 
+UPLOAD_TYPES = {"pdf", "jpg", "jpeg", "png"}
+UPLOAD_MAX_MB = 10
+
+
+def _upload_rules(application: Application, doc_type: str) -> dict:
+    """The platform's file rules, narrowed by the form's own field when it sets any (``accept``,
+    ``max_mb``; review 2026-10-25 R20). A field never widens them."""
+    allowed, max_mb = set(UPLOAD_TYPES), UPLOAD_MAX_MB
+    template = application.form_template
+    for field in schema_fields(template.schema) if template else []:
+        if field.get("key") == doc_type and field.get("type") == "file":
+            if isinstance(field.get("accept"), list):
+                allowed &= {str(a).lower() for a in field["accept"]}
+            if isinstance(field.get("max_mb"), (int, float)) and field["max_mb"] > 0:
+                max_mb = min(max_mb, field["max_mb"])
+    return {"allowed": allowed or set(UPLOAD_TYPES), "max_mb": max_mb}
+
+
 def add_document(contact, application: Application, doc_type: str, upload) -> ApplicationDocument:
     if application.status not in OPEN_FOR_APPLICANT:
         raise Conflict(
             gettext("Documents can be added while the application is open."), code="locked"
         )
     try:
-        kind = validation.check(upload, allowed={"pdf", "jpg", "jpeg", "png"}, max_mb=10)
+        kind = validation.check(upload, **_upload_rules(application, doc_type))
     except validation.UploadError as error:
         raise ValidationError({"file": [str(error)]}) from None
     document = None
