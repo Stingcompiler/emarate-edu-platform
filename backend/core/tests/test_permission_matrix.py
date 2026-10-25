@@ -258,7 +258,12 @@ READS: dict[str, tuple[str, frozenset, frozenset]] = {
         frozenset({R.SYSTEM_ADMIN, R.SITE_MANAGER}),
         frozenset(),
     ),
-    "news-list": ("/api/v1/content/news", frozenset({R.SYSTEM_ADMIN, R.SITE_MANAGER}), frozenset()),
+    # The events manager reads the news linked to its events only (docs/03 §3.13; content tests).
+    "news-list": (
+        "/api/v1/content/news",
+        frozenset({R.SYSTEM_ADMIN, R.SITE_MANAGER, R.EVENTS_MANAGER}),
+        frozenset(),
+    ),
     "redirect-list": (
         "/api/v1/content/redirects",
         frozenset({R.SYSTEM_ADMIN, R.SITE_MANAGER}),

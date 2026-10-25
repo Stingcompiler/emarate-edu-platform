@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router";
+import { useNavigate, useParams, useSearchParams } from "react-router";
 
 import { PortalShell } from "../../components/PortalShell";
 import {
@@ -22,6 +22,8 @@ export function NewsEditor() {
   const unsaved = useUnsavedChanges();
   const { id } = useParams();
   const creating = !id || id === "new";
+  // «خبر عن هذه الفعالية» from the event editor opens this page linked to the event.
+  const [search] = useSearchParams();
   const [slugEdited, setSlugEdited] = useState(false);
   const navigate = useNavigate();
   const client = useQueryClient();
@@ -46,7 +48,8 @@ export function NewsEditor() {
   const save = useMutation({
     mutationFn: async (status: "draft" | "published") => {
       const html = textToHtml(form.body);
-      const body = { ...form, body: html, status } as never;
+      const event = creating ? search.get("event") : undefined;
+      const body = { ...form, body: html, status, ...(event ? { event } : {}) } as never;
       const res = creating
         ? await api.POST("/api/v1/content/news", { body })
         : await api.PATCH("/api/v1/content/news/{public_id}", {
@@ -63,6 +66,7 @@ export function NewsEditor() {
     },
   });
   const set = (patch: Partial<typeof form>) => setForm((f) => ({ ...f, ...patch }));
+  const eventId = item.data?.event ?? (creating ? search.get("event") : null);
   return (
     <PortalShell
       title={form.title || "خبر جديد"}
@@ -73,7 +77,11 @@ export function NewsEditor() {
             : "مسودة — لا تظهر على الموقع"
           : undefined
       }
-      back={{ label: "محتوى الموقع", to: "/site" }}
+      back={
+        eventId
+          ? { label: "الفعالية", to: `/events/${eventId}` }
+          : { label: "محتوى الموقع", to: "/site" }
+      }
     >
       <div className="contents" onInput={unsaved.onInput}>
         {/* Desktop: the article; its search preview and publishing beside. */}
@@ -112,6 +120,11 @@ export function NewsEditor() {
             </div>
           }
         >
+          {item.data?.event_title && (
+            <p className="mb-3 text-sm text-text-muted">
+              خبر عن الفعالية: <b className="text-text">{item.data.event_title}</b>
+            </p>
+          )}
           <Card>
             <Field
               label="العنوان"

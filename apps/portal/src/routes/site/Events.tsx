@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { CalendarDays, Plus } from "lucide-react";
+import { CalendarDays, Newspaper, Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
 
@@ -386,6 +386,15 @@ export function EventEditor() {
                 </span>
               </span>
             </Card>
+            {!creating && (
+              <Link
+                to={`/site/news/new?event=${id}`}
+                className="mt-3 flex min-h-11 items-center justify-center gap-2 rounded-lg border border-border bg-surface px-4 text-sm font-semibold text-primary hover:bg-surface-alt"
+              >
+                <Newspaper size={16} aria-hidden />
+                خبر عن هذه الفعالية
+              </Link>
+            )}
           </aside>
         </div>
       </div>

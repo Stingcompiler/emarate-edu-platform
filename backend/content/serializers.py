@@ -165,6 +165,13 @@ class AnnouncementSerializer(serializers.ModelSerializer):
 class NewsSerializer(serializers.ModelSerializer):
     cover = CoverField()
     cover_url = serializers.SerializerMethodField()
+    event = serializers.SlugRelatedField(
+        slug_field="public_id",
+        queryset=Event.objects.all(),
+        required=False,
+        allow_null=True,
+    )
+    event_title = serializers.CharField(source="event.title", read_only=True, default=None)
 
     class Meta:
         model = News
@@ -178,6 +185,8 @@ class NewsSerializer(serializers.ModelSerializer):
             "cover_url",
             "status",
             "publish_at",
+            "event",
+            "event_title",
             "updated_at",
         ]
         read_only_fields = ["public_id", "updated_at"]
