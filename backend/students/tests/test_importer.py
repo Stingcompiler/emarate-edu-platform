@@ -141,3 +141,38 @@ def test_only_head_registrar_and_admin_import(api, make_user, it_dept, it_progra
     user = make_user(role, department=it_dept)
     file = _csv("university_number,full_name_ar,program_code,level", "26-IT-0001,أحمد,BIT,1")
     assert _upload(api(user), file).status_code == 403
+
+
+def test_commit_and_reject_decide_on_the_batch_they_lock(api, head, it_program, make_student):
+    """Review 2026-10-25 R18: a page loaded the batch while it was ready. Rejected since, its
+    old copy must not commit it (an update row would rewrite an existing student); committed
+    since, its old copy must not reject it."""
+    from audit.services import RequestMeta
+    from students import importer
+
+    make_student(it_program, "26-IT-0001", name="أحمد محمد")
+    meta = RequestMeta(actor=head)
+
+    def ready_batch():
+        file = _csv(
+            "university_number,full_name_ar,program_code,level",
+            "26-IT-0001,أحمد محمد,BIT,3",
+        )
+        made = _upload(api(head), file).data
+        return StudentImportBatch.objects.get(public_id=made["public_id"])
+
+    rejected = ready_batch()
+    stale = StudentImportBatch.objects.get(pk=rejected.pk)
+    importer.reject(meta, rejected)
+    with pytest.raises(ValueError):
+        importer.commit(meta, stale)
+    assert StudentRecord.objects.get(university_number="26-IT-0001").level == 1
+    assert StudentImportBatch.objects.get(pk=rejected.pk).status == "rejected"
+
+    committed = ready_batch()
+    stale = StudentImportBatch.objects.get(pk=committed.pk)
+    importer.commit(meta, committed)
+    with pytest.raises(ValueError):
+        importer.reject(meta, stale)
+    assert StudentImportBatch.objects.get(pk=committed.pk).status == "committed"
+    assert AuditLog.objects.filter(action="students.import_reject").count() == 1
