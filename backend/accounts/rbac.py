@@ -181,7 +181,17 @@ CAPABILITIES: dict[str, frozenset[Role]] = {
             R.DEPARTMENT_SUPERVISOR,
         }
     ),
-    "reports.admissions": frozenset({R.SYSTEM_ADMIN, R.HEAD_REGISTRAR}),
+    # docs/03 §7 «تقارير القبول/الطلاب»: the registrar, manager and supervisor see their
+    # departments (review 2026-10-25 decisions, item 7).
+    "reports.admissions": frozenset(
+        {
+            R.SYSTEM_ADMIN,
+            R.HEAD_REGISTRAR,
+            R.REGISTRAR,
+            R.DEPARTMENT_MANAGER,
+            R.DEPARTMENT_SUPERVISOR,
+        }
+    ),
     "reports.affairs": frozenset({R.SYSTEM_ADMIN, R.STUDENT_AFFAIRS}),
     # HR notices (docs/03 §3.11): one teacher at a time, never broadcast.
     "hr.view": frozenset({R.SYSTEM_ADMIN, R.ACADEMIC_AFFAIRS, R.HR}),

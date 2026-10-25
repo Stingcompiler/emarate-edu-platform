@@ -317,9 +317,18 @@ READS: dict[str, tuple[str, frozenset, frozenset]] = {
         REPORTS_TEACHERS,
         frozenset(),
     ),
+    # Department roles read their departments' admissions (docs/03 §7; decisions item 7).
     "report-admissions": (
         "/api/v1/reports/admissions",
-        frozenset({R.SYSTEM_ADMIN, R.HEAD_REGISTRAR}),
+        frozenset(
+            {
+                R.SYSTEM_ADMIN,
+                R.HEAD_REGISTRAR,
+                R.REGISTRAR,
+                R.DEPARTMENT_MANAGER,
+                R.DEPARTMENT_SUPERVISOR,
+            }
+        ),
         frozenset(),
     ),
     "report-affairs": (
@@ -329,7 +338,7 @@ READS: dict[str, tuple[str, frozenset, frozenset]] = {
     ),
     "report-snapshot-list": (
         "/api/v1/report-snapshots",
-        REPORTS_TEACHERS | {R.HEAD_REGISTRAR, R.STUDENT_AFFAIRS},
+        REPORTS_TEACHERS | {R.HEAD_REGISTRAR, R.REGISTRAR, R.STUDENT_AFFAIRS},
         frozenset(),
     ),
     "transcript": ("/api/v1/transcripts/26-IT-0001", RESULTS_VIEW, frozenset()),

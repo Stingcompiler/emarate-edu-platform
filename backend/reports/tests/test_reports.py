@@ -211,14 +211,17 @@ def test_snapshots_are_frozen_and_scoped(api, users, staffed, make_user, ba_dept
     assert api(other).get(detail).status_code == 404
     assert api(users[Role.ACADEMIC_AFFAIRS]).get(detail).status_code == 200
     assert api(users[Role.HR]).get(detail).status_code == 404  # department reports aren't HR's
-    assert api(users[Role.REGISTRAR]).get("/api/v1/report-snapshots").status_code == 403
+    # The registrar keeps admissions snapshots of its departments only; none of these.
+    assert api(users[Role.REGISTRAR]).get("/api/v1/report-snapshots").data["count"] == 0
     assert manager.patch(detail, {"notes": "x"}, format="json").status_code == 405
     assert manager.delete(detail).status_code == 405
     hr = api(users[Role.HR]).post("/api/v1/report-snapshots", {"kind": "teachers"}, format="json")
     assert hr.status_code == 201 and hr.data["data"]["summary"]["members"] >= 1
+    # The manager may keep its department's admissions report (decisions item 7); this world
+    # has no admission cycle, hence 404 rather than a snapshot.
     assert (
         manager.post("/api/v1/report-snapshots", {"kind": "admissions"}, format="json").status_code
-        == 403
+        == 404
     )
 
 
@@ -268,7 +271,8 @@ def test_admissions_report(api, users, it_program, term, make_user, it_dept):
     assert by_day[str(timezone.localdate(now - timedelta(days=2)))] == 4
     row = next(r for r in data["registrars"] if r["name"] == registrar.full_name_ar)
     assert row["applications"] == 3 and row["departments"] == ["IT"]
-    assert api(users[Role.REGISTRAR]).get("/api/v1/reports/admissions").status_code == 403
+    # The department's registrar now sees the same report for IT (decisions item 7).
+    assert api(users[Role.REGISTRAR]).get("/api/v1/reports/admissions").data["total"] == 4
 
 
 def test_the_daily_chart_follows_the_chosen_cycle(db, it_program, term):
@@ -381,3 +385,50 @@ def test_transcript(
     outsider = make_user(Role.DEPARTMENT_MANAGER, department=ba_dept)
     assert api(outsider).get(url).status_code == 404
     assert api(users[Role.DEPARTMENT_MANAGER]).get(url).status_code == 200
+
+
+def test_department_roles_see_their_departments_admissions_only(
+    api, make_user, it_dept, ba_dept, it_program, ba_program, term
+):
+    """docs/03 §7 «تقارير القبول/الطلاب»: registrar, manager and supervisor ◐ their departments
+    (review 2026-10-25 decisions, item 7). Other departments' numbers and registrars stay out."""
+    from django.utils import timezone
+
+    from admissions.models import AdmissionCycle, Application, ProgramIntake
+    from contacts.models import Contact
+    from reports.models import ReportSnapshot
+
+    now = timezone.now()
+    cycle = AdmissionCycle.objects.create(
+        academic_year=term.academic_year,
+        name="قبول",
+        opens_at=now - timedelta(days=5),
+        closes_at=now + timedelta(days=5),
+    )
+    for program, count in ((it_program, 2), (ba_program, 3)):
+        intake = ProgramIntake.objects.create(cycle=cycle, program=program)
+        for n in range(count):
+            Application.objects.create(
+                reference_no=f"APP-{program.code}-{n}",
+                contact=Contact.objects.create(name="م", email=f"{program.code}{n}@x.test"),
+                intake=intake,
+                full_name="م",
+                status="submitted",
+                submitted_at=now - timedelta(days=1),
+            )
+    ba_registrar = make_user(Role.REGISTRAR, department=ba_dept)
+    url = "/api/v1/reports/admissions"
+    for role in (Role.REGISTRAR, Role.DEPARTMENT_MANAGER, Role.DEPARTMENT_SUPERVISOR):
+        user = make_user(role, department=it_dept)
+        report = api(user).get(url).data
+        assert report["total"] == 2, role
+        assert ba_registrar.full_name_ar not in [r["name"] for r in report["registrars"]]
+        assert api(user).get(url, {"department": ba_dept.pk}).status_code == 403
+    head = make_user(Role.HEAD_REGISTRAR)
+    assert api(head).get(url).data["total"] == 5
+    manager = make_user(Role.DEPARTMENT_MANAGER, department=it_dept)
+    made = api(manager).post("/api/v1/report-snapshots", {"kind": "admissions"}, format="json")
+    assert made.status_code == 201, made.data
+    assert ReportSnapshot.objects.get().department_id == it_dept.pk
+    ba_manager = make_user(Role.DEPARTMENT_MANAGER, department=ba_dept)
+    assert api(ba_manager).get("/api/v1/report-snapshots").data["count"] == 0
