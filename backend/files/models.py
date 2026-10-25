@@ -20,6 +20,7 @@ class Purpose(models.TextChoices):
     SUBMISSION = "submission", "تسليم واجب"
     REGULATION = "regulation", "لائحة"
     CASE = "case", "مرفق حالة طالب"
+    PHOTO = "photo", "صورة شخصية"
 
 
 def _upload_to(instance, filename: str) -> str:

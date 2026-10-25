@@ -7,6 +7,7 @@ import { Link, useNavigate } from "react-router";
 import { PortalShell } from "../components/PortalShell";
 import { Segmented } from "../components/motion";
 import {
+  Avatar,
   Button,
   Card,
   Field,
@@ -16,7 +17,10 @@ import {
   WithSide,
   problemMessage,
 } from "../components/ui";
+import { OtpInput } from "../components/OtpInput";
 import { api, ok } from "../lib/api";
+import { initials } from "../lib/reports";
+import { asForm, formData } from "../lib/upload";
 import { hasRole, useMe, useSignOut } from "../lib/auth";
 import { disablePush, enablePush, pushState, type PushState } from "../lib/push";
 import { type Density, useDensity } from "../lib/density";
@@ -85,12 +89,16 @@ export function Settings() {
             </Card>
 
             <SectionLabel>الحساب</SectionLabel>
-            <Card className="px-4 py-3">
-              <p className="text-sm font-semibold text-text">{me.data?.full_name_ar}</p>
-              <p className="mt-0.5 text-sm text-text-muted" dir="ltr">
-                {me.data?.email}
-              </p>
-            </Card>
+            {me.data?.student ? (
+              <MyDetails />
+            ) : (
+              <Card className="px-4 py-3">
+                <p className="text-sm font-semibold text-text">{me.data?.full_name_ar}</p>
+                <p className="mt-0.5 text-sm text-text-muted" dir="ltr">
+                  {me.data?.email}
+                </p>
+              </Card>
+            )}
             <Link
               to="/change-password"
               className="mt-3 flex min-h-11 w-full items-center justify-center rounded-xl border border-border bg-surface px-4 text-sm font-semibold text-text hover:bg-surface-alt"
@@ -375,6 +383,176 @@ function PushCard() {
         <span className="sr-only" role="status">
           لحظة…
         </span>
+      )}
+    </Card>
+  );
+}
+
+/** A student's email (confirmed by a code sent to the new address), phone and photo
+ *  (docs/03 §3.10; review 2026-10-25 decisions, item 13). */
+function MyDetails() {
+  const me = useMe();
+  const client = useQueryClient();
+  const refresh = () => client.invalidateQueries({ queryKey: ["me"] });
+  const [phone, setPhone] = useState<string | null>(null);
+  const [email, setEmail] = useState("");
+  const [code, setCode] = useState("");
+  const [sentTo, setSentTo] = useState<string | null>(null);
+  const photoId = me.data?.photo ?? null;
+  const photo = useQuery({
+    queryKey: ["me", "photo", photoId],
+    enabled: !!photoId,
+    queryFn: async () =>
+      ok(
+        await api.GET("/api/v1/files/{public_id}/url", {
+          params: { path: { public_id: photoId! } },
+        }),
+      )?.url ?? null,
+  });
+  const saveContact = useMutation({
+    mutationFn: async (body: { phone_e164?: string; photo?: string | null }) => {
+      const { data, error } = await api.PATCH("/api/v1/me", { body });
+      if (!data) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      setPhone(null);
+      void refresh();
+    },
+  });
+  const upload = useMutation({
+    mutationFn: async (file: File) => {
+      const { data, error } = await api.POST("/api/v1/files", {
+        body: formData({ file, purpose: "photo" }) as never,
+        ...asForm,
+      });
+      if (!data) throw error;
+      return saveContact.mutateAsync({ photo: data.public_id });
+    },
+  });
+  const sendCode = useMutation({
+    mutationFn: async () => {
+      const { error, response } = await api.POST("/api/v1/me/email", { body: { email } });
+      if (!response.ok) throw error;
+    },
+    onSuccess: () => setSentTo(email.trim().toLowerCase()),
+  });
+  const confirm = useMutation({
+    mutationFn: async () => {
+      const { data, error } = await api.POST("/api/v1/me/email/confirm", {
+        body: { email: sentTo!, code },
+      });
+      if (!data) throw error;
+    },
+    onSuccess: () => {
+      setSentTo(null);
+      setEmail("");
+      setCode("");
+      void refresh();
+    },
+  });
+  const failed = saveContact.error ?? upload.error ?? sendCode.error ?? confirm.error;
+  const currentPhone = me.data?.phone_e164 ?? "";
+  return (
+    <Card className="divide-y divide-border-soft">
+      <div className="flex items-center gap-3 px-4 py-3">
+        {photo.data ? (
+          <img
+            src={photo.data}
+            alt=""
+            className="size-14 shrink-0 rounded-full object-cover"
+            width={56}
+            height={56}
+          />
+        ) : (
+          <Avatar text={initials(me.data?.full_name_ar ?? "")} size="2xl" tone="primary" />
+        )}
+        <span className="min-w-0 flex-1">
+          <b className="block text-sm text-text">{me.data?.full_name_ar}</b>
+          <label className="mt-1 inline-flex min-h-11 cursor-pointer items-center text-sm font-semibold text-primary">
+            {upload.isPending ? "جارٍ الرفع…" : photoId ? "تغيير الصورة" : "إضافة صورة"}
+            <input
+              type="file"
+              accept=".jpg,.jpeg,.png,.webp"
+              className="sr-only"
+              onChange={(e) => e.target.files?.[0] && upload.mutate(e.target.files[0])}
+            />
+          </label>
+        </span>
+      </div>
+      <div className="px-4 py-3">
+        <p className="text-xs text-text-muted">البريد</p>
+        <p className="text-sm text-text" dir="ltr">
+          {me.data?.email}
+        </p>
+        {sentTo ? (
+          <div className="mt-2 space-y-2">
+            <OtpInput label={`الرمز المرسل إلى ${sentTo}`} value={code} onChange={setCode} />
+            <div className="flex flex-wrap gap-2">
+              <Button
+                onClick={() => confirm.mutate()}
+                disabled={confirm.isPending}
+                why={code.length === 6 ? undefined : "أدخل الرمز المكوّن من 6 أرقام"}
+              >
+                تأكيد البريد الجديد
+              </Button>
+              <Button variant="secondary" onClick={() => setSentTo(null)}>
+                تراجع
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <form
+            className="mt-2 flex flex-wrap gap-2"
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (email.trim()) sendCode.mutate();
+            }}
+          >
+            <input
+              type="email"
+              dir="ltr"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="البريد الجديد"
+              aria-label="البريد الجديد"
+              className="min-h-11 flex-1 rounded-lg border border-border bg-surface px-3 text-sm"
+            />
+            <Button type="submit" variant="secondary" disabled={sendCode.isPending}>
+              أرسل رمزًا
+            </Button>
+          </form>
+        )}
+      </div>
+      <form
+        className="px-4 py-3"
+        onSubmit={(e) => {
+          e.preventDefault();
+          if (phone !== null) saveContact.mutate({ phone_e164: phone });
+        }}
+      >
+        <label className="text-xs text-text-muted" htmlFor="my-phone">
+          الهاتف
+        </label>
+        <div className="mt-1 flex flex-wrap gap-2">
+          <input
+            id="my-phone"
+            type="tel"
+            dir="ltr"
+            value={phone ?? currentPhone}
+            onChange={(e) => setPhone(e.target.value)}
+            placeholder="0912345678"
+            className="min-h-11 flex-1 rounded-lg border border-border bg-surface px-3 text-sm"
+          />
+          <Button type="submit" variant="secondary" disabled={saveContact.isPending}>
+            حفظ
+          </Button>
+        </div>
+      </form>
+      {failed && (
+        <div className="px-4 py-3">
+          <Notice>{problemMessage(failed)}</Notice>
+        </div>
       )}
     </Card>
   );

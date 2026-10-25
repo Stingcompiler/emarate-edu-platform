@@ -6,4 +6,6 @@ class AccountsConfig(AppConfig):
     verbose_name = "Accounts"
 
     def ready(self):
-        from . import schema  # noqa: F401  (registers the OpenAPI auth extension)
+        from . import profile, schema  # noqa: F401  (schema: the OpenAPI auth extension)
+
+        profile.register_file_policy()
