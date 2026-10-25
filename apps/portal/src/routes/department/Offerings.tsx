@@ -52,7 +52,7 @@ export function Offerings() {
       ok(await api.GET("/api/v1/reports/department", { params: { query: { department: id } } })) ??
       null,
   });
-  const canRemove = can(me.data, "membership.remove");
+  const canRemove = can(me.data, "courses.unassign");
   const [error, setError] = useState<unknown>(null);
   const refresh = () => client.invalidateQueries({ queryKey: ["offerings"] });
   const canDelete = can(me.data, "courses.delete");

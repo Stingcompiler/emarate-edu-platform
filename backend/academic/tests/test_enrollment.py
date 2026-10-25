@@ -141,3 +141,19 @@ def test_my_courses(api, make_user, it_offering, ba_offering, cohort):
     ba_offering.save()
     [row] = api(ta).get("/api/v1/me/courses").data
     assert (row["ta_can_grade"], row["ta_can_notify"]) == (False, True)
+
+
+def test_academic_affairs_removes_assignments_but_never_a_course(
+    api, make_user, it_dept, it_offering
+):
+    """docs/03 §7 «الحذف»: academic affairs removes teaching assignments only (review
+    2026-10-25: courses.delete used to let it delete courses and offerings)."""
+    affairs = make_user(Role.ACADEMIC_AFFAIRS)
+    teacher = make_user(Role.TEACHER)
+    DepartmentMembership.objects.create(department=it_dept, user=teacher, kind="teacher")
+    instructor = it_offering.instructors.create(user=teacher, role="teacher")
+    assert (
+        api(affairs).delete(f"/api/v1/offerings/{it_offering.pk}/instructors/{instructor.pk}")
+    ).status_code == 204
+    assert api(affairs).delete(f"/api/v1/offerings/{it_offering.pk}").status_code == 403
+    assert api(affairs).delete(f"/api/v1/courses/{it_offering.course_id}").status_code == 403

@@ -526,3 +526,21 @@ def test_department_announcements_reach_the_departments_log(api, make_user, it_d
     api(manager).post(f"{A}/{made['public_id']}/publish")
     rows = AuditLog.objects.filter(action__startswith="announcement.")
     assert {r.department_id for r in rows} == {it_dept.pk} and rows.count() == 2
+
+
+def test_two_roles_do_not_add_up_to_a_delete_neither_has(api, make_user, it_dept):
+    """Review 2026-10-25 R15: supervisor + site manager. The supervisor addresses the department
+    but never deletes; the site manager deletes college announcements only. Together: still no
+    delete of a department announcement, still a delete of a college one."""
+    dept = {"scope": "department", "scope_id": it_dept.pk, "audience": "all_internal"}
+    college = {"scope": "college", "audience": "all_internal"}
+    both = make_user(Role.DEPARTMENT_SUPERVISOR, Role.SITE_MANAGER, department=it_dept)
+    supervisor = make_user(Role.DEPARTMENT_SUPERVISOR, department=it_dept)
+    site = make_user(Role.SITE_MANAGER)
+    for user in (supervisor, both):
+        made = api(user).post(A, {**dept, "title": "t", "body": "b"}, format="json")
+        assert made.status_code == 201, made.data
+        assert api(user).delete(f"{A}/{made.data['public_id']}").status_code == 403
+    for user in (site, both):
+        made = api(user).post(A, {**college, "title": "t", "body": "b"}, format="json")
+        assert api(user).delete(f"{A}/{made.data['public_id']}").status_code == 204

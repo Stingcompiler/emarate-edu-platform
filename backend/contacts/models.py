@@ -43,26 +43,23 @@ class VisitorSession(TimestampedModel):
 
 
 def match_or_create(*, name: str, email: str | None, phone_e164: str | None) -> Contact:
-    """Same email or phone → same contact; the name is never a lookup key."""
+    """Same email → same contact; with no email, same phone → same contact. The name is never a
+    lookup key.
+
+    An identifier nobody verified is never added to an existing contact (review 2026-10-25 R12):
+    an email added to a phone-only contact let whoever then verified that email read the
+    contact's history, and a phone added to an email contact would send the college's WhatsApp
+    replies to it. A new email whose phone already belongs to someone else gets its own contact
+    (without that phone); staff merge by hand if it really is the same person.
+    """
     email = (email or "").strip().lower() or None
-    found = None
     if email:
         found = Contact.objects.filter(email=email).first()
-    if found is None and phone_e164:
-        found = Contact.objects.filter(phone_e164=phone_e164).first()
-    if found is None:
-        return Contact.objects.create(name=name, email=email, phone_e164=phone_e164)
-    changed = []
-    if email and not found.email and not Contact.objects.filter(email=email).exists():
-        found.email = email
-        changed.append("email")
-    if (
-        phone_e164
-        and not found.phone_e164
-        and not Contact.objects.filter(phone_e164=phone_e164).exists()
-    ):
-        found.phone_e164 = phone_e164
-        changed.append("phone_e164")
-    if changed:
-        found.save(update_fields=[*changed, "updated_at"])
-    return found
+        if found is not None:
+            return found
+        phone_free = phone_e164 and not Contact.objects.filter(phone_e164=phone_e164).exists()
+        return Contact.objects.create(
+            name=name, email=email, phone_e164=phone_e164 if phone_free else None
+        )
+    found = Contact.objects.filter(phone_e164=phone_e164).first()
+    return found or Contact.objects.create(name=name, phone_e164=phone_e164)

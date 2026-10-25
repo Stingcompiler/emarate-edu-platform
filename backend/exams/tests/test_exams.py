@@ -529,6 +529,39 @@ def test_the_exam_page_sees_an_extension_and_a_close(api, classroom, exam, make_
     assert api(make_user(Role.STUDENT)).get(clock).status_code == 404  # only the owner
 
 
+def test_only_who_may_delete_the_exam_deletes_its_questions(api, classroom, make_user, it_dept):
+    """Review 2026-10-25 R14: a supervisor and a TA build questions but never delete one; the
+    teacher deletes in their own exam, the department manager in any of the department's."""
+    from exams.models import Question
+
+    body = {
+        "type": "single",
+        "text": "س",
+        "choices": [{"text": "أ", "is_correct": True}, {"text": "ب"}],
+    }
+    manager = make_user(Role.DEPARTMENT_MANAGER, department=it_dept)
+    supervisor = make_user(Role.DEPARTMENT_SUPERVISOR, department=it_dept)
+
+    def exam_with_questions(author, count=2):
+        made = api(author).post(URL, _exam_body(classroom.offering), format="json")
+        exam = made.data["public_id"]
+        for _ in range(count):
+            assert (
+                api(author).post(f"{URL}/{exam}/questions", body, format="json").status_code == 201
+            )
+        ids = Question.objects.filter(exam__public_id=exam).values_list("pk", flat=True)
+        return [f"{URL}/{exam}/questions/{pk}" for pk in ids]
+
+    first, second = exam_with_questions(classroom.teacher)
+    assert api(classroom.ta).delete(first).status_code == 403
+    assert api(supervisor).delete(first).status_code == 403
+    assert api(classroom.teacher).delete(first).status_code == 204
+    assert api(manager).delete(second).status_code == 204
+    # The teacher does not delete in an exam the manager wrote for their course.
+    managers = exam_with_questions(manager, count=1)[0]
+    assert api(classroom.teacher).delete(managers).status_code == 403
+
+
 def test_a_grade_from_a_stale_copy_never_revives_an_invalidated_attempt(api, classroom, exam):
     """Review 2026-10-25 R16: the teacher's grading page loaded the essay of a submitted
     attempt; the attempt was then invalidated; the late grade must be refused, and the attempt
