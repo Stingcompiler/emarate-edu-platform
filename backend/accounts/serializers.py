@@ -2,6 +2,7 @@ from django.utils.translation import gettext
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
+from files.models import StoredFile
 from organization.models import Department
 
 from . import rbac
@@ -46,6 +47,7 @@ class MeSerializer(serializers.ModelSerializer):
     creatable_roles = serializers.SerializerMethodField()
     grantable_roles = serializers.SerializerMethodField()
     student = serializers.SerializerMethodField()
+    photo = serializers.SlugRelatedField(slug_field="public_id", read_only=True)
 
     class Meta:
         model = User
@@ -55,6 +57,7 @@ class MeSerializer(serializers.ModelSerializer):
             "full_name_ar",
             "full_name_en",
             "phone_e164",
+            "photo",
             "must_change_password",
             "roles",
             "capabilities",
@@ -278,3 +281,25 @@ class PublicProfileSerializer(serializers.ModelSerializer):
             "academic_title_en",
         ]
         read_only_fields = ["full_name_ar"]
+
+
+class MyContactSerializer(serializers.Serializer):
+    """What a student changes about themself directly: phone and photo (the email goes
+    through a code)."""
+
+    phone_e164 = serializers.CharField(required=False, allow_blank=True, max_length=30)
+    photo = serializers.SlugRelatedField(
+        slug_field="public_id",
+        queryset=StoredFile.objects.all(),
+        required=False,
+        allow_null=True,
+    )
+
+
+class EmailChangeSerializer(serializers.Serializer):
+    email = serializers.CharField(max_length=254)
+
+
+class EmailConfirmSerializer(serializers.Serializer):
+    email = serializers.CharField(max_length=254)
+    code = serializers.CharField(max_length=10)

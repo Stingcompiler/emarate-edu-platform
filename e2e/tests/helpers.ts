@@ -27,7 +27,10 @@ export async function lastCode(address: string): Promise<string> {
       const text = await readFile(path.join(MAIL_DIR, name), "utf8");
       const messages = text.split(/^-{20,}$/m).reverse();
       const mine = messages.find((m) => m.includes(address));
-      const code = mine?.match(/\b(\d{6})\b/)?.[1];
+      // Quoted-printable may break a line inside the code; a colour such as #576075 in the
+      // HTML part is six digits too (the emails carry the college colours since 2026-10-24).
+      const unfolded = mine?.replace(/=\r?\n/g, "");
+      const code = unfolded?.match(/(?<![#\w])(\d{6})(?!\w)/)?.[1];
       if (code) return code;
     }
     await new Promise((resolve) => setTimeout(resolve, 250));

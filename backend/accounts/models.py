@@ -52,6 +52,11 @@ class User(PublicIdModel, AbstractUser):
     full_name_ar = models.CharField(max_length=200)
     full_name_en = models.CharField(max_length=200, blank=True)
     phone_e164 = models.CharField(max_length=20, blank=True)
+    # The student's own photo (docs/03 §3.10; decisions item 13): read by them and by staff who
+    # may see their record (accounts/profile.py registers the file policy).
+    photo = models.ForeignKey(
+        "files.StoredFile", on_delete=models.SET_NULL, null=True, blank=True, related_name="+"
+    )
     must_change_password = models.BooleanField(default=False)
     # The member's own consent to appear on their department's public page (owner decision
     # 2026-09-30), with the academic title shown there. Off until the member turns it on.
@@ -134,6 +139,7 @@ class OneTimeCode(TimestampedModel):
         REGISTER = "register", "تسجيل طالب"
         PASSWORD_RESET = "password_reset", "استعادة كلمة المرور"
         CONTACT = "contact", "تحقق زائر"
+        EMAIL_CHANGE = "email_change", "تغيير البريد"
 
     purpose = models.CharField(max_length=20, choices=Purpose.choices)
     target = models.CharField(max_length=254)  # normalized email

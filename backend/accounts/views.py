@@ -26,15 +26,18 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from audit.services import RequestMeta, record, snapshot
 from core.permissions import capability
 
-from . import rbac, services
+from . import profile, rbac, services
 from .models import RegistrationRequest, RoleAssignment, User
 from .rbac import Role
 from .serializers import (
     ActivateSerializer,
     ChangePasswordSerializer,
     DetailSerializer,
+    EmailChangeSerializer,
+    EmailConfirmSerializer,
     LoginSerializer,
     MeSerializer,
+    MyContactSerializer,
     PasswordForgotSerializer,
     PasswordResetSerializer,
     PublicProfileSerializer,
@@ -205,6 +208,50 @@ class MeView(APIView):
     @extend_schema(responses=MeSerializer, tags=["me"])
     def get(self, request):
         return Response(MeSerializer(request.user).data)
+
+    @extend_schema(request=MyContactSerializer, responses=MeSerializer, tags=["me"])
+    def patch(self, request):
+        """A student's phone and photo (decisions item 13)."""
+        data = MyContactSerializer(data=request.data, partial=True)
+        data.is_valid(raise_exception=True)
+        user = profile.update_contact(
+            RequestMeta.from_request(request), request.user, **data.validated_data
+        )
+        return Response(MeSerializer(user).data)
+
+
+class MyEmailView(APIView):
+    """Step 1: a code to the new address (the same answer whether or not it is taken)."""
+
+    permission_classes = [IsAuthenticated]
+    throttle_classes = [OTPIPThrottle, OTPTargetThrottle]
+
+    @extend_schema(request=EmailChangeSerializer, responses={202: None}, tags=["me"])
+    def post(self, request):
+        data = EmailChangeSerializer(data=request.data)
+        data.is_valid(raise_exception=True)
+        profile.start_email_change(
+            RequestMeta.from_request(request), request.user, data.validated_data["email"]
+        )
+        return Response(status=status.HTTP_202_ACCEPTED)
+
+
+class MyEmailConfirmView(APIView):
+    """Step 2: the code makes the new address the account's email."""
+
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(request=EmailConfirmSerializer, responses=MeSerializer, tags=["me"])
+    def post(self, request):
+        data = EmailConfirmSerializer(data=request.data)
+        data.is_valid(raise_exception=True)
+        user = profile.confirm_email_change(
+            RequestMeta.from_request(request),
+            request.user,
+            data.validated_data["email"],
+            data.validated_data["code"],
+        )
+        return Response(MeSerializer(user).data)
 
 
 class RoleSummarySerializer(serializers.Serializer):

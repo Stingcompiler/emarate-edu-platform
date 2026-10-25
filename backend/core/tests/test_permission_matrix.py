@@ -373,12 +373,17 @@ _F = "files.tests.test_files::"
 _N = "notifications.tests.test_notifications::"
 _EX = "exams.tests.test_exams::"
 _AD = "admissions.tests.test_admissions::"
+_PROFILE = "accounts.tests.test_profile::"
 _LV = "live.tests.test_live::"
 _IQ = "inquiries.tests.test_inquiries::"
 _CT = "content.tests.test_content::"
 _RS = "results.tests.test_results::"
 _SA = "student_affairs.tests.test_student_affairs::"
 COVERED_ELSEWHERE = {
+    # A student's own email change (decisions item 13): POST only.
+    "me-email": _PROFILE + "test_a_student_changes_their_email_with_a_code",
+    "me-email-confirm": _PROFILE
+    + "test_a_taken_address_gets_no_code_and_a_code_is_for_one_account",
     "application-claim": _AD + "test_claim_and_assign",
     "application-assign": _AD + "test_claim_and_assign",
     "application-transition": _AD + "test_full_journey",

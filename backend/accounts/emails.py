@@ -47,6 +47,24 @@ def registration_decided(to: str, approved: bool, reason: str = "") -> None:
     _send(to, subject, body)
 
 
+def email_change_code(to: str, code: str, minutes: int) -> None:
+    _send(
+        to,
+        "تأكيد البريد الجديد — بوابة كلية الإمارات",
+        f"رمز تأكيد بريدك الجديد: {code}\n\n"
+        f"صالح لمدة {minutes} دقائق. إن لم تطلب تغيير بريدك فتجاهل هذه الرسالة.",
+    )
+
+
+def email_changed(to: str, new_email: str) -> None:
+    _send(
+        to,
+        "تغيّر بريد حسابك — بوابة كلية الإمارات",
+        f"تغيّر بريد حسابك في بوابة الكلية إلى {new_email}.\n\n"
+        "إن لم تكن أنت من غيّره فتواصل مع مسجل قسمك فورًا.",
+    )
+
+
 def account_invitation(to: str, full_name: str, token: str, days: int) -> None:
     link = f"{settings.PORTAL_BASE_URL}/activate/{token}"
     _send(
