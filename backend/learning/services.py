@@ -204,7 +204,10 @@ def add_resource(
 
 def remove_resource(meta: RequestMeta, resource: LectureResource) -> None:
     lecture = resource.lecture
-    require(meta.actor, lecture.offering, "edit")
+    # Removing a file or link is a delete: whoever may delete the lecture (review 2026-10-25 R14).
+    found = require(meta.actor, lecture.offering, "edit")
+    if not found.can_delete(meta.actor, lecture):
+        raise PermissionDenied(gettext("You cannot remove files from this lecture."))
     with transaction.atomic():
         record(
             meta,

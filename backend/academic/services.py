@@ -118,7 +118,7 @@ def add_instructor(
 
 def remove_instructor(meta: RequestMeta, instructor: OfferingInstructor) -> None:
     department_id = instructor.offering.course.department_id
-    _require(meta, "courses.delete", department_id)
+    _require(meta, "courses.unassign", department_id)
     with transaction.atomic():
         record(
             meta,

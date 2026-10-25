@@ -17,6 +17,7 @@ const CAPABILITY: Record<string, string> = {
   "courses.view": "عرض المواد",
   "courses.manage": "المواد والتعيينات",
   "courses.delete": "حذف المواد",
+  "courses.unassign": "إزالة تعيينات المواد",
   "membership.manage": "إضافة أعضاء القسم",
   "membership.remove": "إزالة أعضاء القسم",
   "learning.view": "عرض المحاضرات والأعمال",

@@ -38,9 +38,8 @@ def department_of(scope: str, scope_id: int | None) -> int | None:
     return None
 
 
-def may_announce(user, scope: str, scope_id: int | None, audience: str) -> bool:
-    """docs/03 §7 «إعلانات»: who may address which scope and audience."""
-    roles = rbac.roles_of(user)
+def _college_grant(roles, scope: str, audience: str) -> bool:
+    """What a college-wide role may address on its own (docs/03 §7 «إعلانات»)."""
     if Role.SYSTEM_ADMIN in roles:
         return True
     college = scope == A.Scope.COLLEGE
@@ -58,11 +57,16 @@ def may_announce(user, scope: str, scope_id: int | None, audience: str) -> bool:
         and scope != A.Scope.OFFERING
     ):
         return True
-    if (
+    return bool(
         Role.ACADEMIC_AFFAIRS in roles
         and audience == A.Audience.STAFF
         and scope in (A.Scope.COLLEGE, A.Scope.DEPARTMENT)
-    ):
+    )
+
+
+def may_announce(user, scope: str, scope_id: int | None, audience: str) -> bool:
+    """docs/03 §7 «إعلانات»: who may address which scope and audience."""
+    if _college_grant(rbac.roles_of(user), scope, audience):
         return True
     department = department_of(scope, scope_id)
     if (
@@ -90,34 +94,32 @@ def may_announce(user, scope: str, scope_id: int | None, audience: str) -> bool:
     return False
 
 
-# College-wide roles that address a department through their own branch of may_announce.
-_COLLEGE_ANNOUNCERS = frozenset(
-    {
-        Role.SYSTEM_ADMIN,
-        Role.SITE_MANAGER,
-        Role.EVENTS_MANAGER,
-        Role.HEAD_REGISTRAR,
-        Role.ACADEMIC_AFFAIRS,
-    }
-)
-
-
 def may_delete_announcement(user, announcement) -> bool:
     """Deleting is narrower than announcing (docs/03 §3.7, §3.9, §7 «الحذف»): a supervisor or a
-    TA never deletes; a teacher removes only their own course announcement."""
-    if not may_announce(user, announcement.scope, announcement.scope_id, announcement.audience):
-        return False
-    department = department_of(announcement.scope, announcement.scope_id)
-    if department is None or rbac.roles_of(user) & _COLLEGE_ANNOUNCERS:
+    TA never deletes; a teacher removes only their own course announcement.
+
+    Each role is judged on its own and the answers are OR-ed (review 2026-10-25 R15): a
+    supervisor who is also the site manager may address the department as supervisor and
+    delete college announcements as site manager, but neither role deletes a department's.
+    """
+    scope, scope_id, audience = announcement.scope, announcement.scope_id, announcement.audience
+    if _college_grant(rbac.roles_of(user), scope, audience):
         return True
-    if rbac.can(user, "learning.delete", department):
+    department = department_of(scope, scope_id)
+    if department is None:
+        return False
+    if audience != A.Audience.PUBLIC and rbac.can(user, "learning.delete", department):
+        return True
+    if (
+        scope == A.Scope.DEPARTMENT
+        and audience == A.Audience.PUBLIC
+        and rbac.has_role_in(user, Role.DEPARTMENT_MANAGER, scope_id)
+    ):
         return True
     return (
-        announcement.scope == A.Scope.OFFERING
+        scope == A.Scope.OFFERING
         and announcement.created_by_id == user.pk
-        and OfferingInstructor.objects.filter(
-            offering=announcement.scope_id, user=user, role="teacher"
-        ).exists()
+        and OfferingInstructor.objects.filter(offering=scope_id, user=user, role="teacher").exists()
     )
 
 

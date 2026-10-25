@@ -549,6 +549,38 @@ def test_a_department_without_registrars_falls_back_only_when_the_switch_is_on(
     assert told is fallback
 
 
+def test_an_unverified_email_never_joins_a_phone_only_contact(
+    django_capture_on_commit_callbacks, db
+):
+    """Review 2026-10-25 R12: someone who knows a visitor's phone sends an inquiry with their own
+    email and that phone, verifies the email, and must not see the earlier inquiry."""
+    from contacts.models import Contact
+    from inquiries import services as inquiry_services
+
+    def ask(email, subject):
+        with django_capture_on_commit_callbacks(execute=True):
+            return inquiry_services.submit(
+                name="زائر",
+                email=email,
+                phone="0912345678",
+                type="general",
+                department=None,
+                subject=subject,
+                message="؟",
+            )
+
+    earlier = ask("", "سؤال خاص بالهاتف فقط")
+    later = ask("other@example.test", "سؤال من بريد آخر")
+    assert later.contact_id != earlier.contact_id
+    assert Contact.objects.get(pk=earlier.contact_id).email is None
+    seen = visitor(django_capture_on_commit_callbacks, email="other@example.test")
+    refs = [i["reference_no"] for i in seen.get("/api/visitor/me").data["inquiries"]]
+    assert refs == [later.reference_no]
+    # The phone stays with its first contact; the same email later still finds its own.
+    assert ask("", "مرة أخرى").contact_id == earlier.contact_id
+    assert ask("OTHER@example.test", "ثالث").contact_id == later.contact_id
+
+
 def test_a_withdrawal_loaded_before_the_acceptance_cannot_undo_it(intake, make_user):
     """Review 2026-10-25 R17: the applicant's page read "eligible", the head registrar accepted,
     then the withdrawal arrived with the old copy: 409, and the application stays accepted."""
