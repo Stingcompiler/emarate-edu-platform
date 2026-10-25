@@ -10,6 +10,7 @@ from rest_framework.views import APIView
 
 from accounts import rbac
 from audit.services import RequestMeta
+from core.idempotency import run_once
 
 from . import audience as audiences
 from . import push, services
@@ -103,12 +104,15 @@ class SentViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
 
     @extend_schema(request=SendSerializer, responses={201: SentNotificationSerializer})
     def create(self, request):
-        data = SendSerializer(data=request.data)
-        data.is_valid(raise_exception=True)
-        notification = services.send(RequestMeta.from_request(request), **data.validated_data)
-        return Response(
-            SentNotificationSerializer(notification).data, status=status.HTTP_201_CREATED
-        )
+        def perform():
+            data = SendSerializer(data=request.data)
+            data.is_valid(raise_exception=True)
+            notification = services.send(RequestMeta.from_request(request), **data.validated_data)
+            return Response(
+                SentNotificationSerializer(notification).data, status=status.HTTP_201_CREATED
+            )
+
+        return run_once(request, perform)
 
     @extend_schema(request=AudienceSerializer, responses=AudienceCountSerializer)
     @action(detail=False, methods=["post"], url_path="preview")

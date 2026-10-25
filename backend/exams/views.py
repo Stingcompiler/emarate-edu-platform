@@ -9,6 +9,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from audit.services import RequestMeta
+from core.idempotency import run_once
 from learning import access
 from learning.services import require
 from students.models import StudentRecord
@@ -279,8 +280,18 @@ class AttemptViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
     @extend_schema(request=None, responses=AttemptSerializer)
     @action(detail=True, methods=["post"])
     def submit(self, request, public_id=None):
-        attempt = services.submit(_meta(request), self._own())
-        return Response(AttemptSerializer(attempt).data)
+        attempt = self._own()
+
+        def perform():
+            return Response(AttemptSerializer(services.submit(_meta(request), attempt)).data)
+
+        # A repeat of a submission the teacher has since reopened is refused, not answered
+        # with the old «submitted» (owner decision 2026-10-25, R21).
+        def reopened():
+            attempt.refresh_from_db(fields=["status"])
+            return attempt.status == ExamAttempt.Status.IN_PROGRESS
+
+        return run_once(request, perform, stale=reopened)
 
     @extend_schema(request=SignalSerializer, responses={204: None})
     @action(detail=True, methods=["post"])

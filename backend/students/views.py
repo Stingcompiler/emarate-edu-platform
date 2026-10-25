@@ -10,6 +10,7 @@ from rest_framework.response import Response
 from accounts import rbac
 from audit.services import RequestMeta
 from core.errors import Conflict
+from core.idempotency import run_once
 from core.permissions import capability
 
 from . import importer, services
@@ -116,11 +117,14 @@ class StudentImportViewSet(
     @extend_schema(request=None, responses={200: ImportBatchSerializer})
     @action(detail=True, methods=["post"])
     def commit(self, request, public_id=None):
-        try:
-            batch = importer.commit(RequestMeta.from_request(request), self.get_object())
-        except ValueError as error:
-            raise Conflict(str(error), code="batch_closed") from None
-        return Response(ImportBatchSerializer(batch).data)
+        def perform():
+            try:
+                batch = importer.commit(RequestMeta.from_request(request), self.get_object())
+            except ValueError as error:
+                raise Conflict(str(error), code="batch_closed") from None
+            return Response(ImportBatchSerializer(batch).data)
+
+        return run_once(request, perform)
 
     @extend_schema(request=None, responses={200: ImportBatchSerializer})
     @action(detail=True, methods=["post"])

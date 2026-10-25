@@ -203,7 +203,7 @@ backend/
 | الفلترة/الفرز/البحث | `django-filter` معلَن لكل View؛ `?ordering=`؛ `?search=`. |
 | الأخطاء | `application/problem+json` (RFC 9457): `{type, title, status, detail, errors:{field:[...]}, code}`؛ رسائل عربية/إنجليزية حسب `Accept-Language`. |
 | الحالات | أفعال صريحة: `POST /applications/{id}/transition {to, note}`؛ الاستجابة تحمل `allowed_transitions`. |
-| Idempotency | Header `Idempotency-Key` مطلوب على: تسليم اختبار، إرسال طلب تقديم، اعتماد استيراد، إرسال إشعار. يُخزَّن 24 ساعة. |
+| Idempotency | Header `Idempotency-Key` على: تسليم اختبار، إرسال طلب تقديم، اعتماد استيراد (الطلاب والنتائج)، إرسال إشعار. يُخزَّن 24 ساعة لكل مستخدم ومفتاح (`core.IdempotencyRecord`، `core/idempotency.py`): التكرار يعيد الرد الأول دون تنفيذ ثانٍ؛ المفتاح نفسه لطلب مختلف → 422؛ أثناء تنفيذ الأول → 409؛ فشل الأول لا يحفظ شيئًا. تسليم محاولة أُعيد فتحها بعد التسليم الأول → 409 (`stale`). طلب التقديم يحفظ رده بمفتاح الجهة + الطلب + المفتاح. |
 | الحدود | Throttle: عام 60/دقيقة للمستخدم؛ OTP 5/ساعة للهدف؛ login 10/دقيقة للـ IP؛ التواصل 5/ساعة؛ Autosave 30/دقيقة للمحاولة. |
 | الملفات | الرفع عبر `POST /files` (multipart، تحقق نوع/حجم) يعيد `file_id`؛ الوصول عبر `GET /files/{id}/url` يعيد رابطًا موقّعًا (10 دقائق) بعد تحقق الصلاحية. الفيديو: `POST /videos/upload-ticket` (Bunny Stream TUS في الإنتاج؛ رفع محلي في التطوير). |
 | الإصدار والتوثيق | drf-spectacular → `/api/schema` + Swagger UI في التطوير؛ `packages/api` يولَّد منه في CI. |
