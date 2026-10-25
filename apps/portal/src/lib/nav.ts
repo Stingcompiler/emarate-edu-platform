@@ -249,6 +249,9 @@ export function navFor(me: Me | null | undefined, unread: number): NavItem[] {
   if (canCompose(me)) items.push({ label: "إشعار جديد", to: "/notifications/new", icon: Send });
   items.push({ label: "الإعدادات", to: "/settings", icon: Settings });
   items.push({ label: "تثبيت التطبيق", to: "/install", icon: Download });
+  // The log of one's field of work (decisions item 8); last, so phone tabs stay as they were.
+  if (can(me, "audit.domain") && !hasRole(me, "system_admin"))
+    items.push({ label: "سجل العمليات", to: "/audit", icon: History });
   return hasRole(me, "system_admin") ? grouped(items) : items;
 }
 

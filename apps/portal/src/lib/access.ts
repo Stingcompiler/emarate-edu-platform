@@ -141,5 +141,5 @@ export const ROUTE_ACCESS: Record<string, Allow> = {
   "/system/roles": cap("users.view"),
   "/system/structure": cap("structure.manage"),
   "/system/settings": cap("settings.manage"),
-  "/audit": cap("audit.view"),
+  "/audit": cap("audit.view", "audit.domain"),
 };
