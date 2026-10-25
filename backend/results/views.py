@@ -15,6 +15,7 @@ from rest_framework.views import APIView
 from academic.models import OfferingInstructor
 from accounts import rbac
 from audit.services import RequestMeta, record, snapshot
+from core.idempotency import run_once
 from core.permissions import capability
 from students.importer import ImportFileError
 from students.models import StudentRecord
@@ -116,8 +117,11 @@ class ResultImportViewSet(
     @extend_schema(request=None, responses=ResultBatchSerializer)
     @action(detail=True, methods=["post"])
     def commit(self, request, public_id=None):
-        return Response(
-            ResultBatchSerializer(services.commit(_meta(request), self.get_object())).data
+        return run_once(
+            request,
+            lambda: Response(
+                ResultBatchSerializer(services.commit(_meta(request), self.get_object())).data
+            ),
         )
 
     @extend_schema(request=None, responses=ResultBatchSerializer)

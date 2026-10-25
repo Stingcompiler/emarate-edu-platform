@@ -2,6 +2,7 @@
 
 import uuid
 
+from django.core.serializers.json import DjangoJSONEncoder
 from django.db import models
 from django.utils.translation import get_language
 
@@ -63,3 +64,23 @@ class SingletonModel(models.Model):
     def load(cls):
         obj, _ = cls.objects.get_or_create(pk=1)
         return obj
+
+
+class IdempotencyRecord(models.Model):
+    """One use of an ``Idempotency-Key`` (docs/05 §7; review 2026-10-25 R21): who sent it, for
+    which request, and the answer to give again if the same request comes back."""
+
+    user = models.ForeignKey("accounts.User", on_delete=models.CASCADE, related_name="+")
+    key = models.CharField(max_length=100)
+    method = models.CharField(max_length=10)
+    path = models.CharField(max_length=255)
+    body_digest = models.CharField(max_length=64)
+    status_code = models.PositiveSmallIntegerField(null=True, blank=True)  # None while running
+    response = models.JSONField(null=True, blank=True, encoder=DjangoJSONEncoder)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=["user", "key"], name="uniq_idempotency_key")]
+
+    def __str__(self) -> str:
+        return f"{self.user_id}:{self.key}"
