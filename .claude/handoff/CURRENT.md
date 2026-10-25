@@ -1,4 +1,40 @@
-# Handoff — UI design review 2026-10-16 done except owner items — 2026-10-17
+# Handoff — review 2026-10-25 and its decisions, all implemented — 2026-10-26
+
+## Review `docs/qa/comprehensive-review-2026-10-25.md` (R12–R25)
+
+- Fixed, each with a test that fails on the old code: #156 R12/R14/R15 + course deletion
+  (`courses.unassign`), #157 R16–R18 (lock then re-read), #158 R13/R22–R25, #159 R19/R20/R21
+  (admissions key), #168 R21 shared `Idempotency-Key` store (`core.IdempotencyRecord`,
+  `core/idempotency.py`; exam submit repeated after a reopen → 409 `stale`, owner decision).
+- R13: cycles follow docs/03 §3.6 (department roles see their departments' cycles only); the
+  doc was NOT changed — docs/03 line 88 names admission cycles explicitly.
+- Decision table `docs/qa/review-2026-10-25-open-differences.md` (#160), owner approved all
+  recommendations: docs amended (#163: items 1–4, 10, 12); implemented — #161 items 4/9/11
+  (aa sees live sessions without joining, delete draft regulation, registrar fallback switch),
+  #162 item 5 (events manager writes news linked to an event; migration content/0009),
+  #164 item 7 (admissions report scoped for reg/dm/ds), #165 item 6 («أدائي» /me/teaching),
+  #166 item 8 (audit log by field of work, `audit.views.DOMAINS`), #167 item 13 (student
+  email with a code, phone, photo; migrations accounts/0007, files/0003).
+- Also this round: emails carry the college design (#154, `notifications/mail.py`), security
+  updates (#155, Pillow 13), «طلباتي» overflow fix and the `offscreen()` e2e guard (#152/#153).
+
+## Gotchas learned
+
+- Merge a PR only after its four checks exist AND pass: the watcher in the session scratchpad
+  (`merge-when-green.sh`) waits 45 s first; an early version merged #152 before CI started.
+- Parallel PRs appending tests to the same file conflict after each merge: merge `main` in and
+  keep both sides (never rebase). Regenerate the API client (`pnpm api:generate`) after merging
+  before trusting a local typecheck.
+- e2e `lastCode` skips `#`-prefixed six-digit colours (the branded emails contain `#576075`).
+- Port 8001 is used by another local project: run e2e with `E2E_API_PORT=8011
+  E2E_PORTAL_PORT=5184 E2E_SITE_PORT=4332`; `CI=1` uses Playwright's Chromium (local Chrome
+  crashes under load). Local Postgres was down on 2026-10-25 (not started on purpose).
+- Query-count tests: clear `connection.queries_log` first (it keeps 9000 entries).
+
+## Still open (owner)
+
+- Restore-drill result, real `OPS_ALERT_EMAIL`, college content, SEO launch steps after the
+  domain move (runbook §11), Dependabot alerts are off on the repo.
 
 # Handoff — design-gaps work order B1–B10 — 2026-10-24
 
