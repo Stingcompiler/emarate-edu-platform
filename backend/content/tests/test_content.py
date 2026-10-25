@@ -165,11 +165,12 @@ def test_events_media_menus_redirects_settings(api, site, make_user, settings):
         "status": "published",
     }
     assert api(events).post("/api/v1/content/events", event, format="json").status_code == 201
+    # News only about an event (docs/03 §3.13; test_events_manager_writes_linked_news_only).
     assert (
         api(events)
         .post("/api/v1/content/news", {"slug": "n", "title": "t", "body": "b"}, format="json")
         .status_code
-        == 403
+        == 400
     )
     listed = api().get("/api/public/events").data
     assert listed[0]["slug"] == "open-day" and listed[0]["cover_url"]
@@ -544,3 +545,38 @@ def test_two_roles_do_not_add_up_to_a_delete_neither_has(api, make_user, it_dept
     for user in (site, both):
         made = api(user).post(A, {**college, "title": "t", "body": "b"}, format="json")
         assert api(user).delete(f"{A}/{made.data['public_id']}").status_code == 204
+
+
+def test_events_manager_writes_linked_news_only(api, make_user, site):
+    """docs/03 §3.13: the events manager writes news about its events («خبر مرتبط»), not the
+    college's other news (review 2026-10-25 decisions, item 5)."""
+    events = make_user(Role.EVENTS_MANAGER)
+    now = timezone.now()
+    made = (
+        api(events)
+        .post(
+            "/api/v1/content/events",
+            {
+                "slug": "graduation",
+                "title": "حفل التخرج",
+                "description": "<p>حفل</p>",
+                "starts_at": (now + timedelta(days=5)).isoformat(),
+                "ends_at": (now + timedelta(days=5, hours=3)).isoformat(),
+            },
+            format="json",
+        )
+        .data
+    )
+    news = "/api/v1/content/news"
+    body = {"slug": "about-graduation", "title": "عن الحفل", "body": "<p>تفاصيل</p>"}
+    assert api(events).post(news, body, format="json").status_code == 400
+    linked = api(events).post(news, {**body, "event": made["public_id"]}, format="json")
+    assert linked.status_code == 201, linked.data
+    assert linked.data["event_title"] == "حفل التخرج"
+    unlinked = api(site).post(news, {**body, "slug": "college-news"}, format="json").data
+    assert [n["slug"] for n in api(events).get(news).data["results"]] == ["about-graduation"]
+    assert api(events).get(f"{news}/{unlinked['public_id']}").status_code == 404
+    own = f"{news}/{linked.data['public_id']}"
+    assert api(events).patch(own, {"event": None}, format="json").status_code == 400
+    assert api(events).patch(own, {"title": "تحديث"}, format="json").status_code == 200
+    assert api(site).get(news).data["count"] == 2

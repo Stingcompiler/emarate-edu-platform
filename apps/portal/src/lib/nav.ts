@@ -87,6 +87,8 @@ function departmentNav(me: Me | null | undefined, unread: number): NavItem[] {
     { label: "طلبات التسجيل", to: "/department/approvals", icon: ClipboardCheck },
     { label: "الاختبارات", to: "/exams", icon: ClipboardList, end: false },
     { label: "جلسات البث", to: "/live", icon: Radio, end: false },
+    // The department's admissions (docs/03 §7; review 2026-10-25 decisions, item 7).
+    { label: "تقارير القبول", to: "/reports/admissions", icon: BarChart3 },
     { label: "الإعلانات", to: "/announcements", icon: Megaphone, end: false },
     { label: "الإشعارات", to: "/notifications", icon: Bell, badge: unread },
     { label: "إشعار جديد", to: "/notifications/new", icon: Send },

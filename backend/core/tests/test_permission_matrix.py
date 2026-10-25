@@ -258,7 +258,12 @@ READS: dict[str, tuple[str, frozenset, frozenset]] = {
         frozenset({R.SYSTEM_ADMIN, R.SITE_MANAGER}),
         frozenset(),
     ),
-    "news-list": ("/api/v1/content/news", frozenset({R.SYSTEM_ADMIN, R.SITE_MANAGER}), frozenset()),
+    # The events manager reads the news linked to its events only (docs/03 §3.13; content tests).
+    "news-list": (
+        "/api/v1/content/news",
+        frozenset({R.SYSTEM_ADMIN, R.SITE_MANAGER, R.EVENTS_MANAGER}),
+        frozenset(),
+    ),
     "redirect-list": (
         "/api/v1/content/redirects",
         frozenset({R.SYSTEM_ADMIN, R.SITE_MANAGER}),
@@ -317,9 +322,18 @@ READS: dict[str, tuple[str, frozenset, frozenset]] = {
         REPORTS_TEACHERS,
         frozenset(),
     ),
+    # Department roles read their departments' admissions (docs/03 §7; decisions item 7).
     "report-admissions": (
         "/api/v1/reports/admissions",
-        frozenset({R.SYSTEM_ADMIN, R.HEAD_REGISTRAR}),
+        frozenset(
+            {
+                R.SYSTEM_ADMIN,
+                R.HEAD_REGISTRAR,
+                R.REGISTRAR,
+                R.DEPARTMENT_MANAGER,
+                R.DEPARTMENT_SUPERVISOR,
+            }
+        ),
         frozenset(),
     ),
     "report-affairs": (
@@ -335,7 +349,7 @@ READS: dict[str, tuple[str, frozenset, frozenset]] = {
     ),
     "report-snapshot-list": (
         "/api/v1/report-snapshots",
-        REPORTS_TEACHERS | {R.HEAD_REGISTRAR, R.STUDENT_AFFAIRS},
+        REPORTS_TEACHERS | {R.HEAD_REGISTRAR, R.REGISTRAR, R.STUDENT_AFFAIRS},
         frozenset(),
     ),
     "transcript": ("/api/v1/transcripts/26-IT-0001", RESULTS_VIEW, frozenset()),

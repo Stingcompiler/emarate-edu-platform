@@ -37,15 +37,17 @@ class RegulationViewSet(
     mixins.RetrieveModelMixin,
     mixins.CreateModelMixin,
     mixins.UpdateModelMixin,
+    mixins.DestroyModelMixin,
     viewsets.GenericViewSet,
 ):
-    """Everyone reads published regulations; student affairs writes and publishes them."""
+    """Everyone reads published regulations; student affairs writes and publishes them, and
+    deletes a draft it no longer wants (docs/03 §3.14)."""
 
     serializer_class = RegulationSerializer
     permission_classes = [IsAuthenticated]
     lookup_field = "public_id"
     filterset_fields = ["category", "status", "requires_acknowledgement"]
-    http_method_names = ["get", "post", "patch", "head", "options"]
+    http_method_names = ["get", "post", "patch", "delete", "head", "options"]
 
     def get_queryset(self):
         if getattr(self, "swagger_fake_view", False):
@@ -83,6 +85,10 @@ class RegulationViewSet(
         data.is_valid(raise_exception=True)
         regulation = services.save_regulation(_meta(request), regulation, **data.validated_data)
         return Response(self.get_serializer(regulation).data)
+
+    def destroy(self, request, *args, **kwargs):
+        services.delete_draft(_meta(request), self.get_object())
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     @extend_schema(request=None, responses=RegulationSerializer)
     @action(detail=True, methods=["post"])

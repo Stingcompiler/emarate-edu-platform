@@ -229,13 +229,22 @@ class MyTeachingView(APIView):
 def build_admissions(user, cycle_value, department_value):
     from admissions.models import AdmissionCycle
 
+    scope = rbac.scope_for(user, "reports.admissions")
+    department_id = _int(department_value, "department")
+    if department_id is not None and not scope.allows(department_id):
+        raise PermissionDenied()
+    if department_id is None and not scope.everything:
+        # A department role reports on one of its departments, never the college: the first
+        # one unless the page picks another.
+        department_id = min(scope.departments)
     cycle_id = _int(cycle_value, "cycle")
-    cycles = AdmissionCycle.objects.order_by("-opens_at")
+    cycles = scope.filter(
+        AdmissionCycle.objects.order_by("-opens_at"), "intakes__program__department"
+    ).distinct()
     cycle = cycles.filter(pk=cycle_id).first() if cycle_id else cycles.first()
     if cycle is None:
         raise NotFound(gettext("No admission cycle."))
-    department_id = _int(department_value, "department")
-    return metrics.admissions_report(cycle, department_id=department_id), cycle
+    return metrics.admissions_report(cycle, department_id=department_id), cycle, department_id
 
 
 class AdmissionsReportView(APIView):
@@ -246,7 +255,7 @@ class AdmissionsReportView(APIView):
         responses=AdmissionsReportSerializer,
     )
     def get(self, request):
-        data, _ = build_admissions(
+        data, _, _ = build_admissions(
             request.user, request.query_params.get("cycle"), request.query_params.get("department")
         )
         return Response(AdmissionsReportSerializer(data).data)
@@ -352,7 +361,10 @@ class ReportSnapshotViewSet(
                 links["department"] = Department.objects.get(pk=v["department"])
             title = f"تقرير أداء هيئة التدريس — {term.name_ar}"
         elif kind == K.ADMISSIONS:
-            data, cycle = build_admissions(user, v.get("cycle"), v.get("department"))
+            data, cycle, department_id = build_admissions(user, v.get("cycle"), v.get("department"))
+            if department_id is not None:
+                # Filed under its department, so that department's roles find it.
+                links["department"] = Department.objects.get(pk=department_id)
             title = f"تقرير القبول والتسجيل — {cycle.name}"
         else:
             data, year = build_affairs(user, v.get("year"), v.get("department"))

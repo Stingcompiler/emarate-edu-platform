@@ -181,7 +181,17 @@ CAPABILITIES: dict[str, frozenset[Role]] = {
             R.DEPARTMENT_SUPERVISOR,
         }
     ),
-    "reports.admissions": frozenset({R.SYSTEM_ADMIN, R.HEAD_REGISTRAR}),
+    # docs/03 §7 «تقارير القبول/الطلاب»: the registrar, manager and supervisor see their
+    # departments (review 2026-10-25 decisions, item 7).
+    "reports.admissions": frozenset(
+        {
+            R.SYSTEM_ADMIN,
+            R.HEAD_REGISTRAR,
+            R.REGISTRAR,
+            R.DEPARTMENT_MANAGER,
+            R.DEPARTMENT_SUPERVISOR,
+        }
+    ),
     "reports.affairs": frozenset({R.SYSTEM_ADMIN, R.STUDENT_AFFAIRS}),
     # HR notices (docs/03 §3.11): one teacher at a time, never broadcast.
     "hr.view": frozenset({R.SYSTEM_ADMIN, R.ACADEMIC_AFFAIRS, R.HR}),
@@ -189,6 +199,8 @@ CAPABILITIES: dict[str, frozenset[Role]] = {
     # Website content (docs/03 §3.12–3.13)
     "content.manage": frozenset({R.SYSTEM_ADMIN, R.SITE_MANAGER}),
     "events.manage": frozenset({R.SYSTEM_ADMIN, R.SITE_MANAGER, R.EVENTS_MANAGER}),
+    # News: the site team; the events manager only news linked to an event (docs/03 §3.13).
+    "news.manage": frozenset({R.SYSTEM_ADMIN, R.SITE_MANAGER, R.EVENTS_MANAGER}),
     # Users and roles
     "users.view": frozenset({R.SYSTEM_ADMIN, R.ACADEMIC_AFFAIRS, R.HEAD_REGISTRAR}),
     # Sets a temporary password for another account (the owner's request, 2026-10-13).

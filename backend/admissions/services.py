@@ -537,7 +537,9 @@ def _submit(application: Application) -> Application:
             role_assignments__role=Role.REGISTRAR,
             role_assignments__department=application.department_id,
         ).distinct()
-        if not handlers.exists():
+        # A department with no registrar: the head registrar hears of it when the switch is on
+        # (docs/03 §2 applications_fallback_to_head_registrar; it was always on before).
+        if not handlers.exists() and SystemSettings.load().applications_fallback_to_head_registrar:
             handlers = User.objects.filter(
                 is_active=True, role_assignments__role=Role.HEAD_REGISTRAR
             )

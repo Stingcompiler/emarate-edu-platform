@@ -40,14 +40,18 @@ def visible_q(user) -> Q:
     )
     if rbac.scope_for(user, "learning.view").everything:
         staff = Q(pk__isnull=False)
+    return staff | _attending_q(user)
+
+
+def _attending_q(user) -> Q:
+    """Sessions a student attends: their courses, or their cohort."""
     record_ = StudentRecord.objects.filter(user=user, status="active").first()
-    student = Q(pk__in=[])
-    if record_ is not None:
-        enrolled = Enrollment.objects.filter(student_record=record_, status="active").values(
-            "offering_id"
-        )
-        student = Q(offering_id__in=enrolled) | Q(program=record_.program_id, level=record_.level)
-    return staff | student
+    if record_ is None:
+        return Q(pk__in=[])
+    enrolled = Enrollment.objects.filter(student_record=record_, status="active").values(
+        "offering_id"
+    )
+    return Q(offering_id__in=enrolled) | Q(program=record_.program_id, level=record_.level)
 
 
 def save(
@@ -112,6 +116,20 @@ def cancel(meta: RequestMeta, session: LiveSession) -> LiveSession:
     return session
 
 
+def _hosting(user, session: LiveSession) -> bool:
+    return (
+        can_manage(user, session)
+        or OfferingInstructor.objects.filter(offering=session.offering_id, user=user).exists()
+    )
+
+
+def may_join(user, session: LiveSession) -> bool:
+    """Hosts (managers and instructors) and the students the session is for."""
+    return _hosting(user, session) or (
+        LiveSession.objects.filter(_attending_q(user), pk=session.pk).exists()
+    )
+
+
 def join_link(user, session: LiveSession) -> str:
     """The meeting link, only for someone entitled and only near the session time."""
     if not LiveSession.objects.filter(visible_q(user), pk=session.pk).exists():
@@ -119,10 +137,11 @@ def join_link(user, session: LiveSession) -> str:
     if session.status == LiveSession.Status.CANCELLED:
         raise ValidationError({"detail": [gettext("This session was cancelled.")]})
     now = timezone.now()
-    staff = (
-        can_manage(user, session)
-        or OfferingInstructor.objects.filter(offering=session.offering_id, user=user).exists()
-    )
+    staff = _hosting(user, session)
+    if not staff and not may_join(user, session):
+        # Seeing the schedule (academic affairs reads every course) is not joining the class
+        # (docs/03 §7 «جلسات بث»: aa 👁 without joining; review 2026-10-25 decisions, item 4).
+        raise PermissionDenied(gettext("You can see this session but not join it."))
     if not staff and not (session.starts_at - JOIN_EARLY <= now <= session.ends_at):
         raise ValidationError(
             {"detail": [gettext("The link opens 15 minutes before the start.")]}, code="not_yet"

@@ -177,6 +177,10 @@ class News(PublicIdModel, TimestampedModel):
     status = models.CharField(max_length=10, choices=Status.choices, default=Status.DRAFT)
     publish_at = models.DateTimeField(null=True, blank=True)
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="+")
+    # News about an event: the events manager writes these (docs/03 §3.13 «خبر مرتبط»).
+    event = models.ForeignKey(
+        "content.Event", on_delete=models.SET_NULL, null=True, blank=True, related_name="news"
+    )
 
     class Meta:
         ordering = ["-publish_at", "-id"]

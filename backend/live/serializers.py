@@ -21,6 +21,7 @@ class LiveSessionSerializer(serializers.ModelSerializer):
         source="offering.course.name_ar", read_only=True, default=None
     )
     program_name = serializers.CharField(source="program.name_ar", read_only=True, default=None)
+    can_join = serializers.SerializerMethodField()
 
     class Meta:
         model = LiveSession
@@ -41,8 +42,16 @@ class LiveSessionSerializer(serializers.ModelSerializer):
             "host_name",
             "status",
             "recording_url",
+            "can_join",
         ]
         read_only_fields = ["public_id", "status", "host_name"]
+
+    def get_can_join(self, obj) -> bool:
+        """Whether the link is theirs to open (an observer sees the session without it)."""
+        from .services import may_join
+
+        request = self.context.get("request")
+        return request is not None and may_join(request.user, obj)
 
     def validate(self, attrs):
         scope = attrs.get("scope", getattr(self.instance, "scope", None))
