@@ -42,7 +42,7 @@
 | `apps/landing` | Astro SSG + React islands | صفحات عامة ثابتة من `/api/public` وقت البناء؛ جزر: التقديم، التواصل، متابعة الطلب | لا مصادقة، لا كوكيز |
 | `apps/portal` | React 19 + Vite + TS + PWA | كل شاشات الأدوار الـ 14؛ إشعارات Push | لا منطق أعمال، لا حساب صلاحيات |
 | `backend` | Django 6 + DRF | كل المنطق، الصلاحيات، الحالات، التدقيق، الملفات، الإشعارات، OpenAPI | لا HTML (إلا Admin وPDF) |
-| Celery | Eager (dev) / Redis (prod) | استيراد، إشعارات، إغلاق اختبارات، PDF، إعادة بناء الموقع | – |
+| Celery | Eager (dev) / Redis (prod) | إشعارات، إغلاق اختبارات، PDF، إعادة بناء الموقع (تحليل ملفات الاستيراد يجري داخل الطلب ما دامت الملفات صغيرة؛ يُنقل إلى مهمة إن تجاوز زمن الطلب حدًّا يقيسه اختبار الحمل — قرار 2026-10-25) | – |
 | التخزين | `media/` (dev) / Bunny (prod) خلف واجهة `MediaService` | حفظ الملفات وإصدار روابط موقّعة | – |
 | `packages/ui` | React + Tokens | مكوّنات الهوية (`06-design-system.md`) | – |
 | `packages/api` | openapi-typescript | أنواع وClient مولَّدان من الخادم | – |
