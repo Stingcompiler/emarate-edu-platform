@@ -117,12 +117,14 @@ export function LiveList() {
             <p className="text-sm text-text-muted">
               {s.host_name} · {PROVIDER[s.provider]} · بدأ {time.format(new Date(s.starts_at))}
             </p>
-            <Button
-              className="mt-3 w-full bg-accent hover:bg-accent-hover sm:w-auto"
-              onClick={() => join.mutate(s.public_id)}
-            >
-              انضمام
-            </Button>
+            {s.can_join && (
+              <Button
+                className="mt-3 w-full bg-accent hover:bg-accent-hover sm:w-auto"
+                onClick={() => join.mutate(s.public_id)}
+              >
+                انضمام
+              </Button>
+            )}
           </Card>
         ))}
         {[...groups.entries()].map(([g, list]) => (
@@ -151,7 +153,7 @@ export function LiveList() {
                   </span>
                   {s.status === "cancelled" ? (
                     <StatusBadge status="rejected" label="ملغاة" />
-                  ) : (
+                  ) : !s.can_join ? null : (
                     <Button
                       variant="secondary"
                       className="min-h-9 px-3"

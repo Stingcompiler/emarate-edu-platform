@@ -86,6 +86,18 @@ def new_version(meta: RequestMeta, regulation: Regulation) -> Regulation:
     return draft
 
 
+def delete_draft(meta: RequestMeta, regulation: Regulation) -> None:
+    """Only an unpublished draft is deleted (docs/03 §3.14); a published one is superseded by a
+    new version, never removed."""
+    _require(meta.actor, "regulations.manage")
+    with transaction.atomic():
+        locked = Regulation.objects.select_for_update().get(pk=regulation.pk)
+        if locked.status != Regulation.Status.DRAFT:
+            raise Conflict(gettext("Only an unpublished draft can be deleted."), code="published")
+        record(meta, "regulation.delete", locked, old=snapshot(locked))
+        locked.delete()
+
+
 def publish_regulation(meta: RequestMeta, regulation: Regulation) -> Regulation:
     _require(meta.actor, "regulations.manage")
     if regulation.status != Regulation.Status.DRAFT:
