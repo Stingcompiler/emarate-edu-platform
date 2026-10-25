@@ -253,7 +253,10 @@ class SubmissionSerializer(serializers.ModelSerializer):
         read_only_fields = fields
 
     def get_versions_count(self, obj) -> int:
-        return obj.versions.count()
+        # Lists annotate it (review 2026-10-25 R23: one query per student before); a single
+        # submission counts its own.
+        counted = getattr(obj, "versions_total", None)
+        return counted if counted is not None else obj.versions.count()
 
     @extend_schema_field(GradeSerializer(allow_null=True))
     def get_grade(self, obj) -> dict | None:

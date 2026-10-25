@@ -321,13 +321,9 @@ def validate_file(meta: RequestMeta, name: str, uploaded) -> StudentImportBatch:
 
 def commit(meta: RequestMeta, batch: StudentImportBatch) -> StudentImportBatch:
     """Apply create/update rows; error rows are skipped. One transaction."""
-    if batch.status not in (
-        StudentImportBatch.Status.VALIDATED,
-        StudentImportBatch.Status.HAS_ERRORS,
-    ):
-        raise ValueError("This batch was already committed or rejected.")
     created = updated = 0
     with transaction.atomic():
+        batch = _locked_open(batch)
         rows = batch.rows.exclude(
             action__in=[StudentImportRow.Action.ERROR, StudentImportRow.Action.SKIP]
         )
@@ -373,9 +369,21 @@ def commit(meta: RequestMeta, batch: StudentImportBatch) -> StudentImportBatch:
 
 
 def reject(meta: RequestMeta, batch: StudentImportBatch) -> StudentImportBatch:
-    if batch.status == StudentImportBatch.Status.COMMITTED:
-        raise ValueError("A committed batch cannot be rejected.")
-    batch.status = StudentImportBatch.Status.REJECTED
-    batch.save(update_fields=["status", "updated_at"])
-    record(meta, "students.import_reject", batch)
+    with transaction.atomic():
+        batch = _locked_open(batch)
+        batch.status = StudentImportBatch.Status.REJECTED
+        batch.save(update_fields=["status", "updated_at"])
+        record(meta, "students.import_reject", batch)
+    return batch
+
+
+def _locked_open(batch: StudentImportBatch) -> StudentImportBatch:
+    """The batch row, locked and read again (review 2026-10-25 R18): commit and reject decide on
+    the state they hold the lock on, never on the copy a page loaded earlier."""
+    batch = StudentImportBatch.objects.select_for_update().get(pk=batch.pk)
+    if batch.status not in (
+        StudentImportBatch.Status.VALIDATED,
+        StudentImportBatch.Status.HAS_ERRORS,
+    ):
+        raise ValueError("This batch was already committed or rejected.")
     return batch

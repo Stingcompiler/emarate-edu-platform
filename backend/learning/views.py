@@ -226,7 +226,9 @@ class AssignmentViewSet(viewsets.ModelViewSet):
         services.require(request.user, assignment.offering, "view_all")
         rows = assignment.submissions.select_related(
             "student_record", "current_version", "grade", "assignment"
-        )
+        ).annotate(versions_total=Count("versions", distinct=True))
+        # GROUP BY drops the model's default ordering; restate it for pagination.
+        rows = rows.order_by(*Submission._meta.ordering)
         page = self.paginate_queryset(rows)
         data = SubmissionSerializer(page, many=True, context={"staff": True}).data
         return self.get_paginated_response(data)
@@ -437,6 +439,7 @@ class GradingQueueView(APIView):
             .select_related(
                 "assignment__offering__course", "student_record", "current_version", "grade"
             )
+            .annotate(versions_total=Count("versions", distinct=True))
             .order_by("current_version__submitted_at", "first_submitted_at")
             .distinct()
         )

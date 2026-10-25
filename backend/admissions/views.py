@@ -108,8 +108,16 @@ class _Audited(viewsets.ModelViewSet):
 @extend_schema(tags=["admissions"])
 class CycleViewSet(_Audited):
     serializer_class = CycleSerializer
-    queryset = AdmissionCycle.objects.all()
     audit_name = "cycle"
+
+    def get_queryset(self):
+        # Department roles see the cycles their departments' programmes open in, nothing of
+        # the others (docs/03 §3.6: «دورات القبول … مقصورة على قسمه»; review 2026-10-25 R13).
+        return (
+            rbac.scope_for(self.request.user, "admissions.view")
+            .filter(AdmissionCycle.objects.all(), "intakes__program__department")
+            .distinct()
+        )
 
 
 @extend_schema(tags=["admissions"])
@@ -520,7 +528,9 @@ class VisitorSubmitView(_Visitor):
     def post(self, request, public_id):
         # Idempotency-Key (docs/05 §7): a retried submit returns the first response.
         key = request.META.get("HTTP_IDEMPOTENCY_KEY", "")[:100]
-        cache_key = f"idem:submit:{request.contact.pk}:{key}" if key else None
+        # Bound to this application: the same key on another one is a different request
+        # (review 2026-10-25 R21).
+        cache_key = f"idem:submit:{request.contact.pk}:{public_id}:{key}" if key else None
         if cache_key and (hit := cache.get(cache_key)) is not None:
             return Response(hit)
         application = services.submit(request.contact, services.own(request.contact, public_id))

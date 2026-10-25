@@ -8,7 +8,7 @@ from django.utils import timezone
 
 from accounts.rbac import Role
 from exams import services
-from exams.models import Exam, ExamAttempt
+from exams.models import Exam, ExamAttempt, StudentAnswer
 from exams.question_types import normalize
 
 URL = "/api/v1/exams"
@@ -183,6 +183,18 @@ def test_time_limits_are_the_servers(api, classroom, exam):
     assert services.close_expired() == 1
     row.refresh_from_db()
     assert row.status == "auto_submitted" and row.score is not None
+    # In the log once, like a student's own submission (review 2026-10-25 R25).
+    from audit.models import AuditLog
+
+    assert services.close_expired() == 0
+    assert AuditLog.objects.filter(action="exam.attempt_auto_submit").count() == 1
+    Exam.objects.filter(pk=exam.pk).update(
+        opens_at=timezone.now() - timedelta(hours=2),
+        closes_at=timezone.now() - timedelta(minutes=6),
+    )
+    services.close_expired()
+    services.close_expired()
+    assert AuditLog.objects.filter(action="exam.auto_close").count() == 1
 
 
 def test_window_and_other_courses(
@@ -515,3 +527,26 @@ def test_the_exam_page_sees_an_extension_and_a_close(api, classroom, exam, make_
     assert teacher.post(f"{URL}/{exam.public_id}/close").status_code == 200
     assert student.get(clock).data["status"] == "auto_submitted"
     assert api(make_user(Role.STUDENT)).get(clock).status_code == 404  # only the owner
+
+
+def test_a_grade_from_a_stale_copy_never_revives_an_invalidated_attempt(api, classroom, exam):
+    """Review 2026-10-25 R16: the teacher's grading page loaded the essay of a submitted
+    attempt; the attempt was then invalidated; the late grade must be refused, and the attempt
+    stays invalidated and failed."""
+    from audit.services import RequestMeta
+    from core.errors import Conflict
+
+    student = RequestMeta(actor=classroom.student)
+    attempt = services.start(student, exam)
+    services.save_answer(student, attempt, _ids(exam)["short_answer"].pk, "إجابة")
+    services.submit(student, attempt)
+    stale = StudentAnswer.objects.select_related("attempt", "question").get(
+        attempt=attempt, question=_ids(exam)["short_answer"]
+    )
+    teacher = RequestMeta(actor=classroom.teacher)
+    services.invalidate(teacher, ExamAttempt.objects.get(pk=attempt.pk), "غش")
+    with pytest.raises(Conflict):
+        services.grade_answer(teacher, stale, stale.question.marks)
+    row = ExamAttempt.objects.get(pk=attempt.pk)
+    assert row.status == "invalidated" and row.passed is False
+    assert StudentAnswer.objects.get(pk=stale.pk).marks_awarded is None

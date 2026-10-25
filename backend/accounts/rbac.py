@@ -136,6 +136,8 @@ CAPABILITIES: dict[str, frozenset[Role]] = {
     "results.correct": frozenset({R.SYSTEM_ADMIN, R.RESULTS_OFFICER}),
     "results.approve": frozenset({R.SYSTEM_ADMIN, R.ACADEMIC_AFFAIRS}),
     "results.settings": frozenset({R.SYSTEM_ADMIN, R.RESULTS_OFFICER}),
+    # Reading them: the head registrar too; department roles not (docs/03 §7; review R13).
+    "results.settings_view": frozenset({R.SYSTEM_ADMIN, R.HEAD_REGISTRAR, R.RESULTS_OFFICER}),
     # Student affairs (docs/03 §3.14)
     "regulations.manage": frozenset({R.SYSTEM_ADMIN, R.STUDENT_AFFAIRS}),
     "cases.manage": frozenset({R.SYSTEM_ADMIN, R.STUDENT_AFFAIRS}),

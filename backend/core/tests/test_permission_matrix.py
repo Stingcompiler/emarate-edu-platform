@@ -94,6 +94,8 @@ RESULTS = frozenset(
     }
 )
 CORRECTIONS = frozenset({R.SYSTEM_ADMIN, R.RESULTS_OFFICER, R.ACADEMIC_AFFAIRS})
+# docs/03 §7 «نتائج: إعدادات العرض»: department roles do not read them (review 2026-10-25 R13).
+RESULT_SETTINGS = frozenset({R.SYSTEM_ADMIN, R.HEAD_REGISTRAR, R.RESULTS_OFFICER})
 CASES = frozenset(
     {
         R.SYSTEM_ADMIN,
@@ -219,9 +221,9 @@ READS: dict[str, tuple[str, frozenset, frozenset]] = {
         CORRECTIONS,
         frozenset(),
     ),
-    "result-settings": ("/api/v1/results/settings", RESULTS, frozenset()),
-    "grading-scale-list": ("/api/v1/results/grading-scales", RESULTS, frozenset()),
-    "term-release-list": ("/api/v1/results/term-releases", RESULTS, frozenset()),
+    "result-settings": ("/api/v1/results/settings", RESULT_SETTINGS, frozenset()),
+    "grading-scale-list": ("/api/v1/results/grading-scales", RESULT_SETTINGS, frozenset()),
+    "term-release-list": ("/api/v1/results/term-releases", RESULT_SETTINGS, frozenset()),
     "me-results": ("/api/v1/me/results", ONLY_STUDENT, EVERYONE - ONLY_STUDENT),
     # Exams (the world's exam is published in IT101; the student has a submitted attempt)
     "exam-list": ("/api/v1/exams", EVERYONE, frozenset()),
