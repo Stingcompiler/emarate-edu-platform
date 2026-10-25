@@ -96,7 +96,8 @@ export const ROUTE_ACCESS: Record<string, Allow> = {
   "/inquiries/:id": role("site_manager", "head_registrar", "registrar", "system_admin"),
   "/site": cap("content.manage"),
   "/site/pages/:id": cap("content.manage"),
-  "/site/news/:id": cap("content.manage"),
+  // The events manager writes news about its events (docs/03 §3.13).
+  "/site/news/:id": cap("news.manage"),
   "/site/media": cap("content.manage"),
   "/site/redirects": cap("content.manage"),
   "/events": cap("events.manage"),

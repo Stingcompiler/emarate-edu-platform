@@ -10,7 +10,7 @@ from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
-from rest_framework.exceptions import PermissionDenied
+from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.parsers import JSONParser, MultiPartParser
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
@@ -111,11 +111,34 @@ class PageViewSet(_Managed):
 
 @extend_schema(tags=["content"])
 class NewsViewSet(_Managed):
+    """The site team manages all news; the events manager the news linked to an event only
+    (docs/03 §3.13 «خبر مرتبط»; review 2026-10-25 decisions, item 5)."""
+
     serializer_class = NewsSerializer
-    queryset = News.objects.select_related("cover")
+    capability_name = "news.manage"
     audit_name = "news"
-    filterset_fields = ["status"]
+    filterset_fields = ["status", "event"]
     search_fields = ["title", "slug"]
+
+    def _all_news(self) -> bool:
+        return rbac.can(self.request.user, "content.manage")
+
+    def get_queryset(self):
+        queryset = News.objects.select_related("cover", "event")
+        return queryset if self._all_news() else queryset.filter(event__isnull=False)
+
+    def _require_event(self, serializer):
+        event = serializer.validated_data.get("event", getattr(serializer.instance, "event", None))
+        if event is None and not self._all_news():
+            raise ValidationError({"event": [gettext("Choose the event this news is about.")]})
+
+    def perform_create(self, serializer):
+        self._require_event(serializer)
+        super().perform_create(serializer)
+
+    def perform_update(self, serializer):
+        self._require_event(serializer)
+        super().perform_update(serializer)
 
 
 @extend_schema(tags=["content"])
