@@ -14,7 +14,7 @@ from django.utils.translation import gettext
 from rest_framework.exceptions import NotFound, PermissionDenied, ValidationError
 
 from academic.models import Enrollment
-from audit.services import RequestMeta, record, snapshot
+from audit.services import SYSTEM, RequestMeta, record, snapshot
 from core.errors import Conflict, Invalid
 from learning.services import require
 from notifications.models import Category
@@ -404,10 +404,24 @@ def close_expired() -> int:
                 if locked.status != A.IN_PROGRESS or now <= locked.deadline_at + grace:
                     continue
                 _finish(locked, A.AUTO_SUBMITTED)
+                # In the log like a student's own submission (review 2026-10-25 R25).
+                record(
+                    SYSTEM,
+                    "exam.attempt_auto_submit",
+                    locked,
+                    new={"score": str(locked.score)},
+                    department_id=_dept(locked.exam),
+                )
             count += 1
-    Exam.objects.filter(
+    ended = Exam.objects.filter(
         status=Exam.Status.PUBLISHED, closes_at__lt=now - timedelta(minutes=5)
-    ).update(status=Exam.Status.CLOSED)
+    ).select_related("offering__course")
+    for exam in ended:
+        with transaction.atomic():
+            if Exam.objects.filter(pk=exam.pk, status=Exam.Status.PUBLISHED).update(
+                status=Exam.Status.CLOSED
+            ):
+                record(SYSTEM, "exam.auto_close", exam, department_id=_dept(exam))
     return count
 
 

@@ -269,7 +269,7 @@ class DisplaySettingsView(APIView):
 
     def check_permissions(self, request):
         super().check_permissions(request)
-        name = "results.settings" if request.method == "PATCH" else "results.view"
+        name = "results.settings" if request.method == "PATCH" else "results.settings_view"
         if not rbac.can(request.user, name):
             raise PermissionDenied()
 
@@ -294,7 +294,7 @@ class GradingScaleViewSet(
 ):
     serializer_class = GradingScaleSerializer
     queryset = GradingScale.objects.select_related("program")
-    permission_classes = [IsAuthenticated, capability("results.view", "results.settings")]
+    permission_classes = [IsAuthenticated, capability("results.settings_view", "results.settings")]
     http_method_names = ["get", "post", "put", "head", "options"]
 
     def perform_create(self, serializer):
@@ -315,7 +315,7 @@ class TermReleaseViewSet(
 
     serializer_class = TermReleaseSerializer
     queryset = TermResultRelease.objects.all()
-    permission_classes = [IsAuthenticated, capability("results.view", "results.settings")]
+    permission_classes = [IsAuthenticated, capability("results.settings_view", "results.settings")]
     http_method_names = ["get", "post", "put", "head", "options"]
     filterset_fields = ["term"]
 

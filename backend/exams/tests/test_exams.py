@@ -183,6 +183,18 @@ def test_time_limits_are_the_servers(api, classroom, exam):
     assert services.close_expired() == 1
     row.refresh_from_db()
     assert row.status == "auto_submitted" and row.score is not None
+    # In the log once, like a student's own submission (review 2026-10-25 R25).
+    from audit.models import AuditLog
+
+    assert services.close_expired() == 0
+    assert AuditLog.objects.filter(action="exam.attempt_auto_submit").count() == 1
+    Exam.objects.filter(pk=exam.pk).update(
+        opens_at=timezone.now() - timedelta(hours=2),
+        closes_at=timezone.now() - timedelta(minutes=6),
+    )
+    services.close_expired()
+    services.close_expired()
+    assert AuditLog.objects.filter(action="exam.auto_close").count() == 1
 
 
 def test_window_and_other_courses(

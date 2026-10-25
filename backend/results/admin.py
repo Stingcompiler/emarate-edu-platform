@@ -12,10 +12,15 @@ class ResultImportBatchAdmin(admin.ModelAdmin):
     def has_add_permission(self, request):
         return False
 
+    def has_delete_permission(self, request, obj=None):
+        return False
+
 
 @admin.register(AcademicResult)
 class AcademicResultAdmin(admin.ModelAdmin):
-    """Read-only: results change only through approved corrections (audited)."""
+    """Read-only: results change only through approved corrections (audited). No delete either:
+    a deleted result could be imported again outside the correction workflow (review
+    2026-10-25 R24)."""
 
     list_display = ("student_record", "offering", "score", "letter", "status", "is_published")
     list_filter = ("term", "status", "is_published")
@@ -27,12 +32,18 @@ class AcademicResultAdmin(admin.ModelAdmin):
     def has_add_permission(self, request):
         return False
 
+    def has_delete_permission(self, request, obj=None):
+        return False
+
 
 @admin.register(ResultCorrection)
 class ResultCorrectionAdmin(admin.ModelAdmin):
     list_display = ("result", "status", "requested_by", "decided_by", "created_at")
     list_filter = ("status",)
     readonly_fields = [f.name for f in ResultCorrection._meta.fields]
+
+    def has_delete_permission(self, request, obj=None):
+        return False
 
 
 admin.site.register(GradingScale)
