@@ -200,6 +200,18 @@ CAPABILITIES: dict[str, frozenset[Role]] = {
     "users.delete": frozenset({R.SYSTEM_ADMIN}),
     # Audit log: system admin sees everything; department roles their department.
     "audit.view": frozenset({R.SYSTEM_ADMIN, R.DEPARTMENT_MANAGER, R.DEPARTMENT_SUPERVISOR}),
+    # The log of one's own field of work (docs/03 §7 «سجل التدقيق» ◐; review 2026-10-25
+    # decisions, item 8): which actions belong to which role is audit.views.DOMAINS.
+    "audit.domain": frozenset(
+        {
+            R.SYSTEM_ADMIN,  # holds every capability; already sees the whole log
+            R.HEAD_REGISTRAR,
+            R.REGISTRAR,
+            R.RESULTS_OFFICER,
+            R.ACADEMIC_AFFAIRS,
+            R.SITE_MANAGER,
+        }
+    ),
 }
 
 # Who may grant (and revoke) which role (docs/03 §6).

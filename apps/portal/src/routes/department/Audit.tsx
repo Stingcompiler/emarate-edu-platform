@@ -7,6 +7,7 @@ import { isWide } from "../../lib/media";
 import { api, ok } from "../../lib/api";
 import { useMe } from "../../lib/auth";
 import { useDepartment } from "../../lib/department";
+import { can } from "../../lib/nav";
 import { downloadCsv } from "../../lib/reports";
 import { count, N } from "../../lib/format";
 import { Pager } from "../../components/Pager";
@@ -291,9 +292,12 @@ export function Audit() {
   const everything = !!(
     me.data?.capabilities?.["audit.view"] as { everything?: boolean } | undefined
   )?.everything;
+  // The head registrar, registrar, results officer, academic affairs and site manager read the
+  // log of their own field of work, which the server picks (decisions item 8).
+  const domain = !everything && !can(me.data, "audit.view") && can(me.data, "audit.domain");
   const dept = useDepartment();
-  const id = everything ? undefined : dept.id;
-  const department = everything ? undefined : dept.department;
+  const id = everything || domain ? undefined : dept.id;
+  const department = everything || domain ? undefined : dept.department;
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [picked, setPicked] = useState<number | null>(null);
@@ -332,11 +336,13 @@ export function Audit() {
   return (
     <PortalShell
       title="سجل العمليات"
-      subtitle={`${department?.name_ar ?? "كل الكلية"} · ${count(list.data?.count ?? 0, N.operation)} · كل عملية تُسجَّل بالقيمة قبل/بعد ولا تُحذف`}
+      subtitle={`${domain ? "عمليات مجال عملك" : (department?.name_ar ?? "كل الكلية")} · ${count(list.data?.count ?? 0, N.operation)} · كل عملية تُسجَّل بالقيمة قبل/بعد ولا تُحذف`}
       back={
         everything
           ? { label: "إدارة النظام", to: "/system" }
-          : { label: "لوحة القسم", to: "/department" }
+          : domain
+            ? undefined
+            : { label: "لوحة القسم", to: "/department" }
       }
     >
       <FilterBar>

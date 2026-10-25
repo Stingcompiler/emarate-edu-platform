@@ -71,6 +71,11 @@ RESULTS_VIEW = frozenset(
     }
 )
 AUDIT = frozenset({R.SYSTEM_ADMIN, R.DEPARTMENT_MANAGER, R.DEPARTMENT_SUPERVISOR})
+# Roles that read the log of their own field of work (docs/03 §7 ◐; decisions item 8). The
+# world's entry ("test", IT) is in nobody's field, so its detail is 404 for them.
+AUDIT_DOMAIN = frozenset(
+    {R.HEAD_REGISTRAR, R.REGISTRAR, R.RESULTS_OFFICER, R.ACADEMIC_AFFAIRS, R.SITE_MANAGER}
+)
 # In the world below, the teacher and TA are assigned to IT101 and the student is enrolled.
 LEARNING_STAFF = frozenset(
     {
@@ -173,8 +178,8 @@ READS: dict[str, tuple[str, frozenset, frozenset]] = {
         ENROLLMENT,
         frozenset(),
     ),
-    "audit-log-list": ("/api/v1/audit-logs", AUDIT, frozenset()),
-    "audit-log-detail": ("/api/v1/audit-logs/{audit}", AUDIT, frozenset()),
+    "audit-log-list": ("/api/v1/audit-logs", AUDIT | AUDIT_DOMAIN, frozenset()),
+    "audit-log-detail": ("/api/v1/audit-logs/{audit}", AUDIT, AUDIT_DOMAIN),
     "lecture-list": ("/api/v1/lectures", EVERYONE, frozenset()),
     "lecture-detail": ("/api/v1/lectures/{lecture}", LEARNING, OUTSIDERS),
     "assignment-list": ("/api/v1/assignments", EVERYONE, frozenset()),
