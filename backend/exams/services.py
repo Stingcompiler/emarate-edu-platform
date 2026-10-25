@@ -487,13 +487,19 @@ def invalidate(meta: RequestMeta, attempt: ExamAttempt, reason: str) -> ExamAtte
 def grade_answer(meta: RequestMeta, answer: StudentAnswer, marks: Decimal) -> StudentAnswer:
     attempt = answer.attempt
     require(meta.actor, attempt.exam.offering, "grade")
-    if attempt.status not in DONE_STATES:
-        raise Conflict(gettext("Grade after the attempt is submitted."), code="not_submitted")
     if not 0 <= marks <= answer.question.marks:
         raise ValidationError(
             {"marks": [gettext("Between 0 and %(marks)s.") % {"marks": answer.question.marks}]}
         )
     with transaction.atomic():
+        # The same lock as invalidate (R03), and the state read under it (review 2026-10-25 R16):
+        # a grade made from a copy loaded before an invalidation never makes that attempt pass.
+        attempt = _locked(attempt)
+        if attempt.status == A.INVALIDATED:
+            raise Conflict(gettext("This attempt was invalidated."), code="invalidated")
+        if attempt.status not in DONE_STATES:
+            raise Conflict(gettext("Grade after the attempt is submitted."), code="not_submitted")
+        answer = StudentAnswer.objects.select_related("question").get(pk=answer.pk)
         answer.marks_awarded = marks
         answer.is_correct = marks == answer.question.marks
         answer.needs_manual = False

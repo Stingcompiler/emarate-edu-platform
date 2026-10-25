@@ -558,3 +558,54 @@ def test_an_unverified_email_never_joins_a_phone_only_contact(
     # The phone stays with its first contact; the same email later still finds its own.
     assert ask("", "مرة أخرى").contact_id == earlier.contact_id
     assert ask("OTHER@example.test", "ثالث").contact_id == later.contact_id
+
+
+def test_a_withdrawal_loaded_before_the_acceptance_cannot_undo_it(intake, make_user):
+    """Review 2026-10-25 R17: the applicant's page read "eligible", the head registrar accepted,
+    then the withdrawal arrived with the old copy: 409, and the application stays accepted."""
+    from audit.services import RequestMeta
+    from contacts.models import Contact
+    from core.errors import Conflict
+
+    contact = Contact.objects.create(name="متقدم", email="withdraw@example.test")
+    application = Application.objects.create(
+        reference_no="APP-WD", contact=contact, intake=intake, full_name="متقدم", status="eligible"
+    )
+    stale = Application.objects.get(pk=application.pk)
+    head = make_user(Role.HEAD_REGISTRAR)
+    admissions_services.transition(RequestMeta(actor=head), application, to="accepted")
+    with pytest.raises(Conflict):
+        admissions_services.withdraw(contact, stale)
+    assert Application.objects.get(pk=application.pk).status == "accepted"
+
+
+def test_an_application_decided_after_the_expiry_job_picked_it_keeps_the_decision(intake):
+    """Review 2026-10-25 R17: the job listed the application while it was under review; it was
+    marked eligible before the job reached it; the job must leave it alone."""
+    from audit.models import AuditLog
+    from contacts.models import Contact
+
+    AdmissionCycle.objects.update(
+        closes_at=timezone.now() - timedelta(days=31), opens_at=timezone.now() - timedelta(days=60)
+    )
+    picked = Application.objects.create(
+        reference_no="APP-EXP1",
+        contact=Contact.objects.create(name="أ", email="exp1@example.test"),
+        intake=intake,
+        full_name="أ",
+        status="under_review",
+    )
+    expiring = Application.objects.create(
+        reference_no="APP-EXP2",
+        contact=Contact.objects.create(name="ب", email="exp2@example.test"),
+        intake=intake,
+        full_name="ب",
+        status="submitted",
+    )
+    cutoff = timezone.now() - timedelta(days=30)
+    Application.objects.filter(pk=picked.pk).update(status="eligible")  # decided meanwhile
+    assert admissions_services._expire_one(picked.pk, cutoff) is False
+    assert admissions_services._expire_one(expiring.pk, cutoff) is True
+    assert Application.objects.get(pk=picked.pk).status == "eligible"
+    assert Application.objects.get(pk=expiring.pk).status == "expired"
+    assert AuditLog.objects.filter(action="admissions.expire").count() == 1

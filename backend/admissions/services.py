@@ -483,9 +483,12 @@ def _submit(application: Application) -> Application:
 
 
 def withdraw(contact, application: Application) -> Application:
-    if (application.status, S.WITHDRAWN) not in TRANSITIONS:
-        raise Conflict(gettext("This application can no longer be withdrawn."), code="locked")
     with transaction.atomic():
+        # Read under the same lock as every other move (review 2026-10-25 R17): a withdrawal
+        # that loaded the application before it was accepted must not undo the acceptance.
+        application = _locked(application)
+        if (application.status, S.WITHDRAWN) not in TRANSITIONS:
+            raise Conflict(gettext("This application can no longer be withdrawn."), code="locked")
         source = application.status
         application.status = S.WITHDRAWN
         application.save(update_fields=["status", "updated_at"])
@@ -716,21 +719,36 @@ def mark_activated(student_record) -> None:
     _record_move(application, S.REGISTERED, S.ACTIVATED)
 
 
+EXPIRING = (S.SUBMITTED, S.UNDER_REVIEW)
+
+
 def expire_closed() -> int:
-    """Beat: submitted / under-review applications of a closed cycle expire."""
-    now = timezone.now()
-    stale = Application.objects.filter(
-        status__in=[S.SUBMITTED, S.UNDER_REVIEW],
-        intake__cycle__closes_at__lt=now - timedelta(days=30),
+    """Beat: submitted / under-review applications of a cycle closed for 30 days expire."""
+    cutoff = timezone.now() - timedelta(days=30)
+    candidates = list(
+        Application.objects.filter(
+            status__in=EXPIRING, intake__cycle__closes_at__lt=cutoff
+        ).values_list("pk", flat=True)
     )
-    count = 0
-    for application in stale:
+    return sum(_expire_one(pk, cutoff) for pk in candidates)
+
+
+def _expire_one(pk: int, cutoff) -> bool:
+    """One application, locked and checked again (review 2026-10-25 R17): one decided after the
+    job picked it keeps the decision."""
+    with transaction.atomic():
+        list(Application.objects.select_for_update().filter(pk=pk).values_list("pk"))
+        application = Application.objects.filter(
+            pk=pk, status__in=EXPIRING, intake__cycle__closes_at__lt=cutoff
+        ).first()
+        if application is None:
+            return False
         source = application.status
         application.status = S.EXPIRED
         application.save(update_fields=["status", "updated_at"])
         _record_move(application, source, S.EXPIRED, note="انتهت الدورة")
-        count += 1
-    return count
+        record(SYSTEM, "admissions.expire", application, department_id=application.department_id)
+    return True
 
 
 # ─── Documents ────────────────────────────────────────────────────────────

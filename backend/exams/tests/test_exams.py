@@ -8,7 +8,7 @@ from django.utils import timezone
 
 from accounts.rbac import Role
 from exams import services
-from exams.models import Exam, ExamAttempt
+from exams.models import Exam, ExamAttempt, StudentAnswer
 from exams.question_types import normalize
 
 URL = "/api/v1/exams"
@@ -548,3 +548,26 @@ def test_only_who_may_delete_the_exam_deletes_its_questions(api, classroom, make
     # The teacher does not delete in an exam the manager wrote for their course.
     managers = exam_with_questions(manager, count=1)[0]
     assert api(classroom.teacher).delete(managers).status_code == 403
+
+
+def test_a_grade_from_a_stale_copy_never_revives_an_invalidated_attempt(api, classroom, exam):
+    """Review 2026-10-25 R16: the teacher's grading page loaded the essay of a submitted
+    attempt; the attempt was then invalidated; the late grade must be refused, and the attempt
+    stays invalidated and failed."""
+    from audit.services import RequestMeta
+    from core.errors import Conflict
+
+    student = RequestMeta(actor=classroom.student)
+    attempt = services.start(student, exam)
+    services.save_answer(student, attempt, _ids(exam)["short_answer"].pk, "إجابة")
+    services.submit(student, attempt)
+    stale = StudentAnswer.objects.select_related("attempt", "question").get(
+        attempt=attempt, question=_ids(exam)["short_answer"]
+    )
+    teacher = RequestMeta(actor=classroom.teacher)
+    services.invalidate(teacher, ExamAttempt.objects.get(pk=attempt.pk), "غش")
+    with pytest.raises(Conflict):
+        services.grade_answer(teacher, stale, stale.question.marks)
+    row = ExamAttempt.objects.get(pk=attempt.pk)
+    assert row.status == "invalidated" and row.passed is False
+    assert StudentAnswer.objects.get(pk=stale.pk).marks_awarded is None
