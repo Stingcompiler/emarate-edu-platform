@@ -40,6 +40,15 @@ class TemplateSerializer(serializers.ModelSerializer):
 
 class IntakeSerializer(serializers.ModelSerializer):
     program = serializers.PrimaryKeyRelatedField(queryset=Program.objects.all())
+    # A draft can still change under the same version: only a published (frozen) template is
+    # offered to applicants (review 2026-10-25 R19).
+    form_template = serializers.PrimaryKeyRelatedField(
+        queryset=ApplicationFormTemplate.objects.filter(
+            status=ApplicationFormTemplate.Status.PUBLISHED
+        ),
+        required=False,
+        allow_null=True,
+    )
     program_name = serializers.CharField(source="program.name_ar", read_only=True)
     department_name = serializers.CharField(source="program.department.name_ar", read_only=True)
     applications_count = serializers.IntegerField(read_only=True, default=None)

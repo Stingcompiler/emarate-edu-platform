@@ -528,7 +528,9 @@ class VisitorSubmitView(_Visitor):
     def post(self, request, public_id):
         # Idempotency-Key (docs/05 §7): a retried submit returns the first response.
         key = request.META.get("HTTP_IDEMPOTENCY_KEY", "")[:100]
-        cache_key = f"idem:submit:{request.contact.pk}:{key}" if key else None
+        # Bound to this application: the same key on another one is a different request
+        # (review 2026-10-25 R21).
+        cache_key = f"idem:submit:{request.contact.pk}:{public_id}:{key}" if key else None
         if cache_key and (hit := cache.get(cache_key)) is not None:
             return Response(hit)
         application = services.submit(request.contact, services.own(request.contact, public_id))
