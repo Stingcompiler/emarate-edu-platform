@@ -108,8 +108,16 @@ class _Audited(viewsets.ModelViewSet):
 @extend_schema(tags=["admissions"])
 class CycleViewSet(_Audited):
     serializer_class = CycleSerializer
-    queryset = AdmissionCycle.objects.all()
     audit_name = "cycle"
+
+    def get_queryset(self):
+        # Department roles see the cycles their departments' programmes open in, nothing of
+        # the others (docs/03 §3.6: «دورات القبول … مقصورة على قسمه»; review 2026-10-25 R13).
+        return (
+            rbac.scope_for(self.request.user, "admissions.view")
+            .filter(AdmissionCycle.objects.all(), "intakes__program__department")
+            .distinct()
+        )
 
 
 @extend_schema(tags=["admissions"])

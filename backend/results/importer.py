@@ -102,9 +102,10 @@ def _normalize(raw: dict, term, allowed_departments, cache) -> tuple[dict, list[
 
     letter, points = "", Decimal(0)
     if score is not None and not errors and student is not None:
-        ranges = cache["scales"].setdefault(
-            student.program_id, GradingScale.for_program(student.program_id)
-        )
+        # Looked up once per programme: setdefault evaluated its argument on every row (R23).
+        if student.program_id not in cache["scales"]:
+            cache["scales"][student.program_id] = GradingScale.for_program(student.program_id)
+        ranges = cache["scales"][student.program_id]
         letter, points = GradingScale.grade(ranges, score)
         given = _norm(raw.get("letter")).upper()
         if given and given != letter.upper():

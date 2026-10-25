@@ -129,11 +129,15 @@ def is_allowed(sender, audience: dict) -> bool:
         return True
     if Role.HEAD_REGISTRAR in roles and kind == "role" and set(audience["roles"]) <= {"registrar"}:
         return True
-    if Role.ACADEMIC_AFFAIRS in roles:
-        if kind == "role" and set(audience["roles"]) <= {"teacher", "ta"}:
-            return True
-        if kind == "department" and audience["members"] == "staff":
-            return True
+    # Academic affairs addresses teachers and TAs, college-wide or per department (docs/03 §7
+    # «◐ أساتذة»). A department's "staff" also holds its registrars, so it is not theirs
+    # (review 2026-10-25 R22).
+    if (
+        Role.ACADEMIC_AFFAIRS in roles
+        and kind == "role"
+        and set(audience["roles"]) <= {"teacher", "ta"}
+    ):
+        return True
     # Department manager / supervisor: anything inside their departments.
     scope = rbac.scope_for(sender, "learning.manage")
     if (
