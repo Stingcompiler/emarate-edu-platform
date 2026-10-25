@@ -124,6 +124,7 @@ export const ROUTE_ACCESS: Record<string, Allow> = {
   "/hr": cap("hr.view"),
   "/hr/teachers": cap("reports.teachers"),
   "/hr/teachers/:id": cap("reports.teachers"),
+  "/me/teaching": role("teacher", "ta"),
   "/hr/notices/new": cap("hr.notify"),
   "/hr/report": either(cap("hr.view"), cap("reports.teachers")),
   "/hr-notices/:id": either(role("teacher", "ta"), cap("hr.notify")),
