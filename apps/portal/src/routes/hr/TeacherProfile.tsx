@@ -12,17 +12,30 @@ import { count, N, fmtDate } from "../../lib/format";
 
 /** Board: AcademicAffairsTeacher (phone); desktop derived — indicators beside courses and notices. */
 export function TeacherProfile() {
+  return <ProfilePage mine={false} />;
+}
+
+/** «أدائي»: a teacher's or TA's own indicators, the same page without the HR tools
+ * (docs/03 §7 «تقارير الأساتذة»: 👁 ذاته; review 2026-10-25 decisions, item 6). */
+export function MyTeaching() {
+  return <ProfilePage mine />;
+}
+
+function ProfilePage({ mine }: { mine: boolean }) {
   const { id = "" } = useParams();
   const me = useMe();
   const profile = useQuery({
-    queryKey: ["reports", "teacher", id],
+    queryKey: ["reports", "teacher", mine ? "me" : id],
     queryFn: async () =>
       ok(
-        await api.GET("/api/v1/reports/teachers/{public_id}", {
-          params: { path: { public_id: id } },
-        }),
+        mine
+          ? await api.GET("/api/v1/reports/me/teaching")
+          : await api.GET("/api/v1/reports/teachers/{public_id}", {
+              params: { path: { public_id: id } },
+            }),
       ) ?? null,
   });
+  const notify = !mine && can(me.data, "hr.notify");
   const p = profile.data;
   const t = p?.row;
   const limits = p?.thresholds;
@@ -57,18 +70,18 @@ export function TeacherProfile() {
       : [];
   return (
     <PortalShell
-      title={t?.name ?? "ملف أستاذ"}
+      title={mine ? "أدائي" : (t?.name ?? "ملف أستاذ")}
       subtitle={
         t
           ? `${ROLE_LINE(t)} · ${count(t.offerings, N.course)} · ${count(t.students, N.student)}`
           : undefined
       }
-      back={{ label: "الأساتذة", to: "/hr/teachers" }}
+      back={mine ? undefined : { label: "الأساتذة", to: "/hr/teachers" }}
     >
       {p && t && (
         <div
           className={
-            p.notices || can(me.data, "hr.notify")
+            p.notices || notify
               ? "lg:grid lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start lg:gap-6"
               : "" // a viewer without HR tools: the indicators take the full width
           }
@@ -84,7 +97,9 @@ export function TeacherProfile() {
               </span>
               <TeacherStatus status={t.status} />
             </Card>
-            <div className="grid grid-cols-3 gap-2 lg:grid-cols-6">
+            <div
+              className={`grid grid-cols-3 gap-2 ${p.notices ? "lg:grid-cols-6" : "lg:grid-cols-5"}`}
+            >
               {[
                 [days(t.grading_days), "للتصحيح"],
                 [
@@ -94,7 +109,8 @@ export function TeacherProfile() {
                 [pct(t.ungraded_percent), "غير مصحح"],
                 [num(t.exams), "اختبارات"],
                 [num(t.live_held), "جلسات بث"],
-                [num(p.notices?.length ?? 0), "تنبيهات سابقة"],
+                // The HR file is HR's: no count where the notices are not given («أدائي»).
+                ...(p.notices ? [[num(p.notices.length), "تنبيهات سابقة"]] : []),
               ].map(([v, l]) => (
                 <Card key={l} className="px-3 py-2.5 text-center">
                   <p className="text-lg font-bold text-text">{v}</p>
@@ -106,9 +122,7 @@ export function TeacherProfile() {
                 sit side by side on large screens instead of two bands across the page. */}
             <div
               className={
-                p.notices || can(me.data, "hr.notify")
-                  ? "pt-2"
-                  : "pt-2 lg:grid lg:grid-cols-2 lg:items-start lg:gap-6"
+                p.notices || notify ? "pt-2" : "pt-2 lg:grid lg:grid-cols-2 lg:items-start lg:gap-6"
               }
             >
               <div>
@@ -130,7 +144,7 @@ export function TeacherProfile() {
                   ))}
                 </Card>
               </div>
-              <div className={p.notices || can(me.data, "hr.notify") ? "mt-6" : "mt-6 lg:mt-0"}>
+              <div className={p.notices || notify ? "mt-6" : "mt-6 lg:mt-0"}>
                 <SectionLabel>المواد هذا الفصل</SectionLabel>
                 <Card className="divide-y divide-border-soft">
                   {p.offerings.map((o) => (
@@ -175,7 +189,7 @@ export function TeacherProfile() {
                 </Card>
               </>
             )}
-            {can(me.data, "hr.notify") && (
+            {notify && (
               <Link to={`/hr/notices/new?teacher=${id}`} className="block">
                 <Button className="w-full">تنبيه موجّه</Button>
               </Link>

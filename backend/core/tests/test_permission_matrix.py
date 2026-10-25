@@ -346,6 +346,12 @@ READS: dict[str, tuple[str, frozenset, frozenset]] = {
         frozenset({R.SYSTEM_ADMIN, R.STUDENT_AFFAIRS}),
         frozenset(),
     ),
+    # A teacher's or TA's own indicators (docs/03 §7 «👁 ذاته»; decisions item 6).
+    "report-my-teaching": (
+        "/api/v1/reports/me/teaching",
+        frozenset({R.TEACHER, R.TA}),
+        frozenset(),
+    ),
     "report-snapshot-list": (
         "/api/v1/report-snapshots",
         REPORTS_TEACHERS | {R.HEAD_REGISTRAR, R.REGISTRAR, R.STUDENT_AFFAIRS},

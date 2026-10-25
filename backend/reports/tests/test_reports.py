@@ -387,6 +387,25 @@ def test_transcript(
     assert api(users[Role.DEPARTMENT_MANAGER]).get(url).status_code == 200
 
 
+def test_teachers_and_tas_see_their_own_indicators(api, classroom, make_user, it_dept):
+    """docs/03 §7 «تقارير الأساتذة»: teacher and TA 👁 themself (decisions item 6). The same row
+    the department and HR see, without the HR file; nobody else's."""
+    from notifications.models import HRNotice
+
+    HRNotice.objects.create(
+        teacher=classroom.teacher, sent_by=make_user(Role.HR), subject="ملاحظة", body="…"
+    )
+    url = "/api/v1/reports/me/teaching"
+    mine = api(classroom.teacher).get(url)
+    assert mine.status_code == 200, mine.data
+    assert mine.data["row"]["name"] == classroom.teacher.full_name_ar
+    assert [o["code"] for o in mine.data["offerings"]] == [classroom.offering.course.code]
+    assert mine.data["notices"] is None
+    assert api(classroom.ta).get(url).data["offerings"][0]["role"] == "ta"
+    for user in (classroom.student, make_user(Role.DEPARTMENT_MANAGER, department=it_dept)):
+        assert api(user).get(url).status_code == 403
+
+
 def test_department_roles_see_their_departments_admissions_only(
     api, make_user, it_dept, ba_dept, it_program, ba_program, term
 ):

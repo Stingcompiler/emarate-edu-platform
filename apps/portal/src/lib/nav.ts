@@ -33,6 +33,7 @@ import {
   Settings,
   SlidersHorizontal,
   KeyRound,
+  Gauge,
 } from "lucide-react";
 
 import type { NavItem } from "../components/AppShell";
@@ -82,6 +83,7 @@ function departmentNav(me: Me | null | undefined, unread: number): NavItem[] {
     { label: "سجل العمليات", to: "/department/audit", icon: History },
     ...(teaches ? [{ label: "موادي", to: "/courses", icon: BookOpen, end: false }] : []),
     // Additions (never replace the sections above).
+    ...(teaches ? [{ label: "أدائي", to: "/me/teaching", icon: Gauge }] : []),
     { label: "طلبات التسجيل", to: "/department/approvals", icon: ClipboardCheck },
     { label: "الاختبارات", to: "/exams", icon: ClipboardList, end: false },
     { label: "جلسات البث", to: "/live", icon: Radio, end: false },
@@ -171,6 +173,8 @@ export function navFor(me: Me | null | undefined, unread: number): NavItem[] {
     items.push({ label: "التصحيح", to: "/grading", icon: ClipboardCheck });
   }
   items.push({ label: "الإشعارات", to: "/notifications", icon: Bell, badge: unread });
+  // After the four tabs a teacher uses most, so it sits in «المزيد» on a phone (decisions item 6).
+  if (hasRole(me, "teacher", "ta")) items.push({ label: "أدائي", to: "/me/teaching", icon: Gauge });
   const teaches = hasRole(
     me,
     "teacher",

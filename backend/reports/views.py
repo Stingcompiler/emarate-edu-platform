@@ -16,6 +16,7 @@ from rest_framework.views import APIView
 
 from academic.models import AcademicYear, CourseOffering, OfferingInstructor, Term
 from accounts import rbac
+from accounts.rbac import Role
 from audit.services import RequestMeta
 from core.permissions import capability
 from organization.models import Department
@@ -123,6 +124,47 @@ class TeachersReportView(APIView):
         return Response(TeachersReportSerializer(data).data)
 
 
+def teacher_profile(term, scope, teacher, *, notices) -> dict | None:
+    """One teacher's indicators and courses for ``term`` within ``scope``; None if there is
+    nothing to show. ``notices`` is the HR file (None when the viewer may not see it)."""
+    rows = metrics.teacher_rows(term, scope, user_ids={teacher.id})
+    if not rows:
+        return None
+    before = metrics.previous_term(term)
+    previous = metrics.teacher_rows(before, scope, user_ids={teacher.id}) if before else []
+    offerings = scope.filter(
+        CourseOffering.objects.filter(term=term, instructors__user=teacher),
+        "course__department_id",
+    ).select_related("course")
+    stats = metrics._offering_stats([o.id for o in offerings], timezone.now())
+    roles = dict(
+        OfferingInstructor.objects.filter(offering__in=offerings, user=teacher).values_list(
+            "offering_id", "role"
+        )
+    )
+    planned = metrics.weeks_elapsed(term) * metrics.thresholds()["lectures_per_week"]
+    return {
+        "term": _term_ref(term),
+        "thresholds": metrics.thresholds(),
+        "row": rows[0],
+        "previous": previous[0] if previous else None,
+        "offerings": [
+            {
+                "public_id": o.public_id,
+                "code": o.course.code,
+                "name": o.course.name_ar,
+                "role": roles.get(o.id, "teacher"),
+                "students": stats[o.id]["students"],
+                "lectures": stats[o.id]["lectures"],
+                "planned": planned,
+                "ungraded": stats[o.id]["ungraded"],
+            }
+            for o in offerings
+        ],
+        "notices": notices,
+    }
+
+
 class TeacherProfileView(APIView):
     """One teacher's indicators, courses and (for HR roles) the notices in their file."""
 
@@ -135,25 +177,7 @@ class TeacherProfileView(APIView):
     )
     def get(self, request, public_id):
         user = request.user
-        scope = rbac.scope_for(user, "reports.teachers")
         teacher = get_object_or_404(get_user_model(), public_id=public_id)
-        term = _term(request.query_params.get("term"))
-        rows = metrics.teacher_rows(term, scope, user_ids={teacher.id})
-        if not rows:
-            raise NotFound()
-        before = metrics.previous_term(term)
-        previous = metrics.teacher_rows(before, scope, user_ids={teacher.id}) if before else []
-        offerings = scope.filter(
-            CourseOffering.objects.filter(term=term, instructors__user=teacher),
-            "course__department_id",
-        ).select_related("course")
-        stats = metrics._offering_stats([o.id for o in offerings], timezone.now())
-        roles = dict(
-            OfferingInstructor.objects.filter(offering__in=offerings, user=teacher).values_list(
-                "offering_id", "role"
-            )
-        )
-        planned = metrics.weeks_elapsed(term) * metrics.thresholds()["lectures_per_week"]
         notices = None
         if rbac.can(user, "hr.view"):
             from notifications.models import HRNotice
@@ -161,26 +185,41 @@ class TeacherProfileView(APIView):
             notices = HRNotice.objects.filter(teacher=teacher).select_related(
                 "teacher", "sent_by", "term"
             )
-        data = {
-            "term": _term_ref(term),
-            "thresholds": metrics.thresholds(),
-            "row": rows[0],
-            "previous": previous[0] if previous else None,
-            "offerings": [
-                {
-                    "public_id": o.public_id,
-                    "code": o.course.code,
-                    "name": o.course.name_ar,
-                    "role": roles.get(o.id, "teacher"),
-                    "students": stats[o.id]["students"],
-                    "lectures": stats[o.id]["lectures"],
-                    "planned": planned,
-                    "ungraded": stats[o.id]["ungraded"],
-                }
-                for o in offerings
-            ],
-            "notices": notices,
-        }
+        data = teacher_profile(
+            _term(request.query_params.get("term")),
+            rbac.scope_for(user, "reports.teachers"),
+            teacher,
+            notices=notices,
+        )
+        if data is None:
+            raise NotFound()
+        return Response(TeacherProfileSerializer(data).data)
+
+
+class MyTeachingView(APIView):
+    """A teacher's or TA's own indicators (docs/03 §7 «تقارير الأساتذة»: 👁 ذاته; review
+    2026-10-25 decisions, item 6): the same figures the department and HR see, for themself,
+    across every department they teach in. The HR file stays with HR."""
+
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(
+        operation_id="reports_my_teaching",
+        parameters=[TERM],
+        responses=TeacherProfileSerializer,
+    )
+    def get(self, request):
+        user = request.user
+        if not rbac.roles_of(user) & {Role.TEACHER, Role.TA}:
+            raise PermissionDenied()
+        data = teacher_profile(
+            _term(request.query_params.get("term")),
+            rbac.Scope(everything=True),
+            user,
+            notices=None,
+        )
+        if data is None:
+            raise NotFound(gettext("No courses this term."))
         return Response(TeacherProfileSerializer(data).data)
 
 

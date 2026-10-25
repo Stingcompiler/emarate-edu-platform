@@ -159,6 +159,7 @@ const MyNotice = page(() => import("./routes/hr/MyNotice"), "MyNotice");
 const NoticeNew = page(() => import("./routes/hr/NoticeNew"), "NoticeNew");
 const HRReport = page(() => import("./routes/hr/Report"), "HRReport");
 const TeacherProfile = page(() => import("./routes/hr/TeacherProfile"), "TeacherProfile");
+const MyTeaching = page(() => import("./routes/hr/TeacherProfile"), "MyTeaching");
 const Teachers = page(() => import("./routes/hr/Teachers"), "Teachers");
 const PrintReport = page(() => import("./routes/print/PrintReport"), "PrintReport");
 const PrintMyResults = page(() => import("./routes/print/PrintTranscript"), "PrintMyResults");
@@ -294,6 +295,7 @@ const router = createBrowserRouter([
   { path: "/hr", element: signedIn(<HRHome />, "/hr") },
   { path: "/hr/teachers", element: signedIn(<Teachers />, "/hr/teachers") },
   { path: "/hr/teachers/:id", element: signedIn(<TeacherProfile />, "/hr/teachers/:id") },
+  { path: "/me/teaching", element: signedIn(<MyTeaching />, "/me/teaching") },
   { path: "/hr/notices/new", element: signedIn(<NoticeNew />, "/hr/notices/new") },
   { path: "/hr/report", element: signedIn(<HRReport />, "/hr/report") },
   { path: "/hr-notices/:id", element: signedIn(<MyNotice />, "/hr-notices/:id") },

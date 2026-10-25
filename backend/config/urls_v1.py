@@ -124,6 +124,7 @@ urlpatterns = [
     path("teachers-directory", academic.TeacherDirectoryView.as_view(), name="teacher-directory"),
     path("reports/department", reports.DepartmentReportView.as_view(), name="report-department"),
     path("reports/teachers", reports.TeachersReportView.as_view(), name="report-teachers"),
+    path("reports/me/teaching", reports.MyTeachingView.as_view(), name="report-my-teaching"),
     path(
         "reports/teachers/<uuid:public_id>",
         reports.TeacherProfileView.as_view(),
