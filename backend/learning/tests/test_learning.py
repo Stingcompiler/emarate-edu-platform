@@ -159,7 +159,12 @@ def test_resource_removal_and_unpublish(api, classroom, make_user, it_dept):
     assert added.status_code == 201, added.data
     url = f"/api/v1/lectures/{lecture}/resources/{added.data['id']}"
     assert api(classroom.student).delete(url).status_code == 403
-    assert api(classroom.ta).delete(url).status_code == 204
+    # Removing a file is a delete: a TA or a supervisor never deletes (review 2026-10-25 R14;
+    # this test used to expect 204 from the TA).
+    assert api(classroom.ta).delete(url).status_code == 403
+    supervisor = make_user(Role.DEPARTMENT_SUPERVISOR, department=it_dept)
+    assert api(supervisor).delete(url).status_code == 403
+    assert api(classroom.teacher).delete(url).status_code == 204
     assert api(classroom.student).post(f"/api/v1/lectures/{lecture}/unpublish").status_code == 403
     assert api(classroom.teacher).post(f"/api/v1/lectures/{lecture}/unpublish").status_code == 200
     assert api(classroom.student).get(f"/api/v1/lectures/{lecture}").status_code == 404

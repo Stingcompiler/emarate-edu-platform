@@ -91,7 +91,11 @@ def save_question(
 
 def delete_question(meta: RequestMeta, question: Question) -> None:
     exam = question.exam
-    require(meta.actor, exam.offering, "edit")
+    # A question goes with its exam: whoever may delete the exam (review 2026-10-25 R14; a
+    # supervisor or a TA edits but never deletes, docs/03 §3.7, §3.9).
+    found = require(meta.actor, exam.offering, "edit")
+    if not found.can_delete(meta.actor, exam):
+        raise PermissionDenied(gettext("You cannot delete questions of this exam."))
     _editable(exam)
     with transaction.atomic():
         record(

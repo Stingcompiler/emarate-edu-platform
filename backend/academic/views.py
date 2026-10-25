@@ -162,7 +162,7 @@ class OfferingViewSet(ScopedModelViewSet):
     def get_permissions(self):
         # Instructor removal is a delete (supervisors cannot); adding is a write.
         if self.action == "remove_instructor":
-            return [IsAuthenticated(), capability("courses.view", "courses.delete")()]
+            return [IsAuthenticated(), capability("courses.view", "courses.unassign")()]
         return super().get_permissions()
 
 

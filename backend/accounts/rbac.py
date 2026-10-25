@@ -81,7 +81,10 @@ CAPABILITIES: dict[str, frozenset[Role]] = {
         {R.SYSTEM_ADMIN, R.ACADEMIC_AFFAIRS, R.DEPARTMENT_MANAGER, R.DEPARTMENT_SUPERVISOR}
     ),
     # Supervisor = manager minus any delete/removal (docs/02 D13).
-    "courses.delete": frozenset({R.SYSTEM_ADMIN, R.ACADEMIC_AFFAIRS, R.DEPARTMENT_MANAGER}),
+    # Academic affairs removes assignments, never a course or an offering (docs/03 §7 «الحذف»;
+    # review 2026-10-25).
+    "courses.delete": frozenset({R.SYSTEM_ADMIN, R.DEPARTMENT_MANAGER}),
+    "courses.unassign": frozenset({R.SYSTEM_ADMIN, R.ACADEMIC_AFFAIRS, R.DEPARTMENT_MANAGER}),
     # Teachers / TAs belonging to a department
     "membership.manage": frozenset(
         {R.SYSTEM_ADMIN, R.ACADEMIC_AFFAIRS, R.DEPARTMENT_MANAGER, R.DEPARTMENT_SUPERVISOR}
