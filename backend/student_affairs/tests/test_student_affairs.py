@@ -189,3 +189,20 @@ def test_student_status(api, affairs, classroom, make_user, it_dept):
     assert api(affairs).post(url, {"status": "suspended", "reason": "قرار لجنة"}).status_code == 200
     assert StudentRecord.objects.get(pk=classroom.record.pk).status == "suspended"
     assert api(affairs).post(url, {"status": "suspended", "reason": "مرة أخرى"}).status_code == 409
+
+
+def test_only_an_unpublished_draft_is_deleted(api, affairs, classroom):
+    """docs/03 §3.14: student affairs deletes a draft regulation it no longer wants; a published
+    one is never deleted (a new version supersedes it)."""
+    from audit.models import AuditLog
+
+    draft = api(affairs).post("/api/v1/regulations", {"title": "مسودة", "body": "…"}).data
+    url = f"/api/v1/regulations/{draft['public_id']}"
+    assert api(classroom.teacher).delete(url).status_code in (403, 404)
+    assert api(affairs).delete(url).status_code == 204
+    assert api(affairs).get(url).status_code == 404
+    assert AuditLog.objects.filter(action="regulation.delete").count() == 1
+    published = api(affairs).post("/api/v1/regulations", {"title": "منشورة", "body": "…"}).data
+    url = f"/api/v1/regulations/{published['public_id']}"
+    api(affairs).post(f"{url}/publish")
+    assert api(affairs).delete(url).status_code == 409

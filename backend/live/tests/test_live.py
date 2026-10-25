@@ -93,3 +93,16 @@ def test_bad_links_cancel_and_reminder(api, classroom, django_capture_on_commit_
         assert remind_upcoming() == 0
     assert api(classroom.ta).post(f"{URL}/{session['public_id']}/cancel").status_code == 200
     assert api(classroom.student).get(f"{URL}/{session['public_id']}/join").status_code == 400
+
+
+def test_academic_affairs_sees_sessions_but_does_not_join_them(api, classroom, make_user):
+    """docs/03 §7 «جلسات بث»: academic affairs follows the courses (👁) without joining a class
+    (review 2026-10-25 decisions, item 4)."""
+    created = api(classroom.teacher).post(URL, _body(classroom.offering, minutes=5), format="json")
+    affairs = make_user(Role.ACADEMIC_AFFAIRS)
+    listed = api(affairs).get(URL).data
+    assert listed["count"] == 1 and listed["results"][0]["can_join"] is False
+    assert api(classroom.student).get(URL).data["results"][0]["can_join"] is True
+    join = f"{URL}/{created.data['public_id']}/join"
+    assert api(affairs).get(join).status_code == 403
+    assert api(classroom.student).get(join).data["url"] == LINK

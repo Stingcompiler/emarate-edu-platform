@@ -528,6 +528,27 @@ def test_replacing_a_document_keeps_the_original_until_the_new_one_is_saved(
     assert list(application.documents.values_list("pk", flat=True)) == [replacement.pk]
 
 
+@pytest.mark.parametrize("fallback", [True, False])
+def test_a_department_without_registrars_falls_back_only_when_the_switch_is_on(
+    fallback, intake, make_user, django_capture_on_commit_callbacks
+):
+    """docs/03 §2: applications_fallback_to_head_registrar decides whether the head registrar
+    is told of an application for a department with no registrar (review 2026-10-25)."""
+    from notifications.models import NotificationRecipient
+
+    head = make_user(Role.HEAD_REGISTRAR)
+    config = SystemSettings.load()
+    config.applications_fallback_to_head_registrar = fallback
+    config.save()
+    client = visitor(django_capture_on_commit_callbacks)
+    app_id = client.post("/api/visitor/applications", {"intake": intake.pk}).data["public_id"]
+    _complete(client, app_id)
+    with django_capture_on_commit_callbacks(execute=True):
+        assert client.post(f"/api/visitor/applications/{app_id}/submit").status_code == 200
+    told = NotificationRecipient.objects.filter(user=head).exists()
+    assert told is fallback
+
+
 def test_an_unverified_email_never_joins_a_phone_only_contact(
     django_capture_on_commit_callbacks, db
 ):
