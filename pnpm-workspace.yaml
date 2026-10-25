@@ -14,3 +14,9 @@ overrides:
   # image builds): the fixed releases (review 2026-10-08, dependencies).
   source-map-js: ">=1.2.2"
   sharp: ">=0.35.5"
+  # Audit 2026-10-25, through astro (build and dev only): vite's dev server and launch-editor
+  # (GHSA, 8.3.3), zod memory exhaustion (4.6.6), undici DoS and SRI bypass (8.12.2). Caret, so a
+  # new major never arrives through an override.
+  vite: "^8.3.3"
+  zod: "^4.6.6"
+  undici: "^8.12.2"
