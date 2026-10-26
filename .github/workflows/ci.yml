@@ -13,8 +13,57 @@ permissions:
   contents: read
 
 jobs:
+  # A pull request that only changes documentation (docs/, .claude/, *.md) skips the test jobs:
+  # nothing it touches is tested by them (owner, 2026-10-26: 30 minutes for a sentence). A push to
+  # main always runs everything, because auto-deploy waits for these jobs to succeed by name
+  # (scripts/vps/autodeploy.sh REQUIRED).
+  changes:
+    name: What changed
+    runs-on: ubuntu-latest
+    outputs:
+      code: ${{ steps.diff.outputs.code }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - id: diff
+        name: Code, or documentation only
+        env:
+          EVENT: ${{ github.event_name }}
+          BASE: ${{ github.event.pull_request.base.sha }}
+          HEAD: ${{ github.event.pull_request.head.sha }}
+        run: |
+          if [ "$EVENT" != "pull_request" ]; then
+            echo "code=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          changed=$(git diff --name-only "$BASE" "$HEAD")
+          printf '%s\n' "$changed"
+          if printf '%s\n' "$changed" | grep -qvE '^(docs/|\.claude/)|\.md$'; then
+            echo "code=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "code=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  docs:
+    name: Documentation format
+    needs: changes
+    if: needs.changes.outputs.code == 'false'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm format:check
+
   backend:
     name: Backend (${{ matrix.database }})
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -56,6 +105,8 @@ jobs:
 
   frontend:
     name: Frontend (typecheck, build, API client)
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -82,9 +133,17 @@ jobs:
         run: pnpm test
       - run: pnpm build
 
-  e2e:
-    name: End-to-end (Playwright)
+  # The end-to-end suite in three parts on three runners, each with its own servers and demo
+  # database (about 30 minutes in one part before, 2026-10-26).
+  e2e-shard:
+    name: End-to-end part ${{ matrix.shard }}/3
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3]
     steps:
       - uses: actions/checkout@v5
       - uses: astral-sh/setup-uv@v6
@@ -101,14 +160,31 @@ jobs:
       - run: pnpm api:generate
       - run: pnpm exec playwright install --with-deps chromium
       - name: Critical flows on phone and desktop (sign-in, exam, application, layout)
-        run: pnpm e2e
+        run: pnpm e2e --shard=${{ matrix.shard }}/3
       - name: The public site without the demo's sample texts
+        if: matrix.shard == 1
         run: E2E_HIDE_SAMPLE=1 pnpm e2e hidden-sample.spec.ts
       - if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-report
+          name: playwright-report-${{ matrix.shard }}
           path: |
             playwright-report/
             e2e/test-results/
           retention-days: 7
+
+  # One result under the name auto-deploy and the merge rule wait for.
+  e2e:
+    name: End-to-end (Playwright)
+    needs: [changes, e2e-shard]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Every part passed (or there was no code to test)
+        env:
+          CODE: ${{ needs.changes.outputs.code }}
+          PARTS: ${{ needs.e2e-shard.result }}
+        run: |
+          echo "code changed: $CODE, end-to-end parts: $PARTS"
+          if [ "$CODE" = "false" ] && [ "$PARTS" = "skipped" ]; then exit 0; fi
+          [ "$PARTS" = "success" ]
