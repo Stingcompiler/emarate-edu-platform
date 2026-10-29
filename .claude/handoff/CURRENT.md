@@ -1,3 +1,31 @@
+# Handoff — redesign from the owner's mockups (2026-10-29), all phases merged — 2026-10-30
+
+Plan and decisions: `docs/qa/redesign-plan-2026-10-29.md` (owner: «نفذ جميع توصياتك»).
+
+- #174 shell: navy full-height sidebar (college mark on top), white top bar with «ابحث عن صفحة»
+  (`components/PageSearch.tsx`, searches the person's own nav, Arabic letters folded), bell,
+  account initials → `/settings`. Every role at once.
+- #175 dashboard kit `components/dashboard.tsx`: `Panel` (heading inside the card),
+  `NextStepCard` (the one filled card; its title links too — `exam.spec` taps the exam name),
+  `AckBanner`, `QuickLinks`; `Inbox` count in a neutral square + optional inner heading.
+  Student «اليوم» and system admin home (status line + «يحتاج إجراءك» from health/backups/
+  students without accounts/test-mode email) built on it.
+- #176 other homes: teacher («التالي في يومك»), registrar, results, affairs, academic, HR,
+  department (D20: only the heading moved inside). #179 site manager and events manager homes.
+- #177 visitor site: floating rounded header (`.motion-header-bar`, `overHero` on the home),
+  college photo beside the hero words, deadline band under both, audience icons.
+- #178 `StatusBadge` dot.
+- Not adopted from the mockups (decisions in the plan): tinted course cards (rows stay),
+  tinted icon squares (`lint:ui`), generated photos, mockup text.
+- Before/after page for the owner: `~/Desktop/redesign-before-after/index.html` (9 screens).
+  Before = `bdf9e84`; shots via `SHOTS=<label> pnpm e2e shots.spec.ts -g "... \(light"`.
+
+## Still open (owner)
+
+- Light mode report from 2026-10-29: not reproducible; waiting for device/browser details.
+- Programme pages: structure exists, college content missing. Restore-drill result, real
+  `OPS_ALERT_EMAIL`, SEO steps after the domain move, Dependabot alerts off.
+
 # Handoff — review 2026-10-25 and its decisions, all implemented — 2026-10-26
 
 ## Review `docs/qa/comprehensive-review-2026-10-25.md` (R12–R25)
