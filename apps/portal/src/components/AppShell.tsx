@@ -4,6 +4,7 @@ import { NavLink, useLocation } from "react-router";
 
 import { useSiteLogo } from "../lib/site";
 import { SignOutButton, useSignOutAction } from "./SignOutButton";
+import { PageSearch } from "./PageSearch";
 import { ThemeRow, ThemeToggle } from "./ThemeToggle";
 
 export type NavItem = {
@@ -46,8 +47,8 @@ type AppShellProps = {
  * - **Phone / tablet (< lg):** NavigationBar with a large title on the page
  *   background (collapses to a glass bar on scroll, docs/09); one column; a
  *   floating bottom tab bar once there are two or more destinations.
- * - **Desktop (≥ lg):** navy TopBar + Sidebar on the right (264px) + PageHeader
- *   + content up to 1280px.
+ * - **Desktop (≥ lg):** navy Sidebar on the right (264px, full height, mockups 2026-10-29)
+ *   + white TopBar with the page search + PageHeader + content up to 1280px.
  *
  * Same children render in both; only the chrome around them changes.
  */
@@ -66,20 +67,13 @@ export function AppShell({
   const showTabs = internal.length >= 2;
 
   return (
-    <div className="min-h-dvh bg-bg-subtle lg:flex lg:flex-col">
+    <div className="min-h-dvh bg-bg-subtle lg:flex">
       <a
         href="#main"
         className="sr-only z-50 rounded-lg bg-surface px-4 py-2 font-semibold text-primary shadow focus:not-sr-only focus:fixed focus:start-3 focus:top-3"
       >
         تخطَّ إلى المحتوى
       </a>
-      {/* Desktop top bar */}
-      {/* Stays in place while the page scrolls (owner, 2026-09-29): the bar and the sidebar. */}
-      <header className="sticky top-0 z-30 hidden h-14 shrink-0 items-center gap-4 bg-header px-6 text-text-inverse lg:flex">
-        <Brand />
-        <span className="text-xs text-navy-200">{eyebrow}</span>
-        <div className="ms-auto flex items-center gap-2">{actions}</div>
-      </header>
 
       {/* Phone NavigationBar (docs/09): large title that collapses into a glass bar */}
       <div
@@ -118,18 +112,32 @@ export function AppShell({
         {subtitle && <p className="mt-1 text-sm text-text-muted">{subtitle}</p>}
       </header>
 
-      <div className="lg:flex lg:min-h-0 lg:flex-1">
-        {/* Desktop sidebar — first in DOM, so it sits on the right in RTL */}
-        <aside className="hidden w-66 shrink-0 border-e border-border-soft bg-surface px-3 py-4 lg:sticky lg:top-14 lg:block lg:h-[calc(100dvh-3.5rem)] lg:self-start lg:overflow-y-auto">
-          <nav aria-label="التنقل الرئيسي" className="flex flex-col gap-0.5">
-            <SidebarItems nav={nav} />
-            <div className="mt-4 border-t border-border-soft pt-3">
-              <ThemeRow
-                className={`${sidebarItem} w-full text-text-muted hover:bg-surface-alt hover:text-text`}
-              />
-            </div>
-          </nav>
-        </aside>
+      {/* Desktop sidebar (mockups 2026-10-29): navy, the full height of the screen, the college
+          mark at its top. First in DOM, so it sits on the right in RTL; stays while the page
+          scrolls (owner, 2026-09-29). */}
+      <aside className="hidden w-66 shrink-0 flex-col bg-header text-text-inverse lg:sticky lg:top-0 lg:flex lg:h-dvh">
+        <Brand />
+        <nav
+          aria-label="التنقل الرئيسي"
+          className="flex min-h-0 flex-1 flex-col gap-0.5 overflow-y-auto px-3 pb-4"
+        >
+          <SidebarItems nav={nav} />
+          <div className="mt-auto border-t border-white/10 pt-3">
+            <ThemeRow className={`${sidebarItem} w-full ${sidebarIdle}`} />
+          </div>
+        </nav>
+      </aside>
+
+      <div className="lg:flex lg:min-w-0 lg:flex-1 lg:flex-col">
+        {/* Desktop top bar: who is signed in, a search over their pages, the bell and the
+            account. White, so the page reads as one surface beside the navy sidebar. */}
+        <header className="sticky top-0 z-30 hidden h-16 shrink-0 items-center gap-4 border-b border-border-soft bg-surface/95 px-8 backdrop-blur lg:flex">
+          <span className="truncate text-sm text-text-muted">{eyebrow}</span>
+          <div className="ms-auto flex flex-1 items-center justify-end gap-2">
+            <PageSearch nav={nav} />
+            {actions}
+          </div>
+        </header>
 
         <main
           id="main"
@@ -180,16 +188,21 @@ function useScrolledPast(offset: number): boolean {
 function Brand() {
   const logo = useSiteLogo();
   return (
-    <span className="flex items-center gap-2.5 text-sm font-bold">
+    <div className="flex items-center gap-3 px-5 pb-5 pt-6">
       <img
         src={logo}
         alt=""
-        width={30}
-        height={30}
-        className="size-[30px] rounded-md bg-white object-contain"
+        width={40}
+        height={40}
+        className="size-10 shrink-0 rounded-lg bg-white object-contain"
       />
-      بوابة الكلية
-    </span>
+      <span className="min-w-0">
+        <span className="block text-base font-bold">بوابة الكلية</span>
+        <span className="block text-xs leading-snug text-navy-200">
+          كلية الإمارات للعلوم والتكنولوجيا
+        </span>
+      </span>
+    </div>
   );
 }
 
@@ -235,9 +248,9 @@ export function SidebarItems({ nav }: { nav: NavItem[] }) {
                 return next;
               });
             }}
-            className={`group ${i ? "mt-1 border-t border-border-soft pt-1" : ""}`}
+            className={`group ${i ? "mt-1 border-t border-white/10 pt-1" : ""}`}
           >
-            <summary className="flex min-h-9 cursor-pointer list-none items-center justify-between rounded-md px-3 text-[11px] font-semibold text-text-muted hover:bg-surface-alt">
+            <summary className="flex min-h-9 cursor-pointer list-none items-center justify-between rounded-md px-3 text-xs font-semibold text-navy-300 hover:bg-white/10 hover:text-white">
               {segment.group}
               <ChevronDown
                 size={14}
@@ -260,7 +273,9 @@ export function SidebarItems({ nav }: { nav: NavItem[] }) {
 }
 
 const sidebarItem =
-  "flex items-center gap-3 rounded-md px-3.5 py-2.5 text-sm transition-colors duration-150";
+  "flex items-center gap-3 rounded-lg px-3.5 py-2.5 text-sm transition-colors duration-150";
+/** A sidebar row that is not the current page, on the navy sidebar. */
+const sidebarIdle = "text-navy-100 hover:bg-white/10 hover:text-white";
 
 function SidebarLink({ item }: { item: NavItem }) {
   const Icon = item.icon;
@@ -270,7 +285,7 @@ function SidebarLink({ item }: { item: NavItem }) {
         href={item.to}
         target="_blank"
         rel="noreferrer"
-        className={`${sidebarItem} text-text-muted hover:bg-surface-alt hover:text-text`}
+        className={`${sidebarItem} ${sidebarIdle}`}
       >
         <Icon size={20} strokeWidth={1.75} aria-hidden />
         {item.label}
@@ -282,11 +297,7 @@ function SidebarLink({ item }: { item: NavItem }) {
       to={item.to}
       end={item.end ?? true}
       className={({ isActive }) =>
-        `${sidebarItem} ${
-          isActive
-            ? "bg-primary-soft font-semibold text-primary-700"
-            : "text-text-muted hover:bg-surface-alt hover:text-text"
-        }`
+        `${sidebarItem} ${isActive ? "bg-primary-500 font-semibold text-white" : sidebarIdle}`
       }
     >
       <Icon size={20} strokeWidth={1.75} aria-hidden />
