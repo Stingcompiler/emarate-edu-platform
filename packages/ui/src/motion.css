@@ -195,10 +195,10 @@
 
 /* The sticky header gains a shadow once the page scrolls under it (the page script sets
    data-scrolled), so it reads as floating above the content. */
-.motion-header {
+.motion-header-bar {
   transition: box-shadow var(--dur-2) var(--ease-out);
 }
-.motion-header[data-scrolled] {
+.motion-header[data-scrolled] .motion-header-bar {
   box-shadow: 0 6px 20px -14px rgb(17 23 39 / 0.35);
 }
 
