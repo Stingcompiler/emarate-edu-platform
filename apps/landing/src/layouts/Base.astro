@@ -165,8 +165,10 @@ const ext = (external: boolean) => (external ? { rel: "noopener", target: "_blan
           class="flex min-h-11 min-w-0 items-center gap-2 text-sm font-bold text-text"
         >
           <img src={logo} alt="" width="32" height="32" class="size-8 rounded-md object-contain" />
-          <span class="truncate sm:hidden">{shortName}</span>
-          <span class="hidden truncate sm:inline">{siteName}</span>
+          {/* The full name needs the room of a wide screen: from 1024 the menu shares the
+              floating bar with it (cut off at exactly 1024 otherwise). */}
+          <span class="truncate sm:hidden lg:inline xl:hidden">{shortName}</span>
+          <span class="hidden truncate sm:inline lg:hidden xl:inline">{siteName}</span>
         </a>
         <nav
           class="ms-auto hidden items-center gap-0.5 lg:flex"
