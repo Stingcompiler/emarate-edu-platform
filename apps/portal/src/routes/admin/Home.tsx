@@ -1,9 +1,22 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Activity, Building2, Mail, Settings2, Users } from "lucide-react";
+import {
+  Activity,
+  Building2,
+  ChevronLeft,
+  Clock,
+  ListTodo,
+  Mail,
+  Settings2,
+  ShieldCheck,
+  UserPlus,
+  Users,
+  Zap,
+} from "lucide-react";
 import { Link } from "react-router";
 
 import { PortalShell } from "../../components/PortalShell";
-import { Card, SectionLabel, Summary, Switch } from "../../components/ui";
+import { Panel, QuickLinks } from "../../components/dashboard";
+import { Card, Switch } from "../../components/ui";
 import { api, ok } from "../../lib/api";
 import { actionLabel } from "../department/Audit";
 import { useMe } from "../../lib/auth";
@@ -11,6 +24,7 @@ import { useCurrentTerm } from "../../lib/department";
 import { when, count, N } from "../../lib/format";
 import { num } from "../../lib/reports";
 import { ALL } from "../../components/Pager";
+import { Inbox, type InboxItem, inboxState } from "../homes/Inbox";
 
 const GROUPS: { label: string; roles: string[] }[] = [
   { label: "طلاب", roles: ["student"] },
@@ -31,7 +45,8 @@ const GROUPS: { label: string; roles: string[] }[] = [
   },
 ];
 
-/** Board: SystemAdminHome (phone); desktop derived — health and settings beside users and audit. */
+/** Mockup «مركز إدارة الكلية» (2026-10-29): the system's state in one line, what needs the
+ *  administrator first, settings and users; quick access and recent activity beside. */
 export function AdminHome() {
   const me = useMe();
   const client = useQueryClient();
@@ -97,68 +112,96 @@ export function AdminHome() {
   };
   const healthy = health.data?.status === "ok";
   const total = [...byRole.values()].reduce((a, b) => a + b, 0);
+  const latest = status.data?.backups.latest;
+  const backupDays = latest
+    ? Math.floor((Date.now() - new Date(latest).getTime()) / 86_400_000)
+    : null;
+  const failing = Object.values(checks).filter((v) => v && v !== "ok").length;
+  // «يحتاج إجراءك» (mockups 2026-10-29): what in the system's state waits on the administrator.
+  const inbox: InboxItem[] = [
+    {
+      n: health.data && !healthy ? Math.max(failing, 1) : 0,
+      title: "خدمة لا تعمل كما ينبغي",
+      meta: `قاعدة البيانات: ${checks.database || "—"} · الذاكرة المؤقتة: ${checks.cache || "—"}`,
+      to: "/system/settings",
+      tone: "danger",
+      action: "التفاصيل",
+    },
+    {
+      n: status.data && (backupDays == null || backupDays >= 8) ? (backupDays ?? 1) : 0,
+      title: backupDays == null ? "لا نسخ احتياطية بعد" : "النسخ الاحتياطي متأخر",
+      meta: latest ? `آخر نسخة ${when(latest)} — الرقم بالأيام` : "لم تُسجَّل أي نسخة",
+      to: "/system/settings",
+      tone: "danger",
+      action: "الإعدادات",
+    },
+    {
+      n: status.data
+        ? Math.max(status.data.students.records - status.data.students.accounts, 0)
+        : 0,
+      title: "طلاب في السجلات بلا حساب في البوابة",
+      meta: "تُنشأ الحسابات من سجلات الطلاب",
+      to: "/system/users",
+      action: "المستخدمون",
+    },
+    {
+      n: status.data && !status.data.email.sends_real_mail ? 1 : 0,
+      title: "البريد في الوضع التجريبي",
+      meta: status.data ? `الرسائل لا تصل إلى أصحابها · ${status.data.email.backend}` : undefined,
+      to: "/system/settings",
+      tone: "info",
+      action: "الإعدادات",
+    },
+  ];
   return (
     <PortalShell
       title="إدارة النظام"
       subtitle={`${me.data?.full_name_ar ?? ""} · مدير النظام${health.data?.version ? ` · الإصدار ${health.data.version}` : ""}`}
     >
-      <Summary
-        wide
-        title="حالة النظام"
-        rows={(
-          [
-            ["الخدمة", healthy ? "سليمة" : "تحقق", healthy],
-            [
-              "قاعدة البيانات",
-              checks.database === "ok" ? "متصلة" : (checks.database ?? "—"),
-              checks.database === "ok",
-            ],
-            [
-              "الذاكرة المؤقتة",
-              checks.cache === "ok" ? "تعمل" : (checks.cache ?? "—"),
-              checks.cache === "ok",
-            ],
-            [
-              "آخر نسخة احتياطية",
-              status.data?.backups.latest ? when(status.data.backups.latest) : "لا نسخ بعد",
-              !!status.data?.backups.latest &&
-                Date.now() - new Date(status.data.backups.latest).getTime() < 8 * 86_400_000,
-            ],
-            [
-              "البريد",
-              status.data
-                ? status.data.email.sends_real_mail
-                  ? `يُرسل · ${status.data.email.backend}`
-                  : `تجريبي · ${status.data.email.backend}`
-                : "—",
-              !!status.data?.email.sends_real_mail,
-            ],
-            [
-              "حسابات الطلاب من السجلات",
-              status.data
-                ? `${num(status.data.students.accounts)} / ${num(status.data.students.records)}`
-                : "—",
-              true,
-            ],
-          ] as [string, string, boolean][]
-        ).map(([label, value, good]) => ({
-          label,
-          value,
-          note: good ? "" : "يحتاج نظرة",
-          tone: "warn" as const,
-        }))}
-      />
-      <Link
-        to="/system/roles"
-        className="tap-44 mt-3 inline-flex items-center gap-1 text-sm font-semibold text-primary hover:underline"
-      >
-        الأدوار والصلاحيات
-      </Link>
-      <div className="mt-6 lg:grid lg:grid-cols-2 lg:items-start lg:gap-6">
-        <div className="space-y-4">
-          <SectionLabel>إعدادات النظام</SectionLabel>
-          <Card className="divide-y divide-border-soft text-sm">
-            <div className="flex items-center justify-between gap-3 px-4 py-2">
+      {/* The system's state in one line; what needs attention is in «يحتاج إجراءك» below. */}
+      <Card className="mb-6 flex flex-wrap items-center gap-x-6 gap-y-2 px-4 py-3 text-sm">
+        <span className="flex items-center gap-2 font-semibold text-text">
+          <span
+            aria-hidden
+            className={`size-2.5 rounded-full ${health.data ? (healthy ? "bg-success" : "bg-danger") : "bg-border"}`}
+          />
+          {health.data
+            ? healthy
+              ? "الخدمات تعمل بصورة طبيعية"
+              : "خدمة تحتاج نظرة"
+            : "جارٍ التحقق من الخدمات"}
+        </span>
+        <span className="flex items-center gap-1.5 text-text-muted">
+          <Clock size={16} aria-hidden />
+          آخر نسخة احتياطية: {latest ? when(latest) : "لا نسخ بعد"}
+        </span>
+        <span className="text-text-muted">
+          الطلاب: {num(status.data?.students.accounts ?? 0)} حساب من{" "}
+          {num(status.data?.students.records ?? 0)} سجل
+        </span>
+        <Link
+          to="/system/settings"
+          className="tap-44 ms-auto inline-flex items-center gap-0.5 font-semibold text-primary hover:underline"
+        >
+          تفاصيل النظام
+          <ChevronLeft size={16} aria-hidden className="ltr:rotate-180" />
+        </Link>
+      </Card>
+      <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start lg:gap-6">
+        <div className="space-y-6">
+          <Inbox
+            title="يحتاج إجراءك"
+            icon={ListTodo}
+            items={inbox}
+            empty="لا شيء ينتظرك: الخدمات والنسخ والبريد على ما يرام."
+            {...inboxState(health, status)}
+          />
+          <Panel
+            title="إعدادات النظام"
+            icon={Settings2}
+            more={{ label: "كل الإعدادات", to: "/system/settings" }}
+          >
+            <div className="flex items-center justify-between gap-3 px-4 py-2 text-sm">
               <span>
                 <b className="block">تسجيل الطلاب يتطلب موافقة مدير القسم</b>
                 <span className="text-xs text-text-muted">
@@ -174,7 +217,7 @@ export function AdminHome() {
             </div>
             <Link
               to="/system/structure"
-              className="flex items-center gap-3 px-4 py-3 hover:bg-surface-alt"
+              className="flex items-center gap-3 px-4 py-3 text-sm hover:bg-surface-alt"
             >
               <Building2 size={18} className="text-primary" aria-hidden />
               <span className="flex-1">
@@ -185,55 +228,42 @@ export function AdminHome() {
                 </span>
               </span>
             </Link>
-            <Link
-              to="/system/settings"
-              className="flex items-center gap-3 px-4 py-3 hover:bg-surface-alt"
-            >
-              <Settings2 size={18} className="text-primary" aria-hidden />
-              <span className="flex-1">
-                <b className="block">كل الإعدادات</b>
-                <span className="text-xs text-text-muted">
-                  التسجيل والقبول، التحقق، حدود الأداء
-                </span>
-              </span>
-            </Link>
-            <Link
-              to="/notifications/new"
-              className="flex items-center gap-3 px-4 py-3 hover:bg-surface-alt"
-            >
-              <Mail size={18} className="text-primary" aria-hidden />
-              <span className="flex-1">
-                <b className="block">إشعار للجميع</b>
-              </span>
-            </Link>
-          </Card>
-        </div>
-        <div className="mt-6 space-y-4 lg:mt-0">
-          <div className="flex items-end justify-between">
-            <SectionLabel>المستخدمون · {num(total)}</SectionLabel>
-            <Link to="/system/users" className="tap-44 mb-2 text-sm font-semibold text-primary">
-              إدارة
-            </Link>
-          </div>
-          <Card className="divide-y divide-border-soft text-sm">
+          </Panel>
+          <Panel
+            title={`المستخدمون · ${num(total)}`}
+            icon={Users}
+            more={{ label: "إدارة", to: "/system/users" }}
+          >
             {GROUPS.map((g) => (
               <Link
                 key={g.label}
                 to="/system/users"
-                className="flex items-center justify-between px-4 py-2.5 hover:bg-surface-alt"
+                className="flex items-center justify-between px-4 py-2.5 text-sm hover:bg-surface-alt"
               >
-                <span className="flex items-center gap-2">
-                  <Users size={16} className="text-text-muted" aria-hidden />
-                  {g.label}
-                </span>
+                {g.label}
                 <b>{num(g.roles.reduce((n, r) => n + (byRole.get(r) ?? 0), 0))}</b>
               </Link>
             ))}
-          </Card>
-          <SectionLabel>سجل التدقيق</SectionLabel>
-          <Card className="divide-y divide-border-soft text-sm">
+          </Panel>
+        </div>
+        <aside className="mt-6 space-y-6 lg:mt-0">
+          <Panel title="وصول سريع" icon={Zap}>
+            <QuickLinks
+              items={[
+                { label: "المستخدمون", to: "/system/users", icon: UserPlus },
+                { label: "الأدوار والصلاحيات", to: "/system/roles", icon: ShieldCheck },
+                { label: "الهيكل الأكاديمي", to: "/system/structure", icon: Building2 },
+                { label: "إشعار للجميع", to: "/notifications/new", icon: Mail },
+              ]}
+            />
+          </Panel>
+          <Panel
+            title="آخر النشاطات"
+            icon={Activity}
+            more={{ label: "السجل الكامل", to: "/department/audit" }}
+          >
             {(audit.data ?? []).map((a) => (
-              <div key={a.id} className="px-4 py-2.5">
+              <div key={a.id} className="px-4 py-2.5 text-sm">
                 <b>{a.actor || "النظام"}</b>{" "}
                 <span className="text-text-muted">
                   · {actionLabel(a.action)} · {a.target_repr}
@@ -241,14 +271,11 @@ export function AdminHome() {
                 <span className="block text-xs text-text-muted">{when(a.at)}</span>
               </div>
             ))}
-            <Link
-              to="/department/audit"
-              className="flex items-center justify-center gap-2 px-4 py-2.5 font-semibold text-primary"
-            >
-              <Activity size={16} aria-hidden /> السجل الكامل
-            </Link>
-          </Card>
-        </div>
+            {audit.isSuccess && !audit.data.length && (
+              <p className="px-4 py-3 text-sm text-text-muted">لا نشاط بعد.</p>
+            )}
+          </Panel>
+        </aside>
       </div>
     </PortalShell>
   );
