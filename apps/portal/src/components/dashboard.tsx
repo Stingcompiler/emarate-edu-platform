@@ -83,9 +83,10 @@ export function NextStepCard({
         </Link>
       </h2>
       {meta && <p className="mt-1 text-sm text-primary-100">{meta}</p>}
+      {/* Navy on white in both themes: primary-700 turns light in dark mode (tokens.css). */}
       <Link
         to={action.to}
-        className="mt-4 flex min-h-11 items-center justify-center rounded-lg bg-white px-4 text-sm font-semibold text-primary-700 hover:bg-primary-50 lg:inline-flex lg:min-w-48"
+        className="mt-4 flex min-h-11 items-center justify-center rounded-lg bg-white px-4 text-sm font-semibold text-navy-500 hover:bg-navy-50 lg:inline-flex lg:min-w-48"
       >
         {action.label}
       </Link>

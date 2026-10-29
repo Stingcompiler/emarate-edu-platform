@@ -5,7 +5,10 @@
  */
 
 :root {
-  color-scheme: light; /* native controls, scrollbars and form fields follow the theme */
+  /* Native controls, scrollbars and form fields follow the theme. «only»: a browser that darkens
+     pages by itself (Chrome's auto dark mode; Phoenix and other Android browsers) must not
+     repaint the light theme — «الوضع الفاتح» stays light (owner report 2026-10-30, Phoenix). */
+  color-scheme: only light;
   --bg: var(--color-n0);
   --bg-subtle: var(--color-n50);
   --surface: var(--color-n0);
