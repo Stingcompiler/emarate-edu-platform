@@ -231,7 +231,7 @@ Tailwind 4: `@theme { --color-primary: var(--primary); ... }` فتُستخدم `
 | StatusTransitionMenu | يعرض `allowed_transitions` من الـ API | – | يطلب ملاحظة عند الرفض/الإرجاع |
 
 ### 7.1b مكوّنات الهاتف (ملمس iOS — المواصفة الكاملة في `09-mobile-experience.md` §5)
-TabBar (عائم، ينكمش عند التمرير، شارات)، NavigationBar (عنوان كبير → مضمَّن)، Sheet (Detents نصف/كامل، مقبض)، ActionSheet، SegmentedControl، GroupedList/ListRow، SwipeActions، PullToRefresh، CapsuleToast، CardCourse، CountdownPill، OfflineBanner، DownloadButton، InstallPrompt، SearchBar. القاعدة: على الشاشات < `lg` تُستبدل Dialog بـ Sheet، وDropdownMenu بـ ActionSheet، وTable بـ GroupedList، وToast بـ CapsuleToast تلقائيًا عبر نفس الـ API.
+TabBar (ملتصق بالحافة السفلية، شارات)، NavigationBar (عنوان كبير → مضمَّن)، Sheet (Detents نصف/كامل، مقبض)، ActionSheet، SegmentedControl، GroupedList/ListRow، SwipeActions، PullToRefresh، CapsuleToast، CardCourse، CountdownPill، OfflineBanner، DownloadButton، InstallPrompt، SearchBar. القاعدة: على الشاشات < `lg` تُستبدل Dialog بـ Sheet، وDropdownMenu بـ ActionSheet، وTable بـ GroupedList، وToast بـ CapsuleToast تلقائيًا عبر نفس الـ API.
 
 ### 7.2 تشريح المكوّنات المركّبة
 - **Table:** `Toolbar (FilterBar + Actions)` → `Table` → `Footer (Pagination + selection summary)`. الأعمدة تُعرَّف بمصفوفة `{key, header, cell, sortable, width, hideOnMobile}`؛ الصفوف الطويلة على الموبايل تُعرض بطاقة بـ 3 حقول أولية + "المزيد".
@@ -268,7 +268,7 @@ TabBar (عائم، ينكمش عند التمرير، شارات)، NavigationBa
 |---|---|---|
 | **الموقع العام** | Header (شعار أفقي، قائمة، لغة، زر "قدّم الآن" accent) → المحتوى → Footer (اتصال، روابط، سياسات، اجتماعي، شعار معكوس على navy) | عرض 1200px؛ أقسام بتناوب أبيض/n50 |
 | **البوابة — سطح المكتب (≥ lg)** | TopBar (navy) + Sidebar (يمين، 264px، مطوي 72px) + المحتوى (`PageHeader` + جسم) | الإدارة والأساتذة على الحاسوب |
-| **البوابة — الهاتف (< lg)** | **هاتف-أولًا للطالب والأستاذ:** NavigationBar بعنوان كبير + محتوى + TabBar عائم (5 تبويبات)؛ الأدوار الإدارية: Drawer + TabBar بثلاثة تبويبات (الرئيسية/الإشعارات/أنا) | الوضع الداكن مدعوم من المرحلة الأولى؛ التفاصيل في 09 |
+| **البوابة — الهاتف (< lg)** | **هاتف-أولًا للطالب والأستاذ:** NavigationBar بعنوان كبير + محتوى + TabBar ملتصق بالأسفل (5 تبويبات)؛ الأدوار الإدارية: Drawer + TabBar بثلاثة تبويبات (الرئيسية/الإشعارات/أنا) | الوضع الداكن مدعوم من المرحلة الأولى؛ التفاصيل في 09 |
 | **المصادقة** | بطاقة مركزية 440px على n50 بشعار كامل | تسجيل الدخول، التسجيل (Wizard)، استعادة، تفعيل |
 | **الزائر (متابعة الطلب)** | داخل الموقع العام بجلسة OTP؛ بطاقة واسعة 800px | لا شريط جانبي |
 | **الاختبار** | شاشة مركّزة: عداد ثابت أعلى، سؤال، تنقل أسئلة جانبي، بلا Sidebar | منع الخروج العرضي بتأكيد |

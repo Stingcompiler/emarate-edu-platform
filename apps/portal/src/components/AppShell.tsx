@@ -46,7 +46,7 @@ type AppShellProps = {
  *
  * - **Phone / tablet (< lg):** NavigationBar with a large title on the page
  *   background (collapses to a glass bar on scroll, docs/09); one column; a
- *   floating bottom tab bar once there are two or more destinations.
+ *   bottom tab bar docked to the edge once there are two or more destinations.
  * - **Desktop (≥ lg):** navy Sidebar on the right (264px, full height, mockups 2026-10-29)
  *   + white TopBar with the page search + PageHeader + content up to 1280px.
  *
@@ -142,7 +142,7 @@ export function AppShell({
         <main
           id="main"
           tabIndex={-1}
-          className={`min-w-0 flex-1 focus:outline-none px-4 pb-5 pt-3 lg:px-8 lg:py-6 ${showTabs ? "pb-28 lg:pb-6" : ""}`}
+          className={`min-w-0 flex-1 focus:outline-none px-4 pb-5 pt-3 lg:px-8 lg:py-6 ${showTabs ? "pb-[calc(5rem+env(safe-area-inset-bottom))] lg:pb-6" : ""}`}
         >
           <div className="mx-auto max-w-[1280px]">
             <div className="mb-5 hidden items-end justify-between gap-4 lg:flex">
@@ -440,9 +440,11 @@ function MainTabs({
   more?: { onClick: () => void; badge: number };
 }) {
   return (
+    // Docked to the bottom edge, full width (owner, 2026-10-30: more room than a floating bar,
+    // and the place phone apps keep their tabs); the home-indicator area stays below the tabs.
     <nav
       aria-label="التنقل الرئيسي"
-      className="fixed inset-x-3 bottom-[max(0.875rem,env(safe-area-inset-bottom))] z-10 flex h-16 items-center justify-around rounded-3xl border border-border-soft bg-surface/95 px-1.5 shadow-md backdrop-blur lg:hidden"
+      className="fixed inset-x-0 bottom-0 z-10 flex items-stretch justify-around border-t border-border-soft bg-surface/95 px-1 pb-[env(safe-area-inset-bottom)] backdrop-blur lg:hidden"
     >
       {items.slice(0, 5).map((item) => {
         const Icon = item.icon;
@@ -452,7 +454,7 @@ function MainTabs({
             to={item.to}
             end={item.end ?? true}
             className={({ isActive }) =>
-              `relative flex min-h-11 min-w-0 flex-1 flex-col items-center justify-center gap-0.5 text-xs ${
+              `relative flex h-14 min-w-0 flex-1 flex-col items-center justify-center gap-0.5 text-xs ${
                 isActive ? "font-semibold text-primary" : "text-text-muted"
               }`
             }
@@ -469,7 +471,7 @@ function MainTabs({
         <button
           type="button"
           onClick={more.onClick}
-          className="relative flex min-h-11 min-w-0 flex-1 flex-col items-center justify-center gap-0.5 text-xs text-text-muted"
+          className="relative flex h-14 min-w-0 flex-1 flex-col items-center justify-center gap-0.5 text-xs text-text-muted"
         >
           <Menu size={24} strokeWidth={1.75} aria-hidden />
           <span className="whitespace-nowrap">المزيد</span>

@@ -34,7 +34,7 @@ python3 scripts/boards.py list "<keyword from the page title>"
 
 | Width | Tailwind | Portal shell | Content |
 |---|---|---|---|
-| < 768 | base, `sm` | Top bar with large title; **floating bottom tab bar** (student/teacher, 5 tabs; admins 3 tabs) + drawer; sheets instead of dialogs | single column; **tables become card lists**; touch targets ≥ 44px; works at **375px** |
+| < 768 | base, `sm` | Top bar with large title; **bottom tab bar docked to the edge** (student/teacher, 5 tabs; admins 3 tabs) + drawer; sheets instead of dialogs | single column; **tables become card lists**; touch targets ≥ 44px; works at **375px** |
 | 768–1023 | `md` | same as phone, content may use 2 columns | no horizontal page scroll |
 | ≥ 1024 | `lg` | **TopBar (navy) + Sidebar on the right, 264px (collapsed 72px)** + `PageHeader` + body; bottom tabs hidden | multi-column as in the desktop board; tables allowed |
 | ≥ 1280 | `xl` | portal content max 1280px; public site max 1200px | — |
