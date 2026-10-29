@@ -96,7 +96,13 @@ const heroLines =
       ];
 const heroSet = (format: "avif" | "webp") =>
   HERO_WIDTHS.map((width) => `/img/hero-${width}.${format} ${width}w`).join(", ");
-const heroSizes = "(min-width: 1280px) 1152px, 100vw";
+const heroSizes = "(min-width: 1280px) 560px, (min-width: 1024px) 45vw, 100vw";
+// Applicants, students, parents (lucide graduation-cap, user-round, users), drawn inline.
+const AUDIENCE_ICONS = [
+  '<path d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z"/><path d="M22 10v6"/><path d="M6 12.5V16a6 3 0 0 0 12 0v-3.5"/>',
+  '<circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 0 0-16 0"/>',
+  '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
+];
 const audiences =
   lang === "ar"
     ? [
@@ -190,9 +196,16 @@ const jsonLd = {
 };
 ---
 
-<Base lang={lang} title={name} seoTitle={seoTitle} description={homeDescription} jsonLd={jsonLd}>
+<Base
+  lang={lang}
+  title={name}
+  seoTitle={seoTitle}
+  description={homeDescription}
+  jsonLd={jsonLd}
+  overHero
+>
   <section class="bg-bg-subtle">
-    <div class="mx-auto grid max-w-6xl gap-8 px-4 py-10 lg:grid-cols-[1.2fr_1fr] lg:items-center lg:px-8 lg:py-16">
+    <div class="mx-auto grid max-w-6xl gap-8 px-4 pb-10 pt-[6.75rem] lg:grid-cols-[1.1fr_1fr] lg:items-center lg:px-8 lg:pb-12 lg:pt-[7.75rem]">
       <div>
         {cycle && (
           <p class="inline-flex rounded-full bg-accent-soft px-3 py-1 text-xs font-semibold text-accent-700">
@@ -241,20 +254,44 @@ const jsonLd = {
           </a>
         </div>
       </div>
+      {s.hero_image_url && (
+        // The college's own picture (campus, students): the page's priority image, beside the
+        // words on large screens (mockups 2026-10-29). AVIF, else WebP, at the width the screen
+        // needs; the upload itself is the last resort (design review B6).
+        <picture>
+          <source type="image/avif" srcset={heroSet("avif")} sizes={heroSizes} />
+          <source type="image/webp" srcset={heroSet("webp")} sizes={heroSizes} />
+          <img
+            src={s.hero_image_url}
+            alt={s.hero_image_alt_ar ?? ""}
+            width="1200"
+            height="514"
+            fetchpriority="high"
+            decoding="async"
+            class="aspect-[4/3] w-full rounded-3xl object-cover"
+          />
+        </picture>
+      )}
       {daysLeft !== null && (
-        <div class="rounded-2xl bg-header p-6 text-white shadow-lg lg:p-8">
-          <p class="text-sm text-navy-200">
-            {lang === "ar"
-              ? `يُغلق التقديم بعد ${daysLeft === 1 ? "يوم" : count(lang, daysLeft, N.day)}`
-              : `Applications close in ${daysLeft} days`}
-            {closes && ` · ${fmtDate(lang, closes, { day: "numeric", month: "long" })}`}
-          </p>
-          <p class="mt-1 font-display text-2xl font-bold">
-            {lang === "ar"
-              ? `${count(lang, open.length, N.program)} تقبل الآن`
-              : `${open.length} programmes open now`}
-          </p>
-          <ol class="mt-5 hidden space-y-2 text-sm text-navy-100 lg:block">
+        <div
+          class={`rounded-2xl bg-header p-6 text-white shadow-lg lg:p-8 ${s.hero_image_url ? "lg:col-span-2 lg:flex lg:items-center lg:gap-10" : ""}`}
+        >
+          <div class="lg:shrink-0">
+            <p class="text-sm text-navy-200">
+              {lang === "ar"
+                ? `يُغلق التقديم بعد ${daysLeft === 1 ? "يوم" : count(lang, daysLeft, N.day)}`
+                : `Applications close in ${daysLeft} days`}
+              {closes && ` · ${fmtDate(lang, closes, { day: "numeric", month: "long" })}`}
+            </p>
+            <p class="mt-1 font-display text-2xl font-bold">
+              {lang === "ar"
+                ? `${count(lang, open.length, N.program)} تقبل الآن`
+                : `${open.length} programmes open now`}
+            </p>
+          </div>
+          <ol
+            class={`mt-5 hidden space-y-2 text-sm text-navy-100 lg:block ${s.hero_image_url ? "lg:mt-0 lg:flex lg:flex-1 lg:gap-6 lg:space-y-0" : ""}`}
+          >
             {(lang === "ar"
               ? ["تحقّق من بريدك", "اختر البرنامج", "أكمل النموذج وارفع المستندات"]
               : ["Verify your email", "Choose a programme", "Fill in the form and upload"]
@@ -269,33 +306,13 @@ const jsonLd = {
           </ol>
           <a
             href={href(lang, "admissions/")}
-            class="tap-44 mt-6 inline-flex items-center text-sm font-semibold text-white underline underline-offset-4"
+            class="tap-44 mt-6 inline-flex shrink-0 items-center text-sm font-semibold text-white underline underline-offset-4 lg:mt-0"
           >
             {lang === "ar" ? "كيف تلتحق" : "How to apply"} {arrow(lang)}
           </a>
         </div>
       )}
     </div>
-    {s.hero_image_url && (
-      // The college's own picture (campus, students): the page's priority image.
-      <div class="mx-auto max-w-6xl px-4 pb-6 lg:px-8">
-        {/* AVIF, else WebP, at the width the screen needs; the upload itself is the last resort
-            (design review B6: the original was most of the first screen's weight). */}
-        <picture>
-          <source type="image/avif" srcset={heroSet("avif")} sizes={heroSizes} />
-          <source type="image/webp" srcset={heroSet("webp")} sizes={heroSizes} />
-          <img
-            src={s.hero_image_url}
-            alt={s.hero_image_alt_ar ?? ""}
-            width="1200"
-            height="514"
-            fetchpriority="high"
-            decoding="async"
-            class="aspect-[4/3] w-full rounded-3xl object-cover sm:aspect-[21/9]"
-          />
-        </picture>
-      </div>
-    )}
     {/* The licence and the college's own figures — not portal account counts (review 2026-09-30). */}
     <TrustStrip
       lang={lang}
@@ -339,7 +356,20 @@ const jsonLd = {
           style={`--i:${i}`}
           class="rounded-2xl border border-border-soft bg-surface p-5"
         >
-          <h2 class="text-lg font-bold">{a.title}</h2>
+          <h2 class="flex items-center gap-3 text-lg font-bold">
+            <svg
+              class="size-6 shrink-0 text-primary"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.75"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+              set:html={AUDIENCE_ICONS[i]}
+            />
+            {a.title}
+          </h2>
           <ul class="mt-3 space-y-1">
             {a.links.map(([label, url]) => (
               <li>
