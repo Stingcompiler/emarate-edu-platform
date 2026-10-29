@@ -3,19 +3,12 @@ import { Link } from "react-router";
 
 import { LiveBanner } from "../../components/LiveBanner";
 import { PortalShell } from "../../components/PortalShell";
-import { Card, CodeTile, ListStatus, SectionLabel } from "../../components/ui";
+import { Card, CourseCode, ListStatus, SectionLabel } from "../../components/ui";
 import { api, ok } from "../../lib/api";
 import { useMe } from "../../lib/auth";
 import { when, count, N, score } from "../../lib/format";
 import { num } from "../../lib/reports";
-import {
-  courseTone,
-  dueLabel,
-  splitCourse,
-  taskState,
-  useAssignments,
-  useLectures,
-} from "../../lib/learning";
+import { dueLabel, taskState, useAssignments, useLectures } from "../../lib/learning";
 import { examPhase } from "../exams/Exams";
 import { ALL } from "../../components/Pager";
 
@@ -227,7 +220,6 @@ export function Today() {
               <SectionLabel>هذا الأسبوع</SectionLabel>
               <Card className="divide-y divide-border-soft">
                 {later.map((item) => {
-                  const [top, bottom] = splitCourse(item.code ?? "");
                   return (
                     <Link
                       key={item.key}
@@ -243,12 +235,16 @@ export function Today() {
                         </b>
                         {new Date(item.at).toLocaleDateString("ar-u-nu-latn", { weekday: "long" })}
                       </span>
-                      {item.code ? (
-                        <CodeTile top={top} bottom={bottom} tone={courseTone(item.code)} />
-                      ) : null}
                       <span className="min-w-0 flex-1">
                         <span className="line-clamp-2 font-semibold text-text">{item.title}</span>
-                        <span className="block truncate text-xs text-text-muted">{item.meta}</span>
+                        <span className="block truncate text-xs text-text-muted">
+                          {item.code && (
+                            <>
+                              <CourseCode code={item.code} /> ·{" "}
+                            </>
+                          )}
+                          {item.meta}
+                        </span>
                       </span>
                     </Link>
                   );
@@ -263,17 +259,22 @@ export function Today() {
             {fresh.map((l) => {
               const code =
                 (assignments.data ?? []).find((a) => a.offering === l.offering)?.course_code ?? "";
-              const [top, bottom] = splitCourse(code);
               return (
                 <Link
                   key={l.public_id}
                   to={`/lectures/${l.public_id}`}
                   className="flex items-center gap-3 px-4 py-3 hover:bg-surface-alt"
                 >
-                  {code ? <CodeTile top={top} bottom={bottom} tone={courseTone(code)} /> : null}
                   <span className="min-w-0 flex-1">
                     <b className="block truncate text-sm text-text">{l.title_ar}</b>
-                    <span className="text-xs text-text-muted">رُفعت {when(l.published_at!)}</span>
+                    <span className="text-xs text-text-muted">
+                      {code && (
+                        <>
+                          <CourseCode code={code} /> ·{" "}
+                        </>
+                      )}
+                      رُفعت {when(l.published_at!)}
+                    </span>
                   </span>
                 </Link>
               );

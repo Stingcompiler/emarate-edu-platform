@@ -2,21 +2,14 @@ import { BookOpen } from "lucide-react";
 import { Link } from "react-router";
 
 import { PortalShell } from "../../components/PortalShell";
-import { Card, CodeTile, EmptyState, COURSE_TONES } from "../../components/ui";
+import { Card, CourseCode, EmptyState } from "../../components/ui";
 import { useMe } from "../../lib/auth";
-import {
-  dueLabel,
-  taskState,
-  useAssignments,
-  useLectures,
-  useMyCourses,
-  splitCourse,
-  courseTone,
-} from "../../lib/learning";
+import { dueLabel, taskState, useAssignments, useLectures, useMyCourses } from "../../lib/learning";
 import { count, N } from "../../lib/format";
 
-/** Boards: StudentCourses, TeacherCourses (phone); desktop derived — a card grid, each course
- *  in its own colour with the student's progress (review 2026-09-29 PR 7). */
+/** Boards: StudentCourses, TeacherCourses (phone); desktop derived. One quiet row per course:
+ *  name and details, the next assignment in a line, a word of state only when something needs
+ *  attention (owner, 2026-10-29: the coloured cards read as a template). */
 export function Courses() {
   const me = useMe();
   const courses = useMyCourses();
@@ -39,7 +32,7 @@ export function Courses() {
           <EmptyState icon={<BookOpen size={24} aria-hidden />} title="لا مواد هذا الفصل" />
         </Card>
       ) : (
-        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+        <Card className="divide-y divide-border-soft">
           {list.map((c) => {
             const mine = (assignments.data ?? []).filter((a) => a.offering === c.offering_id);
             const next = mine
@@ -50,86 +43,58 @@ export function Courses() {
               (l) => l.offering === c.offering_id && l.is_published,
             ).length;
             const teacher = c.instructors.find((i) => i.role === "teacher")?.user.full_name_ar;
-            const [top, bottom] = splitCourse(c.code);
-            const tone = courseTone(c.code);
-            // Progress: a student's work handed in; a teacher's lectures published so far.
             const handed = mine.filter((a) => a.mine).length;
-            const progress = student
-              ? { done: handed, of: mine.length, label: "الأعمال المسلّمة" }
+            // One word of state, only when something asks for attention (no «منتظم» pill).
+            const state = student
+              ? late
+                ? {
+                    text: `متأخر ${late.toLocaleString("ar-u-nu-latn")}`,
+                    tone: "text-danger-strong",
+                  }
+                : next && taskState(next) === "today"
+                  ? { text: "مطلوب اليوم", tone: "text-warning-strong" }
+                  : null
               : null;
             return (
-              <Link key={c.offering_id} to={`/courses/${c.offering_id}`} className="block">
-                <Card className="relative flex h-full flex-col overflow-hidden p-4 transition-shadow hover:shadow-md">
+              <Link
+                key={c.offering_id}
+                to={`/courses/${c.offering_id}`}
+                className="grid grid-cols-[minmax(0,1fr)_auto] gap-x-4 px-4 py-3.5 hover:bg-surface-alt lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1.7fr)_auto] lg:items-center lg:gap-x-6"
+              >
+                <span className="col-start-1 row-start-1 block min-w-0">
+                  <span className="block truncate font-semibold text-text">{c.name_ar}</span>
+                  <span className="block text-xs text-text-muted">
+                    <CourseCode code={c.code} /> · {teacher ?? "بلا أستاذ"} · شعبة{" "}
+                    <bdi>{c.section}</bdi> · {count(c.credit_hours, N.hour)}
+                    {c.my_role !== "student" ? ` · ${c.my_role === "ta" ? "معيد" : "أستاذ"}` : ""}
+                  </span>
+                </span>
+                {state && (
                   <span
-                    aria-hidden="true"
-                    className={`absolute inset-x-0 top-0 h-1 ${COURSE_TONES[tone]} [background:currentColor]`}
-                  />
-                  <div className="flex items-start gap-3">
-                    <CodeTile top={top} bottom={bottom} tone={tone} />
-                    <div className="min-w-0 flex-1">
-                      <p className="font-semibold text-text">{c.name_ar}</p>
-                      <p className="text-xs text-text-muted">
-                        {teacher ?? "بلا أستاذ"} · شعبة <bdi>{c.section}</bdi> ·{" "}
-                        {count(c.credit_hours, N.hour)}
-                        {c.my_role !== "student"
-                          ? ` · ${c.my_role === "ta" ? "معيد" : "أستاذ"}`
-                          : ""}
-                      </p>
-                    </div>
-                  </div>
-                  {next && (
-                    <p className="mt-3 rounded-lg bg-surface-alt px-3 py-2 text-xs text-text">
-                      {next.title} — {dueLabel(next.due_at)}
-                    </p>
-                  )}
-                  {progress && progress.of > 0 && (
-                    <div className="mt-3">
-                      <div className="flex justify-between text-xs text-text-muted">
-                        <span>{progress.label}</span>
-                        <span>
-                          {progress.done.toLocaleString("ar-u-nu-latn")} من{" "}
-                          {progress.of.toLocaleString("ar-u-nu-latn")}
-                        </span>
-                      </div>
-                      <div
-                        className="mt-1 h-1.5 overflow-hidden rounded-full bg-surface-alt"
-                        role="progressbar"
-                        aria-label={`${progress.label} — ${c.name_ar}`}
-                        aria-valuemin={0}
-                        aria-valuemax={progress.of}
-                        aria-valuenow={progress.done}
-                      >
-                        <span
-                          className={`motion-grow block h-full rounded-full ${COURSE_TONES[tone]} [background:currentColor]`}
-                          style={{ width: `${(100 * progress.done) / progress.of}%` }}
-                        />
-                      </div>
-                    </div>
-                  )}
-                  <div className="mt-auto flex items-center justify-between pt-3 text-xs">
-                    <span className="text-text-muted">
-                      المحاضرات المنشورة: {published.toLocaleString("ar-u-nu-latn")}
+                    className={`col-start-2 row-start-1 text-xs font-semibold lg:col-start-3 ${state.tone}`}
+                  >
+                    {state.text}
+                  </span>
+                )}
+                <span className="col-span-2 row-start-2 mt-1.5 block min-w-0 text-sm text-text-muted lg:col-span-1 lg:col-start-2 lg:row-start-1 lg:mt-0">
+                  {student && (
+                    <span className="block truncate">
+                      {next
+                        ? `القادم: ${dueLabel(next.due_at)} — ${next.title}`
+                        : "لا واجبات قادمة"}
                     </span>
-                    {student &&
-                      (late ? (
-                        <span className="rounded-full bg-danger-soft px-2 py-0.5 font-semibold text-danger-strong">
-                          متأخر {late.toLocaleString("ar-u-nu-latn")}
-                        </span>
-                      ) : next ? (
-                        <span className="rounded-full bg-warning-soft px-2 py-0.5 font-semibold text-warning-strong">
-                          {taskState(next) === "today" ? "مطلوب اليوم" : "قادم"}
-                        </span>
-                      ) : (
-                        <span className="rounded-full bg-success-soft px-2 py-0.5 font-semibold text-success-strong">
-                          منتظم
-                        </span>
-                      ))}
-                  </div>
-                </Card>
+                  )}
+                  <span className="block text-xs">
+                    {student && mine.length > 0
+                      ? `سلّمتَ ${handed.toLocaleString("ar-u-nu-latn")} من ${mine.length.toLocaleString("ar-u-nu-latn")} · `
+                      : ""}
+                    المحاضرات المنشورة: {published.toLocaleString("ar-u-nu-latn")}
+                  </span>
+                </span>
               </Link>
             );
           })}
-        </div>
+        </Card>
       )}
     </PortalShell>
   );
