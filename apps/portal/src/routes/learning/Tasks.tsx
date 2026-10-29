@@ -4,15 +4,9 @@ import { Link } from "react-router";
 
 import { PortalShell } from "../../components/PortalShell";
 import { ProgressRing } from "../../components/motion";
-import { Card, CodeTile, EmptyState, SectionLabel } from "../../components/ui";
+import { Card, CourseCode, EmptyState, SectionLabel } from "../../components/ui";
 import { api, ok } from "../../lib/api";
-import {
-  type TaskState,
-  dueLabel,
-  splitCourse,
-  taskState,
-  useAssignments,
-} from "../../lib/learning";
+import { type TaskState, dueLabel, taskState, useAssignments } from "../../lib/learning";
 import { examPhase } from "../exams/Exams";
 import { type Noun, count, N } from "../../lib/format";
 import { ALL } from "../../components/Pager";
@@ -83,7 +77,6 @@ export function Tasks() {
                 </SectionLabel>
                 <Card className="motion-stagger divide-y divide-border-soft">
                   {items.map((a) => {
-                    const [top, bottom] = splitCourse(a.course_code);
                     const state = taskState(a, now);
                     return (
                       <Link
@@ -91,11 +84,11 @@ export function Tasks() {
                         to={`/assignments/${a.public_id}`}
                         className="flex items-center gap-3 px-4 py-3 hover:bg-surface-alt"
                       >
-                        <CodeTile top={top} bottom={bottom} />
                         <span className="min-w-0 flex-1">
                           <span className="block truncate font-semibold text-text">{a.title}</span>
                           <span className="text-xs text-text-muted">
-                            {a.course_name} · {count(Number(a.max_grade), N.mark)}
+                            <CourseCode code={a.course_code} /> · {a.course_name} ·{" "}
+                            {count(Number(a.max_grade), N.mark)}
                             {state === "late" && a.late_policy === "penalty"
                               ? ` · خصم ${a.late_penalty_percent}٪`
                               : ""}
@@ -120,14 +113,11 @@ export function Tasks() {
                         to={`/exams/${e.public_id}`}
                         className="flex items-center gap-3 px-4 py-3 hover:bg-surface-alt"
                       >
-                        <CodeTile
-                          top={splitCourse(e.course_code)[0]}
-                          bottom={splitCourse(e.course_code)[1]}
-                        />
                         <span className="min-w-0 flex-1">
                           <span className="block truncate font-semibold text-text">{e.title}</span>
                           <span className="text-xs text-text-muted">
-                            اختبار · {count(e.duration_minutes, N.minute)} ·{" "}
+                            <CourseCode code={e.course_code} /> · اختبار ·{" "}
+                            {count(e.duration_minutes, N.minute)} ·{" "}
                             {count(e.questions_count, N.question)}
                           </span>
                         </span>

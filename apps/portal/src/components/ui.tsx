@@ -202,6 +202,28 @@ export function Chip({
   );
 }
 
+/** A tab in a row of tabs: text only, the open one set in dark type on a faint ground. */
+export function QuietTab({
+  active,
+  children,
+  ...props
+}: ButtonHTMLAttributes<HTMLButtonElement> & { active?: boolean }) {
+  return (
+    <button
+      type="button"
+      aria-pressed={props.role ? undefined : active}
+      {...props}
+      className={`inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-lg px-3 text-sm transition-colors lg:min-h-9 ${
+        active
+          ? "bg-surface-alt font-semibold text-text"
+          : "text-text-muted hover:bg-surface-alt hover:text-text"
+      }`}
+    >
+      {children}
+    </button>
+  );
+}
+
 export function Notice({
   tone = "danger",
   children,
@@ -441,6 +463,19 @@ export function CodeTile({
       <span className="text-[11px] font-semibold">{top}</span>
       {bottom && <span className="text-sm font-bold">{bottom}</span>}
     </span>
+  );
+}
+
+/**
+ * A course code as plain text («IT101»): a label beside the name, not a coloured tile. The
+ * student's screens use it (owner, 2026-10-29: tiles, stripes and pills on every row read as a
+ * template); staff lists keep CodeTile.
+ */
+export function CourseCode({ code, className = "" }: { code: string; className?: string }) {
+  return (
+    <bdi dir="ltr" className={`font-mono text-xs ${className}`}>
+      {code}
+    </bdi>
   );
 }
 

@@ -8,20 +8,17 @@ import { PortalShell } from "../../components/PortalShell";
 import {
   Button,
   Card,
-  Chip,
-  CodeTile,
   EmptyState,
+  QuietTab,
   SectionLabel,
-  SideFigures,
   StatusBadge,
+  Summary,
   WithSide,
 } from "../../components/ui";
 import { api, ok } from "../../lib/api";
 import { when, count, N } from "../../lib/format";
 import {
   dueLabel,
-  splitCourse,
-  courseTone,
   taskState,
   useAssignments,
   useLectures,
@@ -83,7 +80,6 @@ export function Course() {
   const graded = work.filter((a) => a.mine?.graded);
   const earned = graded.reduce((n, a) => n + Number(a.mine?.score ?? 0), 0);
   const possible = graded.reduce((n, a) => n + Number(a.max_grade ?? 0), 0);
-  const [top, bottom] = splitCourse(course?.code ?? "");
   const people = course?.instructors ?? [];
   // The side column (board DesktopStudentCourse; review 2026-09-29 PR 7): where the course
   // stands, what comes next and its latest announcement. Phones get it under the tab.
@@ -96,28 +92,27 @@ export function Course() {
   const latest = news.data?.[0];
   const side = (
     <>
-      <SideFigures
+      <Summary
         title="المادة في أرقام"
-        rows={
-          staff
-            ? [
-                ["محاضرة منشورة", published],
-                ["مسودة", lecs.length - published],
-                ["واجب", work.length],
-                ["اختبار", exams.data?.length ?? 0],
-              ]
-            : [
-                ["محاضرة", published],
-                [`سلّمت من ${work.length.toLocaleString("ar-u-nu-latn")}`, handedIn],
-                ["اختبار", exams.data?.length ?? 0],
-                [
-                  "من أعمال الفصل",
-                  possible
-                    ? `${Math.round((100 * earned) / possible).toLocaleString("ar-u-nu-latn")}٪`
-                    : "—",
-                ],
-              ]
-        }
+        rows={(staff
+          ? ([
+              ["محاضرة منشورة", published],
+              ["مسودة", lecs.length - published],
+              ["واجب", work.length],
+              ["اختبار", exams.data?.length ?? 0],
+            ] as const)
+          : ([
+              ["محاضرة", published],
+              [`سلّمت من ${work.length.toLocaleString("ar-u-nu-latn")}`, handedIn],
+              ["اختبار", exams.data?.length ?? 0],
+              [
+                "من أعمال الفصل",
+                possible
+                  ? `${Math.round((100 * earned) / possible).toLocaleString("ar-u-nu-latn")}٪`
+                  : "—",
+              ],
+            ] as const)
+        ).map(([label, value]) => ({ label, value }))}
       />
       {!staff && (next || nextExam) && (
         <Card className="divide-y divide-border-soft">
@@ -169,7 +164,7 @@ export function Course() {
       title={course?.name_ar ?? "المادة"}
       subtitle={
         course
-          ? `${people.map((p) => `${p.role === "ta" ? "معيد: " : ""}${p.user.full_name_ar}`).join(" · ") || "بلا أستاذ"} · شعبة \u2068${course.section}\u2069 · ${count(course.credit_hours, N.hour)}`
+          ? `\u2068${course.code}\u2069 · ${people.map((p) => `${p.role === "ta" ? "معيد: " : ""}${p.user.full_name_ar}`).join(" · ") || "بلا أستاذ"} · شعبة \u2068${course.section}\u2069 · ${count(course.credit_hours, N.hour)}`
           : undefined
       }
       back={{ label: "موادي", to: "/courses" }}
@@ -177,10 +172,9 @@ export function Course() {
       {course && (
         <>
           <div className="flex flex-wrap items-center gap-3">
-            <CodeTile top={top} bottom={bottom} tone={courseTone(course.code)} />
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-1">
               {tabs.map((t) => (
-                <Chip key={t.key} active={tab === t.key} onClick={() => setTab(t.key)}>
+                <QuietTab key={t.key} active={tab === t.key} onClick={() => setTab(t.key)}>
                   {t.label}
                   {t.key === "lectures"
                     ? ` ${lecs.length.toLocaleString("ar-u-nu-latn")}`
@@ -189,7 +183,7 @@ export function Course() {
                       : t.key === "news"
                         ? ` ${(news.data?.length ?? 0).toLocaleString("ar-u-nu-latn")}`
                         : ""}
-                </Chip>
+                </QuietTab>
               ))}
             </div>
             {staff && (

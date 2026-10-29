@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router";
 
 import { PortalShell } from "../../components/PortalShell";
-import { Button, Card, CodeTile, SectionLabel, WithSide } from "../../components/ui";
+import { Button, Card, CourseCode, SectionLabel, WithSide } from "../../components/ui";
 import { count, N } from "../../lib/format";
 import { api, ok } from "../../lib/api";
 import {
@@ -15,8 +15,6 @@ import {
   useLectures,
   useCourse,
   isCourseStaff,
-  splitCourse,
-  courseTone,
 } from "../../lib/learning";
 
 type Resource = NonNullable<ReturnType<typeof useLectures>["data"]>[number]["resources"][number];
@@ -43,7 +41,6 @@ export function Lecture() {
   const video = l?.resources.find((r) => r.kind === "video" && r.video);
   const course = useCourse(l?.offering).data;
   const staff = isCourseStaff(course);
-  const [top, bottom] = splitCourse(course?.code ?? "");
   // The course's staff see how many students opened each lecture (docs/07); a student's
   // opening is noted once per visit. Staff opening it are not counted.
   const opened = l?.public_id;
@@ -84,10 +81,16 @@ export function Lecture() {
                 to={`/courses/${l.offering}`}
                 className="flex items-center gap-3 border-b border-border-soft px-4 py-3 hover:bg-surface-alt"
               >
-                {course && <CodeTile top={top} bottom={bottom} tone={courseTone(course.code)} />}
                 <span className="min-w-0">
                   <b className="block truncate text-sm text-text">{course?.name_ar ?? "المادة"}</b>
-                  <span className="text-xs text-text-muted">{count(list.length, N.lecture)}</span>
+                  <span className="text-xs text-text-muted">
+                    {course && (
+                      <>
+                        <CourseCode code={course.code} /> ·{" "}
+                      </>
+                    )}
+                    {count(list.length, N.lecture)}
+                  </span>
                 </span>
               </Link>
               <ol className="max-h-[60vh] overflow-y-auto py-1">
@@ -98,11 +101,9 @@ export function Lecture() {
                       <Link
                         to={`/lectures/${x.public_id}`}
                         aria-current={current ? "page" : undefined}
-                        className={`flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-surface-alt ${current ? "bg-primary-soft/50 font-semibold" : ""}`}
+                        className={`flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-surface-alt ${current ? "bg-surface-alt font-semibold" : ""}`}
                       >
-                        <span
-                          className={`grid size-7 shrink-0 place-items-center rounded-lg text-xs font-bold ${current ? "bg-primary text-on-primary" : "bg-surface-alt text-text-muted"}`}
-                        >
+                        <span className="w-6 shrink-0 text-center font-mono text-xs text-text-muted">
                           {(i + 1).toLocaleString("ar-u-nu-latn")}
                         </span>
                         <span className="min-w-0 flex-1 truncate text-text">{x.title_ar}</span>
