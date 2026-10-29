@@ -1,8 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { CalendarDays, Newspaper, Plus } from "lucide-react";
+import { CalendarDays, ListTodo, Newspaper, Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
 
+import { Panel } from "../../components/dashboard";
 import { PortalShell } from "../../components/PortalShell";
 import {
   Button,
@@ -13,7 +14,6 @@ import {
   Notice,
   problemMessage,
   SectionLabel,
-  SideFigures,
   SideNote,
   StatusBadge,
   TextArea,
@@ -25,6 +25,7 @@ import { useUnsavedChanges } from "../../lib/useUnsavedChanges";
 import { slugify } from "../../lib/format";
 import { ALL, Pager, useLocalPages } from "../../components/Pager";
 import { useConfirm } from "../../components/Confirm";
+import { Inbox, inboxState } from "../homes/Inbox";
 
 const day = new Intl.DateTimeFormat("ar-u-nu-latn", { day: "numeric" });
 const month = new Intl.DateTimeFormat("ar-u-nu-latn", { month: "long" });
@@ -51,6 +52,8 @@ export function Events() {
   const next = upcoming[0];
   const list = tab === "upcoming" ? upcoming.slice(next ? 1 : 0) : past;
   const paged = useLocalPages(list, [tab]);
+  // «يحتاج إجراءك» (mockups 2026-10-29): upcoming events not on the site yet.
+  const unpublished = upcoming.filter((e) => e.status === "draft");
   return (
     <PortalShell
       title="الفعاليات"
@@ -63,19 +66,40 @@ export function Events() {
         </Link>
       }
     >
+      <div className="mb-6">
+        <Inbox
+          title="يحتاج إجراءك"
+          icon={ListTodo}
+          items={[
+            {
+              n: unpublished.length,
+              title: "فعاليات قادمة غير منشورة",
+              meta: "لا تظهر على الموقع ولا في التقويم حتى تُنشر",
+              to: unpublished[0] ? `/events/${unpublished[0].public_id}` : "/events",
+              action: "راجع الفعالية",
+            },
+          ]}
+          empty="كل الفعاليات القادمة منشورة."
+          {...inboxState(events)}
+        />
+      </div>
       <WithSide
         side={
           <>
-            <SideFigures
-              rows={[
+            <Panel title="نظرة سريعة" icon={CalendarDays}>
+              {(
                 [
-                  "قادمة",
-                  (events.data ?? []).filter((e) => new Date(e.ends_at).getTime() > Date.now())
-                    .length,
-                ],
-                ["منشورة", (events.data ?? []).filter((e) => e.status === "published").length],
-              ]}
-            />
+                  ["قادمة", upcoming.length],
+                  ["منشورة", (events.data ?? []).filter((e) => e.status === "published").length],
+                  ["سابقة", past.length],
+                ] as const
+              ).map(([label, value]) => (
+                <p key={label} className="flex items-center justify-between px-4 py-2.5 text-sm">
+                  {label}
+                  <b>{value.toLocaleString("ar-u-nu-latn")}</b>
+                </p>
+              ))}
+            </Panel>
             <SideNote title="على الموقع">
               الفعالية المنشورة تظهر في صفحة الفعاليات والتقويم والرئيسية، وتبقى صفحتها بعد انتهائها
               ضمن «فعاليات سابقة».
@@ -100,7 +124,7 @@ export function Events() {
             {tab === "upcoming" && next && (
               <Link
                 to={`/events/${next.public_id}`}
-                className="mb-3 block overflow-hidden rounded-2xl bg-header text-white hover:opacity-95"
+                className="mb-3 block overflow-hidden rounded-2xl bg-primary-500 text-white shadow-sm hover:opacity-95"
               >
                 {next.cover_url && (
                   <img src={next.cover_url} alt="" className="aspect-[3/1] w-full object-cover" />
@@ -113,9 +137,9 @@ export function Events() {
                     <span className="text-xs">{month.format(new Date(next.starts_at))}</span>
                   </span>
                   <span className="min-w-0 flex-1">
-                    <span className="text-xs text-navy-200">الفعالية القادمة</span>
+                    <span className="text-xs text-primary-100">الفعالية القادمة</span>
                     <b className="block truncate text-lg">{next.title}</b>
-                    <span className="text-sm text-navy-200">
+                    <span className="text-sm text-primary-100">
                       {time.format(new Date(next.starts_at))}
                       {next.location ? ` · ${next.location}` : ""}
                     </span>
