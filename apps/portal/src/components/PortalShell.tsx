@@ -10,8 +10,7 @@ import { AppShell, Badge } from "./AppShell";
 import { ConnectivityBar } from "./ConnectivityBar";
 import { InstallHint } from "./InstallHint";
 import { PushPrompt } from "./PushPrompt";
-import { Notice } from "./ui";
-import { ThemeToggle } from "./ThemeToggle";
+import { Avatar, Notice } from "./ui";
 
 type Props = Omit<ComponentProps<typeof AppShell>, "nav" | "actions" | "eyebrow">;
 
@@ -26,6 +25,16 @@ export function useUnreadCount() {
     refetchInterval: 60_000,
   });
 }
+
+/** Two letters for the account button: the first letters of the first two names. */
+const initialsOf = (name: string) =>
+  name
+    .replace(/^(د|أ|م)\.\s*/, "")
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((word) => word.replace(/^ال(?=.)/, "")[0])
+    .join("");
 
 /** The signed-in portal chrome: role navigation, unread badge, account actions. */
 export function PortalShell(props: Props) {
@@ -85,14 +94,21 @@ export function PortalShell(props: Props) {
       nav={navFor(me.data, count)}
       actions={
         <>
-          <ThemeToggle className="hover:bg-white/10" />
           <Link
             to="/notifications"
-            className="relative grid size-10 place-items-center rounded-full hover:bg-white/10"
+            className="relative grid size-10 place-items-center rounded-full text-text-muted hover:bg-surface-alt hover:text-text"
             aria-label="الإشعارات"
           >
             <Bell size={20} strokeWidth={1.75} aria-hidden />
             <Badge count={count} className="absolute -top-0.5 -end-0.5" />
+          </Link>
+          <Link
+            to="/settings"
+            aria-label="حسابي"
+            title={me.data?.full_name_ar}
+            className="rounded-full focus-visible:outline-2 focus-visible:outline-primary"
+          >
+            <Avatar text={initialsOf(me.data?.full_name_ar ?? "")} size="md" tone="neutral" />
           </Link>
           <button
             type="button"
@@ -100,7 +116,7 @@ export function PortalShell(props: Props) {
               await signOut();
               navigate("/login", { replace: true });
             }}
-            className="flex h-10 items-center gap-2 rounded-full px-3 text-sm hover:bg-white/10"
+            className="flex h-10 items-center gap-2 rounded-full px-3 text-sm text-text-muted hover:bg-surface-alt hover:text-text"
           >
             <LogOut size={18} strokeWidth={1.75} aria-hidden className="rtl:-scale-x-100" />
             خروج
