@@ -8,7 +8,7 @@ import type {
   TextareaHTMLAttributes,
 } from "react";
 
-import { ChevronLeft, Eye, EyeOff } from "lucide-react";
+import { ChevronLeft, Eye, EyeOff, type LucideIcon } from "lucide-react";
 import { useEffect, useId, useRef, useState } from "react";
 import { Link } from "react-router";
 
@@ -666,9 +666,26 @@ export function ListStatus({
 }
 
 /** A page's actions as one quiet list (label, optional hint, chevron), not a row of equal tiles. */
-export function ActionLinks({ items }: { items: { to: string; label: string; hint?: string }[] }) {
+export function ActionLinks({
+  items,
+  title,
+  icon: Icon,
+}: {
+  items: { to: string; label: string; hint?: string }[];
+  /** A heading inside the card, as the home screens' panels have (mockups 2026-10-29). */
+  title?: string;
+  icon?: LucideIcon;
+}) {
   return (
     <Card className="divide-y divide-border-soft">
+      {title && (
+        <div className="flex min-h-12 items-center gap-2 px-4 pt-1">
+          {Icon && (
+            <Icon size={20} strokeWidth={1.75} aria-hidden className="shrink-0 text-primary" />
+          )}
+          <h2 className="text-base font-bold text-text">{title}</h2>
+        </div>
+      )}
       {items.map((a) => (
         <Link
           key={a.to}

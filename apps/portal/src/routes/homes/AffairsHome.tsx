@@ -1,8 +1,10 @@
+import { ListTodo, Zap } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router";
 
+import { Panel } from "../../components/dashboard";
 import { PortalShell } from "../../components/PortalShell";
-import { ActionLinks, Avatar, Card, ListStatus, SectionLabel } from "../../components/ui";
+import { ActionLinks, Avatar, Card, ListStatus } from "../../components/ui";
 import { api, ok } from "../../lib/api";
 import { useMe } from "../../lib/auth";
 import { when, count, N } from "../../lib/format";
@@ -67,8 +69,9 @@ export function AffairsHome() {
     >
       <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_380px] lg:items-start lg:gap-6">
         <div className="space-y-4">
-          <SectionLabel>يحتاج إجراءً</SectionLabel>
           <Inbox
+            title="يحتاج إجراءً"
+            icon={ListTodo}
             {...inboxState(reports, open, drafts)}
             items={[
               {
@@ -105,8 +108,9 @@ export function AffairsHome() {
               </Card>
             );
           })}
-          <SectionLabel>الإجراءات</SectionLabel>
           <ActionLinks
+            title="الإجراءات"
+            icon={Zap}
             items={[
               { to: "/regulations/new", label: "نشر لائحة أو ضابط" },
               { to: "/notifications/new", label: "إشعار تنظيمي للطلاب" },
@@ -115,8 +119,7 @@ export function AffairsHome() {
           />
         </div>
         <aside className="mt-6 lg:mt-0">
-          <SectionLabel>الحالات المفتوحة · {num(open.data?.count ?? 0)}</SectionLabel>
-          <Card className="divide-y divide-border-soft">
+          <Panel title={`الحالات المفتوحة · ${num(open.data?.count ?? 0)}`}>
             {cases.slice(0, 8).map((c) => (
               <Link
                 key={c.public_id}
@@ -137,7 +140,7 @@ export function AffairsHome() {
               onRetry={() => void open.refetch()}
               empty="لا حالات مفتوحة."
             />
-          </Card>
+          </Panel>
         </aside>
       </div>
     </PortalShell>
