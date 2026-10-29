@@ -1,7 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { CalendarRange, FileUp, LayoutTemplate, Users } from "lucide-react";
+import { CalendarRange, FileUp, LayoutTemplate, ListTodo, Users } from "lucide-react";
 import { Link } from "react-router";
 
+import { Panel } from "../../components/dashboard";
 import { PortalShell } from "../../components/PortalShell";
 import { Avatar, Button, Card, ListStatus, SectionLabel } from "../../components/ui";
 import { api, ok } from "../../lib/api";
@@ -184,10 +185,13 @@ export function RegistrarHome() {
       </Card>
       <div className="mt-6 lg:grid lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start lg:gap-6">
         <div className="space-y-4">
-          <SectionLabel>يحتاج إجراءك</SectionLabel>
-          <Inbox {...inboxState(summary, registrations, inquiries)} items={inbox} />
-          <SectionLabel>غير مُتولّى · {num(unassigned.data?.count ?? 0)}</SectionLabel>
-          <Card className="divide-y divide-border-soft">
+          <Inbox
+            title="يحتاج إجراءك"
+            icon={ListTodo}
+            {...inboxState(summary, registrations, inquiries)}
+            items={inbox}
+          />
+          <Panel title={`غير مُتولّى · ${num(unassigned.data?.count ?? 0)}`}>
             {(unassigned.data?.results ?? []).map((a) => (
               <div key={a.public_id} className="flex items-center gap-3 px-4 py-3">
                 <Avatar text={initials(a.full_name)} size="md" tone="primary" />
@@ -215,7 +219,7 @@ export function RegistrarHome() {
               onRetry={() => void unassigned.refetch()}
               empty="كل الطلبات موزعة."
             />
-          </Card>
+          </Panel>
         </div>
         <aside className="mt-6 space-y-4 lg:mt-0">
           {/* «طلباتي — تحتاج إجراء» (board RegistrarHome). */}
@@ -280,8 +284,7 @@ export function RegistrarHome() {
           )}
           {head && (
             <>
-              <SectionLabel>الإدارة</SectionLabel>
-              <Card className="divide-y divide-border-soft text-sm">
+              <Panel title="الإدارة">
                 {[
                   {
                     to: "/admissions/cycles",
@@ -301,20 +304,19 @@ export function RegistrarHome() {
                     {l.label}
                   </Link>
                 ))}
-              </Card>
+              </Panel>
             </>
           )}
           {head && summary.data && (
             <>
-              <SectionLabel>حسب القسم</SectionLabel>
-              <Card className="divide-y divide-border-soft text-sm">
+              <Panel title="حسب القسم">
                 {Object.entries(summary.data.by_department).map(([d, n]) => (
                   <div key={d} className="flex justify-between px-4 py-2.5">
                     <span>{d}</span>
                     <b>{num(n)}</b>
                   </div>
                 ))}
-              </Card>
+              </Panel>
             </>
           )}
         </aside>

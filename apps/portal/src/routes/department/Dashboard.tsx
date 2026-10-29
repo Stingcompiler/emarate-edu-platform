@@ -1,3 +1,4 @@
+import { ListTodo } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router";
 
@@ -135,8 +136,9 @@ export function DepartmentDashboard() {
       <DepartmentSwitch />
       <div className="flex flex-col gap-6 lg:grid lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start">
         <section className="order-1 lg:col-start-1 lg:row-start-1">
-          <SectionLabel>يحتاج قرارك · {num(inbox.length)}</SectionLabel>
           <Inbox
+            title={`يحتاج قرارك · ${num(inbox.length)}`}
+            icon={ListTodo}
             {...inboxState(term, offerings, report, teachers, approvals, batches)}
             items={inbox}
           />

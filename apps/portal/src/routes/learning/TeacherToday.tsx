@@ -1,7 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
-import { BookPlus, ClipboardPlus, Megaphone, Radio } from "lucide-react";
+import { BookPlus, CalendarClock, ClipboardPlus, Megaphone, Radio } from "lucide-react";
 import { Link } from "react-router";
 
+import { AckBanner, NextStepCard, Panel } from "../../components/dashboard";
 import { PortalShell } from "../../components/PortalShell";
 import { COURSE_TONES, Card, CodeTile, ListStatus, SectionLabel } from "../../components/ui";
 import { api, ok } from "../../lib/api";
@@ -78,6 +79,7 @@ export function TeacherToday() {
         title: `بث: ${s.course_name || s.title}`,
         meta: s.title,
         to: "/live",
+        action: "صفحة البث",
         tag: new Date(s.starts_at).getTime() <= now ? "جارٍ" : dueLabel(s.starts_at, now),
       })),
     ...(exams.data ?? [])
@@ -94,6 +96,7 @@ export function TeacherToday() {
         title: `${e.title} — ${new Date(e.opens_at).getTime() <= now ? "جارٍ" : "يبدأ قريبًا"}`,
         meta: `${e.course_name} · يُغلق ${dueLabel(e.closes_at, now).replace(/^بعد /, "خلال ")}`,
         to: `/exams/${e.public_id}/monitor`,
+        action: "مراقبة الاختبار",
         tag: "مراقبة",
       })),
     ...mine
@@ -105,6 +108,7 @@ export function TeacherToday() {
         title: `ينتهي موعد ${a.title}`,
         meta: a.course_name,
         to: `/assignments/${a.public_id}`,
+        action: "فتح الواجب",
         tag: dueLabel(a.due_at, now),
       })),
   ].sort((a, b) => a.at.localeCompare(b.at));
@@ -133,24 +137,29 @@ export function TeacherToday() {
       subtitle={`${new Date().toLocaleDateString("ar-u-nu-latn", { weekday: "long", day: "numeric", month: "long" })} · ${count(students, N.course)}`}
     >
       {toAck.map((n) => (
-        <Link
-          key={n.public_id}
-          to={`/hr-notices/${n.public_id}`}
-          className="mb-4 flex items-center justify-between gap-3 rounded-2xl bg-warning-soft px-4 py-3 hover:opacity-95"
-        >
-          <span className="min-w-0">
-            <b className="block text-sm text-text">{n.subject}</b>
-            <span className="text-xs text-warning-strong">{n.sent_by} · يتطلب إقرار الاطلاع</span>
-          </span>
-          <span className="shrink-0 rounded-lg bg-text px-3 py-2 text-xs font-bold text-bg">
-            اطّلع وأقرّ
-          </span>
-        </Link>
+        <div key={n.public_id} className="mb-4">
+          <AckBanner
+            to={`/hr-notices/${n.public_id}`}
+            title={n.subject}
+            line={`${n.sent_by} · يتطلب إقرار الاطلاع`}
+            label="اطّلع وأقرّ"
+          />
+        </div>
       ))}
+      {agenda[0] && (
+        <div className="mb-6">
+          <NextStepCard
+            eyebrow="التالي في يومك"
+            title={agenda[0].title}
+            meta={agenda[0].meta}
+            tag={agenda[0].tag || undefined}
+            action={{ label: agenda[0].action, to: agenda[0].to }}
+          />
+        </div>
+      )}
       <div className="lg:grid lg:grid-cols-2 lg:items-start lg:gap-6">
         <section>
-          <SectionLabel>جدول اليوم</SectionLabel>
-          <Card className="divide-y divide-border-soft">
+          <Panel title="جدول اليوم" icon={CalendarClock}>
             {agenda.map((i) => (
               <Link
                 key={i.key}
@@ -179,7 +188,7 @@ export function TeacherToday() {
               onRetry={retryDue}
               empty="لا شيء مجدول في الأربع والعشرين ساعة القادمة."
             />
-          </Card>
+          </Panel>
           <SectionLabel>إجراءات سريعة</SectionLabel>
           <div className="grid auto-cols-fr grid-flow-col gap-2 text-center text-xs">
             {[
@@ -266,8 +275,7 @@ export function TeacherToday() {
           </Link>
           {newest.length > 0 && (
             <>
-              <SectionLabel>تسليمات جديدة</SectionLabel>
-              <Card className="divide-y divide-border-soft">
+              <Panel title="تسليمات جديدة">
                 {newest.map((sub) => {
                   const [top, bottom] = splitCourse(sub.assignment.course_code);
                   return (
@@ -303,7 +311,7 @@ export function TeacherToday() {
                     </Link>
                   );
                 })}
-              </Card>
+              </Panel>
             </>
           )}
         </aside>

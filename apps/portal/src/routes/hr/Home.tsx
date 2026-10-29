@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router";
 
+import { Panel } from "../../components/dashboard";
 import { PortalShell } from "../../components/PortalShell";
 import { Avatar, Button, Card, SectionLabel } from "../../components/ui";
 import { api, ok } from "../../lib/api";
@@ -62,8 +63,7 @@ export function HRHome() {
           </Card>
           <div className="mt-6 lg:grid lg:grid-cols-2 lg:gap-6">
             <section>
-              <SectionLabel>تحت الحد · {num(below.length)}</SectionLabel>
-              <Card className="divide-y divide-border-soft">
+              <Panel title={`تحت الحد · ${num(below.length)}`}>
                 {below.slice(0, 5).map((t) => (
                   <Link
                     key={t.public_id}
@@ -91,9 +91,8 @@ export function HRHome() {
                 >
                   الجدول الكامل
                 </Link>
-              </Card>
-              <SectionLabel>حسب القسم</SectionLabel>
-              <Card className="divide-y divide-border-soft">
+              </Panel>
+              <Panel title="حسب القسم">
                 {r.departments.map((d) => (
                   <div key={d.department} className="flex items-center gap-3 px-4 py-3 text-sm">
                     <span className="min-w-0 flex-1">
@@ -111,7 +110,7 @@ export function HRHome() {
                     <span className="text-xs text-text-muted">تحت الحد</span>
                   </div>
                 ))}
-              </Card>
+              </Panel>
             </section>
             {/* Stacked on phones the heading is this column's first child (no top margin of
                 its own), so the column carries the gap. */}

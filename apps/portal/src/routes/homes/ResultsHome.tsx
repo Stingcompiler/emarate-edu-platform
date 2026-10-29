@@ -1,6 +1,8 @@
+import { ListTodo, Zap } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router";
 
+import { Panel } from "../../components/dashboard";
 import { PortalShell } from "../../components/PortalShell";
 import { ActionLinks, Card, SectionLabel, StatusBadge, STATUS_LABELS } from "../../components/ui";
 import { api, ok } from "../../lib/api";
@@ -44,8 +46,9 @@ export function ResultsHome() {
     >
       <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start lg:gap-6">
         <div className="space-y-4">
-          <SectionLabel>يحتاج إجراءً</SectionLabel>
           <Inbox
+            title="يحتاج إجراءً"
+            icon={ListTodo}
             {...inboxState(batches, corrections)}
             items={[
               {
@@ -77,16 +80,16 @@ export function ResultsHome() {
               },
             ]}
           />
-          <SectionLabel>الإجراءات</SectionLabel>
           <ActionLinks
+            title="الإجراءات"
+            icon={Zap}
             items={[
               { to: "/result-imports", label: "رفع ملف نتائج", hint: "ملف جاهز فقط" },
               { to: "/results/search", label: "بحث نتيجة" },
               { to: "/results/settings", label: "إعدادات العرض" },
             ]}
           />
-          <SectionLabel>الدفعات</SectionLabel>
-          <Card className="divide-y divide-border-soft">
+          <Panel title="الدفعات">
             {list.map((b) => (
               <Link
                 key={b.public_id}
@@ -104,7 +107,7 @@ export function ResultsHome() {
               </Link>
             ))}
             {!list.length && <p className="px-4 py-4 text-sm text-text-muted">لا دفعات بعد.</p>}
-          </Card>
+          </Panel>
         </div>
         <aside className="mt-6 space-y-4 lg:mt-0">
           <SectionLabel>إعدادات العرض</SectionLabel>

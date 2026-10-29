@@ -1,3 +1,4 @@
+import { ListTodo, Zap } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 
 import { PortalShell } from "../../components/PortalShell";
@@ -103,8 +104,9 @@ export function AcademicHome() {
           empty). */}
         <div className="order-1 mb-6 lg:order-2 lg:mb-0 lg:mt-6 lg:grid lg:grid-cols-[minmax(0,1fr)_300px] lg:items-start lg:gap-6">
           <div>
-            <SectionLabel>يحتاج قرارك</SectionLabel>
             <Inbox
+              title="يحتاج قرارك"
+              icon={ListTodo}
               {...inboxState(departments, term, corrections, leaders, teachers, offerings)}
               items={[
                 {
@@ -154,8 +156,9 @@ export function AcademicHome() {
             />
           </div>
           <div className="mt-6 lg:mt-0">
-            <SectionLabel>اختصارات</SectionLabel>
             <ActionLinks
+              title="اختصارات"
+              icon={Zap}
               items={[
                 { to: "/hr/teachers", label: "تقارير الأداء" },
                 { to: "/system/users", label: "حساب أستاذ / معيد" },
