@@ -1,4 +1,4 @@
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, type LucideIcon } from "lucide-react";
 import { Link } from "react-router";
 
 import { Card, Skeleton } from "../../components/ui";
@@ -30,17 +30,22 @@ export function inboxState(...sources: Source[]) {
 }
 
 /**
- * «يحتاج إجراءً / قرارك»: what waits on the person, by priority. The count is a plain big
- * number (colour only for urgency), each row ends in a button; the first row's is the
+ * «يحتاج إجراءً / قرارك»: what waits on the person, by priority. The count is a big number in a
+ * neutral square (colour only for urgency, mockups 2026-10-29), each row ends in a button; the first row's is the
  * primary one. The whole row is the link.
  */
 export function Inbox({
+  title,
+  icon: Icon,
   items,
   empty = "لا شيء بانتظارك.",
   loading = false,
   failed = false,
   onRetry,
 }: {
+  /** A heading inside the card (mockups 2026-10-29); without it the page labels the list. */
+  title?: string;
+  icon?: LucideIcon;
   items: InboxItem[];
   empty?: string;
   loading?: boolean;
@@ -55,6 +60,14 @@ export function Inbox({
   };
   return (
     <Card className="divide-y divide-border-soft">
+      {title && (
+        <div className="flex min-h-12 items-center gap-2 px-4 pt-1">
+          {Icon && (
+            <Icon size={20} strokeWidth={1.75} aria-hidden className="shrink-0 text-primary" />
+          )}
+          <h2 className="text-base font-bold text-text">{title}</h2>
+        </div>
+      )}
       {shown.map((i, at) => (
         <Link
           key={i.title}
@@ -62,7 +75,7 @@ export function Inbox({
           className="flex items-center gap-4 px-4 py-3.5 hover:bg-surface-alt"
         >
           <span
-            className={`w-12 shrink-0 text-center text-3xl font-bold tabular-nums ${tone[i.tone ?? "warning"]}`}
+            className={`grid size-12 shrink-0 place-items-center rounded-xl bg-surface-alt text-2xl font-bold tabular-nums ${tone[i.tone ?? "warning"]}`}
           >
             {num(i.n)}
           </span>

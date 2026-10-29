@@ -1,8 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
+import { CalendarDays, ListChecks, Sparkles } from "lucide-react";
 import { Link } from "react-router";
 
 import { LiveBanner } from "../../components/LiveBanner";
 import { PortalShell } from "../../components/PortalShell";
+import { AckBanner, NextStepCard, Panel } from "../../components/dashboard";
 import { Card, CourseCode, ListStatus, SectionLabel } from "../../components/ui";
 import { api, ok } from "../../lib/api";
 import { useMe } from "../../lib/auth";
@@ -66,6 +68,7 @@ export function Today() {
         title: `بث: ${s.course_name || s.title}`,
         meta: `${s.title} · ${s.host_name}`,
         to: "/live",
+        action: "صفحة البث",
         tag: new Date(s.starts_at).getTime() <= now ? "جارٍ" : "",
       })),
     ...(assignments.data ?? [])
@@ -80,6 +83,7 @@ export function Today() {
         title: `تسليم: ${a.title}`,
         meta: `${a.course_name} · ${count(Number(a.max_grade), N.mark)}`,
         to: `/assignments/${a.public_id}`,
+        action: "فتح الواجب",
         tag: dueLabel(a.due_at, now),
       })),
     ...(exams.data ?? [])
@@ -95,9 +99,12 @@ export function Today() {
         title: e.title,
         meta: `${e.course_name} · ${count(e.duration_minutes, N.minute)} · ${count(e.questions_count, N.question)}`,
         to: `/exams/${e.public_id}`,
+        action: "فتح الاختبار",
         tag: new Date(e.opens_at).getTime() <= now ? "مفتوح" : dueLabel(e.opens_at, now),
       })),
   ].sort((a, b) => a.at.localeCompare(b.at));
+  // «يمكنك إنجازه الآن»: the first item on the agenda (mockups 2026-10-29).
+  const next = agenda[0];
   // Later this week (after tomorrow, within 7 days): what to plan for (board DesktopStudentToday).
   const weekEnd = now + 7 * DAY;
   const later = [
@@ -161,29 +168,36 @@ export function Today() {
         </div>
       )}
       {pendingAck.map((r) => (
-        <Link
-          key={r.public_id}
-          to={`/regulations/${r.public_id}`}
-          className="mb-4 flex items-center justify-between gap-3 rounded-2xl bg-warning-soft px-4 py-3 hover:opacity-95"
-        >
-          <span className="min-w-0">
-            <b className="block text-sm text-text">{r.title} تنتظر إقرارك</b>
-            <span className="text-xs text-warning-strong">إقرار مطلوب قبل ما يشترطه من أعمال</span>
-          </span>
-          <span className="shrink-0 rounded-lg bg-text px-3 py-2 text-xs font-bold text-bg">
-            اقرأ وأقرّ
-          </span>
-        </Link>
+        <div key={r.public_id} className="mb-4">
+          <AckBanner
+            to={`/regulations/${r.public_id}`}
+            title={`${r.title} تنتظر إقرارك`}
+            line="إقرار مطلوب قبل ما يشترطه من أعمال"
+            label="اقرأ وأقرّ"
+          />
+        </div>
       ))}
+      {next && (
+        <div className="mb-6">
+          <NextStepCard
+            title={next.title}
+            meta={`${next.meta} · ${new Date(next.at).toLocaleString("ar-u-nu-latn", {
+              weekday: "long",
+              hour: "numeric",
+              minute: "2-digit",
+            })}`}
+            tag={next.tag || undefined}
+            action={{ label: next.action, to: next.to }}
+          />
+        </div>
+      )}
       <div className="lg:grid lg:grid-cols-2 lg:items-start lg:gap-6">
-        <section>
-          <div className="flex items-end justify-between">
-            <SectionLabel>مستحق اليوم والغد</SectionLabel>
-            <Link to="/tasks" className="tap-44 mb-2 text-sm font-semibold text-primary">
-              كل المهام
-            </Link>
-          </div>
-          <Card className="divide-y divide-border-soft">
+        <div className="space-y-6">
+          <Panel
+            title="مستحق اليوم والغد"
+            icon={ListChecks}
+            more={{ label: "كل المهام", to: "/tasks" }}
+          >
             {agenda.map((item) => (
               <Link
                 key={item.key}
@@ -214,48 +228,44 @@ export function Today() {
               onRetry={retry(dueSources)}
               empty="لا شيء مجدول اليوم وغدًا."
             />
-          </Card>
+          </Panel>
           {later.length > 0 && (
-            <>
-              <SectionLabel>هذا الأسبوع</SectionLabel>
-              <Card className="divide-y divide-border-soft">
-                {later.map((item) => {
-                  return (
-                    <Link
-                      key={item.key}
-                      to={item.to}
-                      className="flex items-center gap-3 px-4 py-3 hover:bg-surface-alt"
-                    >
-                      <span className="w-14 shrink-0 text-center text-xs leading-tight text-text-muted">
-                        <b className="block text-sm text-text">
-                          {new Date(item.at).toLocaleDateString("ar-u-nu-latn", {
-                            day: "numeric",
-                            month: "short",
-                          })}
-                        </b>
-                        {new Date(item.at).toLocaleDateString("ar-u-nu-latn", { weekday: "long" })}
+            <Panel title="المواعيد القادمة هذا الأسبوع" icon={CalendarDays}>
+              {later.map((item) => {
+                return (
+                  <Link
+                    key={item.key}
+                    to={item.to}
+                    className="flex items-center gap-3 px-4 py-3 hover:bg-surface-alt"
+                  >
+                    <span className="w-14 shrink-0 text-center text-xs leading-tight text-text-muted">
+                      <b className="block text-sm text-text">
+                        {new Date(item.at).toLocaleDateString("ar-u-nu-latn", {
+                          day: "numeric",
+                          month: "short",
+                        })}
+                      </b>
+                      {new Date(item.at).toLocaleDateString("ar-u-nu-latn", { weekday: "long" })}
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className="line-clamp-2 font-semibold text-text">{item.title}</span>
+                      <span className="block truncate text-xs text-text-muted">
+                        {item.code && (
+                          <>
+                            <CourseCode code={item.code} /> ·{" "}
+                          </>
+                        )}
+                        {item.meta}
                       </span>
-                      <span className="min-w-0 flex-1">
-                        <span className="line-clamp-2 font-semibold text-text">{item.title}</span>
-                        <span className="block truncate text-xs text-text-muted">
-                          {item.code && (
-                            <>
-                              <CourseCode code={item.code} /> ·{" "}
-                            </>
-                          )}
-                          {item.meta}
-                        </span>
-                      </span>
-                    </Link>
-                  );
-                })}
-              </Card>
-            </>
+                    </span>
+                  </Link>
+                );
+              })}
+            </Panel>
           )}
-        </section>
-        <aside className="mt-6 lg:mt-0">
-          <SectionLabel>جديد في موادك</SectionLabel>
-          <Card className="divide-y divide-border-soft">
+        </div>
+        <aside className="mt-6 space-y-6 lg:mt-0">
+          <Panel title="جديد في موادك" icon={Sparkles}>
             {fresh.map((l) => {
               const code =
                 (assignments.data ?? []).find((a) => a.offering === l.offering)?.course_code ?? "";
@@ -301,9 +311,9 @@ export function Today() {
               onRetry={retry(freshSources)}
               empty="لا جديد هذا الأسبوع."
             />
-          </Card>
+          </Panel>
           {week.length > 0 && (
-            <>
+            <section>
               <SectionLabel>حجم العمل هذا الأسبوع</SectionLabel>
               <Card className="px-4 py-3">
                 <p className="text-xs text-text-muted">
@@ -320,7 +330,7 @@ export function Today() {
                   ))}
                 </div>
               </Card>
-            </>
+            </section>
           )}
         </aside>
       </div>
