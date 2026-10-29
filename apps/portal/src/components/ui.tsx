@@ -430,8 +430,10 @@ export function StatusBadge({ status, label }: { status: string; label: string }
   const tone = TONES[STATUS_TONE[status] ?? "neutral"];
   return (
     <span
-      className={`inline-flex shrink-0 items-center rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${tone}`}
+      className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${tone}`}
     >
+      {/* A dot in the state's colour (mockups 2026-10-29); the word still says it. */}
+      <span aria-hidden className="size-1.5 shrink-0 rounded-full bg-current" />
       {label}
     </span>
   );
