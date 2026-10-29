@@ -1,8 +1,9 @@
-import { ChevronDown, ChevronRight, type LucideIcon, Menu } from "lucide-react";
+import { ChevronDown, ChevronRight, LogOut, type LucideIcon, Menu } from "lucide-react";
 import { type ReactNode, useEffect, useRef, useState } from "react";
 import { NavLink, useLocation } from "react-router";
 
 import { useSiteLogo } from "../lib/site";
+import { SignOutButton, useSignOutAction } from "./SignOutButton";
 import { ThemeRow, ThemeToggle } from "./ThemeToggle";
 
 export type NavItem = {
@@ -105,7 +106,10 @@ export function AppShell({
           ) : (
             <p className="text-xs font-semibold text-text-muted">{eyebrow}</p>
           )}
-          <ThemeToggle className="-me-2 text-text-muted hover:bg-surface-alt" />
+          <div className="-me-2 flex items-center">
+            <SignOutButton className="text-text-muted hover:bg-surface-alt hover:text-text" />
+            <ThemeToggle className="text-text-muted hover:bg-surface-alt" />
+          </div>
         </div>
         <div className="mt-1 flex items-end justify-between gap-3">
           <h1 className="text-[28px] font-bold leading-tight text-text">{title}</h1>
@@ -305,6 +309,7 @@ export function Badge({ count, className = "" }: { count?: number; className?: s
 }
 
 function BottomTabs({ items }: { items: NavItem[] }) {
+  const signOutAction = useSignOutAction();
   const [open, setOpen] = useState(false);
   const sheet = useRef<HTMLElement>(null);
   const opener = useRef<HTMLElement | null>(null);
@@ -390,6 +395,19 @@ function BottomTabs({ items }: { items: NavItem[] }) {
                   iconSize={22}
                   className="flex min-h-12 w-full items-center gap-3 rounded-xl px-3 text-[15px] text-text hover:bg-surface-alt"
                 />
+                <button
+                  type="button"
+                  onClick={signOutAction}
+                  className="flex min-h-12 w-full items-center gap-3 rounded-xl px-3 text-[15px] text-text hover:bg-surface-alt"
+                >
+                  <LogOut
+                    size={22}
+                    strokeWidth={1.75}
+                    aria-hidden
+                    className="shrink-0 opacity-70 rtl:-scale-x-100"
+                  />
+                  تسجيل الخروج
+                </button>
               </div>
             </div>
           </nav>
