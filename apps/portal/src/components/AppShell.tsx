@@ -300,10 +300,42 @@ function SidebarLink({ item }: { item: NavItem }) {
         `${sidebarItem} ${isActive ? "bg-primary-500 font-semibold text-white" : sidebarIdle}`
       }
     >
-      <Icon size={20} strokeWidth={1.75} aria-hidden />
-      {item.label}
-      <Badge count={item.badge} className="ms-auto" />
+      {({ isActive }) => (
+        <>
+          <NavIcon icon={Icon} active={isActive} size={20} />
+          {item.label}
+          <Badge count={item.badge} className="ms-auto" />
+        </>
+      )}
     </NavLink>
+  );
+}
+
+/**
+ * A navigation icon: the current page's is filled and a little bolder, the others outlined
+ * (docs/09: «where am I» at a glance, not by colour alone). Used by the phone tabs, the «المزيد»
+ * sheet and the desktop sidebar, so every role reads it the same way.
+ */
+function NavIcon({
+  icon: Icon,
+  active,
+  size,
+  className,
+}: {
+  icon: LucideIcon;
+  active: boolean;
+  size: number;
+  className?: string;
+}) {
+  return (
+    <Icon
+      size={size}
+      strokeWidth={active ? 2.25 : 1.75}
+      fill={active ? "currentColor" : "none"}
+      fillOpacity={active ? 0.25 : undefined}
+      aria-hidden
+      className={className}
+    />
   );
 }
 
@@ -390,14 +422,18 @@ function BottomTabs({ items }: { items: NavItem[] }) {
                       }`
                     }
                   >
-                    <Icon
-                      size={22}
-                      strokeWidth={1.75}
-                      aria-hidden
-                      className="shrink-0 opacity-70"
-                    />
-                    {item.label}
-                    <Badge count={item.badge} className="ms-auto" />
+                    {({ isActive }) => (
+                      <>
+                        <NavIcon
+                          icon={Icon}
+                          active={isActive}
+                          size={22}
+                          className={`shrink-0 ${isActive ? "" : "opacity-70"}`}
+                        />
+                        {item.label}
+                        <Badge count={item.badge} className="ms-auto" />
+                      </>
+                    )}
                   </NavLink>
                 );
               })}
@@ -459,11 +495,15 @@ function MainTabs({
               }`
             }
           >
-            <Icon size={24} strokeWidth={1.75} aria-hidden />
-            <span className="max-w-full truncate whitespace-nowrap">
-              {item.short ?? item.label}
-            </span>
-            <Badge count={item.badge} className="absolute -top-1 start-9" />
+            {({ isActive }) => (
+              <>
+                <NavIcon icon={Icon} active={isActive} size={24} />
+                <span className="max-w-full truncate whitespace-nowrap">
+                  {item.short ?? item.label}
+                </span>
+                <Badge count={item.badge} className="absolute -top-1 start-9" />
+              </>
+            )}
           </NavLink>
         );
       })}
