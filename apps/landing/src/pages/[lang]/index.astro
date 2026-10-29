@@ -119,6 +119,7 @@ const audiences =
           title: "لطلاب الكلية",
           links: [
             ["دخول المنصة", `${PORTAL}/login`],
+            ["تطبيق البوابة على هاتفك", `${PORTAL}/install`],
             ["التقويم الأكاديمي", href(lang, "calendar/")],
             ["اللوائح والأنظمة", href(lang, "regulations/")],
             ["الإعلانات", href(lang, "announcements/")],
@@ -148,6 +149,7 @@ const audiences =
           title: "Current students",
           links: [
             ["Sign in to the portal", `${PORTAL}/login`],
+            ["The portal app on your phone", `${PORTAL}/install`],
             ["Academic calendar", href(lang, "calendar/")],
             ["Regulations", href(lang, "regulations/")],
             ["Announcements", href(lang, "announcements/")],
@@ -385,6 +387,37 @@ const jsonLd = {
           </ul>
         </div>
       ))}
+    </div>
+  </section>
+
+  {/* The portal as an app on the phone (owner, 2026-10-30). It installs from the portal's own
+      address (a browser installs an app only from its origin): the button opens the portal's
+      install page, which guides iPhone and Android and asks to sign in first. */}
+  <section class="mx-auto max-w-6xl px-4 pt-10 lg:px-8" aria-labelledby="app-band">
+    <div class="flex flex-col gap-5 rounded-2xl bg-header p-6 text-white lg:flex-row lg:items-center lg:gap-10 lg:p-8">
+      <div class="flex-1">
+        <h2 id="app-band" class="font-display text-2xl font-bold">
+          {lang === "ar" ? "بوابة الكلية تطبيقًا على هاتفك" : "The college portal as an app"}
+        </h2>
+        <p class="mt-2 text-sm leading-6 text-navy-100">
+          {lang === "ar"
+            ? "ثبّتها من المتصفح دون متجر تطبيقات: تصلك الإشعارات فور نشر محاضرة أو نتيجة، وتفتح بلمسة من الشاشة الرئيسية، ويُحفظ ما تكتبه حين ينقطع الاتصال."
+            : "Install it from the browser, no app store: notifications as soon as a lecture or result is published, one tap from the home screen, and what you write is kept when the connection drops."}
+        </p>
+      </div>
+      <div class="flex flex-wrap items-center gap-x-6 gap-y-3">
+        <a
+          href={`${PORTAL}/install`}
+          class="tap-44 inline-flex items-center rounded-lg bg-white px-5 py-3 text-sm font-bold text-navy-500 hover:bg-navy-50"
+        >
+          {lang === "ar" ? "ثبّت التطبيق" : "Install the app"}
+        </a>
+        <span class="text-xs text-navy-200">
+          {lang === "ar"
+            ? "iPhone وAndroid · لطلاب الكلية ومنسوبيها"
+            : "iPhone and Android · students and staff"}
+        </span>
+      </div>
     </div>
   </section>
 
