@@ -76,7 +76,12 @@ export function NextStepCard({
           </span>
         )}
       </p>
-      <h2 className="mt-2 text-xl font-bold leading-snug">{title}</h2>
+      <h2 className="mt-2 text-xl font-bold leading-snug">
+        {/* The title opens it too (people tap the words first); one tab stop: the button. */}
+        <Link to={action.to} tabIndex={-1} className="hover:underline">
+          {title}
+        </Link>
+      </h2>
       {meta && <p className="mt-1 text-sm text-primary-100">{meta}</p>}
       <Link
         to={action.to}
