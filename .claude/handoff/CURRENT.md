@@ -1,5 +1,10 @@
 # Handoff — after the redesign, owner follow-ups — 2026-10-30
 
+- **Restore drill passed 2026-10-30** (owner ran it): backup `20261030T012118Z` restored into a
+  scratch DB, counts match live, 32 files in the archive; result in runbook §5. The `ecst`
+  role cannot create databases (kept): `postgres` makes `ecst_drill` (#196). Still to test:
+  the off-site copy. Dependabot alerts turned on 2026-10-30. Open: real `OPS_ALERT_EMAIL`.
+
 - #181 site header: short college name between 1024 and 1279 (the full one was cut off).
 - #182 «الوضع الفاتح لا يعمل» was **Phoenix** (Android, auto-darkens pages): `tokens.css`
   `color-scheme: only light` stops the repaint (verified with Chromium forced dark; a
