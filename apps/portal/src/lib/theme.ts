@@ -1,12 +1,21 @@
 import { useEffect, useState } from "react";
 
-export type Theme = "light" | "dark" | "system";
+export type Theme = "light" | "warm" | "dark" | "system";
+/** What is on screen once "system" is resolved. */
+export type Mode = "light" | "warm" | "dark";
+/** The switch's order (owner, 2026-10-30: three modes): light → warm → dark → light. */
+const NEXT: Record<Mode, Mode> = { light: "warm", warm: "dark", dark: "light" };
+export const MODE_LABEL: Record<Mode, string> = {
+  light: "الوضع الفاتح",
+  warm: "الوضع الدافئ",
+  dark: "الوضع الداكن",
+};
 const KEY = "ecst-theme";
 
 export function storedTheme(): Theme {
   try {
     const value = localStorage.getItem(KEY);
-    return value === "light" || value === "dark" ? value : "system";
+    return value === "light" || value === "warm" || value === "dark" ? value : "system";
   } catch {
     return "system";
   }
@@ -27,10 +36,10 @@ export function applyTheme(theme: Theme): void {
 
 const EVENT = "ecst-theme-change";
 
-/** The mode actually on screen ("system" resolves through the OS setting). */
-export function isDark(theme: Theme = storedTheme()): boolean {
-  if (theme !== "system") return theme === "dark";
-  return window.matchMedia("(prefers-color-scheme: dark)").matches;
+/** The mode actually on screen ("system" resolves through the OS setting: light or dark). */
+export function modeOf(theme: Theme = storedTheme()): Mode {
+  if (theme !== "system") return theme;
+  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
 }
 
 /**
@@ -39,12 +48,12 @@ export function isDark(theme: Theme = storedTheme()): boolean {
  */
 export function useTheme() {
   const [theme, setThemeState] = useState<Theme>(storedTheme);
-  const [dark, setDark] = useState(() => isDark(theme));
+  const [mode, setMode] = useState<Mode>(() => modeOf(theme));
   useEffect(() => {
     const sync = () => {
       const t = storedTheme();
       setThemeState(t);
-      setDark(isDark(t));
+      setMode(modeOf(t));
     };
     const media = window.matchMedia("(prefers-color-scheme: dark)");
     window.addEventListener(EVENT, sync);
@@ -58,5 +67,5 @@ export function useTheme() {
     applyTheme(next);
     window.dispatchEvent(new Event(EVENT));
   };
-  return { theme, dark, set, toggle: () => set(dark ? "light" : "dark") };
+  return { theme, mode, next: NEXT[mode], set, toggle: () => set(NEXT[mode]) };
 }

@@ -227,6 +227,7 @@ function ThemeSwitch() {
   const { theme, set } = useTheme();
   const options: { key: Theme; label: string }[] = [
     { key: "light", label: "فاتح" },
+    { key: "warm", label: "دافئ" },
     { key: "dark", label: "داكن" },
     { key: "system", label: "النظام" },
   ];

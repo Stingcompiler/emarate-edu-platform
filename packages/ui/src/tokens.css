@@ -40,89 +40,119 @@
   --dur-base: 200ms;
 }
 
-/* Dark mode (§2.6): explicit choice, or the system preference by default. */
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    color-scheme: dark;
-  }
-}
+/* Dark mode (§2.6): explicit choice, or the system preference by default. Softened
+   2026-10-30 (owner: «الداكن قوي ومزعج»): a slate navy instead of near-black and an off-white
+   text — about 11:1 instead of 15:1, still well above AA. */
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --bg: #0c111c;
-  --bg-subtle: #111727;
-  --surface: #151e31;
-  --surface-alt: #1a243c;
-  --border: #2a3349;
-  --border-soft: #1f2b47;
-  --text: #f1f2f3;
-  --text-muted: #c0c3cb;
-  --primary: #96b1d3;
-  --focus-ring: #96b1d3;
+  --bg: #1a2131;
+  --bg-subtle: #1c2333;
+  --surface: #242d40;
+  --surface-alt: #2b3549;
+  --border: #3c4760;
+  --border-soft: #333d52;
+  --text: #e2e5eb;
+  --text-muted: #a9b0be;
+  --primary: #9db6d6;
+  --focus-ring: #9db6d6;
   --primary-hover: #c4d3e6;
-  --primary-soft: #18375b;
-  --on-primary: #0c111c;
-  --accent: #d792a1;
+  --primary-soft: #22406a;
+  --on-primary: #1a2131;
+  --accent: #d99aa8;
   --accent-hover: #e8c1ca;
-  --accent-soft: #460e1b;
-  --header-bg: #0c111c;
-  /* Status colours and "strong text on soft" (primary-700, accent-700) are raw scale values, so dark
-   * mode redefines them here: soft backgrounds become dark tints, strong text becomes light.
-   * Keeps WCAG AA (docs/06 §1) — checked by e2e/tests/a11y.spec.ts. */
+  --accent-soft: #4a1d28;
+  --header-bg: #161c2a;
   --color-primary-700: #c4d3e6;
   --color-accent-700: #e8c1ca;
-  --color-success-soft: #12301f;
-  --color-success-strong: #86d3a8;
-  --color-warning-soft: #3a2a0e;
-  --color-warning-strong: #f0c36b;
-  --color-danger-soft: #3d1612;
-  --color-danger-strong: #f19a8f;
-  --color-info-soft: #16304f;
-  --color-info-strong: #a9c3e3;
-  --color-neutral-soft: #1f2b47;
-  --color-neutral-strong: #c0c3cb;
-  --color-pending: #576075;
-  --color-pending-soft: #1c2438;
-  --color-pending-strong: #c0c3cb;
+  --color-success-soft: #203628;
+  --color-success-strong: #98cfae;
+  --color-warning-soft: #3b3324;
+  --color-warning-strong: #e6c27c;
+  --color-danger-soft: #42221f;
+  --color-danger-strong: #eba59c;
+  --color-info-soft: #22395a;
+  --color-info-strong: #b0c7e4;
+  --color-neutral-soft: #333d52;
+  --color-neutral-strong: #c3c8d2;
+  --color-pending: #6b7489;
+  --color-pending-soft: #262f43;
+  --color-pending-strong: #c3c8d2;
 }
-
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --bg: #0c111c;
-    --bg-subtle: #111727;
-    --surface: #151e31;
-    --surface-alt: #1a243c;
-    --border: #2a3349;
-    --border-soft: #1f2b47;
-    --text: #f1f2f3;
-    --text-muted: #c0c3cb;
-    --primary: #96b1d3;
-    --focus-ring: #96b1d3;
+  :root:not([data-theme="light"]):not([data-theme="warm"]) {
+    color-scheme: dark;
+    --bg: #1a2131;
+    --bg-subtle: #1c2333;
+    --surface: #242d40;
+    --surface-alt: #2b3549;
+    --border: #3c4760;
+    --border-soft: #333d52;
+    --text: #e2e5eb;
+    --text-muted: #a9b0be;
+    --primary: #9db6d6;
+    --focus-ring: #9db6d6;
     --primary-hover: #c4d3e6;
-    --primary-soft: #18375b;
-    --on-primary: #0c111c;
-    --accent: #d792a1;
+    --primary-soft: #22406a;
+    --on-primary: #1a2131;
+    --accent: #d99aa8;
     --accent-hover: #e8c1ca;
-    --accent-soft: #460e1b;
-    --header-bg: #0c111c;
-    /* Status colours and "strong text on soft" (primary-700, accent-700) are raw scale values, so dark
-     * mode redefines them here: soft backgrounds become dark tints, strong text becomes light.
-     * Keeps WCAG AA (docs/06 §1) — checked by e2e/tests/a11y.spec.ts. */
+    --accent-soft: #4a1d28;
+    --header-bg: #161c2a;
     --color-primary-700: #c4d3e6;
     --color-accent-700: #e8c1ca;
-    --color-success-soft: #12301f;
-    --color-success-strong: #86d3a8;
-    --color-warning-soft: #3a2a0e;
-    --color-warning-strong: #f0c36b;
-    --color-danger-soft: #3d1612;
-    --color-danger-strong: #f19a8f;
-    --color-info-soft: #16304f;
-    --color-info-strong: #a9c3e3;
-    --color-neutral-soft: #1f2b47;
-    --color-neutral-strong: #c0c3cb;
-    --color-pending: #576075;
-    --color-pending-soft: #1c2438;
-    --color-pending-strong: #c0c3cb;
+    --color-success-soft: #203628;
+    --color-success-strong: #98cfae;
+    --color-warning-soft: #3b3324;
+    --color-warning-strong: #e6c27c;
+    --color-danger-soft: #42221f;
+    --color-danger-strong: #eba59c;
+    --color-info-soft: #22395a;
+    --color-info-strong: #b0c7e4;
+    --color-neutral-soft: #333d52;
+    --color-neutral-strong: #c3c8d2;
+    --color-pending: #6b7489;
+    --color-pending-soft: #262f43;
+    --color-pending-strong: #c3c8d2;
   }
+}
+
+/* Warm (owner, 2026-10-30): between light and dark — a dim warm grey-brown that neither
+   glares nor goes black, for evenings. Chosen only from the theme switch, never automatic.
+   The college's navy, blue and single red stay. */
+:root[data-theme="warm"] {
+  color-scheme: dark;
+  --bg: #35302a;
+  --bg-subtle: #3a352f;
+  --surface: #45403a;
+  --surface-alt: #4f4943;
+  --border: #6a6259;
+  --border-soft: #57514a;
+  --text: #f1ebe2;
+  --text-muted: #cfc6ba;
+  --primary: #a9c3e3;
+  --focus-ring: #a9c3e3;
+  --primary-hover: #cfdcee;
+  --primary-soft: #34465e;
+  --on-primary: #2a2520;
+  --accent: #e0a4b0;
+  --accent-hover: #ecc6ce;
+  --accent-soft: #5a2c36;
+  --header-bg: #2c2823;
+  --color-primary-700: #cfdcee;
+  --color-accent-700: #ecc6ce;
+  --color-success-soft: #3c4d3a;
+  --color-success-strong: #a8d6a0;
+  --color-warning-soft: #54452e;
+  --color-warning-strong: #f0cd8a;
+  --color-danger-soft: #5a3530;
+  --color-danger-strong: #f2b0a6;
+  --color-info-soft: #3a4a5e;
+  --color-info-strong: #bdd0e8;
+  --color-neutral-soft: #57514a;
+  --color-neutral-strong: #d6cdc1;
+  --color-pending: #8a8177;
+  --color-pending-soft: #4a443d;
+  --color-pending-strong: #d6cdc1;
 }
 
 /* List density (design review B9): comfortable is the default everywhere; «compact» is a choice
