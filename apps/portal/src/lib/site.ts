@@ -7,6 +7,13 @@ export const SITE_URL: string =
   import.meta.env.VITE_SITE_URL ??
   (import.meta.env.DEV ? "http://localhost:4321/ar/" : "https://ecst.edu.sd/ar/");
 
+/**
+ * A page of the public site from its path ("/ar/contact/"): resolved against the site's
+ * origin, since SITE_URL already ends in the language ("…/ar/") — joining the two strings
+ * gave "/ar//ar/contact/", a 404 (owner report 2026-10-30).
+ */
+export const siteUrl = (path: string): string => new URL(path, SITE_URL).href;
+
 /** The built-in mark, shown until the site settings name a logo (and while they load). */
 export const DEFAULT_LOGO = "/favicon.svg";
 
