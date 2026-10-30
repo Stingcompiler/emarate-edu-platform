@@ -91,6 +91,7 @@ const noun = (one: string, two: string, few: string, many: string): Noun => ({
 export const N = {
   application: noun("طلب", "طلبان", "طلبات", "طلبًا"),
   acknowledgement: noun("إقرار", "إقراران", "إقرارات", "إقرارًا"),
+  assignment: noun("واجب", "واجبان", "واجبات", "واجبًا"),
   answer: noun("إجابة", "إجابتان", "إجابات", "إجابة"),
   case: noun("حالة", "حالتان", "حالات", "حالة"),
   change: noun("تغيير", "تغييران", "تغييرات", "تغييرًا"),
@@ -115,6 +116,7 @@ export const N = {
   student: noun("طالب", "طالبان", "طلاب", "طالبًا"),
   submission: noun("تسليم", "تسليمان", "تسليمات", "تسليمًا"),
   task: noun("مهمة", "مهمتان", "مهام", "مهمة"),
+  ta: noun("معيد", "معيدان", "معيدين", "معيدًا"),
   term: noun("فصل", "فصلان", "فصول", "فصلًا"),
   time: noun("مرة", "مرتان", "مرات", "مرة"),
 } satisfies Record<string, Noun>;

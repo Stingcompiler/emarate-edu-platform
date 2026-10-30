@@ -1,8 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
-import { ExternalLink, FileText, Link2, Pencil, PlayCircle } from "lucide-react";
-import { useEffect, useState } from "react";
+import { ChevronLeft, ChevronRight, ExternalLink, FileText, Link2, Pencil } from "lucide-react";
+import { useEffect } from "react";
 import { Link, useParams } from "react-router";
 
+import { LecturePlayer, youTubeId } from "../../components/LecturePlayer";
 import { PortalShell } from "../../components/PortalShell";
 import { Button, Card, CourseCode, SectionLabel, WithSide } from "../../components/ui";
 import { count, N } from "../../lib/format";
@@ -39,6 +40,11 @@ export function Lecture() {
   const next = index >= 0 && index < list.length - 1 ? list[index + 1] : undefined;
   const related = (assignments.data ?? []).filter((a) => a.lecture === id);
   const video = l?.resources.find((r) => r.kind === "video" && r.video);
+  // A YouTube link among the resources plays in the player when there is no recording.
+  const tube = l?.resources
+    .filter((r) => r.kind === "link" && r.url)
+    .map((r) => youTubeId(r.url!))
+    .find(Boolean);
   const course = useCourse(l?.offering).data;
   const staff = isCourseStaff(course);
   // The course's staff see how many students opened each lecture (docs/07); a student's
@@ -117,12 +123,65 @@ export function Lecture() {
           }
         >
           <div className="space-y-4">
-            {video?.video && (
-              <Player
-                videoId={video.video.public_id}
-                provider={video.video.provider}
-                status={video.video.status}
-              />
+            <LecturePlayer
+              title={l.title_ar}
+              source={
+                video?.video
+                  ? {
+                      kind: "hosted",
+                      id: video.video.public_id,
+                      provider: video.video.provider,
+                      status: video.video.status,
+                    }
+                  : tube
+                    ? { kind: "youtube", id: tube }
+                    : null
+              }
+            />
+            {/* Previous / next right under the player, as lesson pages put them. */}
+            {(prev || next) && (
+              <nav aria-label="المحاضرات" className="grid grid-cols-2 gap-3">
+                {prev ? (
+                  <Link
+                    to={`/lectures/${prev.public_id}`}
+                    className="flex min-h-14 items-center gap-2 rounded-xl border border-border-soft bg-surface px-3 py-2 hover:bg-surface-alt"
+                  >
+                    <ChevronRight
+                      size={18}
+                      aria-hidden
+                      className="shrink-0 text-text-muted ltr:rotate-180"
+                    />
+                    <span className="min-w-0">
+                      <span className="block text-xs text-text-muted">السابقة</span>
+                      <span className="block truncate text-sm font-semibold text-text">
+                        {prev.title_ar}
+                      </span>
+                    </span>
+                  </Link>
+                ) : (
+                  <span />
+                )}
+                {next ? (
+                  <Link
+                    to={`/lectures/${next.public_id}`}
+                    className="flex min-h-14 items-center justify-end gap-2 rounded-xl border border-border-soft bg-surface px-3 py-2 text-end hover:bg-surface-alt"
+                  >
+                    <span className="min-w-0">
+                      <span className="block text-xs text-text-muted">التالية</span>
+                      <span className="block truncate text-sm font-semibold text-text">
+                        {next.title_ar}
+                      </span>
+                    </span>
+                    <ChevronLeft
+                      size={18}
+                      aria-hidden
+                      className="shrink-0 text-text-muted ltr:rotate-180"
+                    />
+                  </Link>
+                ) : (
+                  <span />
+                )}
+              </nav>
             )}
             <div>
               <SectionLabel>الموارد</SectionLabel>
@@ -165,26 +224,6 @@ export function Lecture() {
                 </Card>
               </div>
             )}
-            <div className="flex justify-between gap-3">
-              {prev ? (
-                <Link
-                  to={`/lectures/${prev.public_id}`}
-                  className="text-sm font-semibold text-primary"
-                >
-                  السابقة · {prev.title_ar}
-                </Link>
-              ) : (
-                <span />
-              )}
-              {next && (
-                <Link
-                  to={`/lectures/${next.public_id}`}
-                  className="text-end text-sm font-semibold text-primary"
-                >
-                  التالية · {next.title_ar}
-                </Link>
-              )}
-            </div>
           </div>
         </WithSide>
       )}
@@ -226,52 +265,5 @@ function ResourceRow({ r }: { r: Resource }) {
     >
       {content}
     </button>
-  );
-}
-
-/** Private video: a signed, expiring link fetched on demand (docs/05 §8.2). */
-function Player({
-  videoId,
-  provider,
-  status,
-}: {
-  videoId: string;
-  provider: string;
-  status: string;
-}) {
-  const [url, setUrl] = useState<string | null>(null);
-  const [error, setError] = useState(false);
-  if (status !== "ready")
-    return (
-      <Card className="grid aspect-video place-items-center text-sm text-text-muted">
-        الفيديو قيد المعالجة…
-      </Card>
-    );
-  const load = async () => {
-    const { data } = await api.GET("/api/v1/videos/{public_id}/playback", {
-      params: { path: { public_id: videoId } },
-    });
-    if (data?.url) setUrl(data.url);
-    else setError(true);
-  };
-  if (!url)
-    return (
-      <Card className="grid aspect-video place-items-center bg-header">
-        <Button variant="ghost" className="text-white hover:bg-white/10" onClick={load}>
-          <PlayCircle size={28} aria-hidden />{" "}
-          {error ? "تعذّر التحميل — أعد المحاولة" : "تشغيل التسجيل"}
-        </Button>
-      </Card>
-    );
-  return provider === "bunny" ? (
-    <iframe
-      src={url}
-      title="تسجيل المحاضرة"
-      className="aspect-video w-full rounded-2xl border-0"
-      allow="autoplay; encrypted-media; picture-in-picture"
-      allowFullScreen
-    />
-  ) : (
-    <video src={url} controls autoPlay className="aspect-video w-full rounded-2xl bg-black" />
   );
 }

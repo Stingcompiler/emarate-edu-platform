@@ -20,9 +20,10 @@ import { initials } from "../../lib/reports";
 
 type Status = "pending" | "suggested" | "late" | "done";
 
-export function useGradingQueue(status: Status = "pending") {
+export function useGradingQueue(status: Status = "pending", enabled = true) {
   return useQuery({
     queryKey: ["grading", status],
+    enabled,
     queryFn: async () =>
       ok(await api.GET("/api/v1/grading-queue", { params: { query: { status } } })) ?? null,
   });

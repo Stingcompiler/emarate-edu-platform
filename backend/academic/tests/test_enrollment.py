@@ -134,6 +134,12 @@ def test_my_courses(api, make_user, it_offering, ba_offering, cohort):
     assert [(c["code"], c["my_role"]) for c in mine] == [("IT101", "student")]
     teaching = api(teacher).get("/api/v1/me/courses").data
     assert [(c["code"], c["my_role"]) for c in teaching] == [("IT101", "teacher")]
+    # The course card counts the active students (owner, 2026-10-30).
+    assert teaching[0]["students_count"] == 1
+    Enrollment.objects.create(
+        offering=it_offering, student_record=cohort[1], status=Enrollment.Status.DROPPED
+    )
+    assert api(teacher).get("/api/v1/me/courses").data[0]["students_count"] == 1
     assert [c["my_role"] for c in api(ta).get("/api/v1/me/courses").data] == ["ta"]
 
     # The TA's permissions travel with the course so the UI offers only what is allowed.
