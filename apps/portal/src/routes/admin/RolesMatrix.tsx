@@ -13,7 +13,11 @@ const CAPABILITY: Record<string, string> = {
   "structure.manage": "تعديل الهيكل الأكاديمي",
   "structure.view": "عرض الهيكل الأكاديمي",
   "users.view": "عرض المستخدمين",
+  "users.reset_password": "إعادة تعيين كلمة المرور",
+  "users.rename": "تعديل اسم المستخدم",
+  "users.delete": "حذف حساب أُنشئ خطأً",
   "audit.view": "سجل التدقيق",
+  "audit.domain": "سجل عمليات مجال العمل",
   "courses.view": "عرض المواد",
   "courses.manage": "المواد والتعيينات",
   "courses.delete": "حذف المواد",
@@ -35,6 +39,8 @@ const CAPABILITY: Record<string, string> = {
   "results.correct": "طلب تعديل نتيجة",
   "results.approve": "الموافقة على تعديل النتائج",
   "results.settings": "إعدادات عرض النتائج",
+  "results.settings_view": "الاطلاع على إعدادات النتائج",
+  "results.delete": "حذف دفعة نتائج",
   "regulations.manage": "نشر اللوائح",
   "cases.manage": "إدارة حالات الطلاب",
   "cases.view": "عرض الحالات",
@@ -48,6 +54,7 @@ const CAPABILITY: Record<string, string> = {
   "hr.view": "الموارد البشرية",
   "hr.notify": "تنبيه الأساتذة",
   "content.manage": "محتوى الموقع",
+  "news.manage": "الأخبار",
   "events.manage": "الفعاليات",
 };
 const GROUPS: [string, string[]][] = [
@@ -167,16 +174,18 @@ export function Roles() {
             <table className="w-full min-w-[720px] text-xs">
               <thead className="bg-surface-alt text-text-muted">
                 <tr>
-                  <th scope="col" className="px-3 py-2 text-start font-medium">
+                  <th scope="col" className="min-w-48 px-3 py-2 text-start font-medium">
                     الصلاحية
                   </th>
                   {roles.map((r) => (
                     <th key={r.key} scope="col" className="px-1 py-2 align-bottom font-medium">
+                      {/* Horizontal, wrapped on two lines: vertical Arabic read bottom-up (owner,
+                          2026-10-30: «fix the direction»). */}
                       <button
                         type="button"
                         onClick={() => setPicked(r.key)}
                         aria-pressed={role?.key === r.key}
-                        className={`mx-auto block rounded px-1 py-1 [writing-mode:vertical-rl] hover:text-text ${role?.key === r.key ? "bg-primary-soft font-bold text-primary-700" : ""}`}
+                        className={`mx-auto block w-16 rounded px-1 py-1 text-center text-[11px] leading-snug hover:text-text ${role?.key === r.key ? "bg-primary-soft font-bold text-primary-700" : ""}`}
                       >
                         {r.label}
                       </button>
@@ -197,7 +206,10 @@ export function Roles() {
                   </tr>
                   {g.rows.map((c) => (
                     <tr key={c.key}>
-                      <th scope="row" className="px-3 py-2 text-start font-normal text-text">
+                      <th
+                        scope="row"
+                        className="min-w-48 px-3 py-2 text-start font-normal text-text"
+                      >
                         {CAPABILITY[c.key] ?? c.key}
                       </th>
                       {roles.map((r) => {
