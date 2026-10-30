@@ -1,10 +1,10 @@
-import { ListTodo, Zap } from "lucide-react";
+import { FileCheck, FolderOpen, ListTodo, Zap } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router";
 
 import { Panel } from "../../components/dashboard";
 import { PortalShell } from "../../components/PortalShell";
-import { ActionLinks, Avatar, Card, ListStatus } from "../../components/ui";
+import { ActionLinks, Avatar, ListStatus } from "../../components/ui";
 import { api, ok } from "../../lib/api";
 import { useMe } from "../../lib/auth";
 import { when, count, N } from "../../lib/format";
@@ -93,19 +93,20 @@ export function AffairsHome() {
           {(required.data ?? []).map((r) => {
             const pct = students ? Math.round((100 * r.acknowledgements_count) / students) : 0;
             return (
-              <Card key={r.public_id} className="p-4">
-                <div className="flex items-center justify-between text-sm">
-                  <b>الإقرارات — {r.title}</b>
-                  <span className="font-bold">{num(pct)}٪</span>
+              <Panel key={r.public_id} title={`الإقرارات — ${r.title}`} icon={FileCheck}>
+                <div className="px-4 py-3">
+                  <div className="flex items-center justify-end text-sm">
+                    <span className="font-bold">{num(pct)}٪</span>
+                  </div>
+                  <div className="mt-2 h-2 overflow-hidden rounded-full bg-surface-alt">
+                    <div className="motion-grow h-full bg-primary" style={{ width: `${pct}%` }} />
+                  </div>
+                  <p className="mt-2 text-xs text-text-muted">
+                    أقرّ {num(r.acknowledgements_count)} من {num(students)} ·{" "}
+                    {num(Math.max(0, students - r.acknowledgements_count))} لم يقرّوا
+                  </p>
                 </div>
-                <div className="mt-2 h-2 overflow-hidden rounded-full bg-surface-alt">
-                  <div className="motion-grow h-full bg-primary" style={{ width: `${pct}%` }} />
-                </div>
-                <p className="mt-2 text-xs text-text-muted">
-                  أقرّ {num(r.acknowledgements_count)} من {num(students)} ·{" "}
-                  {num(Math.max(0, students - r.acknowledgements_count))} لم يقرّوا
-                </p>
-              </Card>
+              </Panel>
             );
           })}
           <ActionLinks
@@ -119,7 +120,7 @@ export function AffairsHome() {
           />
         </div>
         <aside className="mt-6 lg:mt-0">
-          <Panel title={`الحالات المفتوحة · ${num(open.data?.count ?? 0)}`}>
+          <Panel title={`الحالات المفتوحة · ${num(open.data?.count ?? 0)}`} icon={FolderOpen}>
             {cases.slice(0, 8).map((c) => (
               <Link
                 key={c.public_id}

@@ -1,10 +1,10 @@
-import { ListTodo, Zap } from "lucide-react";
+import { Files, ListTodo, SlidersHorizontal, Zap } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router";
 
 import { Panel } from "../../components/dashboard";
 import { PortalShell } from "../../components/PortalShell";
-import { ActionLinks, Card, SectionLabel, StatusBadge, STATUS_LABELS } from "../../components/ui";
+import { ActionLinks, StatusBadge, STATUS_LABELS } from "../../components/ui";
 import { api, ok } from "../../lib/api";
 import { useMe } from "../../lib/auth";
 import { when, fileName } from "../../lib/format";
@@ -89,7 +89,7 @@ export function ResultsHome() {
               { to: "/results/settings", label: "إعدادات العرض" },
             ]}
           />
-          <Panel title="الدفعات">
+          <Panel title="الدفعات" icon={Files}>
             {list.map((b) => (
               <Link
                 key={b.public_id}
@@ -110,24 +110,25 @@ export function ResultsHome() {
           </Panel>
         </div>
         <aside className="mt-6 space-y-4 lg:mt-0">
-          <SectionLabel>إعدادات العرض</SectionLabel>
-          <Link to="/results/settings" className="block">
-            <Card className="divide-y divide-border-soft text-sm hover:shadow-md">
-              <p className="flex justify-between px-4 py-2.5">
-                <span className="text-text-muted">الحقول الظاهرة</span>
-                <b>
-                  {num(fields)}/{num(4)}
-                </b>
-              </p>
-              <p className="flex justify-between px-4 py-2.5">
-                <span className="text-text-muted">السجل السابق</span>
-                <b>{d?.history_open ? "مفتوح" : "مغلق"}</b>
-              </p>
-              {d?.notice_text && (
-                <p className="px-4 py-2.5 text-xs text-text-muted">{d.notice_text}</p>
-              )}
-            </Card>
-          </Link>
+          <Panel
+            title="إعدادات العرض"
+            icon={SlidersHorizontal}
+            more={{ label: "تعديل", to: "/results/settings" }}
+          >
+            <p className="flex justify-between px-4 py-2.5 text-sm">
+              <span className="text-text-muted">الحقول الظاهرة</span>
+              <b>
+                {num(fields)}/{num(4)}
+              </b>
+            </p>
+            <p className="flex justify-between px-4 py-2.5 text-sm">
+              <span className="text-text-muted">السجل السابق</span>
+              <b>{d?.history_open ? "مفتوح" : "مغلق"}</b>
+            </p>
+            {d?.notice_text && (
+              <p className="px-4 py-2.5 text-xs text-text-muted">{d.notice_text}</p>
+            )}
+          </Panel>
         </aside>
       </div>
     </PortalShell>
