@@ -2,14 +2,17 @@
 # Restore drill (docs/runbook.md §5): proves the newest backup can really be read back.
 #
 #   scp scripts/vps/restore-drill.sh "$ECST_SSH":/tmp/ecst-restore-drill.sh
-#   ssh "$ECST_SSH" 'sudo systemd-run --wait --pipe --quiet -p User=ecst \
+#   ssh "$ECST_SSH" 'sudo -u postgres createdb -O ecst ecst_drill && \
+#       sudo systemd-run --wait --pipe --quiet -p User=ecst \
 #       -p EnvironmentFile=/opt/ecst/env -p WorkingDirectory=/opt/ecst/app/backend \
-#       bash /tmp/ecst-restore-drill.sh; rm -f /tmp/ecst-restore-drill.sh'
+#       bash /tmp/ecst-restore-drill.sh; sudo -u postgres dropdb --if-exists ecst_drill; \
+#       rm -f /tmp/ecst-restore-drill.sh'
 #   # a given backup instead of the newest: … bash /tmp/ecst-restore-drill.sh 20261016T012249Z
 #
 # Runs as the `ecst` user with the app's environment (the backup key is read from it, never
 # printed). It decrypts the database dump and the files archive into a private temporary folder,
-# restores the dump into a scratch database `ecst_drill` (never the live one), compares counts
+# restores the dump into a scratch database `ecst_drill` (never the live one; created empty by
+# `postgres` and owned by `ecst`, which may not create databases itself), compares counts
 # with the live database, counts the archived files, and removes the scratch database and the
 # folder whatever happens. It prints counts and a duration only: no data, no secret.
 set -euo pipefail
@@ -41,8 +44,11 @@ echo "Backup: $stamp ($(stat -c %y "$BACKUPS/ecst-$stamp.dump.enc" | cut -d. -f1
 "$PY" manage.py restore_database --name "backups/ecst-$stamp.dump.enc" --out "$work/ecst.dump" >/dev/null
 echo "Database dump decrypted: $(stat -c %s "$work/ecst.dump") bytes"
 
-dropdb --if-exists ecst_drill
-createdb ecst_drill
+# The scratch database is made by `postgres` beforehand (the app's role may not create one).
+psql -Atqd ecst_drill -c "select 1" >/dev/null 2>&1 || {
+  echo "Create the empty scratch database first: sudo -u postgres createdb -O ecst ecst_drill" >&2
+  exit 1
+}
 pg_restore --no-owner --no-privileges --dbname ecst_drill "$work/ecst.dump"
 echo "Restored into the scratch database in $(($(date +%s) - started)) s"
 

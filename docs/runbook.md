@@ -155,9 +155,11 @@ dropdb ecst_drill
 
 ```bash
 scp scripts/vps/restore-drill.sh "$ECST_SSH":/tmp/ecst-restore-drill.sh
-ssh "$ECST_SSH" 'sudo systemd-run --wait --pipe --quiet -p User=ecst \
+ssh "$ECST_SSH" 'sudo -u postgres createdb -O ecst ecst_drill && \
+  sudo systemd-run --wait --pipe --quiet -p User=ecst \
   -p EnvironmentFile=/opt/ecst/env -p WorkingDirectory=/opt/ecst/app/backend \
-  bash /tmp/ecst-restore-drill.sh; rm -f /tmp/ecst-restore-drill.sh'
+  bash /tmp/ecst-restore-drill.sh; sudo -u postgres dropdb --if-exists ecst_drill; \
+  rm -f /tmp/ecst-restore-drill.sh'
 ```
 
 لنسخة بعينها أضف طابعها بعد اسم السكربت (مثل `20261016T012249Z`). أعداد الإنتاج قد تزيد على أعداد النسخة بما جرى بعد أخذها، ويزيد سجل التدقيق صفًا هو صف النسخة نفسها.
