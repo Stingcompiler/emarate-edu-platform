@@ -50,6 +50,14 @@ const ROLE: Record<string, string> = {
   teacher: "",
   ta: L("معيد", "Teaching assistant"),
 };
+const DEGREE_EN: Record<string, string> = {
+  phd: "PhD",
+  master: "Master's",
+  higher_diploma: "Higher diploma",
+  bachelor: "Bachelor's",
+  diploma: "Diploma",
+  other: "",
+};
 const initial = (name: string) =>
   (name.replace(/^(د|أ|م|Dr|Prof|Mr|Ms)\.?\s+/u, "").trim()[0] ?? "").toUpperCase();
 const others = all
@@ -113,28 +121,64 @@ const others = all
       {faculty.length > 0 && (
         <section aria-labelledby="faculty" class="mt-10">
           <h2 id="faculty" class="font-display text-2xl font-bold">
-            {L("هيئة التدريس", "Faculty")}
+            {L("الكوادر", "Faculty")}
           </h2>
           <ul class="mt-4 grid gap-3 sm:grid-cols-2">
             {faculty.map((m, i) => (
               <li
                 data-reveal
                 style={`--i:${i}`}
-                class="flex items-center gap-3 rounded-2xl border border-border-soft bg-surface p-4"
+                class="rounded-2xl border border-border-soft bg-surface p-4"
               >
-                <!-- ui-allow: initials avatar -->
-                <span
-                  aria-hidden="true"
-                  class="grid size-11 shrink-0 place-items-center rounded-full bg-primary-soft font-bold text-primary-700"
-                >
-                  {initial(pick(lang, m.name_ar, m.name_en))}
-                </span>
-                <span class="min-w-0">
-                  <b class="block text-text">{pick(lang, m.name_ar, m.name_en)}</b>
-                  <span class="text-sm text-text-muted">
-                    {[pick(lang, m.title_ar, m.title_en), ROLE[m.role]].filter(Boolean).join(" · ")}
+                <div class="flex items-center gap-3">
+                  {m.photo ? (
+                    <img
+                      src={m.photo}
+                      alt=""
+                      width="56"
+                      height="56"
+                      loading="lazy"
+                      decoding="async"
+                      class="size-14 shrink-0 rounded-full bg-surface-alt object-cover"
+                    />
+                  ) : (
+                    // ui-allow: initials avatar
+                    <span
+                      aria-hidden="true"
+                      class="grid size-14 shrink-0 place-items-center rounded-full bg-primary-soft text-lg font-bold text-primary-700"
+                    >
+                      {initial(pick(lang, m.name_ar, m.name_en))}
+                    </span>
+                  )}
+                  <span class="min-w-0">
+                    <b class="block text-text">{pick(lang, m.name_ar, m.name_en)}</b>
+                    <span class="text-sm text-text-muted">
+                      {[pick(lang, m.title_ar, m.title_en), ROLE[m.role]]
+                        .filter(Boolean)
+                        .join(" · ")}
+                    </span>
                   </span>
-                </span>
+                </div>
+                {(m.qualifications ?? []).length > 0 && (
+                  <ul class="mt-3 space-y-1 border-t border-border-soft pt-3 text-sm">
+                    {(m.qualifications ?? []).map((q) => (
+                      <li class="text-text">
+                        <b>{lang === "ar" ? q.degree_ar : (DEGREE_EN[q.degree] ?? q.degree_ar)}</b>{" "}
+                        {lang === "ar" ? "في" : "in"} {q.field}
+                        <span class="block text-xs text-text-muted">
+                          {q.institution}
+                          {q.year ? ` · ${num(lang, q.year)}` : ""}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                {m.research_interests && (
+                  <p class="mt-2 text-xs text-text-muted">
+                    {L("الاهتمامات البحثية: ", "Research interests: ")}
+                    {m.research_interests}
+                  </p>
+                )}
               </li>
             ))}
           </ul>

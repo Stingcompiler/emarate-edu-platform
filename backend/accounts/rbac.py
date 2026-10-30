@@ -201,6 +201,8 @@ CAPABILITIES: dict[str, frozenset[Role]] = {
     "events.manage": frozenset({R.SYSTEM_ADMIN, R.SITE_MANAGER, R.EVENTS_MANAGER}),
     # News: the site team; the events manager only news linked to an event (docs/03 §3.13).
     "news.manage": frozenset({R.SYSTEM_ADMIN, R.SITE_MANAGER, R.EVENTS_MANAGER}),
+    # Hides a staff photo or qualification from the site's «الكوادر» (owner, 2026-10-30).
+    "staff_profiles.moderate": frozenset({R.SYSTEM_ADMIN, R.ACADEMIC_AFFAIRS}),
     # Users and roles
     "users.view": frozenset({R.SYSTEM_ADMIN, R.ACADEMIC_AFFAIRS, R.HEAD_REGISTRAR}),
     # Sets a temporary password for another account (the owner's request, 2026-10-13).

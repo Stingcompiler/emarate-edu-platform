@@ -266,6 +266,7 @@ function PublicProfileCard() {
     full_name_en: "",
     academic_title_ar: "",
     academic_title_en: "",
+    research_interests: "",
   });
   useEffect(() => {
     const p = profile.data;
@@ -274,6 +275,7 @@ function PublicProfileCard() {
         full_name_en: p.full_name_en ?? "",
         academic_title_ar: p.academic_title_ar ?? "",
         academic_title_en: p.academic_title_en ?? "",
+        research_interests: p.research_interests ?? "",
       });
   }, [profile.data]);
   const save = useMutation({
@@ -289,7 +291,8 @@ function PublicProfileCard() {
   const changed =
     draft.full_name_en !== (p.full_name_en ?? "") ||
     draft.academic_title_ar !== (p.academic_title_ar ?? "") ||
-    draft.academic_title_en !== (p.academic_title_en ?? "");
+    draft.academic_title_en !== (p.academic_title_en ?? "") ||
+    draft.research_interests !== (p.research_interests ?? "");
   return (
     <>
       <SectionLabel>الظهور في صفحة القسم على موقع الكلية</SectionLabel>
@@ -306,6 +309,22 @@ function PublicProfileCard() {
             label="أظهر اسمي ولقبي في صفحة قسمي"
             disabled={save.isPending}
             onChange={(value) => save.mutate({ public_profile: value })}
+          />
+        </div>
+        {/* The photo is a separate consent (owner, 2026-10-30): some show their name, not
+            their face. */}
+        <div className="flex items-center justify-between gap-3 border-t border-border-soft px-4 py-3">
+          <div>
+            <p className="text-sm font-semibold text-text">أظهر صورتي في صفحة الكوادر</p>
+            <p className="mt-0.5 text-xs text-text-muted">
+              صورتك الشخصية من «الحساب» أعلاه، ولا تظهر إلا مع اسمك.
+            </p>
+          </div>
+          <Switch
+            checked={p.public_photo ?? false}
+            label="أظهر صورتي في صفحة الكوادر"
+            disabled={save.isPending}
+            onChange={(value) => save.mutate({ public_photo: value })}
           />
         </div>
         <div className="border-t border-border-soft sm:grid sm:grid-cols-2">
@@ -329,6 +348,12 @@ function PublicProfileCard() {
             maxLength={200}
             onChange={(e) => setDraft({ ...draft, full_name_en: e.target.value })}
           />
+          <Field
+            label="الاهتمامات البحثية (سطر واحد، اختياري)"
+            value={draft.research_interests}
+            maxLength={300}
+            onChange={(e) => setDraft({ ...draft, research_interests: e.target.value })}
+          />
           <div className="flex items-center justify-end px-4 py-2.5">
             <Button disabled={!changed || save.isPending} onClick={() => save.mutate(draft)}>
               {save.isPending ? "جارٍ الحفظ…" : "حفظ"}
@@ -338,6 +363,159 @@ function PublicProfileCard() {
         {save.isError && (
           <div className="px-4 pb-3">
             <Notice>{problemMessage(save.error)}</Notice>
+          </div>
+        )}
+      </Card>
+      <Qualifications />
+    </>
+  );
+}
+
+const DEGREES: { key: Schemas["QualificationDegreeEnum"]; label: string }[] = [
+  { key: "phd", label: "دكتوراه" },
+  { key: "master", label: "ماجستير" },
+  { key: "higher_diploma", label: "دبلوم عالٍ" },
+  { key: "bachelor", label: "بكالوريوس" },
+  { key: "diploma", label: "دبلوم" },
+  { key: "other", label: "أخرى" },
+];
+const degreeLabel = (key: string) => DEGREES.find((d) => d.key === key)?.label ?? key;
+
+/** The member's degrees for the site's «الكوادر» (owner, 2026-10-30), highest first. */
+function Qualifications() {
+  const client = useQueryClient();
+  const list = useQuery({
+    queryKey: ["me", "qualifications"],
+    queryFn: async () => ok(await api.GET("/api/v1/me/qualifications")) ?? [],
+  });
+  const empty = {
+    degree: "master" as Schemas["QualificationDegreeEnum"],
+    field: "",
+    institution: "",
+    year: "",
+  };
+  const [form, setForm] = useState(empty);
+  const refresh = () => client.invalidateQueries({ queryKey: ["me", "qualifications"] });
+  const add = useMutation({
+    mutationFn: async () => {
+      const { data, error } = await api.POST("/api/v1/me/qualifications", {
+        body: {
+          degree: form.degree,
+          field: form.field.trim(),
+          institution: form.institution.trim(),
+          year: form.year ? Number(form.year) : null,
+        } as never,
+      });
+      if (!data) throw error;
+    },
+    onSuccess: () => {
+      setForm(empty);
+      void refresh();
+    },
+  });
+  const remove = useMutation({
+    mutationFn: async (id: number) => {
+      const { error, response } = await api.DELETE("/api/v1/me/qualifications/{id}", {
+        params: { path: { id } },
+      });
+      if (!response.ok) throw error;
+    },
+    onSuccess: () => void refresh(),
+  });
+  const rows = list.data ?? [];
+  return (
+    <>
+      <SectionLabel>مؤهلاتي العلمية</SectionLabel>
+      <Card className="divide-y divide-border-soft">
+        {rows.map((q) => (
+          <div key={q.id} className="flex items-center gap-3 px-4 py-3 text-sm">
+            <span className="min-w-0 flex-1">
+              <b className="block text-text">
+                {degreeLabel(q.degree)} في {q.field}
+              </b>
+              <span className="text-xs text-text-muted">
+                {q.institution}
+                {q.year ? ` · ${q.year}` : ""}
+                {q.hidden ? " · أخفته الشؤون العلمية من الموقع" : ""}
+              </span>
+            </span>
+            <button
+              type="button"
+              onClick={() => remove.mutate(q.id)}
+              className="min-h-11 shrink-0 px-2 text-sm text-text-muted hover:text-danger-strong"
+            >
+              حذف
+            </button>
+          </div>
+        ))}
+        {!rows.length && (
+          <p className="px-4 py-3 text-sm text-text-muted">
+            لم تُضف مؤهلات بعد. تظهر في صفحة الكوادر حين تفعّل ظهورك أعلاه.
+          </p>
+        )}
+        <form
+          className="grid gap-2 px-4 py-3 sm:grid-cols-[auto_1fr_1fr_6rem_auto] sm:items-end"
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (form.field.trim() && form.institution.trim()) add.mutate();
+          }}
+        >
+          <label className="text-xs text-text-muted">
+            الدرجة
+            <select
+              value={form.degree}
+              onChange={(e) =>
+                setForm({ ...form, degree: e.target.value as Schemas["QualificationDegreeEnum"] })
+              }
+              className="mt-1 block min-h-11 w-full rounded-lg border border-border bg-surface px-2 text-sm text-text"
+            >
+              {DEGREES.map((d) => (
+                <option key={d.key} value={d.key}>
+                  {d.label}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="text-xs text-text-muted">
+            التخصص
+            <input
+              value={form.field}
+              maxLength={150}
+              onChange={(e) => setForm({ ...form, field: e.target.value })}
+              className="mt-1 block min-h-11 w-full rounded-lg border border-border bg-surface px-3 text-sm text-text"
+            />
+          </label>
+          <label className="text-xs text-text-muted">
+            الجامعة
+            <input
+              value={form.institution}
+              maxLength={150}
+              onChange={(e) => setForm({ ...form, institution: e.target.value })}
+              className="mt-1 block min-h-11 w-full rounded-lg border border-border bg-surface px-3 text-sm text-text"
+            />
+          </label>
+          <label className="text-xs text-text-muted">
+            السنة
+            <input
+              inputMode="numeric"
+              dir="ltr"
+              value={form.year}
+              maxLength={4}
+              onChange={(e) => setForm({ ...form, year: e.target.value.replace(/\D/g, "") })}
+              className="mt-1 block min-h-11 w-full rounded-lg border border-border bg-surface px-3 text-sm text-text"
+            />
+          </label>
+          <Button
+            type="submit"
+            disabled={add.isPending}
+            why={form.field.trim() && form.institution.trim() ? undefined : "أكمل التخصص والجامعة"}
+          >
+            إضافة
+          </Button>
+        </form>
+        {(add.isError || remove.isError) && (
+          <div className="px-4 py-3">
+            <Notice>{problemMessage(add.error ?? remove.error)}</Notice>
           </div>
         )}
       </Card>

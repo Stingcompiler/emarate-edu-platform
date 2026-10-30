@@ -63,6 +63,11 @@ class User(PublicIdModel, AbstractUser):
     public_profile = models.BooleanField(default=False)
     academic_title_ar = models.CharField(max_length=100, blank=True)
     academic_title_en = models.CharField(max_length=100, blank=True)
+    # «الكوادر» on the site (owner, 2026-10-30): the photo only with its own consent, and a
+    # line of research interests. Academic affairs may hide the photo from the site.
+    public_photo = models.BooleanField(default=False)
+    public_photo_hidden = models.BooleanField(default=False)
+    research_interests = models.CharField(max_length=300, blank=True)
     last_seen = models.DateTimeField(null=True, blank=True)
     # Carried in every token as «tv»; raising it (password reset, account disabled) ends the
     # sessions at once, open access tokens included (review 2026-10-08, R05).
@@ -192,3 +197,31 @@ class ActivationToken(TimestampedModel):
     token_hash = models.CharField(max_length=128, unique=True)
     expires_at = models.DateTimeField()
     used_at = models.DateTimeField(null=True, blank=True)
+
+
+class Qualification(TimestampedModel):
+    """A staff member's degree, entered by them, shown on the site's «الكوادر» when they appear
+    there (owner, 2026-10-30). Published as entered; academic affairs may hide one."""
+
+    class Degree(models.TextChoices):
+        PHD = "phd", "دكتوراه"
+        MASTER = "master", "ماجستير"
+        HIGHER_DIPLOMA = "higher_diploma", "دبلوم عالٍ"
+        BACHELOR = "bachelor", "بكالوريوس"
+        DIPLOMA = "diploma", "دبلوم"
+        OTHER = "other", "أخرى"
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="qualifications"
+    )
+    degree = models.CharField(max_length=20, choices=Degree.choices)
+    field = models.CharField(max_length=150)
+    institution = models.CharField(max_length=150)
+    year = models.PositiveSmallIntegerField(null=True, blank=True)
+    hidden = models.BooleanField(default=False)
+
+    # Highest degree first, then the most recent.
+    RANK = {"phd": 0, "master": 1, "higher_diploma": 2, "bachelor": 3, "diploma": 4, "other": 5}
+
+    class Meta:
+        ordering = ["user", "-year", "id"]

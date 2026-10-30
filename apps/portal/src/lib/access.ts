@@ -101,6 +101,7 @@ export const ROUTE_ACCESS: Record<string, Allow> = {
   "/site/media": cap("content.manage"),
   "/site/redirects": cap("content.manage"),
   "/events": cap("events.manage"),
+  "/staff-profiles": cap("staff_profiles.moderate"),
   "/events/:id": cap("events.manage"),
   "/applications": cap("admissions.view"),
   "/applications/:id": cap("admissions.view"),

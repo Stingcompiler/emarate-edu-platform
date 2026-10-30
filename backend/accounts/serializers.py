@@ -6,7 +6,7 @@ from files.models import StoredFile
 from organization.models import Department
 
 from . import rbac
-from .models import RegistrationRequest, RoleAssignment, User
+from .models import Qualification, RegistrationRequest, RoleAssignment, User
 from .rbac import Role
 
 
@@ -281,8 +281,42 @@ class PublicProfileSerializer(serializers.ModelSerializer):
             "full_name_en",
             "academic_title_ar",
             "academic_title_en",
+            "public_photo",
+            "research_interests",
         ]
         read_only_fields = ["full_name_ar"]
+
+
+class QualificationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Qualification
+        fields = ["id", "degree", "field", "institution", "year", "hidden"]
+        read_only_fields = ["id", "hidden"]
+
+
+class StaffProfileSerializer(serializers.ModelSerializer):
+    """A member who appears on the site, as academic affairs reviews them."""
+
+    photo = serializers.SlugRelatedField(slug_field="public_id", read_only=True)
+    qualifications = QualificationSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = User
+        fields = [
+            "public_id",
+            "full_name_ar",
+            "academic_title_ar",
+            "photo",
+            "public_photo",
+            "public_photo_hidden",
+            "research_interests",
+            "qualifications",
+        ]
+        read_only_fields = fields
+
+
+class HiddenSerializer(serializers.Serializer):
+    hidden = serializers.BooleanField()
 
 
 class MyContactSerializer(serializers.Serializer):

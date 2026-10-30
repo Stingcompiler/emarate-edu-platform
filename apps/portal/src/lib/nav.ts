@@ -1,39 +1,40 @@
 import {
   Award,
-  Briefcase,
-  Bell,
-  CalendarDays,
   BarChart3,
-  History,
-  LayoutDashboard,
-  Library,
-  UserRound,
-  Users,
+  Bell,
   BookOpen,
+  Briefcase,
   Building2,
-  ListChecks,
-  Sun,
+  CalendarDays,
   CalendarRange,
-  GraduationCap,
-  UserCheck,
-  FileText,
-  LayoutTemplate,
   ClipboardCheck,
   ClipboardList,
-  Globe,
-  Inbox,
-  Megaphone,
-  Radio,
   Download,
+  FileText,
   FileUp,
   FolderLock,
+  Gauge,
+  Globe,
+  GraduationCap,
+  History,
+  Inbox,
+  KeyRound,
+  LayoutDashboard,
+  LayoutTemplate,
+  Library,
+  ListChecks,
+  Megaphone,
+  Radio,
   ScrollText,
   Search,
   Send,
   Settings,
   SlidersHorizontal,
-  KeyRound,
-  Gauge,
+  Sun,
+  UserCheck,
+  UserRound,
+  Users,
+  UsersRound,
 } from "lucide-react";
 
 import type { NavItem } from "../components/AppShell";
@@ -195,6 +196,9 @@ export function navFor(me: Me | null | undefined, unread: number): NavItem[] {
     items.push({ label: "محتوى الموقع", to: "/site", icon: Globe, end: false });
   if (can(me, "events.manage"))
     items.push({ label: "الفعاليات", to: "/events", icon: CalendarDays, end: false });
+  // The site's «الكوادر», reviewed by academic affairs (owner, 2026-10-30).
+  if (can(me, "staff_profiles.moderate"))
+    items.push({ label: "الكوادر على الموقع", to: "/staff-profiles", icon: UsersRound });
   if (me?.student) {
     items.push({ label: "النتائج", to: "/results", icon: Award });
     items.push({ label: "اللوائح", to: "/regulations", icon: ScrollText });

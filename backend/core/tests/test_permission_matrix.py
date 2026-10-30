@@ -399,12 +399,19 @@ _N = "notifications.tests.test_notifications::"
 _EX = "exams.tests.test_exams::"
 _AD = "admissions.tests.test_admissions::"
 _PROFILE = "accounts.tests.test_profile::"
+_STAFF = "accounts.tests.test_staff_profile::"
 _LV = "live.tests.test_live::"
 _IQ = "inquiries.tests.test_inquiries::"
 _CT = "content.tests.test_content::"
 _RS = "results.tests.test_results::"
 _SA = "student_affairs.tests.test_student_affairs::"
 COVERED_ELSEWHERE = {
+    # «الكوادر» (owner, 2026-10-30): a member's own degrees; academic affairs' review.
+    "me-qualifications": _STAFF + "test_staff_degrees_and_photo_on_the_site_with_consent",
+    "me-qualification": _STAFF + "test_staff_degrees_and_photo_on_the_site_with_consent",
+    "staff-profiles": _STAFF + "test_staff_degrees_and_photo_on_the_site_with_consent",
+    "staff-photo-visibility": _STAFF + "test_staff_degrees_and_photo_on_the_site_with_consent",
+    "qualification-visibility": _STAFF + "test_staff_degrees_and_photo_on_the_site_with_consent",
     # A profile photo for an <img> (owner, 2026-10-30): staff photos to anyone signed in, a
     # student's to the staff who may see their record; a redirect, not JSON.
     "photo": _PROFILE + "test_everyone_has_a_photo_cropped_small_and_seen_by_colleagues",
