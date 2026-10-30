@@ -53,7 +53,7 @@ const STEPS = [
   "المراجعة والإرسال",
 ];
 
-/** Boards: VisitorApplyVerify → Program → Apply → Docs → Review → Success (phone); desktop: same steps in the 800px public column. */
+/** Boards: VisitorApplyVerify → Program → Apply → Docs → Review → Success (phone); desktop: the form beside the steps and help (VisitorLayout, 2026-10-30). */
 export function Apply() {
   const [params, setParams] = useSearchParams();
   const [session, setSession] = useState<VisitorSession | null>(readSession);
@@ -93,24 +93,8 @@ export function Apply() {
       title={STEPS[step - 1]!}
       step={`الخطوة ${step} من 5`}
       progress={{ value: step, max: 5 }}
+      steps={{ labels: STEPS, current: step }}
     >
-      <ol className="mb-5 flex flex-wrap gap-x-3 gap-y-1 text-xs text-text-muted">
-        {STEPS.map((label, i) => (
-          <li
-            key={label}
-            className={
-              i + 1 === step
-                ? "font-semibold text-primary"
-                : i + 1 < step
-                  ? "text-success-strong"
-                  : ""
-            }
-          >
-            {i + 1 < step ? "✓ " : `${i + 1}. `}
-            {label}
-          </li>
-        ))}
-      </ol>
       {session && step > 1 && (
         <p className="mb-4 text-xs text-text-muted">
           ✓ البريد مُتحقق: <span dir="ltr">{maskEmail(session.email)}</span>
