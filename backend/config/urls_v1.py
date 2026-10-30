@@ -81,6 +81,23 @@ urlpatterns = [
     path("me/email", accounts.MyEmailView.as_view(), name="me-email"),
     path("me/email/confirm", accounts.MyEmailConfirmView.as_view(), name="me-email-confirm"),
     path("me/public-profile", accounts.MyPublicProfileView.as_view(), name="me-public-profile"),
+    path("me/qualifications", accounts.MyQualificationsView.as_view(), name="me-qualifications"),
+    path(
+        "me/qualifications/<int:pk>",
+        accounts.MyQualificationView.as_view(),
+        name="me-qualification",
+    ),
+    path("staff-profiles", accounts.StaffProfilesView.as_view(), name="staff-profiles"),
+    path(
+        "staff-profiles/<uuid:public_id>/photo",
+        accounts.StaffPhotoVisibilityView.as_view(),
+        name="staff-photo-visibility",
+    ),
+    path(
+        "qualifications/<int:pk>/visibility",
+        accounts.QualificationVisibilityView.as_view(),
+        name="qualification-visibility",
+    ),
     path("roles", accounts.RolesView.as_view(), name="roles"),
     path("me/courses", academic.MyCoursesView.as_view(), name="me-courses"),
     path("system-settings", organization.SystemSettingsView.as_view(), name="system-settings"),

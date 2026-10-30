@@ -33,6 +33,11 @@ urlpatterns = [
         content.PublicPortalIconView.as_view(),
         name="public-portal-icon",
     ),
+    path(
+        "staff-photos/<uuid:public_id>.webp",
+        catalogue.PublicStaffPhotoView.as_view(),
+        name="public-staff-photo",
+    ),
     path("intakes", admissions.PublicIntakesView.as_view(), name="public-intakes"),
     path("intakes/<int:pk>", admissions.PublicIntakeView.as_view(), name="public-intake"),
     path("visitor/otp", admissions.VisitorOTPView.as_view(), name="visitor-otp"),

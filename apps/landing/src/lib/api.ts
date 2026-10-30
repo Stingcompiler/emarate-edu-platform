@@ -166,6 +166,16 @@ export type Department = {
     title_ar: string;
     title_en: string;
     role: "manager" | "teacher" | "ta";
+    /** Shown only with the member's consent (owner, 2026-10-30); absent from older APIs. */
+    photo?: string | null;
+    research_interests?: string;
+    qualifications?: {
+      degree: string;
+      degree_ar: string;
+      field: string;
+      institution: string;
+      year: number | null;
+    }[];
   }[];
   /** The department's own public news, newest first. */
   news?: { public_id: string; title: string; body: string; publish_at: string | null }[];

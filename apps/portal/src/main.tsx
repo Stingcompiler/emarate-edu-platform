@@ -121,6 +121,7 @@ const AdminUsers = page(() => import("./routes/admin/Users"), "AdminUsers");
 const Activate = page(() => import("./routes/Activate"), "Activate");
 const Home = page(() => import("./routes/Home"), "Home");
 const AcademicHome = page(() => import("./routes/homes/AcademicHome"), "AcademicHome");
+const StaffProfiles = page(() => import("./routes/homes/StaffProfiles"), "StaffProfiles");
 const AffairsHome = page(() => import("./routes/homes/AffairsHome"), "AffairsHome");
 const ResultsHome = page(() => import("./routes/homes/ResultsHome"), "ResultsHome");
 const Me = page(() => import("./routes/learning/Me"), "Me");
@@ -224,6 +225,7 @@ const router = createBrowserRouter([
   { path: "/me/status", element: signedIn(<MyStatus />, "/me/status") },
   { path: "/results-office", element: signedIn(<ResultsHome />, "/results-office") },
   { path: "/academic", element: signedIn(<AcademicHome />, "/academic") },
+  { path: "/staff-profiles", element: signedIn(<StaffProfiles />, "/staff-profiles") },
   { path: "/affairs", element: signedIn(<AffairsHome />, "/affairs") },
   { path: "/notifications", element: signedIn(<Notifications />, "/notifications") },
   { path: "/notifications/new", element: signedIn(<Compose />, "/notifications/new") },

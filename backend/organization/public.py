@@ -18,7 +18,8 @@ from rest_framework.exceptions import NotFound
 from rest_framework.response import Response
 
 from academic.models import Course, DepartmentMembership
-from accounts.models import RoleAssignment
+from accounts import staff_profile
+from accounts.models import RoleAssignment, User
 from accounts.rbac import Role
 from content.models import Announcement, Page, Status
 from content.official import ORDER, public_path
@@ -90,12 +91,25 @@ class PublicProgramDetailSerializer(PublicProgramSerializer):
     plan = PlanLevelSerializer(many=True)
 
 
+class FacultyQualificationSerializer(S.Serializer):
+    degree = S.CharField()
+    degree_ar = S.CharField()
+    field = S.CharField()
+    institution = S.CharField()
+    year = S.IntegerField(allow_null=True)
+
+
 class FacultyMemberSerializer(S.Serializer):
     name_ar = S.CharField()
     name_en = S.CharField()
     title_ar = S.CharField()
     title_en = S.CharField()
     role = S.ChoiceField(choices=["manager", "teacher", "ta"])
+    # «الكوادر» (owner, 2026-10-30): the photo only with its own consent and unless academic
+    # affairs hid it; the degrees as the member entered them, highest first.
+    photo = S.CharField(allow_null=True)
+    research_interests = S.CharField()
+    qualifications = FacultyQualificationSerializer(many=True)
 
 
 class DepartmentNewsSerializer(S.Serializer):
@@ -259,7 +273,7 @@ class PublicProgramView(_PublicRead):
         return Response(PublicProgramDetailSerializer(row).data)
 
 
-def _departments(queryset) -> list[dict]:
+def _departments(queryset, request=None) -> list[dict]:
     ids = list(queryset.values_list("id", flat=True))
     managers = dict(
         RoleAssignment.objects.filter(role=Role.DEPARTMENT_MANAGER, department_id__in=ids)
@@ -283,7 +297,7 @@ def _departments(queryset) -> list[dict]:
     programs: dict[str, list] = defaultdict(list)
     for row in _programs(_active_programs().filter(department_id__in=ids)):
         programs[row["department_code"]].append(row)
-    faculty = _faculty(ids)
+    faculty = _faculty(ids, request)
     news: dict[int, list] = defaultdict(list)
     for a in Announcement.objects.filter(department_public_q_any(ids)).order_by(
         "-publish_at", "-id"
@@ -308,7 +322,7 @@ def _departments(queryset) -> list[dict]:
     ]
 
 
-def _faculty(ids: list[int]) -> dict[int, list[dict]]:
+def _faculty(ids: list[int], request=None) -> dict[int, list[dict]]:
     """Members who turned on their public profile, per department: the head, then teachers,
     then teaching assistants, each by name. Nobody appears without their own consent."""
     rows: dict[int, list[dict]] = defaultdict(list)
@@ -318,6 +332,11 @@ def _faculty(ids: list[int]) -> dict[int, list[dict]]:
         if (department_id, user.pk) in seen:
             return
         seen.add((department_id, user.pk))
+        shows_photo = user.public_photo and not user.public_photo_hidden and user.photo_id
+        photo = f"/api/public/staff-photos/{user.public_id}.webp" if shows_photo else None
+        if photo and request is not None:
+            photo = request.build_absolute_uri(photo)
+        degrees = staff_profile.ranked(q for q in user.qualifications.all() if not q.hidden)
         rows[department_id].append(
             {
                 "name_ar": user.full_name_ar,
@@ -325,6 +344,18 @@ def _faculty(ids: list[int]) -> dict[int, list[dict]]:
                 "title_ar": user.academic_title_ar,
                 "title_en": user.academic_title_en,
                 "role": role,
+                "photo": photo,
+                "research_interests": user.research_interests,
+                "qualifications": [
+                    {
+                        "degree": q.degree,
+                        "degree_ar": q.get_degree_display(),
+                        "field": q.field,
+                        "institution": q.institution,
+                        "year": q.year,
+                    }
+                    for q in degrees
+                ],
             }
         )
 
@@ -334,6 +365,7 @@ def _faculty(ids: list[int]) -> dict[int, list[dict]]:
             role=Role.DEPARTMENT_MANAGER, department_id__in=ids, **visible
         )
         .select_related("user")
+        .prefetch_related("user__qualifications")
         .order_by("user__full_name_ar")
     ):
         add(ra.department_id, ra.user, "manager")
@@ -341,6 +373,7 @@ def _faculty(ids: list[int]) -> dict[int, list[dict]]:
     members = (
         DepartmentMembership.objects.filter(department_id__in=ids, **visible)
         .select_related("user")
+        .prefetch_related("user__qualifications")
         .order_by("user__full_name_ar")
     )
     for m in sorted(members, key=lambda m: order.get(m.kind, 2)):
@@ -356,7 +389,9 @@ class PublicDepartmentsView(_PublicRead):
     )
     def get(self, request):
         departments = Department.objects.filter(is_active=True).order_by("name_ar")
-        return Response(PublicDepartmentSerializer(_departments(departments), many=True).data)
+        return Response(
+            PublicDepartmentSerializer(_departments(departments, request), many=True).data
+        )
 
 
 @PUBLIC_CACHE
@@ -367,7 +402,7 @@ class PublicDepartmentView(_PublicRead):
         department = Department.objects.filter(is_active=True, code=code)
         if not department.exists():
             raise NotFound()
-        return Response(PublicDepartmentSerializer(_departments(department)[0]).data)
+        return Response(PublicDepartmentSerializer(_departments(department, request)[0]).data)
 
 
 @PUBLIC_CACHE
@@ -468,3 +503,31 @@ class PublicCalendarView(_PublicRead):
                 }
             ).data
         )
+
+
+@extend_schema(exclude=True)
+class PublicStaffPhotoView(_PublicRead):
+    """A staff member's photo on the site — only if they appear there, agreed to show it and
+    academic affairs did not hide it (owner, 2026-10-30). Anything else is a plain 404."""
+
+    def get(self, request, public_id):
+        from django.http import FileResponse, Http404
+
+        user = (
+            User.objects.filter(
+                public_id=public_id,
+                is_active=True,
+                public_profile=True,
+                public_photo=True,
+                public_photo_hidden=False,
+                photo__isnull=False,
+            )
+            .select_related("photo")
+            .first()
+        )
+        if user is None:
+            raise Http404
+        response = FileResponse(user.photo.file.open("rb"), content_type="image/webp")
+        response["Cache-Control"] = "public, max-age=86400"
+        response["X-Content-Type-Options"] = "nosniff"
+        return response

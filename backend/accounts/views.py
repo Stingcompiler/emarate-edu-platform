@@ -15,7 +15,7 @@ from django.views.decorators.csrf import ensure_csrf_cookie
 from drf_spectacular.utils import OpenApiParameter, extend_schema, inline_serializer
 from rest_framework import mixins, serializers, status, viewsets
 from rest_framework.decorators import action
-from rest_framework.exceptions import NotAuthenticated, PermissionDenied
+from rest_framework.exceptions import NotAuthenticated, NotFound, PermissionDenied
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -26,7 +26,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from audit.services import RequestMeta, record, snapshot
 from core.permissions import capability
 
-from . import profile, rbac, services
+from . import profile, rbac, services, staff_profile
 from .models import RegistrationRequest, RoleAssignment, User
 from .rbac import Role
 from .serializers import (
@@ -35,12 +35,14 @@ from .serializers import (
     DetailSerializer,
     EmailChangeSerializer,
     EmailConfirmSerializer,
+    HiddenSerializer,
     LoginSerializer,
     MeSerializer,
     MyContactSerializer,
     PasswordForgotSerializer,
     PasswordResetSerializer,
     PublicProfileSerializer,
+    QualificationSerializer,
     RegistrationCompleteResponseSerializer,
     RegistrationCompleteSerializer,
     RegistrationDecisionSerializer,
@@ -50,6 +52,7 @@ from .serializers import (
     RegistrationVerifySerializer,
     RoleAssignmentDetailSerializer,
     RoleGrantSerializer,
+    StaffProfileSerializer,
     TemporaryPasswordSerializer,
     UserActiveSerializer,
     UserCreateSerializer,
@@ -308,7 +311,14 @@ class MyPublicProfileView(APIView):
     (owner decision 2026-09-30). Only the member sets it; the change is audited."""
 
     permission_classes = [IsAuthenticated]
-    FIELDS = ["public_profile", "full_name_en", "academic_title_ar", "academic_title_en"]
+    FIELDS = [
+        "public_profile",
+        "full_name_en",
+        "academic_title_ar",
+        "academic_title_en",
+        "public_photo",
+        "research_interests",
+    ]
 
     @extend_schema(responses=PublicProfileSerializer, tags=["me"])
     def get(self, request):
@@ -333,7 +343,97 @@ class MyPublicProfileView(APIView):
                 old=old,
                 new=snapshot(user, self.FIELDS),
             )
+            # The department pages show these: rebuild the site (owner, 2026-10-30).
+            staff_profile.site_changed()
         return Response(PublicProfileSerializer(user).data)
+
+
+class MyQualificationsView(APIView):
+    """The member's own degrees, shown on the site's «الكوادر» (owner, 2026-10-30)."""
+
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(responses=QualificationSerializer(many=True), tags=["me"])
+    def get(self, request):
+        return Response(
+            QualificationSerializer(
+                staff_profile.ranked(request.user.qualifications.all()), many=True
+            ).data
+        )
+
+    @extend_schema(request=QualificationSerializer, responses=QualificationSerializer, tags=["me"])
+    def post(self, request):
+        data = QualificationSerializer(data=request.data)
+        data.is_valid(raise_exception=True)
+        q = staff_profile.add(
+            RequestMeta.from_request(request), request.user, **data.validated_data
+        )
+        return Response(QualificationSerializer(q).data, status=201)
+
+
+class MyQualificationView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(request=QualificationSerializer, responses=QualificationSerializer, tags=["me"])
+    def patch(self, request, pk):
+        data = QualificationSerializer(data=request.data, partial=True)
+        data.is_valid(raise_exception=True)
+        q = staff_profile.change(
+            RequestMeta.from_request(request), request.user, pk, **data.validated_data
+        )
+        return Response(QualificationSerializer(q).data)
+
+    @extend_schema(responses={204: None}, tags=["me"])
+    def delete(self, request, pk):
+        staff_profile.remove(RequestMeta.from_request(request), request.user, pk)
+        return Response(status=204)
+
+
+class StaffProfilesView(APIView):
+    """Members who appear on the site, for academic affairs to review (owner, 2026-10-30)."""
+
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(responses=StaffProfileSerializer(many=True), tags=["staff-profiles"])
+    def get(self, request):
+        if not rbac.can(request.user, "staff_profiles.moderate"):
+            raise PermissionDenied()
+        members = (
+            User.objects.filter(public_profile=True, is_active=True)
+            .select_related("photo")
+            .prefetch_related("qualifications")
+            .order_by("full_name_ar")
+        )
+        return Response(StaffProfileSerializer(members, many=True).data)
+
+
+class StaffPhotoVisibilityView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(request=HiddenSerializer, responses={204: None}, tags=["staff-profiles"])
+    def patch(self, request, public_id):
+        data = HiddenSerializer(data=request.data)
+        data.is_valid(raise_exception=True)
+        member = User.objects.filter(public_id=public_id).first()
+        if member is None:
+            raise NotFound()
+        staff_profile.hide_photo(
+            RequestMeta.from_request(request), request.user, member, data.validated_data["hidden"]
+        )
+        return Response(status=204)
+
+
+class QualificationVisibilityView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(request=HiddenSerializer, responses={204: None}, tags=["staff-profiles"])
+    def patch(self, request, pk):
+        data = HiddenSerializer(data=request.data)
+        data.is_valid(raise_exception=True)
+        staff_profile.hide_qualification(
+            RequestMeta.from_request(request), request.user, pk, data.validated_data["hidden"]
+        )
+        return Response(status=204)
 
 
 # ─── Public: registration, password reset, activation ─────────────────────
