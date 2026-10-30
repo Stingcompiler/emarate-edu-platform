@@ -13,7 +13,7 @@
 - #186 lucide-react 1.63 (1.64 is under pnpm's minimum release age; no exception kept).
 - Production verified 2026-10-30 after `2bbe31f`: app band and floating header on the site,
   portal health 200, both CSS bundles carry the light-only colour scheme.
-- Waiting on the owner: retest light mode on Phoenix (if still dark, its own night mode).
+- Owner confirmed 2026-10-30: light mode works on Phoenix after #182.
 
 # Handoff — redesign from the owner's mockups (2026-10-29), all phases merged — 2026-10-30
 
@@ -39,7 +39,6 @@ Plan and decisions: `docs/qa/redesign-plan-2026-10-29.md` (owner: «نفذ جم�
 
 ## Still open (owner)
 
-- Light mode report from 2026-10-29: not reproducible; waiting for device/browser details.
 - Programme pages: structure exists, college content missing. Restore-drill result, real
   `OPS_ALERT_EMAIL`, SEO steps after the domain move, Dependabot alerts off.
 
