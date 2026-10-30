@@ -206,7 +206,10 @@ export function Roles() {
                   </tr>
                   {g.rows.map((c) => (
                     <tr key={c.key}>
-                      <th scope="row" className="min-w-48 px-3 py-2 text-start font-normal text-text">
+                      <th
+                        scope="row"
+                        className="min-w-48 px-3 py-2 text-start font-normal text-text"
+                      >
                         {CAPABILITY[c.key] ?? c.key}
                       </th>
                       {roles.map((r) => {
