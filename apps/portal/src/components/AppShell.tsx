@@ -123,7 +123,7 @@ export function AppShell({
         >
           <SidebarItems nav={nav} />
           <div className="mt-auto border-t border-white/10 pt-3">
-            <ThemeRow className={`${sidebarItem} w-full ${sidebarIdle}`} />
+            <ThemeRow onDark className={`${sidebarItem} w-full text-navy-100`} />
           </div>
         </nav>
       </aside>

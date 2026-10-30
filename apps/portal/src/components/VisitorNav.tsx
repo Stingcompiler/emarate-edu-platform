@@ -2,6 +2,7 @@ import { Menu, X } from "lucide-react";
 import { type ReactNode, useState } from "react";
 import { Link, NavLink } from "react-router";
 
+import { isStandalone } from "../lib/push";
 import { SITE_URL } from "../lib/site";
 import { useHideOnScroll } from "../lib/useHideOnScroll";
 
@@ -18,6 +19,8 @@ const SITE_LINKS: [string, string][] = [
 export function VisitorNav() {
   const hidden = useHideOnScroll();
   const [open, setOpen] = useState(false);
+  // The installed app is the portal only (owner, 2026-10-30): no site navigation inside it.
+  if (isStandalone()) return null;
   const away = hidden && !open;
   return (
     <header
@@ -27,7 +30,11 @@ export function VisitorNav() {
     >
       <div className="mx-auto flex h-16 max-w-[1120px] items-center gap-4 px-4 lg:px-8">
         {/* Visitors came from the college's site: its name takes them back (review 🟢). */}
-        <a href={SITE_URL} className="flex min-w-0 items-center gap-2 hover:opacity-80">
+        <a
+          href={SITE_URL}
+          {...siteLink()}
+          className="flex min-w-0 items-center gap-2 hover:opacity-80"
+        >
           <img src="/favicon.svg" alt="" width={32} height={32} />
           <span className="truncate text-sm font-bold text-text sm:hidden">كلية الإمارات</span>
           <span className="hidden truncate text-sm font-bold text-text sm:inline">
@@ -39,6 +46,7 @@ export function VisitorNav() {
             <a
               key={path}
               href={`${SITE_URL}${path}`}
+              {...siteLink()}
               className="rounded-md px-3 py-2 text-sm font-semibold text-text-muted hover:bg-surface-alt hover:text-text"
             >
               {label}
@@ -74,6 +82,7 @@ export function VisitorNav() {
             <a
               key={path}
               href={`${SITE_URL}${path}`}
+              {...siteLink()}
               className="flex min-h-12 items-center rounded-lg px-3 text-[15px] text-text hover:bg-surface-alt"
             >
               {label}
@@ -105,3 +114,10 @@ function VisitorLink({ to, children }: { to: string; children: ReactNode }) {
     </NavLink>
   );
 }
+
+/**
+ * A link to the college's site: from the installed app it opens in the browser, not inside the
+ * app (owner, 2026-10-30); in a browser tab it stays an ordinary link.
+ */
+export const siteLink = () =>
+  isStandalone() ? { target: "_blank", rel: "noopener noreferrer" } : {};

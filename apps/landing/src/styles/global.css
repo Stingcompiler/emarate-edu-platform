@@ -29,8 +29,7 @@ html[lang="en"] :where(p, li, dd, dt, h1, h2, h3, h4, td, th, blockquote, figcap
   unicode-bidi: plaintext;
 }
 
-/* The theme switch shows what it turns on (D28; three modes 2026-10-30): a sunset in light
-   mode (→ warm), a moon in warm (→ dark), a sun in dark (→ light). */
+/* The theme button's icon shows the mode in use (D28; three modes 2026-10-30). */
 :root:not([data-theme="warm"]):not([data-theme="dark"]) :is(.theme-when-warm, .theme-when-dark),
 :root[data-theme="warm"] :is(.theme-when-light, .theme-when-dark),
 :root[data-theme="dark"] :is(.theme-when-light, .theme-when-warm) {
