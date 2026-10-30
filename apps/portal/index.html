@@ -18,7 +18,8 @@
       // Apply the saved theme before first paint (no flash).
       try {
         var t = localStorage.getItem("ecst-theme");
-        if (t === "light" || t === "warm" || t === "dark") document.documentElement.setAttribute("data-theme", t);
+        if (t === "light" || t === "warm" || t === "dark")
+          document.documentElement.setAttribute("data-theme", t);
         if (localStorage.getItem("ecst-density") === "compact")
           document.documentElement.setAttribute("data-density", "compact");
       } catch (e) {}
