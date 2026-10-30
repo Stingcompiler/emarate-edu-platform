@@ -13,6 +13,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import { Link } from "react-router";
 
 import { SITE_URL, useSiteLogo } from "../lib/site";
+import { VisitorNav } from "./VisitorNav";
 import { CountUp } from "./motion";
 
 /** Small shared primitives for portal pages; tokens only (docs/06). */
@@ -287,66 +288,73 @@ export function AuthLayout({
 }) {
   const logo = useSiteLogo();
   return (
-    <div className="min-h-dvh bg-bg lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)]">
-      <main className="flex min-h-dvh flex-col px-5 pb-6 pt-[max(3rem,env(safe-area-inset-top))] sm:px-8 lg:px-16 lg:pt-10">
-        <div className="mx-auto flex w-full max-w-[400px] flex-1 flex-col lg:justify-center">
-          <img src={logo} alt="" width={56} height={56} className="size-14 object-contain" />
-          <h1 className="mt-5 text-2xl font-bold text-text">{title}</h1>
-          {subtitle && <p className="mt-1 text-sm leading-6 text-text-muted">{subtitle}</p>}
-          <div className="mt-7">{children}</div>
-        </div>
-        <footer className="mx-auto mt-10 flex w-full max-w-[400px] flex-wrap items-center justify-between gap-2 text-xs text-text-muted">
-          <a href={SITE_URL} className="font-semibold hover:text-text">
-            العودة إلى موقع الكلية
-          </a>
-          <span>كلية الإمارات للعلوم والتكنولوجيا</span>
-        </footer>
-      </main>
-      <aside className="relative hidden overflow-hidden bg-header p-12 text-text-inverse lg:flex lg:flex-col lg:justify-between">
-        {/* Orbits like the logo's, very faint — the panel's only decoration. */}
-        <svg
-          aria-hidden="true"
-          viewBox="0 0 400 400"
-          className="pointer-events-none absolute -bottom-24 -start-24 size-[520px] opacity-[0.07]"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.5"
-        >
-          <ellipse cx="200" cy="200" rx="190" ry="80" />
-          <ellipse cx="200" cy="200" rx="190" ry="80" transform="rotate(60 200 200)" />
-          <ellipse cx="200" cy="200" rx="190" ry="80" transform="rotate(-60 200 200)" />
-          <circle cx="200" cy="200" r="34" />
-        </svg>
-        <p className="relative text-sm font-semibold opacity-80">
-          كلية الإمارات للعلوم والتكنولوجيا
-        </p>
-        <div className="relative max-w-md">
-          <p className="text-3xl font-bold leading-snug">
-            بوابتك إلى الكلية —
-            <br />
-            في مكان واحد.
+    <div className="min-h-dvh bg-bg">
+      {/* The site's navigation on every public page (owner, 2026-10-30). */}
+      <VisitorNav />
+      <div className="lg:grid lg:min-h-[calc(100dvh-4rem)] lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)]">
+        <main className="flex min-h-[calc(100dvh-4rem)] flex-col px-5 pb-6 pt-8 sm:px-8 lg:px-16 lg:pt-10">
+          <div className="mx-auto flex w-full max-w-[400px] flex-1 flex-col lg:justify-center">
+            <img src={logo} alt="" width={56} height={56} className="size-14 object-contain" />
+            <h1 className="mt-5 text-2xl font-bold text-text">{title}</h1>
+            {subtitle && <p className="mt-1 text-sm leading-6 text-text-muted">{subtitle}</p>}
+            <div className="mt-7">{children}</div>
+          </div>
+          <footer className="mx-auto mt-10 flex w-full max-w-[400px] flex-wrap items-center justify-between gap-2 text-xs text-text-muted">
+            <a href={SITE_URL} className="font-semibold hover:text-text">
+              العودة إلى موقع الكلية
+            </a>
+            <span>كلية الإمارات للعلوم والتكنولوجيا</span>
+          </footer>
+        </main>
+        <aside className="relative hidden overflow-hidden bg-header p-12 text-text-inverse lg:flex lg:flex-col lg:justify-between">
+          {/* Orbits like the logo's, very faint — the panel's only decoration. */}
+          <svg
+            aria-hidden="true"
+            viewBox="0 0 400 400"
+            className="pointer-events-none absolute -bottom-24 -start-24 size-[520px] opacity-[0.07]"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.5"
+          >
+            <ellipse cx="200" cy="200" rx="190" ry="80" />
+            <ellipse cx="200" cy="200" rx="190" ry="80" transform="rotate(60 200 200)" />
+            <ellipse cx="200" cy="200" rx="190" ry="80" transform="rotate(-60 200 200)" />
+            <circle cx="200" cy="200" r="34" />
+          </svg>
+          <p className="relative text-sm font-semibold opacity-80">
+            كلية الإمارات للعلوم والتكنولوجيا
           </p>
-          <ul className="mt-8 space-y-4 text-sm leading-6 opacity-90">
-            {[
-              ["موادك ومحاضراتك", "المحاضرات والملفات والبث المباشر لكل مادة."],
-              ["مهامك ونتائجك", "الواجبات والاختبارات ومواعيدها، ودرجاتك حين تُنشر."],
-              ["إشعارات فورية", "على هاتفك حتى والتطبيق مغلق — لا يفوتك شيء."],
-            ].map(([head, body]) => (
-              <li key={head} className="flex gap-3">
-                <span className="mt-2 size-2 shrink-0 rounded-full bg-accent" aria-hidden="true" />
-                <span>
-                  <b className="block text-base">{head}</b>
-                  {body}
-                </span>
-              </li>
-            ))}
-          </ul>
-        </div>
-        <p className="relative text-xs opacity-70">
-          للطلاب وأعضاء هيئة التدريس والإدارة. المتقدمون الجدد يستخدمون «قدّم الآن» و«تابع طلبك» بلا
-          حساب.
-        </p>
-      </aside>
+          <div className="relative max-w-md">
+            <p className="text-3xl font-bold leading-snug">
+              بوابتك إلى الكلية —
+              <br />
+              في مكان واحد.
+            </p>
+            <ul className="mt-8 space-y-4 text-sm leading-6 opacity-90">
+              {[
+                ["موادك ومحاضراتك", "المحاضرات والملفات والبث المباشر لكل مادة."],
+                ["مهامك ونتائجك", "الواجبات والاختبارات ومواعيدها، ودرجاتك حين تُنشر."],
+                ["إشعارات فورية", "على هاتفك حتى والتطبيق مغلق — لا يفوتك شيء."],
+              ].map(([head, body]) => (
+                <li key={head} className="flex gap-3">
+                  <span
+                    className="mt-2 size-2 shrink-0 rounded-full bg-accent"
+                    aria-hidden="true"
+                  />
+                  <span>
+                    <b className="block text-base">{head}</b>
+                    {body}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <p className="relative text-xs opacity-70">
+            للطلاب وأعضاء هيئة التدريس والإدارة. المتقدمون الجدد يستخدمون «قدّم الآن» و«تابع طلبك»
+            بلا حساب.
+          </p>
+        </aside>
+      </div>
     </div>
   );
 }

@@ -647,6 +647,25 @@ const ext = (external: boolean) => (external ? { rel: "noopener", target: "_blan
       const lift = () => header?.toggleAttribute("data-scrolled", window.scrollY > 8);
       lift();
       window.addEventListener("scroll", lift, { passive: true });
+      // It gets out of the way while the page scrolls down and comes back as soon as the
+      // scrolling stops or turns up (owner, 2026-10-30); never while one of its menus is open.
+      let lastY = window.scrollY;
+      let idle: number | undefined;
+      const away = (on: boolean) => header?.toggleAttribute("data-away", on);
+      window.addEventListener(
+        "scroll",
+        () => {
+          const y = window.scrollY;
+          const menuOpen = !!header?.querySelector("details[data-menu][open]");
+          if (y < 80 || y < lastY - 4 || menuOpen) away(false);
+          else if (y > lastY + 4) away(true);
+          lastY = y;
+          window.clearTimeout(idle);
+          idle = window.setTimeout(() => away(false), 400);
+        },
+        { passive: true },
+      );
+      header?.addEventListener("focusin", () => away(false));
 
       // Light or dark (D28): the choice is kept, in the same key as the portal. Printing (the
       // programme brochure) is always light.
