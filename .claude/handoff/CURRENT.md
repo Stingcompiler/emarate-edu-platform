@@ -1,3 +1,24 @@
+# Handoff — photos, «الكوادر», uploads, player — 2026-10-31
+
+- #197 site header attached to the top; theme chosen from a menu of three; no site nav in the
+  installed app (`isStandalone`), site links open in the browser (`siteLink()`).
+- #198 `siteUrl(path)`: SITE_URL ends in `/ar/`, joining gave `/ar//ar/…` 404s.
+- #199 «موادي» cards (students_count on /me/courses); `components/LecturePlayer.tsx`.
+- #200 `postWithProgress` (XHR) + `components/UploadStatus.tsx` on submissions, lecture files,
+  applicant documents; upload errors translated (files/validation.py → gettext, .po/.mo);
+  loading screen uses `LOGO_ICON` (/api/public/portal-icon/192.png); YouTube iframe in page.
+- #201 roles matrix: horizontal headers, Arabic names for every capability.
+- #202 profile photo for every user: 3 MB, stored as 512 px WebP (`accounts/photos.py`),
+  `/api/v1/photos/<id>` (302 to signed link); `Avatar photo=`; docs/03 note.
+- #203 `Qualification` model + `/api/v1/me/qualifications`, `public_photo` consent,
+  `research_interests`; academic affairs page `/staff-profiles` (`staff_profiles.moderate`)
+  hides a photo or degree; department page section renamed «الكوادر» with photo/degrees;
+  `/api/public/staff-photos/<id>.webp`; profile changes request a site rebuild.
+- Gotchas: GitHub GraphQL failed for `gh pr create` on 2026-10-30 → use
+  `gh api repos/<owner>/<repo>/pulls -f …`; the session scratchpad (merge watcher) can be
+  wiped — recreate it; under a loaded Mac use `E2E_BOOT_MS=480000`; the landing dev server
+  caches API responses in memory (restart it to see new data).
+
 # Handoff — after the redesign, owner follow-ups — 2026-10-30
 
 - **Restore drill passed 2026-10-30** (owner ran it): backup `20261030T012118Z` restored into a
