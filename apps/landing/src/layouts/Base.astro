@@ -104,8 +104,8 @@ const ext = (external: boolean) => (external ? { rel: "noopener", target: "_blan
     <!-- Before paint, so a dark choice never flashes white. Same key as the portal. -->
     <script is:inline>
       try {
-        if (localStorage.getItem("ecst-theme") === "dark")
-          document.documentElement.setAttribute("data-theme", "dark");
+        var t = localStorage.getItem("ecst-theme");
+        if (t === "dark" || t === "warm") document.documentElement.setAttribute("data-theme", t);
       } catch {}
     </script>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -232,13 +232,27 @@ const ext = (external: boolean) => (external ? { rel: "noopener", target: "_blan
         <button
           type="button"
           data-theme-toggle
-          aria-pressed="false"
           class="hidden size-10 shrink-0 place-items-center rounded-md text-text-muted hover:bg-surface-alt hover:text-text sm:ms-auto sm:grid lg:ms-0"
         >
-          <span class="sr-only theme-when-light">{t(lang, "darkMode")}</span>
+          <span class="sr-only theme-when-light">{t(lang, "warmMode")}</span>
+          <span class="sr-only theme-when-warm">{t(lang, "darkMode")}</span>
           <span class="sr-only theme-when-dark">{t(lang, "lightMode")}</span>
           <svg
             class="theme-when-light"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.75"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M12 10V2M4.93 10.93l1.41 1.41M2 18h2M20 18h2M19.07 10.93l-1.41 1.41M22 22H2M8 6l4-4 4 4M16 18a4 4 0 0 0-8 0" />
+          </svg>
+          <svg
+            class="theme-when-warm"
             width="20"
             height="20"
             viewBox="0 0 24 24"
@@ -407,10 +421,10 @@ const ext = (external: boolean) => (external ? { rel: "noopener", target: "_blan
               <button
                 type="button"
                 data-theme-toggle
-                aria-pressed="false"
                 class="flex w-full items-center gap-2 border-t border-border-soft px-3 py-3 text-start text-sm font-semibold text-text-muted hover:bg-surface-alt sm:hidden"
               >
-                <span class="theme-when-light">{t(lang, "darkMode")}</span>
+                <span class="theme-when-light">{t(lang, "warmMode")}</span>
+                <span class="theme-when-warm">{t(lang, "darkMode")}</span>
                 <span class="theme-when-dark">{t(lang, "lightMode")}</span>
               </button>
             </div>
@@ -671,22 +685,19 @@ const ext = (external: boolean) => (external ? { rel: "noopener", target: "_blan
       // programme brochure) is always light.
       const root = document.documentElement;
       const toggles = () => document.querySelectorAll<HTMLButtonElement>("[data-theme-toggle]");
-      const show = () =>
-        toggles().forEach((b) =>
-          b.setAttribute("aria-pressed", String(root.dataset.theme === "dark")),
-        );
-      show();
+      // Three modes in turn (owner, 2026-10-30): light → warm → dark → light. The button shows
+      // the mode it turns on.
+      const NEXT: Record<string, string> = { light: "warm", warm: "dark", dark: "light" };
       toggles().forEach((b) =>
         b.addEventListener("click", () => {
-          const next = root.dataset.theme === "dark" ? "light" : "dark";
+          const next = NEXT[root.dataset.theme ?? "light"] ?? "light";
           root.dataset.theme = next;
           try {
-            if (next === "dark") localStorage.setItem("ecst-theme", "dark");
-            else localStorage.removeItem("ecst-theme");
+            if (next === "light") localStorage.removeItem("ecst-theme");
+            else localStorage.setItem("ecst-theme", next);
           } catch {
             /* private mode: the choice lasts for this page */
           }
-          show();
         }),
       );
       let printedFrom = "";

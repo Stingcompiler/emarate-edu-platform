@@ -1,24 +1,25 @@
-import { Moon, Sun } from "lucide-react";
+import { type LucideIcon, Moon, Sun, Sunset } from "lucide-react";
 
-import { useTheme } from "../lib/theme";
+import { MODE_LABEL, type Mode, useTheme } from "../lib/theme";
 
-/** One tap between light and dark, always in the same place (top bar); Settings has «النظام». */
+const ICON: Record<Mode, LucideIcon> = { light: Sun, warm: Sunset, dark: Moon };
+
+/**
+ * One tap to the next mode — light, warm, dark (owner, 2026-10-30) — always in the same place;
+ * Settings has the three and «النظام». The icon and the words say which mode it turns on.
+ */
 export function ThemeToggle({ className = "" }: { className?: string }) {
-  const { dark, toggle } = useTheme();
+  const { next, toggle } = useTheme();
+  const Icon = ICON[next];
   return (
     <button
       type="button"
       onClick={toggle}
-      aria-pressed={dark}
-      aria-label={dark ? "الوضع الفاتح" : "الوضع الداكن"}
-      title={dark ? "الوضع الفاتح" : "الوضع الداكن"}
+      aria-label={MODE_LABEL[next]}
+      title={MODE_LABEL[next]}
       className={`grid size-10 shrink-0 place-items-center rounded-full transition-colors ${className}`}
     >
-      {dark ? (
-        <Sun size={20} strokeWidth={1.75} aria-hidden />
-      ) : (
-        <Moon size={20} strokeWidth={1.75} aria-hidden />
-      )}
+      <Icon size={20} strokeWidth={1.75} aria-hidden />
     </button>
   );
 }
@@ -34,12 +35,12 @@ export function ThemeRow({
   className?: string;
   iconSize?: number;
 }) {
-  const { dark, toggle } = useTheme();
-  const Icon = dark ? Sun : Moon;
+  const { next, toggle } = useTheme();
+  const Icon = ICON[next];
   return (
-    <button type="button" onClick={toggle} aria-pressed={dark} className={className}>
+    <button type="button" onClick={toggle} className={className}>
       <Icon size={iconSize} strokeWidth={1.75} aria-hidden className="shrink-0 opacity-70" />
-      {dark ? "الوضع الفاتح" : "الوضع الداكن"}
+      {MODE_LABEL[next]}
     </button>
   );
 }

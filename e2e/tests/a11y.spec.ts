@@ -53,3 +53,12 @@ test("dark mode keeps AA contrast", async ({ page }) => {
   await signIn(page, "26-IT-0001");
   for (const path of ["/", "/courses", "/tasks", "/me"]) await audit(page, path);
 });
+
+// The warm mode (owner, 2026-10-30) is only ever chosen: the same audits with it pinned.
+test("warm mode keeps AA contrast", async ({ page }) => {
+  test.setTimeout(60_000);
+  await page.addInitScript(() => localStorage.setItem("ecst-theme", "warm"));
+  await audit(page, "/login");
+  await signIn(page, "26-IT-0001");
+  for (const path of ["/", "/courses", "/tasks", "/me"]) await audit(page, path);
+});
