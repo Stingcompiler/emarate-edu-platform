@@ -300,7 +300,11 @@ class MyCoursesView(APIView):
         if term is None:
             return Response([])
         base = CourseOffering.objects.filter(term=term).select_related("course", "term")
-        base = base.prefetch_related(_INSTRUCTORS)
+        base = base.prefetch_related(_INSTRUCTORS).annotate(
+            students_count=Count(
+                "enrollments", filter=Q(enrollments__status="active"), distinct=True
+            )
+        )
         courses = []
         record_ = StudentRecord.objects.filter(user=request.user).first()
         if record_ is not None:

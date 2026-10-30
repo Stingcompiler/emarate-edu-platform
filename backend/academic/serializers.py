@@ -195,3 +195,5 @@ class MyCourseSerializer(serializers.Serializer):
     ta_can_grade = serializers.BooleanField()
     ta_can_notify = serializers.BooleanField()
     instructors = InstructorSerializer(many=True)
+    # Active enrolments, for the course card (owner, 2026-10-30: more detail on «موادي»).
+    students_count = serializers.IntegerField(default=0)
