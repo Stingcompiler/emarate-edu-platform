@@ -3,7 +3,7 @@ import { type ReactNode, useState } from "react";
 import { Link, NavLink } from "react-router";
 
 import { isStandalone } from "../lib/push";
-import { SITE_URL } from "../lib/site";
+import { SITE_URL, siteUrl } from "../lib/site";
 import { useHideOnScroll } from "../lib/useHideOnScroll";
 
 /** The college site's main sections: a visitor applying or tracking keeps the site's navigation. */
@@ -45,7 +45,7 @@ export function VisitorNav() {
           {SITE_LINKS.map(([label, path]) => (
             <a
               key={path}
-              href={`${SITE_URL}${path}`}
+              href={siteUrl(path)}
               {...siteLink()}
               className="rounded-md px-3 py-2 text-sm font-semibold text-text-muted hover:bg-surface-alt hover:text-text"
             >
@@ -81,7 +81,7 @@ export function VisitorNav() {
           {SITE_LINKS.map(([label, path]) => (
             <a
               key={path}
-              href={`${SITE_URL}${path}`}
+              href={siteUrl(path)}
               {...siteLink()}
               className="flex min-h-12 items-center rounded-lg px-3 text-[15px] text-text hover:bg-surface-alt"
             >

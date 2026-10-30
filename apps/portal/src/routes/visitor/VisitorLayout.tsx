@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 import { ConnectivityBar } from "../../components/ConnectivityBar";
 import { VisitorNav, siteLink } from "../../components/VisitorNav";
 import { ProgressRing } from "../../components/motion";
-import { SITE_URL } from "../../lib/site";
+import { SITE_URL, siteUrl } from "../../lib/site";
 
 /**
  * Visitor pages (apply / track), redesigned 2026-10-30 (owner): the site's navigation on top
@@ -115,7 +115,7 @@ export function VisitorLayout({
                 مكتب القبول يجيب عن أسئلة التقديم والبرامج والرسوم.
               </p>
               <a
-                href={`${SITE_URL}/ar/contact/`}
+                href={siteUrl("/ar/contact/")}
                 {...siteLink()}
                 className="tap-44 mt-2 inline-flex items-center font-semibold text-primary hover:underline"
               >
