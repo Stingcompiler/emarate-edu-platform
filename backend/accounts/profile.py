@@ -81,8 +81,10 @@ def confirm_email_change(meta: RequestMeta, user: User, email: str, code: str) -
 
 
 def update_contact(meta: RequestMeta, user: User, **data) -> User:
-    """Phone and photo; what is not given stays as it is."""
-    _student(user)
+    """Phone and photo; what is not given stays as it is. Everyone may set their photo
+    (owner, 2026-10-30); the phone stays a student's own detail here."""
+    if set(data) - {"photo"}:
+        _student(user)
     from files.models import Purpose, StoredFile
     from inquiries.services import normalize_phone
 
@@ -117,10 +119,15 @@ def update_contact(meta: RequestMeta, user: User, **data) -> User:
 
 
 def _photo_readable(user, stored) -> bool:
-    """Staff who may see the student's record (the owner is let through by files.access)."""
+    """A student's photo: staff who may see their record. A staff member's: anyone signed in
+    (colleagues, their students). The owner is let through by files.access."""
     owner = User.objects.filter(photo=stored).select_related("student_record").first()
-    record_ = getattr(owner, "student_record", None) if owner else None
-    return record_ is not None and rbac.can(user, "students.view", record_.department_id)
+    if owner is None:
+        return False
+    record_ = getattr(owner, "student_record", None)
+    if record_ is None:
+        return user.is_authenticated
+    return rbac.can(user, "students.view", record_.department_id)
 
 
 def register_file_policy() -> None:
@@ -129,10 +136,10 @@ def register_file_policy() -> None:
     access.register(
         "photo",
         access.Policy(
-            can_upload=lambda user, offering: hasattr(user, "student_record"),
+            can_upload=lambda user, offering: user.is_authenticated,
             can_read=_photo_readable,
             allowed_extensions=PHOTO_TYPES,
-            max_mb=5,
+            max_mb=3,
             needs_offering=False,
         ),
     )

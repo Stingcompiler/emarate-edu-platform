@@ -46,6 +46,15 @@ def upload(meta: RequestMeta, *, purpose: str, offering, uploaded) -> StoredFile
         kind = validation.check(uploaded, allowed=found.allowed_extensions, max_mb=found.max_mb)
     except validation.UploadError as error:
         raise ValidationError({"file": [str(error)]}) from None
+    if purpose == "photo":
+        # Profile photos are stored cropped and compressed (accounts/photos.py).
+        from accounts.photos import normalize
+
+        try:
+            uploaded = normalize(uploaded)
+        except Exception:
+            raise ValidationError({"file": [gettext("The image could not be read.")]}) from None
+        kind = validation.KINDS["webp"]
     digest = hashlib.sha256()
     for chunk in uploaded.chunks():
         digest.update(chunk)

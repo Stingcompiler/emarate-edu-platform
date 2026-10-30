@@ -49,7 +49,8 @@ export function Courses() {
             const published = (lectures.data ?? []).filter(
               (l) => l.offering === c.offering_id && l.is_published,
             ).length;
-            const teacher = c.instructors.find((i) => i.role === "teacher")?.user.full_name_ar;
+            const lead = c.instructors.find((i) => i.role === "teacher")?.user;
+            const teacher = lead?.full_name_ar;
             const tas = c.instructors.filter((i) => i.role === "ta").length;
             const handed = mine.filter((a) => a.mine).length;
             const waiting = (queue.data?.groups ?? [])
@@ -93,6 +94,7 @@ export function Courses() {
                     text={initials(student ? (teacher ?? "—") : (me.data?.full_name_ar ?? ""))}
                     size="sm"
                     tone="neutral"
+                    photo={student ? lead?.photo : me.data?.photo}
                   />
                   <span className="min-w-0 truncate">
                     {student

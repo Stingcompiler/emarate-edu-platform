@@ -724,11 +724,16 @@ export function Avatar({
   text,
   size = "md",
   tone = "primary",
+  photo,
 }: {
   text: string;
   size?: "sm" | "md" | "lg" | "xl" | "2xl";
   tone?: "primary" | "danger" | "warning" | "neutral";
+  /** The person's profile photo id (owner, 2026-10-30): shown instead of the initials; the
+   *  initials come back if it cannot be loaded. */
+  photo?: string | null;
 }) {
+  const [broken, setBroken] = useState(false);
   const sizes = {
     sm: "size-8 text-xs",
     md: "size-9 text-xs",
@@ -742,6 +747,16 @@ export function Avatar({
     warning: "bg-warning-soft text-warning-strong",
     neutral: "bg-surface-alt text-text-muted",
   }[tone];
+  if (photo && !broken)
+    return (
+      <img
+        src={`/api/v1/photos/${photo}`}
+        alt=""
+        loading="lazy"
+        onError={() => setBroken(true)}
+        className={`shrink-0 rounded-full bg-surface-alt object-cover ${sizes}`}
+      />
+    );
   return (
     // ui-allow: initials avatar, the one shared component
     <span

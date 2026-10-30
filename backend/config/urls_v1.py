@@ -97,6 +97,7 @@ urlpatterns = [
     ),
     path("files", files.FileUploadView.as_view(), name="file-upload"),
     path("files/<uuid:public_id>/url", files.FileUrlView.as_view(), name="file-url"),
+    path("photos/<uuid:public_id>", files.PhotoView.as_view(), name="photo"),
     path("videos/upload-ticket", files.VideoTicketView.as_view(), name="video-ticket"),
     path(
         "videos/<uuid:public_id>/upload",

@@ -108,7 +108,12 @@ export function PortalShell(props: Props) {
             title={me.data?.full_name_ar}
             className="rounded-full focus-visible:outline-2 focus-visible:outline-primary"
           >
-            <Avatar text={initialsOf(me.data?.full_name_ar ?? "")} size="md" tone="neutral" />
+            <Avatar
+              text={initialsOf(me.data?.full_name_ar ?? "")}
+              size="md"
+              tone="neutral"
+              photo={me.data?.photo}
+            />
           </Link>
           <button
             type="button"
