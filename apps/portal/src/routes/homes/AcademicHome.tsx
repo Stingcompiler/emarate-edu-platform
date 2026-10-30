@@ -69,10 +69,10 @@ export function AcademicHome() {
       title="الشؤون العلمية"
       subtitle={`${me.data?.full_name_ar ?? ""} · ${count(departments.data?.length ?? 0, N.department)} · هيئة التدريس: ${count(teachers.data?.summary.members ?? 0, N.member)}${term.data ? ` · ${term.data.name_ar}` : ""}`}
     >
-      {/* Board DesktopAcademicAffairs: the departments and their leadership first, as cards;
-          then what needs a decision. */}
+      {/* What needs a decision first at every size (mockups 2026-10-29: a home starts with the
+          pending work); the departments and their leadership after it. */}
       <div className="flex flex-col">
-        <div className="order-2 lg:order-1">
+        <div className="order-2">
           <SectionLabel>
             الأقسام وقياداتها · {count(departments.data?.length ?? 0, N.department)}
           </SectionLabel>
@@ -102,7 +102,7 @@ export function AcademicHome() {
         </div>
         {/* Large screens: the decisions beside the shortcuts (a 3xl column left half the row
           empty). */}
-        <div className="order-1 mb-6 lg:order-2 lg:mb-0 lg:mt-6 lg:grid lg:grid-cols-[minmax(0,1fr)_300px] lg:items-start lg:gap-6">
+        <div className="order-1 mb-6 lg:grid lg:grid-cols-[minmax(0,1fr)_300px] lg:items-start lg:gap-6">
           <div>
             <Inbox
               title="يحتاج قرارك"
