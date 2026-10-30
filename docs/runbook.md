@@ -155,12 +155,20 @@ dropdb ecst_drill
 
 ```bash
 scp scripts/vps/restore-drill.sh "$ECST_SSH":/tmp/ecst-restore-drill.sh
-ssh "$ECST_SSH" 'sudo systemd-run --wait --pipe --quiet -p User=ecst \
+ssh "$ECST_SSH" 'sudo -u postgres createdb -O ecst ecst_drill && \
+  sudo systemd-run --wait --pipe --quiet -p User=ecst \
   -p EnvironmentFile=/opt/ecst/env -p WorkingDirectory=/opt/ecst/app/backend \
-  bash /tmp/ecst-restore-drill.sh; rm -f /tmp/ecst-restore-drill.sh'
+  bash /tmp/ecst-restore-drill.sh; sudo -u postgres dropdb --if-exists ecst_drill; \
+  rm -f /tmp/ecst-restore-drill.sh'
 ```
 
 لنسخة بعينها أضف طابعها بعد اسم السكربت (مثل `20261016T012249Z`). أعداد الإنتاج قد تزيد على أعداد النسخة بما جرى بعد أخذها، ويزيد سجل التدقيق صفًا هو صف النسخة نفسها.
+
+**سجل التدريبات:**
+
+| التاريخ | النسخة | النتيجة |
+|---|---|---|
+| 2026-10-30 | `20261030T012118Z` (القرص نفسه) | ✅ فُكّ التشفير (455 KB)، واستُعيدت القاعدة في 2 ث: 90 جدولًا، والأعداد مطابقة للإنتاج (المستخدمون 18، السجلات 41، المواد 22، الطلبات 6؛ سجل التدقيق 153 مقابل 158 لعمل بعد النسخة). أرشيف الملفات 32 ملفًا (7.6 MB). المدة 5 ث. لم تُختبر النسخة **الخارجية** بعد. |
 
 **ملفات VPS جزء من تدريب الاستعادة أيضًا.** فك تشفير أرشيف الملفات من الطابع الزمني نفسه إلى مكان خاص، وفكّه إلى مجلد مؤقت منفصل، ثم تحقق من عدد الملفات وأحجامها وفتح عينة من المرفقات. لا تفك الأرشيف إلى `/opt/ecst/media` أثناء التدريب. الأمر `restore_database --name backups/ecst-media-<وقت>.tar.gz.enc --out <مجلد-خاص>/media.tar.gz` يفك التشفير فقط؛ هذا الأرشيف يغطي مساري `public/` و`private/` تحت MEDIA_ROOT. اختبر الاستعادة من النسخة **الخارجية** بعد إعدادها، مع المفتاح المحفوظ خارج الخادم؛ استعادة ملف على القرص نفسه لا تختبر فقدان الخادم.
 
