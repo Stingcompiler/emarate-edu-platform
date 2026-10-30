@@ -187,7 +187,12 @@ export function AdminUsers() {
                   to={`/system/users/${u.public_id}`}
                   className="flex items-center gap-3 px-4 py-3 hover:bg-surface-alt"
                 >
-                  <Avatar text={initials(u.full_name_ar)} size="md" tone="primary" />
+                  <Avatar
+                    text={initials(u.full_name_ar)}
+                    size="md"
+                    tone="primary"
+                    photo={u.photo}
+                  />
                   <span className="min-w-0 flex-1">
                     <b className="block truncate text-sm text-text">{u.full_name_ar}</b>
                     <span className="block truncate text-xs text-text-muted">
@@ -263,7 +268,12 @@ export function AdminUsers() {
                 sort: "full_name_ar",
                 cell: (u) => (
                   <Link to={`/system/users/${u.public_id}`} className="flex items-center gap-3">
-                    <Avatar text={initials(u.full_name_ar)} size="md" tone="primary" />
+                    <Avatar
+                      text={initials(u.full_name_ar)}
+                      size="md"
+                      tone="primary"
+                      photo={u.photo}
+                    />
                     <span className="min-w-0">
                       <b className="block truncate text-text">{u.full_name_ar}</b>
                       <span className="block truncate text-xs text-text-muted" dir="ltr">

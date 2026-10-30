@@ -1,7 +1,7 @@
 import hmac
 
 from django.conf import settings
-from django.http import FileResponse, Http404
+from django.http import FileResponse, Http404, HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.utils.translation import gettext
 from drf_spectacular.utils import extend_schema
@@ -58,6 +58,21 @@ class FileUrlView(APIView):
         stored = get_object_or_404(StoredFile, public_id=public_id)
         url, expires_at = services.signed_url(request.user, stored)
         return Response({"url": url, "expires_at": expires_at})
+
+
+@extend_schema(tags=["files"], responses={302: None})
+class PhotoView(APIView):
+    """A profile photo for an <img>: the same read check as any file, then a redirect to a
+    short-lived link. The browser may keep it a few minutes (owner, 2026-10-30)."""
+
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, public_id):
+        stored = get_object_or_404(StoredFile, public_id=public_id, purpose="photo")
+        url, _expires = services.signed_url(request.user, stored)
+        response = HttpResponseRedirect(url)
+        response["Cache-Control"] = "private, max-age=300"
+        return response
 
 
 @extend_schema(exclude=True)

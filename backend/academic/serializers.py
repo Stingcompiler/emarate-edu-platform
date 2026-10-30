@@ -82,9 +82,12 @@ class CourseSerializer(serializers.ModelSerializer):
 
 
 class PersonSerializer(serializers.ModelSerializer):
+    # The profile photo's id, for /api/v1/photos/<id> (owner, 2026-10-30).
+    photo = serializers.SlugRelatedField(slug_field="public_id", read_only=True)
+
     class Meta:
         model = User
-        fields = ["public_id", "full_name_ar", "full_name_en", "email"]
+        fields = ["public_id", "full_name_ar", "full_name_en", "email", "photo"]
 
 
 class InstructorSerializer(serializers.ModelSerializer):

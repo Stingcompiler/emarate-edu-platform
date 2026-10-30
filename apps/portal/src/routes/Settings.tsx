@@ -20,7 +20,8 @@ import {
 import { OtpInput } from "../components/OtpInput";
 import { api, ok } from "../lib/api";
 import { initials } from "../lib/reports";
-import { asForm, formData } from "../lib/upload";
+import { formData, postWithProgress } from "../lib/upload";
+import { type Upload as UploadItem, UploadStatus } from "../components/UploadStatus";
 import { hasRole, useMe, useSignOut } from "../lib/auth";
 import { disablePush, enablePush, pushState, type PushState } from "../lib/push";
 import { type Density, useDensity } from "../lib/density";
@@ -93,9 +94,9 @@ export function Settings() {
             {me.data?.student ? (
               <MyDetails />
             ) : (
-              <Card className="px-4 py-3">
-                <p className="text-sm font-semibold text-text">{me.data?.full_name_ar}</p>
-                <p className="mt-0.5 text-sm text-text-muted" dir="ltr">
+              <Card className="divide-y divide-border-soft">
+                <PhotoRow />
+                <p className="px-4 py-3 text-sm text-text-muted" dir="ltr">
                   {me.data?.email}
                 </p>
               </Card>
@@ -398,6 +399,99 @@ function PushCard() {
   );
 }
 
+const PHOTO_MAX_MB = 3;
+
+/**
+ * The profile photo, for everyone (owner, 2026-10-30): up to 3 MB, JPG/PNG/WEBP; the server
+ * keeps a 512 px square. It replaces the initials wherever the person appears. The upload
+ * shows its progress and result.
+ */
+function PhotoRow() {
+  const me = useMe();
+  const client = useQueryClient();
+  const [upload, setUpload] = useState<UploadItem | null>(null);
+  const photoId = me.data?.photo ?? null;
+  const choose = async (file: File) => {
+    if (file.size > PHOTO_MAX_MB * 1024 * 1024) {
+      setUpload({
+        state: "error",
+        name: file.name,
+        message: `حجم الصورة أكبر من ${PHOTO_MAX_MB} ميغابايت — اختر صورة أصغر.`,
+      });
+      return;
+    }
+    setUpload({ state: "uploading", name: file.name, progress: null });
+    try {
+      const stored = await postWithProgress<{ public_id: string }>(
+        "/api/v1/files",
+        formData({ file, purpose: "photo" }),
+        (progress) => setUpload({ state: "uploading", name: file.name, progress }),
+      );
+      const { error, response } = await api.PATCH("/api/v1/me", {
+        body: { photo: stored.public_id },
+      });
+      if (!response.ok) throw error;
+      setUpload({ state: "done", name: file.name, message: "حُدّثت صورتك" });
+      await client.invalidateQueries({ queryKey: ["me"] });
+    } catch (error) {
+      setUpload({ state: "error", name: file.name, message: problemMessage(error) });
+    }
+  };
+  const remove = async () => {
+    await api.PATCH("/api/v1/me", { body: { photo: null } });
+    setUpload(null);
+    await client.invalidateQueries({ queryKey: ["me"] });
+  };
+  return (
+    <div className="space-y-3 px-4 py-3">
+      <div className="flex items-center gap-3">
+        <Avatar
+          text={initials(me.data?.full_name_ar ?? "")}
+          size="2xl"
+          tone="primary"
+          photo={photoId}
+        />
+        <span className="min-w-0 flex-1">
+          <b className="block text-sm text-text">{me.data?.full_name_ar}</b>
+          <span className="flex flex-wrap items-center gap-x-4">
+            <label className="inline-flex min-h-11 cursor-pointer items-center text-sm font-semibold text-primary">
+              {photoId ? "تغيير الصورة" : "إضافة صورة"}
+              <input
+                type="file"
+                accept=".jpg,.jpeg,.png,.webp"
+                className="sr-only"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  e.target.value = "";
+                  if (file) void choose(file);
+                }}
+              />
+            </label>
+            {photoId && (
+              <button
+                type="button"
+                onClick={() => void remove()}
+                className="min-h-11 text-sm text-text-muted hover:text-text"
+              >
+                إزالة الصورة
+              </button>
+            )}
+          </span>
+          <span className="block text-xs text-text-muted">
+            JPG أو PNG أو WEBP، حتى {PHOTO_MAX_MB} ميغابايت
+          </span>
+        </span>
+      </div>
+      {upload && (
+        <UploadStatus
+          upload={upload}
+          onDismiss={upload.state !== "uploading" ? () => setUpload(null) : undefined}
+        />
+      )}
+    </div>
+  );
+}
+
 /** A student's email (confirmed by a code sent to the new address), phone and photo
  *  (docs/03 §3.10; review 2026-10-25 decisions, item 13). */
 function MyDetails() {
@@ -408,17 +502,6 @@ function MyDetails() {
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
   const [sentTo, setSentTo] = useState<string | null>(null);
-  const photoId = me.data?.photo ?? null;
-  const photo = useQuery({
-    queryKey: ["me", "photo", photoId],
-    enabled: !!photoId,
-    queryFn: async () =>
-      ok(
-        await api.GET("/api/v1/files/{public_id}/url", {
-          params: { path: { public_id: photoId! } },
-        }),
-      )?.url ?? null,
-  });
   const saveContact = useMutation({
     mutationFn: async (body: { phone_e164?: string; photo?: string | null }) => {
       const { data, error } = await api.PATCH("/api/v1/me", { body });
@@ -428,16 +511,6 @@ function MyDetails() {
     onSuccess: () => {
       setPhone(null);
       void refresh();
-    },
-  });
-  const upload = useMutation({
-    mutationFn: async (file: File) => {
-      const { data, error } = await api.POST("/api/v1/files", {
-        body: formData({ file, purpose: "photo" }) as never,
-        ...asForm,
-      });
-      if (!data) throw error;
-      return saveContact.mutateAsync({ photo: data.public_id });
     },
   });
   const sendCode = useMutation({
@@ -461,35 +534,11 @@ function MyDetails() {
       void refresh();
     },
   });
-  const failed = saveContact.error ?? upload.error ?? sendCode.error ?? confirm.error;
+  const failed = saveContact.error ?? sendCode.error ?? confirm.error;
   const currentPhone = me.data?.phone_e164 ?? "";
   return (
     <Card className="divide-y divide-border-soft">
-      <div className="flex items-center gap-3 px-4 py-3">
-        {photo.data ? (
-          <img
-            src={photo.data}
-            alt=""
-            className="size-14 shrink-0 rounded-full object-cover"
-            width={56}
-            height={56}
-          />
-        ) : (
-          <Avatar text={initials(me.data?.full_name_ar ?? "")} size="2xl" tone="primary" />
-        )}
-        <span className="min-w-0 flex-1">
-          <b className="block text-sm text-text">{me.data?.full_name_ar}</b>
-          <label className="mt-1 inline-flex min-h-11 cursor-pointer items-center text-sm font-semibold text-primary">
-            {upload.isPending ? "جارٍ الرفع…" : photoId ? "تغيير الصورة" : "إضافة صورة"}
-            <input
-              type="file"
-              accept=".jpg,.jpeg,.png,.webp"
-              className="sr-only"
-              onChange={(e) => e.target.files?.[0] && upload.mutate(e.target.files[0])}
-            />
-          </label>
-        </span>
-      </div>
+      <PhotoRow />
       <div className="px-4 py-3">
         <p className="text-xs text-text-muted">البريد</p>
         <p className="text-sm text-text" dir="ltr">

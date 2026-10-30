@@ -155,6 +155,7 @@ class DetailSerializer(serializers.Serializer):
 
 class UserSerializer(serializers.ModelSerializer):
     roles = RoleAssignmentSerializer(source="role_assignments", many=True, read_only=True)
+    photo = serializers.SlugRelatedField(slug_field="public_id", read_only=True)
 
     class Meta:
         model = User
@@ -167,6 +168,7 @@ class UserSerializer(serializers.ModelSerializer):
             "is_active",
             "last_login",
             "roles",
+            "photo",
         ]
         read_only_fields = fields
 

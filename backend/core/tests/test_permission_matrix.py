@@ -405,6 +405,9 @@ _CT = "content.tests.test_content::"
 _RS = "results.tests.test_results::"
 _SA = "student_affairs.tests.test_student_affairs::"
 COVERED_ELSEWHERE = {
+    # A profile photo for an <img> (owner, 2026-10-30): staff photos to anyone signed in, a
+    # student's to the staff who may see their record; a redirect, not JSON.
+    "photo": _PROFILE + "test_everyone_has_a_photo_cropped_small_and_seen_by_colleagues",
     # A student's own email change (decisions item 13): POST only.
     "me-email": _PROFILE + "test_a_student_changes_their_email_with_a_code",
     "me-email-confirm": _PROFILE
