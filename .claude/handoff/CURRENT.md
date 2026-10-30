@@ -1,3 +1,20 @@
+# Handoff — after the redesign, owner follow-ups — 2026-10-30
+
+- #181 site header: short college name between 1024 and 1279 (the full one was cut off).
+- #182 «الوضع الفاتح لا يعمل» was **Phoenix** (Android, auto-darkens pages): `tokens.css`
+  `color-scheme: only light` stops the repaint (verified with Chromium forced dark; a
+  `<meta name=color-scheme>` alone does not help). Deployed CSS reads `light only` (minifier).
+  Also the next-step button text is navy (primary-700 turns pale in dark).
+- #183 phone tab bar docked to the bottom edge (owner); docs/06, docs/09, responsive-page skill.
+- #184 visitor home band «بوابة الكلية تطبيقًا على هاتفك» → `portal/install` (a PWA installs
+  only from its own origin; `/login?next=/install` returns there).
+- #185 `NavIcon`: the current page's icon filled (tabs, «المزيد» sheet, sidebar), all roles.
+  Owner asked about glass icons: advised against (flat surfaces, low-end phones, `lint:ui`).
+- #186 lucide-react 1.63 (1.64 is under pnpm's minimum release age; no exception kept).
+- Production verified 2026-10-30 after `2bbe31f`: app band and floating header on the site,
+  portal health 200, both CSS bundles carry the light-only colour scheme.
+- Waiting on the owner: retest light mode on Phoenix (if still dark, its own night mode).
+
 # Handoff — redesign from the owner's mockups (2026-10-29), all phases merged — 2026-10-30
 
 Plan and decisions: `docs/qa/redesign-plan-2026-10-29.md` (owner: «نفذ جميع توصياتك»).
