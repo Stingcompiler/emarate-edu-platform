@@ -36,6 +36,12 @@ visitorApi.use({
   },
 });
 
+/** The visitor's Authorization header, for the uploads sent outside the typed client. */
+export function visitorAuth(): Record<string, string> {
+  const session = readSession();
+  return session ? { Authorization: `Visitor ${session.token}` } : {};
+}
+
 export function maskEmail(email: string): string {
   const [user = "", domain = ""] = email.split("@");
   return `${user.slice(0, Math.min(6, user.length))}***@${domain}`;

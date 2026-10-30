@@ -14,6 +14,13 @@ export const SITE_URL: string =
  */
 export const siteUrl = (path: string): string => new URL(path, SITE_URL).href;
 
+/**
+ * The college's current logo as the server cuts it for the app icon: available before
+ * sign-in and before the settings load, so the loading screen shows the logo in use, not
+ * the built-in mark (owner, 2026-10-30). The server falls back to the built-in one.
+ */
+export const LOGO_ICON = "/api/public/portal-icon/192.png";
+
 /** The built-in mark, shown until the site settings name a logo (and while they load). */
 export const DEFAULT_LOGO = "/favicon.svg";
 

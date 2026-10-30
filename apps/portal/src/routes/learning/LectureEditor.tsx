@@ -17,7 +17,8 @@ import { api, ok } from "../../lib/api";
 import { useUnsavedChanges } from "../../lib/useUnsavedChanges";
 import { fmtSize, useLectures, useCourse } from "../../lib/learning";
 import { tusUpload } from "../../lib/tus";
-import { asForm, formData } from "../../lib/upload";
+import { formData, postWithProgress } from "../../lib/upload";
+import { type Upload as UploadItem, UploadStatus } from "../../components/UploadStatus";
 import { useConfirm } from "../../components/Confirm";
 
 /** Board: TeacherLectureNew (phone); desktop derived — form beside resources. `/lectures/new?offering=` or `/lectures/:id/edit`. */
@@ -197,7 +198,6 @@ function Resources({
   const fileInput = useRef<HTMLInputElement>(null);
   const videoInput = useRef<HTMLInputElement>(null);
   const [link, setLink] = useState({ title: "", url: "" });
-  const [progress, setProgress] = useState<string | null>(null);
   const [error, setError] = useState<unknown>(null);
   const path = { params: { path: { public_id: lecture.public_id } } };
   const order = lecture.resources.length + 1;
@@ -221,52 +221,68 @@ function Resources({
       await task();
     } catch (e) {
       setError(e);
-    } finally {
-      setProgress(null);
+    }
+  };
+  // The file's upload as it goes, then its result (owner, 2026-10-30).
+  const [upload, setUpload] = useState<UploadItem | null>(null);
+  const sending = (name: string, total: number) => (loaded: number) =>
+    setUpload({ state: "uploading", name, progress: { loaded, total } });
+  const track = async (name: string, task: () => Promise<void>, done: string) => {
+    setError(null);
+    setUpload({ state: "uploading", name, progress: null });
+    try {
+      await task();
+      setUpload({ state: "done", name, message: done });
+    } catch (e) {
+      setUpload({ state: "error", name, message: problemMessage(e) });
     }
   };
   const uploadFile = (file: File) =>
-    run(async () => {
-      setProgress(`${file.name}…`);
-      const { data, error } = await api.POST("/api/v1/files", {
-        body: formData({ file, purpose: "lecture", offering: String(offering) }) as never,
-        ...asForm,
-      });
-      if (!data) throw error;
-      await add({ kind: "file", title: file.name, file: data.public_id });
-    });
-  const uploadVideo = (file: File) =>
-    run(async () => {
-      setProgress("تجهيز الرفع…");
-      const { data, error } = await api.POST("/api/v1/videos/upload-ticket", {
-        body: { offering, title: lecture.title_ar, size: file.size },
-      });
-      if (!data) throw error;
-      const ticket = data.ticket as {
-        mode: string;
-        endpoint?: string;
-        headers?: Record<string, string>;
-      };
-      if (ticket.mode === "tus") {
-        await tusUpload(
-          file,
-          { endpoint: ticket.endpoint!, headers: ticket.headers ?? {} },
-          {
-            title: lecture.title_ar,
-            onProgress: (f) => setProgress(`يُرفع مباشرة · ${Math.round(f * 100)}٪`),
-          },
+    track(
+      file.name,
+      async () => {
+        const data = await postWithProgress<{ public_id: string }>(
+          "/api/v1/files",
+          formData({ file, purpose: "lecture", offering: String(offering) }),
+          (p) => sending(file.name, p.total)(p.loaded),
         );
-      } else {
-        setProgress("يُرفع…");
-        const res = await api.POST("/api/v1/videos/{public_id}/upload", {
-          params: { path: { public_id: data.video.public_id } },
-          body: formData({ file }) as never,
-          ...asForm,
+        await add({ kind: "file", title: file.name, file: data.public_id });
+      },
+      "رُفع وأُضيف إلى المحاضرة",
+    );
+  const uploadVideo = (file: File) =>
+    track(
+      file.name,
+      async () => {
+        const { data, error } = await api.POST("/api/v1/videos/upload-ticket", {
+          body: { offering, title: lecture.title_ar, size: file.size },
         });
-        if (!res.data) throw res.error;
-      }
-      await add({ kind: "video", title: "تسجيل المحاضرة", video: data.video.public_id });
-    });
+        if (!data) throw error;
+        const ticket = data.ticket as {
+          mode: string;
+          endpoint?: string;
+          headers?: Record<string, string>;
+        };
+        if (ticket.mode === "tus") {
+          await tusUpload(
+            file,
+            { endpoint: ticket.endpoint!, headers: ticket.headers ?? {} },
+            {
+              title: lecture.title_ar,
+              onProgress: (f) => sending(file.name, file.size)(f * file.size),
+            },
+          );
+        } else {
+          await postWithProgress(
+            `/api/v1/videos/${data.video.public_id}/upload`,
+            formData({ file }),
+            (p) => sending(file.name, p.total)(p.loaded),
+          );
+        }
+        await add({ kind: "video", title: "تسجيل المحاضرة", video: data.video.public_id });
+      },
+      "رُفع التسجيل — يظهر للطلاب بعد اكتمال معالجته",
+    );
   const remove = (resourceId: number) =>
     run(async () => {
       const { error, response } = await api.DELETE(
@@ -323,13 +339,18 @@ function Resources({
           <p className="px-4 py-3 text-sm text-text-muted">لا موارد بعد.</p>
         )}
       </Card>
-      {progress && <Notice tone="info">{progress}</Notice>}
+      {upload && (
+        <UploadStatus
+          upload={upload}
+          onDismiss={upload.state !== "uploading" ? () => setUpload(null) : undefined}
+        />
+      )}
       {error ? <Notice>{problemMessage(error)}</Notice> : null}
       <div className="flex flex-wrap gap-2">
         <Button
           variant="secondary"
           className="min-h-9 px-3"
-          disabled={!!progress}
+          disabled={upload?.state === "uploading"}
           onClick={() => videoInput.current?.click()}
         >
           + فيديو
@@ -337,7 +358,7 @@ function Resources({
         <Button
           variant="secondary"
           className="min-h-9 px-3"
-          disabled={!!progress}
+          disabled={upload?.state === "uploading"}
           onClick={() => fileInput.current?.click()}
         >
           + ملف

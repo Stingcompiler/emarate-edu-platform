@@ -3,7 +3,7 @@ import { type ReactNode, useState } from "react";
 import { Link, NavLink } from "react-router";
 
 import { isStandalone } from "../lib/push";
-import { SITE_URL, siteUrl } from "../lib/site";
+import { SITE_URL, siteUrl, useSiteLogo } from "../lib/site";
 import { useHideOnScroll } from "../lib/useHideOnScroll";
 
 /** The college site's main sections: a visitor applying or tracking keeps the site's navigation. */
@@ -19,6 +19,7 @@ const SITE_LINKS: [string, string][] = [
 export function VisitorNav() {
   const hidden = useHideOnScroll();
   const [open, setOpen] = useState(false);
+  const logo = useSiteLogo();
   // The installed app is the portal only (owner, 2026-10-30): no site navigation inside it.
   if (isStandalone()) return null;
   const away = hidden && !open;
@@ -35,7 +36,7 @@ export function VisitorNav() {
           {...siteLink()}
           className="flex min-w-0 items-center gap-2 hover:opacity-80"
         >
-          <img src="/favicon.svg" alt="" width={32} height={32} />
+          <img src={logo} alt="" width={32} height={32} className="size-8 object-contain" />
           <span className="truncate text-sm font-bold text-text sm:hidden">كلية الإمارات</span>
           <span className="hidden truncate text-sm font-bold text-text sm:inline">
             كلية الإمارات للعلوم والتكنولوجيا

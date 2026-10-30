@@ -11,7 +11,8 @@ import {
   problemMessage,
 } from "../../components/ui";
 import { when, count, N } from "../../lib/format";
-import { asForm, formData } from "../../lib/upload";
+import { formData, postWithProgress } from "../../lib/upload";
+import { type Upload as UploadItem, UploadStatus } from "../../components/UploadStatus";
 import {
   maskEmail,
   readSession,
@@ -20,6 +21,7 @@ import {
   STATUS_TONE,
   type VisitorSession,
   visitorApi,
+  visitorAuth,
 } from "../../lib/visitor";
 import { QueuedReply } from "../../components/QueuedReply";
 import { VerifyEmail } from "./VerifyEmail";
@@ -114,17 +116,24 @@ export function Track() {
 function ApplicationCard({ app }: { app: App }) {
   const client = useQueryClient();
   const refresh = () => client.invalidateQueries({ queryKey: ["visitor", "me"] });
+  // The document's upload as it goes, then its result (owner, 2026-10-30).
+  const [sent, setSent] = useState<{ key: string; upload: UploadItem; file: File } | null>(null);
   const upload = useMutation({
     mutationFn: async ({ key, file }: { key: string; file: File }) => {
-      const { data, error } = await visitorApi.POST(
-        "/api/visitor/applications/{public_id}/documents",
-        {
-          params: { path: { public_id: app.public_id } },
-          body: formData({ doc_type: key, file }) as never,
-          ...asForm,
-        },
-      );
-      if (!data) throw error;
+      const show = (u: UploadItem) => setSent({ key, upload: u, file });
+      show({ state: "uploading", name: file.name, progress: null });
+      try {
+        await postWithProgress(
+          `/api/visitor/applications/${app.public_id}/documents`,
+          formData({ doc_type: key, file }),
+          (progress) => show({ state: "uploading", name: file.name, progress }),
+          visitorAuth(),
+        );
+        show({ state: "done", name: file.name, message: "رُفع المستند بنجاح" });
+      } catch (error) {
+        show({ state: "error", name: file.name, message: problemMessage(error) });
+        throw error;
+      }
     },
     onSuccess: refresh,
   });
@@ -214,6 +223,13 @@ function ApplicationCard({ app }: { app: App }) {
               />
             </label>
           ))}
+          {sent && (
+            <UploadStatus
+              upload={sent.upload}
+              onRetry={() => upload.mutate({ key: sent.key, file: sent.file })}
+              onDismiss={() => setSent(null)}
+            />
+          )}
           <Button
             className="w-full"
             onClick={() => resubmit.mutate()}
@@ -236,9 +252,9 @@ function ApplicationCard({ app }: { app: App }) {
           label="الرد على المسجل"
         />
       )}
-      {(upload.isError || resubmit.isError) && (
+      {resubmit.isError && (
         <div className="mt-2">
-          <Notice>{problemMessage(upload.error ?? resubmit.error)}</Notice>
+          <Notice>{problemMessage(resubmit.error)}</Notice>
         </div>
       )}
     </Card>

@@ -8,7 +8,7 @@ import { api } from "../lib/api";
  * platforms (Coursera, Udemy, YouTube): a dark 16:9 stage with a start screen (play, title,
  * source), a spinner while the signed link loads, a retry on failure; for the college's own
  * recordings a speed choice and «تابع من حيث توقفت» (the position is kept on this device).
- * A YouTube link among the resources plays here too (youtube-nocookie). No video at all: a
+ * A YouTube link among the resources plays inside the page, in an iframe (youtube-nocookie). No video at all: a
  * short line, not an empty frame.
  */
 
@@ -107,18 +107,15 @@ function StartScreen({
   );
 }
 
+/** A YouTube video plays right here, in YouTube's own player (privacy-enhanced domain). */
 function YouTube({ id, title }: { id: string; title: string }) {
-  const [on, setOn] = useState(false);
-  if (!on)
-    return (
-      <StartScreen title={title} label="فيديو المحاضرة على YouTube" onPlay={() => setOn(true)} />
-    );
   return (
     <Stage>
       <iframe
-        src={`https://www.youtube-nocookie.com/embed/${encodeURIComponent(id)}?autoplay=1&rel=0`}
+        src={`https://www.youtube-nocookie.com/embed/${encodeURIComponent(id)}?rel=0&modestbranding=1&playsinline=1`}
         title={title}
         className="absolute inset-0 size-full border-0"
+        loading="lazy"
         allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
         allowFullScreen
       />

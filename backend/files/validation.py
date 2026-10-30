@@ -9,6 +9,8 @@ import zipfile
 from dataclasses import dataclass
 from pathlib import PurePosixPath
 
+from django.utils.translation import gettext
+
 _OLE = (0, b"\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1")
 _ZIP = (0, b"PK\x03\x04")
 
@@ -69,18 +71,18 @@ def check(upload, *, allowed: frozenset[str] | set[str] | None, max_mb: int) -> 
     ext = extension_of(upload.name)
     allowed = frozenset(allowed or DEFAULT_EXTENSIONS) & DEFAULT_EXTENSIONS
     if ext not in allowed:
-        raise UploadError(f"File type .{ext or '?'} is not allowed here.")
+        raise UploadError(gettext("File type .%(ext)s is not allowed here.") % {"ext": ext or "?"})
     if upload.size > max_mb * 1024 * 1024:
-        raise UploadError(f"The file is larger than {max_mb} MB.")
+        raise UploadError(gettext("The file is larger than %(max_mb)s MB.") % {"max_mb": max_mb})
     kind = KINDS[ext]
     upload.seek(0)
     head = upload.read(4096)
     upload.seek(0)
     if kind.signatures:
         if not any(head[o : o + len(sig)] == sig for o, sig in kind.signatures):
-            raise UploadError("The file content does not match its extension.")
+            raise UploadError(gettext("The file content does not match its extension."))
     elif b"\x00" in head:
-        raise UploadError("Text files must not contain binary data.")
+        raise UploadError(gettext("Text files must not contain binary data."))
     if kind.is_zip:
         _check_zip(upload, max_mb)
     return kind
@@ -91,10 +93,10 @@ def _check_zip(upload, max_mb: int) -> None:
         with zipfile.ZipFile(upload) as archive:
             entries = archive.infolist()
     except zipfile.BadZipFile:
-        raise UploadError("The archive is damaged.") from None
+        raise UploadError(gettext("The archive is damaged.")) from None
     finally:
         upload.seek(0)
     if len(entries) > _MAX_ZIP_ENTRIES:
-        raise UploadError("The archive has too many files.")
+        raise UploadError(gettext("The archive has too many files."))
     if sum(e.file_size for e in entries) > max_mb * 1024 * 1024 * _MAX_ZIP_RATIO:
-        raise UploadError("The archive expands to an unsafe size.")
+        raise UploadError(gettext("The archive expands to an unsafe size."))

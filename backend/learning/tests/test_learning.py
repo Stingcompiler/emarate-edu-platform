@@ -104,9 +104,9 @@ def test_expired_link_is_refused(api, classroom, client, monkeypatch):
 @pytest.mark.parametrize(
     ("name", "content", "message"),
     [
-        ("notes.pdf", b"MZ\x90\x00 not a pdf", "does not match"),
-        ("virus.exe", b"MZ\x90\x00", "not allowed"),
-        ("notes.txt", b"hello\x00world", "binary"),
+        ("notes.pdf", b"MZ\x90\x00 not a pdf", "لا يطابق امتداده"),
+        ("virus.exe", b"MZ\x90\x00", "غير مسموح"),
+        ("notes.txt", b"hello\x00world", "غير نصية"),
     ],
 )
 def test_unsafe_uploads_are_rejected(api, classroom, name, content, message):

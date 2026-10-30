@@ -15,7 +15,8 @@ import {
 import { api, ok, okOrNone } from "../../lib/api";
 import { when, count, N, score } from "../../lib/format";
 import { dueLabel, fmtSize, openFile, useCourse, isCourseStaff } from "../../lib/learning";
-import { asForm, formData } from "../../lib/upload";
+import { formData, postWithProgress } from "../../lib/upload";
+import { type Upload as UploadItem, UploadStatus } from "../../components/UploadStatus";
 import { ALL } from "../../components/Pager";
 import { useToast } from "../../components/Toast";
 
@@ -237,16 +238,27 @@ function SubmitForm({ a, again, onDone }: { a: A; again: boolean; onDone: () => 
   const input = useRef<HTMLInputElement>(null);
   const types = a.submission_types ?? [];
   const toast = useToast();
+  // Each file's upload as it goes (owner, 2026-10-30): bytes, percentage, then its result.
+  const [uploads, setUploads] = useState<UploadItem[]>([]);
+  const mark = (i: number, u: UploadItem) =>
+    setUploads((list) => list.map((old, j) => (j === i ? u : old)));
   const submit = useMutation({
     mutationFn: async () => {
       const ids: string[] = [];
-      for (const file of files) {
-        const { data, error } = await api.POST("/api/v1/files", {
-          body: formData({ file, purpose: "submission", offering: String(a.offering) }) as never,
-          ...asForm,
-        });
-        if (!data) throw error;
-        ids.push(data.public_id);
+      setUploads(files.map((f) => ({ state: "uploading", name: f.name, progress: null })));
+      for (const [i, file] of files.entries()) {
+        try {
+          const data = await postWithProgress<{ public_id: string }>(
+            "/api/v1/files",
+            formData({ file, purpose: "submission", offering: String(a.offering) }),
+            (progress) => mark(i, { state: "uploading", name: file.name, progress }),
+          );
+          mark(i, { state: "done", name: file.name });
+          ids.push(data.public_id);
+        } catch (error) {
+          mark(i, { state: "error", name: file.name, message: problemMessage(error) });
+          throw error;
+        }
       }
       const { data, error } = await api.POST("/api/v1/assignments/{public_id}/submit", {
         params: { path: { public_id: a.public_id } },
@@ -263,6 +275,7 @@ function SubmitForm({ a, again, onDone }: { a: A; again: boolean; onDone: () => 
       setContent("");
       setFiles([]);
       setLinks({});
+      setUploads([]);
       onDone();
     },
   });
@@ -295,11 +308,19 @@ function SubmitForm({ a, again, onDone }: { a: A; again: boolean; onDone: () => 
             accept={a.allowed_extensions?.map((e) => `.${e}`).join(",") || undefined}
             onChange={(e) => setFiles(Array.from(e.target.files ?? []).slice(0, a.max_files ?? 3))}
           />
-          {files.map((f) => (
-            <p key={f.name} className="text-xs text-text">
-              {f.name} · {fmtSize(f.size)}
-            </p>
-          ))}
+          {uploads.length
+            ? uploads.map((u, i) => (
+                <UploadStatus
+                  key={`${u.name}-${i}`}
+                  upload={u}
+                  onRetry={u.state === "error" ? () => submit.mutate() : undefined}
+                />
+              ))
+            : files.map((f) => (
+                <p key={f.name} className="text-xs text-text">
+                  {f.name} · {fmtSize(f.size)}
+                </p>
+              ))}
         </>
       )}
       {(a.link_fields ?? []).map((f) => (
@@ -324,7 +345,10 @@ function SubmitForm({ a, again, onDone }: { a: A; again: boolean; onDone: () => 
           className="mt-1 block min-h-24 w-full rounded-lg border border-border bg-surface p-2 text-sm"
         />
       </label>
-      {submit.isError && <Notice>{problemMessage(submit.error)}</Notice>}
+      {/* A file's failure is said on its own line above; this is for the rest. */}
+      {submit.isError && !uploads.some((u) => u.state === "error") && (
+        <Notice>{problemMessage(submit.error)}</Notice>
+      )}
       <Button
         className="w-full"
         disabled={
@@ -333,7 +357,11 @@ function SubmitForm({ a, again, onDone }: { a: A; again: boolean; onDone: () => 
         }
         onClick={() => submit.mutate()}
       >
-        {submit.isPending ? "جارٍ الإرسال…" : "إرسال التسليم"}
+        {submit.isPending
+          ? uploads.some((u) => u.state === "uploading")
+            ? "جارٍ رفع الملفات…"
+            : "جارٍ الإرسال…"
+          : "إرسال التسليم"}
       </Button>
       <p className="text-center text-xs text-text-muted">يُحفظ كل إصدار.</p>
     </Card>

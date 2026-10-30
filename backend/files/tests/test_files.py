@@ -47,13 +47,13 @@ def test_zip_bombs_are_rejected():
     with zipfile.ZipFile(buffer, "w", zipfile.ZIP_DEFLATED) as archive:
         archive.writestr("big.txt", b"0" * (3 * 1024 * 1024))
     upload = SimpleUploadedFile("slides.zip", buffer.getvalue())
-    with pytest.raises(validation.UploadError, match="unsafe"):
+    with pytest.raises(validation.UploadError, match="غير آمن"):
         validation.check(upload, allowed=None, max_mb=0.1)
 
 
 def test_size_limit():
     upload = SimpleUploadedFile("a.pdf", b"%PDF-" + b"0" * 2048)
-    with pytest.raises(validation.UploadError, match="larger"):
+    with pytest.raises(validation.UploadError, match="أكبر من"):
         validation.check(upload, allowed=None, max_mb=0.001)
 
 
