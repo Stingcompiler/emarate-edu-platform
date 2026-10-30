@@ -18,6 +18,14 @@
   are panels. #190 `SideFigures` → quiet rows with the heading inside (4 pages).
 - e2e parts take 12/12/8 min (2026-10-30): rebalancing no longer worth it.
 - Later: lucide 1.64 once past pnpm's minimum release age (no exception).
+- #192 visitor pages: `VisitorLayout` (apply/track) form + side column (steps, help) on large
+  screens; `components/VisitorNav.tsx` (site sections, sign-in, apply, track) on apply, track and
+  every `AuthLayout` page; `useHideOnScroll` + the site header script hide the header while
+  scrolling down, back after 400 ms still or on scrolling up.
+- #193 three modes: light, warm (`data-theme="warm"`, dim grey-brown, only by choice), dark
+  softened (slate navy, ≈11:1). Switch cycles light → warm → dark (`lib/theme.ts` `Mode`,
+  `MODE_LABEL`); Settings has فاتح · دافئ · داكن · النظام (own line on phones — fit test).
+  a11y spec audits warm too. Comparison: `~/Desktop/before-after-1030/index.html`.
 - Comparison page `~/Desktop/redesign-before-after/index.html`: 13 screens, after = production.
 
 # Handoff — redesign from the owner's mockups (2026-10-29), all phases merged — 2026-10-30
