@@ -15,7 +15,8 @@ import {
 } from "../../components/ui";
 import { useConfirm } from "../../components/Confirm";
 import { SuccessMark } from "../../components/motion";
-import { asForm, formData } from "../../lib/upload";
+import { formData, postWithProgress } from "../../lib/upload";
+import { type Upload as UploadItem, UploadStatus } from "../../components/UploadStatus";
 import {
   type Field as FormField,
   fieldsOf,
@@ -24,6 +25,7 @@ import {
   readSession,
   type VisitorSession,
   visitorApi,
+  visitorAuth,
 } from "../../lib/visitor";
 import { VerifyEmail } from "./VerifyEmail";
 import { isNetworkError, useOnline } from "../../lib/online";
@@ -527,17 +529,24 @@ function DocumentsStep({
     .filter((f) => f.type === "file")
     .map((f) => ({ key: f.key, label: f.label, required: f.required }));
   const needed = [...app.required_documents, ...fileFields];
+  // The document's upload as it goes, then its result, on its own row (owner, 2026-10-30).
+  const [sent, setSent] = useState<{ key: string; upload: UploadItem; file: File } | null>(null);
   const upload = useMutation({
     mutationFn: async ({ key, file }: { key: string; file: File }) => {
-      const { data, error } = await visitorApi.POST(
-        "/api/visitor/applications/{public_id}/documents",
-        {
-          params: { path: { public_id: app.public_id } },
-          body: formData({ doc_type: key, file }) as never,
-          ...asForm,
-        },
-      );
-      if (!data) throw error;
+      const show = (u: UploadItem) => setSent({ key, upload: u, file });
+      show({ state: "uploading", name: file.name, progress: null });
+      try {
+        await postWithProgress(
+          `/api/visitor/applications/${app.public_id}/documents`,
+          formData({ doc_type: key, file }),
+          (progress) => show({ state: "uploading", name: file.name, progress }),
+          visitorAuth(),
+        );
+        show({ state: "done", name: file.name, message: "رُفع المستند بنجاح" });
+      } catch (error) {
+        show({ state: "error", name: file.name, message: problemMessage(error) });
+        throw error;
+      }
     },
     onSuccess: onChanged,
   });
@@ -553,7 +562,7 @@ function DocumentsStep({
         {needed.map((n) => {
           const doc = have.get(n.key);
           return (
-            <div key={n.key} className="flex items-center gap-3 px-4 py-3">
+            <div key={n.key} className="flex flex-wrap items-center gap-3 px-4 py-3">
               <span className="min-w-0 flex-1">
                 <span className="block text-sm font-semibold text-text">
                   {n.label}
@@ -582,6 +591,15 @@ function DocumentsStep({
                   }
                 />
               </label>
+              {sent?.key === n.key && (
+                <div className="basis-full">
+                  <UploadStatus
+                    upload={sent.upload}
+                    onRetry={() => upload.mutate({ key: sent.key, file: sent.file })}
+                    onDismiss={() => setSent(null)}
+                  />
+                </div>
+              )}
             </div>
           );
         })}
@@ -596,8 +614,6 @@ function DocumentsStep({
           رفع المستندات يحتاج اتصالًا بالإنترنت، وبياناتك محفوظة على جهازك حتى يعود.
         </p>
       )}
-      {upload.isPending && <Notice tone="info">جارٍ الرفع…</Notice>}
-      {upload.isError && <Notice>{problemMessage(upload.error)}</Notice>}
       <div className="flex gap-2">
         <Button variant="secondary" onClick={onBack}>
           رجوع

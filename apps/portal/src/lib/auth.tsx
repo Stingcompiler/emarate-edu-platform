@@ -1,3 +1,4 @@
+import { LOGO_ICON } from "./site";
 import type { Schemas } from "@ecst/api";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type { ReactNode } from "react";
@@ -85,7 +86,7 @@ function Unavailable({ onRetry }: { onRetry: () => void }) {
 export function Splash() {
   return (
     <div className="grid min-h-dvh place-items-center bg-bg-subtle" aria-busy="true">
-      <img src="/favicon.svg" alt="" width={56} height={56} />
+      <img src={LOGO_ICON} alt="" width={64} height={64} className="size-16 rounded-2xl" />
     </div>
   );
 }

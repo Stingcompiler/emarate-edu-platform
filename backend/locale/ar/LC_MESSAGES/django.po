@@ -922,3 +922,33 @@ msgid ""
 msgstr ""
 "لهذا الطالب حساب أو سجل أكاديمي فلا يُحذف. اطلب من شؤون الطلاب تغيير حالته "
 "بدلًا من ذلك."
+
+#: files/validation.py
+#, python-format
+msgid "File type .%(ext)s is not allowed here."
+msgstr "نوع الملف .%(ext)s غير مسموح هنا."
+
+#: files/validation.py
+#, python-format
+msgid "The file is larger than %(max_mb)s MB."
+msgstr "حجم الملف أكبر من %(max_mb)s ميغابايت."
+
+#: files/validation.py
+msgid "The file content does not match its extension."
+msgstr "محتوى الملف لا يطابق امتداده — تأكد أنه ملف صحيح بهذا النوع."
+
+#: files/validation.py
+msgid "Text files must not contain binary data."
+msgstr "الملف النصي يحتوي بيانات غير نصية."
+
+#: files/validation.py
+msgid "The archive is damaged."
+msgstr "الملف المضغوط تالف."
+
+#: files/validation.py
+msgid "The archive has too many files."
+msgstr "الملف المضغوط يحتوي ملفات كثيرة جدًا."
+
+#: files/validation.py
+msgid "The archive expands to an unsafe size."
+msgstr "الملف المضغوط يتمدد إلى حجم غير آمن."

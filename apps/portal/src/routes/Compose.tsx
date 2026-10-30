@@ -1,3 +1,4 @@
+import { LOGO_ICON } from "../lib/site";
 import type { Schemas } from "@ecst/api";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Send, Users } from "lucide-react";
@@ -255,13 +256,7 @@ function Preview({ title, body, urgent }: { title: string; body: string; urgent:
   return (
     <div className="rounded-2xl bg-navy-800 p-3">
       <div className="flex gap-3 rounded-xl bg-surface/95 p-3 shadow-sm">
-        <img
-          src="/favicon.svg"
-          alt=""
-          width={36}
-          height={36}
-          className="size-9 rounded-lg bg-white"
-        />
+        <img src={LOGO_ICON} alt="" width={36} height={36} className="size-9 rounded-lg bg-white" />
         <div className="min-w-0 flex-1">
           <p className="flex justify-between text-xs text-text-muted">
             <span>بوابة الكلية{urgent ? " · عاجل" : ""}</span>
