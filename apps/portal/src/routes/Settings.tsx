@@ -78,7 +78,8 @@ export function Settings() {
         side={
           <div>
             <SectionLabel>المظهر</SectionLabel>
-            <Card className="flex min-h-14 items-center justify-between gap-3 px-4 py-2">
+            {/* Four modes: on phones the switch takes its own line, so it fits with larger text. */}
+            <Card className="flex min-h-14 flex-col items-stretch gap-2 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:py-2">
               <span className="text-sm font-medium text-text">المظهر</span>
               <ThemeSwitch />
             </Card>
@@ -231,7 +232,15 @@ function ThemeSwitch() {
     { key: "dark", label: "داكن" },
     { key: "system", label: "النظام" },
   ];
-  return <Segmented label="المظهر" options={options} value={theme} onChange={set} />;
+  return (
+    <Segmented
+      label="المظهر"
+      options={options}
+      value={theme}
+      onChange={set}
+      className="w-full sm:w-auto"
+    />
+  );
 }
 
 const PUSH_TEXT: Record<PushState, string> = {
