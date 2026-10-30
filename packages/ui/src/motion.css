@@ -195,12 +195,12 @@
 
 /* The sticky header gains a shadow once the page scrolls under it (the page script sets
    data-scrolled), so it reads as floating above the content. */
-.motion-header-bar {
-  transition: box-shadow var(--dur-2) var(--ease-out);
-}
+
 /* Hidden while the page scrolls down (the page script sets data-away), back when it stops. */
 .motion-header {
-  transition: transform var(--dur-2) var(--ease-out);
+  transition:
+    transform var(--dur-2) var(--ease-out),
+    box-shadow var(--dur-2) var(--ease-out);
 }
 .motion-header[data-away] {
   transform: translateY(-110%);
@@ -210,7 +210,7 @@
     transition: none;
   }
 }
-.motion-header[data-scrolled] .motion-header-bar {
+.motion-header[data-scrolled] {
   box-shadow: 0 6px 20px -14px rgb(17 23 39 / 0.35);
 }
 

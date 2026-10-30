@@ -2,7 +2,7 @@ import { Check } from "lucide-react";
 import type { ReactNode } from "react";
 
 import { ConnectivityBar } from "../../components/ConnectivityBar";
-import { VisitorNav } from "../../components/VisitorNav";
+import { VisitorNav, siteLink } from "../../components/VisitorNav";
 import { ProgressRing } from "../../components/motion";
 import { SITE_URL } from "../../lib/site";
 
@@ -116,13 +116,14 @@ export function VisitorLayout({
               </p>
               <a
                 href={`${SITE_URL}/ar/contact/`}
+                {...siteLink()}
                 className="tap-44 mt-2 inline-flex items-center font-semibold text-primary hover:underline"
               >
                 تواصل مع القبول
               </a>
             </section>
             <p className="text-center text-sm text-text-muted lg:text-start">
-              <a href={SITE_URL} className="font-semibold hover:text-text">
+              <a href={SITE_URL} {...siteLink()} className="font-semibold hover:text-text">
                 العودة إلى موقع الكلية
               </a>
             </p>

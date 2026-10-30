@@ -13,7 +13,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import { Link } from "react-router";
 
 import { SITE_URL, useSiteLogo } from "../lib/site";
-import { VisitorNav } from "./VisitorNav";
+import { VisitorNav, siteLink } from "./VisitorNav";
 import { CountUp } from "./motion";
 
 /** Small shared primitives for portal pages; tokens only (docs/06). */
@@ -300,7 +300,7 @@ export function AuthLayout({
             <div className="mt-7">{children}</div>
           </div>
           <footer className="mx-auto mt-10 flex w-full max-w-[400px] flex-wrap items-center justify-between gap-2 text-xs text-text-muted">
-            <a href={SITE_URL} className="font-semibold hover:text-text">
+            <a href={SITE_URL} {...siteLink()} className="font-semibold hover:text-text">
               العودة إلى موقع الكلية
             </a>
             <span>كلية الإمارات للعلوم والتكنولوجيا</span>
