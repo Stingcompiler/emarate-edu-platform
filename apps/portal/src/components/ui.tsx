@@ -584,17 +584,22 @@ export function WithSide({ side, children }: { side: ReactNode; children: ReactN
 
 /** Figures for a side column: [label, value] rows in one card. */
 export function SideFigures({ title, rows }: { title?: string; rows: [string, ReactNode][] }) {
+  // Quiet rows under a heading inside the card, like the home screens' panels (mockups
+  // 2026-10-29; docs/ui-profile.md: rows, not metric tiles).
   return (
-    <Card className="p-4">
-      {title && <h2 className="mb-3 text-xs font-semibold text-text-muted">{title}</h2>}
-      {/* An odd last tile takes the row instead of leaving an empty half beside it. */}
-      <dl className="grid grid-cols-2 gap-3 [&>:last-child:nth-child(odd)]:col-span-2">
+    <Card className="divide-y divide-border-soft overflow-hidden">
+      {title && (
+        <h2 className="flex min-h-12 items-center px-4 pt-1 text-base font-bold text-text">
+          {title}
+        </h2>
+      )}
+      <dl className="divide-y divide-border-soft">
         {rows.map(([label, value]) => (
-          <div key={label} className="rounded-lg bg-surface-alt p-3">
-            <dd className="text-xl font-bold text-text">
+          <div key={label} className="flex items-center justify-between gap-3 px-4 py-2.5 text-sm">
+            <dt className="text-text-muted">{label}</dt>
+            <dd className="font-bold text-text">
               {typeof value === "number" ? <CountUp value={value} /> : value}
             </dd>
-            <dt className="text-xs text-text-muted">{label}</dt>
           </div>
         ))}
       </dl>
