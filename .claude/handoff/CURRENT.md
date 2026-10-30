@@ -14,6 +14,11 @@
 - Production verified 2026-10-30 after `2bbe31f`: app band and floating header on the site,
   portal health 200, both CSS bundles carry the light-only colour scheme.
 - Owner confirmed 2026-10-30: light mode works on Phoenix after #182.
+- #189 academic affairs opens with «يحتاج قرارك» at every size; affairs/results side cards
+  are panels. #190 `SideFigures` → quiet rows with the heading inside (4 pages).
+- e2e parts take 12/12/8 min (2026-10-30): rebalancing no longer worth it.
+- Later: lucide 1.64 once past pnpm's minimum release age (no exception).
+- Comparison page `~/Desktop/redesign-before-after/index.html`: 13 screens, after = production.
 
 # Handoff — redesign from the owner's mockups (2026-10-29), all phases merged — 2026-10-30
 
