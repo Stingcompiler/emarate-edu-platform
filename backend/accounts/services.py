@@ -600,6 +600,97 @@ def rename_account(
     return user
 
 
+PROFILE_FIELDS = [
+    "full_name_ar",
+    "full_name_en",
+    "email",
+    "phone_e164",
+    "academic_title_ar",
+    "academic_title_en",
+    "research_interests",
+    "photo",
+]
+
+
+def update_profile(meta: RequestMeta, user: User, **data) -> User:
+    """The system admin edits a user's profile (owner, 2026-10-30): name, email, phone, titles,
+    research interests, photo. Two things stay the person's own: whether they appear on the
+    site (their consent), and — for a student — the name, which belongs to the student record.
+    A changed email is unique, and the old address is told. Audited as one change."""
+    from django.core.exceptions import ValidationError as DjangoValidationError
+    from django.core.validators import validate_email
+
+    from files.models import Purpose, StoredFile
+    from inquiries.services import normalize_phone
+
+    if not rbac.can(meta.actor, "users.rename"):
+        raise PermissionDenied()
+    student = StudentRecord.objects.filter(user=user).exists()
+    if student and ({"full_name_ar", "full_name_en"} & set(data)):
+        raise Conflict(
+            gettext("A student's name is edited from the student record."), code="student_account"
+        )
+
+    def shown(u: User) -> dict:
+        snap = {f: getattr(u, f) for f in PROFILE_FIELDS if f != "photo"}
+        snap["photo"] = str(u.photo.public_id) if u.photo_id else None
+        return snap
+
+    old = shown(user)
+    if "email" in data:
+        email = (data["email"] or "").strip().lower()
+        try:
+            validate_email(email)
+        except DjangoValidationError:
+            raise ValidationError({"email": [gettext("Enter a valid email address.")]}) from None
+        if User.objects.filter(email=email).exclude(pk=user.pk).exists():
+            raise ValidationError(
+                {"email": [gettext("This email is already used by another account.")]}
+            )
+        user.email = email
+    if "phone_e164" in data:
+        raw = (data["phone_e164"] or "").strip()
+        user.phone_e164 = normalize_phone(raw) if raw else ""
+    for f in ("full_name_ar", "full_name_en", "academic_title_ar", "academic_title_en"):
+        if f in data:
+            user_value = " ".join((data[f] or "").split())
+            if f == "full_name_ar" and not user_value:
+                raise ValidationError({f: [gettext("The Arabic name cannot be empty.")]})
+            setattr(user, f, user_value)
+    if "research_interests" in data:
+        user.research_interests = (data["research_interests"] or "").strip()
+    if "photo" in data:
+        photo = data["photo"]
+        if photo is not None and not (
+            isinstance(photo, StoredFile)
+            and photo.purpose == Purpose.PHOTO
+            and photo.uploaded_by_id in (meta.actor.pk, user.pk)
+        ):
+            raise ValidationError({"photo": [gettext("Upload the photo first.")]})
+        user.photo = photo
+    new = shown(user)
+    if new == old:
+        return user
+    with transaction.atomic():
+        user.save()
+        changed = {k: v for k, v in new.items() if old.get(k) != v}
+        # A name-only change keeps the action it has always had in the log.
+        names_only = set(changed) <= {"full_name_ar", "full_name_en"}
+        record(
+            meta,
+            "account.rename" if names_only else "account.profile_update",
+            user,
+            old={k: old[k] for k in changed},
+            new=changed,
+        )
+    if new["email"] != old["email"]:
+        transaction.on_commit(lambda: emails.email_changed(old["email"], new["email"]))
+    from .staff_profile import site_changed
+
+    site_changed()
+    return user
+
+
 def set_active(meta: RequestMeta, user: User, active: bool) -> User:
     """Disable or re-enable a staff account (docs/03 §3.5, §7).
 

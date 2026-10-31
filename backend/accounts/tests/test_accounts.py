@@ -152,3 +152,65 @@ def test_the_users_and_applications_lists_sort_by_the_columns_the_tables_offer(
     for ordering in ("reference_no", "-full_name", "submitted_at", "status"):
         response = api(head).get(f"/api/v1/applications?ordering={ordering}")
         assert response.status_code == 200, ordering
+
+
+def test_the_admin_edits_a_users_profile(
+    api, users, make_user, make_student, it_program, django_capture_on_commit_callbacks
+):
+    """Owner, 2026-10-30: the system admin edits name, email, phone, titles, interests and photo
+    in one change; consent to appear on the site stays the person's; a student's name stays
+    with the record; the old address is told of a new email."""
+    import io
+
+    from django.core import mail
+    from django.core.files.uploadedfile import SimpleUploadedFile
+    from PIL import Image
+
+    from accounts.rbac import Role
+    from audit.models import AuditLog
+
+    admin = api(users[Role.SYSTEM_ADMIN])
+    staff = make_user(Role.TEACHER, email="old@ecst.edu.sd")
+    url = f"/api/v1/users/{staff.public_id}"
+    out = io.BytesIO()
+    Image.new("RGB", (600, 600), (10, 20, 30)).save(out, "PNG")
+    photo = admin.post(
+        "/api/v1/files",
+        {"purpose": "photo", "file": SimpleUploadedFile("p.png", out.getvalue(), "image/png")},
+        format="multipart",
+    ).data["public_id"]
+    mail.outbox.clear()
+    with django_capture_on_commit_callbacks(execute=True):
+        changed = admin.patch(
+            url,
+            {
+                "full_name_ar": "د. سلمى  الخضر",
+                "email": "New@ECST.edu.sd",
+                "phone_e164": "0912345678",
+                "academic_title_ar": "أستاذ مساعد",
+                "research_interests": "تعلم الآلة",
+                "photo": photo,
+                "public_profile": True,  # not the admin's to switch: ignored
+            },
+            format="json",
+        )
+    assert changed.status_code == 200, changed.data
+    staff.refresh_from_db()
+    assert staff.full_name_ar == "د. سلمى الخضر" and staff.email == "new@ecst.edu.sd"
+    assert staff.phone_e164 == "+249912345678" and staff.academic_title_ar == "أستاذ مساعد"
+    assert str(staff.photo.public_id) == str(photo) and staff.public_profile is False
+    assert [m.to for m in mail.outbox] == [["old@ecst.edu.sd"]]
+    log = AuditLog.objects.get(action="account.profile_update", target_id=str(staff.pk))
+    assert set(log.new) >= {"full_name_ar", "email", "phone_e164", "photo"}
+
+    # A taken email; another user's role cannot; a student's name stays with the record.
+    other = make_user(Role.HR, email="taken@ecst.edu.sd")
+    assert admin.patch(url, {"email": "taken@ecst.edu.sd"}, format="json").status_code == 400
+    assert api(other).patch(url, {"academic_title_ar": "x"}, format="json").status_code == 403
+    student_user = make_user(Role.STUDENT)
+    make_student(it_program, "PR-0001", user=student_user)
+    s_url = f"/api/v1/users/{student_user.public_id}"
+    assert admin.patch(s_url, {"full_name_ar": "اسم"}, format="json").status_code == 409
+    assert admin.patch(s_url, {"phone_e164": "0911111111"}, format="json").status_code == 200
+    # Removing the photo.
+    assert admin.patch(url, {"photo": None}, format="json").data["photo"] is None

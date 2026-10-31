@@ -56,7 +56,7 @@ from .serializers import (
     TemporaryPasswordSerializer,
     UserActiveSerializer,
     UserCreateSerializer,
-    UserNameSerializer,
+    UserProfileAdminSerializer,
     UserSerializer,
 )
 from .throttles import LoginThrottle, OTPIPThrottle, OTPTargetThrottle
@@ -595,7 +595,9 @@ class UserViewSet(
 
     def get_queryset(self):
         user = self.request.user
-        queryset = User.objects.prefetch_related("role_assignments__department")
+        queryset = User.objects.select_related("student_record", "photo").prefetch_related(
+            "role_assignments__department"
+        )
         # ?role=registrar: one role's accounts, filtered by the server (review 2026-09-29, P3).
         role = self.request.query_params.get("role")
         if role in Role.values:
@@ -629,13 +631,14 @@ class UserViewSet(
             return [IsAuthenticated()]
         return super().get_permissions()
 
-    @extend_schema(request=UserNameSerializer, responses=UserSerializer)
+    @extend_schema(request=UserProfileAdminSerializer, responses=UserSerializer)
     def partial_update(self, request, public_id=None):
-        """The system admin changes a staff member's name."""
+        """The system admin edits a user's profile (owner, 2026-10-30): name, email, phone,
+        titles, research interests, photo — not the person's consent to appear on the site."""
         target = get_object_or_404(User, public_id=public_id)
-        data = UserNameSerializer(data=request.data)
+        data = UserProfileAdminSerializer(data=request.data, partial=True)
         data.is_valid(raise_exception=True)
-        user = services.rename_account(
+        user = services.update_profile(
             RequestMeta.from_request(request), target, **data.validated_data
         )
         return Response(UserSerializer(user).data)
