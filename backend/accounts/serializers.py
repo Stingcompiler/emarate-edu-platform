@@ -169,8 +169,17 @@ class UserSerializer(serializers.ModelSerializer):
             "last_login",
             "roles",
             "photo",
+            "academic_title_ar",
+            "academic_title_en",
+            "research_interests",
+            "is_student",
         ]
         read_only_fields = fields
+
+    is_student = serializers.SerializerMethodField()
+
+    def get_is_student(self, user) -> bool:
+        return hasattr(user, "student_record") and user.student_record is not None
 
 
 class UserCreateSerializer(serializers.Serializer):
@@ -245,6 +254,24 @@ class RegistrationDecisionSerializer(serializers.Serializer):
 
 class UserActiveSerializer(serializers.Serializer):
     is_active = serializers.BooleanField()
+
+
+class UserProfileAdminSerializer(serializers.Serializer):
+    """What the system admin may change on a user's profile; every field optional."""
+
+    full_name_ar = serializers.CharField(max_length=200, required=False)
+    full_name_en = serializers.CharField(max_length=200, required=False, allow_blank=True)
+    email = serializers.EmailField(required=False)
+    phone_e164 = serializers.CharField(max_length=32, required=False, allow_blank=True)
+    academic_title_ar = serializers.CharField(max_length=100, required=False, allow_blank=True)
+    academic_title_en = serializers.CharField(max_length=100, required=False, allow_blank=True)
+    research_interests = serializers.CharField(max_length=300, required=False, allow_blank=True)
+    photo = serializers.SlugRelatedField(
+        slug_field="public_id",
+        queryset=StoredFile.objects.all(),
+        required=False,
+        allow_null=True,
+    )
 
 
 class UserNameSerializer(serializers.Serializer):

@@ -5,7 +5,7 @@ apps/portal/src/routes/Notifications.tsx 1
 apps/portal/src/routes/Settings.tsx 1
 apps/portal/src/routes/admin/Home.tsx 1
 apps/portal/src/routes/admin/Structure.tsx 3
-apps/portal/src/routes/admin/User.tsx 2
+apps/portal/src/routes/admin/User.tsx 1
 apps/portal/src/routes/admin/Users.tsx 1
 apps/portal/src/routes/admissions/ApplicationDetail.tsx 5
 apps/portal/src/routes/admissions/Applications.tsx 1
