@@ -42,6 +42,10 @@ class SiteSettings(SingletonModel):
     office_hours_ar = models.CharField(max_length=200, blank=True)
     office_hours_en = models.CharField(max_length=200, blank=True)
     map_url = models.URLField(max_length=500, blank=True)
+    # A short line under «الكوادر» on the home page and the staff page (owner, 2026-10-31);
+    # blank shows the built-in sentence.
+    staff_intro_ar = models.CharField(max_length=300, blank=True)
+    staff_intro_en = models.CharField(max_length=300, blank=True)
     hero_image = models.ForeignKey(
         "MediaAsset", on_delete=models.SET_NULL, null=True, blank=True, related_name="+"
     )

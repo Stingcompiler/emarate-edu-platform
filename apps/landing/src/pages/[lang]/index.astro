@@ -457,6 +457,9 @@ const jsonLd = {
           {t(lang, "all")} · {num(lang, members.length)}
         </a>
       </div>
+      <p class="mt-1 max-w-2xl text-sm text-text-muted">
+        {(lang === "en" ? s.staff_intro_en : s.staff_intro_ar) || t(lang, "staffLead")}
+      </p>
       <ul class="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {members.slice(0, 4).map((m, i) => (
           <li>

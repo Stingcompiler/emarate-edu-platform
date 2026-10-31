@@ -451,6 +451,8 @@ function SiteSettingsForm() {
     office_hours_ar: "",
     office_hours_en: "",
     map_url: "",
+    staff_intro_ar: "",
+    staff_intro_en: "",
     hero_image: "",
     share_image: "",
     logo: "",
@@ -473,6 +475,8 @@ function SiteSettingsForm() {
         office_hours_ar: s.office_hours_ar ?? "",
         office_hours_en: s.office_hours_en ?? "",
         map_url: s.map_url ?? "",
+        staff_intro_ar: s.staff_intro_ar ?? "",
+        staff_intro_en: s.staff_intro_en ?? "",
         hero_image: s.hero_image ?? "",
         share_image: s.share_image ?? "",
         logo: s.logo ?? "",
@@ -520,6 +524,25 @@ function SiteSettingsForm() {
               label="الشعار النصي"
               value={form.tagline}
               onChange={(e) => set({ tagline: e.target.value })}
+            />
+          </Card>
+        </div>
+        <div>
+          <SectionLabel>«الكوادر» — وصف قصير في الرئيسية وصفحة الكوادر</SectionLabel>
+          <Card>
+            <Field
+              label="الوصف"
+              value={form.staff_intro_ar}
+              maxLength={300}
+              placeholder="أعضاء هيئة التدريس الذين اختاروا الظهور، بمؤهلاتهم واهتماماتهم."
+              onChange={(e) => set({ staff_intro_ar: e.target.value })}
+            />
+            <Field
+              label="الوصف بالإنجليزية"
+              dir="ltr"
+              value={form.staff_intro_en}
+              maxLength={300}
+              onChange={(e) => set({ staff_intro_en: e.target.value })}
             />
           </Card>
         </div>

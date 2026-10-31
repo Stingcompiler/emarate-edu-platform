@@ -358,6 +358,7 @@ def test_trust_signals_in_site_settings(api, site):
             {"value": "", "label_ar": "فارغ"},  # dropped
         ],
         "office_hours_ar": "الأحد–الخميس 8:00–15:00",
+        "staff_intro_ar": "نخبة من الأساتذة والمحاضرين في كل الأقسام.",
         "hero_image": image.data["public_id"],
         "share_image": image.data["public_id"],
         "logo": image.data["public_id"],
@@ -367,6 +368,7 @@ def test_trust_signals_in_site_settings(api, site):
     assert saved.status_code == 200, saved.data
     public = api().get("/api/public/site").data
     assert public["founded_year"] == 2005
+    assert public["staff_intro_ar"] == "نخبة من الأساتذة والمحاضرين في كل الأقسام."
     assert public["figures"] == [{"value": "1,200+", "label_ar": "خريج", "label_en": "graduates"}]
     assert public["hero_image_url"].startswith("http") and public["hero_image_alt_ar"] == "الحرم"
     assert public["share_image_url"]

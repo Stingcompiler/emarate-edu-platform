@@ -95,6 +95,8 @@ export type Site = {
   office_hours_ar?: string;
   office_hours_en?: string;
   map_url?: string;
+  staff_intro_ar?: string;
+  staff_intro_en?: string;
   hero_image_url?: string | null;
   hero_image_alt_ar?: string;
   share_image_url?: string | null;

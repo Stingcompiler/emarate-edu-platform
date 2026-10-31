@@ -349,6 +349,8 @@ class SiteSettingsSerializer(serializers.ModelSerializer):
             "office_hours_ar",
             "office_hours_en",
             "map_url",
+            "staff_intro_ar",
+            "staff_intro_en",
             "hero_image",
             "hero_image_url",
             "hero_image_alt_ar",
