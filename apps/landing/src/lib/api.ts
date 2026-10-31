@@ -161,6 +161,8 @@ export type Department = {
   programs: Program[];
   /** Members who chose to appear, the head first (missing from an older API → none). */
   faculty?: {
+    /** The member's page, /staff/<id>/ (owner, 2026-10-30). */
+    id?: string;
     name_ar: string;
     name_en: string;
     title_ar: string;
@@ -250,6 +252,33 @@ export const site = () =>
 export const programs = () => get<Program[]>("programs", []);
 export const intakes = () => get<PublicIntake[]>("intakes", []);
 export const departments = () => get<Department[]>("departments", []);
+
+export type FacultyMember = NonNullable<Department["faculty"]>[number];
+/** A staff member as the site shows them: their departments gathered (one may teach in two). */
+export type StaffMember = FacultyMember & {
+  id: string;
+  departments: { code: string; name_ar: string; name_en: string }[];
+};
+const ROLE_ORDER = { manager: 0, teacher: 1, ta: 2 } as const;
+
+/** Every member who chose to appear, once each, heads first, then by name (owner, 2026-10-30). */
+export async function staff(): Promise<StaffMember[]> {
+  const byId = new Map<string, StaffMember>();
+  for (const d of await departments()) {
+    for (const m of d.faculty ?? []) {
+      if (!m.id) continue;
+      const where = { code: d.code, name_ar: d.name_ar, name_en: d.name_en };
+      const found = byId.get(m.id);
+      if (found) {
+        found.departments.push(where);
+        if (ROLE_ORDER[m.role] < ROLE_ORDER[found.role]) found.role = m.role;
+      } else byId.set(m.id, { ...m, id: m.id, departments: [where] });
+    }
+  }
+  return [...byId.values()].sort(
+    (a, b) => ROLE_ORDER[a.role] - ROLE_ORDER[b.role] || a.name_ar.localeCompare(b.name_ar, "ar"),
+  );
+}
 export const news = () => get<News[]>("news", []);
 export const events = () => get<Event[]>("events", []);
 /** Ended events, newest first: their pages stay online (docs/07 §1). */

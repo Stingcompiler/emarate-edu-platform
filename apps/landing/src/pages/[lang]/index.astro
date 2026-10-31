@@ -1,5 +1,6 @@
 ---
 import ProgramCard from "../../components/ProgramCard.astro";
+import StaffCard from "../../components/StaffCard.astro";
 import { HERO_WIDTHS } from "../../lib/images";
 import TrustStrip from "../../components/TrustStrip.astro";
 import Base from "../../layouts/Base.astro";
@@ -7,6 +8,7 @@ import {
   PORTAL,
   announcements,
   departments,
+  staff,
   events,
   news,
   page,
@@ -31,7 +33,7 @@ import {
 
 export const getStaticPaths = langPaths;
 const lang = Astro.params.lang as Lang;
-const [s, all, st, upcoming, latest, depts, notes, dean] = await Promise.all([
+const [s, all, st, upcoming, latest, depts, notes, dean, members] = await Promise.all([
   site(),
   programs(),
   stats(),
@@ -40,6 +42,7 @@ const [s, all, st, upcoming, latest, depts, notes, dean] = await Promise.all([
   departments(),
   announcements(),
   page("about/dean"), // shown here once the site manager publishes it
+  staff(),
 ]);
 const deanWords = (dean?.blocks ?? [])
   .filter((b) => b.type === "paragraph" && b.text)
@@ -442,6 +445,27 @@ const jsonLd = {
       ))}
     </div>
   </section>
+
+  {/* «الكوادر» (owner, 2026-10-30): members who chose to appear; a card opens their page. */}
+  {members.length > 0 && (
+    <section class="mx-auto max-w-6xl px-4 pt-10 lg:px-8" aria-labelledby="staff-home">
+      <div class="flex items-end justify-between">
+        <h2 id="staff-home" class="font-display text-2xl font-bold">
+          {t(lang, "staff")}
+        </h2>
+        <a href={href(lang, "staff/")} class="tap-44 text-sm font-semibold text-primary">
+          {t(lang, "all")} · {num(lang, members.length)}
+        </a>
+      </div>
+      <ul class="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        {members.slice(0, 4).map((m, i) => (
+          <li>
+            <StaffCard lang={lang} member={m} index={i} />
+          </li>
+        ))}
+      </ul>
+    </section>
+  )}
 
   <section class="mx-auto max-w-6xl px-4 pt-10 lg:px-8">
     <div class="flex items-end justify-between">

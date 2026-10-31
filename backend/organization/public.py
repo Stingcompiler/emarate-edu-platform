@@ -100,6 +100,8 @@ class FacultyQualificationSerializer(S.Serializer):
 
 
 class FacultyMemberSerializer(S.Serializer):
+    # The member's page on the site, /staff/<id>/ (owner, 2026-10-30).
+    id = S.CharField()
     name_ar = S.CharField()
     name_en = S.CharField()
     title_ar = S.CharField()
@@ -339,6 +341,7 @@ def _faculty(ids: list[int], request=None) -> dict[int, list[dict]]:
         degrees = staff_profile.ranked(q for q in user.qualifications.all() if not q.hidden)
         rows[department_id].append(
             {
+                "id": str(user.public_id),
                 "name_ar": user.full_name_ar,
                 "name_en": user.full_name_en,
                 "title_ar": user.academic_title_ar,
