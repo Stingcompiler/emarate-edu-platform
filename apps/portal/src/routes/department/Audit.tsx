@@ -233,7 +233,8 @@ function AuditDetail({ r }: { r: Entry }) {
           <div key={k} className="flex justify-between gap-3 py-1.5">
             <dt className="text-text-muted">{k}</dt>
             <dd className="min-w-0 truncate text-end font-semibold text-text">
-              <bdi>{v || "—"}</bdi>
+              {/* Block, so a long name with its email is cut inside the cell, not past the edge. */}
+              <bdi className="block truncate">{v || "—"}</bdi>
             </dd>
           </div>
         ))}

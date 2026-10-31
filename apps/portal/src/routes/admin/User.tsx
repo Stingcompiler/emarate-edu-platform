@@ -527,7 +527,7 @@ function ProfileCard({ user, onSaved }: { user: Schemas["User"]; onSaved: () => 
             <Button
               type="submit"
               className="min-h-11 w-full"
-              disabled={save.isPending}
+              disabled={save.isPending || nameMissing || !Object.keys(changes).length}
               why={
                 nameMissing
                   ? "الاسم بالعربية مطلوب"

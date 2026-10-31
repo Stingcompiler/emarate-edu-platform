@@ -72,14 +72,15 @@ test("an admin changes a staff member's name", async ({ page }) => {
   await page.goto(`/system/users/${target.public_id}`);
   const field = page.getByLabel("الاسم بالعربية");
   await expect(field).toHaveValue(target.full_name_ar);
-  await expect(page.getByRole("button", { name: "حفظ الاسم" })).toBeDisabled();
+  // Nothing changed yet: the save says why it is off (lint:ui «why»).
+  await expect(page.getByRole("button", { name: "حفظ الملف الشخصي" })).toBeDisabled();
   await field.fill("أ. اسم مُصحَّح");
-  await page.getByRole("button", { name: "حفظ الاسم" }).click();
-  await expect(page.getByText("حُفظ الاسم")).toBeVisible();
+  await page.getByRole("button", { name: "حفظ الملف الشخصي" }).click();
+  await expect(page.getByText("حُفظ الملف الشخصي")).toBeVisible();
   await expect(page.getByRole("heading", { level: 1 })).toContainText("اسم مُصحَّح");
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 
   await page.getByLabel("الاسم بالعربية").fill(target.full_name_ar); // leave the demo data as found
-  await page.getByRole("button", { name: "حفظ الاسم" }).click();
+  await page.getByRole("button", { name: "حفظ الملف الشخصي" }).click();
   await expect(page.getByRole("heading", { level: 1 })).toContainText(target.full_name_ar);
 });
