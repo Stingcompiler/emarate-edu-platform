@@ -395,21 +395,29 @@ function Qualifications() {
     year: "",
   };
   const [form, setForm] = useState(empty);
+  // The degree being edited (owner, 2026-10-31: «لا يمكن تعديل المؤهلات بعد إضافتها»); null adds.
+  const [editing, setEditing] = useState<number | null>(null);
   const refresh = () => client.invalidateQueries({ queryKey: ["me", "qualifications"] });
   const add = useMutation({
     mutationFn: async () => {
-      const { data, error } = await api.POST("/api/v1/me/qualifications", {
-        body: {
-          degree: form.degree,
-          field: form.field.trim(),
-          institution: form.institution.trim(),
-          year: form.year ? Number(form.year) : null,
-        } as never,
-      });
+      const body = {
+        degree: form.degree,
+        field: form.field.trim(),
+        institution: form.institution.trim(),
+        year: form.year ? Number(form.year) : null,
+      } as never;
+      const { data, error } =
+        editing === null
+          ? await api.POST("/api/v1/me/qualifications", { body })
+          : await api.PATCH("/api/v1/me/qualifications/{id}", {
+              params: { path: { id: editing } },
+              body,
+            });
       if (!data) throw error;
     },
     onSuccess: () => {
       setForm(empty);
+      setEditing(null);
       void refresh();
     },
   });
@@ -439,6 +447,22 @@ function Qualifications() {
                 {q.hidden ? " · أخفته الشؤون العلمية من الموقع" : ""}
               </span>
             </span>
+            <button
+              type="button"
+              onClick={() => {
+                setEditing(q.id);
+                setForm({
+                  degree: q.degree,
+                  field: q.field,
+                  institution: q.institution,
+                  year: q.year ? String(q.year) : "",
+                });
+              }}
+              aria-pressed={editing === q.id}
+              className="min-h-11 shrink-0 px-2 text-sm text-primary hover:underline aria-pressed:font-semibold"
+            >
+              تعديل
+            </button>
             <button
               type="button"
               onClick={() => remove.mutate(q.id)}
@@ -510,8 +534,20 @@ function Qualifications() {
             disabled={add.isPending}
             why={form.field.trim() && form.institution.trim() ? undefined : "أكمل التخصص والجامعة"}
           >
-            إضافة
+            {editing === null ? "إضافة" : "حفظ التعديل"}
           </Button>
+          {editing !== null && (
+            <button
+              type="button"
+              onClick={() => {
+                setEditing(null);
+                setForm(empty);
+              }}
+              className="min-h-11 px-2 text-sm text-text-muted hover:text-text sm:col-span-full sm:justify-self-end"
+            >
+              إلغاء التعديل
+            </button>
+          )}
         </form>
         {(add.isError || remove.isError) && (
           <div className="px-4 py-3">
