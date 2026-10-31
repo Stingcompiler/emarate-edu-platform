@@ -99,6 +99,11 @@ class FacultyQualificationSerializer(S.Serializer):
     year = S.IntegerField(allow_null=True)
 
 
+class FacultyLinkSerializer(S.Serializer):
+    label = S.CharField()
+    url = S.CharField()
+
+
 class FacultyMemberSerializer(S.Serializer):
     # The member's page on the site, /staff/<id>/ (owner, 2026-10-30).
     id = S.CharField()
@@ -112,6 +117,8 @@ class FacultyMemberSerializer(S.Serializer):
     photo = S.CharField(allow_null=True)
     research_interests = S.CharField()
     qualifications = FacultyQualificationSerializer(many=True)
+    # Accounts elsewhere the member switched on (owner, 2026-10-31).
+    links = FacultyLinkSerializer(many=True)
 
 
 class DepartmentNewsSerializer(S.Serializer):
@@ -359,6 +366,11 @@ def _faculty(ids: list[int], request=None) -> dict[int, list[dict]]:
                     }
                     for q in degrees
                 ],
+                "links": [
+                    {"label": link.label, "url": link.url}
+                    for link in user.staff_links.all()
+                    if link.public
+                ],
             }
         )
 
@@ -368,7 +380,7 @@ def _faculty(ids: list[int], request=None) -> dict[int, list[dict]]:
             role=Role.DEPARTMENT_MANAGER, department_id__in=ids, **visible
         )
         .select_related("user")
-        .prefetch_related("user__qualifications")
+        .prefetch_related("user__qualifications", "user__staff_links")
         .order_by("user__full_name_ar")
     ):
         add(ra.department_id, ra.user, "manager")
@@ -376,7 +388,7 @@ def _faculty(ids: list[int], request=None) -> dict[int, list[dict]]:
     members = (
         DepartmentMembership.objects.filter(department_id__in=ids, **visible)
         .select_related("user")
-        .prefetch_related("user__qualifications")
+        .prefetch_related("user__qualifications", "user__staff_links")
         .order_by("user__full_name_ar")
     )
     for m in sorted(members, key=lambda m: order.get(m.kind, 2)):

@@ -952,3 +952,9 @@ msgstr "الملف المضغوط يحتوي ملفات كثيرة جدًا."
 #: files/validation.py
 msgid "The archive expands to an unsafe size."
 msgstr "الملف المضغوط يتمدد إلى حجم غير آمن."
+
+msgid "Use a link that starts with https://"
+msgstr "استخدم رابطًا يبدأ بـ https://"
+
+msgid "At most ten links."
+msgstr "عشرة روابط على الأكثر."

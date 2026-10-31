@@ -367,6 +367,7 @@ function PublicProfileCard() {
         )}
       </Card>
       <Qualifications />
+      <Links />
     </>
   );
 }
@@ -552,6 +553,139 @@ function Qualifications() {
         {(add.isError || remove.isError) && (
           <div className="px-4 py-3">
             <Notice>{problemMessage(add.error ?? remove.error)}</Notice>
+          </div>
+        )}
+      </Card>
+    </>
+  );
+}
+
+/** The member's accounts elsewhere (owner, 2026-10-31): name + link; each appears on their
+ *  site page only when its switch is on. */
+function Links() {
+  const client = useQueryClient();
+  const list = useQuery({
+    queryKey: ["me", "links"],
+    queryFn: async () => ok(await api.GET("/api/v1/me/links")) ?? [],
+  });
+  const empty = { label: "", url: "" };
+  const [form, setForm] = useState(empty);
+  const refresh = () => client.invalidateQueries({ queryKey: ["me", "links"] });
+  const add = useMutation({
+    mutationFn: async () => {
+      const { data, error } = await api.POST("/api/v1/me/links", {
+        body: { label: form.label.trim(), url: form.url.trim(), public: true } as never,
+      });
+      if (!data) throw error;
+    },
+    onSuccess: () => {
+      setForm(empty);
+      void refresh();
+    },
+  });
+  const toggle = useMutation({
+    mutationFn: async ({ id, shown }: { id: number; shown: boolean }) => {
+      const { data, error } = await api.PATCH("/api/v1/me/links/{id}", {
+        params: { path: { id } },
+        body: { public: shown } as never,
+      });
+      if (!data) throw error;
+    },
+    onSuccess: () => void refresh(),
+  });
+  const remove = useMutation({
+    mutationFn: async (id: number) => {
+      const { error, response } = await api.DELETE("/api/v1/me/links/{id}", {
+        params: { path: { id } },
+      });
+      if (!response.ok) throw error;
+    },
+    onSuccess: () => void refresh(),
+  });
+  const rows = list.data ?? [];
+  const failed = add.error ?? toggle.error ?? remove.error;
+  return (
+    <>
+      <SectionLabel>حساباتي على الشبكات</SectionLabel>
+      <Card className="divide-y divide-border-soft">
+        {rows.map((link) => (
+          <div key={link.id} className="flex items-center gap-3 px-4 py-3 text-sm">
+            <span className="min-w-0 flex-1">
+              <b className="block text-text">{link.label}</b>
+              <a
+                href={link.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                dir="ltr"
+                className="block truncate text-xs text-primary hover:underline"
+              >
+                {link.url}
+              </a>
+              <span className="text-xs text-text-muted">
+                {link.public ? "يظهر في صفحتك على الموقع" : "لا يظهر في الموقع"}
+              </span>
+            </span>
+            <Switch
+              checked={!!link.public}
+              label={`إظهار ${link.label} في الموقع`}
+              disabled={toggle.isPending}
+              onChange={(shown) => toggle.mutate({ id: link.id, shown })}
+            />
+            <button
+              type="button"
+              onClick={() => remove.mutate(link.id)}
+              className="min-h-11 shrink-0 px-2 text-sm text-text-muted hover:text-danger-strong"
+            >
+              حذف
+            </button>
+          </div>
+        ))}
+        {!rows.length && (
+          <p className="px-4 py-3 text-sm text-text-muted">
+            أضف حساباتك (LinkedIn، Google Scholar، ResearchGate…) واختر ما يظهر منها في صفحتك على
+            الموقع.
+          </p>
+        )}
+        <form
+          className="grid gap-2 px-4 py-3 sm:grid-cols-[12rem_1fr_auto] sm:items-end"
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (form.label.trim() && form.url.trim()) add.mutate();
+          }}
+        >
+          <label className="text-xs text-text-muted">
+            الاسم
+            <input
+              value={form.label}
+              maxLength={60}
+              placeholder="LinkedIn"
+              onChange={(e) => setForm({ ...form, label: e.target.value })}
+              className="mt-1 block min-h-11 w-full rounded-lg border border-border bg-surface px-3 text-sm text-text"
+            />
+          </label>
+          <label className="text-xs text-text-muted">
+            الرابط
+            <input
+              value={form.url}
+              maxLength={300}
+              dir="ltr"
+              inputMode="url"
+              placeholder="https://"
+              onChange={(e) => setForm({ ...form, url: e.target.value })}
+              className="mt-1 block min-h-11 w-full rounded-lg border border-border bg-surface px-3 text-sm text-text"
+            />
+          </label>
+          <Button
+            type="submit"
+            disabled={add.isPending}
+            why={form.label.trim() && form.url.trim() ? undefined : "أكمل الاسم والرابط"}
+          >
+            إضافة
+          </Button>
+        </form>
+        {failed && (
+          <div className="px-4 py-3">
+            <Notice>{problemMessage(failed)}</Notice>
           </div>
         )}
       </Card>

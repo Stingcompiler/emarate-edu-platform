@@ -6,7 +6,7 @@ from files.models import StoredFile
 from organization.models import Department
 
 from . import rbac
-from .models import Qualification, RegistrationRequest, RoleAssignment, User
+from .models import Qualification, RegistrationRequest, RoleAssignment, StaffLink, User
 from .rbac import Role
 
 
@@ -319,6 +319,19 @@ class QualificationSerializer(serializers.ModelSerializer):
         model = Qualification
         fields = ["id", "degree", "field", "institution", "year", "hidden"]
         read_only_fields = ["id", "hidden"]
+
+
+class StaffLinkSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = StaffLink
+        fields = ["id", "label", "url", "public"]
+        read_only_fields = ["id"]
+
+    def validate_url(self, value: str) -> str:
+        # Only web addresses: no javascript:, mailto: or plain http on the public page.
+        if not value.lower().startswith("https://"):
+            raise serializers.ValidationError(gettext("Use a link that starts with https://"))
+        return value
 
 
 class StaffProfileSerializer(serializers.ModelSerializer):

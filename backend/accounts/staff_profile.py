@@ -6,12 +6,12 @@ from __future__ import annotations
 
 from django.db import transaction
 from django.utils.translation import gettext
-from rest_framework.exceptions import NotFound, PermissionDenied
+from rest_framework.exceptions import NotFound, PermissionDenied, ValidationError
 
 from audit.services import RequestMeta, record
 
 from . import rbac
-from .models import Qualification, User
+from .models import Qualification, StaffLink, User
 from .rbac import Role
 
 # Who appears on a department's public page (same as MyPublicProfileView).
@@ -70,6 +70,54 @@ def remove(meta: RequestMeta, user: User, pk: int) -> None:
         q = _own(user, pk)
         record(meta, "profile.qualification_remove", q, old=_snapshot(q))
         q.delete()
+        site_changed()
+
+
+LINK_FIELDS = ["label", "url", "public"]
+
+
+def _link_snapshot(link: StaffLink) -> dict:
+    return {f: getattr(link, f) for f in LINK_FIELDS}
+
+
+def add_link(meta: RequestMeta, user: User, **data) -> StaffLink:
+    """An account elsewhere; on the site only once the member switches it on (2026-10-31)."""
+    _member(user)
+    with transaction.atomic():
+        if StaffLink.objects.filter(user=user).count() >= StaffLink.MAX:
+            raise ValidationError(gettext("At most ten links."))
+        link = StaffLink.objects.create(user=user, **{f: data[f] for f in LINK_FIELDS if f in data})
+        record(meta, "profile.link_add", link, new=_link_snapshot(link))
+        site_changed()
+    return link
+
+
+def _own_link(user: User, pk: int) -> StaffLink:
+    link = StaffLink.objects.select_for_update().filter(pk=pk, user=user).first()
+    if link is None:
+        raise NotFound()
+    return link
+
+
+def change_link(meta: RequestMeta, user: User, pk: int, **data) -> StaffLink:
+    _member(user)
+    with transaction.atomic():
+        link = _own_link(user, pk)
+        old = _link_snapshot(link)
+        for f in LINK_FIELDS:
+            if f in data:
+                setattr(link, f, data[f])
+        link.save()
+        record(meta, "profile.link_change", link, old=old, new=_link_snapshot(link))
+        site_changed()
+    return link
+
+
+def remove_link(meta: RequestMeta, user: User, pk: int) -> None:
+    with transaction.atomic():
+        link = _own_link(user, pk)
+        record(meta, "profile.link_remove", link, old=_link_snapshot(link))
+        link.delete()
         site_changed()
 
 

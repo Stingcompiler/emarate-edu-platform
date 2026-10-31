@@ -87,6 +87,8 @@ urlpatterns = [
         accounts.MyQualificationView.as_view(),
         name="me-qualification",
     ),
+    path("me/links", accounts.MyLinksView.as_view(), name="me-links"),
+    path("me/links/<int:pk>", accounts.MyLinkView.as_view(), name="me-link"),
     path("staff-profiles", accounts.StaffProfilesView.as_view(), name="staff-profiles"),
     path(
         "staff-profiles/<uuid:public_id>/photo",
