@@ -85,7 +85,11 @@ export function AppShell({
         }`}
       >
         <span className="text-[17px] font-semibold text-text">{title}</span>
-        <ThemeToggle className="absolute bottom-0.5 end-2 text-text-muted hover:bg-surface-alt" />
+        {/* Pinned to the edge; the toggle's own wrapper would otherwise sit on the title
+            (owner, 2026-10-31: the mode icon covered «الإعدادات»). */}
+        <div className="absolute bottom-0.5 end-2">
+          <ThemeToggle className="text-text-muted hover:bg-surface-alt" />
+        </div>
       </div>
       <header className="px-4 pb-2 pt-[max(1rem,env(safe-area-inset-top))] lg:hidden">
         <div className="flex min-h-10 items-center justify-between gap-3">
