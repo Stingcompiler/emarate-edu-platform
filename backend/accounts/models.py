@@ -225,3 +225,20 @@ class Qualification(TimestampedModel):
 
     class Meta:
         ordering = ["user", "-year", "id"]
+
+
+class StaffLink(TimestampedModel):
+    """A staff member's account elsewhere (LinkedIn, Google Scholar, …), entered by them; it
+    appears on their site page only when they switch it on (owner, 2026-10-31)."""
+
+    MAX = 10
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="staff_links"
+    )
+    label = models.CharField(max_length=60)
+    url = models.URLField(max_length=300)
+    public = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ["user", "id"]

@@ -110,3 +110,51 @@ def test_staff_degrees_and_photo_on_the_site_with_consent(api, it_dept, make_use
     assert api().get(public_photo).status_code == 404
     assert AuditLog.objects.filter(action="profile.photo_moderate").exists()
     assert teacher.delete(f"{mine}/{phd.data['id']}").status_code == 204
+
+
+def test_staff_links_show_on_the_site_only_when_switched_on(api, it_dept, make_user):
+    """Owner, 2026-10-31: a member adds accounts elsewhere and chooses which appear."""
+    teacher_user = make_user(Role.TEACHER, full_name_ar="د. سلمى")
+    DepartmentMembership.objects.create(department=it_dept, user=teacher_user, kind="teacher")
+    teacher = api(teacher_user)
+    teacher.patch("/api/v1/me/public-profile", {"public_profile": True}, format="json")
+    mine = "/api/v1/me/links"
+    linkedin = teacher.post(
+        mine, {"label": "LinkedIn", "url": "https://linkedin.com/in/salma"}, format="json"
+    )
+    assert linkedin.status_code == 201 and linkedin.data["public"] is False
+    scholar = teacher.post(
+        mine,
+        {"label": "Google Scholar", "url": "https://scholar.google.com/x", "public": True},
+        format="json",
+    )
+    for bad in ("javascript:alert(1)", "http://example.com", "mailto:a@b.c"):
+        assert teacher.post(mine, {"label": "x", "url": bad}, format="json").status_code == 400
+    assert [link["label"] for link in teacher.get(mine).data] == ["LinkedIn", "Google Scholar"]
+
+    url = f"/api/public/departments/{it_dept.code}"
+    cache.clear()
+    [member] = api().get(url).data["faculty"]
+    assert member["links"] == [{"label": "Google Scholar", "url": "https://scholar.google.com/x"}]
+
+    teacher.patch(f"{mine}/{linkedin.data['id']}", {"public": True}, format="json")
+    teacher.patch(f"{mine}/{scholar.data['id']}", {"public": False}, format="json")
+    cache.clear()
+    [member] = api().get(url).data["faculty"]
+    assert [link["label"] for link in member["links"]] == ["LinkedIn"]
+    assert AuditLog.objects.filter(action="profile.link_change").count() == 2
+
+    # Only the owner; students do not appear on the site.
+    assert api(make_user(Role.TEACHER)).delete(f"{mine}/{linkedin.data['id']}").status_code == 404
+    student = api(make_user(Role.STUDENT))
+    assert (
+        student.post(mine, {"label": "x", "url": "https://x.test"}, format="json").status_code
+        == 403
+    )
+    assert teacher.delete(f"{mine}/{linkedin.data['id']}").status_code == 204
+    for i in range(9):
+        teacher.post(mine, {"label": f"L{i}", "url": f"https://x.test/{i}"}, format="json")
+    assert (
+        teacher.post(mine, {"label": "z", "url": "https://z.test"}, format="json").status_code
+        == 400
+    )

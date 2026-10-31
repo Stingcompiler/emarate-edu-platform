@@ -20,6 +20,8 @@ const title = pick(lang, m.title_ar, m.title_en);
 const role = ROLE_LABEL[m.role]?.[lang] ?? "";
 const degrees = m.qualifications ?? [];
 const lead = [title, role].filter(Boolean).join(" · ");
+// Only https links reach the API; the check here keeps an odd value off the page all the same.
+const links = (m.links ?? []).filter((l) => l.url.startsWith("https://"));
 ---
 
 <Base lang={lang} title={name} path={`staff/${m.id}/`} description={lead || t(lang, "staff")}>
@@ -67,6 +69,26 @@ const lead = [title, role].filter(Boolean).join(" · ");
           ))}
         </ul>
       </div>
+      {links.length > 0 && (
+        <div class="rounded-2xl border border-border-soft bg-surface p-4 text-sm">
+          <p class="text-xs text-text-muted">{t(lang, "staffLinks")}</p>
+          <ul class="mt-1">
+            {links.map((l) => (
+              <li>
+                <a
+                  href={l.url}
+                  target="_blank"
+                  rel="noopener noreferrer me"
+                  class="tap-44 inline-flex items-center gap-1 font-semibold text-primary hover:underline"
+                >
+                  {l.label}
+                  <span aria-hidden="true">↗</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </aside>
     <div class="space-y-8">
       <section aria-labelledby="degrees">

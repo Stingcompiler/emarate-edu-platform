@@ -52,6 +52,7 @@ from .serializers import (
     RegistrationVerifySerializer,
     RoleAssignmentDetailSerializer,
     RoleGrantSerializer,
+    StaffLinkSerializer,
     StaffProfileSerializer,
     TemporaryPasswordSerializer,
     UserActiveSerializer,
@@ -386,6 +387,43 @@ class MyQualificationView(APIView):
     @extend_schema(responses={204: None}, tags=["me"])
     def delete(self, request, pk):
         staff_profile.remove(RequestMeta.from_request(request), request.user, pk)
+        return Response(status=204)
+
+
+class MyLinksView(APIView):
+    """The member's accounts elsewhere; each shows on the site only when switched on."""
+
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(responses=StaffLinkSerializer(many=True), tags=["me"])
+    def get(self, request):
+        return Response(StaffLinkSerializer(request.user.staff_links.all(), many=True).data)
+
+    @extend_schema(request=StaffLinkSerializer, responses=StaffLinkSerializer, tags=["me"])
+    def post(self, request):
+        data = StaffLinkSerializer(data=request.data)
+        data.is_valid(raise_exception=True)
+        link = staff_profile.add_link(
+            RequestMeta.from_request(request), request.user, **data.validated_data
+        )
+        return Response(StaffLinkSerializer(link).data, status=201)
+
+
+class MyLinkView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(request=StaffLinkSerializer, responses=StaffLinkSerializer, tags=["me"])
+    def patch(self, request, pk):
+        data = StaffLinkSerializer(data=request.data, partial=True)
+        data.is_valid(raise_exception=True)
+        link = staff_profile.change_link(
+            RequestMeta.from_request(request), request.user, pk, **data.validated_data
+        )
+        return Response(StaffLinkSerializer(link).data)
+
+    @extend_schema(responses={204: None}, tags=["me"])
+    def delete(self, request, pk):
+        staff_profile.remove_link(RequestMeta.from_request(request), request.user, pk)
         return Response(status=204)
 
 

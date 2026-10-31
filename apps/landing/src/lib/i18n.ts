@@ -44,6 +44,7 @@ const T = {
     en: "Faculty members who chose to appear, with their degrees and interests.",
   },
   qualifications: { ar: "المؤهلات العلمية", en: "Qualifications" },
+  staffLinks: { ar: "على الشبكات", en: "Online" },
   researchInterests: { ar: "الاهتمامات البحثية", en: "Research interests" },
   lightModeShort: { ar: "فاتح", en: "Light" },
   warmModeShort: { ar: "دافئ", en: "Warm" },

@@ -180,6 +180,8 @@ export type Department = {
       institution: string;
       year: number | null;
     }[];
+    /** Accounts elsewhere the member chose to show (owner, 2026-10-31). */
+    links?: { label: string; url: string }[];
   }[];
   /** The department's own public news, newest first. */
   news?: { public_id: string; title: string; body: string; publish_at: string | null }[];

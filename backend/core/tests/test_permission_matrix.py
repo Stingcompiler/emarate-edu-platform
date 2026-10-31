@@ -409,6 +409,8 @@ COVERED_ELSEWHERE = {
     # «الكوادر» (owner, 2026-10-30): a member's own degrees; academic affairs' review.
     "me-qualifications": _STAFF + "test_staff_degrees_and_photo_on_the_site_with_consent",
     "me-qualification": _STAFF + "test_staff_degrees_and_photo_on_the_site_with_consent",
+    "me-links": _STAFF + "test_staff_links_show_on_the_site_only_when_switched_on",
+    "me-link": _STAFF + "test_staff_links_show_on_the_site_only_when_switched_on",
     "staff-profiles": _STAFF + "test_staff_degrees_and_photo_on_the_site_with_consent",
     "staff-photo-visibility": _STAFF + "test_staff_degrees_and_photo_on_the_site_with_consent",
     "qualification-visibility": _STAFF + "test_staff_degrees_and_photo_on_the_site_with_consent",
