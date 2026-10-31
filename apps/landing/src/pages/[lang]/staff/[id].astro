@@ -1,0 +1,112 @@
+---
+import PageHead from "../../../components/PageHead.astro";
+import Base from "../../../layouts/Base.astro";
+import { type StaffMember, staff } from "../../../lib/api";
+import { LANGS, type Lang, href, num, pick, t } from "../../../lib/i18n";
+import { DEGREE_EN, ROLE_LABEL, initialOf } from "../../../lib/staff";
+
+// A staff member's page (owner, 2026-10-30): photo, title, departments, degrees, interests.
+// Only members who chose to appear have one; nothing private (no email, no phone).
+export async function getStaticPaths() {
+  const members = await staff();
+  return LANGS.flatMap((lang) =>
+    members.map((m) => ({ params: { lang, id: m.id }, props: { member: m } })),
+  );
+}
+const lang = Astro.params.lang as Lang;
+const { member: m } = Astro.props as { member: StaffMember };
+const name = pick(lang, m.name_ar, m.name_en);
+const title = pick(lang, m.title_ar, m.title_en);
+const role = ROLE_LABEL[m.role]?.[lang] ?? "";
+const degrees = m.qualifications ?? [];
+const lead = [title, role].filter(Boolean).join(" · ");
+---
+
+<Base lang={lang} title={name} path={`staff/${m.id}/`} description={lead || t(lang, "staff")}>
+  <PageHead
+    lang={lang}
+    title={name}
+    lead={lead}
+    crumbs={[
+      [t(lang, "staff"), "staff/"],
+      [name, `staff/${m.id}/`],
+    ]}
+  />
+  <div class="mx-auto grid max-w-6xl gap-8 px-4 py-10 lg:grid-cols-[280px_minmax(0,1fr)] lg:px-8">
+    <aside class="space-y-4">
+      {m.photo ? (
+        <img
+          src={m.photo}
+          alt={name}
+          width="280"
+          height="280"
+          decoding="async"
+          class="aspect-square w-40 max-w-[280px] rounded-3xl bg-surface-alt object-cover lg:w-full"
+        />
+      ) : (
+        // ui-allow: initials avatar
+        <span
+          aria-hidden="true"
+          class="grid aspect-square w-40 max-w-[280px] place-items-center rounded-3xl bg-primary-soft text-5xl font-bold text-primary-700 lg:w-full lg:text-6xl"
+        >
+          {initialOf(name)}
+        </span>
+      )}
+      <div class="rounded-2xl border border-border-soft bg-surface p-4 text-sm">
+        <p class="text-xs text-text-muted">{t(lang, "departments")}</p>
+        <ul class="mt-1 space-y-1">
+          {m.departments.map((d) => (
+            <li>
+              <a
+                href={href(lang, `departments/${d.code}/`)}
+                class="font-semibold text-primary hover:underline"
+              >
+                {pick(lang, d.name_ar, d.name_en)}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </aside>
+    <div class="space-y-8">
+      <section aria-labelledby="degrees">
+        <h2 id="degrees" class="font-display text-2xl font-bold">
+          {t(lang, "qualifications")}
+        </h2>
+        {degrees.length ? (
+          <ol class="mt-4 space-y-3">
+            {degrees.map((q) => (
+              <li class="rounded-2xl border border-border-soft bg-surface p-4">
+                <b class="block text-text">
+                  {lang === "ar" ? q.degree_ar : (DEGREE_EN[q.degree] ?? q.degree_ar)}{" "}
+                  {lang === "ar" ? "في" : "in"} {q.field}
+                </b>
+                <span class="mt-0.5 block text-sm text-text-muted">
+                  {q.institution}
+                  {q.year ? ` · ${num(lang, q.year)}` : ""}
+                </span>
+              </li>
+            ))}
+          </ol>
+        ) : (
+          <p class="mt-3 text-text-muted">
+            {lang === "ar" ? "لم تُضف المؤهلات بعد." : "No qualifications listed yet."}
+          </p>
+        )}
+      </section>
+      {m.research_interests && (
+        <section aria-labelledby="interests">
+          <h2 id="interests" class="font-display text-2xl font-bold">
+            {t(lang, "researchInterests")}
+          </h2>
+          <p class="mt-3 leading-7 text-text">{m.research_interests}</p>
+        </section>
+      )}
+      <p>
+        <a href={href(lang, "staff/")} class="tap-44 text-sm font-semibold text-primary">
+          {lang === "ar" ? "كل الكوادر" : "All faculty"}
+        </a>
+      </p>
+    </div>
+  </div>
+</Base>

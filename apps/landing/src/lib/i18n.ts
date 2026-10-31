@@ -38,6 +38,13 @@ const T = {
   darkMode: { ar: "الوضع الداكن", en: "Dark mode" },
   lightMode: { ar: "الوضع الفاتح", en: "Light mode" },
   warmMode: { ar: "الوضع الدافئ", en: "Warm mode" },
+  staff: { ar: "الكوادر", en: "Faculty" },
+  staffLead: {
+    ar: "أعضاء هيئة التدريس الذين اختاروا الظهور، بمؤهلاتهم واهتماماتهم.",
+    en: "Faculty members who chose to appear, with their degrees and interests.",
+  },
+  qualifications: { ar: "المؤهلات العلمية", en: "Qualifications" },
+  researchInterests: { ar: "الاهتمامات البحثية", en: "Research interests" },
   lightModeShort: { ar: "فاتح", en: "Light" },
   warmModeShort: { ar: "دافئ", en: "Warm" },
   darkModeShort: { ar: "داكن", en: "Dark" },

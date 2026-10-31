@@ -1,14 +1,15 @@
 import type { APIRoute } from "astro";
 
-import { departments, news, pages, programs } from "../lib/api";
+import { departments, news, pages, programs, staff } from "../lib/api";
 import { LANGS } from "../lib/i18n";
 
 export const GET: APIRoute = async ({ site }) => {
-  const [depts, progs, items, cms] = await Promise.all([
+  const [depts, progs, items, cms, members] = await Promise.all([
     departments(),
     programs(),
     news(),
     pages(),
+    staff(),
   ]);
   const paths = [
     "",
@@ -23,6 +24,7 @@ export const GET: APIRoute = async ({ site }) => {
     "news/",
     "contact/",
     ...depts.map((d) => `departments/${d.code}/`),
+    ...(members.length ? ["staff/", ...members.map((m) => `staff/${m.id}/`)] : []),
     ...progs.map((p) => `programs/${p.code}/`),
     ...items.map((n) => `news/${encodeURIComponent(n.slug)}/`),
     ...cms

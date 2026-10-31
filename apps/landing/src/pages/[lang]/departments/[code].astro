@@ -151,7 +151,16 @@ const others = all
                     </span>
                   )}
                   <span class="min-w-0">
-                    <b class="block text-text">{pick(lang, m.name_ar, m.name_en)}</b>
+                    {m.id ? (
+                      <a
+                        href={href(lang, `staff/${m.id}/`)}
+                        class="block font-bold text-text hover:text-primary hover:underline"
+                      >
+                        {pick(lang, m.name_ar, m.name_en)}
+                      </a>
+                    ) : (
+                      <b class="block text-text">{pick(lang, m.name_ar, m.name_en)}</b>
+                    )}
                     <span class="text-sm text-text-muted">
                       {[pick(lang, m.title_ar, m.title_en), ROLE[m.role]]
                         .filter(Boolean)

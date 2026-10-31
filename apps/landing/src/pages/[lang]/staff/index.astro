@@ -1,0 +1,38 @@
+---
+import PageHead from "../../../components/PageHead.astro";
+import StaffCard from "../../../components/StaffCard.astro";
+import Base from "../../../layouts/Base.astro";
+import { staff } from "../../../lib/api";
+import { type Lang, langPaths, t } from "../../../lib/i18n";
+
+// «الكوادر» (owner, 2026-10-30): every member who chose to appear, as cards.
+export const getStaticPaths = langPaths;
+const lang = Astro.params.lang as Lang;
+const members = await staff();
+---
+
+<Base lang={lang} title={t(lang, "staff")} path="staff/" description={t(lang, "staffLead")}>
+  <PageHead
+    lang={lang}
+    title={t(lang, "staff")}
+    lead={t(lang, "staffLead")}
+    crumbs={[[t(lang, "staff"), "staff/"]]}
+  />
+  <div class="mx-auto max-w-6xl px-4 py-10 lg:px-8">
+    {members.length ? (
+      <ul class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {members.map((m, i) => (
+          <li>
+            <StaffCard lang={lang} member={m} index={i} />
+          </li>
+        ))}
+      </ul>
+    ) : (
+      <p class="text-text-muted">
+        {lang === "ar"
+          ? "لم يُنشر أعضاء هيئة التدريس هنا بعد."
+          : "No faculty members are listed here yet."}
+      </p>
+    )}
+  </div>
+</Base>

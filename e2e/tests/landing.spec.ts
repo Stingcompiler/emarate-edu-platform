@@ -296,6 +296,20 @@ test("a department page shows the members who chose to appear, and its own news"
   await expect(page.getByRole("region", { name: "الكوادر" })).toHaveCount(0);
 });
 
+test("the home page shows «الكوادر», and a card opens the member's page", async ({ page }) => {
+  // Owner, 2026-10-30: members who chose to appear, as cards; each has its own page.
+  await page.goto(`${SITE}/ar/`);
+  const section = page.getByRole("region", { name: "الكوادر" });
+  const card = section.getByRole("link", { name: /د\. مصطفى الأمين/ });
+  await expect(card).toBeVisible();
+  await card.click();
+  await expect(page).toHaveURL(/\/ar\/staff\/[0-9a-f-]+\/$/);
+  await expect(page.getByRole("heading", { level: 1, name: "د. مصطفى الأمين" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "المؤهلات العلمية" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "تقنية المعلومات" }).first()).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+});
+
 // The widest gap between the controls of the phone's top bar: «outside» the open menu, not a
 // link (the bar holds the logo, the sign-in link, «apply» and the menu button).
 async function emptyTopBarX(page: Page): Promise<number> {
