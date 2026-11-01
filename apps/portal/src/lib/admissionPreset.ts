@@ -61,6 +61,7 @@ export const ADMISSION_PRESET: FormSchema = {
             }),
             f({
               key: "full_name_en",
+              ltr: true,
               type: "text",
               label: "الاسم الكامل باللغة الإنجليزية",
               required: true,
@@ -238,6 +239,7 @@ export const ADMISSION_PRESET: FormSchema = {
           fields: [
             f({
               key: "university_number",
+              ltr: true,
               type: "text",
               label: "الرقم الجامعي",
               help: "يدخله موظف التسجيل بعد إتمام إجراءات القبول.",
@@ -300,6 +302,7 @@ export const ADMISSION_PRESET: FormSchema = {
             }),
             f({
               key: "department_student_number",
+              ltr: true,
               type: "text",
               label: "رقم الطالب بالقسم",
               help: "الرقم الداخلي للطالب لدى القسم، إن كان مستخدمًا.",

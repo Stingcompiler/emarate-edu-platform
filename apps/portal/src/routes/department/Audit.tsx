@@ -113,6 +113,7 @@ const ACTIONS: Record<string, string> = {
   "term.set_current": "غيّر الفصل الحالي",
   "admissions.start": "بدأ طلب قبول",
   "admissions.register": "حوّل متقدمًا إلى طالب",
+  "admissions.staff_answers": "عدّل بيانات القبول والتسجيل في طلب",
   "admissions.submit": "قدّم طلب قبول",
   "admissions.withdraw": "سحب طلب قبول",
   "admissions.assign": "وزّع طلب قبول",

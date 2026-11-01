@@ -426,6 +426,9 @@ COVERED_ELSEWHERE = {
     "application-transition": _AD + "test_full_journey",
     "application-messages": _AD + "test_claim_and_assign",
     "application-register": _AD + "test_full_journey",
+    # The form's college fields (owner, 2026-11-01): reviewers only, release to the applicant.
+    "application-staff-answers": "admissions.tests.test_form_rules::"
+    + "test_staff_fill_the_college_fields_and_release_some",
     "application-document-link": _AD + "test_full_journey",
     "application-document-review": _AD + "test_full_journey",
     "form-template-detail": _AD + "test_templates_freeze_on_publish",

@@ -440,7 +440,7 @@ export function FieldInput({
         {...common}
         type={type}
         inputMode={numeric ? "decimal" : field.type === "phone" ? "tel" : undefined}
-        dir={type === "email" || type === "tel" || numeric ? "ltr" : undefined}
+        dir={type === "email" || type === "tel" || numeric || field.ltr ? "ltr" : undefined}
         value={(value as string | number) ?? ""}
         placeholder={field.type === "phone" ? "+249…" : undefined}
         onChange={(e) =>

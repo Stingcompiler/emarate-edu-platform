@@ -38,6 +38,8 @@ type App = {
   messages: { id: number; from_college: boolean; body: string; sent_at: string }[];
   required_documents: { key: string; label: string; required?: boolean }[];
   documents: { doc_type: string; name: string }[];
+  /** The college's fields the registrar released (owner, 2026-11-01). */
+  released?: { key: string; label: string; value: unknown }[];
 };
 type Inq = {
   public_id: string;
@@ -199,6 +201,18 @@ function ApplicationCard({ app }: { app: App }) {
             </li>
           ))}
         </ol>
+      )}
+      {!!app.released?.length && (
+        <dl className="mt-4 divide-y divide-border-soft rounded-xl border border-border-soft text-sm">
+          {app.released.map((r) => (
+            <div key={r.key} className="flex justify-between gap-3 px-3 py-2.5">
+              <dt className="font-semibold text-text">{r.label}</dt>
+              <dd className="text-end text-text">
+                <bdi>{String(r.value)}</bdi>
+              </dd>
+            </div>
+          ))}
+        </dl>
       )}
       {app.status === "missing_documents" && (
         <div className="mt-4 space-y-3 rounded-xl bg-warning-soft p-3">

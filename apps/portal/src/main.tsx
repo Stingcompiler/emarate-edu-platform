@@ -65,6 +65,10 @@ function RouteLoading() {
   );
 }
 
+const ApplicationPrint = page(
+  () => import("./routes/admissions/ApplicationPrint"),
+  "ApplicationPrint",
+);
 const ApplicationDetail = page(
   () => import("./routes/admissions/ApplicationDetail"),
   "ApplicationDetail",
@@ -267,6 +271,10 @@ const router = createBrowserRouter([
   { path: "/events/:id", element: signedIn(<EventEditor />, "/events/:id") },
   { path: "/applications", element: signedIn(<Applications />, "/applications") },
   { path: "/applications/:id", element: signedIn(<ApplicationDetail />, "/applications/:id") },
+  {
+    path: "/applications/:id/print",
+    element: signedIn(<ApplicationPrint />, "/applications/:id/print"),
+  },
   { path: "/admissions/cycles", element: signedIn(<Cycles />, "/admissions/cycles") },
   { path: "/admissions/forms", element: signedIn(<FormBuilder />, "/admissions/forms") },
   { path: "/registrar", element: signedIn(<RegistrarHome />, "/registrar") },
