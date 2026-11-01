@@ -158,3 +158,159 @@ def test_a_submit_key_belongs_to_one_application(
     assert one.data == again.data
     assert other.status_code == 200 and other.data["public_id"] == second
     assert Application.objects.get(public_id=second).status == "submitted"
+
+
+# ─── The college's admission form (owner, 2026-11-01) ────────────────────────
+COLLEGE = {
+    "title": "استمارة طلب الالتحاق بالكلية",
+    "steps": [
+        {
+            "title": "الاستمارة",
+            "sections": [
+                {
+                    "title": "الطلب",
+                    "fields": [
+                        {
+                            "key": "application_path",
+                            "type": "select",
+                            "label": "مسار التقديم",
+                            "options": ["قبول جديد", "تجسير", "تحويل"],
+                            "required": True,
+                            "width": "half",
+                        },
+                        {
+                            "key": "previous_university",
+                            "type": "text",
+                            "label": "الجامعة السابقة",
+                            "required": True,
+                            "show_if": {"key": "application_path", "in": ["تجسير", "تحويل"]},
+                        },
+                        {"key": "certificate_year", "type": "year", "label": "السنة"},
+                        {
+                            "key": "declaration",
+                            "type": "consent",
+                            "label": "أقر",
+                            "required": True,
+                        },
+                    ],
+                },
+                {
+                    "title": "القبول",
+                    "fields": [
+                        {
+                            "key": "university_number",
+                            "type": "text",
+                            "label": "الرقم الجامعي",
+                            "audience": "release",
+                            "required": True,
+                        },
+                        {
+                            "key": "tuition_fees",
+                            "type": "money",
+                            "label": "رسوم الدراسة",
+                            "audience": "staff",
+                            "required": True,
+                        },
+                    ],
+                },
+            ],
+        }
+    ],
+}
+
+
+def test_the_college_form_checks_audiences_conditions_and_new_types():
+    assert services.check_schema(COLLEGE) == []
+    ok = {"application_path": "قبول جديد", "certificate_year": 2024, "declaration": True}
+    # Staff fields are never required of the applicant; a condition that is off asks nothing.
+    assert services.validate_answers(COLLEGE, ok, set()) == {}
+    errors = services.validate_answers(
+        COLLEGE, {"application_path": "تجسير", "certificate_year": "2024"}, set()
+    )
+    assert errors == {
+        "previous_university": "Required.",
+        "certificate_year": "Must be a year.",
+        "declaration": "Required.",
+    }
+    assert services.validate_answers(COLLEGE, {**ok, "declaration": False}, set()) == {
+        "declaration": "Required."
+    }
+    staff = services.validate_answers(COLLEGE, {"tuition_fees": "12.345"}, set(), who="staff")
+    assert staff == {"tuition_fees": "Must be an amount.", "university_number": "Required."}
+    assert (
+        services.validate_answers(
+            COLLEGE, {"tuition_fees": "1500.50", "university_number": "26-IT-1"}, set(), who="staff"
+        )
+        == {}
+    )
+    public = services.public_schema(COLLEGE)
+    assert [f["key"] for f in services.schema_fields(public)] == [
+        "application_path",
+        "previous_university",
+        "certificate_year",
+        "declaration",
+    ]
+    assert len(public["steps"][0]["sections"]) == 1  # a section of staff fields disappears
+
+
+def test_a_condition_must_name_an_earlier_applicant_field():
+    def schema(fields):
+        return {"steps": [{"sections": [{"fields": fields}]}]}
+
+    later = schema(
+        [
+            {"key": "a", "type": "text", "label": "أ", "show_if": {"key": "b", "equals": "x"}},
+            {"key": "b", "type": "text", "label": "ب"},
+        ]
+    )
+    assert any("above" in p for p in services.check_schema(later))
+    hidden = schema(
+        [
+            {"key": "s", "type": "text", "label": "س", "audience": "staff"},
+            {"key": "a", "type": "text", "label": "أ", "show_if": {"key": "s", "equals": "x"}},
+        ]
+    )
+    assert any("applicant fills" in p for p in services.check_schema(hidden))
+    odd = schema([{"key": "a", "type": "text", "label": "أ", "audience": "x", "width": "wide"}])
+    assert len(services.check_schema(odd)) == 2
+
+
+def test_the_applicant_never_sees_or_writes_staff_fields(
+    api,
+    intake,  # noqa: F811
+    make_user,
+    django_capture_on_commit_callbacks,
+):
+    head = make_user(Role.HEAD_REGISTRAR)
+    ApplicationFormTemplate.objects.filter(name="default").delete()
+    ApplicationFormTemplate.objects.create(
+        name="default", status="published", schema=COLLEGE, created_by=head
+    )
+    client = visitor(django_capture_on_commit_callbacks)
+    offered = client.get("/api/public/intakes?with_form=1")
+    started = client.post("/api/visitor/applications", {"intake": intake.id}, format="json")
+    assert started.status_code == 201, started.data
+    url = f"/api/visitor/applications/{started.data['public_id']}"
+    mine = client.get(url).data
+    keys = [f["key"] for f in services.schema_fields(mine["form"]["schema"])]
+    assert "university_number" not in keys and "tuition_fees" not in keys
+    assert mine["academic_year"] == intake.cycle.academic_year.name
+    assert offered.status_code == 200
+    # Sent by hand, a staff field is refused and nothing is saved.
+    sneaky = client.patch(
+        url, {"answers": {"application_path": "تحويل", "tuition_fees": "0"}}, format="json"
+    )
+    assert sneaky.status_code == 400
+    assert Application.objects.get().answers == {}
+    fine = client.patch(
+        url,
+        {
+            "answers": {
+                "application_path": "قبول جديد",
+                "certificate_year": 2020,
+                "declaration": True,
+            }
+        },
+        format="json",
+    )
+    assert fine.status_code == 200, fine.data

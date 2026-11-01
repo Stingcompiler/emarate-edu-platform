@@ -213,7 +213,7 @@ export function navFor(me: Me | null | undefined, unread: number): NavItem[] {
     items.push({ label: "المسجلون", to: "/registrars", icon: UserCheck });
   if (can(me, "admissions.manage")) {
     items.push({ label: "دورات القبول", to: "/admissions/cycles", icon: CalendarRange });
-    items.push({ label: "قوالب التقديم", to: "/admissions/forms", icon: LayoutTemplate });
+    items.push({ label: "استمارات التقديم", to: "/admissions/forms", icon: LayoutTemplate });
   }
   if (can(me, "results.manage"))
     items.push({ label: "رفع النتائج", to: "/result-imports", icon: FileUp, end: false });
