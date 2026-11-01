@@ -36,6 +36,7 @@ from .serializers import (
     ApplicationDocumentReviewSerializer,
     ApplicationDocumentSerializer,
     ApplicationDocumentUploadSerializer,
+    ApplicationStaffAnswersSerializer,
     ApplicationStaffMessageSerializer,
     ApplicationStartSerializer,
     ApplicationTransitionSerializer,
@@ -243,6 +244,16 @@ class ApplicationViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, views
         application = self.get_object()
         services.staff_message(_meta(request), application, **data.validated_data)
         return self._done(application)
+
+    @extend_schema(request=ApplicationStaffAnswersSerializer, responses=StaffApplicationSerializer)
+    @action(detail=True, methods=["patch"], url_path="staff-answers")
+    def staff_answers(self, request, public_id=None):
+        """The form's college fields; a release field reaches the applicant once released."""
+        data = ApplicationStaffAnswersSerializer(data=request.data)
+        data.is_valid(raise_exception=True)
+        return self._done(
+            services.set_staff_answers(_meta(request), self.get_object(), **data.validated_data)
+        )
 
     @extend_schema(request=None, responses=StaffApplicationSerializer)
     @action(detail=True, methods=["post"])

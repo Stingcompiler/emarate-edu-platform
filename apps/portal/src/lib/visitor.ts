@@ -79,6 +79,8 @@ export type Field = {
   /** Who fills it (owner, 2026-11-01): the applicant (default), staff then released to the
    *  applicant, or staff only. The applicant's form never carries the last two. */
   audience?: "applicant" | "release" | "staff";
+  /** Typed left to right (Latin names, numbers like 26-IT-0117). */
+  ltr?: boolean;
   /** Half a row beside another half on large screens; always one column on phones. */
   width?: "full" | "half";
   show_if?: { key: string; equals?: unknown; in?: unknown[] };

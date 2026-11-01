@@ -8,6 +8,9 @@ from accounts.rbac import Role
 from admissions import services
 from admissions.models import Application, ApplicationFormTemplate
 from admissions.tests.test_admissions import SCHEMA, _complete, intake, visitor  # noqa: F401
+from audit.models import AuditLog
+from conftest import pdf_upload
+from students.models import StudentRecord
 
 FIELDS = {
     "steps": [
@@ -211,6 +214,13 @@ COLLEGE = {
                             "audience": "staff",
                             "required": True,
                         },
+                        {
+                            "key": "admitted_level",
+                            "type": "select",
+                            "label": "المستوى المقبول به",
+                            "options": ["المستوى الأول", "المستوى الثاني"],
+                            "audience": "release",
+                        },
                     ],
                 },
             ],
@@ -314,3 +324,114 @@ def test_the_applicant_never_sees_or_writes_staff_fields(
         format="json",
     )
     assert fine.status_code == 200, fine.data
+
+
+def test_staff_fill_the_college_fields_and_release_some(
+    api,
+    intake,  # noqa: F811
+    make_user,
+    it_dept,
+    django_capture_on_commit_callbacks,
+):
+    """Owner, 2026-11-01: reviewers fill the college's fields; a release field reaches the
+    applicant only when released and filled; registration takes the typed university number."""
+    head = make_user(Role.HEAD_REGISTRAR)
+    registrar = make_user(Role.REGISTRAR, department=it_dept)
+    ApplicationFormTemplate.objects.filter(name="default").delete()
+    ApplicationFormTemplate.objects.create(
+        name="default", status="published", schema=COLLEGE, created_by=head
+    )
+    client = visitor(django_capture_on_commit_callbacks)
+    app_id = client.post("/api/visitor/applications", {"intake": intake.id}).data["public_id"]
+    mine = f"/api/visitor/applications/{app_id}"
+    client.patch(
+        mine,
+        {
+            "answers": {
+                "application_path": "قبول جديد",
+                "certificate_year": 2024,
+                "declaration": True,
+            }
+        },
+        format="json",
+    )
+    client.post(
+        f"{mine}/documents",
+        {"doc_type": "certificate", "file": pdf_upload("cert.pdf")},
+        format="multipart",
+    )
+    with django_capture_on_commit_callbacks(execute=True):
+        assert client.post(f"{mine}/submit").data["status"] == "submitted"
+
+    url = f"/api/v1/applications/{app_id}"
+    review = api(registrar)
+    staff_url = f"{url}/staff-answers"
+    assert [f["key"] for f in review.get(url).data["staff_fields"]] == [
+        "university_number",
+        "tuition_fees",
+        "admitted_level",
+    ]
+    # Applicants cannot reach it; unknown keys, bad amounts and staff-only releases are refused.
+    assert client.patch(staff_url, {"answers": {}}, format="json").status_code in (401, 403)
+    assert review.patch(staff_url, {"answers": {"school": "x"}}, format="json").status_code == 400
+    assert (
+        review.patch(staff_url, {"answers": {"tuition_fees": "-5"}}, format="json").status_code
+        == 400
+    )
+    assert (
+        review.patch(
+            staff_url, {"answers": {}, "released": ["tuition_fees"]}, format="json"
+        ).status_code
+        == 400
+    )
+    saved = review.patch(
+        staff_url,
+        {
+            "answers": {
+                "university_number": " 26-IT-7777 ",
+                "tuition_fees": "1500.50",
+                "admitted_level": "المستوى الثاني",
+            },
+            "released": ["admitted_level"],
+        },
+        format="json",
+    )
+    assert saved.status_code == 200, saved.data
+    assert saved.data["staff_answers"]["university_number"] == "26-IT-7777"
+    log = AuditLog.objects.get(action="admissions.staff_answers")
+    assert "1500" not in str(log.new) and log.new["released"] == ["admitted_level"]
+
+    # Released and filled: the level; never the number (not released) or the fees (staff).
+    seen = client.get(mine).data["released"]
+    assert seen == [
+        {"key": "admitted_level", "label": "المستوى المقبول به", "value": "المستوى الثاني"}
+    ]
+    review.patch(staff_url, {"answers": {"admitted_level": ""}}, format="json")
+    assert client.get(mine).data["released"] == []  # released but empty: never alone
+    review.patch(staff_url, {"answers": {"admitted_level": "المستوى الثاني"}}, format="json")
+
+    # Registration takes the typed number and the admitted level.
+    for to in ("under_review", "eligible"):
+        review.post(f"{url}/transition", {"to": to})
+    api(head).post(f"{url}/transition", {"to": "accepted"})
+    with django_capture_on_commit_callbacks(execute=True):
+        registered = api(head).post(f"{url}/register")
+    assert registered.status_code == 200, registered.data
+    record = StudentRecord.objects.get(university_number="26-IT-7777")
+    assert record.level == 2
+    # Its own record keeps the number; on another application it is refused.
+    assert (
+        review.patch(
+            staff_url, {"answers": {"university_number": "26-IT-7777"}}, format="json"
+        ).status_code
+        == 200
+    )
+    second = visitor(django_capture_on_commit_callbacks, email="other@example.test")
+    other_id = second.post("/api/visitor/applications", {"intake": intake.id}).data["public_id"]
+    Application.objects.filter(public_id=other_id).update(status="submitted")
+    taken = review.patch(
+        f"/api/v1/applications/{other_id}/staff-answers",
+        {"answers": {"university_number": "26-IT-7777"}},
+        format="json",
+    )
+    assert taken.status_code == 400 and "university_number" in taken.data["errors"]

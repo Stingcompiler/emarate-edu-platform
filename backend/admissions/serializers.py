@@ -160,6 +160,8 @@ class StaffApplicationSerializer(serializers.ModelSerializer):
     allowed_transitions = serializers.SerializerMethodField()
     labels = serializers.SerializerMethodField()
     documents = serializers.SerializerMethodField()
+    staff_fields = serializers.SerializerMethodField()
+    form_schema = serializers.SerializerMethodField()
     history = ApplicationHistorySerializer(many=True, read_only=True)
     messages = ApplicationMessageSerializer(many=True, read_only=True)
 
@@ -186,6 +188,10 @@ class StaffApplicationSerializer(serializers.ModelSerializer):
             "allowed_transitions",
             "labels",
             "documents",
+            "staff_fields",
+            "form_schema",
+            "staff_answers",
+            "released_fields",
             "history",
             "messages",
             "created_at",
@@ -208,6 +214,20 @@ class StaffApplicationSerializer(serializers.ModelSerializer):
                 labels.setdefault(doc["key"], doc.get("label", doc["key"]))
         return labels
 
+    @extend_schema_field(serializers.ListField(child=serializers.DictField(), allow_null=True))
+    def get_staff_fields(self, obj):
+        """The form's college fields, for those who review it (owner, 2026-11-01)."""
+        if not self._reviewer(obj):
+            return None
+        return services.staff_fields(obj)
+
+    @extend_schema_field(serializers.DictField(allow_null=True))
+    def get_form_schema(self, obj):
+        """The whole form the applicant filled, for the review and the printed copy."""
+        if not self._reviewer(obj) or not obj.form_template_id:
+            return None
+        return obj.form_template.schema
+
     @extend_schema_field(ApplicationDocumentSerializer(many=True, allow_null=True))
     def get_documents(self, obj):
         # Department manager/supervisor see counts and names, never the documents (docs/03 §3.6).
@@ -218,7 +238,7 @@ class StaffApplicationSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         data = super().to_representation(instance)
         if not self._reviewer(instance):
-            for key in ("answers", "email", "phone_e164", "messages"):
+            for key in ("answers", "email", "phone_e164", "messages", "staff_answers"):
                 data[key] = None
         return data
 
@@ -236,6 +256,8 @@ class ApplicantApplicationSerializer(serializers.ModelSerializer):
     history = serializers.SerializerMethodField()
     messages = serializers.SerializerMethodField()
     can_edit = serializers.SerializerMethodField()
+    # The college's fields the registrar released, with their values (owner, 2026-11-01).
+    released = serializers.SerializerMethodField()
 
     class Meta:
         model = Application
@@ -258,6 +280,7 @@ class ApplicantApplicationSerializer(serializers.ModelSerializer):
             "history",
             "messages",
             "can_edit",
+            "released",
             "created_at",
         ]
         read_only_fields = fields
@@ -270,6 +293,10 @@ class ApplicantApplicationSerializer(serializers.ModelSerializer):
             if t
             else None
         )
+
+    @extend_schema_field(serializers.ListField(child=serializers.DictField()))
+    def get_released(self, obj):
+        return services.released_answers(obj)
 
     def get_history(self, obj) -> list[dict]:
         return [
@@ -363,3 +390,8 @@ class StatusOnlySerializer(serializers.Serializer):
     reference_no = serializers.CharField()
     status = serializers.CharField()
     status_label = serializers.CharField()
+
+
+class ApplicationStaffAnswersSerializer(serializers.Serializer):
+    answers = serializers.DictField()
+    released = serializers.ListField(child=serializers.CharField(), required=False)

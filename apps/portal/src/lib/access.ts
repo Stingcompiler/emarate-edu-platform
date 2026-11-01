@@ -105,6 +105,7 @@ export const ROUTE_ACCESS: Record<string, Allow> = {
   "/events/:id": cap("events.manage"),
   "/applications": cap("admissions.view"),
   "/applications/:id": cap("admissions.view"),
+  "/applications/:id/print": cap("admissions.view"),
   "/admissions/cycles": cap("admissions.manage"),
   "/admissions/forms": cap("admissions.review", "admissions.manage"),
   "/registrar": cap("admissions.review"),

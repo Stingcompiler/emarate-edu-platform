@@ -822,6 +822,128 @@ def _university_number(program) -> str:
     return issue_university_number(program)
 
 
+def staff_fields(application: Application) -> list[dict]:
+    schema = application.form_template.schema if application.form_template_id else {}
+    return [f for f in schema_fields(schema) if audience(f) != "applicant"]
+
+
+def set_staff_answers(
+    meta: RequestMeta, application: Application, *, answers: dict, released: list | None = None
+) -> Application:
+    """The college's own fields on an application (owner, 2026-11-01): reviewers fill them;
+    a release field reaches the applicant only once released, and never alone — only with a
+    value. An empty value clears the field."""
+    require_review(meta.actor, application)
+    if not isinstance(answers, dict):
+        raise ValidationError({"answers": [gettext("Send an object of answers.")]})
+    fields = {f["key"]: f for f in staff_fields(application)}
+    unknown = set(answers) - set(fields)
+    if unknown:
+        raise ValidationError(
+            {
+                "answers": [
+                    gettext("Not a staff field of this form: %(keys)s")
+                    % {"keys": ", ".join(sorted(unknown))}
+                ]
+            }
+        )
+    given = {k: v for k, v in answers.items() if v not in (None, "", [])}
+    sub = {"steps": [{"sections": [{"fields": [fields[k] for k in given]}]}]}
+    errors = {
+        k: v for k, v in validate_answers(sub, given, set(), who="staff").items() if k in given
+    }
+    if errors:
+        raise Invalid({k: [v] for k, v in errors.items()}, code="invalid")
+    number = str(given.get("university_number", "")).strip()
+    if number:
+        given["university_number"] = number
+        taken = StudentRecord.objects.filter(university_number=number)
+        if application.student_record_id:
+            taken = taken.exclude(pk=application.student_record_id)
+        if taken.exists():
+            raise ValidationError(
+                {"university_number": [gettext("This university number is already in use.")]}
+            )
+    releasable = {k for k, f in fields.items() if audience(f) == "release"}
+    if released is not None and not (isinstance(released, list) and set(released) <= releasable):
+        raise ValidationError(
+            {"released": [gettext("Only fields marked for release can be released.")]}
+        )
+    with transaction.atomic():
+        locked = _locked(application)
+        old = {"keys": sorted(locked.staff_answers), "released": list(locked.released_fields)}
+        merged = {**locked.staff_answers, **given}
+        for key in set(answers) - set(given):
+            merged.pop(key, None)
+        locked.staff_answers = merged
+        if released is not None:
+            locked.released_fields = sorted(set(released))
+        locked.save(update_fields=["staff_answers", "released_fields", "updated_at"])
+        # Keys and releases only: the values (fees, national numbers) stay out of the log.
+        record(
+            meta,
+            "admissions.staff_answers",
+            locked,
+            old=old,
+            new={"keys": sorted(merged), "released": list(locked.released_fields)},
+            department_id=locked.department_id,
+        )
+    return locked
+
+
+def released_answers(application: Application) -> list[dict]:
+    """What the applicant may see of the college's fields: released, and with a value."""
+    out = []
+    for field in staff_fields(application):
+        key = field["key"]
+        value = application.staff_answers.get(key)
+        if (
+            audience(field) == "release"
+            and key in application.released_fields
+            and value not in (None, "", [])
+        ):
+            out.append({"key": key, "label": field.get("label", key), "value": value})
+    return out
+
+
+def _registration_details(locked: Application, program) -> dict:
+    """What the form adds to the student record: the typed university number when the form
+    has that field (owner: the registration staff enter it), the English name, gender,
+    nationality, the national number (hashed), the admitted level by its option's place."""
+    keys = {f["key"]: f for f in staff_fields(locked)}
+    details: dict = {}
+    if "university_number" in keys:
+        number = str(locked.staff_answers.get("university_number", "")).strip()
+        if not number:
+            raise ValidationError(
+                {"university_number": [gettext("Enter the university number first.")]}
+            )
+        if StudentRecord.objects.filter(university_number=number).exists():
+            raise ValidationError(
+                {"university_number": [gettext("This university number is already in use.")]}
+            )
+        details["university_number"] = number
+    answers = locked.answers
+    if isinstance(answers.get("full_name_en"), str):
+        details["full_name_en"] = answers["full_name_en"].strip()[:200]
+    gender = {"ذكر": "male", "أنثى": "female"}.get(answers.get("gender"))
+    if gender:
+        details["gender"] = gender
+    if isinstance(answers.get("nationality"), str):
+        details["nationality"] = answers["nationality"][:60]
+    if isinstance(answers.get("national_id"), str) and answers["national_id"].strip():
+        from students.importer import _hash_national_id
+
+        details["national_id_hash"] = _hash_national_id(answers["national_id"])
+    level_field = keys.get("admitted_level")
+    level = locked.staff_answers.get("admitted_level")
+    if level_field and level in level_field.get("options", []):
+        place = level_field["options"].index(level) + 1
+        if place <= program.levels_count:
+            details["level"] = place
+    return details
+
+
 def register_applicant(meta: RequestMeta, application: Application) -> StudentRecord:
     """Accepted applicant → StudentRecord with a university number (docs/01 K.5). Atomic."""
     if not rbac.can(meta.actor, "admissions.manage"):
@@ -834,11 +956,14 @@ def register_applicant(meta: RequestMeta, application: Application) -> StudentRe
                 code="bad_state",
             )
         program = locked.intake.program
+        details = _registration_details(locked, program)
+        # The number the registration staff typed, else the next in the department's series.
+        number = details.pop("university_number", None) or _university_number(program)
         record_ = StudentRecord.objects.create(
-            university_number=_university_number(program),
+            **{"level": 1, **details},
+            university_number=number,
             full_name_ar=locked.full_name,
             program=program,
-            level=1,
             email=locked.email,
             phone_e164=locked.phone_e164,
             admitted_term=Term.current(),

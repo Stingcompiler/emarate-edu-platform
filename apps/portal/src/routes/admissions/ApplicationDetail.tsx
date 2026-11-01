@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { FileText } from "lucide-react";
+import { FileText, Printer } from "lucide-react";
 import { useState } from "react";
-import { useParams } from "react-router";
+import { Link, useParams } from "react-router";
 
 import { PortalShell } from "../../components/PortalShell";
 import {
@@ -16,7 +16,8 @@ import { api, ok, openAfter } from "../../lib/api";
 import { useMe } from "../../lib/auth";
 import { when } from "../../lib/format";
 import { can } from "../../lib/nav";
-import { STATUS_LABEL, STATUS_TONE } from "../../lib/visitor";
+import { type Field, STATUS_LABEL, STATUS_TONE } from "../../lib/visitor";
+import { StaffFields } from "./StaffFields";
 import { useConfirm } from "../../components/Confirm";
 import { useToast } from "../../components/Toast";
 
@@ -151,6 +152,15 @@ export function ApplicationDetail() {
                   {a.university_number}
                 </span>
               )}
+              {reviewer && (
+                <Link
+                  to={`/applications/${id}/print`}
+                  className="ms-auto inline-flex min-h-11 items-center gap-1.5 text-sm font-semibold text-primary"
+                >
+                  <Printer size={16} aria-hidden />
+                  طباعة الطلب
+                </Link>
+              )}
             </Card>
             {reviewer ? (
               <>
@@ -160,7 +170,16 @@ export function ApplicationDetail() {
                     ["البريد", a.email],
                     ["الهاتف", a.phone_e164 || "—"],
                     ...Object.entries((a.answers ?? {}) as Record<string, unknown>).map(
-                      ([k, v]) => [a.labels[k] ?? k, Array.isArray(v) ? v.join("، ") : String(v)],
+                      ([k, v]) => [
+                        a.labels[k] ?? k,
+                        Array.isArray(v)
+                          ? v.join("، ")
+                          : v === true
+                            ? "نعم"
+                            : v === false
+                              ? "لا"
+                              : String(v),
+                      ],
                     ),
                   ].map(([k, v]: string[]) => (
                     <div key={k} className="flex justify-between gap-3 px-4 py-2.5">
@@ -235,6 +254,14 @@ export function ApplicationDetail() {
                     </div>
                   ))}
                 </Card>
+                {!!a.staff_fields?.length && (
+                  <StaffFields
+                    id={id}
+                    fields={a.staff_fields as unknown as Field[]}
+                    saved={(a.staff_answers ?? {}) as Record<string, unknown>}
+                    released={(a.released_fields ?? []) as string[]}
+                  />
+                )}
               </>
             ) : (
               <Notice tone="info">

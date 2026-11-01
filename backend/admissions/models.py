@@ -123,6 +123,11 @@ class Application(PublicIdModel, TimestampedModel):
     email = models.EmailField(blank=True)
     phone_e164 = models.CharField(max_length=20, blank=True)
     answers = models.JSONField(default=dict, blank=True)
+    # The form's staff fields (audience release|staff), filled by the college, never by the
+    # applicant; ``released_fields`` lists the release fields the applicant may now see
+    # (owner, 2026-11-01).
+    staff_answers = models.JSONField(default=dict, blank=True)
+    released_fields = models.JSONField(default=list, blank=True)
     status = models.CharField(max_length=20, choices=Status.choices, default=Status.DRAFT)
     assigned_registrar = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="+"

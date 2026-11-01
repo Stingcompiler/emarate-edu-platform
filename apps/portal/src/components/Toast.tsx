@@ -57,7 +57,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
         ref={box}
         role="status"
         aria-live="polite"
-        className="pointer-events-none fixed inset-x-0 bottom-24 z-50 flex justify-center px-4 transition-[bottom] duration-200 motion-reduce:transition-none lg:bottom-6"
+        className="pointer-events-none fixed inset-x-0 bottom-24 z-50 flex justify-center px-4 transition-[bottom] duration-200 motion-reduce:transition-none print:hidden lg:bottom-6"
       >
         {note && (
           <span

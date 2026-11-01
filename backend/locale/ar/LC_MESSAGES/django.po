@@ -958,3 +958,18 @@ msgstr "استخدم رابطًا يبدأ بـ https://"
 
 msgid "At most ten links."
 msgstr "عشرة روابط على الأكثر."
+
+msgid "Not a staff field of this form: %(keys)s"
+msgstr "ليست من حقول الموظفين في هذه الاستمارة: %(keys)s"
+
+msgid "This university number is already in use."
+msgstr "هذا الرقم الجامعي مستخدم."
+
+msgid "Only fields marked for release can be released."
+msgstr "لا يُتاح للمتقدم إلا ما عُلِّم «يُتاح للمتقدم»."
+
+msgid "Enter the university number first."
+msgstr "أدخل الرقم الجامعي أولًا."
+
+msgid "These fields are filled by the college."
+msgstr "هذه الحقول تعبئها الكلية."
