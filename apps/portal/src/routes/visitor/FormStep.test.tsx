@@ -171,5 +171,5 @@ it("the college's form: sections, bold labels tied to inputs, «تعليمات»
   expect(screen.getByLabelText(/اسم الجامعة السابقة/)).toBeTruthy();
   // The guide lists the same explanation and says when the conditional field applies.
   expect(screen.getByText("دليل تعبئة الاستمارة")).toBeTruthy();
-  expect(screen.getByText("يظهر عند اختيار «تجسير» في «مسار التقديم»")).toBeTruthy();
+  expect(screen.getByText(/^يظهر عند اختيار «تجسير» في «مسار التقديم»/)).toBeTruthy();
 });
