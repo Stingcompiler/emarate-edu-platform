@@ -150,7 +150,41 @@ FIELD_TYPES = {
     "boolean",
     "file",
     "note",
+    # The college's admission form (owner, 2026-11-01): a year, an amount, an agreement box.
+    "year",
+    "money",
+    "consent",
 }
+
+# Who fills a field and who sees it (owner, 2026-11-01). «applicant»: the public form.
+# «release»: staff fill it; the applicant sees it only once staff release it (never on the form).
+# «staff»: staff only, never shown to the applicant or in the public guide.
+AUDIENCES = {"applicant", "release", "staff"}
+WIDTHS = {"full", "half"}
+
+
+def audience(field: dict) -> str:
+    return field.get("audience") or "applicant"
+
+
+def applicant_fields(schema: dict) -> list[dict]:
+    return [f for f in schema_fields(schema) if audience(f) == "applicant"]
+
+
+def public_schema(schema: dict) -> dict:
+    """The form as the applicant (and the public guide) may see it: applicant fields only."""
+    if not isinstance(schema, dict):
+        return {}
+    steps = []
+    for step in schema.get("steps", []):
+        sections = []
+        for section in step.get("sections", []):
+            fields = [f for f in section.get("fields", []) if audience(f) == "applicant"]
+            if fields:
+                sections.append({**section, "fields": fields})
+        if sections:
+            steps.append({**step, "sections": sections})
+    return {**schema, "steps": steps}
 
 
 def schema_fields(schema: dict) -> list[dict]:
@@ -163,7 +197,7 @@ def schema_fields(schema: dict) -> list[dict]:
 
 
 def check_schema(schema: dict) -> list[str]:
-    problems, keys = [], set()
+    problems, keys, seen = [], set(), []
     if not isinstance(schema, dict) or not isinstance(schema.get("steps"), list):
         return ["The schema needs a list of steps."]
     for field in schema_fields(schema):
@@ -182,6 +216,20 @@ def check_schema(schema: dict) -> list[str]:
                 re.compile(str(field["pattern"]))
             except re.error:
                 problems.append(f"{key}: the pattern is not a valid regular expression.")
+        if audience(field) not in AUDIENCES:
+            problems.append(f"{key}: audience must be one of {sorted(AUDIENCES)}.")
+        if field.get("width") is not None and field.get("width") not in WIDTHS:
+            problems.append(f"{key}: width must be full or half.")
+        condition = field.get("show_if")
+        if condition:
+            # Only on an applicant field that comes earlier: no loops, and an applicant is never
+            # held to a field they cannot see (spec §4.3, §5.1).
+            target = next((f for f in seen if f.get("key") == condition.get("key")), None)
+            if target is None:
+                problems.append(f"{key}: show_if must name a field above it.")
+            elif audience(field) == "applicant" and audience(target) != "applicant":
+                problems.append(f"{key}: show_if must name a field the applicant fills.")
+        seen.append(field)
         accept = field.get("accept")
         if accept is not None and not (
             isinstance(accept, list) and accept and set(accept) <= UPLOAD_TYPES
@@ -194,7 +242,10 @@ def _visible(field: dict, answers: dict) -> bool:
     condition = field.get("show_if")
     if not condition:
         return True
-    return answers.get(condition.get("key")) == condition.get("equals")
+    value = answers.get(condition.get("key"))
+    if "in" in condition:
+        return isinstance(condition["in"], list) and value in condition["in"]
+    return value == condition.get("equals")
 
 
 TEXT_KINDS = {"text", "textarea", "phone", "email", "select"}
@@ -205,7 +256,7 @@ def _type_problem(kind: str, value) -> str | None:
     a value that was not text, and dates, booleans and phones were not checked at all)."""
     if kind in TEXT_KINDS and not isinstance(value, str):
         return "Must be text."
-    if kind == "boolean" and type(value) is not bool:
+    if kind in ("boolean", "consent") and type(value) is not bool:
         return "Must be true or false."
     if kind == "date":
         if not isinstance(value, str) or not re.fullmatch(r"\d{4}-\d{2}-\d{2}", value):
@@ -222,6 +273,8 @@ def _type_problem(kind: str, value) -> str | None:
                 return "Invalid phone number."
         except ValidationError:
             return "Invalid phone number."
+    if kind == "year" and not (type(value) is int and 1900 <= value <= timezone.now().year + 10):
+        return "Must be a year."
     if kind == "multiselect" and not (
         isinstance(value, list) and all(isinstance(v, str) for v in value)
     ):
@@ -229,9 +282,15 @@ def _type_problem(kind: str, value) -> str | None:
     return None
 
 
-def validate_answers(schema: dict, answers: dict, documents: set[str]) -> dict[str, str]:
+def validate_answers(
+    schema: dict, answers: dict, documents: set[str], *, who: str = "applicant"
+) -> dict[str, str]:
+    """The answers of one audience's fields: the applicant's at submission (staff fields are
+    never theirs to fill, so never required of them)."""
     errors: dict[str, str] = {}
     for field in schema_fields(schema):
+        if (who == "applicant") != (audience(field) == "applicant"):
+            continue
         key, kind = field.get("key"), field.get("type")
         if kind == "note" or not _visible(field, answers):
             continue
@@ -241,6 +300,9 @@ def validate_answers(schema: dict, answers: dict, documents: set[str]) -> dict[s
             if field.get("required") and key not in documents:
                 errors[key] = "Upload this document."
             continue
+        if kind == "consent" and field.get("required") and value is not True:
+            errors[key] = "Required."
+            continue
         if empty:
             if field.get("required"):
                 errors[key] = "Required."
@@ -248,6 +310,19 @@ def validate_answers(schema: dict, answers: dict, documents: set[str]) -> dict[s
         problem = _type_problem(kind, value)
         if problem:
             errors[key] = problem
+            continue
+        if kind == "money":
+            try:
+                amount = Decimal(str(value)) if not isinstance(value, bool) else None
+            except InvalidOperation:
+                amount = None
+            if (
+                amount is None
+                or not amount.is_finite()
+                or amount < 0
+                or amount.as_tuple().exponent < -2
+            ):
+                errors[key] = "Must be an amount."
             continue
         if kind == "number":
             if isinstance(value, bool):
@@ -382,7 +457,7 @@ def start(contact, intake: ProgramIntake) -> Application:
 def own(contact, public_id) -> Application:
     application = (
         Application.objects.select_related(
-            "intake__program__department", "intake__cycle", "form_template"
+            "intake__program__department", "intake__cycle__academic_year", "form_template"
         )
         .filter(public_id=public_id, contact=contact)
         .first()
@@ -425,6 +500,15 @@ def update(
             application.phone_e164 = normalize_phone(phone_e164) or ""
             changed.append("phone_e164")
         if answers is not None:
+            schema = application.form_template.schema if application.form_template_id else {}
+            closed = {f["key"] for f in schema_fields(schema) if audience(f) != "applicant"} & set(
+                answers
+            )
+            if closed:
+                # Staff fields are never the applicant's to write, even sent by hand (spec §3).
+                raise ValidationError(
+                    {"answers": [gettext("These fields are filled by the college.")]}
+                )
             application.answers = {**application.answers, **answers}
             changed.append("answers")
         # Only what the applicant edits: never status or submitted_at.

@@ -34,14 +34,19 @@ function setOnline(value: boolean) {
   window.dispatchEvent(new Event(value ? "online" : "offline"));
 }
 
-function show() {
+function show(over: Record<string, unknown> = {}, problems?: Record<string, string>) {
   const client = new QueryClient({ defaultOptions: { mutations: { retry: false } } });
   render(
     <QueryClientProvider client={client}>
       <MemoryRouter>
         <ConfirmProvider>
           <ConnectivityBar />
-          <FormStep app={app as never} onNext={vi.fn()} onChangeProgram={vi.fn()} />
+          <FormStep
+            app={{ ...app, ...over } as never}
+            problems={problems}
+            onNext={vi.fn()}
+            onChangeProgram={vi.fn()}
+          />
         </ConfirmProvider>
       </MemoryRouter>
     </QueryClientProvider>,
@@ -102,4 +107,69 @@ it("a draft kept on the device survives a reload", () => {
   show();
   expect((screen.getByLabelText("الاسم الكامل *") as HTMLInputElement).value).toBe("سلمى عثمان");
   expect(screen.getByText("محفوظة على الجهاز · بانتظار الإرسال")).toBeTruthy();
+});
+
+const college = {
+  title: "استمارة طلب الالتحاق بالكلية",
+  intro: "املأ الاستمارة بدقة.",
+  steps: [
+    {
+      sections: [
+        {
+          title: "بيانات الطلب",
+          fields: [
+            {
+              key: "application_path",
+              type: "select",
+              label: "مسار التقديم",
+              required: true,
+              options: ["قبول جديد", "تجسير"],
+              help: "اختر «تجسير» إن كنت تحمل دبلومًا.",
+            },
+            {
+              key: "previous_university",
+              type: "text",
+              label: "اسم الجامعة السابقة",
+              required: true,
+              show_if: { key: "application_path", in: ["تجسير"] },
+            },
+            {
+              key: "full_name_ar",
+              type: "text",
+              label: "الاسم الكامل باللغة العربية",
+              required: true,
+            },
+            { key: "student_phone", type: "phone", label: "رقم هاتف الطالب", required: true },
+          ],
+        },
+      ],
+    },
+  ],
+};
+
+it("the college's form: sections, bold labels tied to inputs, «تعليمات», conditions and the server's errors beside the fields (owner, 2026-11-01)", () => {
+  show({ form: { schema: college }, academic_year: "2026/2027" }, { full_name_ar: "Required." });
+  expect(screen.getByRole("heading", { name: "استمارة طلب الالتحاق بالكلية" })).toBeTruthy();
+  expect(screen.getByText("2026/2027")).toBeTruthy();
+  expect(screen.getAllByRole("heading", { name: "بيانات الطلب" }).length).toBe(2); // form + guide
+  // The form asks for the name and phone itself: the built-in two are not asked twice.
+  expect(screen.queryByLabelText("الاسم الكامل *")).toBeNull();
+  expect(screen.queryByLabelText("الهاتف")).toBeNull();
+  // The error sits under its field, in Arabic, and is announced with it.
+  const name = screen.getByLabelText(/الاسم الكامل باللغة العربية/);
+  expect(name.getAttribute("aria-invalid")).toBe("true");
+  expect(screen.getByText("هذا الحقل مطلوب.")).toBeTruthy();
+  // «تعليمات» opens the registrar's explanation.
+  const help = screen.getByRole("button", { name: /تعليمات.*مسار التقديم/ });
+  expect(help.getAttribute("aria-expanded")).toBe("false");
+  fireEvent.click(help);
+  expect(help.getAttribute("aria-expanded")).toBe("true");
+  expect(screen.getAllByText("اختر «تجسير» إن كنت تحمل دبلومًا.").length).toBeGreaterThan(0);
+  // A conditional field appears only for its answer.
+  expect(screen.queryByLabelText(/اسم الجامعة السابقة/)).toBeNull();
+  fireEvent.change(screen.getByLabelText(/مسار التقديم/), { target: { value: "تجسير" } });
+  expect(screen.getByLabelText(/اسم الجامعة السابقة/)).toBeTruthy();
+  // The guide lists the same explanation and says when the conditional field applies.
+  expect(screen.getByText("دليل تعبئة الاستمارة")).toBeTruthy();
+  expect(screen.getByText("يظهر عند اختيار «تجسير» في «مسار التقديم»")).toBeTruthy();
 });

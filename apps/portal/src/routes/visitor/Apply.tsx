@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Copy, FileUp } from "lucide-react";
+import { BookOpen, Copy, FileUp, Info } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router";
 
@@ -18,9 +18,12 @@ import { SuccessMark } from "../../components/motion";
 import { formData, postWithProgress } from "../../lib/upload";
 import { type Upload as UploadItem, UploadStatus } from "../../components/UploadStatus";
 import {
+  conditionText,
   type Field as FormField,
   fieldsOf,
   type FormSchema,
+  sectionsOf,
+  shown,
   maskEmail,
   readSession,
   type VisitorSession,
@@ -37,6 +40,7 @@ type Application = {
   public_id: string;
   reference_no: string;
   program_name: string;
+  academic_year?: string;
   full_name: string;
   email: string;
   phone_e164: string;
@@ -85,6 +89,8 @@ export function Apply() {
       ).data as unknown as Application,
   });
   const app = application.data;
+  // What the server found missing at submission, shown beside each field (spec §6).
+  const [problems, setProblems] = useState<Record<string, string>>({});
   const refresh = () => client.invalidateQueries({ queryKey: ["visitor", "application", appId] });
 
   if (app && app.status !== "draft" && app.status !== "missing_documents")
@@ -123,6 +129,7 @@ export function Apply() {
       {step === 3 && app && (
         <FormStep
           app={app}
+          problems={problems}
           onNext={async () => {
             await refresh();
             setStep(4);
@@ -143,7 +150,15 @@ export function Apply() {
         />
       )}
       {step === 5 && app && (
-        <ReviewStep app={app} onBack={() => setStep(3)} onSubmitted={refresh} />
+        <ReviewStep
+          app={app}
+          onBack={() => setStep(3)}
+          onSubmitted={refresh}
+          onProblems={(found) => {
+            setProblems(found);
+            setStep(3);
+          }}
+        />
       )}
     </VisitorLayout>
   );
@@ -224,112 +239,285 @@ function ChooseProgram({
   );
 }
 
-function FieldInput({
+/** The server's words for a field's problem, in Arabic. */
+const PROBLEM: Record<string, string> = {
+  "Required.": "هذا الحقل مطلوب.",
+  "Upload this document.": "ارفع هذا المستند.",
+  "Must be text.": "أدخل نصًا.",
+  "Must be a number.": "أدخل رقمًا.",
+  "Must be a year.": "اختر سنة صحيحة.",
+  "Must be an amount.": "أدخل مبلغًا صحيحًا.",
+  "Must be a date (YYYY-MM-DD).": "أدخل تاريخًا صحيحًا.",
+  "Must be true or false.": "اختر نعم أو لا.",
+  "Invalid phone number.": "رقم الهاتف غير صحيح — اكتبه مع مفتاح الدولة.",
+  "Invalid email.": "البريد غير صحيح.",
+  "Out of range.": "القيمة خارج الحدود المسموحة.",
+  "Choose one of the options.": "اختر من الخيارات.",
+  "Choose from the options.": "اختر من الخيارات.",
+  "Invalid format.": "الصيغة غير صحيحة.",
+};
+export const problemText = (message: string) => PROBLEM[message] ?? message;
+
+const INPUT =
+  "mt-1.5 block min-h-11 w-full rounded-lg border border-border bg-surface px-3 text-base text-text outline-none focus:border-primary focus:ring-2 focus:ring-[var(--focus-ring)] aria-invalid:border-danger";
+
+/** One field: a bold label above the input (spec §6), «تعليمات» opening the registrar's
+ *  explanation and example, the error under it. Every input is tied to its label. */
+export function FieldInput({
   field,
   value,
   onChange,
+  error,
 }: {
   field: FormField;
   value: unknown;
   onChange: (v: unknown) => void;
+  error?: string;
 }) {
-  const label = `${field.label}${field.required ? " *" : ""}`;
+  const [open, setOpen] = useState(false);
+  const id = `f-${field.key}`;
+  const helpId = `${id}-help`;
+  const errorId = `${id}-error`;
+  const hasHelp = !!(field.help || field.example);
+  const described = [open && hasHelp ? helpId : "", error ? errorId : ""].filter(Boolean).join(" ");
+  const common = {
+    id,
+    "aria-invalid": error ? true : undefined,
+    "aria-describedby": described || undefined,
+    "aria-required": field.required || undefined,
+  };
   if (field.type === "note")
-    return <p className="px-4 py-3 text-sm text-text-muted">{field.label}</p>;
-  if (field.type === "select") {
     return (
-      <label className="block border-b border-border-soft px-4 py-2.5 last:border-b-0">
-        <span className="block text-xs text-text-muted">{label}</span>
-        <select
-          value={(value as string) ?? ""}
-          onChange={(e) => onChange(e.target.value)}
-          className="mt-1 block min-h-10 w-full bg-transparent text-base"
-        >
-          <option value="">اختر…</option>
-          {(field.options ?? []).map((o) => (
-            <option key={o} value={o}>
-              {o}
-            </option>
-          ))}
-        </select>
-      </label>
+      <p className="rounded-lg bg-info-soft px-3 py-2 text-sm text-info-strong">{field.label}</p>
     );
-  }
-  if (field.type === "multiselect") {
+  const label = (
+    <span className="text-sm font-bold text-text">
+      {field.label}
+      {field.required && (
+        <>
+          <span aria-hidden className="ms-0.5 text-danger-strong">
+            *
+          </span>
+          <span className="sr-only"> (مطلوب)</span>
+        </>
+      )}
+    </span>
+  );
+  const head = (
+    <div className="flex items-start justify-between gap-2">
+      {field.type === "multiselect" ? (
+        <span id={`${id}-label`}>{label}</span>
+      ) : (
+        <label htmlFor={id}>{label}</label>
+      )}
+      {hasHelp && (
+        <button
+          type="button"
+          aria-expanded={open}
+          aria-controls={helpId}
+          onClick={() => setOpen((o) => !o)}
+          className="-my-2 inline-flex min-h-11 shrink-0 items-center gap-1 px-1 text-xs font-semibold text-primary"
+        >
+          <Info size={14} aria-hidden />
+          تعليمات
+          <span className="sr-only"> الحقل: {field.label}</span>
+        </button>
+      )}
+    </div>
+  );
+  const help = hasHelp && (
+    <div
+      id={helpId}
+      hidden={!open}
+      className="mt-1 rounded-lg bg-info-soft px-3 py-2 text-xs leading-6 text-info-strong"
+    >
+      {field.help}
+      {field.example && (
+        <span className="block">
+          مثال: <bdi>{field.example}</bdi>
+        </span>
+      )}
+    </div>
+  );
+  let input;
+  if (field.type === "select") {
+    input = (
+      <select
+        {...common}
+        value={(value as string) ?? ""}
+        onChange={(e) => onChange(e.target.value)}
+        className={INPUT}
+      >
+        <option value="">اختر…</option>
+        {(field.options ?? []).map((o) => (
+          <option key={o} value={o}>
+            {o}
+          </option>
+        ))}
+      </select>
+    );
+  } else if (field.type === "year") {
+    const now = new Date().getFullYear();
+    input = (
+      <select
+        {...common}
+        value={value == null ? "" : String(value)}
+        onChange={(e) => onChange(e.target.value ? Number(e.target.value) : "")}
+        className={INPUT}
+      >
+        <option value="">اختر السنة…</option>
+        {Array.from({ length: 61 }, (_, i) => now + 1 - i).map((y) => (
+          <option key={y} value={y}>
+            {y}
+          </option>
+        ))}
+      </select>
+    );
+  } else if (field.type === "multiselect") {
     const picked = (value as string[]) ?? [];
-    return (
-      <div className="border-b border-border-soft px-4 py-2.5 last:border-b-0">
-        <span className="block text-xs text-text-muted">{label}</span>
-        <div className="mt-2 flex flex-wrap gap-2">
-          {(field.options ?? []).map((o) => (
-            <Chip
-              key={o}
-              active={picked.includes(o)}
-              onClick={() =>
-                onChange(picked.includes(o) ? picked.filter((p) => p !== o) : [...picked, o])
-              }
-            >
-              {o}
-            </Chip>
-          ))}
-        </div>
+    input = (
+      <div
+        role="group"
+        aria-labelledby={`${id}-label`}
+        aria-describedby={described || undefined}
+        className="mt-2 flex flex-wrap gap-2"
+      >
+        {(field.options ?? []).map((o) => (
+          <Chip
+            key={o}
+            active={picked.includes(o)}
+            onClick={() =>
+              onChange(picked.includes(o) ? picked.filter((p) => p !== o) : [...picked, o])
+            }
+          >
+            {o}
+          </Chip>
+        ))}
       </div>
     );
-  }
-  if (field.type === "boolean") {
+  } else if (field.type === "boolean" || field.type === "consent") {
     return (
-      <label className="flex min-h-12 items-center justify-between border-b border-border-soft px-4 last:border-b-0 text-sm">
-        {label}
-        <input
-          type="checkbox"
-          checked={value === true}
-          onChange={(e) => onChange(e.target.checked)}
-          className="size-5 accent-[var(--color-primary)]"
-        />
-      </label>
+      <div>
+        <label className="flex min-h-11 items-start gap-3 text-sm">
+          <input
+            {...common}
+            type="checkbox"
+            checked={value === true}
+            onChange={(e) => onChange(e.target.checked)}
+            className="mt-0.5 size-5 shrink-0 accent-[var(--color-primary)]"
+          />
+          {label}
+        </label>
+        {help}
+        {error && (
+          <p id={errorId} className="mt-1 text-xs text-danger-strong">
+            {problemText(error)}
+          </p>
+        )}
+      </div>
     );
-  }
-  if (field.type === "textarea") {
-    return (
-      <label className="block border-b border-border-soft px-4 py-2.5 last:border-b-0">
-        <span className="block text-xs text-text-muted">{label}</span>
-        <textarea
-          value={(value as string) ?? ""}
-          onChange={(e) => onChange(e.target.value)}
-          className="mt-1 block min-h-24 w-full bg-transparent"
-        />
-      </label>
+  } else if (field.type === "textarea") {
+    input = (
+      <textarea
+        {...common}
+        value={(value as string) ?? ""}
+        onChange={(e) => onChange(e.target.value)}
+        className={`${INPUT} min-h-24 py-2`}
+      />
     );
-  }
-  const type =
-    field.type === "number"
-      ? "number"
-      : field.type === "date"
+  } else {
+    const numeric = field.type === "number" || field.type === "money";
+    const type =
+      field.type === "date"
         ? "date"
         : field.type === "email"
           ? "email"
           : field.type === "phone"
             ? "tel"
             : "text";
+    input = (
+      <input
+        {...common}
+        type={type}
+        inputMode={numeric ? "decimal" : field.type === "phone" ? "tel" : undefined}
+        dir={type === "email" || type === "tel" || numeric ? "ltr" : undefined}
+        value={(value as string | number) ?? ""}
+        placeholder={field.type === "phone" ? "+249…" : undefined}
+        onChange={(e) =>
+          onChange(
+            numeric
+              ? e.target.value === ""
+                ? ""
+                : Number.isNaN(Number(e.target.value))
+                  ? e.target.value
+                  : Number(e.target.value)
+              : e.target.value,
+          )
+        }
+        className={`${INPUT} ${type === "tel" || type === "email" || numeric ? "text-end" : ""}`}
+      />
+    );
+  }
   return (
-    <Field
-      label={label}
-      type={type}
-      value={(value as string | number) ?? ""}
-      min={field.min}
-      max={field.max}
-      onChange={(e) =>
-        onChange(
-          field.type === "number"
-            ? e.target.value === ""
-              ? ""
-              : Number(e.target.value)
-            : e.target.value,
-        )
-      }
-      hint={field.help}
-      dir={type === "email" || type === "tel" ? "ltr" : undefined}
-    />
+    <div>
+      {head}
+      {help}
+      {input}
+      {error && (
+        <p id={errorId} className="mt-1 text-xs text-danger-strong">
+          {problemText(error)}
+        </p>
+      )}
+    </div>
+  );
+}
+
+/** «دليل تعبئة الاستمارة» (spec §7): every section and field the applicant fills, with the
+ *  registrar's explanation and example — the same text «تعليمات» opens, from one source. */
+export function FillingGuide({ schema }: { schema: FormSchema | null | undefined }) {
+  const all = fieldsOf(schema);
+  return (
+    <details className="group rounded-2xl border border-border-soft bg-surface">
+      <summary className="flex min-h-12 cursor-pointer list-none items-center gap-2 px-4 text-sm font-bold text-primary">
+        <BookOpen size={18} aria-hidden />
+        دليل تعبئة الاستمارة
+        <span className="ms-auto text-xs font-normal text-text-muted group-open:hidden">
+          اضغط للعرض
+        </span>
+      </summary>
+      <div className="space-y-4 border-t border-border-soft px-4 py-4 text-sm">
+        {schema?.intro && <p className="leading-7 text-text">{schema.intro}</p>}
+        {sectionsOf(schema).map((section, i) => (
+          <section key={i}>
+            {section.title && <h3 className="font-bold text-text">{section.title}</h3>}
+            <dl className="mt-2 space-y-2">
+              {(section.fields ?? [])
+                .filter((f) => f.type !== "note")
+                .map((f) => (
+                  <div key={f.key}>
+                    <dt className="font-bold text-text">
+                      {f.label}
+                      {f.required && !f.show_if ? " *" : ""}
+                    </dt>
+                    <dd className="text-text-muted">
+                      {f.help || "—"}
+                      {f.example && (
+                        <span className="block">
+                          مثال: <bdi>{f.example}</bdi>
+                        </span>
+                      )}
+                      {conditionText(f, all) && (
+                        <span className="block text-xs">{conditionText(f, all)}</span>
+                      )}
+                    </dd>
+                  </div>
+                ))}
+            </dl>
+          </section>
+        ))}
+        <p className="text-xs text-text-muted">الحقول المعلَّمة بـ * مطلوبة.</p>
+      </div>
+    </details>
   );
 }
 
@@ -338,10 +526,12 @@ const draftClock = new Intl.DateTimeFormat("ar-u-nu-latn", { hour: "numeric", mi
 
 export function FormStep({
   app,
+  problems = {},
   onNext,
   onChangeProgram,
 }: {
   app: Application;
+  problems?: Record<string, string>;
   onNext: () => void;
   onChangeProgram: () => void;
 }) {
@@ -369,12 +559,29 @@ export function FormStep({
   const [answers, setAnswers] = useState<Record<string, unknown>>(
     restored?.answers ?? app.answers ?? {},
   );
-  const fields = fieldsOf(app.form?.schema).filter((f) => f.type !== "file");
-  const visible = (f: FormField) => !f.show_if || answers[f.show_if.key] === f.show_if.equals;
+  const schema = app.form?.schema;
+  const keys = new Set(fieldsOf(schema).map((f) => f.key));
+  // The college's form asks for the name and phone itself (full_name_ar, student_phone): then
+  // the built-in two are not asked twice, and the application's own copies follow the answers.
+  const ownName = keys.has("full_name_ar");
+  const ownPhone = keys.has("student_phone");
+  const name = ownName ? String(answers.full_name_ar ?? "") : fullName;
+  const [cleared, setCleared] = useState<Set<string>>(new Set());
   const patch = async () => {
+    // A field hidden by a condition sends nothing: an old answer is not kept as a live one.
+    const live = Object.fromEntries(
+      Object.entries(answers).filter(([key]) => {
+        const field = fieldsOf(schema).find((f) => f.key === key);
+        return !field || shown(field, answers);
+      }),
+    );
     const { data, error } = await visitorApi.PATCH("/api/visitor/applications/{public_id}", {
       params: { path: { public_id: app.public_id } },
-      body: { full_name: fullName, phone_e164: phone, answers },
+      body: {
+        full_name: name,
+        phone_e164: ownPhone ? String(answers.student_phone ?? "") : phone,
+        answers: live,
+      },
     });
     if (!data) throw error;
   };
@@ -410,10 +617,10 @@ export function FormStep({
       setDraft("device");
       return;
     }
-    if (!fullName.trim()) return;
+    if (!name.trim()) return;
     const timer = window.setTimeout(() => saveDraft(), 1500);
     return () => window.clearTimeout(timer);
-  }, [app.public_id, fullName, phone, answers, online, saveDraft]);
+  }, [app.public_id, fullName, phone, answers, online, saveDraft, name]);
   useEffect(() => {
     const warn = (event: BeforeUnloadEvent) => {
       if (dirty.current) event.preventDefault();
@@ -448,36 +655,69 @@ export function FormStep({
         </button>
       </div>
       {change.isError && <Notice>{problemMessage(change.error)}</Notice>}
-      <Card>
-        <Field
-          label="الاسم الكامل *"
-          value={fullName}
-          onChange={(e) => edited(setFullName)(e.target.value)}
-        />
-        <Field
-          label="الهاتف"
-          type="tel"
-          dir="ltr"
-          value={phone}
-          onChange={(e) => edited(setPhone)(e.target.value)}
-          placeholder="+249…"
-        />
-      </Card>
-      {fields.length > 0 && (
+      {(schema?.title || app.academic_year) && (
+        <div>
+          {schema?.title && <h2 className="text-lg font-bold text-text">{schema.title}</h2>}
+          {app.academic_year && (
+            <p className="text-sm text-text-muted">
+              العام الدراسي <bdi>{app.academic_year}</bdi>
+            </p>
+          )}
+        </div>
+      )}
+      <FillingGuide schema={schema} />
+      {Object.keys(problems).length > cleared.size && (
+        <Notice>أكمل الحقول المعلَّمة أدناه ثم أرسل الطلب.</Notice>
+      )}
+      {(!ownName || !ownPhone) && (
         <Card>
-          {fields.filter(visible).map((f) => (
-            <FieldInput
-              key={f.key}
-              field={f}
-              value={answers[f.key]}
-              onChange={(v) => {
-                dirty.current = true;
-                setAnswers((a) => ({ ...a, [f.key]: v }));
-              }}
+          {!ownName && (
+            <Field
+              label="الاسم الكامل *"
+              value={fullName}
+              onChange={(e) => edited(setFullName)(e.target.value)}
             />
-          ))}
+          )}
+          {!ownPhone && (
+            <Field
+              label="الهاتف"
+              type="tel"
+              dir="ltr"
+              value={phone}
+              onChange={(e) => edited(setPhone)(e.target.value)}
+              placeholder="+249…"
+            />
+          )}
         </Card>
       )}
+      {sectionsOf(schema).map((section, i) => {
+        const items = (section.fields ?? []).filter((f) => f.type !== "file" && shown(f, answers));
+        if (!items.length) return null;
+        return (
+          <Card key={i} className="p-4">
+            {section.title && <h3 className="text-base font-bold text-text">{section.title}</h3>}
+            {section.description && (
+              <p className="mt-0.5 text-sm text-text-muted">{section.description}</p>
+            )}
+            <div className="mt-3 grid gap-4 lg:grid-cols-2">
+              {items.map((f) => (
+                <div key={f.key} className={f.width === "half" ? "" : "lg:col-span-2"}>
+                  <FieldInput
+                    field={f}
+                    value={answers[f.key]}
+                    error={cleared.has(f.key) ? undefined : problems[f.key]}
+                    onChange={(v) => {
+                      dirty.current = true;
+                      setCleared((c) => new Set(c).add(f.key));
+                      setAnswers((a) => ({ ...a, [f.key]: v }));
+                    }}
+                  />
+                </div>
+              ))}
+            </div>
+          </Card>
+        );
+      })}
       <p
         className={`text-xs ${
           draft === "device"
@@ -501,11 +741,13 @@ export function FormStep({
       <Button
         className="w-full"
         onClick={() => save.mutate()}
-        disabled={!fullName.trim() || save.isPending || !online}
+        disabled={!name.trim() || save.isPending || !online}
         why={
           !online
             ? "يحتاج اتصالًا بالإنترنت: يُحفظ ما كتبته على جهازك ويكتمل عند عودة الاتصال"
-            : "أدخل اسمك الكامل للمتابعة"
+            : ownName
+              ? "أدخل اسمك الكامل بالعربية للمتابعة"
+              : "أدخل اسمك الكامل للمتابعة"
         }
       >
         التالي: المستندات
@@ -527,8 +769,22 @@ function DocumentsStep({
 }) {
   const fileFields = fieldsOf(app.form?.schema)
     .filter((f) => f.type === "file")
-    .map((f) => ({ key: f.key, label: f.label, required: f.required }));
-  const needed = [...app.required_documents, ...fileFields];
+    .map((f) => ({
+      key: f.key,
+      label: f.label,
+      required: f.required,
+      accept: f.accept,
+      max_mb: f.max_mb,
+      help: f.help,
+    }));
+  const needed: {
+    key: string;
+    label: string;
+    required?: boolean;
+    accept?: string[];
+    max_mb?: number;
+    help?: string;
+  }[] = [...app.required_documents, ...fileFields];
   // The document's upload as it goes, then its result, on its own row (owner, 2026-10-30).
   const [sent, setSent] = useState<{ key: string; upload: UploadItem; file: File } | null>(null);
   const upload = useMutation({
@@ -564,10 +820,19 @@ function DocumentsStep({
           return (
             <div key={n.key} className="flex flex-wrap items-center gap-3 px-4 py-3">
               <span className="min-w-0 flex-1">
-                <span className="block text-sm font-semibold text-text">
+                <span className="block text-sm font-bold text-text">
                   {n.label}
                   {n.required ? " *" : ""}
                 </span>
+                {(n.help || n.accept || n.max_mb) && (
+                  <span className="block text-xs text-text-muted">
+                    {n.help}
+                    {n.accept &&
+                      ` · ${n.accept.map((a) => a.toUpperCase()).join(" أو ")}${
+                        n.max_mb ? ` حتى ${n.max_mb} MB` : ""
+                      }`}
+                  </span>
+                )}
                 <span className="text-xs text-text-muted">
                   {doc
                     ? `${doc.name} · ${(doc.size / 1024).toFixed(0)} KB · مرفوع ✓`
@@ -582,7 +847,7 @@ function DocumentsStep({
                 <FileUp size={16} aria-hidden /> {doc ? "استبدال" : "رفع"}
                 <input
                   type="file"
-                  accept=".pdf,.jpg,.jpeg,.png"
+                  accept={(n.accept ?? ["pdf", "jpg", "jpeg", "png"]).map((a) => `.${a}`).join(",")}
                   // ui-allow: the offline note under the list says why uploads are off
                   disabled={!online}
                   className="sr-only"
@@ -630,12 +895,15 @@ function ReviewStep({
   app,
   onBack,
   onSubmitted,
+  onProblems,
 }: {
   app: Application;
   onBack: () => void;
   onSubmitted: () => void;
+  onProblems: (problems: Record<string, string>) => void;
 }) {
-  const fields = fieldsOf(app.form?.schema).filter((f) => f.type !== "file" && f.type !== "note");
+  const schema = app.form?.schema;
+  const answers = app.answers ?? {};
   const online = useOnline();
   const [key] = useState(() => crypto.randomUUID());
   const submit = useMutation({
@@ -647,6 +915,21 @@ function ReviewStep({
       if (!data) throw error;
     },
     onSuccess: onSubmitted,
+    onError: (error) => {
+      // Fields of the form go back to it, each with its own message (spec §6).
+      const found = (error as { errors?: Record<string, string[]> } | null)?.errors ?? {};
+      const formKeys = new Set(
+        fieldsOf(schema)
+          .filter((f) => f.type !== "file")
+          .map((f) => f.key),
+      );
+      const mine = Object.fromEntries(
+        Object.entries(found)
+          .filter(([k]) => formKeys.has(k))
+          .map(([k, v]) => [k, v[0] ?? "Required."]),
+      );
+      if (Object.keys(mine).length) onProblems(mine);
+    },
   });
   const show = (v: unknown) =>
     Array.isArray(v)
@@ -655,27 +938,53 @@ function ReviewStep({
         ? "نعم"
         : v === false
           ? "لا"
-          : v === undefined || v === ""
+          : v === undefined || v === null || v === ""
             ? "—"
             : String(v);
+  const keys = new Set(fieldsOf(schema).map((f) => f.key));
+  const basics: [string, string][] = [
+    ...(keys.has("full_name_ar") ? [] : ([["الاسم", app.full_name]] as [string, string][])),
+    ["البريد", app.email],
+    ...(keys.has("student_phone")
+      ? []
+      : ([["الهاتف", app.phone_e164 || "—"]] as [string, string][])),
+  ];
+  const rows = (pairs: [string, string][]) =>
+    pairs.map(([k, v]) => (
+      <div key={k} className="flex justify-between gap-3 px-4 py-2.5">
+        <span className="font-semibold text-text">{k}</span>
+        <span className="text-end text-text" dir="auto">
+          {v}
+        </span>
+      </div>
+    ));
   return (
     <div className="space-y-4">
-      <SectionLabel>البيانات</SectionLabel>
+      <p className="text-sm text-text-muted">
+        راجع بياناتك قبل الإرسال؛ «تعديل» يعيدك إلى الاستمارة.
+      </p>
+      <SectionLabel>البيانات الأساسية</SectionLabel>
       <Card className="divide-y divide-border-soft text-sm">
-        {[
-          ["الاسم", app.full_name],
-          ["البريد", app.email],
-          ["الهاتف", app.phone_e164 || "—"],
-          ...fields.map((f) => [f.label, show(app.answers?.[f.key])]),
-        ].map(([k, v]) => (
-          <div key={String(k)} className="flex justify-between gap-3 px-4 py-2.5">
-            <span className="text-text-muted">{k}</span>
-            <span className="text-end font-medium text-text" dir="auto">
-              {v as string}
-            </span>
-          </div>
-        ))}
+        {rows([
+          ...(app.academic_year ? [["العام الدراسي", app.academic_year]] : []),
+          ["البرنامج", app.program_name],
+          ...basics,
+        ] as [string, string][])}
       </Card>
+      {sectionsOf(schema).map((section, i) => {
+        const items = (section.fields ?? []).filter(
+          (f) => f.type !== "file" && f.type !== "note" && shown(f, answers),
+        );
+        if (!items.length) return null;
+        return (
+          <div key={i}>
+            <SectionLabel>{section.title || "البيانات"}</SectionLabel>
+            <Card className="divide-y divide-border-soft text-sm">
+              {rows(items.map((f) => [f.label, show(answers[f.key])]))}
+            </Card>
+          </div>
+        );
+      })}
       <SectionLabel>المستندات · {app.documents.length}</SectionLabel>
       <Card className="divide-y divide-border-soft text-sm">
         {app.documents.map((d) => (
@@ -685,7 +994,9 @@ function ReviewStep({
         ))}
       </Card>
       {submit.isError && (
-        <Notice>{problemMessage(submit.error, "أكمل الحقول والمستندات المطلوبة.")}</Notice>
+        <Notice>
+          {problemText(problemMessage(submit.error, "أكمل الحقول والمستندات المطلوبة."))}
+        </Notice>
       )}
       <div className="flex gap-2">
         <Button variant="secondary" onClick={onBack}>
@@ -697,7 +1008,7 @@ function ReviewStep({
           disabled={submit.isPending || !online}
           why="إرسال الطلب يحتاج اتصالًا بالإنترنت"
         >
-          إرسال الطلب
+          {submit.isPending ? "جارٍ الإرسال…" : "إرسال الطلب"}
         </Button>
       </div>
     </div>

@@ -35,15 +35,15 @@ test("a visitor verifies the email, fills the application, uploads documents and
   // 3. The application form (default template).
   await expect(page.getByLabel("الاسم الكامل *")).toHaveValue("سلمى عثمان الأمين");
   await page.getByLabel("الهاتف").fill("+249912345678");
-  await page.getByLabel("تاريخ الميلاد *").fill("2008-05-01");
-  await page.getByLabel("نوع الشهادة *").selectOption("سودانية");
-  await page.getByLabel("النسبة المئوية *").fill("82.5");
+  await page.getByLabel(/^تاريخ الميلاد/).fill("2008-05-01");
+  await page.getByLabel(/^نوع الشهادة/).selectOption("سودانية");
+  await page.getByLabel(/^النسبة المئوية/).fill("82.5");
   await page.getByLabel("المدرسة").fill("مدرسة الخرطوم الثانوية");
   // The draft really is saved as the page says (review 2026-10-04 UX1): it survives a reload.
   await expect(page.getByText(/محفوظة على الخادم/)).toBeVisible({ timeout: 8000 });
   await page.reload();
   await expect(page.getByLabel("المدرسة")).toHaveValue("مدرسة الخرطوم الثانوية");
-  await expect(page.getByLabel("النسبة المئوية *")).toHaveValue("82.5");
+  await expect(page.getByLabel(/^النسبة المئوية/)).toHaveValue("82.5");
   await page.getByRole("button", { name: "التالي: المستندات" }).click();
 
   // 4. Documents: the two required ones (a phone camera photo or a PDF).

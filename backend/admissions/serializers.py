@@ -106,7 +106,11 @@ class PublicIntakeSerializer(serializers.ModelSerializer):
             return None
         template = services.template_for(obj)
         return (
-            {"id": template.pk, "version": template.version, "schema": template.schema}
+            {
+                "id": template.pk,
+                "version": template.version,
+                "schema": services.public_schema(template.schema),
+            }
             if template
             else None
         )
@@ -223,6 +227,8 @@ class ApplicantApplicationSerializer(serializers.ModelSerializer):
     """The applicant's view: no internal notes, no reviewer names on internal steps."""
 
     program_name = serializers.CharField(source="intake.program.name_ar", read_only=True)
+    # From the admission cycle, never typed (spec: the year is a setting, not printed text).
+    academic_year = serializers.CharField(source="intake.cycle.academic_year.name", read_only=True)
     intake = serializers.IntegerField(source="intake_id", read_only=True)
     form = serializers.SerializerMethodField()
     required_documents = serializers.JSONField(source="intake.required_documents", read_only=True)
@@ -238,6 +244,7 @@ class ApplicantApplicationSerializer(serializers.ModelSerializer):
             "reference_no",
             "intake",
             "program_name",
+            "academic_year",
             "full_name",
             "email",
             "phone_e164",
@@ -257,7 +264,12 @@ class ApplicantApplicationSerializer(serializers.ModelSerializer):
 
     def get_form(self, obj) -> dict | None:
         t = obj.form_template
-        return {"id": t.pk, "version": t.version, "schema": t.schema} if t else None
+        # Applicant fields only: staff fields stay with the college (owner, 2026-11-01).
+        return (
+            {"id": t.pk, "version": t.version, "schema": services.public_schema(t.schema)}
+            if t
+            else None
+        )
 
     def get_history(self, obj) -> list[dict]:
         return [

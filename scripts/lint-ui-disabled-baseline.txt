@@ -10,7 +10,7 @@ apps/portal/src/routes/admin/Users.tsx 1
 apps/portal/src/routes/admissions/ApplicationDetail.tsx 5
 apps/portal/src/routes/admissions/Applications.tsx 1
 apps/portal/src/routes/admissions/Cycles.tsx 1
-apps/portal/src/routes/admissions/FormBuilder.tsx 7
+apps/portal/src/routes/admissions/FormBuilder.tsx 5
 apps/portal/src/routes/affairs/CaseDetail.tsx 2
 apps/portal/src/routes/affairs/CaseNew.tsx 1
 apps/portal/src/routes/affairs/RegulationDetail.tsx 1

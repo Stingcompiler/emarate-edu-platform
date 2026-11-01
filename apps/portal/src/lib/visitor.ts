@@ -60,23 +60,60 @@ export type Field = {
     | "multiselect"
     | "boolean"
     | "file"
-    | "note";
+    | "note"
+    | "year"
+    | "money"
+    | "consent";
   label: string;
   required?: boolean;
   options?: string[];
+  /** The guide's line for this field: shown under «تعليمات» and in the filling guide. */
   help?: string;
+  /** An example of a good answer, shown with the help. */
+  example?: string;
   min?: number;
   max?: number;
-  show_if?: { key: string; equals: unknown };
+  pattern?: string;
+  accept?: string[];
+  max_mb?: number;
+  /** Who fills it (owner, 2026-11-01): the applicant (default), staff then released to the
+   *  applicant, or staff only. The applicant's form never carries the last two. */
+  audience?: "applicant" | "release" | "staff";
+  /** Half a row beside another half on large screens; always one column on phones. */
+  width?: "full" | "half";
+  show_if?: { key: string; equals?: unknown; in?: unknown[] };
 };
+export type Section = { title?: string; description?: string; fields?: Field[] };
 export type FormSchema = {
-  steps?: { title?: string; sections?: { title?: string; fields?: Field[] }[] }[];
+  /** What the applicant reads at the top of the form and of the guide. */
+  title?: string;
+  intro?: string;
+  steps?: { title?: string; sections?: Section[] }[];
 };
 
 export function fieldsOf(schema: FormSchema | null | undefined): Field[] {
-  return (schema?.steps ?? []).flatMap((s) =>
-    (s.sections ?? []).flatMap((sec) => sec.fields ?? []),
-  );
+  return sectionsOf(schema).flatMap((sec) => sec.fields ?? []);
+}
+
+export function sectionsOf(schema: FormSchema | null | undefined): Section[] {
+  return (schema?.steps ?? []).flatMap((s) => s.sections ?? []);
+}
+
+/** Whether a field shows for these answers (the server applies the same rule). */
+export function shown(field: Field, answers: Record<string, unknown>): boolean {
+  const rule = field.show_if;
+  if (!rule) return true;
+  const value = answers[rule.key];
+  return rule.in ? rule.in.includes(value) : value === rule.equals;
+}
+
+/** What a reader is told about a condition, in the guide (spec §7). */
+export function conditionText(field: Field, fields: Field[]): string | null {
+  const rule = field.show_if;
+  if (!rule) return null;
+  const target = fields.find((f) => f.key === rule.key)?.label ?? rule.key;
+  const values = (rule.in ?? [rule.equals]).map(String).join(" أو ");
+  return `يظهر عند اختيار «${values}» في «${target}»`;
 }
 
 export const STATUS_LABEL: Record<string, string> = {
