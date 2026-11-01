@@ -160,7 +160,8 @@ export function SiteHome() {
                   <FileText size={18} className="text-text-muted" aria-hidden />
                   <span className="min-w-0 flex-1">
                     <span className="block text-sm font-semibold text-text">{p.title_ar}</span>
-                    <span className="text-xs text-text-muted" dir="ltr">
+                    {/* Long paths wrap beside the wider «منشورة · لا تظهر» (360 px, larger text). */}
+                    <span className="block text-xs break-all text-text-muted" dir="ltr">
                       /{p.path}/
                     </span>
                   </span>
