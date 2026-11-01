@@ -38,7 +38,7 @@ export function PrintTranscript() {
       }
       footer="هذا السجل يعرض النتائج المعتمدة والمنشورة فقط. أي كشط أو تعديل يلغيه."
     >
-      <div className="grid grid-cols-2 gap-x-6 gap-y-1">
+      <div className="grid gap-x-6 gap-y-1 sm:grid-cols-2 print:grid-cols-2">
         <p>
           <span className="text-n600">الاسم: </span>
           <b>{d.full_name_ar}</b>
@@ -61,7 +61,7 @@ export function PrintTranscript() {
           {num(d.level)} · {d.status}
         </p>
       </div>
-      <div className="flex gap-6 rounded bg-n50 p-3">
+      <div className="flex flex-wrap gap-x-6 gap-y-1 rounded bg-n50 p-3">
         <p>
           المعدل التراكمي{" "}
           <b className="text-lg" dir="ltr">
