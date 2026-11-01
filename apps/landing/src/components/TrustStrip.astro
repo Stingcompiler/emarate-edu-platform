@@ -13,12 +13,21 @@ interface Props {
   programs: number;
   departments: number;
   class?: string;
+  /** Whether «الاعتماد والاعتراف» is published: the licence line links there only then. */
+  accreditationPage?: boolean;
 }
-const { lang, site, programs, departments, class: className = "" } = Astro.props;
+const {
+  lang,
+  site,
+  programs,
+  departments,
+  class: className = "",
+  accreditationPage = false,
+} = Astro.props;
 const licence = pick(lang, site.licence_ar ?? "", site.licence_en);
 const licenceHref = site.licence_url?.startsWith("/")
   ? site.licence_url
-  : site.licence_url || href(lang, "about/accreditation/");
+  : site.licence_url || (accreditationPage ? href(lang, "about/accreditation/") : undefined);
 const figures = [
   ...(site.founded_year
     ? [{ value: String(site.founded_year), label: lang === "ar" ? "سنة التأسيس" : "founded" }]

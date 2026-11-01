@@ -12,6 +12,7 @@ import {
   events,
   news,
   page,
+  pages,
   programs,
   site,
   stats,
@@ -44,6 +45,12 @@ const [s, all, st, upcoming, latest, depts, notes, dean, members] = await Promis
   page("about/dean"), // shown here once the site manager publishes it
   staff(),
 ]);
+// Official pages (fees, accreditation…) are linked only once the site manager publishes them:
+// before, the links led to «الصفحة غير موجودة» (owner, 2026-11-01).
+const published = new Set((await pages()).map((p) => p.path));
+const OFFICIAL = ["admissions/fees", "about/accreditation"];
+const live = ([, url]: string[]) =>
+  !OFFICIAL.some((path) => url!.endsWith(`/${path}/`) && !published.has(path));
 const deanWords = (dean?.blocks ?? [])
   .filter((b) => b.type === "paragraph" && b.text)
   .map((b) => b.text!)
@@ -324,6 +331,7 @@ const jsonLd = {
       site={s}
       programs={st.programs || all.length}
       departments={st.departments || depts.length}
+      accreditationPage={published.has("about/accreditation")}
       class="pb-10"
     />
   </section>
@@ -376,7 +384,7 @@ const jsonLd = {
             {a.title}
           </h2>
           <ul class="mt-3 space-y-1">
-            {a.links.map(([label, url]) => (
+            {a.links.filter(live).map(([label, url]) => (
               <li>
                 <a
                   href={url}
