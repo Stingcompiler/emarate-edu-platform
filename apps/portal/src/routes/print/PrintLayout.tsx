@@ -3,6 +3,7 @@ import { type ReactNode, useEffect } from "react";
 import { useNavigate } from "react-router";
 
 import { Button } from "../../components/ui";
+import { useSiteLogo } from "../../lib/site";
 
 /**
  * A4 print page, outside the portal chrome. "طباعة / PDF" opens the browser's
@@ -21,6 +22,7 @@ export function PrintLayout({
   footer?: ReactNode;
 }) {
   const navigate = useNavigate();
+  const logo = useSiteLogo();
   useEffect(() => {
     document.title = `${title} — كلية الإمارات`;
   }, [title]);
@@ -37,12 +39,20 @@ export function PrintLayout({
           <Printer size={16} aria-hidden /> طباعة / حفظ PDF
         </Button>
       </div>
-      <article className="mx-auto max-w-[210mm] bg-white px-[14mm] py-[12mm] text-[13px] text-n900 shadow-sm print:max-w-none print:p-0 print:shadow-none">
+      {/* A4 margins on paper and large screens; a phone keeps its width for the table (owner
+          report 2026-11-01: the results table ran past the page on a phone). */}
+      <article className="mx-auto max-w-[210mm] bg-white px-4 py-5 text-[13px] text-n900 shadow-sm sm:px-[14mm] sm:py-[12mm] print:max-w-none print:p-0 print:shadow-none">
         {/* ui-allow: the letterhead rule of a printed document */}
-        <header className="flex items-start justify-between gap-4 border-b-2 border-navy-800 pb-3">
-          <div>
-            <p className="text-xs font-semibold text-navy-700">كلية الإمارات للعلوم والتكنولوجيا</p>
-            <h1 className="mt-1 text-xl font-bold text-navy-900">{title}</h1>
+        <header className="flex flex-wrap items-start justify-between gap-x-4 gap-y-2 border-b-2 border-navy-800 pb-3">
+          <div className="flex min-w-0 items-center gap-3">
+            {/* The college's mark from the site settings (its identity, not a fixed text). */}
+            <img src={logo} alt="" className="size-11 shrink-0 object-contain" />
+            <div className="min-w-0">
+              <p className="text-xs font-semibold text-navy-700">
+                كلية الإمارات للعلوم والتكنولوجيا
+              </p>
+              <h1 className="mt-1 text-xl font-bold text-navy-900">{title}</h1>
+            </div>
           </div>
           <div className="text-end text-[11px] leading-5 text-n600">{meta}</div>
         </header>
@@ -55,36 +65,61 @@ export function PrintLayout({
   );
 }
 
-export function PrintTable({ head, rows }: { head: string[]; rows: ReactNode[][] }) {
+/** A table of the document. On a phone the cells tighten, codes and numbers never break,
+ *  and a table still wider than the screen scrolls inside its frame (never the page); on paper
+ *  it prints at full width. */
+export function PrintTable({
+  head,
+  rows,
+  label,
+}: {
+  head: string[];
+  rows: ReactNode[][];
+  label?: string;
+}) {
   return (
-    <table className="w-full border-collapse text-[12px]">
-      <thead>
-        <tr className="bg-n50">
-          {head.map((h) => (
-            <th key={h} className="border border-n200 px-2 py-1.5 text-start font-semibold">
-              {h}
-            </th>
-          ))}
-        </tr>
-      </thead>
-      <tbody>
-        {rows.map((r, i) => (
-          <tr key={i} className="break-inside-avoid">
-            {r.map((c, j) => (
-              <td key={j} className="border border-n200 px-2 py-1.5">
-                {c}
-              </td>
+    <div
+      role="region"
+      aria-label={label ?? head.join("، ")}
+      tabIndex={0}
+      className="max-w-full overflow-x-auto print:overflow-visible"
+    >
+      <table className="w-full border-collapse text-[11px] sm:text-[12px]">
+        <thead>
+          <tr className="bg-n50">
+            {head.map((h) => (
+              <th
+                key={h}
+                className="border border-n200 px-1 py-1.5 text-start font-semibold whitespace-nowrap sm:px-2"
+              >
+                {h}
+              </th>
             ))}
           </tr>
-        ))}
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          {rows.map((r, i) => (
+            <tr key={i} className="break-inside-avoid">
+              {r.map((c, j) => (
+                <td
+                  key={j}
+                  // The second column is the name: it may wrap; codes and figures do not.
+                  className={`border border-n200 px-1 py-1.5 sm:px-2 ${j === 1 ? "min-w-20" : "whitespace-nowrap"}`}
+                >
+                  {c}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 }
 
 export function PrintStats({ items }: { items: [ReactNode, string][] }) {
   return (
-    <div className="grid grid-cols-4 gap-2">
+    <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 print:grid-cols-4">
       {items.map(([v, l]) => (
         <div key={l} className="rounded border border-n200 p-2">
           <p className="text-lg font-bold">{v}</p>
