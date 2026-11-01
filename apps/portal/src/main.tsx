@@ -77,6 +77,7 @@ const Applications = page(() => import("./routes/admissions/Applications"), "App
 const Cycles = page(() => import("./routes/admissions/Cycles"), "Cycles");
 const FormBuilder = page(() => import("./routes/admissions/FormBuilder"), "FormBuilder");
 const Apply = page(() => import("./routes/visitor/Apply"), "Apply");
+const Guide = page(() => import("./routes/visitor/Guide"), "Guide");
 const Track = page(() => import("./routes/visitor/Track"), "Track");
 const CaseDetail = page(() => import("./routes/affairs/CaseDetail"), "CaseDetail");
 const CaseNew = page(() => import("./routes/affairs/CaseNew"), "CaseNew");
@@ -207,6 +208,7 @@ const router = createBrowserRouter([
   { path: "/change-password", element: <ChangePassword /> },
   // Visitors (no account): apply and track — the public site links here (docs/03 §4).
   { path: "/apply", element: <Apply /> },
+  { path: "/apply/guide", element: <Guide /> },
   { path: "/track", element: <Track /> },
   // Role dashboards arrive with Phase 10; until then home is the notification centre.
   { path: "/", element: signedIn(<Home />, "/") },

@@ -69,3 +69,14 @@ test("a visitor verifies the email, fills the application, uploads documents and
   await expect(page).toHaveURL(/\/track/);
   await expect(page.getByText(reference)).toBeVisible();
 });
+
+test("the filling guide lists the form's fields with their explanations and prints (owner, 2026-11-01)", async ({
+  page,
+}) => {
+  await page.goto("/apply/guide?program=BIT");
+  await expect(page.getByRole("heading", { name: "دليل تعبئة الاستمارة" })).toBeVisible();
+  await expect(page.getByRole("term").filter({ hasText: "المدرسة" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "المستندات المطلوبة" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "طباعة / حفظ PDF" })).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+});

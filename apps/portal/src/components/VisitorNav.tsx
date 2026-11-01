@@ -25,7 +25,7 @@ export function VisitorNav() {
   const away = hidden && !open;
   return (
     <header
-      className={`sticky top-0 z-30 border-b border-border-soft bg-surface/95 backdrop-blur transition-transform duration-200 focus-within:translate-y-0 motion-reduce:transition-none ${
+      className={`sticky top-0 z-30 border-b border-border-soft bg-surface/95 backdrop-blur transition-transform print:hidden duration-200 focus-within:translate-y-0 motion-reduce:transition-none ${
         away ? "-translate-y-full" : "translate-y-0"
       }`}
     >

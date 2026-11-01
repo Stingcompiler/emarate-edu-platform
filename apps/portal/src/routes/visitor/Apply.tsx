@@ -475,7 +475,6 @@ export function FieldInput({
 /** «دليل تعبئة الاستمارة» (spec §7): every section and field the applicant fills, with the
  *  registrar's explanation and example — the same text «تعليمات» opens, from one source. */
 export function FillingGuide({ schema }: { schema: FormSchema | null | undefined }) {
-  const all = fieldsOf(schema);
   return (
     <details className="group rounded-2xl border border-border-soft bg-surface">
       <summary className="flex min-h-12 cursor-pointer list-none items-center gap-2 px-4 text-sm font-bold text-primary">
@@ -486,38 +485,64 @@ export function FillingGuide({ schema }: { schema: FormSchema | null | undefined
         </span>
       </summary>
       <div className="space-y-4 border-t border-border-soft px-4 py-4 text-sm">
-        {schema?.intro && <p className="leading-7 text-text">{schema.intro}</p>}
-        {sectionsOf(schema).map((section, i) => (
-          <section key={i}>
-            {section.title && <h3 className="font-bold text-text">{section.title}</h3>}
-            <dl className="mt-2 space-y-2">
-              {(section.fields ?? [])
-                .filter((f) => f.type !== "note")
-                .map((f) => (
-                  <div key={f.key}>
-                    <dt className="font-bold text-text">
-                      {f.label}
-                      {f.required && !f.show_if ? " *" : ""}
-                    </dt>
-                    <dd className="text-text-muted">
-                      {f.help || "—"}
-                      {f.example && (
-                        <span className="block">
-                          مثال: <bdi>{f.example}</bdi>
-                        </span>
-                      )}
-                      {conditionText(f, all) && (
-                        <span className="block text-xs">{conditionText(f, all)}</span>
-                      )}
-                    </dd>
-                  </div>
-                ))}
-            </dl>
-          </section>
-        ))}
-        <p className="text-xs text-text-muted">الحقول المعلَّمة بـ * مطلوبة.</p>
+        <GuideSections schema={schema} />
+        <Link to="/apply/guide" target="_blank" className="tap-44 font-semibold text-primary">
+          الدليل كاملًا للطباعة أو حفظه PDF
+        </Link>
       </div>
     </details>
+  );
+}
+
+/** The guide's body (spec §7): the intro, then every section and field the applicant fills,
+ *  the label in bold with the explanation, the example and any condition under it. One source
+ *  for «تعليمات», the in-form guide and the printable page. */
+export function GuideSections({
+  schema,
+  level = 3,
+}: {
+  schema: FormSchema | null | undefined;
+  level?: 2 | 3;
+}) {
+  const all = fieldsOf(schema);
+  const Heading = `h${level}` as const;
+  return (
+    <>
+      {schema?.intro && <p className="leading-7 text-text">{schema.intro}</p>}
+      {sectionsOf(schema).map((section, i) => (
+        <section key={i} className="break-inside-avoid">
+          {section.title && <Heading className="font-bold text-text">{section.title}</Heading>}
+          {section.description && <p className="text-xs text-text-muted">{section.description}</p>}
+          <dl className="mt-2 space-y-2">
+            {(section.fields ?? [])
+              .filter((f) => f.type !== "note")
+              .map((f) => (
+                <div key={f.key} className="break-inside-avoid">
+                  <dt className="font-bold text-text">
+                    {f.label}
+                    {f.required && !f.show_if ? " *" : ""}
+                  </dt>
+                  <dd className="text-text-muted">
+                    {f.help || "—"}
+                    {f.example && (
+                      <span className="block">
+                        مثال: <bdi>{f.example}</bdi>
+                      </span>
+                    )}
+                    {conditionText(f, all) && (
+                      <span className="block text-xs">
+                        {conditionText(f, all)}
+                        {f.required ? "، ويكون مطلوبًا عندها" : ""}
+                      </span>
+                    )}
+                  </dd>
+                </div>
+              ))}
+          </dl>
+        </section>
+      ))}
+      <p className="text-xs text-text-muted">الحقول المعلَّمة بـ * مطلوبة.</p>
+    </>
   );
 }
 
