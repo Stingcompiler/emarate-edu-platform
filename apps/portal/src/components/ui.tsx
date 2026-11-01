@@ -264,7 +264,8 @@ export function EmptyState({
       </div>
       <p className="mt-4 font-semibold text-text">{title}</p>
       {children && (
-        <p className="mt-1 max-w-sm text-sm leading-relaxed text-text-muted">{children}</p>
+        // A div: the text may come with a button (NoAccess), never valid inside a <p>.
+        <div className="mt-1 max-w-sm text-sm leading-relaxed text-text-muted">{children}</div>
       )}
     </div>
   );

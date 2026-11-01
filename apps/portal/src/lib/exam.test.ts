@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { formatClock, pendingStore, textParts } from "./exam";
+import { formatClock, pendingStore, positionStore, textParts } from "./exam";
 
 describe("formatClock", () => {
   it.each([
@@ -54,5 +54,15 @@ describe("pendingStore", () => {
     store.put(1, "answer");
     expect(store.read()).toEqual({ "1": "answer" });
     expect(store.persisted()).toBe(false);
+  });
+});
+
+describe("positionStore", () => {
+  it("remembers the question the student is on, per attempt", () => {
+    localStorage.clear();
+    expect(positionStore("a").read()).toBe(0);
+    positionStore("a").write(4);
+    expect(positionStore("a").read()).toBe(4);
+    expect(positionStore("b").read()).toBe(0);
   });
 });

@@ -180,6 +180,28 @@ export function flagsStore(attemptId: string) {
   };
 }
 
+/** The question the student is on, so reopening the attempt resumes there (the exam page
+ *  promises «تُستأنف المحاولة من حيث توقفت»; exam test 2026-11-01 found it back at 1). */
+export function positionStore(attemptId: string) {
+  const key = `exam:${attemptId}:at`;
+  return {
+    read(): number {
+      try {
+        return Number(localStorage.getItem(key)) || 0;
+      } catch {
+        return 0;
+      }
+    },
+    write(index: number) {
+      try {
+        localStorage.setItem(key, String(index));
+      } catch {
+        /* ignore */
+      }
+    },
+  };
+}
+
 /** Question text may carry ```code``` fences; split them for rendering. */
 export function textParts(text: string): { code: boolean; value: string }[] {
   return text
