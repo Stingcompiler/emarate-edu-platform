@@ -14,6 +14,7 @@ from .models import (
     SiteSettings,
 )
 from .official import BY_SLUG, public_path
+from .placeholder import has_content, leftover_guidance
 from .sanitize import clean_blocks, clean_html
 
 MAX_IMAGE_MB = 5
@@ -87,10 +88,14 @@ class PageSerializer(serializers.ModelSerializer):
             "updated_at",
             "path",
             "official",
+            "has_content",
         ]
         read_only_fields = ["public_id", "updated_at"]
 
     path = serializers.SerializerMethodField()
+    # Whether the site shows it: a page of sample text or guidance only is not built (review
+    # 2026-11-01); the editor says so instead of letting «منشورة» look live.
+    has_content = serializers.SerializerMethodField()
     # One of the college's official pages (content/official.py): its slug is fixed.
     official = serializers.SerializerMethodField()
 
@@ -99,6 +104,31 @@ class PageSerializer(serializers.ModelSerializer):
 
     def get_official(self, page) -> bool:
         return page.slug in BY_SLUG
+
+    def get_has_content(self, page) -> bool:
+        return has_content(page.blocks)
+
+    def validate(self, attrs):
+        """An official page is never published with the system's writing guidance still in it:
+        the guidance has no sample mark, so it would show to visitors as the college's text."""
+        status = attrs.get("status", getattr(self.instance, "status", None))
+        if status == "published":
+            slug = attrs.get("slug", getattr(self.instance, "slug", ""))
+            blocks = attrs.get("blocks", getattr(self.instance, "blocks", []))
+            left = leftover_guidance(slug, blocks)
+            if left:
+                raise serializers.ValidationError(
+                    {
+                        "blocks": [
+                            gettext(
+                                "Replace the writing guidance with the college's text before "
+                                "publishing: %(sections)s"
+                            )
+                            % {"sections": "، ".join(left)}
+                        ]
+                    }
+                )
+        return attrs
 
     def validate_slug(self, value):
         if self.instance and self.instance.slug in BY_SLUG and value != self.instance.slug:

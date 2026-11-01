@@ -73,9 +73,12 @@ class _Managed(viewsets.ModelViewSet):
 
     def perform_update(self, serializer):
         old = snapshot(serializer.instance)
+        was_live = getattr(serializer.instance, "status", None) == Status.PUBLISHED
         obj = self._stamp(serializer.save())
         record(_meta(self.request), f"{self.audit_name}.update", obj, old=old, new=snapshot(obj))
-        self._maybe_rebuild(obj)
+        # Taking an item down rebuilds too (review 2026-11-01): the editor promises it leaves
+        # the site, which otherwise kept it until the six-hourly build.
+        self._maybe_rebuild(obj, was_live=was_live)
 
     def perform_destroy(self, instance):
         record(_meta(self.request), f"{self.audit_name}.delete", instance, old=snapshot(instance))
@@ -95,8 +98,8 @@ class _Managed(viewsets.ModelViewSet):
             obj.save(update_fields=["publish_at"])
         return obj
 
-    def _maybe_rebuild(self, obj):
-        if getattr(obj, "status", None) == Status.PUBLISHED or obj.__class__ is Event:
+    def _maybe_rebuild(self, obj, *, was_live: bool = False):
+        if was_live or getattr(obj, "status", None) == Status.PUBLISHED or obj.__class__ is Event:
             services.request_site_rebuild()
 
 
@@ -338,7 +341,14 @@ class AnnouncementViewSet(viewsets.ModelViewSet):
             }
         )
         old = snapshot(obj)
+        was_public = obj.audience == Announcement.Audience.PUBLIC and obj.status == Status.PUBLISHED
         obj = serializer.save()
+        # A public announcement on the site: any change to a live one, or one going live, is
+        # rebuilt (review 2026-11-01: edits and take-downs waited for the six-hourly build).
+        if was_public or (
+            obj.audience == Announcement.Audience.PUBLIC and obj.status == Status.PUBLISHED
+        ):
+            services.request_site_rebuild()
         record(
             _meta(self.request),
             "announcement.update",
@@ -365,7 +375,13 @@ class AnnouncementViewSet(viewsets.ModelViewSet):
             old=snapshot(instance),
             department_id=_department(instance),
         )
+        was_public = (
+            instance.audience == Announcement.Audience.PUBLIC
+            and instance.status == Status.PUBLISHED
+        )
         instance.delete()
+        if was_public:
+            services.request_site_rebuild()
 
     @extend_schema(request=None, responses=AnnouncementSerializer)
     @action(detail=True, methods=["post"])
@@ -385,9 +401,12 @@ class AnnouncementViewSet(viewsets.ModelViewSet):
     def archive(self, request, public_id=None):
         obj = self.get_object()
         self._still_allowed(obj)
+        was_public = obj.audience == Announcement.Audience.PUBLIC and obj.status == Status.PUBLISHED
         obj.status = Status.ARCHIVED
         obj.save(update_fields=["status", "updated_at"])
         record(_meta(request), "announcement.archive", obj, department_id=_department(obj))
+        if was_public:
+            services.request_site_rebuild()
         return Response(self.get_serializer(obj).data)
 
 

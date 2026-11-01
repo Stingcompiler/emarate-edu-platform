@@ -27,7 +27,10 @@ function useSiteLinks(): [string, string][] {
     retry: false,
     meta: { silent: true },
   });
-  const paths = new Set((published.data ?? []).map((p) => p.path));
+  // Published *and* built: a page of sample text or guidance only is not on the site.
+  const paths = new Set(
+    (published.data ?? []).filter((p) => p.has_content !== false).map((p) => p.path),
+  );
   return SITE_LINKS.filter(([, , page]) => !page || paths.has(page)).map(([label, path]) => [
     label,
     path,

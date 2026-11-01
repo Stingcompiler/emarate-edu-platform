@@ -306,7 +306,12 @@ def test_official_pages_start_as_drafts_and_go_live_at_their_path(api, site):
 
     url = f"/api/v1/content/pages/{dean['public_id']}"
     assert api(site).patch(url, {"slug": "dean"}, format="json").status_code == 400  # fixed
-    assert api(site).patch(url, {"status": "published"}, format="json").status_code == 200
+    # The writing guidance is never published as the college's text (review 2026-11-01).
+    guided = api(site).patch(url, {"status": "published"}, format="json")
+    assert guided.status_code == 400 and "كلمة ترحيب" not in str(guided.data)
+    words = [{"type": "paragraph", "text": "أهلًا بكم في الكلية."}]
+    published = api(site).patch(url, {"status": "published", "blocks": words}, format="json")
+    assert published.status_code == 200 and published.data["has_content"] is True
     assert api().get("/api/public/pages/about/dean").data["title_ar"] == "كلمة العميد"
     free = api(site).post(
         "/api/v1/content/pages",
@@ -582,3 +587,56 @@ def test_events_manager_writes_linked_news_only(api, make_user, site):
     assert api(events).patch(own, {"event": None}, format="json").status_code == 400
     assert api(events).patch(own, {"title": "تحديث"}, format="json").status_code == 200
     assert api(site).get(news).data["count"] == 2
+
+
+@pytest.mark.django_db
+def test_the_site_shows_what_the_editor_says_and_rebuilds_on_take_down(api, site, monkeypatch):
+    """Owner review 2026-11-01: a page of sample text only is «published» but not built — the
+    API says so; unpublishing rebuilds the site; scheduled items rebuild when they fall due."""
+    from datetime import timedelta
+
+    from django.core.cache import cache
+    from django.utils import timezone
+
+    from content import services, tasks
+    from content.models import Page, Status
+
+    calls = []
+    monkeypatch.setattr(services, "request_site_rebuild", lambda: calls.append(1))
+    monkeypatch.setattr(
+        "content.tasks.request_site_rebuild", lambda: calls.append(1), raising=False
+    )
+    sample = api(site).post(
+        "/api/v1/content/pages",
+        {
+            "slug": "sample",
+            "title_ar": "صفحة",
+            "status": "published",
+            "blocks": [
+                {"type": "heading", "text": "عنوان"},
+                {"type": "paragraph", "text": "(نص تجريبي) فقرة"},
+            ],
+        },
+        format="json",
+    )
+    assert sample.status_code == 201 and sample.data["has_content"] is False
+    refs = {p["slug"]: p for p in api().get("/api/public/pages").data}
+    assert refs["sample"]["has_content"] is False
+    url = f"/api/v1/content/pages/{sample.data['public_id']}"
+    calls.clear()
+    assert api(site).patch(url, {"status": "draft"}, format="json").status_code == 200
+    assert calls, "taking a page down rebuilds the site"
+    calls.clear()
+    assert api(site).patch(url, {"title_ar": "مسودة"}, format="json").status_code == 200
+    assert not calls  # a draft's edit changes nothing on the site
+
+    cache.delete("site-due-checked")
+    Page.objects.create(
+        slug="later",
+        title_ar="لاحقًا",
+        status=Status.PUBLISHED,
+        publish_at=timezone.now() - timedelta(minutes=1),
+    )
+    calls.clear()
+    assert tasks.rebuild_when_due() is True and calls
+    assert tasks.rebuild_when_due() is False  # already handled
