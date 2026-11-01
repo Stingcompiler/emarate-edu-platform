@@ -435,3 +435,48 @@ def test_staff_fill_the_college_fields_and_release_some(
         format="json",
     )
     assert taken.status_code == 400 and "university_number" in taken.data["errors"]
+
+
+def test_a_condition_needs_answers_and_an_unpublished_copy_falls_back(
+    api,
+    intake,  # noqa: F811
+    make_user,
+):
+    empty = {
+        "steps": [
+            {
+                "sections": [
+                    {
+                        "fields": [
+                            {"key": "p", "type": "select", "label": "م", "options": ["أ"]},
+                            {
+                                "key": "q",
+                                "type": "text",
+                                "label": "ق",
+                                "show_if": {"key": "p", "in": []},
+                            },
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+    assert any("choose the answers" in p for p in services.check_schema(empty))
+    head = make_user(Role.HEAD_REGISTRAR)
+    copy = ApplicationFormTemplate.objects.create(
+        name="استمارة التجسير", schema=COLLEGE, created_by=head
+    )
+    url = f"/api/v1/intakes/{intake.id}"
+    # Only a published form can be linked (review R19): a draft copy is refused.
+    assert api(head).patch(url, {"form_template": copy.id}, format="json").status_code == 400
+    copy.status = "published"
+    copy.save()
+    linked = api(head).patch(url, {"form_template": copy.id}, format="json")
+    assert linked.status_code == 200, linked.data
+    intake.refresh_from_db()
+    assert services.template_for(intake).pk == copy.pk
+    # Its newer published version replaces it for new applications.
+    v2 = ApplicationFormTemplate.objects.create(
+        name=copy.name, version=2, status="published", schema=COLLEGE, created_by=head
+    )
+    assert services.template_for(intake).pk == v2.pk

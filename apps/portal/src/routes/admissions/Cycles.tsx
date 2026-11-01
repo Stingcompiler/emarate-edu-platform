@@ -38,6 +38,31 @@ export function Cycles() {
     queryFn: async () =>
       ok(await api.GET("/api/v1/programs", { params: { query: ALL } }))?.results ?? [],
   });
+  // Which form a programme uses (spec §5): the college's default unless one is chosen; the
+  // newest published version of that form is offered to applicants.
+  const templates = useQuery({
+    queryKey: ["admissions", "templates"],
+    queryFn: async () =>
+      ok(await api.GET("/api/v1/form-templates", { params: { query: ALL } }))?.results ?? [],
+  });
+  // Published forms only (a draft could still change under its version); one per name.
+  const forms = [
+    ...new Map(
+      (templates.data ?? [])
+        .filter((tpl) => tpl.status === "published")
+        .map((tpl) => [tpl.name, tpl] as const),
+    ).values(),
+  ].filter((tpl) => tpl.name !== "default");
+  const linkForm = useMutation({
+    mutationFn: async ({ id, form_template }: { id: number; form_template: number | null }) => {
+      const { data, error } = await api.PATCH("/api/v1/intakes/{id}", {
+        params: { path: { id } },
+        body: { form_template } as never,
+      });
+      if (!data) throw error;
+    },
+    onSuccess: () => client.invalidateQueries({ queryKey: ["admissions", "intakes"] }),
+  });
   const toggle = useMutation({
     mutationFn: async ({ id, is_open }: { id: number; is_open: boolean }) => {
       const { data, error } = await api.PATCH("/api/v1/intakes/{id}", {
@@ -207,6 +232,36 @@ export function Cycles() {
                       </span>
                     </span>
                   ) : null}
+                  {forms.length > 0 && (
+                    <label className="mt-1.5 flex items-center gap-2 text-xs text-text-muted">
+                      الاستمارة:
+                      <select
+                        value={
+                          forms.find(
+                            (f) =>
+                              f.name ===
+                              (templates.data ?? []).find((tpl) => tpl.id === i.form_template)
+                                ?.name,
+                          )?.id ?? ""
+                        }
+                        disabled={linkForm.isPending}
+                        onChange={(e) =>
+                          linkForm.mutate({
+                            id: i.id,
+                            form_template: e.target.value ? Number(e.target.value) : null,
+                          })
+                        }
+                        className="min-h-11 rounded-lg border border-border bg-surface px-2 text-xs text-text sm:min-h-9"
+                      >
+                        <option value="">الاستمارة الافتراضية</option>
+                        {forms.map((f) => (
+                          <option key={f.id} value={f.id}>
+                            {f.name}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                  )}
                 </span>
 
                 {/* Top-aligned beside the name: centred, it sat over the seats percentage. */}
@@ -234,9 +289,9 @@ export function Cycles() {
               <p className="text-sm text-text-muted">كل البرامج مضافة إلى هذه الدورة.</p>
             )}
           </div>
-          {(toggle.isError || add.isError) && (
+          {(toggle.isError || add.isError || linkForm.isError) && (
             <div className="mt-3">
-              <Notice>{problemMessage(toggle.error ?? add.error)}</Notice>
+              <Notice>{problemMessage(toggle.error ?? add.error ?? linkForm.error)}</Notice>
             </div>
           )}
         </>

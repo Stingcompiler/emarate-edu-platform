@@ -227,6 +227,8 @@ def check_schema(schema: dict) -> list[str]:
             target = next((f for f in seen if f.get("key") == condition.get("key")), None)
             if target is None:
                 problems.append(f"{key}: show_if must name a field above it.")
+            elif "in" in condition and not (isinstance(condition["in"], list) and condition["in"]):
+                problems.append(f"{key}: choose the answers that show this field.")
             elif audience(field) == "applicant" and audience(target) != "applicant":
                 problems.append(f"{key}: show_if must name a field the applicant fills.")
         seen.append(field)
@@ -364,14 +366,12 @@ def template_for(intake: ProgramIntake) -> ApplicationFormTemplate | None:
     """The published version of the intake's form (or of "default"). Never a draft, which may
     still change under its version number; a newer published version replaces a retired one.
     The application keeps the version it started with (review 2026-10-25 R19)."""
+    published = ApplicationFormTemplate.objects.filter(
+        status=ApplicationFormTemplate.Status.PUBLISHED
+    ).order_by("-version")
     name = intake.form_template.name if intake.form_template_id else "default"
-    return (
-        ApplicationFormTemplate.objects.filter(
-            name=name, status=ApplicationFormTemplate.Status.PUBLISHED
-        )
-        .order_by("-version")
-        .first()
-    )
+    # A programme linked to a copy not yet published keeps the college's default meanwhile.
+    return published.filter(name=name).first() or published.filter(name="default").first()
 
 
 def publish_template(
