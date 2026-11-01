@@ -976,3 +976,18 @@ msgstr "هذه الحقول تعبئها الكلية."
 
 msgid "Replace the writing guidance with the college's text before publishing: %(sections)s"
 msgstr "استبدل إرشادات الكتابة بنص الكلية المعتمد قبل النشر: %(sections)s"
+
+# The stock Arabic of these (DRF / Django) reads «تأكد ان القيمة…» (exam test 2026-11-01).
+msgid "Ensure this value is greater than or equal to {min_value}."
+msgstr "يجب ألا تقل القيمة عن {min_value}."
+
+msgid "Ensure this value is less than or equal to {max_value}."
+msgstr "يجب ألا تزيد القيمة على {max_value}."
+
+#, python-format
+msgid "Ensure this value is greater than or equal to %(limit_value)s."
+msgstr "يجب ألا تقل القيمة عن %(limit_value)s."
+
+#, python-format
+msgid "Ensure this value is less than or equal to %(limit_value)s."
+msgstr "يجب ألا تزيد القيمة على %(limit_value)s."

@@ -1,7 +1,7 @@
 import type { Schemas } from "@ecst/api";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Plus, Trash2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { Pencil, Plus, Trash2 } from "lucide-react";
+import { useEffect, useId, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 
 import { PortalShell } from "../../components/PortalShell";
@@ -328,7 +328,7 @@ export function ExamEditor() {
                     locked={e.status !== "draft"}
                   />
                 ))}
-                {e.status === "draft" && <NewQuestion examId={id!} onAdded={refresh} />}
+                {e.status === "draft" && <QuestionForm examId={id!} onDone={refresh} />}
               </div>
               {publish.isError && (
                 <div className="mt-3">
@@ -374,7 +374,22 @@ function QuestionCard({
     },
     onSuccess: onChanged,
   });
+  const [editing, setEditing] = useState(false);
   const config = (q.config ?? {}) as { answer?: boolean; accepted?: string[] };
+  // A question is corrected in place while the exam is a draft (exam test 2026-11-01: the only
+  // way was to delete it and type it again).
+  if (editing)
+    return (
+      <QuestionForm
+        examId={examId}
+        question={q}
+        onDone={() => {
+          setEditing(false);
+          onChanged();
+        }}
+        onCancel={() => setEditing(false)}
+      />
+    );
   return (
     <Card className="p-4">
       <div className="flex items-start gap-3">
@@ -411,6 +426,16 @@ function QuestionCard({
         {!locked && (
           <button
             type="button"
+            onClick={() => setEditing(true)}
+            aria-label="تعديل السؤال"
+            className="grid size-9 place-items-center rounded-lg text-primary hover:bg-primary-soft"
+          >
+            <Pencil size={16} aria-hidden />
+          </button>
+        )}
+        {!locked && (
+          <button
+            type="button"
             onClick={async () =>
               (await confirm({ title: "حذف السؤال؟", confirm: "حذف السؤال" })) && remove.mutate()
             }
@@ -425,16 +450,34 @@ function QuestionCard({
   );
 }
 
-function NewQuestion({ examId, onAdded }: { examId: string; onAdded: () => void }) {
-  const [type, setType] = useState<QType>("single");
-  const [text, setText] = useState("");
-  const [marks, setMarks] = useState("1");
-  const [choices, setChoices] = useState([
-    { text: "", is_correct: true },
-    { text: "", is_correct: false },
-  ]);
-  const [tf, setTf] = useState(true);
-  const [accepted, setAccepted] = useState("");
+/** A new question, or `question` corrected in place. */
+function QuestionForm({
+  examId,
+  question,
+  onDone,
+  onCancel,
+}: {
+  examId: string;
+  question?: Question;
+  onDone: () => void;
+  onCancel?: () => void;
+}) {
+  // Its own radio group: an open edit and the new-question form are on the page together.
+  const group = useId();
+  const given = (question?.config ?? {}) as { answer?: boolean; accepted?: string[] };
+  const [type, setType] = useState<QType>((question?.type as QType) ?? "single");
+  const [text, setText] = useState(question?.text ?? "");
+  const [marks, setMarks] = useState(question ? String(Number(question.marks ?? 1)) : "1");
+  const [choices, setChoices] = useState(
+    question?.choices?.length
+      ? question.choices.map((c) => ({ text: c.text, is_correct: !!c.is_correct }))
+      : [
+          { text: "", is_correct: true },
+          { text: "", is_correct: false },
+        ],
+  );
+  const [tf, setTf] = useState(given.answer ?? true);
+  const [accepted, setAccepted] = useState((given.accepted ?? []).join("، "));
   const add = useMutation({
     mutationFn: async () => {
       const body: Record<string, unknown> = { type, text, marks };
@@ -449,19 +492,26 @@ function NewQuestion({ examId, onAdded }: { examId: string; onAdded: () => void 
             .map((a) => a.trim())
             .filter(Boolean),
         };
-      const { data, error } = await api.POST("/api/v1/exams/{public_id}/questions", {
-        params: { path: { public_id: examId } },
-        body: body as never,
-      });
+      const { data, error } = question
+        ? await api.PATCH("/api/v1/exams/{public_id}/questions/{question_id}", {
+            params: { path: { public_id: examId, question_id: String(question.id) } },
+            body: body as never,
+          })
+        : await api.POST("/api/v1/exams/{public_id}/questions", {
+            params: { path: { public_id: examId } },
+            body: body as never,
+          });
       if (!data) throw error;
     },
     onSuccess: () => {
-      setText("");
-      setChoices([
-        { text: "", is_correct: true },
-        { text: "", is_correct: false },
-      ]);
-      onAdded();
+      if (!question) {
+        setText("");
+        setChoices([
+          { text: "", is_correct: true },
+          { text: "", is_correct: false },
+        ]);
+      }
+      onDone();
     },
   });
   const pick = (i: number) =>
@@ -499,7 +549,7 @@ function NewQuestion({ examId, onAdded }: { examId: string; onAdded: () => void 
             <div key={i} className="flex items-center gap-2">
               <input
                 type={type === "single" ? "radio" : "checkbox"}
-                name="correct"
+                name={group}
                 checked={c.is_correct}
                 onChange={() => pick(i)}
                 aria-label="إجابة صحيحة"
@@ -551,14 +601,28 @@ function NewQuestion({ examId, onAdded }: { examId: string; onAdded: () => void 
           <Notice>{problemMessage(add.error)}</Notice>
         </div>
       )}
-      <Button
-        className="mt-3 w-full"
-        onClick={() => add.mutate()}
-        disabled={!text.trim() || add.isPending}
-      >
-        <Plus size={16} aria-hidden />
-        إضافة السؤال
-      </Button>
+      <div className="mt-3 flex gap-2">
+        <Button
+          className="flex-1"
+          onClick={() => add.mutate()}
+          disabled={!text.trim() || add.isPending}
+          why={!text.trim() ? "اكتب نص السؤال" : undefined}
+        >
+          {question ? (
+            "حفظ التعديل"
+          ) : (
+            <>
+              <Plus size={16} aria-hidden />
+              إضافة السؤال
+            </>
+          )}
+        </Button>
+        {onCancel && (
+          <Button variant="secondary" onClick={onCancel}>
+            إلغاء
+          </Button>
+        )}
+      </div>
     </Card>
   );
 }

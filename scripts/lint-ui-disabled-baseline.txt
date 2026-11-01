@@ -19,7 +19,7 @@ apps/portal/src/routes/announcements/AnnouncementNew.tsx 2
 apps/portal/src/routes/department/Approvals.tsx 1
 apps/portal/src/routes/department/Offerings.tsx 2
 apps/portal/src/routes/department/Students.tsx 1
-apps/portal/src/routes/exams/ExamEditor.tsx 10
+apps/portal/src/routes/exams/ExamEditor.tsx 9
 apps/portal/src/routes/exams/ExamMonitor.tsx 2
 apps/portal/src/routes/exams/ExamStats.tsx 1
 apps/portal/src/routes/exams/TakeExam.tsx 3
