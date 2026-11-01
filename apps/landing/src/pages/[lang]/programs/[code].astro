@@ -4,7 +4,7 @@ import { whatsappUrl } from "../../../lib/whatsapp";
 import Faq from "../../../components/Faq.astro";
 import PageHead from "../../../components/PageHead.astro";
 import Base from "../../../layouts/Base.astro";
-import { PORTAL, type ProgramDetail, get, programs, site } from "../../../lib/api";
+import { PORTAL, type ProgramDetail, get, pages, programs, site } from "../../../lib/api";
 import {
   arrow,
   count,
@@ -153,6 +153,8 @@ const programLd = {
   ...(open ? { applicationDeadline: p.intake!.closes_at.slice(0, 10) } : {}),
 };
 const jsonLd = [programLd, faqLd(faq)];
+// «الرسوم والمنح» is linked once the site manager publishes it (a 404 before; 2026-11-01).
+const feesPage = (await pages()).some((page) => page.path === "admissions/fees");
 ---
 
 <Base
@@ -307,12 +309,16 @@ const jsonLd = [programLd, faqLd(faq)];
             </a>
           )}
           <div class="flex flex-wrap items-center justify-between gap-2 pt-1 text-sm">
-            <a
-              href={href(lang, "admissions/fees/")}
-              class="tap-44 font-semibold text-primary hover:underline"
-            >
-              {L("الرسوم والمنح", "Fees and scholarships")} {arrow(lang)}
-            </a>
+            {feesPage ? (
+              <a
+                href={href(lang, "admissions/fees/")}
+                class="tap-44 font-semibold text-primary hover:underline"
+              >
+                {L("الرسوم والمنح", "Fees and scholarships")} {arrow(lang)}
+              </a>
+            ) : (
+              <span />
+            )}
             <button
               type="button"
               data-print

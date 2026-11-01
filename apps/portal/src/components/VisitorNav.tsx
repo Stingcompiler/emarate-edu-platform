@@ -1,25 +1,45 @@
+import { useQuery } from "@tanstack/react-query";
 import { Menu, X } from "lucide-react";
 import { type ReactNode, useState } from "react";
 import { Link, NavLink } from "react-router";
 
+import { api } from "../lib/api";
 import { isStandalone } from "../lib/push";
 import { SITE_URL, siteUrl, useSiteLogo } from "../lib/site";
 import { useHideOnScroll } from "../lib/useHideOnScroll";
 
-/** The college site's main sections: a visitor applying or tracking keeps the site's navigation. */
-const SITE_LINKS: [string, string][] = [
+/** The college site's main sections: a visitor applying or tracking keeps the site's navigation.
+ *  The third item is an official page: linked only once the site manager publishes it (it led
+ *  to «الصفحة غير موجودة» before; owner, 2026-11-01). */
+const SITE_LINKS: [string, string, string?][] = [
   ["الرئيسية", "/ar/"],
   ["البرامج", "/ar/programs/"],
   ["القبول", "/ar/admissions/"],
-  ["الرسوم والمنح", "/ar/admissions/fees/"],
+  ["الرسوم والمنح", "/ar/admissions/fees/", "admissions/fees"],
   ["تواصل", "/ar/contact/"],
 ];
+
+function useSiteLinks(): [string, string][] {
+  const published = useQuery({
+    queryKey: ["public", "pages"],
+    queryFn: async () => (await api.GET("/api/public/pages")).data ?? [],
+    staleTime: 60 * 60_000,
+    retry: false,
+    meta: { silent: true },
+  });
+  const paths = new Set((published.data ?? []).map((p) => p.path));
+  return SITE_LINKS.filter(([, , page]) => !page || paths.has(page)).map(([label, path]) => [
+    label,
+    path,
+  ]);
+}
 
 /** The site's header, kept on the portal's public pages (apply, track, sign-in…): sticky, hidden while scrolling down. */
 export function VisitorNav() {
   const hidden = useHideOnScroll();
   const [open, setOpen] = useState(false);
   const logo = useSiteLogo();
+  const links = useSiteLinks();
   // The installed app is the portal only (owner, 2026-10-30): no site navigation inside it.
   if (isStandalone()) return null;
   const away = hidden && !open;
@@ -43,7 +63,7 @@ export function VisitorNav() {
           </span>
         </a>
         <nav aria-label="موقع الكلية" className="ms-auto hidden items-center gap-1 lg:flex">
-          {SITE_LINKS.map(([label, path]) => (
+          {links.map(([label, path]) => (
             <a
               key={path}
               href={siteUrl(path)}
@@ -79,7 +99,7 @@ export function VisitorNav() {
           aria-label="موقع الكلية"
           className="border-t border-border-soft bg-surface px-4 pb-4 pt-2 lg:hidden"
         >
-          {SITE_LINKS.map(([label, path]) => (
+          {links.map(([label, path]) => (
             <a
               key={path}
               href={siteUrl(path)}
