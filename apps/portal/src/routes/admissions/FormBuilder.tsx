@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowDown, ArrowUp, Plus, Trash2 } from "lucide-react";
+import { ArrowDown, ArrowUp, Copy, GripVertical, Plus, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { useConfirm } from "../../components/Confirm";
@@ -109,15 +109,22 @@ function ApplicantPreview({ schema }: { schema: FormSchema }) {
 function FieldEditor({
   field,
   all,
+  before,
   locked,
   onChange,
 }: {
   field: Field;
   all: Field[];
+  /** The applicant's choice fields above this one: what a condition may depend on. */
+  before: Field[];
   locked: boolean;
   onChange: (patch: Partial<Field>) => void;
 }) {
   const condition = conditionText(field, all);
+  const rule = field.show_if;
+  const target = before.find((f) => f.key === rule?.key);
+  const choices = target?.type === "boolean" ? ["true", "false"] : (target?.options ?? []);
+  const picked = (rule?.in ?? (rule && "equals" in rule ? [rule.equals] : [])).map(String);
   return (
     <div className="grid border-t border-border-soft sm:grid-cols-2">
       <TextField
@@ -212,9 +219,55 @@ function FieldEditor({
           onChange={(e) => onChange({ example: e.target.value })}
         />
       </div>
-      {condition && (
-        <p className="px-4 py-2.5 text-xs text-text-muted sm:col-span-2">{condition}</p>
-      )}
+      {/* Shown only for some answers of an earlier choice (spec §5.1): a field above, so no
+          loops; the server checks the same rule. */}
+      <div className="sm:col-span-2">
+        <SelectField
+          label="الظهور"
+          value={rule?.key ?? ""}
+          // ui-allow: the hint under it says why
+          disabled={locked || !before.length}
+          hint={before.length ? undefined : "لا حقول اختيار للمتقدم فوقه يُشترط عليها"}
+          onChange={(e) =>
+            onChange({ show_if: e.target.value ? { key: e.target.value, in: [] } : undefined })
+          }
+        >
+          <option value="">يظهر دائمًا</option>
+          {before.map((f) => (
+            <option key={f.key} value={f.key}>
+              يظهر حسب «{f.label}»
+            </option>
+          ))}
+        </SelectField>
+        {target && (
+          <fieldset className="flex flex-wrap gap-2 border-b border-border-soft px-4 py-2.5">
+            <legend className="sr-only">القيم التي يظهر عندها</legend>
+            <span className="w-full text-xs text-text-muted">يظهر عند اختيار:</span>
+            {choices.map((c) => {
+              const value = target.type === "boolean" ? c === "true" : c;
+              const on = picked.includes(c);
+              return (
+                <Chip
+                  key={c}
+                  active={on}
+                  disabled={locked}
+                  onClick={() => {
+                    const values = (rule?.in ?? []).filter((v) => String(v) !== c);
+                    onChange({
+                      show_if: { key: target.key, in: on ? values : [...values, value] },
+                    });
+                  }}
+                >
+                  {target.type === "boolean" ? (c === "true" ? "نعم" : "لا") : c}
+                </Chip>
+              );
+            })}
+          </fieldset>
+        )}
+        {condition && picked.length > 0 && (
+          <p className="px-4 py-2.5 text-xs text-text-muted">{condition}</p>
+        )}
+      </div>
     </div>
   );
 }
@@ -289,8 +342,37 @@ export function FormBuilder() {
       void refresh();
     },
   });
+  // A copy under another name (spec §5): a draft of its own, for a programme that needs
+  // a different form; link it to the programme from «دورات القبول».
+  const [copyName, setCopyName] = useState("");
+  const copy = useMutation({
+    mutationFn: async () => {
+      const { data, error } = await api.POST("/api/v1/form-templates", {
+        body: { name: copyName.trim(), schema },
+      });
+      if (!data) throw error;
+      return data.id;
+    },
+    onSuccess: (id) => {
+      setCopyName("");
+      setPicked(id);
+      void refresh();
+    },
+  });
   const draft = !template || template.status === "draft";
   const locked = !draft || !editor;
+  // Drag and drop between rows (the arrows stay, for keyboards and phones).
+  const [dragged, setDragged] = useState<{ si: number; fi: number } | null>(null);
+  const drop = (si: number, fi: number) => {
+    if (!dragged) return;
+    setSections((ss) => {
+      const next = ss.map((s) => ({ ...s, fields: [...(s.fields ?? [])] }));
+      const [moved] = next[dragged.si]!.fields!.splice(dragged.fi, 1);
+      next[si]!.fields!.splice(fi, 0, moved!);
+      return next;
+    });
+    setDragged(null);
+  };
   const setSection = (si: number, patch: Partial<Section>) =>
     setSections((ss) => ss.map((s, j) => (j === si ? { ...s, ...patch } : s)));
   const setField = (si: number, fi: number, patch: Partial<Field>) =>
@@ -338,7 +420,7 @@ export function FormBuilder() {
       <div className="flex flex-wrap items-center gap-2">
         {(templates.data ?? []).map((t) => (
           <Chip key={t.id} active={t.id === template?.id} onClick={() => setPicked(t.id)}>
-            {t.name} v{t.version}
+            {t.name === "default" ? "الاستمارة الافتراضية" : t.name} v{t.version}
           </Chip>
         ))}
         {template && (
@@ -460,9 +542,34 @@ export function FormBuilder() {
                   return (
                     <div
                       key={`${f.key}-${fi}`}
-                      className="border-b border-border-soft last:border-b-0"
+                      className={`border-b border-border-soft last:border-b-0 ${
+                        dragged && (dragged.si !== si || dragged.fi !== fi)
+                          ? "data-[over=true]:bg-primary-soft/40"
+                          : ""
+                      }`}
+                      draggable={!locked && !expanded}
+                      onDragStart={() => setDragged({ si, fi })}
+                      onDragEnd={() => setDragged(null)}
+                      onDragOver={(e) => {
+                        if (!dragged) return;
+                        e.preventDefault();
+                        e.currentTarget.dataset.over = "true";
+                      }}
+                      onDragLeave={(e) => delete e.currentTarget.dataset.over}
+                      onDrop={(e) => {
+                        e.preventDefault();
+                        delete e.currentTarget.dataset.over;
+                        drop(si, fi);
+                      }}
                     >
-                      <div className="flex items-center gap-2 ps-4 pe-1">
+                      <div className="flex items-center gap-2 ps-1 pe-1">
+                        {!locked && (
+                          <GripVertical
+                            size={16}
+                            aria-hidden
+                            className="shrink-0 cursor-grab text-text-muted"
+                          />
+                        )}
                         <button
                           type="button"
                           aria-expanded={expanded}
@@ -523,6 +630,19 @@ export function FormBuilder() {
                         <FieldEditor
                           field={f}
                           all={all}
+                          before={sections
+                            .flatMap((s, j) =>
+                              j < si
+                                ? (s.fields ?? [])
+                                : j === si
+                                  ? (s.fields ?? []).slice(0, fi)
+                                  : [],
+                            )
+                            .filter(
+                              (b) =>
+                                (b.audience ?? "applicant") === "applicant" &&
+                                (b.type === "select" || b.type === "boolean"),
+                            )}
                           locked={locked}
                           onChange={(patch) => setField(si, fi, patch)}
                         />
@@ -578,6 +698,36 @@ export function FormBuilder() {
         <div className="mt-3">
           <Notice>{problemMessage(save.error ?? act.error)}</Notice>
         </div>
+      )}
+      {editor && template && (
+        <form
+          className="mt-5 flex flex-wrap items-end gap-2"
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (copyName.trim()) copy.mutate();
+          }}
+        >
+          <label className="text-xs text-text-muted">
+            نسخ هذه الاستمارة باسم جديد
+            <input
+              value={copyName}
+              maxLength={100}
+              onChange={(e) => setCopyName(e.target.value)}
+              placeholder="مثال: استمارة التجسير"
+              className="mt-1 block min-h-11 w-64 max-w-full rounded-lg border border-border bg-surface px-3 text-sm text-text"
+            />
+          </label>
+          <Button
+            type="submit"
+            variant="secondary"
+            disabled={copy.isPending}
+            why={copyName.trim() ? undefined : "اكتب اسم النسخة"}
+          >
+            <Copy size={16} aria-hidden />
+            نسخ
+          </Button>
+          {copy.isError && <Notice>{problemMessage(copy.error)}</Notice>}
+        </form>
       )}
       {editor && (
         <div className="mt-5 flex flex-wrap gap-2">
