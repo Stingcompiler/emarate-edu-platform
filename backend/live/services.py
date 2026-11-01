@@ -83,7 +83,7 @@ def save(
                 category=Category.COURSE,
                 title=f"جلسة بث: {session.title}",
                 body=f"{opens}",
-                action_url=f"/live/{session.public_id}",
+                action_url="/live",
             )
             return session
         for field, value in data.items():
@@ -163,7 +163,7 @@ def remind_upcoming() -> int:
             _audience(session),
             category=Category.COURSE,
             title=f"تبدأ خلال 30 دقيقة: {session.title}",
-            action_url=f"/live/{session.public_id}",
+            action_url="/live",
         )
         LiveSession.objects.filter(pk=session.pk).update(reminder_sent_at=now)
         count += 1

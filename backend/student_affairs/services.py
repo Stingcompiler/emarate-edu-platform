@@ -237,7 +237,7 @@ def publish_case(meta: RequestMeta, case: StudentCase) -> StudentCase:
                 category=Category.ACCOUNT,
                 title="قرار من شؤون الطلاب",
                 body=case.title,
-                action_url=f"/my-cases/{case.public_id}",
+                action_url="/me/status",
                 channels=["inapp", "push", "email"],
             )
     return case
@@ -304,7 +304,7 @@ def report_misconduct(
             category=Category.COLLEGE,
             title=f"بلاغ غش في {offering.course.code}",
             body=student_record.full_name_ar,
-            action_url=f"/misconduct-reports/{report.public_id}",
+            action_url="/cases?tab=reports",
         )
     return report
 
