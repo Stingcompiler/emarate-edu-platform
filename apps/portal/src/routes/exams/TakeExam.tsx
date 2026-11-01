@@ -22,6 +22,7 @@ import {
   clockOffset,
   type ExamQuestion,
   flagsStore,
+  positionStore,
   formatClock,
   pendingStore,
   REJECT_LABEL,
@@ -111,6 +112,7 @@ function ExamRunner({ attempt }: { attempt: AttemptPayload }) {
   const pending = useMemo(() => pendingStore(attempt.public_id), [attempt.public_id]);
   const rejectedAnswers = useMemo(() => rejectedStore(attempt.public_id), [attempt.public_id]);
   const flagStore = useMemo(() => flagsStore(attempt.public_id), [attempt.public_id]);
+  const place = useMemo(() => positionStore(attempt.public_id), [attempt.public_id]);
   // The deadline can move while the page is open (a teacher's extension) and the attempt can
   // be closed by the teacher: the page polls the attempt's clock (review 2026-10-08, R10).
   const clockQuery = useQuery({
@@ -139,7 +141,9 @@ function ExamRunner({ attempt }: { attempt: AttemptPayload }) {
     ...pending.read(),
   }));
   const [flags, setFlags] = useState<number[]>(flagStore.read);
-  const [index, setIndex] = useState(0);
+  const [index, setIndex] = useState(() =>
+    Math.min(place.read(), Math.max(0, attempt.questions.length - 1)),
+  );
   const [now, setNow] = useState(Date.now());
   const [online, setOnline] = useState(navigator.onLine);
   const [savedAt, setSavedAt] = useState<string | null>(attempt.last_saved_at);
@@ -149,7 +153,7 @@ function ExamRunner({ attempt }: { attempt: AttemptPayload }) {
   const [confirm, setConfirm] = useState(false);
   const [error, setError] = useState("");
   const submitting = useRef(false);
-  const furthest = useRef(0);
+  const furthest = useRef(index);
 
   const remaining = deadline - (now + offset);
   const question = questions[index]!;
@@ -347,6 +351,7 @@ function ExamRunner({ attempt }: { attempt: AttemptPayload }) {
     if (!attempt.exam.allow_backtrack && to < furthest.current) return;
     furthest.current = Math.max(furthest.current, to);
     setIndex(to);
+    place.write(to);
     setSheet(false);
   }
 

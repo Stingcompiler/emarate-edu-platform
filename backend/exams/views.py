@@ -311,6 +311,13 @@ class AttemptViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
         answers = {a.question_id: a for a in attempt.answers.all()}
         questions = {q.pk: q for q in exam.questions.prefetch_related("choices")}
         rows = [answers.get(qid) for qid in attempt.question_order]
+
+        def earned(r):
+            return bool(r.marks_awarded) and r.marks_awarded > 0
+
+        def wrong(r):
+            return r.is_correct is False and not earned(r)
+
         review = None
         if exam.show_answers:
             review = []
@@ -327,6 +334,7 @@ class AttemptViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
                         "your_answer": a.answer if a else None,
                         "correct_answer": REGISTRY[q.type].correct_answer(q),
                         "is_correct": a.is_correct if a else False,
+                        "partial": bool(a and a.is_correct is False and earned(a)),
                         "marks_awarded": str(a.marks_awarded)
                         if a and a.marks_awarded is not None
                         else None,
@@ -352,9 +360,10 @@ class AttemptViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
                     "attempt_no": attempt.attempt_no,
                     "max_attempts": exam.max_attempts,
                     "correct": sum(1 for r in rows if r and r.is_correct),
-                    "wrong": sum(
-                        1 for r in rows if r and r.answer is not None and r.is_correct is False
-                    ),
+                    "wrong": sum(1 for r in rows if r and r.answer is not None and wrong(r)),
+                    # Some of the marks, not all (a graded essay, a multiple choice half right):
+                    # not «خطأ» (exam test 2026-11-01).
+                    "partial": sum(1 for r in rows if r and r.is_correct is False and earned(r)),
                     "blank": sum(1 for r in rows if r is None or r.answer is None),
                     "pending_review": sum(1 for r in rows if r and r.needs_manual),
                     "review": review,

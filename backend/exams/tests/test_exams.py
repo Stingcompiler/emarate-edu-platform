@@ -158,6 +158,10 @@ def test_student_takes_the_exam(api, classroom, exam):
     assert result["pending_review"] == 1 and result["correct"] == 3
     assert result["review"][0]["correct_answer"] is not None
     assert student.post(f"{URL}/{exam.public_id}/start").status_code == 409  # one attempt only
+    # Exam test 2026-11-01: an answer waiting for the teacher is neither failed nor 0% right.
+    stats = api(classroom.teacher).get(f"{URL}/{exam.public_id}/stats").data
+    rates = {r["question"]: r["correct_rate"] for r in stats["questions"]}
+    assert stats["pass_rate"] is None and rates[q["short_answer"].pk] is None
 
     ta_grade = api(classroom.ta).post(f"{url}/answers/{q['short_answer'].pk}/grade", {"marks": "3"})
     assert ta_grade.status_code == 403
@@ -169,6 +173,12 @@ def test_student_takes_the_exam(api, classroom, exam):
         and graded.data["score"] == "7.00"
         and graded.data["passed"] is True
     )
+    # 3 of 4 on the essay is part of the marks, not «خطأ»; the multiple choice earned none.
+    result = student.get(f"{url}/result").data
+    assert (result["correct"], result["partial"], result["wrong"]) == (3, 1, 1)
+    assert [r["partial"] for r in result["review"]].count(True) == 1
+    stats = api(classroom.teacher).get(f"{URL}/{exam.public_id}/stats").data
+    assert stats["pass_rate"] == 1.0
 
 
 def test_time_limits_are_the_servers(api, classroom, exam):

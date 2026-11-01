@@ -551,10 +551,13 @@ def stats(exam: Exam) -> dict:
     durations = [
         (a.submitted_at - a.started_at).total_seconds() for a in attempts if a.submitted_at
     ]
+    decided = [a for a in attempts if a.passed is not None]
     questions = list(exam.questions.all())
     rates = []
     for q in questions:
-        rows = StudentAnswer.objects.filter(attempt__in=attempts, question=q)
+        # An answer still waiting for the teacher is neither right nor wrong yet (exam test
+        # 2026-11-01: an ungraded essay read as the hardest question, 0%).
+        rows = StudentAnswer.objects.filter(attempt__in=attempts, question=q, needs_manual=False)
         total = rows.count()
         right = rows.filter(is_correct=True).count()
         rates.append(
@@ -570,8 +573,9 @@ def stats(exam: Exam) -> dict:
         "students": exam.offering.enrollments.filter(status="active").count(),
         "average": round(sum(scores) / len(scores), 2) if scores else None,
         "median": statistics.median(scores) if scores else None,
-        "pass_rate": round(sum(1 for a in attempts if a.passed) / len(attempts), 3)
-        if attempts
+        # Of the attempts already decided: one waiting for grading has not failed.
+        "pass_rate": round(sum(1 for a in decided if a.passed) / len(decided), 3)
+        if decided
         else None,
         "average_seconds": round(sum(durations) / len(durations)) if durations else None,
         "questions": sorted(

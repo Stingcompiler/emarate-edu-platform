@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Check, Hourglass, X } from "lucide-react";
+import { Check, Hourglass, Minus, X } from "lucide-react";
 import { Link, useLocation, useParams } from "react-router";
 
 import { PortalShell } from "../../components/PortalShell";
@@ -16,6 +16,9 @@ type Review = {
   your_answer: unknown;
   correct_answer: unknown;
   is_correct: boolean;
+  /** Some of the marks, not all. */
+  partial?: boolean;
+  marks_awarded?: string | null;
   explanation: string;
 };
 
@@ -102,9 +105,13 @@ export function ExamResult() {
                 {r.attempt_no} من {r.max_attempts}
               </p>
             </Card>
-            <Card className="mt-3 grid grid-cols-3 divide-x divide-border-soft text-center">
+            <Card
+              className={`mt-3 grid divide-x divide-border-soft text-center ${r.partial ? "grid-cols-4" : "grid-cols-3"}`}
+            >
               {[
                 { n: r.correct, l: "صحيح" },
+                // Only when some answer earned part of its marks (a graded essay).
+                ...(r.partial ? [{ n: r.partial, l: "جزئي" }] : []),
                 { n: r.wrong, l: "خطأ" },
                 { n: r.blank, l: "بلا إجابة" },
               ].map((s) => (
@@ -127,10 +134,12 @@ export function ExamResult() {
                   {(r.review as unknown as Review[]).map((q) => (
                     <div key={q.order} className="flex gap-3 px-4 py-3">
                       <span
-                        className={`grid size-7 shrink-0 place-items-center rounded-full ${q.is_correct ? "bg-success-soft text-success-strong" : "bg-danger-soft text-danger-strong"}`}
+                        className={`grid size-7 shrink-0 place-items-center rounded-full ${q.is_correct ? "bg-success-soft text-success-strong" : q.partial ? "bg-warning-soft text-warning-strong" : "bg-danger-soft text-danger-strong"}`}
                       >
                         {q.is_correct ? (
                           <Check size={16} aria-label="صحيح" />
+                        ) : q.partial ? (
+                          <Minus size={16} aria-label="صحيح جزئيًا" />
                         ) : (
                           <X size={16} aria-label="خطأ" />
                         )}
@@ -158,6 +167,12 @@ export function ExamResult() {
                         )}
                         <p className="mt-1 text-text-muted">
                           إجابتك: <span dir="auto">{show(q.your_answer, q.choices)}</span>
+                          {q.partial && q.marks_awarded && (
+                            <>
+                              {" "}
+                              · نلت {Number(q.marks_awarded).toLocaleString("ar-u-nu-latn")} درجة
+                            </>
+                          )}
                           {!q.is_correct && q.correct_answer !== null && (
                             <>
                               {" "}

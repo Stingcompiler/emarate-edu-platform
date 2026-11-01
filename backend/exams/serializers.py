@@ -330,6 +330,7 @@ class ExamResultSerializer(serializers.Serializer):
     max_attempts = serializers.IntegerField()
     correct = serializers.IntegerField()
     wrong = serializers.IntegerField()
+    partial = serializers.IntegerField()
     blank = serializers.IntegerField()
     pending_review = serializers.IntegerField()
     review = serializers.ListField(child=serializers.DictField(), allow_null=True)
