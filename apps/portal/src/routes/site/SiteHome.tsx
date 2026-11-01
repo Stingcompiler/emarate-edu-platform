@@ -40,6 +40,10 @@ export function SiteHome() {
     (x) => x.status !== "published",
   ).length;
   const draftPages = (pages.data ?? []).filter((x) => x.status === "draft");
+  // Published but not on the site: sample text or guidance only (review 2026-11-01).
+  const hiddenPages = (pages.data ?? []).filter(
+    (x) => x.status === "published" && x.has_content === false,
+  );
   const draftNews = (news.data ?? []).filter((x) => x.status === "draft");
   // «يحتاج إجراءك» (mockups 2026-10-29): drafts waiting for the approved text; the button opens
   // the first one.
@@ -52,6 +56,13 @@ export function SiteHome() {
       action: "أكمل الصفحة",
     },
     {
+      n: hiddenPages.length,
+      title: "صفحات منشورة لا تظهر في الموقع",
+      meta: "كل ما فيها نص تجريبي أو إرشادات: اكتب نص الكلية المعتمد",
+      to: hiddenPages[0] ? `/site/pages/${hiddenPages[0].public_id}` : "/site",
+      action: "اكتب النص",
+    },
+    {
       n: draftNews.length,
       title: "أخبار في المسودة",
       meta: "لا تظهر على الموقع حتى تُنشر",
@@ -60,14 +71,18 @@ export function SiteHome() {
       action: "راجع الخبر",
     },
   ];
-  const ready = (list: { status?: string | null }[] | undefined) =>
-    (list ?? []).filter((x) => x.status === "published").length;
+  // On the site: published, and (for a page) with real content.
+  const ready = (list: { status?: string | null; has_content?: boolean }[] | undefined) =>
+    (list ?? []).filter((x) => x.status === "published" && x.has_content !== false).length;
+  const waiting = drafts + hiddenPages.length;
   const pagedPages = useLocalPages(pages.data ?? []);
   const pagedNews = useLocalPages(news.data ?? []);
   return (
     <PortalShell
       title="محتوى الموقع"
-      subtitle={drafts ? `${drafts.toLocaleString("ar-u-nu-latn")} غير منشور` : "كل المحتوى منشور"}
+      subtitle={
+        waiting ? `${waiting.toLocaleString("ar-u-nu-latn")} لا يظهر في الموقع` : "كل المحتوى منشور"
+      }
     >
       <div className="mb-6">
         <Inbox
@@ -94,7 +109,7 @@ export function SiteHome() {
               {(
                 [
                   [
-                    "صفحات منشورة",
+                    "صفحات في الموقع",
                     ready(pages.data),
                     (pages.data?.length ?? 0) - ready(pages.data),
                   ],
@@ -104,7 +119,7 @@ export function SiteHome() {
                 <p key={label} className="flex items-center justify-between px-4 py-2.5 text-sm">
                   {label}
                   <span className="text-text-muted">
-                    <b className="text-text">{num(done)}</b> · غير منشور {num(left)}
+                    <b className="text-text">{num(done)}</b> · لا يظهر {num(left)}
                   </span>
                 </p>
               ))}
@@ -149,9 +164,17 @@ export function SiteHome() {
                       /{p.path}/
                     </span>
                   </span>
+                  {/* «منشورة» but not on the site: only sample text or guidance (review
+                      2026-11-01) — the list says so instead of looking live. */}
                   <StatusBadge
-                    status={p.status ?? "draft"}
-                    label={LABEL[p.status ?? "draft"] ?? ""}
+                    status={
+                      p.status === "published" && !p.has_content ? "pending" : (p.status ?? "draft")
+                    }
+                    label={
+                      p.status === "published" && !p.has_content
+                        ? "منشورة · لا تظهر"
+                        : (LABEL[p.status ?? "draft"] ?? "")
+                    }
                   />
                 </Link>
               ))

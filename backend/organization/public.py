@@ -151,9 +151,17 @@ class PublicPageRefSerializer(S.Serializer):
     title_ar = S.CharField()
     title_en = S.CharField()
     updated_at = S.DateTimeField()
+    # False for a page of sample text or guidance only: the site does not build it, so nothing
+    # should link to it (the portal's site navigation; review 2026-11-01).
+    has_content = S.SerializerMethodField()
 
     def get_path(self, page) -> str:
         return public_path(page.slug)
+
+    def get_has_content(self, page) -> bool:
+        from content.placeholder import has_content
+
+        return has_content(page.blocks)
 
 
 class PublicStatsSerializer(S.Serializer):

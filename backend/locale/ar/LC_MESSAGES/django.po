@@ -973,3 +973,6 @@ msgstr "أدخل الرقم الجامعي أولًا."
 
 msgid "These fields are filled by the college."
 msgstr "هذه الحقول تعبئها الكلية."
+
+msgid "Replace the writing guidance with the college's text before publishing: %(sections)s"
+msgstr "استبدل إرشادات الكتابة بنص الكلية المعتمد قبل النشر: %(sections)s"

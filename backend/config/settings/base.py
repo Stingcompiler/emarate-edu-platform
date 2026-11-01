@@ -167,6 +167,8 @@ CELERY_BEAT_SCHEDULE = {
     "remind-exams-starting": {"task": "exams.tasks.remind_exams_starting", "schedule": 5 * 60},
     "remind-live-sessions": {"task": "live.tasks.remind_live_sessions", "schedule": 5 * 60},
     "expire-applications": {"task": "admissions.tasks.expire_applications", "schedule": 24 * 3600},
+    # Scheduled site content goes live (or expires) on time, not at the six-hourly build.
+    "rebuild-site-when-due": {"task": "content.tasks.rebuild_when_due", "schedule": 10 * 60},
 }
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"

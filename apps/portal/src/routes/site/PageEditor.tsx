@@ -370,6 +370,14 @@ export function PageEditor() {
                 <Notice>{problemMessage(save.error)}</Notice>
               </div>
             )}
+            {published && page.data?.has_content === false && !unsaved.dirty && (
+              <div className="mt-3">
+                <Notice tone="warning">
+                  منشورة لكنها لا تظهر في موقع الكلية: كل ما فيها نص تجريبي أو إرشادات كتابة، ولا
+                  رابط لها في القوائم. اكتب نص الكلية المعتمد مكانه ثم «حفظ التعديلات ونشرها».
+                </Notice>
+              </div>
+            )}
             {/* Above the phone's tab bar while editing; in the flow on large screens. */}
             <div
               data-dock
