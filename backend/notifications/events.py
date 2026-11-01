@@ -27,7 +27,7 @@ def lecture_published(lecture) -> None:
         category=Category.COURSE,
         title=f"محاضرة جديدة: {lecture.title_ar}",
         body=offering.course.name_ar,
-        action_url=f"/courses/{offering.public_id}/lectures/{lecture.public_id}",
+        action_url=f"/lectures/{lecture.public_id}",
     )
 
 
@@ -84,7 +84,7 @@ def registration_pending(request) -> None:
         category=Category.ACCOUNT,
         title="طلب تسجيل طالب بانتظار الاعتماد",
         body=f"{student.full_name_ar} · {student.university_number}",
-        action_url=f"/registration-requests/{request.public_id}",
+        action_url="/department/approvals",
     )
 
 

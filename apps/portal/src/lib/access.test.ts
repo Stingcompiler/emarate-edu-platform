@@ -38,3 +38,33 @@ describe("route access (review 2026-09-29, P2)", () => {
     expect(ROUTE_ACCESS["/system/settings"]!(manager)).toBe(false);
   });
 });
+
+/** Every page a server notification opens (backend `action_url=`: notifications/events.py,
+ *  exams, inquiries, admissions, student_affairs, live, results). Owner 2026-11-01: a lecture
+ *  notification opened «الصفحة غير موجودة». Add the new shape here when the server adds one. */
+const NOTIFICATION_LINKS = [
+  "/lectures/L1",
+  "/assignments/A1",
+  "/courses/C1",
+  "/department/approvals",
+  "/",
+  "/hr-notices/N1",
+  "/hr/teachers/T1",
+  "/exams/E1",
+  "/inquiries/I1",
+  "/applications/P1",
+  "/regulations/R1",
+  "/me/status",
+  "/cases",
+  "/live",
+  "/results",
+];
+
+describe("notification links", () => {
+  it.each(NOTIFICATION_LINKS)("%s is a portal page", (link) => {
+    const routes = Object.keys(ROUTE_ACCESS).map(
+      (r) => new RegExp(`^${r.replace(/:[^/]+/g, "[^/]+")}$`),
+    );
+    expect(routes.some((r) => r.test(link))).toBe(true);
+  });
+});

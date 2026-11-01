@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { FolderLock, Plus } from "lucide-react";
 import { useState } from "react";
-import { Link } from "react-router";
+import { Link, useSearchParams } from "react-router";
 
 import { PortalShell } from "../../components/PortalShell";
 import {
@@ -42,7 +42,9 @@ export const EVENTS: Record<string, string> = {
 export function Cases() {
   const me = useMe();
   const manager = can(me.data, "cases.manage");
-  const [tab, setTab] = useState<Tab>("open");
+  // A misconduct report's notification opens «البلاغات» (?tab=reports).
+  const [params] = useSearchParams();
+  const [tab, setTab] = useState<Tab>(params.get("tab") === "reports" ? "reports" : "open");
   const [kind, setKind] = useState<string>("");
   const cases = useQuery({
     queryKey: ["cases"],

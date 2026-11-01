@@ -285,6 +285,8 @@ def test_automatic_notifications(
     assert titles == ["تم تصحيح واجب 2", "واجب جديد: واجب 2", "محاضرة جديدة: المحاضرة 3"]
     assert notices[0]["body"].startswith("الدرجة 9 من ")  # no trailing ".00"
     assert ".00" not in notices[0]["body"]
+    # Each opens a page the portal has (owner 2026-11-01: the lecture one opened «غير موجودة»).
+    assert notices[2]["action_url"] == f"/lectures/{lecture['public_id']}"
 
     manager = make_user(Role.DEPARTMENT_MANAGER, department=it_dept)
     teacher2 = make_user(Role.TEACHER)
@@ -424,3 +426,30 @@ def test_push_unsubscribe_and_config(api, classroom):
     assert not PushSubscription.objects.exists()
     assert Notification.objects.count() == 0
     assert NotificationPreference.objects.count() == 0
+
+
+def test_old_links_are_rewritten_to_portal_pages(db):
+    import importlib
+
+    from django.apps import apps
+
+    from notifications.models import Notification
+
+    fix = importlib.import_module("notifications.migrations.0004_fix_action_urls").fix
+    old = {
+        "/courses/abc/lectures/L1": "/lectures/L1",
+        "/registration-requests/R1": "/department/approvals",
+        "/my-cases/C1": "/me/status",
+        "/misconduct-reports/M1": "/cases?tab=reports",
+        "/live/S1": "/live",
+        "/live/new": "/live/new",
+        "/assignments/A1": "/assignments/A1",
+    }
+    rows = {
+        url: Notification.objects.create(category="course", title="x", action_url=url)
+        for url in old
+    }
+    fix(apps, None)
+    for url, row in rows.items():
+        row.refresh_from_db()
+        assert row.action_url == old[url]
