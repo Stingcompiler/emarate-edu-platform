@@ -288,6 +288,14 @@ const lead = L(
       >
         {t(lang, "track")}
       </a>
+      {accepting.length > 0 && (
+        <a
+          href={`${PORTAL}/apply/guide`}
+          class="rounded-xl border border-border px-5 py-3 font-semibold hover:bg-surface-alt"
+        >
+          {L("دليل تعبئة الاستمارة", "How to fill in the form")}
+        </a>
+      )}
       <a
         href={href(lang, "contact/")}
         class="rounded-xl px-5 py-3 font-semibold text-primary hover:bg-surface-alt"

@@ -37,7 +37,7 @@ export function VisitorLayout({
       <main className="mx-auto max-w-[1120px] px-4 pb-16 pt-5 lg:px-8 lg:pt-8">
         <ConnectivityBar />
         {back}
-        <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_300px] lg:items-start lg:gap-10">
+        <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_300px] lg:items-start lg:gap-10 print:block">
           <div className="min-w-0">
             <div className="mt-2 flex items-center gap-3">
               {progress && (
@@ -69,7 +69,7 @@ export function VisitorLayout({
             )}
             <div className="mt-5 lg:mt-6">{children}</div>
           </div>
-          <aside className="mt-8 space-y-4 lg:sticky lg:top-24 lg:mt-2">
+          <aside className="mt-8 space-y-4 lg:sticky lg:top-24 lg:mt-2 print:hidden">
             {steps && (
               <section
                 aria-label="خطوات التقديم"
