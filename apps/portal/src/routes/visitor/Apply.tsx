@@ -35,6 +35,7 @@ import { isNetworkError, useOnline } from "../../lib/online";
 import { markSynced, readDraft, writeDraft } from "../../lib/localDraft";
 import { VisitorLayout } from "./VisitorLayout";
 import { fmtDate } from "../../lib/format";
+import { exampleText, explain } from "../../lib/guide";
 
 type Application = {
   public_id: string;
@@ -278,7 +279,10 @@ export function FieldInput({
   const id = `f-${field.key}`;
   const helpId = `${id}-help`;
   const errorId = `${id}-error`;
-  const hasHelp = !!(field.help || field.example);
+  // Every field explains itself (owner, 2026-11-01): the registrar's text or a plain one, how
+  // to fill it and an example.
+  const hasHelp = true;
+  const explained = explain(field);
   const described = [open && hasHelp ? helpId : "", error ? errorId : ""].filter(Boolean).join(" ");
   const common = {
     id,
@@ -331,10 +335,15 @@ export function FieldInput({
       hidden={!open}
       className="mt-1 rounded-lg bg-info-soft px-3 py-2 text-xs leading-6 text-info-strong"
     >
-      {field.help}
-      {field.example && (
-        <span className="block">
-          مثال: <bdi>{field.example}</bdi>
+      {explained.help}
+      {explained.how.map((line) => (
+        <span key={line} className="block">
+          {line}
+        </span>
+      ))}
+      {explained.example && (
+        <span className="block font-semibold">
+          مثال: <bdi>{exampleText(field, explained.example)}</bdi>
         </span>
       )}
     </div>
@@ -513,35 +522,36 @@ export function GuideSections({
         <section key={i} className="break-inside-avoid">
           {section.title && <Heading className="font-bold text-text">{section.title}</Heading>}
           {section.description && <p className="text-xs text-text-muted">{section.description}</p>}
-          <dl className="mt-2 space-y-2">
+          <dl className="mt-2 space-y-3">
             {(section.fields ?? [])
               .filter((f) => f.type !== "note")
-              .map((f) => (
-                <div key={f.key} className="break-inside-avoid">
-                  <dt className="font-bold text-text">
-                    {f.label}
-                    {f.required && !f.show_if ? " *" : ""}
-                  </dt>
-                  <dd className="text-text-muted">
-                    {f.help || "—"}
-                    {f.example && (
-                      <span className="block">
-                        مثال: <bdi>{f.example}</bdi>
-                      </span>
-                    )}
-                    {conditionText(f, all) && (
-                      <span className="block text-xs">
-                        {conditionText(f, all)}
-                        {f.required ? "، ويكون مطلوبًا عندها" : ""}
-                      </span>
-                    )}
-                  </dd>
-                </div>
-              ))}
+              .map((f) => {
+                const x = explain(f);
+                const condition = conditionText(f, all);
+                return (
+                  <div key={f.key} className="break-inside-avoid">
+                    <dt className="font-bold text-text">
+                      {f.label}{" "}
+                      <span className="text-xs font-normal text-text-muted">({x.required})</span>
+                    </dt>
+                    <dd className="mt-0.5 space-y-0.5 leading-6 text-text-muted">
+                      <p>{x.help}</p>
+                      {x.how.map((line) => (
+                        <p key={line}>{line}</p>
+                      ))}
+                      {x.example && (
+                        <p className="text-text">
+                          مثال: <bdi>{exampleText(f, x.example)}</bdi>
+                        </p>
+                      )}
+                      {condition && <p className="text-xs">{condition}.</p>}
+                    </dd>
+                  </div>
+                );
+              })}
           </dl>
         </section>
       ))}
-      <p className="text-xs text-text-muted">الحقول المعلَّمة بـ * مطلوبة.</p>
     </>
   );
 }
