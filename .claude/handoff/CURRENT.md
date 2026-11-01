@@ -1,3 +1,30 @@
+# Handoff — admission form (owner spec 2026-11-01), staff pages — 2026-11-01
+
+Owner's spec `~/Downloads/college-admission-form-spec.md`; decisions in chat 2026-11-01: identity
+from the site (no colour/font editor), religion required, English name required, previous
+university required only for تجسير/تحويل (field «مسار التقديم» added), everything down to the
+closest contact's phone is the applicant's and required; university number, admitted level,
+admission type = `release` (staff fill, shown to the applicant only when released **and**
+filled); from the bridging/transfer cohort down = `staff`. The registration staff type the
+university number.
+
+- #205 admin edits users' profiles; #206 «الكوادر» on the home page + /staff/<id>;
+  #207 site settings `staff_intro_ar/en`; #208 theme icon off the phone title, edit
+  qualifications; #209 `StaffLink` (/api/v1/me/links) with a per-link «show on site» switch.
+- #210 phase 1: field `audience` applicant|release|staff, `width`, `help`+`example`, types
+  year/money/consent, `show_if.in`; `public_schema()` for the applicant; 400 on staff keys;
+  applicant form with sections, bold labels, «تعليمات», in-form guide; builder «استمارات
+  التقديم» keeps sections, loads `lib/admissionPreset.ts`, saves before publishing.
+- #211 phase 2: `Application.staff_answers` + `released_fields`, PATCH
+  `/api/v1/applications/<id>/staff-answers`; registration uses the typed number when the form
+  has `university_number`; `/applications/<id>/print`.
+- Phase 3 (this PR): `/apply/guide` public guide, print/PDF via the browser (checked: Arabic
+  shaping fine in Chromium's PDF); linked from the form and the site's admissions page.
+- To do (phase 4): copy a template, UI for conditions (show_if) in the builder, drag & drop;
+  the published «default» on production still has the old fields until the head registrar
+  loads the college template into a new version and publishes it.
+- Gotcha: probes that count file inputs must wait for the documents step to render.
+
 # Handoff — photos, «الكوادر», uploads, player — 2026-10-31
 
 - #197 site header attached to the top; theme chosen from a menu of three; no site nav in the
