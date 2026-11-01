@@ -76,7 +76,10 @@ test("the filling guide lists the form's fields with their explanations and prin
   await page.goto("/apply/guide?program=BIT");
   await expect(page.getByRole("heading", { name: "دليل تعبئة الاستمارة" })).toBeVisible();
   await expect(page.getByRole("term").filter({ hasText: "المدرسة" })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "المستندات المطلوبة" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "المستندات", exact: true })).toBeVisible();
+  // Every item explained with an example (owner, 2026-11-01): no empty «—».
+  await expect(page.getByRole("definition").filter({ hasText: /^—$/ })).toHaveCount(0);
+  await expect(page.getByText("مثال: 01/05/2008")).toBeVisible();
   await expect(page.getByRole("button", { name: "طباعة / حفظ PDF" })).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 });

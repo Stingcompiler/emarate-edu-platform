@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router";
 
 import { Button, Card, Notice } from "../../components/ui";
+import { explain } from "../../lib/guide";
 import { useSiteLogo } from "../../lib/site";
 import { fieldsOf, type FormSchema, visitorApi } from "../../lib/visitor";
 import { GuideSections } from "./Apply";
@@ -47,6 +48,7 @@ export function Guide() {
   const form = intake.data?.form as { schema?: FormSchema } | null | undefined;
   const schema = form?.schema;
   const files = fieldsOf(schema).filter((f) => f.type === "file");
+  const keys = new Set(fieldsOf(schema).map((f) => f.key));
   const documents = [
     ...((intake.data?.required_documents ?? []) as {
       key: string;
@@ -99,21 +101,80 @@ export function Guide() {
               </p>
             </div>
           </header>
+          <section className="break-inside-avoid">
+            <h2 className="font-bold text-text">قبل أن تبدأ</h2>
+            <dl className="mt-2 space-y-3 leading-6 text-text-muted">
+              <div>
+                <dt className="font-bold text-text">البريد الإلكتروني (مطلوب)</dt>
+                <dd>
+                  اكتب بريدك؛ يصلك رمز تحقق من 6 أرقام خلال دقيقة (راجع مجلد الرسائل غير المرغوبة إن
+                  لم يصل)، فتكتبه مع اسمك. على هذا البريد تصلك نسخة الطلب وكل تحديث، ومنه تتابع طلبك
+                  بلا حساب ولا كلمة مرور.
+                  <span className="block text-text">
+                    مثال: <bdi>salma.osman@gmail.com</bdi>
+                  </span>
+                </dd>
+              </div>
+              <div>
+                <dt className="font-bold text-text">اختيار البرنامج (مطلوب)</dt>
+                <dd>
+                  اختر البرنامج من قائمة البرامج المفتوحة للتقديم الآن. لكل طلب برنامج واحد؛ للتقديم
+                  لبرنامج آخر قدّم طلبًا ثانيًا بالبريد نفسه. العام الدراسي يُحدَّد من دورة القبول
+                  ولا تكتبه.
+                </dd>
+              </div>
+              {!keys.has("full_name_ar") && (
+                <div>
+                  <dt className="font-bold text-text">الاسم الكامل (مطلوب)</dt>
+                  <dd>
+                    {explain({ key: "full_name_ar", type: "text", label: "الاسم الكامل" }).help}
+                    <span className="block text-text">مثال: محمد أحمد علي عثمان</span>
+                  </dd>
+                </div>
+              )}
+              {!keys.has("student_phone") && (
+                <div>
+                  <dt className="font-bold text-text">الهاتف (اختياري)</dt>
+                  <dd>
+                    رقم يصلك عليه اتصال أو رسالة، كاملًا مع مفتاح الدولة يبدأ بـ +.
+                    <span className="block text-text">
+                      مثال: <bdi>+249912345678</bdi>
+                    </span>
+                  </dd>
+                </div>
+              )}
+            </dl>
+          </section>
           {schema ? <GuideSections schema={schema} level={2} /> : <p>…</p>}
           {documents.length > 0 && (
             <section className="break-inside-avoid">
-              <h2 className="font-bold text-text">المستندات المطلوبة</h2>
-              <ul className="mt-2 list-inside list-disc text-text-muted">
-                {documents.map((d) => (
-                  <li key={d.key}>
-                    {d.label}
-                    {d.required ? " *" : " (اختياري)"}
-                  </li>
-                ))}
-              </ul>
-              <p className="mt-1 text-xs text-text-muted">
-                صورة واضحة بالكاميرا تكفي؛ PDF أو JPG أو PNG.
+              <h2 className="font-bold text-text">المستندات</h2>
+              <p className="mt-1 text-text-muted">
+                تُرفع في خطوة «المستندات» بعد الاستمارة. لكل مستند ملف واحد، ويمكنك استبداله برفع
+                غيره قبل الإرسال. لا يراها إلا مسجل القسم.
               </p>
+              <dl className="mt-2 space-y-3 leading-6 text-text-muted">
+                {documents.map((d) => {
+                  const field = files.find((f) => f.key === d.key);
+                  const x = explain(
+                    field ?? { key: d.key, type: "file", label: d.label, required: d.required },
+                  );
+                  return (
+                    <div key={d.key} className="break-inside-avoid">
+                      <dt className="font-bold text-text">
+                        {d.label}{" "}
+                        <span className="text-xs font-normal text-text-muted">({x.required})</span>
+                      </dt>
+                      <dd>
+                        <p>{x.help}</p>
+                        {x.how.map((line) => (
+                          <p key={line}>{line}</p>
+                        ))}
+                      </dd>
+                    </div>
+                  );
+                })}
+              </dl>
             </section>
           )}
           <section className="break-inside-avoid">
@@ -124,6 +185,32 @@ export function Guide() {
               <li>ارفع المستندات، وراجع بياناتك، ثم أرسل الطلب واحتفظ بالرقم المرجعي.</li>
               <li>إرسال الطلب لا يعني القبول؛ تابع حالته من «متابعة طلبي» ببريدك.</li>
             </ol>
+          </section>
+          <section className="break-inside-avoid">
+            <h2 className="font-bold text-text">بعد الإرسال</h2>
+            <dl className="mt-2 space-y-2 leading-6 text-text-muted">
+              <div>
+                <dt className="font-bold text-text">الرقم المرجعي</dt>
+                <dd>
+                  يظهر بعد الإرسال ويصلك بالبريد، مثل <bdi>APP-2026-123456</bdi>. إن فقدته فادخل
+                  «متابعة طلبي» ببريدك وتجد طلباتك كلها.
+                </dd>
+              </div>
+              <div>
+                <dt className="font-bold text-text">تعديل الطلب</dt>
+                <dd>
+                  قبل الإرسال تعدّل كل شيء من «تعديل» في صفحة المراجعة. بعد الإرسال لا يُعدَّل إلا
+                  إن طلب المسجل مستندًا ناقصًا، فترفعه من «متابعة طلبي» وتعيد الإرسال.
+                </dd>
+              </div>
+              <div>
+                <dt className="font-bold text-text">مراحل الطلب</dt>
+                <dd>
+                  مُقدَّم ← قيد المراجعة ← مؤهل ← قرار القبول ← التسجيل؛ يصلك بريد عند كل تغيير،
+                  وعند القبول يصلك رقمك الجامعي ورابط تفعيل حسابك في البوابة.
+                </dd>
+              </div>
+            </dl>
             {(site.data?.phone || site.data?.email) && (
               <p className="mt-2 text-text-muted">
                 للاستفسار: {site.data?.phone && <bdi dir="ltr">{site.data.phone}</bdi>}
