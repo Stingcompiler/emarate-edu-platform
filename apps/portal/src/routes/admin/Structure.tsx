@@ -1,5 +1,6 @@
 import type { Schemas } from "@ecst/api";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Pencil } from "lucide-react";
 import { useState } from "react";
 
 import { PortalShell } from "../../components/PortalShell";
@@ -13,6 +14,7 @@ import {
   problemMessage,
   SectionLabel,
   StatusBadge,
+  Switch,
   TextArea,
 } from "../../components/ui";
 import { api, ok } from "../../lib/api";
@@ -60,8 +62,10 @@ export function Structure() {
       ok(await api.GET("/api/v1/academic-years", { params: { query: ALL } }))?.results ?? [],
   });
   const [picked, setPicked] = useState<number | null>(null);
-  // The programme whose public page is open for editing (description, fees, outcomes).
-  const [editing, setEditing] = useState<number | null>(null);
+  // The open form: a programme's details or its public page (description, fees, outcomes),
+  // or the selected department's details.
+  const [editing, setEditing] = useState<{ id: number; part: "details" | "page" } | null>(null);
+  const [editingDept, setEditingDept] = useState(false);
   const dept = departments.data?.find((d) => d.id === picked) ?? departments.data?.[0];
   const deptPrograms = (programs.data ?? []).filter((p) => p.department === dept?.id);
   const refresh = (key: string) => client.invalidateQueries({ queryKey: [key] });
@@ -90,32 +94,6 @@ export function Structure() {
       void refresh("departments");
     },
   });
-  const [pForm, setP] = useState({
-    code: "",
-    name_ar: "",
-    name_en: "",
-    degree: "bachelor",
-    levels_count: 4,
-    duration_terms: 8,
-    total_credit_hours: "",
-  });
-  const addProgram = useMutation({
-    mutationFn: async () => {
-      const { data, error } = await api.POST("/api/v1/programs", {
-        body: {
-          department: dept!.id,
-          ...pForm,
-          degree: pForm.degree as never,
-          total_credit_hours: pForm.total_credit_hours ? Number(pForm.total_credit_hours) : null,
-        },
-      });
-      if (!data) throw error;
-    },
-    onSuccess: () => {
-      setP({ ...pForm, code: "", name_ar: "", name_en: "", total_credit_hours: "" });
-      void refresh("programs");
-    },
-  });
   const [tForm, setT] = useState({
     academic_year: "",
     name_ar: "",
@@ -135,10 +113,9 @@ export function Structure() {
       void refresh("terms");
     },
   });
-  const err = setCurrent.error ?? addDept.error ?? addProgram.error ?? addTerm.error;
+  const err = setCurrent.error ?? addDept.error ?? addTerm.error;
   // min-w-0 w-full: a field never sets its row's width (a text field's default is ~200px).
   const input = "min-h-10 w-full min-w-0 rounded-lg border border-border bg-surface px-3 text-sm";
-  const label = "grid min-w-0 gap-1 text-xs font-medium text-text-muted";
   return (
     <PortalShell
       title="الهيكل الأكاديمي"
@@ -160,10 +137,17 @@ export function Structure() {
               <button
                 key={d.id}
                 type="button"
-                onClick={() => setPicked(d.id)}
+                onClick={() => {
+                  setPicked(d.id);
+                  setEditing(null);
+                  setEditingDept(false);
+                }}
                 className={`flex w-full items-center justify-between px-4 py-2.5 text-start text-sm hover:bg-surface-alt ${dept?.id === d.id ? "bg-primary-soft/40 font-semibold" : ""}`}
               >
-                <span>{d.name_ar}</span>
+                <span>
+                  {d.name_ar}
+                  {!d.is_active && <span className="ms-2 text-xs text-text-muted">· موقوف</span>}
+                </span>
                 <span className="text-xs text-text-muted">
                   {count(
                     (programs.data ?? []).filter((p) => p.department === d.id).length,
@@ -310,9 +294,33 @@ export function Structure() {
         {/* Its layout follows its own width (container query), not the screen's: beside the
             320px column at 1024–1279 it is narrow even on a laptop (owner, 2026-10-02). */}
         <section className="@container min-w-0">
-          <SectionLabel>
-            قسم {dept?.name_ar ?? ""} — البرامج · {num(deptPrograms.length)}
-          </SectionLabel>
+          <div className="flex items-center justify-between gap-3">
+            <SectionLabel>
+              قسم {dept?.name_ar ?? ""} — البرامج · {num(deptPrograms.length)}
+            </SectionLabel>
+            {dept && (
+              <Button
+                variant="secondary"
+                aria-expanded={editingDept}
+                className="mb-2 min-h-10 shrink-0 px-3 text-sm"
+                onClick={() => setEditingDept(!editingDept)}
+              >
+                <Pencil size={16} aria-hidden />
+                تعديل القسم
+              </Button>
+            )}
+          </div>
+          {dept && editingDept && (
+            <DepartmentForm
+              key={dept.id}
+              department={dept}
+              onDone={(deleted) => {
+                setEditingDept(false);
+                if (deleted) setPicked(null);
+                void refresh("departments");
+              }}
+            />
+          )}
           <Card className="divide-y divide-border-soft">
             <div className="hidden grid-cols-[minmax(0,1fr)_88px_120px_120px_56px] gap-3 bg-surface-alt px-4 py-2 text-xs text-text-muted @2xl:grid">
               <span>البرنامج</span>
@@ -331,14 +339,27 @@ export function Structure() {
                 <span className="min-w-0">
                   <bdi className="block font-mono text-xs text-text-muted">{p.code}</bdi>
                   <b className="block">{p.name_ar}</b>
-                  <button
-                    type="button"
-                    aria-expanded={editing === p.id}
-                    onClick={() => setEditing(editing === p.id ? null : p.id)}
-                    className="tap-44 mt-0.5 text-xs font-semibold text-primary hover:underline"
-                  >
-                    {editing === p.id ? "إغلاق صفحة الموقع" : "صفحة الموقع: الوصف والرسوم"}
-                  </button>
+                  <span className="mt-0.5 flex flex-wrap gap-x-4">
+                    {(
+                      [
+                        ["details", "تعديل البرنامج"],
+                        ["page", "صفحة الموقع: الوصف والرسوم"],
+                      ] as const
+                    ).map(([part, text]) => {
+                      const open = editing?.id === p.id && editing.part === part;
+                      return (
+                        <button
+                          key={part}
+                          type="button"
+                          aria-expanded={open}
+                          onClick={() => setEditing(open ? null : { id: p.id, part })}
+                          className="tap-44 text-xs font-semibold text-primary hover:underline"
+                        >
+                          {open ? "إغلاق" : text}
+                        </button>
+                      );
+                    })}
+                  </span>
                 </span>
                 <span className="hidden text-text-muted @2xl:block">
                   {DEGREE[p.degree] ?? p.degree}
@@ -367,110 +388,24 @@ export function Structure() {
             {!deptPrograms.length && <p className="px-4 py-3 text-sm text-text-muted">لا برامج.</p>}
           </Card>
           {deptPrograms
-            .filter((p) => p.id === editing)
-            .map((p) => (
-              <ProgramPageForm
-                key={p.id}
-                program={p}
-                onDone={() => {
-                  setEditing(null);
-                  void refresh("programs");
-                }}
-              />
-            ))}
+            .filter((p) => p.id === editing?.id)
+            .map((p) => {
+              const done = () => {
+                setEditing(null);
+                void refresh("programs");
+              };
+              return editing?.part === "page" ? (
+                <ProgramPageForm key={p.id} program={p} onDone={done} />
+              ) : (
+                <ProgramForm key={p.id} department={dept!} program={p} onDone={done} />
+              );
+            })}
           {dept && (
-            // A labelled form (it was a row of bare boxes whose placeholders were the only hint).
-            <Card className="mt-3 space-y-3 p-4">
-              <p className="text-sm font-semibold">برنامج جديد في {dept.name_ar}</p>
-              <div className="grid gap-3 @lg:grid-cols-[110px_minmax(0,1fr)_minmax(0,1fr)]">
-                <label className={label}>
-                  رمز البرنامج
-                  <input
-                    dir="ltr"
-                    value={pForm.code}
-                    onChange={(e) => setP({ ...pForm, code: e.target.value.toUpperCase() })}
-                    placeholder="BIT"
-                    className={input}
-                  />
-                </label>
-                <label className={label}>
-                  اسم البرنامج
-                  <input
-                    value={pForm.name_ar}
-                    onChange={(e) => setP({ ...pForm, name_ar: e.target.value })}
-                    className={input}
-                  />
-                </label>
-                <label className={label}>
-                  الاسم بالإنجليزية
-                  <input
-                    dir="ltr"
-                    value={pForm.name_en}
-                    onChange={(e) => setP({ ...pForm, name_en: e.target.value })}
-                    className={input}
-                  />
-                </label>
-              </div>
-              <div role="group" aria-label="الدرجة" className={label}>
-                الدرجة
-                <span className="flex flex-wrap gap-2">
-                  {Object.entries(DEGREE).map(([k, l]) => (
-                    <Chip
-                      key={k}
-                      active={pForm.degree === k}
-                      onClick={() => setP({ ...pForm, degree: k })}
-                    >
-                      {l}
-                    </Chip>
-                  ))}
-                </span>
-              </div>
-              <div className="grid grid-cols-3 gap-3 @lg:max-w-md">
-                <label className={label}>
-                  مستويات
-                  <input
-                    type="number"
-                    min={1}
-                    max={10}
-                    value={pForm.levels_count}
-                    onChange={(e) => setP({ ...pForm, levels_count: Number(e.target.value) })}
-                    className={input}
-                  />
-                </label>
-                <label className={label}>
-                  فصول
-                  <input
-                    type="number"
-                    min={1}
-                    max={20}
-                    value={pForm.duration_terms}
-                    onChange={(e) => setP({ ...pForm, duration_terms: Number(e.target.value) })}
-                    className={input}
-                  />
-                </label>
-                <label className={label}>
-                  ساعات للتخرج
-                  <input
-                    type="number"
-                    min={1}
-                    max={300}
-                    value={pForm.total_credit_hours}
-                    onChange={(e) => setP({ ...pForm, total_credit_hours: e.target.value })}
-                    placeholder="—"
-                    className={input}
-                  />
-                </label>
-              </div>
-              <div className="flex justify-end">
-                <Button
-                  className="min-h-10 w-full px-5 @lg:w-auto"
-                  disabled={!pForm.code || !pForm.name_ar}
-                  onClick={() => addProgram.mutate()}
-                >
-                  + برنامج
-                </Button>
-              </div>
-            </Card>
+            <ProgramForm
+              key={`new-${dept.id}`}
+              department={dept}
+              onDone={() => void refresh("programs")}
+            />
           )}
         </section>
       </div>
@@ -663,5 +598,383 @@ function HoursInput({
         ) : null}
       </span>
     </span>
+  );
+}
+
+// min-w-0 w-full: a field never sets its row's width (a text field's default is ~200px).
+const INPUT = "min-h-10 w-full min-w-0 rounded-lg border border-border bg-surface px-3 text-sm";
+const LABEL = "grid min-w-0 gap-1 text-xs font-medium text-text-muted";
+
+/** «تعديل/حذف» for a structure row; a row still in use answers 409 and is stopped instead. */
+function useRemove(path: "/api/v1/departments/{id}" | "/api/v1/programs/{id}", id: number) {
+  return useMutation({
+    mutationFn: async () => {
+      const { error, response } = await api.DELETE(path, { params: { path: { id } } });
+      if (!response.ok) throw error;
+    },
+  });
+}
+
+/**
+ * The selected department's name, code, description and status (admin review 2026-11-02:
+ * a department could be added but never corrected). Stopping it hides it, with its
+ * programmes, from the site and from applying; its students and courses stay.
+ */
+function DepartmentForm({
+  department,
+  onDone,
+}: {
+  department: Schemas["Department"];
+  onDone: (deleted?: boolean) => void;
+}) {
+  const confirm = useConfirm();
+  const unsaved = useUnsavedChanges();
+  const [form, setForm] = useState({
+    code: department.code,
+    name_ar: department.name_ar,
+    name_en: department.name_en ?? "",
+    description: department.description ?? "",
+    is_active: department.is_active ?? true,
+  });
+  const save = useMutation({
+    mutationFn: async () => {
+      const { data, error } = await api.PATCH("/api/v1/departments/{id}", {
+        params: { path: { id: department.id } },
+        body: { ...form, code: form.code.trim(), name_ar: form.name_ar.trim() },
+      });
+      if (!data) throw error;
+    },
+    onSuccess: () => {
+      unsaved.saved();
+      onDone();
+    },
+  });
+  const remove = useRemove("/api/v1/departments/{id}", department.id);
+  const missing = !form.code.trim() || !form.name_ar.trim();
+  const error = save.error ?? remove.error;
+  return (
+    <Card className="mb-3">
+      <form
+        onInput={unsaved.onInput}
+        onSubmit={async (e) => {
+          e.preventDefault();
+          if (
+            form.code.trim() !== department.code &&
+            !(await confirm({
+              title: "تغيير رمز القسم؟",
+              body: `يتغير رابط صفحة القسم في الموقع من …/departments/${department.code}/ إلى …/departments/${form.code.trim()}/. أرقام الطلاب الحاليين لا تتغير.`,
+              confirm: "تغيير الرمز",
+              tone: "primary",
+            }))
+          )
+            return;
+          save.mutate();
+        }}
+        className="space-y-3 p-4"
+      >
+        <p className="font-semibold">تعديل قسم «{department.name_ar}»</p>
+        <div className="grid gap-3 @lg:grid-cols-[110px_minmax(0,1fr)_minmax(0,1fr)]">
+          <label className={LABEL}>
+            رمز القسم
+            <input
+              dir="ltr"
+              required
+              value={form.code}
+              onChange={(e) => setForm({ ...form, code: e.target.value.toUpperCase() })}
+              className={INPUT}
+            />
+          </label>
+          <label className={LABEL}>
+            اسم القسم
+            <input
+              required
+              value={form.name_ar}
+              onChange={(e) => setForm({ ...form, name_ar: e.target.value })}
+              className={INPUT}
+            />
+          </label>
+          <label className={LABEL}>
+            الاسم بالإنجليزية
+            <input
+              dir="ltr"
+              value={form.name_en}
+              onChange={(e) => setForm({ ...form, name_en: e.target.value })}
+              className={INPUT}
+            />
+          </label>
+        </div>
+        <label className={LABEL}>
+          نبذة تظهر في صفحة القسم بالموقع
+          <textarea
+            rows={3}
+            value={form.description}
+            onChange={(e) => setForm({ ...form, description: e.target.value })}
+            className={`${INPUT} py-2`}
+          />
+        </label>
+        <div className="flex items-center justify-between gap-3 rounded-lg bg-surface-alt px-3 py-2 text-sm">
+          <span>
+            <b className="block">القسم نشط</b>
+            <span className="text-xs text-text-muted">
+              الموقوف يختفي هو وبرامجه من الموقع ومن التقديم؛ طلابه ومواده تبقى كما هي.
+            </span>
+          </span>
+          <Switch
+            checked={form.is_active}
+            onChange={(v) => setForm({ ...form, is_active: v })}
+            label="القسم نشط"
+          />
+        </div>
+        {error ? <Notice>{problemMessage(error)}</Notice> : null}
+        <div className="flex flex-wrap items-center gap-2">
+          <Button
+            variant="ghost"
+            className="me-auto text-danger-strong"
+            disabled={remove.isPending}
+            onClick={async () => {
+              if (
+                await confirm({
+                  title: `حذف قسم «${department.name_ar}»؟`,
+                  body: "يُحذف القسم فقط إن لم يكن له برامج أو مواد أو طلاب أو أعضاء. وإلا فأوقفه بدل حذفه.",
+                  confirm: "حذف القسم",
+                })
+              )
+                remove.mutate(undefined, { onSuccess: () => onDone(true) });
+            }}
+          >
+            حذف القسم
+          </Button>
+          <Button variant="secondary" onClick={() => onDone()}>
+            إلغاء
+          </Button>
+          <Button
+            type="submit"
+            disabled={save.isPending || missing}
+            why={missing ? "الرمز والاسم مطلوبان" : undefined}
+          >
+            {save.isPending ? "جارٍ الحفظ…" : "حفظ القسم"}
+          </Button>
+        </div>
+      </form>
+    </Card>
+  );
+}
+
+/**
+ * A programme's structure: add a new one to the department, or correct one (admin review
+ * 2026-11-02). Its department stays: moving a programme would move its students and courses.
+ */
+function ProgramForm({
+  department,
+  program,
+  onDone,
+}: {
+  department: Schemas["Department"];
+  program?: Schemas["Program"];
+  onDone: () => void;
+}) {
+  const confirm = useConfirm();
+  const unsaved = useUnsavedChanges();
+  const blank = {
+    code: "",
+    name_ar: "",
+    name_en: "",
+    degree: "bachelor",
+    levels_count: "4",
+    duration_terms: "8",
+    total_credit_hours: "",
+    is_active: true,
+  };
+  const initial = program
+    ? {
+        code: program.code,
+        name_ar: program.name_ar,
+        name_en: program.name_en ?? "",
+        degree: program.degree as string,
+        levels_count: String(program.levels_count),
+        duration_terms: String(program.duration_terms),
+        total_credit_hours: program.total_credit_hours ? String(program.total_credit_hours) : "",
+        is_active: program.is_active ?? true,
+      }
+    : blank;
+  const [form, setForm] = useState(initial);
+  const set = (patch: Partial<typeof form>) => setForm({ ...form, ...patch });
+  const save = useMutation({
+    mutationFn: async () => {
+      const body = {
+        ...form,
+        code: form.code.trim(),
+        name_ar: form.name_ar.trim(),
+        degree: form.degree as never,
+        levels_count: Number(form.levels_count),
+        duration_terms: Number(form.duration_terms),
+        total_credit_hours: form.total_credit_hours ? Number(form.total_credit_hours) : null,
+      };
+      const { data, error } = program
+        ? await api.PATCH("/api/v1/programs/{id}", { params: { path: { id: program.id } }, body })
+        : await api.POST("/api/v1/programs", { body: { ...body, department: department.id } });
+      if (!data) throw error;
+    },
+    onSuccess: () => {
+      unsaved.saved();
+      if (!program) setForm(blank);
+      onDone();
+    },
+  });
+  const remove = useRemove("/api/v1/programs/{id}", program?.id ?? 0);
+  const missing = !form.code.trim() || !form.name_ar.trim();
+  const error = save.error ?? remove.error;
+  return (
+    // A labelled form (it was a row of bare boxes whose placeholders were the only hint).
+    <Card className="mt-3">
+      <form
+        onInput={unsaved.onInput}
+        onSubmit={async (e) => {
+          e.preventDefault();
+          if (
+            program &&
+            form.code.trim() !== program.code &&
+            !(await confirm({
+              title: "تغيير رمز البرنامج؟",
+              body: `يتغير رابط صفحة البرنامج في الموقع من …/programs/${program.code}/ إلى …/programs/${form.code.trim()}/.`,
+              confirm: "تغيير الرمز",
+              tone: "primary",
+            }))
+          )
+            return;
+          save.mutate();
+        }}
+        className="space-y-3 p-4"
+      >
+        <p className="text-sm font-semibold">
+          {program ? `تعديل برنامج «${program.name_ar}»` : `برنامج جديد في ${department.name_ar}`}
+        </p>
+        <div className="grid gap-3 @lg:grid-cols-[110px_minmax(0,1fr)_minmax(0,1fr)]">
+          <label className={LABEL}>
+            رمز البرنامج
+            <input
+              dir="ltr"
+              value={form.code}
+              onChange={(e) => set({ code: e.target.value.toUpperCase() })}
+              placeholder="BIT"
+              className={INPUT}
+            />
+          </label>
+          <label className={LABEL}>
+            اسم البرنامج
+            <input
+              value={form.name_ar}
+              onChange={(e) => set({ name_ar: e.target.value })}
+              className={INPUT}
+            />
+          </label>
+          <label className={LABEL}>
+            الاسم بالإنجليزية
+            <input
+              dir="ltr"
+              value={form.name_en}
+              onChange={(e) => set({ name_en: e.target.value })}
+              className={INPUT}
+            />
+          </label>
+        </div>
+        <div role="group" aria-label="الدرجة" className={LABEL}>
+          الدرجة
+          <span className="flex flex-wrap gap-2">
+            {Object.entries(DEGREE).map(([k, l]) => (
+              <Chip key={k} active={form.degree === k} onClick={() => set({ degree: k })}>
+                {l}
+              </Chip>
+            ))}
+          </span>
+        </div>
+        <div className="grid grid-cols-3 gap-3 @lg:max-w-md">
+          <label className={LABEL}>
+            مستويات
+            <input
+              type="number"
+              min={1}
+              max={10}
+              value={form.levels_count}
+              onChange={(e) => set({ levels_count: e.target.value })}
+              className={INPUT}
+            />
+          </label>
+          <label className={LABEL}>
+            فصول
+            <input
+              type="number"
+              min={1}
+              max={20}
+              value={form.duration_terms}
+              onChange={(e) => set({ duration_terms: e.target.value })}
+              className={INPUT}
+            />
+          </label>
+          <label className={LABEL}>
+            ساعات للتخرج
+            <input
+              type="number"
+              min={1}
+              max={300}
+              value={form.total_credit_hours}
+              onChange={(e) => set({ total_credit_hours: e.target.value })}
+              placeholder="—"
+              className={INPUT}
+            />
+          </label>
+        </div>
+        {program && (
+          <div className="flex items-center justify-between gap-3 rounded-lg bg-surface-alt px-3 py-2 text-sm">
+            <span>
+              <b className="block">البرنامج نشط</b>
+              <span className="text-xs text-text-muted">
+                الموقوف يختفي من الموقع ومن التقديم؛ طلابه الحاليون يبقون عليه.
+              </span>
+            </span>
+            <Switch
+              checked={form.is_active}
+              onChange={(v) => set({ is_active: v })}
+              label="البرنامج نشط"
+            />
+          </div>
+        )}
+        {error ? <Notice>{problemMessage(error)}</Notice> : null}
+        <div className="flex flex-wrap items-center justify-end gap-2">
+          {program && (
+            <>
+              <Button
+                variant="ghost"
+                className="me-auto text-danger-strong"
+                disabled={remove.isPending}
+                onClick={async () => {
+                  if (
+                    await confirm({
+                      title: `حذف برنامج «${program.name_ar}»؟`,
+                      body: "يُحذف البرنامج فقط إن لم يكن عليه طلاب أو طلبات أو مواد. وإلا فأوقفه بدل حذفه.",
+                      confirm: "حذف البرنامج",
+                    })
+                  )
+                    remove.mutate(undefined, { onSuccess: onDone });
+                }}
+              >
+                حذف البرنامج
+              </Button>
+              <Button variant="secondary" onClick={onDone}>
+                إلغاء
+              </Button>
+            </>
+          )}
+          <Button
+            type="submit"
+            className="min-h-10 w-full px-5 @lg:w-auto"
+            disabled={save.isPending || missing}
+            why={missing ? "الرمز والاسم مطلوبان" : undefined}
+          >
+            {save.isPending ? "جارٍ الحفظ…" : program ? "حفظ البرنامج" : "+ برنامج"}
+          </Button>
+        </div>
+      </form>
+    </Card>
   );
 }
