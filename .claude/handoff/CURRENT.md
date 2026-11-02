@@ -1,3 +1,21 @@
+# Handoff — system admin review, structure editing — 2026-11-02
+
+- #218–#221 exams/assignments test findings (partial marks, edit draft question, notification
+  links, offline auto-submit, late-penalty wording).
+- Admin review report: `Claude outputs/تقرير-مراجعة-مدير-النظام-2026-11-02.md` (not in git).
+- #222 «الهيكل الأكاديمي»: edit/stop/delete departments and programmes (409 `in_use` → stop
+  instead); levels 1–10 / terms 1–20 in the serializer (was a 500); structure writes call
+  `request_site_rebuild`.
+- #223 new programme can open its intake in the active cycle at once; rows show «مفتوح/غير
+  مفتوح للتقديم» with a button; a programme moves department only with no students, courses
+  or applications; rebuild debounce 2 min → 30 s. Live 2026-11-02 17:14 UTC; site shows 28.
+- Owner's production data: 15 programmes were each added as their own department; owner can
+  now move them and delete the empty departments. 17 programmes had no intake.
+- Next (recommended): «+ عام أكاديمي» and editing terms on the structure page (no UI to
+  create an academic year); small notes: admin home audit link → `/audit`, user-group rows
+  → `/system/users?role=…`.
+- Gotcha: `gh pr merge` failed with a GraphQL error → `gh api -X PUT …/pulls/<n>/merge`.
+
 # Handoff — admission form (owner spec 2026-11-01), staff pages — 2026-11-01
 
 Owner's spec `~/Downloads/college-admission-form-spec.md`; decisions in chat 2026-11-01: identity
