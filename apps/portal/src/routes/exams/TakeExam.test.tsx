@@ -92,6 +92,23 @@ it("stays usable when the connection drops during submit", async () => {
   expect(await screen.findByText("submitted")).toBeTruthy(); // the retry went through
 });
 
+it("submits by itself when the connection comes back (test 2026-11-02)", async () => {
+  vi.mocked(api.GET).mockResolvedValue({
+    data: attempt(10),
+    response: new Response(null, { status: 200 }),
+  } as never);
+  vi.mocked(api.POST).mockRejectedValue(new TypeError("Failed to fetch"));
+  mount();
+  fireEvent.click(await screen.findByRole("button", { name: "إنهاء وتسليم" }));
+  fireEvent.click(screen.getByRole("button", { name: "تسليم الآن" }));
+  expect(await screen.findByText(/يُسلَّم الاختبار تلقائيًا حين يعود الاتصال/)).toBeTruthy();
+  vi.mocked(api.POST).mockResolvedValue({ response: new Response(null, { status: 200 }) } as never);
+  act(() => {
+    window.dispatchEvent(new Event("online"));
+  });
+  expect(await screen.findByText("submitted")).toBeTruthy(); // no second press
+});
+
 it("moves through a single-choice question with the arrow keys (review G2)", async () => {
   const single = attempt(10);
   single.questions = [

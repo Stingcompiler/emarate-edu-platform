@@ -88,7 +88,8 @@ function StudentView({ a }: { a: A }) {
     a.late_policy === "none" ? due : a.late_until ? new Date(a.late_until).getTime() : due;
   const closed = a.status === "closed" || now > hardEnd;
   const canSubmit = !closed && (!s || (a.allow_resubmission && !s.grade));
-  const left = Math.max(0, due - now);
+  // Past the due date in a late window: the time left is to the window's end.
+  const left = Math.max(0, (due < now ? hardEnd : due) - now);
   const types = a.submission_types ?? [];
   return (
     <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_380px] lg:items-start lg:gap-6">
@@ -116,11 +117,22 @@ function StudentView({ a }: { a: A }) {
               </p>
               <p className="text-[11px] text-navy-200">ساعة</p>
             </div>
+            {/* Minutes too: under an hour left read «0 يوم 0 ساعة» (test 2026-11-02). */}
+            <div className="text-center">
+              <p className="text-2xl font-bold">
+                {Math.floor((left % 3_600_000) / 60_000).toLocaleString("ar-u-nu-latn")}
+              </p>
+              <p className="text-[11px] text-navy-200">دقيقة</p>
+            </div>
             <p className="flex-1 text-sm text-navy-100">
               {due < now
-                ? `بعد الموعد — ${a.late_policy === "penalty" ? `يُقبل بخصم ${a.late_penalty_percent}٪` : "يُقبل ويُعلَّم متأخرًا"}`
+                ? `بعد الموعد — ${a.late_policy === "penalty" ? `يُقبل بخصم ${a.late_penalty_percent}٪` : "يُقبل ويُعلَّم متأخرًا"} حتى ${absolute(new Date(hardEnd).toISOString())}`
                 : `متبقٍ على التسليم · ${dueLabel(a.due_at)}`}
-              {a.allow_resubmission ? " · يُسمح بإعادة التسليم حتى الموعد" : ""}
+              {a.allow_resubmission
+                ? due < now
+                  ? " · يُسمح بإعادة التسليم"
+                  : " · يُسمح بإعادة التسليم حتى الموعد"
+                : ""}
             </p>
           </div>
         )}
@@ -197,6 +209,13 @@ function StudentView({ a }: { a: A }) {
             {s.grade && s.grade.status === "approved" && (
               <div className="mt-2 rounded-lg bg-success-soft p-3 text-success-strong">
                 <b className="text-lg">{score(s.grade.final_score, a.max_grade ?? 0)}</b>
+                {Number(s.grade.final_score) !== Number(s.grade.score) && (
+                  // The late penalty, said: otherwise 9 of a 10 the teacher gave looks wrong.
+                  <p className="text-xs">
+                    بعد خصم التأخير {a.late_penalty_percent}٪ من{" "}
+                    {Number(s.grade.score).toLocaleString("ar-u-nu-latn")}
+                  </p>
+                )}
                 {s.grade.feedback && <p className="mt-1 text-sm">«{s.grade.feedback}»</p>}
               </div>
             )}

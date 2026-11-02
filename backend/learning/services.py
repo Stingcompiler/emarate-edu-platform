@@ -423,15 +423,16 @@ def submit(
     types = set(assignment.submission_types)
     content = content.strip()
     links = links or {}
-    if content and "text" not in types:
-        raise ValidationError({"content": [gettext("Text answers are not accepted here.")]})
+    # Without «إجابة نصية» the text is the student's note to the teacher (the form offers
+    # «ملاحظة للأستاذ (اختياري)»); it goes with a file or a link, never alone (exam test
+    # 2026-11-02: a note refused the whole submission).
     if files and "file" not in types:
         raise ValidationError({"files": [gettext("Files are not accepted here.")]})
     if links and "link" not in types:
         raise ValidationError({"links": [gettext("Links are not accepted here.")]})
     stored = _submission_files(user, assignment, list(files))
     clean_links = _links(assignment, links) if "link" in types else {}
-    if not (content or stored or clean_links):
+    if not ((content and "text" in types) or stored or clean_links):
         raise Invalid({"detail": [gettext("The submission is empty.")]}, code="empty")
 
     student = StudentRecord.objects.get(user=user)

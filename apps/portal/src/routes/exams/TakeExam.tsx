@@ -222,9 +222,13 @@ function ExamRunner({ attempt }: { attempt: AttemptPayload }) {
     return syncing.current;
   }, [pending, syncOnce]);
 
+  // The student pressed «تسليم» and it has not gone through yet: it goes by itself once the
+  // connection is back (test 2026-11-02: the page said so, but nothing retried it).
+  const wantsSubmit = useRef(false);
   const submit = useCallback(async () => {
     if (submitting.current) return;
     submitting.current = true;
+    wantsSubmit.current = true;
     let leaving = false;
     try {
       await sync();
@@ -238,7 +242,7 @@ function ExamRunner({ attempt }: { attempt: AttemptPayload }) {
       const timeUp = deadline - (Date.now() + offset) <= 0;
       if (unsent > 0 && !timeUp) {
         setError(
-          `لم تصل ${count(unsent, N.answer)} إلى الخادم بعد. تحقّق من الاتصال ثم اضغط «تسليم» مرة أخرى؛ إجاباتك محفوظة على هذه الصفحة.`,
+          `لم تصل ${count(unsent, N.answer)} إلى الخادم بعد. يُسلَّم الاختبار تلقائيًا حين يعود الاتصال؛ إجاباتك محفوظة على هذه الصفحة، فلا تغلقها.`,
         );
         return;
       }
@@ -258,7 +262,9 @@ function ExamRunner({ attempt }: { attempt: AttemptPayload }) {
       setError("تعذّر الإرسال الآن. إجاباتك محفوظة على جهازك وسنعيد المحاولة تلقائيًا.");
     } catch {
       // fetch itself failed (no connection): the page stays usable and retries.
-      setError("انقطع الاتصال أثناء الإرسال. إجاباتك محفوظة، وسنعيد المحاولة عند عودة الاتصال.");
+      setError(
+        "انقطع الاتصال أثناء الإرسال. إجاباتك محفوظة، ويُسلَّم الاختبار تلقائيًا حين يعود الاتصال.",
+      );
     } finally {
       if (!leaving) submitting.current = false;
     }
@@ -268,12 +274,12 @@ function ExamRunner({ attempt }: { attempt: AttemptPayload }) {
   useEffect(() => {
     void sync(); // answers queued before a reload go now, not in 10 s
     const tick = window.setInterval(() => setNow(Date.now()), 500);
-    const save = window.setInterval(() => void sync(), 10_000);
+    const save = window.setInterval(() => void (wantsSubmit.current ? submit() : sync()), 10_000);
     return () => {
       window.clearInterval(tick);
       window.clearInterval(save);
     };
-  }, [sync]);
+  }, [submit, sync]);
   // At the deadline, ask the server first: a teacher may have just extended the time.
   const checking = useRef(false);
   useEffect(() => {
@@ -320,7 +326,7 @@ function ExamRunner({ attempt }: { attempt: AttemptPayload }) {
       setOnline(true);
       if (wentOffline) signal("offline");
       wentOffline = false;
-      void sync();
+      void (wantsSubmit.current ? submit() : sync());
     };
     const onOffline = () => {
       setOnline(false);
@@ -337,7 +343,7 @@ function ExamRunner({ attempt }: { attempt: AttemptPayload }) {
       window.removeEventListener("offline", onOffline);
       document.removeEventListener("visibilitychange", onVisibility);
     };
-  }, [attempt.public_id, sync]);
+  }, [attempt.public_id, submit, sync]);
 
   function setAnswer(q: ExamQuestion, value: AnswerValue) {
     setAnswers((current) => ({ ...current, [q.id]: value }));
@@ -612,7 +618,15 @@ function ExamRunner({ attempt }: { attempt: AttemptPayload }) {
               </p>
             )}
             <div className="mt-5 flex gap-2">
-              <Button variant="secondary" className="flex-1" onClick={() => setConfirm(false)}>
+              <Button
+                variant="secondary"
+                className="flex-1"
+                onClick={() => {
+                  // Back to answering: a submission waiting for the connection is called off.
+                  wantsSubmit.current = false;
+                  setConfirm(false);
+                }}
+              >
                 متابعة الحل
               </Button>
               <Button className="flex-1" onClick={() => void submit()}>

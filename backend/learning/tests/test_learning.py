@@ -275,13 +275,20 @@ def test_submission_rules(api, classroom):
     )
     student = api(classroom.student)
     url = f"/api/v1/assignments/{assignment}/submit"
+    # A note alone is no submission when the assignment takes no text…
     assert student.post(url, {"content": "نص"}, format="json").status_code == 400
     assert (
         student.post(url, {"links": {"GitHub": "https://gitlab.com/x"}}, format="json").status_code
         == 400
     )
-    ok = student.post(url, {"links": {"GitHub": "https://github.com/me/repo"}}, format="json")
+    # …but it goes with the link (test 2026-11-02: «ملاحظة للأستاذ» refused the submission).
+    ok = student.post(
+        url,
+        {"links": {"GitHub": "https://github.com/me/repo"}, "content": "الحل في الفرع main"},
+        format="json",
+    )
     assert ok.status_code == 201, ok.data
+    assert ok.data["current_version"]["content"] == "الحل في الفرع main"
     again = student.post(url, {"links": {"GitHub": "https://github.com/me/v2"}}, format="json")
     assert again.status_code == 409
 
