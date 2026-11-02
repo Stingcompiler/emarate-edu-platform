@@ -9,6 +9,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from audit.services import RequestMeta, record, snapshot
+from content.services import request_site_rebuild
 from core.permissions import capability
 from core.viewsets import ScopedModelViewSet
 
@@ -30,6 +31,20 @@ class _StructureViewSet(ScopedModelViewSet):
 
     def department_of(self, obj):
         return None
+
+    # The public site lists departments and programs: rebuild it after a change instead of
+    # waiting for the six-hourly build (admin review 2026-11-02).
+    def perform_create(self, serializer):
+        super().perform_create(serializer)
+        transaction.on_commit(request_site_rebuild)
+
+    def perform_update(self, serializer):
+        super().perform_update(serializer)
+        transaction.on_commit(request_site_rebuild)
+
+    def perform_destroy(self, instance):
+        super().perform_destroy(instance)
+        transaction.on_commit(request_site_rebuild)
 
 
 class CollegeViewSet(_StructureViewSet):

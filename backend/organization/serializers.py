@@ -46,6 +46,9 @@ class ProgramSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ["name"]
         extra_kwargs = {
+            # The database checks these too; without the bounds here a bad value was a 500.
+            "levels_count": {"min_value": 1, "max_value": 10},
+            "duration_terms": {"min_value": 1, "max_value": 20},
             "total_credit_hours": {"min_value": 1, "max_value": 300},
             "annual_fee_sdg": {"min_value": 1},
             "annual_fee_usd": {"min_value": 1},
