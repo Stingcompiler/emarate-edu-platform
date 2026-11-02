@@ -193,14 +193,15 @@ def department_public_q_any(department_ids) -> Q:
 
 
 def request_site_rebuild() -> None:
-    """Debounced (2 minutes) call to the static site's deploy hook (docs/05 §8.7).
+    """Debounced (30 seconds: enough to gather a burst of saves, short enough that a new
+    programme shows soon — owner 2026-11-02) call to the static site's deploy hook (docs/05 §8.7).
     Without SITE_REBUILD_HOOK_URL (the static host's deploy hook) this does nothing."""
     url = getattr(settings, "SITE_REBUILD_HOOK_URL", "")
-    if not url or not cache.add("site-rebuild-pending", True, timeout=120):
+    if not url or not cache.add("site-rebuild-pending", True, timeout=30):
         return
     from .tasks import trigger_site_rebuild
 
-    trigger_site_rebuild.apply_async(countdown=120)
+    trigger_site_rebuild.apply_async(countdown=30)
 
 
 def call_rebuild_hook() -> bool:

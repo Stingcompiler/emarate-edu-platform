@@ -245,7 +245,7 @@ def test_publishing_asks_for_one_debounced_rebuild(api, site, settings, monkeypa
             {"slug": slug, "title": slug, "body": "x", "status": "published"},
             format="json",
         )
-    assert calls == [{"countdown": 120}]
+    assert calls == [{"countdown": 30}]
 
 
 def test_archive_announcement(api, site):

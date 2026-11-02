@@ -65,3 +65,20 @@ def test_others_cannot_edit_the_structure(api, make_user, it_dept):
     client = api(make_user(Role.ACADEMIC_AFFAIRS))
     response = client.patch(f"/api/v1/departments/{it_dept.pk}", {"name_ar": "x"})
     assert response.status_code == 403
+
+
+def test_a_program_moves_department_only_while_unused(
+    api, make_user, it_program, ba_dept, make_student
+):
+    client = api(make_user(Role.SYSTEM_ADMIN))
+    url = f"/api/v1/programs/{it_program.pk}"
+    assert client.patch(url, {"department": ba_dept.pk}, format="json").status_code == 200
+    it_program.refresh_from_db()
+    assert it_program.department_id == ba_dept.pk
+    make_student(it_program, "26-BA-0901")
+    response = client.patch(url, {"department": it_program.department_id}, format="json")
+    assert response.status_code == 200  # same department: not a move
+    other = Department.objects.exclude(pk=ba_dept.pk).first()
+    response = client.patch(url, {"department": other.pk}, format="json")
+    assert response.status_code == 400
+    assert "department" in str(response.data)

@@ -1,3 +1,4 @@
+from django.utils.translation import gettext as _
 from rest_framework import serializers
 
 from .models import College, Department, Program, SystemSettings
@@ -53,6 +54,24 @@ class ProgramSerializer(serializers.ModelSerializer):
             "annual_fee_sdg": {"min_value": 1},
             "annual_fee_usd": {"min_value": 1},
         }
+
+    def validate_department(self, value):
+        """A programme moves to another department only while nothing hangs on it: its
+        students, courses and applications are scoped by department (owner 2026-11-02)."""
+        program = self.instance
+        if program is None or value == program.department:
+            return value
+        from admissions.models import Application
+
+        if (
+            program.students.exists()
+            or program.courses.exists()
+            or Application.objects.filter(intake__program=program).exists()
+        ):
+            raise serializers.ValidationError(
+                _("A programme with students, courses or applications cannot move department.")
+            )
+        return value
 
 
 class SystemSettingsSerializer(serializers.ModelSerializer):

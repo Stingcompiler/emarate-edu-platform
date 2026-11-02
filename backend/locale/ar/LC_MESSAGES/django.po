@@ -991,3 +991,6 @@ msgstr "يجب ألا تقل القيمة عن %(limit_value)s."
 #, python-format
 msgid "Ensure this value is less than or equal to %(limit_value)s."
 msgstr "يجب ألا تزيد القيمة على %(limit_value)s."
+
+msgid "A programme with students, courses or applications cannot move department."
+msgstr "لا يُنقل إلى قسم آخر برنامجٌ عليه طلاب أو مواد أو طلبات تقديم."

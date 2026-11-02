@@ -61,6 +61,23 @@ export function Structure() {
     queryFn: async () =>
       ok(await api.GET("/api/v1/academic-years", { params: { query: ALL } }))?.results ?? [],
   });
+  // The admission cycle applicants see now, and which programmes it offers: a programme added
+  // here can be opened for applying at once (owner 2026-11-02, «تظهر مباشرة»).
+  const cycles = useQuery({
+    queryKey: ["admissions", "cycles"],
+    queryFn: async () =>
+      ok(await api.GET("/api/v1/admission-cycles", { params: { query: ALL } }))?.results ?? [],
+  });
+  const cycle = cycles.data?.find((c) => c.is_active);
+  const intakes = useQuery({
+    queryKey: ["admissions", "intakes", cycle?.id],
+    enabled: !!cycle,
+    queryFn: async () =>
+      ok(await api.GET("/api/v1/intakes", { params: { query: { ...ALL, cycle: cycle!.id } } }))
+        ?.results ?? [],
+  });
+  const intakeOf = (program: number) => intakes.data?.find((i) => i.program === program);
+  const [saved, setSaved] = useState(false);
   const [picked, setPicked] = useState<number | null>(null);
   // The open form: a programme's details or its public page (description, fees, outcomes),
   // or the selected department's details.
@@ -68,7 +85,17 @@ export function Structure() {
   const [editingDept, setEditingDept] = useState(false);
   const dept = departments.data?.find((d) => d.id === picked) ?? departments.data?.[0];
   const deptPrograms = (programs.data ?? []).filter((p) => p.department === dept?.id);
-  const refresh = (key: string) => client.invalidateQueries({ queryKey: [key] });
+  const refresh = (key: string) => {
+    if (key === "departments" || key === "programs") setSaved(true);
+    return client.invalidateQueries({ queryKey: [key] });
+  };
+  const openIntake = useMutation({
+    mutationFn: (program: number) => addIntake(cycle!.id, program),
+    onSuccess: () => {
+      setSaved(true);
+      void client.invalidateQueries({ queryKey: ["admissions", "intakes"] });
+    },
+  });
   const setCurrent = useMutation({
     mutationFn: async (id: number) => {
       const { data, error } = await api.POST("/api/v1/terms/{id}/set-current", {
@@ -113,7 +140,7 @@ export function Structure() {
       void refresh("terms");
     },
   });
-  const err = setCurrent.error ?? addDept.error ?? addTerm.error;
+  const err = setCurrent.error ?? addDept.error ?? addTerm.error ?? openIntake.error;
   // min-w-0 w-full: a field never sets its row's width (a text field's default is ~200px).
   const input = "min-h-10 w-full min-w-0 rounded-lg border border-border bg-surface px-3 text-sm";
   return (
@@ -125,6 +152,12 @@ export function Structure() {
       {err ? (
         <div className="mb-3">
           <Notice>{problemMessage(err)}</Notice>
+        </div>
+      ) : saved ? (
+        <div className="mb-3">
+          <Notice tone="success">
+            حُفظ. يظهر الآن في البوابة وفي استمارة التقديم، وفي الموقع العام خلال دقائق.
+          </Notice>
         </div>
       ) : null}
       {/* One column on phones that keeps to the screen: an implicit grid column is «auto» and
@@ -360,6 +393,15 @@ export function Structure() {
                       );
                     })}
                   </span>
+                  {cycle && (
+                    <IntakeLine
+                      cycle={cycle.name}
+                      intake={intakeOf(p.id)}
+                      ready={intakes.isSuccess}
+                      busy={openIntake.isPending && openIntake.variables === p.id}
+                      onOpen={() => openIntake.mutate(p.id)}
+                    />
+                  )}
                 </span>
                 <span className="hidden text-text-muted @2xl:block">
                   {DEGREE[p.degree] ?? p.degree}
@@ -397,14 +439,25 @@ export function Structure() {
               return editing?.part === "page" ? (
                 <ProgramPageForm key={p.id} program={p} onDone={done} />
               ) : (
-                <ProgramForm key={p.id} department={dept!} program={p} onDone={done} />
+                <ProgramForm
+                  key={p.id}
+                  department={dept!}
+                  departments={departments.data ?? []}
+                  program={p}
+                  onDone={done}
+                />
               );
             })}
           {dept && (
             <ProgramForm
               key={`new-${dept.id}`}
               department={dept}
-              onDone={() => void refresh("programs")}
+              departments={departments.data ?? []}
+              cycle={cycle}
+              onDone={() => {
+                void refresh("programs");
+                void client.invalidateQueries({ queryKey: ["admissions", "intakes"] });
+              }}
             />
           )}
         </section>
@@ -766,11 +819,16 @@ function DepartmentForm({
  */
 function ProgramForm({
   department,
+  departments,
   program,
+  cycle,
   onDone,
 }: {
   department: Schemas["Department"];
+  departments: Schemas["Department"][];
   program?: Schemas["Program"];
+  /** The active admission cycle: a new programme can be opened for applying in it. */
+  cycle?: Schemas["Cycle"];
   onDone: () => void;
 }) {
   const confirm = useConfirm();
@@ -784,6 +842,8 @@ function ProgramForm({
     duration_terms: "8",
     total_credit_hours: "",
     is_active: true,
+    department: department.id,
+    open_intake: true,
   };
   const initial = program
     ? {
@@ -795,14 +855,17 @@ function ProgramForm({
         duration_terms: String(program.duration_terms),
         total_credit_hours: program.total_credit_hours ? String(program.total_credit_hours) : "",
         is_active: program.is_active ?? true,
+        department: program.department,
+        open_intake: false,
       }
     : blank;
   const [form, setForm] = useState(initial);
   const set = (patch: Partial<typeof form>) => setForm({ ...form, ...patch });
   const save = useMutation({
     mutationFn: async () => {
+      const { open_intake, ...fields } = form;
       const body = {
-        ...form,
+        ...fields,
         code: form.code.trim(),
         name_ar: form.name_ar.trim(),
         degree: form.degree as never,
@@ -812,8 +875,9 @@ function ProgramForm({
       };
       const { data, error } = program
         ? await api.PATCH("/api/v1/programs/{id}", { params: { path: { id: program.id } }, body })
-        : await api.POST("/api/v1/programs", { body: { ...body, department: department.id } });
+        : await api.POST("/api/v1/programs", { body });
       if (!data) throw error;
+      if (!program && cycle && open_intake) await addIntake(cycle.id, data.id);
     },
     onSuccess: () => {
       unsaved.saved();
@@ -925,6 +989,41 @@ function ProgramForm({
           </label>
         </div>
         {program && (
+          <label className={`${LABEL} @lg:max-w-md`}>
+            القسم
+            <select
+              value={form.department}
+              onChange={(e) => set({ department: Number(e.target.value) })}
+              className={INPUT}
+            >
+              {departments.map((d) => (
+                <option key={d.id} value={d.id}>
+                  {d.name_ar}
+                </option>
+              ))}
+            </select>
+            <span className="font-normal">
+              يُنقل إلى قسم آخر ما دام لا طلاب عليه ولا مواد ولا طلبات تقديم.
+            </span>
+          </label>
+        )}
+        {!program && cycle && (
+          <label className="flex items-start gap-2 rounded-lg bg-surface-alt px-3 py-2 text-sm">
+            <input
+              type="checkbox"
+              checked={form.open_intake}
+              onChange={(e) => set({ open_intake: e.target.checked })}
+              className="mt-1 size-4 accent-primary"
+            />
+            <span>
+              <b className="block">فتح التقديم عليه في «{cycle.name}»</b>
+              <span className="text-xs text-text-muted">
+                يظهر فورًا في استمارة التقديم. المقاعد والمستندات تُضبط من «الدورات والبرامج».
+              </span>
+            </span>
+          </label>
+        )}
+        {program && (
           <div className="flex items-center justify-between gap-3 rounded-lg bg-surface-alt px-3 py-2 text-sm">
             <span>
               <b className="block">البرنامج نشط</b>
@@ -976,5 +1075,56 @@ function ProgramForm({
         </div>
       </form>
     </Card>
+  );
+}
+
+/** Opens a programme for applying in a cycle, with the documents the cycles page also asks. */
+async function addIntake(cycle: number, program: number) {
+  const { data, error } = await api.POST("/api/v1/intakes", {
+    body: {
+      cycle,
+      program,
+      required_documents: [
+        { key: "certificate", label: "الشهادة الثانوية", required: true },
+        { key: "id", label: "الرقم الوطني أو الجواز", required: true },
+      ],
+    } as never,
+  });
+  if (!data) throw error;
+}
+
+/** Whether applicants can choose the programme in the active cycle, or a button to open it. */
+function IntakeLine({
+  cycle,
+  intake,
+  ready,
+  busy,
+  onOpen,
+}: {
+  cycle: string;
+  intake?: Schemas["Intake"];
+  ready: boolean;
+  busy: boolean;
+  onOpen: () => void;
+}) {
+  if (!ready) return null;
+  if (intake)
+    return (
+      <span className="block text-xs text-text-muted">
+        {intake.is_open ? `مفتوح للتقديم في «${cycle}»` : `التقديم موقوف في «${cycle}»`}
+      </span>
+    );
+  return (
+    <span className="flex flex-wrap items-center gap-x-2 text-xs">
+      <span className="text-warning-strong">غير مفتوح للتقديم</span>
+      <button
+        type="button"
+        disabled={busy}
+        onClick={onOpen}
+        className="tap-44 font-semibold text-primary hover:underline"
+      >
+        {busy ? "…" : `فتح التقديم في «${cycle}»`}
+      </button>
+    </span>
   );
 }
