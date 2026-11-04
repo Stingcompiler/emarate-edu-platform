@@ -1,0 +1,481 @@
+FFF.                                                                     [100%]
+=================================== FAILURES ===================================
+___________ test_r26_a_stopped_programme_still_accepts_applications ____________
+
+intake = <ProgramIntake: 1:1>
+
+    def test_r26_a_stopped_programme_still_accepts_applications(intake):
+        """Stopping a programme (or its department) hides it from the site, but its open
+        intake still answers accepting() — POST /api/public/applications starts a draft."""
+        program = intake.program
+        program.is_active = False
+        program.save(update_fields=["is_active"])
+>       assert intake.accepting() is True
+E       assert False is True
+E        +  where False = accepting()
+E        +    where accepting = <ProgramIntake: 1:1>.accepting
+
+core/tests/test_qa_probes_review_2026_11.py:21: AssertionError
+____________ test_r27_a_code_change_leaves_the_old_site_link_broken ____________
+
+api = <function api.<locals>.client at 0x10daa2b60>
+make_user = <function make_user.<locals>.make at 0x10daa3100>
+it_dept = <Department: تقانة المعلومات>
+it_program = <Program: بكالوريوس تقانة المعلومات>
+
+    def test_r27_a_code_change_leaves_the_old_site_link_broken(api, make_user, it_dept, it_program):
+        """The site addresses /departments/<code>/ and /programs/<code>/; a new code makes the
+        old links 404 and no CMS redirect is made for them."""
+        client = api(make_user(Role.SYSTEM_ADMIN))
+        assert client.patch(f"/api/v1/departments/{it_dept.pk}", {"code": "ITX"}).status_code == 200
+        assert client.patch(f"/api/v1/programs/{it_program.pk}", {"code": "BITX"}).status_code == 200
+>       assert not Redirect.objects.exists()
+E       assert not True
+E        +  where True = exists()
+E        +    where exists = <django.db.models.manager.Manager object at 0x10dae0750>.exists
+E        +      where <django.db.models.manager.Manager object at 0x10dae0750> = Redirect.objects
+
+core/tests/test_qa_probes_review_2026_11.py:36: AssertionError
+___________ test_r28_a_programme_opened_by_mistake_cannot_be_deleted ___________
+
+api = <function api.<locals>.client at 0x10daa0680>
+make_user = <function make_user.<locals>.make at 0x10daa22a0>
+intake = <ProgramIntake: 1:1>
+
+    def test_r28_a_programme_opened_by_mistake_cannot_be_deleted(api, make_user, intake):
+        """The structure page opens applying when a programme is added (#223). An intake with
+        no application at all still PROTECTs the programme: delete answers 409 in_use."""
+        client = api(make_user(Role.SYSTEM_ADMIN))
+        assert not intake.applications.exists()
+        response = client.delete(f"/api/v1/programs/{intake.program_id}")
+>       assert response.status_code == 409
+E       assert 204 == 409
+E        +  where 204 = <Response status_code=204>.status_code
+
+core/tests/test_qa_probes_review_2026_11.py:45: AssertionError
+==================================== PASSES ====================================
+_________ test_r29_reversed_dates_on_a_year_or_term_are_a_server_error _________
+----------------------------- Captured stderr call -----------------------------
+2026-11-04 13:46:48,995 ERROR django.request Internal Server Error: /api/v1/academic-years
+Traceback (most recent call last):
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/.venv/lib/python3.13/site-packages/django/db/backends/utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/.venv/lib/python3.13/site-packages/django/db/backends/sqlite3/base.py", line 359, in execute
+    return super().execute(query, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+sqlite3.IntegrityError: CHECK constraint failed: year_dates_order
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/.venv/lib/python3.13/site-packages/django/core/handlers/exception.py", line 56, in inner
+    response = get_response(request)
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/.venv/lib/python3.13/site-packages/django/core/handlers/base.py", line 199, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/.venv/lib/python3.13/site-packages/django/views/decorators/csrf.py", line 64, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/.venv/lib/python3.13/site-packages/rest_framework/viewsets.py", line 124, in view
+    return self.dispatch(request, *args, **kwargs)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/.venv/lib/python3.13/site-packages/rest_framework/views.py", line 526, in dispatch
+    response = self.handle_exception(exc)
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/.venv/lib/python3.13/site-packages/rest_framework/views.py", line 474, in handle_exception
+    self.raise_uncaught_exception(exc)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/.venv/lib/python3.13/site-packages/rest_framework/views.py", line 485, in raise_uncaught_exception
+    raise exc
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/.venv/lib/python3.13/site-packages/rest_framework/views.py", line 523, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/.venv/lib/python3.13/site-packages/rest_framework/mixins.py", line 19, in create
+    self.perform_create(serializer)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/core/viewsets.py", line 80, in perform_create
+    obj = serializer.save()
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/.venv/lib/python3.13/site-packages/rest_framework/serializers.py", line 210, in save
+    self.instance = self.create(validated_data)
+                    ~~~~~~~~~~~^^^^^^^^^^^^^^^^
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/.venv/lib/python3.13/site-packages/rest_framework/serializers.py", line 1020, in create
+    instance = ModelClass._default_manager.create(**validated_data)
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/.venv/lib/python3.13/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/.venv/lib/python3.13/site-packages/django/db/models/query.py", line 752, in create
+    obj.save(force_insert=True, using=self.db)
+    ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/.venv/lib/python3.13/site-packages/django/db/models/base.py", line 904, in save
+    self.save_base(
+    ~~~~~~~~~~~~~~^
+        using=using,
+        ^^^^^^^^^^^^
+    ...<2 lines>...
+        update_fields=update_fields,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/.venv/lib/python3.13/site-packages/django/db/models/base.py", line 996, in save_base
+    updated = self._save_table(
+        raw,
+    ...<4 lines>...
+        update_fields,
+    )
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/.venv/lib/python3.13/site-packages/django/db/models/base.py", line 1201, in _save_table
+    results = self._do_insert(
+        cls._base_manager, using, insert_fields, returning_fields, raw
+    )
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/.venv/lib/python3.13/site-packages/django/db/models/base.py", line 1253, in _do_insert
+    return manager._insert(
+           ~~~~~~~~~~~~~~~^
+        [self],
+        ^^^^^^^
+    ...<3 lines>...
+        raw=raw,
+        ^^^^^^^^
+    )
+    ^
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/.venv/lib/python3.13/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/.venv/lib/python3.13/site-packages/django/db/models/query.py", line 2166, in _insert
+    return query.get_compiler(using=using).execute_sql(returning_fields)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/.venv/lib/python3.13/site-packages/django/db/models/sql/compiler.py", line 1954, in execute_sql
+    cursor.execute(sql, params)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/.venv/lib/python3.13/site-packages/django/db/backends/utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        sql, params, many=False, executor=self._execute
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/.venv/lib/python3.13/site-packages/django/db/backends/utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/.venv/lib/python3.13/site-packages/django/db/backends/utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/.venv/lib/python3.13/site-packages/django/db/utils.py", line 94, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/.venv/lib/python3.13/site-packages/django/db/backends/utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/.venv/lib/python3.13/site-packages/django/db/backends/sqlite3/base.py", line 359, in execute
+    return super().execute(query, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+django.db.utils.IntegrityError: CHECK constraint failed: year_dates_order
+2026-11-04 13:46:49,006 ERROR django.request Internal Server Error: /api/v1/terms/1
+Traceback (most recent call last):
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/.venv/lib/python3.13/site-packages/django/db/backends/utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/.venv/lib/python3.13/site-packages/django/db/backends/sqlite3/base.py", line 359, in execute
+    return super().execute(query, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+sqlite3.IntegrityError: CHECK constraint failed: term_dates_order
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/.venv/lib/python3.13/site-packages/django/core/handlers/exception.py", line 56, in inner
+    response = get_response(request)
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/.venv/lib/python3.13/site-packages/django/core/handlers/base.py", line 199, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/.venv/lib/python3.13/site-packages/django/views/decorators/csrf.py", line 64, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/.venv/lib/python3.13/site-packages/rest_framework/viewsets.py", line 124, in view
+    return self.dispatch(request, *args, **kwargs)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/.venv/lib/python3.13/site-packages/rest_framework/views.py", line 526, in dispatch
+    response = self.handle_exception(exc)
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/.venv/lib/python3.13/site-packages/rest_framework/views.py", line 474, in handle_exception
+    self.raise_uncaught_exception(exc)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/.venv/lib/python3.13/site-packages/rest_framework/views.py", line 485, in raise_uncaught_exception
+    raise exc
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/.venv/lib/python3.13/site-packages/rest_framework/views.py", line 523, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/.venv/lib/python3.13/site-packages/rest_framework/mixins.py", line 82, in partial_update
+    return self.update(request, *args, **kwargs)
+           ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/.venv/lib/python3.13/site-packages/rest_framework/mixins.py", line 68, in update
+    self.perform_update(serializer)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/core/viewsets.py", line 97, in perform_update
+    obj = serializer.save()
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/.venv/lib/python3.13/site-packages/rest_framework/serializers.py", line 205, in save
+    self.instance = self.update(self.instance, validated_data)
+                    ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/.venv/lib/python3.13/site-packages/rest_framework/serializers.py", line 1064, in update
+    instance.save()
+    ~~~~~~~~~~~~~^^
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/.venv/lib/python3.13/site-packages/django/db/models/base.py", line 904, in save
+    self.save_base(
+    ~~~~~~~~~~~~~~^
+        using=using,
+        ^^^^^^^^^^^^
+    ...<2 lines>...
+        update_fields=update_fields,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/.venv/lib/python3.13/site-packages/django/db/models/base.py", line 996, in save_base
+    updated = self._save_table(
+        raw,
+    ...<4 lines>...
+        update_fields,
+    )
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/.venv/lib/python3.13/site-packages/django/db/models/base.py", line 1142, in _save_table
+    results = self._do_update(
+        base_qs,
+    ...<5 lines>...
+        returning_fields,
+    )
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/.venv/lib/python3.13/site-packages/django/db/models/base.py", line 1246, in _do_update
+    return filtered._update(values, returning_fields)
+           ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/.venv/lib/python3.13/site-packages/django/db/models/query.py", line 1473, in _update
+    return query.get_compiler(self.db).execute_returning_sql(returning_fields)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/.venv/lib/python3.13/site-packages/django/db/models/sql/compiler.py", line 2168, in execute_returning_sql
+    row_count = self.execute_sql(ROW_COUNT)
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/.venv/lib/python3.13/site-packages/django/db/models/sql/compiler.py", line 2139, in execute_sql
+    row_count = super().execute_sql(result_type)
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/.venv/lib/python3.13/site-packages/django/db/models/sql/compiler.py", line 1643, in execute_sql
+    cursor.execute(sql, params)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/.venv/lib/python3.13/site-packages/django/db/backends/utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        sql, params, many=False, executor=self._execute
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/.venv/lib/python3.13/site-packages/django/db/backends/utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/.venv/lib/python3.13/site-packages/django/db/backends/utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/.venv/lib/python3.13/site-packages/django/db/utils.py", line 94, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/.venv/lib/python3.13/site-packages/django/db/backends/utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/.venv/lib/python3.13/site-packages/django/db/backends/sqlite3/base.py", line 359, in execute
+    return super().execute(query, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+django.db.utils.IntegrityError: CHECK constraint failed: term_dates_order
+------------------------------ Captured log call -------------------------------
+ERROR    django.request:log.py:283 Internal Server Error: /api/v1/academic-years
+Traceback (most recent call last):
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/.venv/lib/python3.13/site-packages/django/db/backends/utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/.venv/lib/python3.13/site-packages/django/db/backends/sqlite3/base.py", line 359, in execute
+    return super().execute(query, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+sqlite3.IntegrityError: CHECK constraint failed: year_dates_order
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/.venv/lib/python3.13/site-packages/django/core/handlers/exception.py", line 56, in inner
+    response = get_response(request)
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/.venv/lib/python3.13/site-packages/django/core/handlers/base.py", line 199, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/.venv/lib/python3.13/site-packages/django/views/decorators/csrf.py", line 64, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/.venv/lib/python3.13/site-packages/rest_framework/viewsets.py", line 124, in view
+    return self.dispatch(request, *args, **kwargs)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/.venv/lib/python3.13/site-packages/rest_framework/views.py", line 526, in dispatch
+    response = self.handle_exception(exc)
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/.venv/lib/python3.13/site-packages/rest_framework/views.py", line 474, in handle_exception
+    self.raise_uncaught_exception(exc)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/.venv/lib/python3.13/site-packages/rest_framework/views.py", line 485, in raise_uncaught_exception
+    raise exc
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/.venv/lib/python3.13/site-packages/rest_framework/views.py", line 523, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/.venv/lib/python3.13/site-packages/rest_framework/mixins.py", line 19, in create
+    self.perform_create(serializer)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/core/viewsets.py", line 80, in perform_create
+    obj = serializer.save()
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/.venv/lib/python3.13/site-packages/rest_framework/serializers.py", line 210, in save
+    self.instance = self.create(validated_data)
+                    ~~~~~~~~~~~^^^^^^^^^^^^^^^^
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/.venv/lib/python3.13/site-packages/rest_framework/serializers.py", line 1020, in create
+    instance = ModelClass._default_manager.create(**validated_data)
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/.venv/lib/python3.13/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/.venv/lib/python3.13/site-packages/django/db/models/query.py", line 752, in create
+    obj.save(force_insert=True, using=self.db)
+    ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/.venv/lib/python3.13/site-packages/django/db/models/base.py", line 904, in save
+    self.save_base(
+    ~~~~~~~~~~~~~~^
+        using=using,
+        ^^^^^^^^^^^^
+    ...<2 lines>...
+        update_fields=update_fields,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/.venv/lib/python3.13/site-packages/django/db/models/base.py", line 996, in save_base
+    updated = self._save_table(
+        raw,
+    ...<4 lines>...
+        update_fields,
+    )
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/.venv/lib/python3.13/site-packages/django/db/models/base.py", line 1201, in _save_table
+    results = self._do_insert(
+        cls._base_manager, using, insert_fields, returning_fields, raw
+    )
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/.venv/lib/python3.13/site-packages/django/db/models/base.py", line 1253, in _do_insert
+    return manager._insert(
+           ~~~~~~~~~~~~~~~^
+        [self],
+        ^^^^^^^
+    ...<3 lines>...
+        raw=raw,
+        ^^^^^^^^
+    )
+    ^
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/.venv/lib/python3.13/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/.venv/lib/python3.13/site-packages/django/db/models/query.py", line 2166, in _insert
+    return query.get_compiler(using=using).execute_sql(returning_fields)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/.venv/lib/python3.13/site-packages/django/db/models/sql/compiler.py", line 1954, in execute_sql
+    cursor.execute(sql, params)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/.venv/lib/python3.13/site-packages/django/db/backends/utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        sql, params, many=False, executor=self._execute
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/.venv/lib/python3.13/site-packages/django/db/backends/utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/.venv/lib/python3.13/site-packages/django/db/backends/utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/.venv/lib/python3.13/site-packages/django/db/utils.py", line 94, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/.venv/lib/python3.13/site-packages/django/db/backends/utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/.venv/lib/python3.13/site-packages/django/db/backends/sqlite3/base.py", line 359, in execute
+    return super().execute(query, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+django.db.utils.IntegrityError: CHECK constraint failed: year_dates_order
+ERROR    django.request:log.py:283 Internal Server Error: /api/v1/terms/1
+Traceback (most recent call last):
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/.venv/lib/python3.13/site-packages/django/db/backends/utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/.venv/lib/python3.13/site-packages/django/db/backends/sqlite3/base.py", line 359, in execute
+    return super().execute(query, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+sqlite3.IntegrityError: CHECK constraint failed: term_dates_order
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/.venv/lib/python3.13/site-packages/django/core/handlers/exception.py", line 56, in inner
+    response = get_response(request)
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/.venv/lib/python3.13/site-packages/django/core/handlers/base.py", line 199, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/.venv/lib/python3.13/site-packages/django/views/decorators/csrf.py", line 64, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/.venv/lib/python3.13/site-packages/rest_framework/viewsets.py", line 124, in view
+    return self.dispatch(request, *args, **kwargs)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/.venv/lib/python3.13/site-packages/rest_framework/views.py", line 526, in dispatch
+    response = self.handle_exception(exc)
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/.venv/lib/python3.13/site-packages/rest_framework/views.py", line 474, in handle_exception
+    self.raise_uncaught_exception(exc)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/.venv/lib/python3.13/site-packages/rest_framework/views.py", line 485, in raise_uncaught_exception
+    raise exc
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/.venv/lib/python3.13/site-packages/rest_framework/views.py", line 523, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/.venv/lib/python3.13/site-packages/rest_framework/mixins.py", line 82, in partial_update
+    return self.update(request, *args, **kwargs)
+           ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/.venv/lib/python3.13/site-packages/rest_framework/mixins.py", line 68, in update
+    self.perform_update(serializer)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/core/viewsets.py", line 97, in perform_update
+    obj = serializer.save()
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/.venv/lib/python3.13/site-packages/rest_framework/serializers.py", line 205, in save
+    self.instance = self.update(self.instance, validated_data)
+                    ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/.venv/lib/python3.13/site-packages/rest_framework/serializers.py", line 1064, in update
+    instance.save()
+    ~~~~~~~~~~~~~^^
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/.venv/lib/python3.13/site-packages/django/db/models/base.py", line 904, in save
+    self.save_base(
+    ~~~~~~~~~~~~~~^
+        using=using,
+        ^^^^^^^^^^^^
+    ...<2 lines>...
+        update_fields=update_fields,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/.venv/lib/python3.13/site-packages/django/db/models/base.py", line 996, in save_base
+    updated = self._save_table(
+        raw,
+    ...<4 lines>...
+        update_fields,
+    )
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/.venv/lib/python3.13/site-packages/django/db/models/base.py", line 1142, in _save_table
+    results = self._do_update(
+        base_qs,
+    ...<5 lines>...
+        returning_fields,
+    )
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/.venv/lib/python3.13/site-packages/django/db/models/base.py", line 1246, in _do_update
+    return filtered._update(values, returning_fields)
+           ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/.venv/lib/python3.13/site-packages/django/db/models/query.py", line 1473, in _update
+    return query.get_compiler(self.db).execute_returning_sql(returning_fields)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/.venv/lib/python3.13/site-packages/django/db/models/sql/compiler.py", line 2168, in execute_returning_sql
+    row_count = self.execute_sql(ROW_COUNT)
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/.venv/lib/python3.13/site-packages/django/db/models/sql/compiler.py", line 2139, in execute_sql
+    row_count = super().execute_sql(result_type)
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/.venv/lib/python3.13/site-packages/django/db/models/sql/compiler.py", line 1643, in execute_sql
+    cursor.execute(sql, params)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/.venv/lib/python3.13/site-packages/django/db/backends/utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        sql, params, many=False, executor=self._execute
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/.venv/lib/python3.13/site-packages/django/db/backends/utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/.venv/lib/python3.13/site-packages/django/db/backends/utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/.venv/lib/python3.13/site-packages/django/db/utils.py", line 94, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/.venv/lib/python3.13/site-packages/django/db/backends/utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/Users/macbookairm1/Desktop/ecst-wt-structure/backend/.venv/lib/python3.13/site-packages/django/db/backends/sqlite3/base.py", line 359, in execute
+    return super().execute(query, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+django.db.utils.IntegrityError: CHECK constraint failed: term_dates_order
+=========================== short test summary info ============================
+PASSED core/tests/test_qa_probes_review_2026_11.py::test_r29_reversed_dates_on_a_year_or_term_are_a_server_error
+FAILED core/tests/test_qa_probes_review_2026_11.py::test_r26_a_stopped_programme_still_accepts_applications
+FAILED core/tests/test_qa_probes_review_2026_11.py::test_r27_a_code_change_leaves_the_old_site_link_broken
+FAILED core/tests/test_qa_probes_review_2026_11.py::test_r28_a_programme_opened_by_mistake_cannot_be_deleted
+3 failed, 1 passed in 7.48s

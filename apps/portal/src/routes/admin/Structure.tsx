@@ -78,6 +78,7 @@ export function Structure() {
   });
   const intakeOf = (program: number) => intakes.data?.find((i) => i.program === program);
   const [saved, setSaved] = useState(false);
+  const [editingTerm, setEditingTerm] = useState<number | null>(null);
   const [picked, setPicked] = useState<number | null>(null);
   // The open form: a programme's details or its public page (description, fees, outcomes),
   // or the selected department's details.
@@ -231,35 +232,57 @@ export function Structure() {
           <SectionLabel>الأعوام والفصول</SectionLabel>
           <Card className="divide-y divide-border-soft">
             {(terms.data ?? []).map((t) => (
-              <div key={t.id} className="flex items-center gap-2 px-4 py-2.5 text-sm">
-                <span className="min-w-0 flex-1">
-                  <b className="block">{t.name_ar}</b>
-                  <span className="text-xs text-text-muted">
-                    {fmtDate(t.starts_on)} – {fmtDate(t.ends_on)}
+              <div key={t.id}>
+                <div className="flex items-center gap-2 px-4 py-2.5 text-sm">
+                  <span className="min-w-0 flex-1">
+                    <b className="block">{t.name_ar}</b>
+                    <span className="text-xs text-text-muted">
+                      {years.data?.find((y) => y.id === t.academic_year)?.name ?? ""} ·{" "}
+                      {fmtDate(t.starts_on)} – {fmtDate(t.ends_on)}
+                    </span>
                   </span>
-                </span>
-                {t.is_current ? (
-                  <StatusBadge status="approved" label="الحالي" />
-                ) : (
-                  <Button
-                    variant="ghost"
-                    className="min-h-8 px-2 text-xs"
-                    disabled={setCurrent.isPending}
-                    onClick={async () =>
-                      (await confirm({
-                        title: `جعل «${t.name_ar}» الفصل الحالي؟`,
-                        body: "يتغير الفصل الذي تعرضه كل لوحات الكلية وموادها وتقاريرها.",
-                        confirm: "تعيينه الفصل الحالي",
-                        tone: "primary",
-                      })) && setCurrent.mutate(t.id)
-                    }
+                  {t.is_current ? (
+                    <StatusBadge status="approved" label="الحالي" />
+                  ) : (
+                    <Button
+                      variant="ghost"
+                      className="min-h-8 px-2 text-xs"
+                      disabled={setCurrent.isPending}
+                      onClick={async () =>
+                        (await confirm({
+                          title: `جعل «${t.name_ar}» الفصل الحالي؟`,
+                          body: "يتغير الفصل الذي تعرضه كل لوحات الكلية وموادها وتقاريرها.",
+                          confirm: "تعيينه الفصل الحالي",
+                          tone: "primary",
+                        })) && setCurrent.mutate(t.id)
+                      }
+                    >
+                      تعيين كحالي
+                    </Button>
+                  )}
+                  <button
+                    type="button"
+                    aria-label={`تعديل الفصل ${t.name_ar}`}
+                    aria-expanded={editingTerm === t.id}
+                    onClick={() => setEditingTerm(editingTerm === t.id ? null : t.id)}
+                    className="tap-44 grid size-8 place-items-center rounded-lg text-text-muted hover:bg-surface-alt hover:text-primary"
                   >
-                    تعيين كحالي
-                  </Button>
+                    <Pencil size={16} aria-hidden />
+                  </button>
+                </div>
+                {editingTerm === t.id && (
+                  <TermForm
+                    term={t}
+                    onDone={() => {
+                      setEditingTerm(null);
+                      void refresh("terms");
+                    }}
+                  />
                 )}
               </div>
             ))}
           </Card>
+          <YearForm onDone={() => void refresh("academic-years")} />
           <Card className="space-y-2 p-3">
             <p className="text-sm font-semibold">+ فصل</p>
             <select
@@ -1126,5 +1149,153 @@ function IntakeLine({
         {busy ? "…" : `فتح التقديم في «${cycle}»`}
       </button>
     </span>
+  );
+}
+
+/**
+ * A new academic year (admin review 2026-11-02, item 5: «+ فصل» could only pick a year that
+ * already existed, so 2027/2028 could not be prepared from the portal).
+ */
+function YearForm({ onDone }: { onDone: () => void }) {
+  const [form, setForm] = useState({ name: "", starts_on: "", ends_on: "" });
+  const add = useMutation({
+    mutationFn: async () => {
+      const { data, error } = await api.POST("/api/v1/academic-years", {
+        body: { ...form, name: form.name.trim() },
+      });
+      if (!data) throw error;
+    },
+    onSuccess: () => {
+      setForm({ name: "", starts_on: "", ends_on: "" });
+      onDone();
+    },
+  });
+  const missing = !form.name.trim() || !form.starts_on || !form.ends_on;
+  return (
+    <Card className="space-y-2 p-3">
+      <p className="text-sm font-semibold">+ عام أكاديمي</p>
+      <Labeled label="اسم العام">
+        <input
+          dir="ltr"
+          value={form.name}
+          onChange={(e) => setForm({ ...form, name: e.target.value })}
+          placeholder="2027/2028"
+          className={INPUT}
+        />
+      </Labeled>
+      <div className="grid grid-cols-2 gap-2">
+        <Labeled label="البداية">
+          <input
+            type="date"
+            value={form.starts_on}
+            onChange={(e) => setForm({ ...form, starts_on: e.target.value })}
+            className={INPUT}
+          />
+        </Labeled>
+        <Labeled label="النهاية">
+          <input
+            type="date"
+            value={form.ends_on}
+            onChange={(e) => setForm({ ...form, ends_on: e.target.value })}
+            className={INPUT}
+          />
+        </Labeled>
+      </div>
+      {add.isError && <Notice>{problemMessage(add.error)}</Notice>}
+      <Button
+        className="w-full"
+        disabled={add.isPending || missing}
+        why={missing ? "الاسم وتاريخا البداية والنهاية مطلوبة" : undefined}
+        onClick={() => add.mutate()}
+      >
+        إضافة العام
+      </Button>
+    </Card>
+  );
+}
+
+/** A term's name, order and dates, corrected in place (admin review 2026-11-02, item 6). */
+function TermForm({ term, onDone }: { term: Schemas["Term"]; onDone: () => void }) {
+  const unsaved = useUnsavedChanges();
+  const [form, setForm] = useState({
+    name_ar: term.name_ar,
+    order: String(term.order),
+    starts_on: term.starts_on,
+    ends_on: term.ends_on,
+  });
+  const save = useMutation({
+    mutationFn: async () => {
+      const { data, error } = await api.PATCH("/api/v1/terms/{id}", {
+        params: { path: { id: term.id } },
+        body: { ...form, name_ar: form.name_ar.trim(), order: Number(form.order) },
+      });
+      if (!data) throw error;
+    },
+    onSuccess: () => {
+      unsaved.saved();
+      onDone();
+    },
+  });
+  const missing = !form.name_ar.trim() || !form.starts_on || !form.ends_on;
+  return (
+    <form
+      onInput={unsaved.onInput}
+      onSubmit={(e) => {
+        e.preventDefault();
+        save.mutate();
+      }}
+      className="space-y-2 border-t border-border-soft bg-surface-alt/50 p-3"
+    >
+      <div className="grid grid-cols-[minmax(0,1fr)_70px] gap-2">
+        <Labeled label="اسم الفصل">
+          <input
+            value={form.name_ar}
+            onChange={(e) => setForm({ ...form, name_ar: e.target.value })}
+            className={INPUT}
+          />
+        </Labeled>
+        <Labeled label="الترتيب">
+          <input
+            type="number"
+            min={1}
+            max={3}
+            value={form.order}
+            onChange={(e) => setForm({ ...form, order: e.target.value })}
+            className={INPUT}
+          />
+        </Labeled>
+      </div>
+      <div className="grid grid-cols-2 gap-2">
+        <Labeled label="البداية">
+          <input
+            type="date"
+            value={form.starts_on}
+            onChange={(e) => setForm({ ...form, starts_on: e.target.value })}
+            className={INPUT}
+          />
+        </Labeled>
+        <Labeled label="النهاية">
+          <input
+            type="date"
+            value={form.ends_on}
+            onChange={(e) => setForm({ ...form, ends_on: e.target.value })}
+            className={INPUT}
+          />
+        </Labeled>
+      </div>
+      {save.isError && <Notice>{problemMessage(save.error)}</Notice>}
+      <div className="flex justify-end gap-2">
+        <Button variant="secondary" onClick={onDone}>
+          إلغاء
+        </Button>
+        <Button
+          type="submit"
+          disabled={save.isPending || missing}
+          why={missing ? "الاسم والتاريخان مطلوبة" : undefined}
+        >
+          {save.isPending ? "جارٍ الحفظ…" : "حفظ الفصل"}
+        </Button>
+      </div>
+    </form>
   );
 }
