@@ -177,7 +177,7 @@ def _intakes(now) -> dict[int, dict]:
 
     intakes = (
         ProgramIntake.objects.filter(cycle__is_active=True)
-        .select_related("cycle")
+        .select_related("cycle", "program__department")
         .annotate(
             taken=Count(
                 "applications",

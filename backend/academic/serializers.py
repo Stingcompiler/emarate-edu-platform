@@ -18,10 +18,25 @@ from .models import (
 User = get_user_model()
 
 
+def _dates_in_order(serializer, attrs):
+    """The database refuses an end on or before the start; say so instead of a 500 (R29)."""
+    instance = serializer.instance
+    starts = attrs.get("starts_on", getattr(instance, "starts_on", None))
+    ends = attrs.get("ends_on", getattr(instance, "ends_on", None))
+    if starts and ends and ends <= starts:
+        raise serializers.ValidationError({"ends_on": gettext("The end must be after the start.")})
+    return attrs
+
+
 class AcademicYearSerializer(serializers.ModelSerializer):
     class Meta:
         model = AcademicYear
         fields = ["id", "name", "starts_on", "ends_on", "is_current"]
+        # The current year and term change together through «تعيين كحالي» (set-current).
+        read_only_fields = ["is_current"]
+
+    def validate(self, attrs):
+        return _dates_in_order(self, attrs)
 
 
 class TermSerializer(serializers.ModelSerializer):
@@ -39,7 +54,10 @@ class TermSerializer(serializers.ModelSerializer):
             "is_current",
             "status",
         ]
-        read_only_fields = ["name"]
+        read_only_fields = ["is_current", "name"]
+
+    def validate(self, attrs):
+        return _dates_in_order(self, attrs)
 
 
 class CourseSerializer(serializers.ModelSerializer):

@@ -13,6 +13,7 @@ from content.services import request_site_rebuild
 from core.permissions import capability
 from core.viewsets import ScopedModelViewSet
 
+from . import services
 from .models import College, Department, Program, SystemSettings
 from .serializers import (
     CollegeSerializer,
@@ -47,6 +48,18 @@ class _StructureViewSet(ScopedModelViewSet):
         transaction.on_commit(request_site_rebuild)
 
 
+class _CodedViewSet(_StructureViewSet):
+    """Departments and programmes: the site's address carries the code."""
+
+    site_section: str
+
+    def perform_update(self, serializer):
+        old = serializer.instance.code
+        with transaction.atomic():
+            super().perform_update(serializer)
+            services.redirect_old_code(self.site_section, old, serializer.instance.code)
+
+
 class CollegeViewSet(_StructureViewSet):
     queryset = College.objects.all()
     serializer_class = CollegeSerializer
@@ -54,7 +67,7 @@ class CollegeViewSet(_StructureViewSet):
     search_fields = ["name_ar", "name_en", "code"]
 
 
-class DepartmentViewSet(_StructureViewSet):
+class DepartmentViewSet(_CodedViewSet):
     """Department roles (registrar, manager, supervisor) see only their departments;
     college-wide roles see all (owner 2026-09-29: nothing about other departments)."""
 
@@ -62,19 +75,28 @@ class DepartmentViewSet(_StructureViewSet):
     department_lookup = "pk"
     serializer_class = DepartmentSerializer
     audit_name = "department"
+    site_section = "departments"
     filterset_fields = ["college", "is_active"]
     search_fields = ["name_ar", "name_en", "code"]
 
 
-class ProgramViewSet(_StructureViewSet):
+class ProgramViewSet(_CodedViewSet):
     """Scoped like departments: a department role sees its departments' programs."""
 
     queryset = Program.objects.select_related("department")
     department_lookup = "department"
     serializer_class = ProgramSerializer
     audit_name = "program"
+    site_section = "programs"
     filterset_fields = ["department", "degree", "is_active"]
     search_fields = ["name_ar", "name_en", "code"]
+
+    def perform_destroy(self, instance):
+        # Intakes nobody applied to go with the programme (it may have been opened for
+        # applying by mistake, #223); one with an application keeps it in use (R28).
+        with transaction.atomic():
+            instance.intakes.filter(applications__isnull=True).delete()
+            super().perform_destroy(instance)
 
 
 @extend_schema(tags=["system"])

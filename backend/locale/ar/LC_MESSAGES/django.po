@@ -997,3 +997,6 @@ msgstr "لا يُنقل إلى قسم آخر برنامجٌ عليه طلاب أ
 
 msgid "The image has too many pixels. Use a smaller photo."
 msgstr "أبعاد الصورة كبيرة جدًا. اختر صورة أصغر."
+
+msgid "The end must be after the start."
+msgstr "يجب أن يكون تاريخ النهاية بعد تاريخ البداية."

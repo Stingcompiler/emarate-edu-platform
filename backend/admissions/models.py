@@ -92,7 +92,16 @@ class ProgramIntake(TimestampedModel):
         now = now or timezone.now()
         opens = self.opens_at or self.cycle.opens_at
         closes = self.closes_at or self.cycle.closes_at
-        return self.is_open and self.cycle.is_active and opens <= now < closes
+        # A programme or department stopped in «الهيكل الأكاديمي» takes no applications, even
+        # while its intake is still open (review 2026-11 R26).
+        program = self.program
+        return (
+            self.is_open
+            and self.cycle.is_active
+            and program.is_active
+            and program.department.is_active
+            and opens <= now < closes
+        )
 
 
 class Application(PublicIdModel, TimestampedModel):
