@@ -66,8 +66,42 @@ def _college_grant(roles, scope: str, audience: str) -> bool:
 
 def may_announce(user, scope: str, scope_id: int | None, audience: str) -> bool:
     """docs/03 §7 «إعلانات»: who may address which scope and audience."""
-    if _college_grant(rbac.roles_of(user), scope, audience):
+    return _college_grant(rbac.roles_of(user), scope, audience) or _local_grant(
+        user, scope, scope_id, audience
+    )
+
+
+def _college_owner(user, announcement) -> bool:
+    """What a college-wide role may change or delete of someone else's announcement (review
+    2026-11): the system admin anything; the site manager the college's; the events manager
+    only one about an event (docs/03 §3.13); the head registrar and academic affairs only
+    their own — addressing an audience never made every author's announcement theirs."""
+    roles = rbac.roles_of(user)
+    scope, audience = announcement.scope, announcement.audience
+    if Role.SYSTEM_ADMIN in roles:
         return True
+    if scope == A.Scope.COLLEGE and Role.SITE_MANAGER in roles:
+        return True
+    own = announcement.created_by_id == user.pk
+    if (
+        Role.EVENTS_MANAGER in roles
+        and scope == A.Scope.COLLEGE
+        and audience in (A.Audience.PUBLIC, A.Audience.ALL_INTERNAL)
+        and (own or announcement.event_id is not None)
+    ):
+        return True
+    return own and _college_grant(roles, scope, audience)
+
+
+def may_edit_announcement(user, announcement) -> bool:
+    """One's own, what a college-wide role owns (above), or what a department role may address
+    in its department (the department's announcements are its staff's to keep)."""
+    if announcement.created_by_id == user.pk or _college_owner(user, announcement):
+        return True
+    return _local_grant(user, announcement.scope, announcement.scope_id, announcement.audience)
+
+
+def _local_grant(user, scope: str, scope_id: int | None, audience: str) -> bool:
     department = department_of(scope, scope_id)
     if (
         department
@@ -103,7 +137,7 @@ def may_delete_announcement(user, announcement) -> bool:
     delete college announcements as site manager, but neither role deletes a department's.
     """
     scope, scope_id, audience = announcement.scope, announcement.scope_id, announcement.audience
-    if _college_grant(rbac.roles_of(user), scope, audience):
+    if _college_owner(user, announcement):
         return True
     department = department_of(scope, scope_id)
     if department is None:

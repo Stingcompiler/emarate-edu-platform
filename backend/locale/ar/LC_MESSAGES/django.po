@@ -997,3 +997,9 @@ msgstr "لا يُنقل إلى قسم آخر برنامجٌ عليه طلاب أ
 
 msgid "The end must be after the start."
 msgstr "يجب أن يكون تاريخ النهاية بعد تاريخ البداية."
+
+msgid "Only the site team changes this picture."
+msgstr "لا يعدّل هذه الصورة إلا فريق الموقع."
+
+msgid "The site uses this picture. Choose another in the site settings first."
+msgstr "الموقع يستعمل هذه الصورة. اختر غيرها من إعدادات الموقع أولًا."

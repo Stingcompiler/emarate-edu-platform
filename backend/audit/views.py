@@ -40,7 +40,9 @@ def _starts(*prefixes: str) -> Q:
 # What each role's own field of work writes to the log (docs/03 §3; §7 «سجل التدقيق» ◐).
 # A role sees these actions; a department role (the registrar) only in its departments.
 DOMAINS = {
-    Role.HEAD_REGISTRAR: _starts("admissions.", "inquiry.", "students.", "registration."),
+    # Inquiries: only the admission ones they handle (review 2026-11; see visible_logs), and a
+    # student's status change with its source (docs/03 §3.14).
+    Role.HEAD_REGISTRAR: _starts("admissions.", "students.", "student.status", "registration."),
     Role.REGISTRAR: _starts("admissions.", "inquiry."),
     Role.RESULTS_OFFICER: _starts("results."),
     Role.ACADEMIC_AFFAIRS: _starts(
@@ -50,6 +52,20 @@ DOMAINS = {
     Role.SITE_MANAGER: _starts("page.", "news.", "event.", "media.", "menu.", "redirect.", "site.")
     | (_starts("announcement.", "inquiry.") & Q(department__isnull=True)),
 }
+
+
+def _admission_inquiries():
+    from django.db.models import CharField
+    from django.db.models.functions import Cast
+
+    from inquiries.models import Inquiry
+    from inquiries.services import ADMISSION_TYPES
+
+    return (
+        Inquiry.objects.filter(type__in=ADMISSION_TYPES)
+        .annotate(key=Cast("pk", CharField()))
+        .values("key")
+    )
 
 
 def visible_logs(user) -> Q:
@@ -63,6 +79,8 @@ def visible_logs(user) -> Q:
     for role, actions in DOMAINS.items():
         if role not in roles:
             continue
+        if role == Role.HEAD_REGISTRAR:
+            actions = actions | (_starts("inquiry.") & Q(target_id__in=_admission_inquiries()))
         if role == Role.REGISTRAR:
             departments = user.role_assignments.filter(role=Role.REGISTRAR).values("department_id")
             actions = actions & Q(department__in=departments)
