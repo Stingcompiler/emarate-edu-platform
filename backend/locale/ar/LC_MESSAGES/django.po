@@ -1001,3 +1001,9 @@ msgstr "الطالب مسجَّل: عدّل رقمه الجامعي من سجل 
 #, python-format
 msgid "At most %(n)s characters."
 msgstr "لا يزيد على %(n)s حرفًا."
+
+msgid "The image has too many pixels. Use a smaller photo."
+msgstr "أبعاد الصورة كبيرة جدًا. اختر صورة أصغر."
+
+msgid "The end must be after the start."
+msgstr "يجب أن يكون تاريخ النهاية بعد تاريخ البداية."

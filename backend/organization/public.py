@@ -177,7 +177,7 @@ def _intakes(now) -> dict[int, dict]:
 
     intakes = (
         ProgramIntake.objects.filter(cycle__is_active=True)
-        .select_related("cycle")
+        .select_related("cycle", "program__department")
         .annotate(
             taken=Count(
                 "applications",
@@ -534,10 +534,17 @@ class PublicStaffPhotoView(_PublicRead):
     academic affairs did not hide it (owner, 2026-10-30). Anything else is a plain 404."""
 
     def get(self, request, public_id):
+        from django.db.models import Exists, OuterRef
         from django.http import FileResponse, Http404
 
+        # Only someone «الكوادر» lists: a department head or a member of a department. A
+        # member who left teaching drops off the site, and so does their photo (review 2026-11).
+        on_staff = Q(
+            Exists(RoleAssignment.objects.filter(user=OuterRef("pk"), role=Role.DEPARTMENT_MANAGER))
+        ) | Q(Exists(DepartmentMembership.objects.filter(user=OuterRef("pk"))))
         user = (
             User.objects.filter(
+                on_staff,
                 public_id=public_id,
                 is_active=True,
                 public_profile=True,
@@ -551,6 +558,7 @@ class PublicStaffPhotoView(_PublicRead):
         if user is None:
             raise Http404
         response = FileResponse(user.photo.file.open("rb"), content_type="image/webp")
-        response["Cache-Control"] = "public, max-age=86400"
+        # Five minutes, not a day: withdrawn consent reaches browsers and caches soon.
+        response["Cache-Control"] = "public, max-age=300"
         response["X-Content-Type-Options"] = "nosniff"
         return response
