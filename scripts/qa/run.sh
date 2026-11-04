@@ -17,6 +17,11 @@
 #   frontend        vitest (pnpm test)
 #   e2e             Playwright on phone + desktop (QA_E2E="exam.spec.ts sign-in.spec.ts")
 #   audit           pnpm audit --prod
+#   pip-audit       known vulnerabilities in the backend's locked dependencies
+#   lint-ui         pnpm lint:ui (disabled buttons, tokens, …)
+#   build           pnpm build (portal + site)
+#   scripts         pnpm test:scripts
+#   seo             pnpm seo:check on the built site (run after build)
 set -uo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
@@ -77,6 +82,13 @@ for suite in "$@"; do
     run e2e "E2E_API_PORT=\${E2E_API_PORT:-8011} E2E_PORTAL_PORT=\${E2E_PORTAL_PORT:-5184} E2E_SITE_PORT=\${E2E_SITE_PORT:-4332} pnpm e2e $specs"
     ;;
   audit) run audit "pnpm audit --prod" ;;
+  pip-audit)
+    run pip-audit "cd backend && uv export --frozen --no-dev --extra prod --no-hashes --no-emit-project -o \"$OUT/requirements.txt\" >/dev/null && uvx pip-audit --strict -r \"$OUT/requirements.txt\""
+    ;;
+  lint-ui) run lint-ui "pnpm lint:ui" ;;
+  build) run build "pnpm build" ;;
+  scripts) run scripts "pnpm test:scripts" ;;
+  seo) run seo "pnpm seo:check" ;;
   *) echo "unknown suite: $suite" >&2 ;;
   esac
 done
