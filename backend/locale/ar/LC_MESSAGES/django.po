@@ -995,6 +995,13 @@ msgstr "يجب ألا تزيد القيمة على %(limit_value)s."
 msgid "A programme with students, courses or applications cannot move department."
 msgstr "لا يُنقل إلى قسم آخر برنامجٌ عليه طلاب أو مواد أو طلبات تقديم."
 
+msgid "The student is registered: change the number on the student record."
+msgstr "الطالب مسجَّل: عدّل رقمه الجامعي من سجل الطالب."
+
+#, python-format
+msgid "At most %(n)s characters."
+msgstr "لا يزيد على %(n)s حرفًا."
+
 msgid "The image has too many pixels. Use a smaller photo."
 msgstr "أبعاد الصورة كبيرة جدًا. اختر صورة أصغر."
 

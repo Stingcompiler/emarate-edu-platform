@@ -187,19 +187,42 @@ def public_schema(schema: dict) -> dict:
     return {**schema, "steps": steps}
 
 
+def _items(container, key: str) -> list[dict]:
+    items = container.get(key) if isinstance(container, dict) else None
+    return [i for i in items if isinstance(i, dict)] if isinstance(items, list) else []
+
+
 def schema_fields(schema: dict) -> list[dict]:
+    # Anything that is not a step, section or field object is skipped here and reported by
+    # check_schema (review 2026-11: a stray string was an AttributeError, a 500).
     return [
         field
-        for step in schema.get("steps", [])
-        for section in step.get("sections", [])
-        for field in section.get("fields", [])
+        for step in _items(schema, "steps")
+        for section in _items(step, "sections")
+        for field in _items(section, "fields")
     ]
 
 
+def _shape_problems(schema: dict) -> list[str]:
+    problems = []
+    for step in schema["steps"]:
+        if not isinstance(step, dict) or not isinstance(step.get("sections", []), list):
+            problems.append("Each step must be an object with a list of sections.")
+            continue
+        for section in step.get("sections", []):
+            if not isinstance(section, dict) or not isinstance(section.get("fields", []), list):
+                problems.append("Each section must be an object with a list of fields.")
+                continue
+            if any(not isinstance(f, dict) for f in section.get("fields", [])):
+                problems.append("Each field must be an object.")
+    return problems
+
+
 def check_schema(schema: dict) -> list[str]:
-    problems, keys, seen = [], set(), []
+    keys, seen = set(), []
     if not isinstance(schema, dict) or not isinstance(schema.get("steps"), list):
         return ["The schema needs a list of steps."]
+    problems = _shape_problems(schema)
     for field in schema_fields(schema):
         key = field.get("key")
         if not key or not re.fullmatch(r"[a-z][a-z0-9_]{0,40}", str(key)):
@@ -207,8 +230,9 @@ def check_schema(schema: dict) -> list[str]:
         elif key in keys:
             problems.append(f"Field key {key!r} is used twice.")
         keys.add(key)
-        if field.get("type") not in FIELD_TYPES:
-            problems.append(f"{key}: unknown type {field.get('type')!r}.")
+        kind = field.get("type")
+        if not isinstance(kind, str) or kind not in FIELD_TYPES:
+            problems.append(f"{key}: unknown type {kind!r}.")
         if field.get("type") in ("select", "multiselect") and not field.get("options"):
             problems.append(f"{key}: add the options.")
         if field.get("pattern") is not None:
@@ -216,25 +240,35 @@ def check_schema(schema: dict) -> list[str]:
                 re.compile(str(field["pattern"]))
             except re.error:
                 problems.append(f"{key}: the pattern is not a valid regular expression.")
-        if audience(field) not in AUDIENCES:
+        if not isinstance(audience(field), str) or audience(field) not in AUDIENCES:
             problems.append(f"{key}: audience must be one of {sorted(AUDIENCES)}.")
+        elif key == "university_number" and audience(field) == "applicant":
+            # The registration staff type it (docs/03 §5); an applicant's copy would be ignored.
+            problems.append(f"{key}: the university number is filled by the college.")
         if field.get("width") is not None and field.get("width") not in WIDTHS:
             problems.append(f"{key}: width must be full or half.")
         condition = field.get("show_if")
-        if condition:
-            # Only on an applicant field that comes earlier: no loops, and an applicant is never
-            # held to a field they cannot see (spec §4.3, §5.1).
+        if condition and not isinstance(condition, dict):
+            problems.append(f"{key}: show_if must be an object.")
+        elif condition:
+            # Only on a field the applicant fills, above it: no loops, and nobody is held to a
+            # field they cannot see (spec §4.3, §5.1; docs/03 §5 — college fields too).
             target = next((f for f in seen if f.get("key") == condition.get("key")), None)
             if target is None:
                 problems.append(f"{key}: show_if must name a field above it.")
-            elif "in" in condition and not (isinstance(condition["in"], list) and condition["in"]):
+            elif ("in" not in condition and "equals" not in condition) or (
+                "in" in condition and not (isinstance(condition["in"], list) and condition["in"])
+            ):
                 problems.append(f"{key}: choose the answers that show this field.")
-            elif audience(field) == "applicant" and audience(target) != "applicant":
+            elif audience(target) != "applicant":
                 problems.append(f"{key}: show_if must name a field the applicant fills.")
         seen.append(field)
         accept = field.get("accept")
         if accept is not None and not (
-            isinstance(accept, list) and accept and set(accept) <= UPLOAD_TYPES
+            isinstance(accept, list)
+            and accept
+            and all(isinstance(a, str) for a in accept)
+            and set(accept) <= UPLOAD_TYPES
         ):
             problems.append(f"{key}: accept must list some of {sorted(UPLOAD_TYPES)}.")
     return problems
@@ -509,6 +543,11 @@ def update(
                 raise ValidationError(
                     {"answers": [gettext("These fields are filled by the college.")]}
                 )
+            own = {f["key"] for f in applicant_fields(schema)}
+            if own:
+                # Keys the form does not ask are not kept (an old draft may still carry some):
+                # they would otherwise reach the student record at registration (review 2026-11).
+                answers = {k: v for k, v in answers.items() if k in own}
             application.answers = {**application.answers, **answers}
             changed.append("answers")
         # Only what the applicant edits: never status or submitted_at.
@@ -849,18 +888,42 @@ def set_staff_answers(
         )
     given = {k: v for k, v in answers.items() if v not in (None, "", [])}
     sub = {"steps": [{"sections": [{"fields": [fields[k] for k in given]}]}]}
+    # A condition names an applicant field: judge it on the applicant's answers, or a college
+    # field with a condition counted as hidden and skipped every check (review 2026-11).
+    context = {**application.answers, **application.staff_answers, **given}
     errors = {
-        k: v for k, v in validate_answers(sub, given, set(), who="staff").items() if k in given
+        k: v for k, v in validate_answers(sub, context, set(), who="staff").items() if k in given
     }
     if errors:
         raise Invalid({k: [v] for k, v in errors.items()}, code="invalid")
+    if application.student_record_id and "university_number" in answers:
+        # Registered: the record holds the number; a new one here would show the applicant a
+        # number that is not theirs (review 2026-11). Correct it on the student's record.
+        current = application.student_record.university_number
+        if str(answers["university_number"] or "").strip() != current:
+            raise Conflict(
+                gettext("The student is registered: change the number on the student record."),
+                code="registered",
+            )
     number = str(given.get("university_number", "")).strip()
     if number:
         given["university_number"] = number
+        limit = StudentRecord._meta.get_field("university_number").max_length
+        if len(number) > limit:
+            raise ValidationError(
+                {
+                    "university_number": [
+                        gettext("At most %(n)s characters.") % {"n": limit},
+                    ]
+                }
+            )
         taken = StudentRecord.objects.filter(university_number=number)
         if application.student_record_id:
             taken = taken.exclude(pk=application.student_record_id)
-        if taken.exists():
+        held = Application.objects.filter(staff_answers__university_number=number).exclude(
+            pk=application.pk
+        )
+        if taken.exists() or held.exists():
             raise ValidationError(
                 {"university_number": [gettext("This university number is already in use.")]}
             )
@@ -923,7 +986,9 @@ def _registration_details(locked: Application, program) -> dict:
                 {"university_number": [gettext("This university number is already in use.")]}
             )
         details["university_number"] = number
-    answers = locked.answers
+    schema = locked.form_template.schema if locked.form_template_id else {}
+    own = {f["key"] for f in applicant_fields(schema)}
+    answers = {k: v for k, v in locked.answers.items() if not own or k in own}
     if isinstance(answers.get("full_name_en"), str):
         details["full_name_en"] = answers["full_name_en"].strip()[:200]
     gender = {"ذكر": "male", "أنثى": "female"}.get(answers.get("gender"))
