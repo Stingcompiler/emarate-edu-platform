@@ -1,0 +1,51 @@
+$ node scripts/seo-check.mjs apps/landing/dist
+ar/about/index.html: description is 45 characters (want 70–170)
+ar/about/index.html: no og:image
+ar/admissions/index.html: description is 68 characters (want 70–170)
+ar/admissions/index.html: no og:image
+ar/announcements/index.html: description is 45 characters (want 70–170)
+ar/announcements/index.html: no og:image
+ar/calendar/index.html: description is 53 characters (want 70–170)
+ar/calendar/index.html: no og:image
+ar/contact/index.html: description is 41 characters (want 70–170)
+ar/contact/index.html: no og:image
+ar/departments/index.html: description is 43 characters (want 70–170)
+ar/departments/index.html: no og:image
+ar/events/index.html: description is 45 characters (want 70–170)
+ar/events/index.html: no og:image
+ar/index.html: no og:image
+ar/news/index.html: description is 54 characters (want 70–170)
+ar/news/index.html: no og:image
+ar/parents/index.html: no og:image
+ar/programs/index.html: description is 43 characters (want 70–170)
+ar/programs/index.html: no og:image
+ar/regulations/index.html: description is 52 characters (want 70–170)
+ar/regulations/index.html: no og:image
+ar/staff/index.html: description is 63 characters (want 70–170)
+ar/staff/index.html: no og:image
+en/about/index.html: description is 50 characters (want 70–170)
+en/about/index.html: no og:image
+en/admissions/index.html: no og:image
+en/announcements/index.html: description is 58 characters (want 70–170)
+en/announcements/index.html: no og:image
+en/calendar/index.html: description is 62 characters (want 70–170)
+en/calendar/index.html: no og:image
+en/contact/index.html: description is 52 characters (want 70–170)
+en/contact/index.html: no og:image
+en/departments/index.html: description is 56 characters (want 70–170)
+en/departments/index.html: no og:image
+en/events/index.html: description is 51 characters (want 70–170)
+en/events/index.html: no og:image
+en/index.html: no og:image
+en/news/index.html: description is 62 characters (want 70–170)
+en/news/index.html: no og:image
+en/parents/index.html: no og:image
+en/programs/index.html: description is 55 characters (want 70–170)
+en/programs/index.html: no og:image
+en/regulations/index.html: description is 56 characters (want 70–170)
+en/regulations/index.html: no og:image
+en/staff/index.html: no og:image
+
+46 search-readiness problem(s) in apps/landing/dist
+[ELIFECYCLE] Command failed with exit code 1.
+# exit 1, 1s, 2026-11-04T11:54:21Z

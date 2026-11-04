@@ -1,0 +1,25 @@
+$ node --test "scripts/*.test.mjs"
+✔ the mark is found in Arabic and English, with or without inner spaces (1.473583ms)
+✔ news and events whose title is a sample are dropped, real ones stay (1.344416ms)
+✔ site settings: marked texts are blanked, marked figures dropped, the sample picture goes (0.168959ms)
+✔ the demo's fake contact details are blanked, real ones stay (design review B5) (0.119916ms)
+✔ a real hero picture stays (0.08775ms)
+✔ a programme keeps its name and loses only its sample texts (0.097583ms)
+✔ a page loses its sample blocks, and is dropped when nothing real is left (0.152667ms)
+✔ once the real texts replace the samples nothing changes (0.069625ms)
+✔ samples are hidden unless SITE_SHOW_SAMPLE=1 (0.08725ms)
+✔ a finished page passes (3.231875ms)
+✔ a page hidden from search, or still carrying sample text, fails (0.625333ms)
+✔ missing or badly sized basics are reported (0.332375ms)
+✔ robots.txt must let the site be indexed and name its sitemap (0.264792ms)
+✔ the sitemap must hold absolute https addresses of one real host (0.252375ms)
+✔ the root redirect page is not judged as a page to rank (6.929ms)
+ℹ tests 15
+ℹ suites 0
+ℹ pass 15
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 80.721
+# exit 0, 0s, 2026-11-04T11:54:21Z

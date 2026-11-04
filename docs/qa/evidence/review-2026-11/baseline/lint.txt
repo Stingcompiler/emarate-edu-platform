@@ -1,0 +1,39 @@
+All checks passed!
+266 files already formatted
+$ prettier --check .
+Checking formatting...
+[[33mwarn[39m] .scratch/contract/contract.html
+[[33mwarn[39m] .scratch/contract/make.js
+[[33mwarn[39m] .scratch/cost/cost-bw.html
+[[33mwarn[39m] .scratch/cost/cost.html
+[[33mwarn[39m] .scratch/cost/data.js
+[[33mwarn[39m] .scratch/cost/make-bw.js
+[[33mwarn[39m] .scratch/cost/make.js
+[[33mwarn[39m] .scratch/directions/A-quiet-ledger.html
+[[33mwarn[39m] .scratch/directions/B-tinted-surfaces.html
+[[33mwarn[39m] .scratch/directions/C-priority-first.html
+[[33mwarn[39m] .scratch/feas/doc.js
+[[33mwarn[39m] .scratch/feas/feas-bw.html
+[[33mwarn[39m] .scratch/feas/feas.html
+[[33mwarn[39m] .scratch/feas/make-bw.js
+[[33mwarn[39m] .scratch/feas/make.js
+[[33mwarn[39m] .scratch/prop/doc.js
+[[33mwarn[39m] .scratch/prop/make.js
+[[33mwarn[39m] .scratch/prop/prop.html
+[[33mwarn[39m] .scratch/tmp-header.spec.ts
+[[33mwarn[39m] .scratch/tmp-plan.spec.ts
+[[33mwarn[39m] Claude outputs/font-comparison/index.html
+[[31merror[39m] Claude outputs/Sting-Design-Reference-3.0.html: SyntaxError: Void elements do not have end tags "input" (821:35)
+[[31merror[39m]   819 | للفحص)</h2>
+[[31merror[39m]   820 | <ul class="task-list">
+[[31merror[39m] > 821 | <li><label><input type="checkbox"></input><code>scripts/check_contrast.py</code> يمر بلا فشل
+[[31merror[39m]       |                                   ^^^^^^^^
+[[31merror[39m]   822 | للثيمين (نص ≥ 4.5:1، شارات ≥ 4.5:1، حدود/أيقونات ≥ 3:1).</label></li>
+[[31merror[39m]   823 | <li><label><input type="checkbox"></input>المهمة الأساسية وأهم إجراء ظاهران
+[[31merror[39m]   824 | دون مؤشرات زائدة؛ إجراء رئيسي واحد في السياق.</label></li>
+[[33mwarn[39m] Claude outputs/student-redesign/index.html
+[[33mwarn[39m] Claude outputs/welcome-email/email-preview.html
+[[33mwarn[39m] Claude outputs/welcome-email/email-template.html
+Error occurred when checking code style in the above file.
+[ELIFECYCLE] Command failed with exit code 2.
+# exit 2, 9s, 2026-11-04T11:42:37Z

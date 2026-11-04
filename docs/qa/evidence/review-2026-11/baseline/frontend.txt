@@ -1,0 +1,17 @@
+$ pnpm -r --if-present test
+Scope: 5 of 6 workspace projects
+$ vitest run
+
+ RUN  v5.0.5 /Users/macbookairm1/Desktop/emarate-edu-platform/apps/portal
+
+
+ Test Files  28 passed (28)
+      Tests  137 passed (137)
+   Start at  13:50:16
+   Duration  18.90s (environment 64%, import 20%, tests 14%, transform 2%)
+
+Environment  jsdom was created 28 times · 71.53s total, 64% of tracked time
+             create it once per worker with pool: 'vmThreads' (keeps per-file isolation) or isolate: false (shares it across files)
+             learn more: https://vitest.dev/guide/improving-performance#test-environments
+
+# exit 0, 20s, 2026-11-04T11:50:35Z
