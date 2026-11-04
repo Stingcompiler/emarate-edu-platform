@@ -144,7 +144,7 @@ export function Events() {
                       {next.location ? ` · ${next.location}` : ""}
                     </span>
                   </span>
-                  <span className="shrink-0 rounded-full bg-white/15 px-2.5 py-1 text-xs font-semibold">
+                  <span className="shrink-0 rounded-full bg-black/15 px-2.5 py-1 text-xs font-semibold">
                     {LABEL[next.status ?? "draft"] ?? ""}
                   </span>
                 </span>
