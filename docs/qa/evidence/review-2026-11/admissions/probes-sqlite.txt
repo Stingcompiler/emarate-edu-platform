@@ -1,0 +1,479 @@
+FFFFFFFFFFFFFFFF                                                         [100%]
+=================================== FAILURES ===================================
+___________ test_probe_conditional_staff_field_skips_type_validation ___________
+
+api = <function api.<locals>.client at 0x1102e7e20>
+intake = <ProgramIntake: 1:1>
+make_user = <function make_user.<locals>.make at 0x110a68900>
+it_dept = <Department: تقانة المعلومات>
+
+    def test_probe_conditional_staff_field_skips_type_validation(api, intake, make_user, it_dept):  # noqa: F811
+        """A staff/release field may carry show_if on an applicant field (check_schema allows it and
+        FormBuilder offers it). set_staff_answers evaluates the condition against the *staff*
+        answers being sent, where the applicant's key never is, so the field counts as hidden and
+        every type rule is skipped: a money field takes any text."""
+        head = make_user(Role.HEAD_REGISTRAR)
+        registrar = make_user(Role.REGISTRAR, department=it_dept)
+        fees = {
+            "key": "tuition_fees",
+            "type": "money",
+            "label": "رسوم الدراسة",
+            "audience": "staff",
+            "show_if": {"key": "application_path", "in": ["تحويل"]},
+        }
+        schema = _form(PATH, fees)
+        assert services.check_schema(schema) == []
+        _default(head, schema)
+        application = _application(intake, answers={"application_path": "تحويل"})
+        url = f"/api/v1/applications/{application.public_id}/staff-answers"
+    
+        # Same field without the condition: refused (the control).
+        plain = _form(PATH, {k: v for k, v in fees.items() if k != "show_if"})
+        assert services.validate_answers(plain, {"tuition_fees": "abc"}, set(), who="staff")
+    
+        saved = api(registrar).patch(url, {"answers": {"tuition_fees": "abc"}}, format="json")
+>       assert saved.status_code == 200  # DEFECT: should be 400 «Must be an amount.»
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       assert 400 == 200
+E        +  where 400 = <Response status_code=400, "application/problem+json">.status_code
+
+core/tests/test_qa_probes_admissions.py:87: AssertionError
+----------------------------- Captured stderr call -----------------------------
+2026-11-04 14:02:52,997 WARNING django.request Bad Request: /api/v1/applications/418b2eb6-94af-4c8d-b6e8-3a6a3a8955a1/staff-answers
+------------------------------ Captured log call -------------------------------
+WARNING  django.request:log.py:283 Bad Request: /api/v1/applications/418b2eb6-94af-4c8d-b6e8-3a6a3a8955a1/staff-answers
+___ test_probe_university_number_editable_after_registration_desyncs_record ____
+
+api = <function api.<locals>.client at 0x1102e5f80>
+intake = <ProgramIntake: 1:1>
+make_user = <function make_user.<locals>.make at 0x110c6ede0>
+it_dept = <Department: تقانة المعلومات>
+django_capture_on_commit_callbacks = <bound method TestCase.captureOnCommitCallbacks of <class 'django.test.testcases.TestCase'>>
+
+    def test_probe_university_number_editable_after_registration_desyncs_record(
+        api,
+        intake,  # noqa: F811
+        make_user,
+        it_dept,
+        django_capture_on_commit_callbacks,
+    ):
+        """After registration the record keeps the first number, but staff_answers accepts a new
+        one (the uniqueness check excludes the application's own record) — the print page and,
+        once released, the applicant's «متابعة طلبي» then show a number that is not theirs."""
+        head = make_user(Role.HEAD_REGISTRAR)
+        registrar = make_user(Role.REGISTRAR, department=it_dept)
+        _default(head, _form(PATH, NUMBER))
+        client = visitor(django_capture_on_commit_callbacks)
+        app_id = client.post("/api/visitor/applications", {"intake": intake.id}).data["public_id"]
+        Application.objects.filter(public_id=app_id).update(status="submitted")
+        url = f"/api/v1/applications/{app_id}"
+        first = api(registrar).patch(
+            f"{url}/staff-answers",
+            {"answers": {"university_number": "26-IT-7001"}, "released": ["university_number"]},
+            format="json",
+        )
+        assert first.status_code == 200, first.data
+        _accept(Application.objects.get(public_id=app_id))
+        with django_capture_on_commit_callbacks(execute=True):
+            assert api(head).post(f"{url}/register").status_code == 200
+        record = StudentRecord.objects.get()
+        assert record.university_number == "26-IT-7001"
+    
+        changed = api(registrar).patch(
+            f"{url}/staff-answers", {"answers": {"university_number": "26-IT-9999"}}, format="json"
+        )
+>       assert changed.status_code == 200  # DEFECT: should be refused once registered
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       assert 409 == 200
+E        +  where 409 = <Response status_code=409, "application/problem+json">.status_code
+
+core/tests/test_qa_probes_admissions.py:127: AssertionError
+----------------------------- Captured stderr call -----------------------------
+2026-11-04 14:02:53,156 WARNING kombu.connection No hostname was supplied. Reverting to default 'localhost'
+2026-11-04 14:02:53,197 INFO celery.app.trace Task notifications.tasks.deliver_outbox[19b0f882-a06a-4272-b62e-1b1f50cd36c8] succeeded in 0.03663191600026039s: 1
+2026-11-04 14:02:53,226 INFO celery.app.trace Task notifications.tasks.deliver_outbox[ec9d924f-b6eb-4336-9e78-b921daf043cf] succeeded in 0.001701959000001807s: 1
+2026-11-04 14:02:53,230 WARNING django.request Conflict: /api/v1/applications/f58c9d07-f1ca-498f-bfce-4c255d038c37/staff-answers
+------------------------------ Captured log call -------------------------------
+WARNING  kombu.connection:connection.py:671 No hostname was supplied. Reverting to default 'localhost'
+INFO     celery.app.trace:trace.py:128 Task notifications.tasks.deliver_outbox[19b0f882-a06a-4272-b62e-1b1f50cd36c8] succeeded in 0.03663191600026039s: 1
+INFO     celery.app.trace:trace.py:128 Task notifications.tasks.deliver_outbox[ec9d924f-b6eb-4336-9e78-b921daf043cf] succeeded in 0.001701959000001807s: 1
+WARNING  django.request:log.py:283 Conflict: /api/v1/applications/f58c9d07-f1ca-498f-bfce-4c255d038c37/staff-answers
+____________ test_probe_typed_university_number_has_no_length_limit ____________
+
+api = <function api.<locals>.client at 0x110df7e20>
+intake = <ProgramIntake: 1:1>
+make_user = <function make_user.<locals>.make at 0x1109c2ac0>
+it_dept = <Department: تقانة المعلومات>
+django_capture_on_commit_callbacks = <bound method TestCase.captureOnCommitCallbacks of <class 'django.test.testcases.TestCase'>>
+
+    def test_probe_typed_university_number_has_no_length_limit(
+        api,
+        intake,  # noqa: F811
+        make_user,
+        it_dept,
+        django_capture_on_commit_callbacks,
+    ):
+        """StudentRecord.university_number is max_length=30, but staff_answers stores any length.
+        Registration then writes it straight into the record: SQLite keeps 40 characters, Postgres
+        raises DataError (a 500) in register()."""
+        head = make_user(Role.HEAD_REGISTRAR)
+        registrar = make_user(Role.REGISTRAR, department=it_dept)
+        _default(head, _form(PATH, NUMBER))
+        application = _application(intake)
+        url = f"/api/v1/applications/{application.public_id}"
+        long_number = "26-IT-" + "9" * 34  # 40 characters
+        saved = api(registrar).patch(
+            f"{url}/staff-answers", {"answers": {"university_number": long_number}}, format="json"
+        )
+>       assert saved.status_code == 200  # DEFECT: should be 400 (longer than the record allows)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       assert 400 == 200
+E        +  where 400 = <Response status_code=400, "application/problem+json">.status_code
+
+core/tests/test_qa_probes_admissions.py:156: AssertionError
+----------------------------- Captured stderr call -----------------------------
+2026-11-04 14:02:53,245 WARNING django.request Bad Request: /api/v1/applications/fc9b9a9e-3ffa-4fb4-8744-2d3a2f5cde78/staff-answers
+------------------------------ Captured log call -------------------------------
+WARNING  django.request:log.py:283 Bad Request: /api/v1/applications/fc9b9a9e-3ffa-4fb4-8744-2d3a2f5cde78/staff-answers
+_________ test_probe_same_typed_university_number_on_two_applications __________
+
+api = <function api.<locals>.client at 0x11063f1a0>
+intake = <ProgramIntake: 1:1>
+make_user = <function make_user.<locals>.make at 0x110c6e8e0>
+it_dept = <Department: تقانة المعلومات>
+
+    def test_probe_same_typed_university_number_on_two_applications(
+        api,
+        intake,  # noqa: F811
+        make_user,
+        it_dept,
+    ):
+        """Uniqueness is checked only against StudentRecord, so two pending applications can hold
+        (and release to two applicants) the same number; the clash surfaces only when the second
+        one is registered."""
+        head = make_user(Role.HEAD_REGISTRAR)
+        registrar = make_user(Role.REGISTRAR, department=it_dept)
+        _default(head, _form(PATH, NUMBER))
+        one = _application(intake, email="one@example.test")
+        two = _application(intake, email="two@example.test")
+        for app in (one, two):
+            saved = api(registrar).patch(
+                f"/api/v1/applications/{app.public_id}/staff-answers",
+                {"answers": {"university_number": "26-IT-5000"}, "released": ["university_number"]},
+                format="json",
+            )
+>           assert saved.status_code == 200
+E           assert 400 == 200
+E            +  where 400 = <Response status_code=400, "application/problem+json">.status_code
+
+core/tests/test_qa_probes_admissions.py:190: AssertionError
+----------------------------- Captured stderr call -----------------------------
+2026-11-04 14:02:53,272 WARNING django.request Bad Request: /api/v1/applications/ffdb1c85-9969-4dff-ab65-cff202eb6de9/staff-answers
+------------------------------ Captured log call -------------------------------
+WARNING  django.request:log.py:283 Bad Request: /api/v1/applications/ffdb1c85-9969-4dff-ab65-cff202eb6de9/staff-answers
+____________ test_probe_deleting_a_used_template_is_a_server_error _____________
+
+api = <function api.<locals>.client at 0x11063ef20>
+intake = <ProgramIntake: 1:1>
+make_user = <function make_user.<locals>.make at 0x110c6f420>
+
+    def test_probe_deleting_a_used_template_is_a_server_error(
+        api,
+        intake,  # noqa: F811
+        make_user,
+    ):
+        """Application.form_template and ProgramIntake.form_template are PROTECT with
+        related_name="+", so _Audited.perform_destroy's `hasattr(instance, "applications")` guard
+        never fires for a template: delete() raises ProtectedError, which the problem handler does
+        not map — a 500 (AtomicWritesMiddleware rolls the audit row back, so the data is safe)."""
+        head = make_user(Role.HEAD_REGISTRAR)
+        template = ApplicationFormTemplate.objects.get(name="default")
+        _application(intake)  # the application references the published template
+>       with pytest.raises(ProtectedError):  # DEFECT: should be 409 «in_use»
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ProtectedError
+
+core/tests/test_qa_probes_admissions.py:212: Failed
+----------------------------- Captured stderr call -----------------------------
+2026-11-04 14:02:53,283 WARNING django.request Conflict: /api/v1/form-templates/1
+------------------------------ Captured log call -------------------------------
+WARNING  django.request:log.py:283 Conflict: /api/v1/form-templates/1
+_______________ test_probe_malformed_show_if_is_a_500_on_the_api _______________
+
+api = <function api.<locals>.client at 0x11063e980>
+make_user = <function make_user.<locals>.make at 0x110c6f6a0>, db = None
+
+    def test_probe_malformed_show_if_is_a_500_on_the_api(api, make_user, db):
+        head = make_user(Role.HEAD_REGISTRAR)
+        schema = _form({"key": "b", "type": "text"}, {"key": "a", "type": "text", "show_if": "b"})
+        body = {"name": "hs", "schema": schema}
+>       with pytest.raises(AttributeError):  # DEFECT: should be 400
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE AttributeError
+
+core/tests/test_qa_probes_admissions.py:242: Failed
+----------------------------- Captured stderr call -----------------------------
+2026-11-04 14:02:53,290 WARNING django.request Bad Request: /api/v1/form-templates
+------------------------------ Captured log call -------------------------------
+WARNING  django.request:log.py:283 Bad Request: /api/v1/form-templates
+____________ test_probe_university_number_can_be_an_applicant_field ____________
+
+api = <function api.<locals>.client at 0x110c6e980>
+intake = <ProgramIntake: 1:1>
+make_user = <function make_user.<locals>.make at 0x1109c28e0>
+django_capture_on_commit_callbacks = <bound method TestCase.captureOnCommitCallbacks of <class 'django.test.testcases.TestCase'>>
+
+    def test_probe_university_number_can_be_an_applicant_field(
+        api,
+        intake,  # noqa: F811
+        make_user,
+        django_capture_on_commit_callbacks,
+    ):
+        """docs/03 §5: «الرقم الجامعي يدخله موظف التسجيل». check_schema accepts a university_number
+        field the applicant fills (the default audience); the applicant types a number, and
+        registration silently ignores it and generates another."""
+        head = make_user(Role.HEAD_REGISTRAR)
+        field = {"key": "university_number", "type": "text", "label": "الرقم الجامعي"}
+        schema = _form(PATH, field)
+>       assert services.check_schema(schema) == []  # DEFECT: should demand staff/release
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: assert ['university_...the college.'] == []
+E         
+E         Left contains one more item: 'university_number: the university number is filled by the college.'
+E         Use -v to get more diff
+
+core/tests/test_qa_probes_admissions.py:295: AssertionError
+___ test_probe_applicant_answers_for_keys_outside_the_form_reach_the_record ____
+
+api = <function api.<locals>.client at 0x1102e6340>
+intake = <ProgramIntake: 1:1>
+make_user = <function make_user.<locals>.make at 0x1109c04a0>
+django_capture_on_commit_callbacks = <bound method TestCase.captureOnCommitCallbacks of <class 'django.test.testcases.TestCase'>>
+
+    def test_probe_applicant_answers_for_keys_outside_the_form_reach_the_record(
+        api,
+        intake,  # noqa: F811
+        make_user,
+        django_capture_on_commit_callbacks,
+    ):
+        """update() refuses keys of staff/release fields but accepts any key the form lacks.
+        _registration_details reads full_name_en / gender / nationality / national_id from the
+        answers whether or not the form asks for them, so they reach the StudentRecord."""
+        head = make_user(Role.HEAD_REGISTRAR)
+        client = visitor(django_capture_on_commit_callbacks)
+        app_id = client.post("/api/visitor/applications", {"intake": intake.id}).data["public_id"]
+        sent = client.patch(
+            f"/api/visitor/applications/{app_id}",
+            {"answers": {"full_name_en": "Injected Name", "nationality": "X", "anything": "y"}},
+            format="json",
+        )
+        assert sent.status_code == 200  # DEFECT: the default form has none of these keys
+        application = Application.objects.get(public_id=app_id)
+>       assert application.answers["anything"] == "y"
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'anything'
+
+core/tests/test_qa_probes_admissions.py:334: KeyError
+----------------------------- Captured stderr call -----------------------------
+2026-11-04 14:02:53,307 INFO celery.app.trace Task notifications.tasks.deliver_outbox[56a824a2-1221-423b-99c1-92c59ff47310] succeeded in 0.0016742499997235427s: 1
+------------------------------ Captured log call -------------------------------
+INFO     celery.app.trace:trace.py:128 Task notifications.tasks.deliver_outbox[56a824a2-1221-423b-99c1-92c59ff47310] succeeded in 0.0016742499997235427s: 1
+___ test_probe_malformed_schema_raises_instead_of_listing_problems[schema0] ____
+
+schema = {'steps': ['not a step']}
+
+    @pytest.mark.parametrize(
+        "schema",
+        [
+            {"steps": ["not a step"]},
+            _form("not a field"),
+            _form({"key": "b", "type": "text"}, {"key": "a", "type": "text", "show_if": "b"}),
+            _form({"key": "a", "type": "text", "audience": ["staff"]}),
+            _form({"key": "a", "type": ["text"]}),
+            _form({"key": "a", "type": "file", "accept": [["pdf"]]}),
+        ],
+    )
+    def test_probe_malformed_schema_raises_instead_of_listing_problems(schema):
+        """check_schema assumes dicts and hashable values; anything else raises (a 500 from
+        POST/PATCH /form-templates) instead of returning a problem (a 400)."""
+>       with pytest.raises((AttributeError, TypeError)):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE any of (AttributeError, TypeError)
+
+core/tests/test_qa_probes_admissions.py:234: Failed
+___ test_probe_malformed_schema_raises_instead_of_listing_problems[schema1] ____
+
+schema = {'steps': [{'title': 'الاستمارة', 'sections': [{'title': 'ق', 'fields': ['not a field']}]}]}
+
+    @pytest.mark.parametrize(
+        "schema",
+        [
+            {"steps": ["not a step"]},
+            _form("not a field"),
+            _form({"key": "b", "type": "text"}, {"key": "a", "type": "text", "show_if": "b"}),
+            _form({"key": "a", "type": "text", "audience": ["staff"]}),
+            _form({"key": "a", "type": ["text"]}),
+            _form({"key": "a", "type": "file", "accept": [["pdf"]]}),
+        ],
+    )
+    def test_probe_malformed_schema_raises_instead_of_listing_problems(schema):
+        """check_schema assumes dicts and hashable values; anything else raises (a 500 from
+        POST/PATCH /form-templates) instead of returning a problem (a 400)."""
+>       with pytest.raises((AttributeError, TypeError)):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE any of (AttributeError, TypeError)
+
+core/tests/test_qa_probes_admissions.py:234: Failed
+___ test_probe_malformed_schema_raises_instead_of_listing_problems[schema2] ____
+
+schema = {'steps': [{'title': 'الاستمارة', 'sections': [{'title': 'ق', 'fields': [{...}, {...}]}]}]}
+
+    @pytest.mark.parametrize(
+        "schema",
+        [
+            {"steps": ["not a step"]},
+            _form("not a field"),
+            _form({"key": "b", "type": "text"}, {"key": "a", "type": "text", "show_if": "b"}),
+            _form({"key": "a", "type": "text", "audience": ["staff"]}),
+            _form({"key": "a", "type": ["text"]}),
+            _form({"key": "a", "type": "file", "accept": [["pdf"]]}),
+        ],
+    )
+    def test_probe_malformed_schema_raises_instead_of_listing_problems(schema):
+        """check_schema assumes dicts and hashable values; anything else raises (a 500 from
+        POST/PATCH /form-templates) instead of returning a problem (a 400)."""
+>       with pytest.raises((AttributeError, TypeError)):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE any of (AttributeError, TypeError)
+
+core/tests/test_qa_probes_admissions.py:234: Failed
+___ test_probe_malformed_schema_raises_instead_of_listing_problems[schema3] ____
+
+schema = {'steps': [{'title': 'الاستمارة', 'sections': [{'title': 'ق', 'fields': [{...}]}]}]}
+
+    @pytest.mark.parametrize(
+        "schema",
+        [
+            {"steps": ["not a step"]},
+            _form("not a field"),
+            _form({"key": "b", "type": "text"}, {"key": "a", "type": "text", "show_if": "b"}),
+            _form({"key": "a", "type": "text", "audience": ["staff"]}),
+            _form({"key": "a", "type": ["text"]}),
+            _form({"key": "a", "type": "file", "accept": [["pdf"]]}),
+        ],
+    )
+    def test_probe_malformed_schema_raises_instead_of_listing_problems(schema):
+        """check_schema assumes dicts and hashable values; anything else raises (a 500 from
+        POST/PATCH /form-templates) instead of returning a problem (a 400)."""
+>       with pytest.raises((AttributeError, TypeError)):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE any of (AttributeError, TypeError)
+
+core/tests/test_qa_probes_admissions.py:234: Failed
+___ test_probe_malformed_schema_raises_instead_of_listing_problems[schema4] ____
+
+schema = {'steps': [{'title': 'الاستمارة', 'sections': [{'title': 'ق', 'fields': [{...}]}]}]}
+
+    @pytest.mark.parametrize(
+        "schema",
+        [
+            {"steps": ["not a step"]},
+            _form("not a field"),
+            _form({"key": "b", "type": "text"}, {"key": "a", "type": "text", "show_if": "b"}),
+            _form({"key": "a", "type": "text", "audience": ["staff"]}),
+            _form({"key": "a", "type": ["text"]}),
+            _form({"key": "a", "type": "file", "accept": [["pdf"]]}),
+        ],
+    )
+    def test_probe_malformed_schema_raises_instead_of_listing_problems(schema):
+        """check_schema assumes dicts and hashable values; anything else raises (a 500 from
+        POST/PATCH /form-templates) instead of returning a problem (a 400)."""
+>       with pytest.raises((AttributeError, TypeError)):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE any of (AttributeError, TypeError)
+
+core/tests/test_qa_probes_admissions.py:234: Failed
+___ test_probe_malformed_schema_raises_instead_of_listing_problems[schema5] ____
+
+schema = {'steps': [{'title': 'الاستمارة', 'sections': [{'title': 'ق', 'fields': [{...}]}]}]}
+
+    @pytest.mark.parametrize(
+        "schema",
+        [
+            {"steps": ["not a step"]},
+            _form("not a field"),
+            _form({"key": "b", "type": "text"}, {"key": "a", "type": "text", "show_if": "b"}),
+            _form({"key": "a", "type": "text", "audience": ["staff"]}),
+            _form({"key": "a", "type": ["text"]}),
+            _form({"key": "a", "type": "file", "accept": [["pdf"]]}),
+        ],
+    )
+    def test_probe_malformed_schema_raises_instead_of_listing_problems(schema):
+        """check_schema assumes dicts and hashable values; anything else raises (a 500 from
+        POST/PATCH /form-templates) instead of returning a problem (a 400)."""
+>       with pytest.raises((AttributeError, TypeError)):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE any of (AttributeError, TypeError)
+
+core/tests/test_qa_probes_admissions.py:234: Failed
+_____________ test_probe_college_field_may_depend_on_a_staff_field _____________
+
+    def test_probe_college_field_may_depend_on_a_staff_field():
+        """docs/03 §5: a condition names an applicant field above it. check_schema enforces that
+        only for applicant fields; a staff or release field may depend on a staff field."""
+        staff = {"key": "fees_paid", "type": "boolean", "label": "دُفعت", "audience": "staff"}
+        release = {
+            "key": "receipt_no",
+            "type": "text",
+            "label": "رقم الإيصال",
+            "audience": "release",
+            "show_if": {"key": "fees_paid", "equals": True},
+        }
+>       assert services.check_schema(_form(staff, release)) == []  # DEFECT per docs/03 §5
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: assert ['receipt_no:...icant fills.'] == []
+E         
+E         Left contains one more item: 'receipt_no: show_if must name a field the applicant fills.'
+E         Use -v to get more diff
+
+core/tests/test_qa_probes_admissions.py:260: AssertionError
+_____________ test_probe_show_if_without_in_or_equals_is_accepted ______________
+
+    def test_probe_show_if_without_in_or_equals_is_accepted():
+        """A condition with neither `in` nor `equals` passes check_schema; _visible then compares
+        with None, so the field shows (and is required) only while the target is EMPTY."""
+        choice = {"key": "track", "type": "select", "label": "المساق", "options": ["علمي"]}
+        dependent = {
+            "key": "school",
+            "type": "text",
+            "label": "المدرسة",
+            "required": True,
+            "show_if": {"key": "track"},
+        }
+        schema = _form(choice, dependent)
+>       assert services.check_schema(schema) == []  # DEFECT: should ask for the answers
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: assert ['school: cho... this field.'] == []
+E         
+E         Left contains one more item: 'school: choose the answers that show this field.'
+E         Use -v to get more diff
+
+core/tests/test_qa_probes_admissions.py:275: AssertionError
+=========================== short test summary info ============================
+FAILED core/tests/test_qa_probes_admissions.py::test_probe_conditional_staff_field_skips_type_validation
+FAILED core/tests/test_qa_probes_admissions.py::test_probe_university_number_editable_after_registration_desyncs_record
+FAILED core/tests/test_qa_probes_admissions.py::test_probe_typed_university_number_has_no_length_limit
+FAILED core/tests/test_qa_probes_admissions.py::test_probe_same_typed_university_number_on_two_applications
+FAILED core/tests/test_qa_probes_admissions.py::test_probe_deleting_a_used_template_is_a_server_error
+FAILED core/tests/test_qa_probes_admissions.py::test_probe_malformed_show_if_is_a_500_on_the_api
+FAILED core/tests/test_qa_probes_admissions.py::test_probe_university_number_can_be_an_applicant_field
+FAILED core/tests/test_qa_probes_admissions.py::test_probe_applicant_answers_for_keys_outside_the_form_reach_the_record
+FAILED core/tests/test_qa_probes_admissions.py::test_probe_malformed_schema_raises_instead_of_listing_problems[schema0]
+FAILED core/tests/test_qa_probes_admissions.py::test_probe_malformed_schema_raises_instead_of_listing_problems[schema1]
+FAILED core/tests/test_qa_probes_admissions.py::test_probe_malformed_schema_raises_instead_of_listing_problems[schema2]
+FAILED core/tests/test_qa_probes_admissions.py::test_probe_malformed_schema_raises_instead_of_listing_problems[schema3]
+FAILED core/tests/test_qa_probes_admissions.py::test_probe_malformed_schema_raises_instead_of_listing_problems[schema4]
+FAILED core/tests/test_qa_probes_admissions.py::test_probe_malformed_schema_raises_instead_of_listing_problems[schema5]
+FAILED core/tests/test_qa_probes_admissions.py::test_probe_college_field_may_depend_on_a_staff_field
+FAILED core/tests/test_qa_probes_admissions.py::test_probe_show_if_without_in_or_equals_is_accepted
+16 failed in 4.89s

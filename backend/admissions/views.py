@@ -1,4 +1,5 @@
 from django.core.cache import cache
+from django.db import transaction
 from django.db.models import Count
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
@@ -97,13 +98,28 @@ class _Audited(viewsets.ModelViewSet):
             from core.errors import Conflict
 
             raise Conflict(gettext("Applications exist; close the intake instead."), code="in_use")
-        record(
-            _meta(self.request),
-            f"admissions.{self.audit_name}_delete",
-            instance,
-            department_id=self._department(instance),
-        )
-        instance.delete()
+        from django.db.models import ProtectedError
+
+        from core.errors import Conflict
+
+        try:
+            with transaction.atomic():
+                record(
+                    _meta(self.request),
+                    f"admissions.{self.audit_name}_delete",
+                    instance,
+                    department_id=self._department(instance),
+                )
+                instance.delete()
+        except ProtectedError:
+            # A form some application or intake uses (its links have no reverse name, so the
+            # check above misses them): 409, not a 500 (review 2026-11).
+            raise Conflict(
+                gettext(
+                    "This item is in use and cannot be deleted. Deactivate or archive it instead."
+                ),
+                code="in_use",
+            ) from None
 
 
 @extend_schema(tags=["admissions"])
