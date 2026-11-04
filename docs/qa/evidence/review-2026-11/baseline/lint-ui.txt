@@ -1,0 +1,2 @@
+$ bash scripts/lint-ui.sh
+# exit 0, 1s, 2026-11-04T11:50:36Z

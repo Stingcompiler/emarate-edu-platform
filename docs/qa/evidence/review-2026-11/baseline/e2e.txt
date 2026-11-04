@@ -1,0 +1,300 @@
+$ playwright test -c e2e/playwright.config.ts
+
+Running 218 tests using 1 worker
+
+  ✓    1 [phone] › e2e/tests/a11y.spec.ts:21:5 › public pages: sign-in and application (4.4s)
+  ✓    2 [phone] › e2e/tests/a11y.spec.ts:39:7 › signed-in pages — 26-IT-0001 (10.6s)
+  ✓    3 [phone] › e2e/tests/a11y.spec.ts:39:7 › signed-in pages — teacher@demo.ecst.test (8.8s)
+  ✓    4 [phone] › e2e/tests/a11y.spec.ts:39:7 › signed-in pages — dept.manager@demo.ecst.test (7.9s)
+  ✓    5 [phone] › e2e/tests/a11y.spec.ts:39:7 › signed-in pages — admin@demo.ecst.test (7.8s)
+  ✓    6 [phone] › e2e/tests/a11y.spec.ts:48:5 › dark mode keeps AA contrast (8.6s)
+  ✓    7 [phone] › e2e/tests/a11y.spec.ts:58:5 › warm mode keeps AA contrast (8.6s)
+  ✓    8 [phone] › e2e/tests/access.spec.ts:7:5 › a student opening staff pages sees «غير مسموح», not empty dashboards (3.0s)
+  ✓    9 [phone] › e2e/tests/apply.spec.ts:7:5 › a visitor verifies the email, fills the application, uploads documents and submits (4.3s)
+  ✓   10 [phone] › e2e/tests/apply.spec.ts:73:5 › the filling guide lists the form's fields with their explanations and prints (owner, 2026-11-01) (810ms)
+  ✓   11 [phone] › e2e/tests/exam.spec.ts:9:5 › a student takes the open quiz, submits it and sees the auto-graded result (2.0s)
+  ✓   12 [phone] › e2e/tests/fit-signed-in.spec.ts:20:9 › pages fit the screen — 26-IT-0001 (28.6s)
+  ✓   13 [phone] › e2e/tests/fit-signed-in.spec.ts:20:9 › pages fit the screen — 26-IT-0001 (larger text) (29.1s)
+  ✓   14 [phone] › e2e/tests/fit-signed-in.spec.ts:20:9 › pages fit the screen — teacher@demo.ecst.test (27.5s)
+  ✓   15 [phone] › e2e/tests/fit-signed-in.spec.ts:20:9 › pages fit the screen — teacher@demo.ecst.test (larger text) (27.1s)
+  ✓   16 [phone] › e2e/tests/fit-signed-in.spec.ts:20:9 › pages fit the screen — dept.manager@demo.ecst.test (35.1s)
+  ✓   17 [phone] › e2e/tests/fit-signed-in.spec.ts:20:9 › pages fit the screen — registrar@demo.ecst.test (18.4s)
+  ✓   18 [phone] › e2e/tests/fit-signed-in.spec.ts:20:9 › pages fit the screen — academic@demo.ecst.test (32.5s)
+  ✓   19 [phone] › e2e/tests/fit-signed-in.spec.ts:20:9 › pages fit the screen — admin@demo.ecst.test (1.3m)
+  ✓   20 [phone] › e2e/tests/fit-signed-in.spec.ts:20:9 › pages fit the screen — admin@demo.ecst.test (larger text) (1.4m)
+  ✓   21 [phone] › e2e/tests/fit.spec.ts:10:7 › fits the screen — portal /login (1.2s)
+  ✓   22 [phone] › e2e/tests/fit.spec.ts:10:7 › fits the screen — portal /register (1.2s)
+  ✓   23 [phone] › e2e/tests/fit.spec.ts:10:7 › fits the screen — portal /forgot-password (1.2s)
+  ✓   24 [phone] › e2e/tests/fit.spec.ts:10:7 › fits the screen — portal /apply (1.2s)
+  ✓   25 [phone] › e2e/tests/fit.spec.ts:10:7 › fits the screen — portal /track (1.2s)
+  ✓   26 [phone] › e2e/tests/fit.spec.ts:18:7 › fits the screen — site /ar/ (1.2s)
+  ✓   27 [phone] › e2e/tests/fit.spec.ts:18:7 › fits the screen — site /ar/contact (696ms)
+  ✓   28 [phone] › e2e/tests/fit.spec.ts:18:7 › fits the screen — site /ar/news (644ms)
+  ✓   29 [phone] › e2e/tests/fit.spec.ts:18:7 › fits the screen — site /ar/events (650ms)
+  ✓   30 [phone] › e2e/tests/fit.spec.ts:18:7 › fits the screen — site /ar/programs (669ms)
+  ✓   31 [phone] › e2e/tests/fit.spec.ts:18:7 › fits the screen — site /ar/about (656ms)
+  ✓   32 [phone] › e2e/tests/fit.spec.ts:34:7 › fits the screen — portal /track with applications, a reply box and an inquiry at 320px, text 100% (1.3s)
+  ✓   33 [phone] › e2e/tests/fit.spec.ts:34:7 › fits the screen — portal /track with applications, a reply box and an inquiry at 360px, text 100% (1.3s)
+  ✓   34 [phone] › e2e/tests/fit.spec.ts:34:7 › fits the screen — portal /track with applications, a reply box and an inquiry at 390px, text 100% (1.3s)
+  ✓   35 [phone] › e2e/tests/fit.spec.ts:34:7 › fits the screen — portal /track with applications, a reply box and an inquiry at 360px, text 138% (1.3s)
+  ✓   36 [phone] › e2e/tests/fit.spec.ts:34:7 › fits the screen — portal /track with applications, a reply box and an inquiry at 360px, text 175% (1.2s)
+  ✓   37 [phone] › e2e/tests/fit.spec.ts:34:7 › fits the screen — portal /track with applications, a reply box and an inquiry at 320px, text 150% (1.3s)
+  -   38 [phone] › e2e/tests/hidden-sample.spec.ts:11:5 › the site shows no sample text, and still shows the real content
+  ✓   39 [phone] › e2e/tests/journeys.spec.ts:11:7 › journeys › a visitor finds a programme's conditions and reaches the application (436ms)
+  ✓   40 [phone] › e2e/tests/journeys.spec.ts:23:7 › journeys › a student returns to the portal and sees what is due, with a way to all tasks (1.4s)
+  ✓   41 [phone] › e2e/tests/journeys.spec.ts:37:7 › journeys › a teacher reaches the grading queue from today (1.3s)
+  ✓   42 [phone] › e2e/tests/journeys.spec.ts:47:7 › journeys › a registrar finds what needs a decision and opens it (1.3s)
+  ✓   43 [phone] › e2e/tests/landing.spec.ts:8:5 › every public page loads, fits, is accessible and has its SEO basics (1.6m)
+  ✓   44 [phone] › e2e/tests/landing.spec.ts:79:5 › the programme page keeps «apply to this programme» in reach (254ms)
+  ✓   45 [phone] › e2e/tests/landing.spec.ts:96:5 › a plan that does not add up to the credit hours says it is partial (179ms)
+  ✓   46 [phone] › e2e/tests/landing.spec.ts:103:5 › the home picture and the logo are served resized, in modern formats (design review B6) (367ms)
+  ✓   47 [phone] › e2e/tests/landing.spec.ts:131:5 › the public site has one filled action, in the accent colour, and no filled blue button (design review B4) (716ms)
+  ✓   48 [phone] › e2e/tests/landing.spec.ts:178:5 › search engines get a dated sitemap and a site-hosted icon (50ms)
+  ✓   49 [phone] › e2e/tests/landing.spec.ts:193:5 › the programme page states its fees, and the fees page lists every programme (273ms)
+  ✓   50 [phone] › e2e/tests/landing.spec.ts:207:5 › the programme finder narrows by name, spelling-tolerant, and by department (366ms)
+  ✓   51 [phone] › e2e/tests/landing.spec.ts:227:5 › WhatsApp is one tap away, and parents have their own page (649ms)
+  ✓   52 [phone] › e2e/tests/landing.spec.ts:245:5 › an event can be added to a calendar, with directions to the college (167ms)
+  ✓   53 [phone] › e2e/tests/landing.spec.ts:262:5 › English pages mark Arabic-only content, and every trail is structured data (262ms)
+  ✓   54 [phone] › e2e/tests/landing.spec.ts:284:5 › a department page shows the members who chose to appear, and its own news (212ms)
+  ✓   55 [phone] › e2e/tests/landing.spec.ts:299:5 › the home page shows «الكوادر», and a card opens the member's page (565ms)
+  ✓   56 [phone] › e2e/tests/landing.spec.ts:332:5 › the site menus come from the CMS and behave like menus (699ms)
+  ✓   57 [phone] › e2e/tests/landing.spec.ts:376:5 › motion never leaves content hidden, and «reduce motion» turns it off (11.1s)
+  ✓   58 [phone] › e2e/tests/landing.spec.ts:414:5 › on a phone every control in the site header and menu is at least 44 px (design review B9) (1.3s)
+  ✓   59 [phone] › e2e/tests/layout.spec.ts:27:7 › no sideways overflow — 26-IT-0001 (8.3s)
+  ✓   60 [phone] › e2e/tests/layout.spec.ts:27:7 › no sideways overflow — teacher@demo.ecst.test (5.9s)
+  ✓   61 [phone] › e2e/tests/layout.spec.ts:27:7 › no sideways overflow — dept.manager@demo.ecst.test (7.1s)
+  ✓   62 [phone] › e2e/tests/layout.spec.ts:27:7 › no sideways overflow — admin@demo.ecst.test (7.0s)
+  ✓   63 [phone] › e2e/tests/password-reset.spec.ts:7:5 › an admin resets a password and the account must choose its own (7.0s)
+  ✓   64 [phone] › e2e/tests/password-reset.spec.ts:47:5 › an admin deletes an account created by mistake (2.9s)
+  ✓   65 [phone] › e2e/tests/password-reset.spec.ts:67:5 › an admin changes a staff member's name (2.2s)
+  ✓   66 [phone] › e2e/tests/pwa.spec.ts:6:5 › the web app manifest, tab icon and home-screen icon are served from the logo endpoint (479ms)
+  -   67 [phone] › e2e/tests/shots.spec.ts:38:9 › student-today (light)
+  -   68 [phone] › e2e/tests/shots.spec.ts:38:9 › student-today (dark)
+  -   69 [phone] › e2e/tests/shots.spec.ts:38:9 › student-courses (light)
+  -   70 [phone] › e2e/tests/shots.spec.ts:38:9 › student-courses (dark)
+  -   71 [phone] › e2e/tests/shots.spec.ts:38:9 › student-exams (light)
+  -   72 [phone] › e2e/tests/shots.spec.ts:38:9 › student-exams (dark)
+  -   73 [phone] › e2e/tests/shots.spec.ts:38:9 › teacher-today (light)
+  -   74 [phone] › e2e/tests/shots.spec.ts:38:9 › teacher-today (dark)
+  -   75 [phone] › e2e/tests/shots.spec.ts:38:9 › department-home (light)
+  -   76 [phone] › e2e/tests/shots.spec.ts:38:9 › department-home (dark)
+  -   77 [phone] › e2e/tests/shots.spec.ts:38:9 › registrar-home (light)
+  -   78 [phone] › e2e/tests/shots.spec.ts:38:9 › registrar-home (dark)
+  -   79 [phone] › e2e/tests/shots.spec.ts:38:9 › admin-home (light)
+  -   80 [phone] › e2e/tests/shots.spec.ts:38:9 › admin-home (dark)
+  -   81 [phone] › e2e/tests/shots.spec.ts:38:9 › admin-users (light)
+  -   82 [phone] › e2e/tests/shots.spec.ts:38:9 › admin-users (dark)
+  -   83 [phone] › e2e/tests/shots.spec.ts:38:9 › results-home (light)
+  -   84 [phone] › e2e/tests/shots.spec.ts:38:9 › results-home (dark)
+  -   85 [phone] › e2e/tests/shots.spec.ts:38:9 › affairs-home (light)
+  -   86 [phone] › e2e/tests/shots.spec.ts:38:9 › affairs-home (dark)
+  -   87 [phone] › e2e/tests/shots.spec.ts:38:9 › academic-home (light)
+  -   88 [phone] › e2e/tests/shots.spec.ts:38:9 › academic-home (dark)
+  -   89 [phone] › e2e/tests/shots.spec.ts:38:9 › site-home (light)
+  -   90 [phone] › e2e/tests/shots.spec.ts:38:9 › site-home (dark)
+  ✓   91 [phone] › e2e/tests/sign-in.spec.ts:5:5 › a student signs in with the university number and lands on Today (1.4s)
+  ✓   92 [phone] › e2e/tests/sign-in.spec.ts:12:5 › a wrong password shows an Arabic error and stays on login (1.3s)
+  ✓   93 [phone] › e2e/tests/sign-in.spec.ts:21:5 › staff land on their role's home (1.3s)
+  -   94 [phone] › e2e/tests/states.spec.ts:11:7 › student today: loading and failed sources › a slow source shows a placeholder, not the empty message
+  -   95 [phone] › e2e/tests/states.spec.ts:22:7 › student today: loading and failed sources › a failed source says so and offers a retry
+  ✘   96 [phone] › e2e/tests/sweep.spec.ts:26:7 › every navigation page works — 26-IT-0001 (18.8s)
+  ✘   97 [phone] › e2e/tests/sweep.spec.ts:26:7 › every navigation page works — 26-IT-0001 (retry #1) (18.6s)
+  ✓   98 [phone] › e2e/tests/sweep.spec.ts:26:7 › every navigation page works — teacher@demo.ecst.test (17.9s)
+  ✓   99 [phone] › e2e/tests/sweep.spec.ts:26:7 › every navigation page works — ta@demo.ecst.test (17.4s)
+  ✓  100 [phone] › e2e/tests/sweep.spec.ts:26:7 › every navigation page works — dept.manager@demo.ecst.test (27.7s)
+  ✓  101 [phone] › e2e/tests/sweep.spec.ts:26:7 › every navigation page works — dept.supervisor@demo.ecst.test (27.4s)
+  ✓  102 [phone] › e2e/tests/sweep.spec.ts:26:7 › every navigation page works — head.registrar@demo.ecst.test (26.4s)
+  ✓  103 [phone] › e2e/tests/sweep.spec.ts:26:7 › every navigation page works — registrar@demo.ecst.test (14.9s)
+  ✓  104 [phone] › e2e/tests/sweep.spec.ts:26:7 › every navigation page works — results@demo.ecst.test (17.5s)
+  ✓  105 [phone] › e2e/tests/sweep.spec.ts:26:7 › every navigation page works — academic@demo.ecst.test (25.2s)
+  ✓  106 [phone] › e2e/tests/sweep.spec.ts:26:7 › every navigation page works — student.affairs@demo.ecst.test (14.6s)
+  ✓  107 [phone] › e2e/tests/sweep.spec.ts:26:7 › every navigation page works — hr@demo.ecst.test (11.5s)
+  ✓  108 [phone] › e2e/tests/sweep.spec.ts:26:7 › every navigation page works — site@demo.ecst.test (15.4s)
+  ✓  109 [phone] › e2e/tests/sweep.spec.ts:26:7 › every navigation page works — events@demo.ecst.test (12.2s)
+  ✓  110 [phone] › e2e/tests/sweep.spec.ts:26:7 › every navigation page works — admin@demo.ecst.test (1.0m)
+  ✓  111 [desktop] › e2e/tests/a11y.spec.ts:21:5 › public pages: sign-in and application (3.8s)
+  ✓  112 [desktop] › e2e/tests/a11y.spec.ts:39:7 › signed-in pages — 26-IT-0001 (9.9s)
+  ✓  113 [desktop] › e2e/tests/a11y.spec.ts:39:7 › signed-in pages — teacher@demo.ecst.test (8.7s)
+  ✓  114 [desktop] › e2e/tests/a11y.spec.ts:39:7 › signed-in pages — dept.manager@demo.ecst.test (6.1s)
+  ✓  115 [desktop] › e2e/tests/a11y.spec.ts:39:7 › signed-in pages — admin@demo.ecst.test (7.6s)
+  ✓  116 [desktop] › e2e/tests/a11y.spec.ts:48:5 › dark mode keeps AA contrast (8.4s)
+  ✓  117 [desktop] › e2e/tests/a11y.spec.ts:58:5 › warm mode keeps AA contrast (8.2s)
+  ✓  118 [desktop] › e2e/tests/access.spec.ts:7:5 › a student opening staff pages sees «غير مسموح», not empty dashboards (3.1s)
+  ✓  119 [desktop] › e2e/tests/apply.spec.ts:7:5 › a visitor verifies the email, fills the application, uploads documents and submits (4.2s)
+  ✓  120 [desktop] › e2e/tests/apply.spec.ts:73:5 › the filling guide lists the form's fields with their explanations and prints (owner, 2026-11-01) (773ms)
+  -  121 [desktop] › e2e/tests/exam.spec.ts:9:5 › a student takes the open quiz, submits it and sees the auto-graded result
+  ✓  122 [desktop] › e2e/tests/fit-signed-in.spec.ts:20:9 › pages fit the screen — 26-IT-0001 (27.9s)
+  -  123 [desktop] › e2e/tests/fit-signed-in.spec.ts:20:9 › pages fit the screen — 26-IT-0001 (larger text)
+  ✓  124 [desktop] › e2e/tests/fit-signed-in.spec.ts:20:9 › pages fit the screen — teacher@demo.ecst.test (27.1s)
+  -  125 [desktop] › e2e/tests/fit-signed-in.spec.ts:20:9 › pages fit the screen — teacher@demo.ecst.test (larger text)
+  ✓  126 [desktop] › e2e/tests/fit-signed-in.spec.ts:20:9 › pages fit the screen — dept.manager@demo.ecst.test (36.1s)
+  ✓  127 [desktop] › e2e/tests/fit-signed-in.spec.ts:20:9 › pages fit the screen — registrar@demo.ecst.test (18.5s)
+  ✓  128 [desktop] › e2e/tests/fit-signed-in.spec.ts:20:9 › pages fit the screen — academic@demo.ecst.test (33.1s)
+  ✓  129 [desktop] › e2e/tests/fit-signed-in.spec.ts:20:9 › pages fit the screen — admin@demo.ecst.test (1.4m)
+  -  130 [desktop] › e2e/tests/fit-signed-in.spec.ts:20:9 › pages fit the screen — admin@demo.ecst.test (larger text)
+  ✓  131 [desktop] › e2e/tests/fit.spec.ts:10:7 › fits the screen — portal /login (969ms)
+  ✓  132 [desktop] › e2e/tests/fit.spec.ts:10:7 › fits the screen — portal /register (1.2s)
+  ✓  133 [desktop] › e2e/tests/fit.spec.ts:10:7 › fits the screen — portal /forgot-password (1.2s)
+  ✓  134 [desktop] › e2e/tests/fit.spec.ts:10:7 › fits the screen — portal /apply (1.2s)
+  ✓  135 [desktop] › e2e/tests/fit.spec.ts:10:7 › fits the screen — portal /track (1.2s)
+  ✓  136 [desktop] › e2e/tests/fit.spec.ts:18:7 › fits the screen — site /ar/ (806ms)
+  ✓  137 [desktop] › e2e/tests/fit.spec.ts:18:7 › fits the screen — site /ar/contact (632ms)
+  ✓  138 [desktop] › e2e/tests/fit.spec.ts:18:7 › fits the screen — site /ar/news (632ms)
+  ✓  139 [desktop] › e2e/tests/fit.spec.ts:18:7 › fits the screen — site /ar/events (630ms)
+  ✓  140 [desktop] › e2e/tests/fit.spec.ts:18:7 › fits the screen — site /ar/programs (648ms)
+  ✓  141 [desktop] › e2e/tests/fit.spec.ts:18:7 › fits the screen — site /ar/about (644ms)
+  ✓  142 [desktop] › e2e/tests/fit.spec.ts:34:7 › fits the screen — portal /track with applications, a reply box and an inquiry at 320px, text 100% (1.3s)
+  ✓  143 [desktop] › e2e/tests/fit.spec.ts:34:7 › fits the screen — portal /track with applications, a reply box and an inquiry at 360px, text 100% (1.3s)
+  ✓  144 [desktop] › e2e/tests/fit.spec.ts:34:7 › fits the screen — portal /track with applications, a reply box and an inquiry at 390px, text 100% (1.3s)
+  ✓  145 [desktop] › e2e/tests/fit.spec.ts:34:7 › fits the screen — portal /track with applications, a reply box and an inquiry at 360px, text 138% (1.2s)
+  ✓  146 [desktop] › e2e/tests/fit.spec.ts:34:7 › fits the screen — portal /track with applications, a reply box and an inquiry at 360px, text 175% (1.2s)
+  ✓  147 [desktop] › e2e/tests/fit.spec.ts:34:7 › fits the screen — portal /track with applications, a reply box and an inquiry at 320px, text 150% (1.3s)
+  -  148 [desktop] › e2e/tests/hidden-sample.spec.ts:11:5 › the site shows no sample text, and still shows the real content
+  ✓  149 [desktop] › e2e/tests/journeys.spec.ts:11:7 › journeys › a visitor finds a programme's conditions and reaches the application (319ms)
+  ✓  150 [desktop] › e2e/tests/journeys.spec.ts:23:7 › journeys › a student returns to the portal and sees what is due, with a way to all tasks (1.4s)
+  ✓  151 [desktop] › e2e/tests/journeys.spec.ts:37:7 › journeys › a teacher reaches the grading queue from today (1.5s)
+  ✓  152 [desktop] › e2e/tests/journeys.spec.ts:47:7 › journeys › a registrar finds what needs a decision and opens it (1.4s)
+  ✓  153 [desktop] › e2e/tests/landing.spec.ts:8:5 › every public page loads, fits, is accessible and has its SEO basics (1.6m)
+  ✓  154 [desktop] › e2e/tests/landing.spec.ts:79:5 › the programme page keeps «apply to this programme» in reach (305ms)
+  ✓  155 [desktop] › e2e/tests/landing.spec.ts:96:5 › a plan that does not add up to the credit hours says it is partial (215ms)
+  ✓  156 [desktop] › e2e/tests/landing.spec.ts:103:5 › the home picture and the logo are served resized, in modern formats (design review B6) (507ms)
+  ✓  157 [desktop] › e2e/tests/landing.spec.ts:131:5 › the public site has one filled action, in the accent colour, and no filled blue button (design review B4) (893ms)
+  ✓  158 [desktop] › e2e/tests/landing.spec.ts:178:5 › search engines get a dated sitemap and a site-hosted icon (67ms)
+  ✓  159 [desktop] › e2e/tests/landing.spec.ts:193:5 › the programme page states its fees, and the fees page lists every programme (350ms)
+  ✓  160 [desktop] › e2e/tests/landing.spec.ts:207:5 › the programme finder narrows by name, spelling-tolerant, and by department (408ms)
+  ✓  161 [desktop] › e2e/tests/landing.spec.ts:227:5 › WhatsApp is one tap away, and parents have their own page (642ms)
+  ✓  162 [desktop] › e2e/tests/landing.spec.ts:245:5 › an event can be added to a calendar, with directions to the college (249ms)
+  ✓  163 [desktop] › e2e/tests/landing.spec.ts:262:5 › English pages mark Arabic-only content, and every trail is structured data (363ms)
+  ✓  164 [desktop] › e2e/tests/landing.spec.ts:284:5 › a department page shows the members who chose to appear, and its own news (304ms)
+  ✓  165 [desktop] › e2e/tests/landing.spec.ts:299:5 › the home page shows «الكوادر», and a card opens the member's page (620ms)
+  ✓  166 [desktop] › e2e/tests/landing.spec.ts:332:5 › the site menus come from the CMS and behave like menus (606ms)
+  ✓  167 [desktop] › e2e/tests/landing.spec.ts:376:5 › motion never leaves content hidden, and «reduce motion» turns it off (10.9s)
+  -  168 [desktop] › e2e/tests/landing.spec.ts:414:5 › on a phone every control in the site header and menu is at least 44 px (design review B9)
+  ✓  169 [desktop] › e2e/tests/layout.spec.ts:27:7 › no sideways overflow — 26-IT-0001 (8.2s)
+  ✓  170 [desktop] › e2e/tests/layout.spec.ts:27:7 › no sideways overflow — teacher@demo.ecst.test (6.0s)
+  ✓  171 [desktop] › e2e/tests/layout.spec.ts:27:7 › no sideways overflow — dept.manager@demo.ecst.test (7.1s)
+  ✓  172 [desktop] › e2e/tests/layout.spec.ts:27:7 › no sideways overflow — admin@demo.ecst.test (7.1s)
+  ✓  173 [desktop] › e2e/tests/password-reset.spec.ts:7:5 › an admin resets a password and the account must choose its own (7.1s)
+  ✓  174 [desktop] › e2e/tests/password-reset.spec.ts:47:5 › an admin deletes an account created by mistake (3.1s)
+  ✓  175 [desktop] › e2e/tests/password-reset.spec.ts:67:5 › an admin changes a staff member's name (2.1s)
+  ✓  176 [desktop] › e2e/tests/pwa.spec.ts:6:5 › the web app manifest, tab icon and home-screen icon are served from the logo endpoint (509ms)
+  -  177 [desktop] › e2e/tests/shots.spec.ts:38:9 › student-today (light)
+  -  178 [desktop] › e2e/tests/shots.spec.ts:38:9 › student-today (dark)
+  -  179 [desktop] › e2e/tests/shots.spec.ts:38:9 › student-courses (light)
+  -  180 [desktop] › e2e/tests/shots.spec.ts:38:9 › student-courses (dark)
+  -  181 [desktop] › e2e/tests/shots.spec.ts:38:9 › student-exams (light)
+  -  182 [desktop] › e2e/tests/shots.spec.ts:38:9 › student-exams (dark)
+  -  183 [desktop] › e2e/tests/shots.spec.ts:38:9 › teacher-today (light)
+  -  184 [desktop] › e2e/tests/shots.spec.ts:38:9 › teacher-today (dark)
+  -  185 [desktop] › e2e/tests/shots.spec.ts:38:9 › department-home (light)
+  -  186 [desktop] › e2e/tests/shots.spec.ts:38:9 › department-home (dark)
+  -  187 [desktop] › e2e/tests/shots.spec.ts:38:9 › registrar-home (light)
+  -  188 [desktop] › e2e/tests/shots.spec.ts:38:9 › registrar-home (dark)
+  -  189 [desktop] › e2e/tests/shots.spec.ts:38:9 › admin-home (light)
+  -  190 [desktop] › e2e/tests/shots.spec.ts:38:9 › admin-home (dark)
+  -  191 [desktop] › e2e/tests/shots.spec.ts:38:9 › admin-users (light)
+  -  192 [desktop] › e2e/tests/shots.spec.ts:38:9 › admin-users (dark)
+  -  193 [desktop] › e2e/tests/shots.spec.ts:38:9 › results-home (light)
+  -  194 [desktop] › e2e/tests/shots.spec.ts:38:9 › results-home (dark)
+  -  195 [desktop] › e2e/tests/shots.spec.ts:38:9 › affairs-home (light)
+  -  196 [desktop] › e2e/tests/shots.spec.ts:38:9 › affairs-home (dark)
+  -  197 [desktop] › e2e/tests/shots.spec.ts:38:9 › academic-home (light)
+  -  198 [desktop] › e2e/tests/shots.spec.ts:38:9 › academic-home (dark)
+  -  199 [desktop] › e2e/tests/shots.spec.ts:38:9 › site-home (light)
+  -  200 [desktop] › e2e/tests/shots.spec.ts:38:9 › site-home (dark)
+  ✓  201 [desktop] › e2e/tests/sign-in.spec.ts:5:5 › a student signs in with the university number and lands on Today (1.5s)
+  ✓  202 [desktop] › e2e/tests/sign-in.spec.ts:12:5 › a wrong password shows an Arabic error and stays on login (1.3s)
+  ✓  203 [desktop] › e2e/tests/sign-in.spec.ts:21:5 › staff land on their role's home (1.3s)
+  ✓  204 [desktop] › e2e/tests/states.spec.ts:11:7 › student today: loading and failed sources › a slow source shows a placeholder, not the empty message (2.5s)
+  ✓  205 [desktop] › e2e/tests/states.spec.ts:22:7 › student today: loading and failed sources › a failed source says so and offers a retry (3.1s)
+  ✓  206 [desktop] › e2e/tests/sweep.spec.ts:26:7 › every navigation page works — 26-IT-0001 (17.6s)
+  ✓  207 [desktop] › e2e/tests/sweep.spec.ts:26:7 › every navigation page works — teacher@demo.ecst.test (20.2s)
+  ✓  208 [desktop] › e2e/tests/sweep.spec.ts:26:7 › every navigation page works — ta@demo.ecst.test (20.3s)
+  ✓  209 [desktop] › e2e/tests/sweep.spec.ts:26:7 › every navigation page works — dept.manager@demo.ecst.test (30.9s)
+  ✓  210 [desktop] › e2e/tests/sweep.spec.ts:26:7 › every navigation page works — dept.supervisor@demo.ecst.test (31.1s)
+  ✓  211 [desktop] › e2e/tests/sweep.spec.ts:26:7 › every navigation page works — head.registrar@demo.ecst.test (27.1s)
+  ✓  212 [desktop] › e2e/tests/sweep.spec.ts:26:7 › every navigation page works — registrar@demo.ecst.test (15.3s)
+  ✓  213 [desktop] › e2e/tests/sweep.spec.ts:26:7 › every navigation page works — results@demo.ecst.test (19.2s)
+  ✓  214 [desktop] › e2e/tests/sweep.spec.ts:26:7 › every navigation page works — academic@demo.ecst.test (28.0s)
+  ✓  215 [desktop] › e2e/tests/sweep.spec.ts:26:7 › every navigation page works — student.affairs@demo.ecst.test (16.0s)
+  ✓  216 [desktop] › e2e/tests/sweep.spec.ts:26:7 › every navigation page works — hr@demo.ecst.test (13.0s)
+  ✓  217 [desktop] › e2e/tests/sweep.spec.ts:26:7 › every navigation page works — site@demo.ecst.test (15.7s)
+  ✓  218 [desktop] › e2e/tests/sweep.spec.ts:26:7 › every navigation page works — events@demo.ecst.test (11.0s)
+  ✓  219 [desktop] › e2e/tests/sweep.spec.ts:26:7 › every navigation page works — admin@demo.ecst.test (1.1m)
+
+
+  1) [phone] › e2e/tests/sweep.spec.ts:26:7 › every navigation page works — 26-IT-0001 ─────────────
+
+    Error: /: color-contrast — .bg-white\/15
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 3
+
+    - Array []
+    + Array [
+    +   "/: color-contrast — .bg-white\\/15",
+    + ]
+
+      79 |           problems.push(`${href}: ${v.id} — ${v.nodes.map((n) => n.target.join(" ")).join(" | ")}`);
+      80 |     }
+    > 81 |     expect(problems, problems.join("\n")).toEqual([]);
+         |                                           ^
+      82 |   });
+      83 | }
+      84 |
+        at /Users/macbookairm1/Desktop/emarate-edu-platform/e2e/tests/sweep.spec.ts:81:43
+
+    Error Context: e2e/test-results/sweep-every-navigation-page-works-—-26-IT-0001-phone/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    e2e/test-results/sweep-every-navigation-page-works-—-26-IT-0001-phone/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace e2e/test-results/sweep-every-navigation-page-works-—-26-IT-0001-phone/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: /: color-contrast — .bg-white\/15
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 3
+
+    - Array []
+    + Array [
+    +   "/: color-contrast — .bg-white\\/15",
+    + ]
+
+      79 |           problems.push(`${href}: ${v.id} — ${v.nodes.map((n) => n.target.join(" ")).join(" | ")}`);
+      80 |     }
+    > 81 |     expect(problems, problems.join("\n")).toEqual([]);
+         |                                           ^
+      82 |   });
+      83 | }
+      84 |
+        at /Users/macbookairm1/Desktop/emarate-edu-platform/e2e/tests/sweep.spec.ts:81:43
+
+    Error Context: e2e/test-results/sweep-every-navigation-page-works-—-26-IT-0001-phone-retry1/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    e2e/test-results/sweep-every-navigation-page-works-—-26-IT-0001-phone-retry1/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace e2e/test-results/sweep-every-navigation-page-works-—-26-IT-0001-phone-retry1/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  Slow test file: [phone] › e2e/tests/fit-signed-in.spec.ts (6.0m)
+  Slow test file: [desktop] › e2e/tests/sweep.spec.ts (5.5m)
+  Consider running tests from slow files in parallel. See: https://playwright.dev/docs/test-parallel
+  1 failed
+    [phone] › e2e/tests/sweep.spec.ts:26:7 › every navigation page works — 26-IT-0001 ──────────────
+  57 skipped
+  160 passed (29.4m)
+[ELIFECYCLE] Command failed with exit code 1.
+# exit 1, 1765s, 2026-11-04T12:24:07Z
