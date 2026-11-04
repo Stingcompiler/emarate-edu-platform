@@ -3,6 +3,7 @@ import PageHead from "../../../components/PageHead.astro";
 import SideLinks from "../../../components/SideLinks.astro";
 import WithAside from "../../../components/WithAside.astro";
 import Base from "../../../layouts/Base.astro";
+import { pageDescription } from "../../../lib/descriptions";
 import { PORTAL, announcements } from "../../../lib/api";
 import { type Lang, fmtDate, href, langPaths, t } from "../../../lib/i18n";
 import { related } from "../../../lib/related";
@@ -23,7 +24,12 @@ const text = (html: string) =>
     .trim();
 ---
 
-<Base lang={lang} title={t(lang, "announcements")} path="announcements/">
+<Base
+  lang={lang}
+  title={t(lang, "announcements")}
+  path="announcements/"
+  description={pageDescription(lang, "announcements")}
+>
   <PageHead
     lang={lang}
     title={t(lang, "announcements")}

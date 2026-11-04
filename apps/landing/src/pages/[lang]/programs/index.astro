@@ -2,6 +2,7 @@
 import PageHead from "../../../components/PageHead.astro";
 import ProgramRow from "../../../components/ProgramRow.astro";
 import Base from "../../../layouts/Base.astro";
+import { pageDescription } from "../../../lib/descriptions";
 import { programs } from "../../../lib/api";
 import { type Lang, degree, fmtDate, langPaths, num, pick, t, count, N } from "../../../lib/i18n";
 
@@ -25,7 +26,12 @@ const lead =
     : `${count(lang, all.length, N.program)} in ${count(lang, groups.length, N.department)}${open.length ? ` · ${open.length} open until ${fmtDate(lang, closes!)}` : ""}`;
 ---
 
-<Base lang={lang} title={t(lang, "programs")} path="programs/">
+<Base
+  lang={lang}
+  title={t(lang, "programs")}
+  path="programs/"
+  description={pageDescription(lang, "programs")}
+>
   <PageHead
     lang={lang}
     title={t(lang, "programs")}

@@ -3,6 +3,7 @@ import PageHead from "../../../components/PageHead.astro";
 import SideLinks from "../../../components/SideLinks.astro";
 import WithAside from "../../../components/WithAside.astro";
 import Base from "../../../layouts/Base.astro";
+import { pageDescription } from "../../../lib/descriptions";
 import { API, regulations } from "../../../lib/api";
 import { type Lang, fmtDate, langPaths } from "../../../lib/i18n";
 import { related } from "../../../lib/related";
@@ -16,7 +17,12 @@ const groups = [...new Map(items.map((r) => [r.category, r.category_label])).ent
 const more = await related(lang, ["guide", "calendar", "affairs", "contact"]);
 ---
 
-<Base lang={lang} title={L("اللوائح والأنظمة", "Regulations")} path="regulations/">
+<Base
+  lang={lang}
+  title={L("اللوائح والأنظمة", "Regulations")}
+  path="regulations/"
+  description={pageDescription(lang, "regulations")}
+>
   <PageHead
     lang={lang}
     title={L("اللوائح والأنظمة", "Regulations")}

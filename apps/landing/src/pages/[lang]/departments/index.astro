@@ -1,6 +1,7 @@
 ---
 import PageHead from "../../../components/PageHead.astro";
 import Base from "../../../layouts/Base.astro";
+import { pageDescription } from "../../../lib/descriptions";
 import { departments } from "../../../lib/api";
 import { type Lang, href, langPaths, num, pick, t, count, N, arrow } from "../../../lib/i18n";
 
@@ -14,7 +15,12 @@ const lead =
     : `${count(lang, depts.length, N.department)} · ${count(lang, programs, N.program)}`;
 ---
 
-<Base lang={lang} title={t(lang, "departments")} path="departments/">
+<Base
+  lang={lang}
+  title={t(lang, "departments")}
+  path="departments/"
+  description={pageDescription(lang, "departments")}
+>
   <PageHead
     lang={lang}
     title={t(lang, "departments")}

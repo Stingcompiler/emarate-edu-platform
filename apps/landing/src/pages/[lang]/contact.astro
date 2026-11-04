@@ -3,6 +3,7 @@ import { whatsappUrl } from "../../lib/whatsapp";
 import PageHead from "../../components/PageHead.astro";
 import SideLinks from "../../components/SideLinks.astro";
 import Base from "../../layouts/Base.astro";
+import { pageDescription } from "../../lib/descriptions";
 import { API, PORTAL, departments, site } from "../../lib/api";
 import { type Lang, isolateNumbers, langPaths, pick, t } from "../../lib/i18n";
 import { related } from "../../lib/related";
@@ -47,7 +48,12 @@ const mapHref =
 const answers = await related(lang, ["admissions", "fees", "programs", "calendar"]);
 ---
 
-<Base lang={lang} title={t(lang, "contact")} path="contact/">
+<Base
+  lang={lang}
+  title={t(lang, "contact")}
+  path="contact/"
+  description={pageDescription(lang, "contact")}
+>
   <PageHead
     lang={lang}
     title={L("تواصل معنا", "Contact us")}

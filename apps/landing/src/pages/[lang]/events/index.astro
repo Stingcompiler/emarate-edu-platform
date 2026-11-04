@@ -4,6 +4,7 @@ import PageHead from "../../../components/PageHead.astro";
 import SideLinks from "../../../components/SideLinks.astro";
 import WithAside from "../../../components/WithAside.astro";
 import Base from "../../../layouts/Base.astro";
+import { pageDescription } from "../../../lib/descriptions";
 import { events, pastEvents } from "../../../lib/api";
 import { type Lang, langPaths, N, num, word } from "../../../lib/i18n";
 import { related } from "../../../lib/related";
@@ -17,7 +18,12 @@ upcoming.sort((a, b) => a.starts_at.localeCompare(b.starts_at));
 const more = await related(lang, ["calendar", "news", "announcements"]);
 ---
 
-<Base lang={lang} title={L("الفعاليات", "Events")} path="events/">
+<Base
+  lang={lang}
+  title={L("الفعاليات", "Events")}
+  path="events/"
+  description={pageDescription(lang, "events")}
+>
   <PageHead
     lang={lang}
     title={L("الفعاليات", "Events")}
