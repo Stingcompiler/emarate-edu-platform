@@ -71,7 +71,7 @@ export function NextStepCard({
       <p className="flex items-center justify-between gap-3 text-sm text-primary-100">
         {eyebrow}
         {tag && (
-          <span className="rounded-full bg-white/15 px-2.5 py-0.5 text-xs font-semibold text-white">
+          <span className="rounded-full bg-black/15 px-2.5 py-0.5 text-xs font-semibold text-white">
             {tag}
           </span>
         )}
