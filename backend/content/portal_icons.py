@@ -37,6 +37,9 @@ ICONS: dict[str, IconSpec] = {
 CACHE_SECONDS = 24 * 60 * 60
 
 
+IMAGE_FORMATS = ("JPEG", "PNG", "WEBP", "GIF")
+
+
 def render(source: Image.Image, spec: IconSpec) -> bytes:
     """The logo, contained in the icon's square (white behind it when it must be opaque)."""
     logo = ImageOps.exif_transpose(source).convert("RGBA")
@@ -60,7 +63,8 @@ def icon_png(logo, kind: str) -> bytes:
     key = f"portal-icon:{logo.pk}:{logo.file.name}:{kind}"
     png = cache.get(key)
     if png is None:
-        with logo.file.open("rb") as handle, Image.open(handle) as image:
+        # Only the image formats media accepts: never the plugin a file's bytes happen to fit.
+        with logo.file.open("rb") as handle, Image.open(handle, formats=IMAGE_FORMATS) as image:
             png = render(image, spec)
         cache.set(key, png, CACHE_SECONDS)
     return png

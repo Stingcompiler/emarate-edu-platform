@@ -20,6 +20,9 @@ class Kind:
     mime: str
     signatures: tuple[tuple[int, bytes], ...] = ()  # (offset, bytes); empty = text
     is_zip: bool = False
+    # True: every signature must match (a RIFF container names its format at offset 8);
+    # False: any one of them.
+    all_signatures: bool = False
 
 
 KINDS: dict[str, Kind] = {
@@ -41,7 +44,8 @@ KINDS: dict[str, Kind] = {
     "jpg": Kind("image/jpeg", ((0, b"\xff\xd8\xff"),)),
     "jpeg": Kind("image/jpeg", ((0, b"\xff\xd8\xff"),)),
     "gif": Kind("image/gif", ((0, b"GIF87a"), (0, b"GIF89a"))),
-    "webp": Kind("image/webp", ((8, b"WEBP"),)),
+    # «WEBP» at 8 alone let an EPS (PostScript) document named .webp through (review 2026-11).
+    "webp": Kind("image/webp", ((0, b"RIFF"), (8, b"WEBP")), all_signatures=True),
     "mp3": Kind("audio/mpeg", ((0, b"ID3"), (0, b"\xff\xfb"), (0, b"\xff\xf3"))),
     "mp4": Kind("video/mp4", ((4, b"ftyp"),)),
     "txt": Kind("text/plain"),
@@ -79,7 +83,8 @@ def check(upload, *, allowed: frozenset[str] | set[str] | None, max_mb: int) -> 
     head = upload.read(4096)
     upload.seek(0)
     if kind.signatures:
-        if not any(head[o : o + len(sig)] == sig for o, sig in kind.signatures):
+        matches = [head[o : o + len(sig)] == sig for o, sig in kind.signatures]
+        if not (all(matches) if kind.all_signatures else any(matches)):
             raise UploadError(gettext("The file content does not match its extension."))
     elif b"\x00" in head:
         raise UploadError(gettext("Text files must not contain binary data."))
