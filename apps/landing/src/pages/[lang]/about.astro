@@ -3,6 +3,7 @@ import ArabicOnly from "../../components/ArabicOnly.astro";
 import Blocks from "../../components/Blocks.astro";
 import PageHead from "../../components/PageHead.astro";
 import Base from "../../layouts/Base.astro";
+import { pageDescription } from "../../lib/descriptions";
 import { type Page, departments, get, pages, site } from "../../lib/api";
 import { type Lang, arrow, href, langPaths, num, pick, t, isArabic } from "../../lib/i18n";
 
@@ -37,7 +38,12 @@ const facts: [string, string][] = [
 ];
 ---
 
-<Base lang={lang} title={title} path="about/" description={page?.seo?.description}>
+<Base
+  lang={lang}
+  title={title}
+  path="about/"
+  description={page?.seo?.description || pageDescription(lang, "about")}
+>
   <PageHead
     lang={lang}
     title={title}

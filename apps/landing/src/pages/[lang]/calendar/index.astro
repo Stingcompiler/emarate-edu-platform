@@ -1,6 +1,7 @@
 ---
 import PageHead from "../../../components/PageHead.astro";
 import Base from "../../../layouts/Base.astro";
+import { pageDescription } from "../../../lib/descriptions";
 import { calendar, events } from "../../../lib/api";
 import { type Lang, fmtDate, href, langPaths, pick } from "../../../lib/i18n";
 
@@ -40,7 +41,12 @@ const rows = [
 ].sort((a, b) => a.at.localeCompare(b.at));
 ---
 
-<Base lang={lang} title={L("التقويم الأكاديمي", "Academic calendar")} path="calendar/">
+<Base
+  lang={lang}
+  title={L("التقويم الأكاديمي", "Academic calendar")}
+  path="calendar/"
+  description={pageDescription(lang, "calendar")}
+>
   <PageHead
     lang={lang}
     title={L("التقويم الأكاديمي", "Academic calendar")}
