@@ -994,3 +994,6 @@ msgstr "يجب ألا تزيد القيمة على %(limit_value)s."
 
 msgid "A programme with students, courses or applications cannot move department."
 msgstr "لا يُنقل إلى قسم آخر برنامجٌ عليه طلاب أو مواد أو طلبات تقديم."
+
+msgid "The end must be after the start."
+msgstr "يجب أن يكون تاريخ النهاية بعد تاريخ البداية."
