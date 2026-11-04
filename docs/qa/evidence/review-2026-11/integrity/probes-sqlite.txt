@@ -1,0 +1,151 @@
+FF.FFs                                                                   [100%]
+=================================== FAILURES ===================================
+_____ test_probe_i1_stopped_program_still_listed_and_accepts_applications ______
+
+api = <function api.<locals>.client at 0x10c9a7b00>
+make_user = <function make_user.<locals>.make at 0x10c9a5620>
+intake = <ProgramIntake: 1:1>
+
+    def test_probe_i1_stopped_program_still_listed_and_accepts_applications(
+        api,
+        make_user,
+        intake,  # noqa: F811
+    ):
+        """The structure page (since 2026-11-02) answers «in use → stop it instead»; stopping a
+        programme (is_active=False) hides it from the site's programme list, but its open intake
+        stays on /api/public/intakes and a visitor can still start an application to it, because
+        ProgramIntake.accepting() and PublicIntakesView never look at program/department
+        is_active."""
+        admin = make_user(Role.SYSTEM_ADMIN)
+        stopped = api(admin).patch(
+            f"/api/v1/programs/{intake.program_id}", {"is_active": False}, format="json"
+        )
+        assert stopped.status_code == 200, stopped.data
+        assert Program.objects.get(pk=intake.program_id).is_active is False
+    
+        listed = api().get("/api/public/intakes")
+        assert listed.status_code == 200
+>       assert intake.id in [row["id"] for row in listed.data]  # FAULT: still offered
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       assert 1 in []
+E        +  where 1 = <ProgramIntake: 1:1>.id
+
+core/tests/test_qa_probes_integrity.py:52: AssertionError
+_________ test_probe_i2_purge_demo_keeps_example_outcomes_and_careers __________
+
+it_program = <Program: بكالوريوس تقانة المعلومات>
+
+    def test_probe_i2_purge_demo_keeps_example_outcomes_and_careers(it_program):
+        """seed_demo writes «(مثال)» lines into Program.outcomes_ar and careers_ar (seed_demo.py
+        ~237-244); purge_demo clears description_ar/description_en/outcomes_en/careers_en only
+        (purge_demo.py:207), so after --apply the public programme pages still list «(مثال)»
+        outcomes and careers. The demo fees seeded beside them (unmarked) stay as well."""
+        it_program.description_ar = "(مثال) وصف البرنامج"
+        it_program.outcomes_ar = "(مثال) يطبّق أساسيات البرنامج\n(مثال) يعمل ضمن فريق"
+        it_program.careers_ar = "(مثال) القطاع الحكومي\n(مثال) العمل الحر"
+        it_program.annual_fee_sdg = 1_600_000
+        it_program.save()
+        tomorrow = (timezone.localdate() + timedelta(days=1)).isoformat()
+    
+        call_command("purge_demo", before=tomorrow, apply=True)
+    
+        it_program.refresh_from_db()
+        assert it_program.description_ar == ""  # cleared, as designed
+>       assert "(مثال)" in it_program.outcomes_ar  # FAULT
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: assert '(مثال)' in ''
+E        +  where '' = <Program: بكالوريوس تقانة المعلومات>.outcomes_ar
+
+core/tests/test_qa_probes_integrity.py:87: AssertionError
+----------------------------- Captured stdout call -----------------------------
+Cut-off: before 2026-11-05 (APPLY)
+  learning.Submission: 0
+  exams.ExamAttempt: 0
+  student_affairs.MisconductReport: 0
+  student_affairs.StudentCase: 0
+  results.ResultCorrection: 0
+  results.AcademicResult: 0
+  academic.Enrollment: 0
+  students.StudentRecord: 0
+  admissions.Application: 0
+  inquiries.Inquiry: 0
+  contacts.Contact: 0
+  notifications.Notification: 0
+  notifications.HRNotice: 0
+  notifications.Outbox: 0
+  learning.Lecture: 0
+  learning.Assignment: 0
+  exams.Exam: 0
+  live.LiveSession: 0
+  content.Announcement: 0
+  content.News: 0
+  content.Event: 0
+  student_affairs.Regulation: 0
+  results.ResultImportBatch: 0
+  content.MediaAsset: 0
+  demo accounts to switch off: 0
+Demo data removed; 3 example texts cleared.
+_______ test_probe_i4_own_profile_save_reverts_a_photo_hidden_meanwhile ________
+
+api = <function api.<locals>.client at 0x10ca232e0>
+make_user = <function make_user.<locals>.make at 0x10ca23600>
+
+    def test_probe_i4_own_profile_save_reverts_a_photo_hidden_meanwhile(api, make_user):
+        """PATCH /me/public-profile saves request.user through a ModelSerializer: a full-row save
+        of the user loaded when the request was authenticated. If academic affairs hides the
+        photo while that request runs, the save writes public_photo_hidden back to False.
+        (force_authenticate hands the view the stale instance, which models that interleaving.)"""
+        member = make_user(Role.TEACHER, public_profile=True, public_photo=True)
+        moderator = make_user(Role.ACADEMIC_AFFAIRS)
+        client = api(member)  # `member` stands for the copy loaded at authentication
+        staff_profile.hide_photo(
+            _meta(moderator), moderator, User.objects.get(pk=member.pk), hidden=True
+        )
+        assert User.objects.get(pk=member.pk).public_photo_hidden is True
+    
+        saved = client.patch("/api/v1/me/public-profile", {"research_interests": "الشبكات"})
+        assert saved.status_code == 200, saved.data
+>       assert User.objects.get(pk=member.pk).public_photo_hidden is False  # FAULT: un-hidden
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       assert True is False
+E        +  where True = <User: مستخدم 6 <user6@ecst.test>>.public_photo_hidden
+E        +    where <User: مستخدم 6 <user6@ecst.test>> = get(pk=1)
+E        +      where get = <accounts.models.UserManager object at 0x109c10550>.get
+E        +        where <accounts.models.UserManager object at 0x109c10550> = User.objects
+E        +      and   1 = <User: مستخدم 6 <user6@ecst.test>>.pk
+
+core/tests/test_qa_probes_integrity.py:153: AssertionError
+_________ test_probe_i5_admin_profile_edit_reverts_the_members_consent _________
+
+make_user = <function make_user.<locals>.make at 0x10cac0ea0>
+
+    def test_probe_i5_admin_profile_edit_reverts_the_members_consent(make_user):
+        """accounts.services.update_profile ends in user.save() (all columns) on the target the
+        view loaded; a consent the member changed in between (public_profile) is written back.
+        The docstring says consent «stays the person's own»."""
+        admin = make_user(Role.SYSTEM_ADMIN)
+        member = make_user(Role.TEACHER)
+        stale = User.objects.get(pk=member.pk)  # what UserViewSet.partial_update loaded
+        User.objects.filter(pk=member.pk).update(public_profile=True)  # the member opts in
+    
+        account_services.update_profile(_meta(admin), stale, research_interests="الذكاء الاصطناعي")
+    
+>       assert User.objects.get(pk=member.pk).public_profile is False  # FAULT: consent reverted
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       assert True is False
+E        +  where True = <User: مستخدم 9 <user9@ecst.test>>.public_profile
+E        +    where <User: مستخدم 9 <user9@ecst.test>> = get(pk=2)
+E        +      where get = <accounts.models.UserManager object at 0x109c10550>.get
+E        +        where <accounts.models.UserManager object at 0x109c10550> = User.objects
+E        +      and   2 = <User: مستخدم 9 <user9@ecst.test>>.pk
+
+core/tests/test_qa_probes_integrity.py:167: AssertionError
+==================================== PASSES ====================================
+=========================== short test summary info ============================
+PASSED core/tests/test_qa_probes_integrity.py::test_probe_i3_staff_answers_number_diverges_from_student_record_after_registration
+SKIPPED [1] core/tests/test_qa_probes_integrity.py:179: needs real concurrent connections (run with DATABASE_URL=postgres:///…)
+FAILED core/tests/test_qa_probes_integrity.py::test_probe_i1_stopped_program_still_listed_and_accepts_applications
+FAILED core/tests/test_qa_probes_integrity.py::test_probe_i2_purge_demo_keeps_example_outcomes_and_careers
+FAILED core/tests/test_qa_probes_integrity.py::test_probe_i4_own_profile_save_reverts_a_photo_hidden_meanwhile
+FAILED core/tests/test_qa_probes_integrity.py::test_probe_i5_admin_profile_edit_reverts_the_members_consent
+4 failed, 1 passed, 1 skipped in 4.30s

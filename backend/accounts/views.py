@@ -336,7 +336,12 @@ class MyPublicProfileView(APIView):
         serializer.is_valid(raise_exception=True)
         old = snapshot(request.user, self.FIELDS)
         with transaction.atomic():
-            user = serializer.save()
+            # Only the fields sent: a full-row save of the request's user wrote back a photo
+            # academic affairs had just hidden (review 2026-11 I4).
+            user = request.user
+            for field, value in serializer.validated_data.items():
+                setattr(user, field, value)
+            user.save(update_fields=list(serializer.validated_data))
             record(
                 RequestMeta.from_request(request),
                 "profile.public_update",

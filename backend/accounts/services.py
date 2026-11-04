@@ -671,9 +671,11 @@ def update_profile(meta: RequestMeta, user: User, **data) -> User:
     new = shown(user)
     if new == old:
         return user
+    changed = {k: v for k, v in new.items() if old.get(k) != v}
     with transaction.atomic():
-        user.save()
-        changed = {k: v for k, v in new.items() if old.get(k) != v}
+        # Only what this edit changed: a full-row save of the copy loaded for the request wrote
+        # back a consent the member had just switched (review 2026-11 I5).
+        user.save(update_fields=list(changed))
         # A name-only change keeps the action it has always had in the log.
         names_only = set(changed) <= {"full_name_ar", "full_name_en"}
         record(
