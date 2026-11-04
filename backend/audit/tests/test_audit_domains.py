@@ -32,10 +32,11 @@ def test_each_role_reads_its_own_field_of_work(api, make_user, it_dept, ba_dept)
         return {(r["action"], r["department"]) for r in rows}
 
     it, ba = it_dept.pk, ba_dept.pk
+    # Not an admission inquiry: the head registrar's log leaves it out (review 2026-11; the
+    # admission ones are in content/tests/test_review_2026_11_permissions.py).
     assert seen(make_user(Role.HEAD_REGISTRAR)) == {
         ("admissions.submit", it),
         ("admissions.submit", ba),
-        ("inquiry.reply", None),
     }
     assert seen(make_user(Role.REGISTRAR, department=it_dept)) == {("admissions.submit", it)}
     assert seen(make_user(Role.RESULTS_OFFICER)) == {

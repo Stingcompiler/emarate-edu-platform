@@ -18,6 +18,7 @@ from rest_framework.views import APIView
 
 from accounts import rbac
 from audit.services import RequestMeta, record, snapshot
+from core.errors import Conflict
 from core.permissions import capability
 from core.throttles import PublicReadThrottle
 
@@ -181,7 +182,15 @@ class MediaAssetViewSet(
         asset = serializer.save(uploaded_by=self.request.user, size=upload.size)
         record(_meta(self.request), "media.upload", asset)
 
+    def _owned(self, asset):
+        # The library is the site manager's (docs/03 §3.12); the events manager uploads
+        # pictures for events and changes or removes only those (review 2026-11).
+        user = self.request.user
+        if asset.uploaded_by_id != user.pk and not rbac.can(user, "content.manage"):
+            raise PermissionDenied(gettext("Only the site team changes this picture."))
+
     def perform_update(self, serializer):
+        self._owned(serializer.instance)
         asset = serializer.save()
         record(_meta(self.request), "media.update", asset)
 
@@ -192,6 +201,13 @@ class MediaAssetViewSet(
         return Response(MediaAssetSerializer(self.get_object(), context={"request": request}).data)
 
     def perform_destroy(self, instance):
+        self._owned(instance)
+        site = SiteSettings.load()
+        if instance.pk in {site.logo_id, site.share_image_id}:
+            raise Conflict(
+                gettext("The site uses this picture. Choose another in the site settings first."),
+                code="in_use",
+            )
         record(_meta(self.request), "media.delete", instance)
         instance.file.delete(save=False)
         instance.delete()
@@ -324,9 +340,7 @@ class AnnouncementViewSet(viewsets.ModelViewSet):
 
     def _owned(self, obj):
         user = self.request.user
-        if obj.created_by_id != user.pk and not services.may_announce(
-            user, obj.scope, obj.scope_id, obj.audience
-        ):
+        if not services.may_edit_announcement(user, obj):
             raise PermissionDenied()
 
     def perform_update(self, serializer):

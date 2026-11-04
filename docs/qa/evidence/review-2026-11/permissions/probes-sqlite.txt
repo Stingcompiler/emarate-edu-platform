@@ -1,0 +1,186 @@
+FFFFFF.                                                                  [100%]
+=================================== FAILURES ===================================
+___ test_probe_d1_events_manager_deletes_site_managers_general_announcement ____
+
+api = <function api.<locals>.client at 0x10cb5f4c0>
+users = {Role.SYSTEM_ADMIN: <User: مستخدم 1 <user1@ecst.test>>, Role.HEAD_REGISTRAR: <User: مستخدم 2 <user2@ecst.test>>, Role.REGISTRAR: <User: مستخدم 3 <user3@ecst.test>>, Role.RESULTS_OFFICER: <User: مستخدم 4 <user4@ecst.test>>, ...}
+
+    def test_probe_d1_events_manager_deletes_site_managers_general_announcement(api, users):
+        general = _published(users[R.SITE_MANAGER], title="مواعيد التسجيل")  # no event
+        assert general.event_id is None
+        em = api(users[R.EVENTS_MANAGER])
+        url = f"/api/v1/announcements/{general.public_id}"
+        edited = em.patch(url, {"title": "عدّله مدير الفعاليات"}, format="json")
+>       assert edited.status_code == 200  # faulty: not em's announcement, not about an event
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       assert 403 == 200
+E        +  where 403 = <Response status_code=403, "application/problem+json">.status_code
+
+core/tests/test_qa_probes_permissions.py:61: AssertionError
+----------------------------- Captured stderr call -----------------------------
+2026-11-04 14:20:27,362 WARNING django.request Forbidden: /api/v1/announcements/99303f63-763f-4691-bbc7-dba8d6b1a0cb
+------------------------------ Captured log call -------------------------------
+WARNING  django.request:log.py:283 Forbidden: /api/v1/announcements/99303f63-763f-4691-bbc7-dba8d6b1a0cb
+_______ test_probe_d2_academic_affairs_deletes_admins_staff_announcement _______
+
+api = <function api.<locals>.client at 0x10d9368e0>
+users = {Role.SYSTEM_ADMIN: <User: مستخدم 15 <user15@ecst.test>>, Role.HEAD_REGISTRAR: <User: مستخدم 16 <user16@ecst.test>>, Role.REGISTRAR: <User: مستخدم 17 <user17@ecst.test>>, Role.RESULTS_OFFICER: <User: مستخدم 18 <user18@ecst.test>>, ...}
+
+    def test_probe_d2_academic_affairs_deletes_admins_staff_announcement(api, users):
+        notice = _published(users[R.SYSTEM_ADMIN], audience="staff", title="صيانة النظام")
+        response = api(users[R.ACADEMIC_AFFAIRS]).delete(f"/api/v1/announcements/{notice.public_id}")
+>       assert response.status_code == 204  # faulty
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       assert 403 == 204
+E        +  where 403 = <Response status_code=403, "application/problem+json">.status_code
+
+core/tests/test_qa_probes_permissions.py:75: AssertionError
+----------------------------- Captured stderr call -----------------------------
+2026-11-04 14:20:27,503 WARNING django.request Forbidden: /api/v1/announcements/e0341293-f4c1-47d9-a43a-39d5afd60050
+------------------------------ Captured log call -------------------------------
+WARNING  django.request:log.py:283 Forbidden: /api/v1/announcements/e0341293-f4c1-47d9-a43a-39d5afd60050
+_ test_probe_d3_aa_plus_teacher_member_deletes_department_managers_announcement _
+
+api = <function api.<locals>.client at 0x10d936de0>
+users = {Role.SYSTEM_ADMIN: <User: مستخدم 29 <user29@ecst.test>>, Role.HEAD_REGISTRAR: <User: مستخدم 30 <user30@ecst.test>>, Role.REGISTRAR: <User: مستخدم 31 <user31@ecst.test>>, Role.RESULTS_OFFICER: <User: مستخدم 32 <user32@ecst.test>>, ...}
+make_user = <function make_user.<locals>.make at 0x10d937ba0>
+ba_dept = <Department: إدارة الأعمال>
+
+    def test_probe_d3_aa_plus_teacher_member_deletes_department_managers_announcement(
+        api, users, make_user, ba_dept
+    ):
+        ba_manager = make_user(R.DEPARTMENT_MANAGER, department=ba_dept)
+        news = _published(
+            ba_manager, scope="department", scope_id=ba_dept.pk, audience="staff", title="اجتماع"
+        )
+        url = f"/api/v1/announcements/{news.public_id}"
+    
+        aa_only = make_user(R.ACADEMIC_AFFAIRS)
+        assert api(aa_only).delete(url).status_code == 404
+    
+        teacher_only = make_user(R.TEACHER)
+        DepartmentMembership.objects.create(user=teacher_only, department=ba_dept, kind="teacher")
+        assert api(teacher_only).delete(url).status_code == 403
+    
+        both = make_user(R.ACADEMIC_AFFAIRS, R.TEACHER)
+        DepartmentMembership.objects.create(user=both, department=ba_dept, kind="teacher")
+>       assert api(both).delete(url).status_code == 204  # faulty: neither role alone may
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       assert 403 == 204
+E        +  where 403 = <Response status_code=403, "application/problem+json">.status_code
+E        +    where <Response status_code=403, "application/problem+json"> = delete('/api/v1/announcements/3703aa3b-5a78-408b-9d53-224895105607')
+E        +      where delete = <rest_framework.test.APIClient object at 0x10d83efd0>.delete
+E        +        where <rest_framework.test.APIClient object at 0x10d83efd0> = <function api.<locals>.client at 0x10d936de0>(<User: مستخدم 46 <user46@ecst.test>>)
+
+core/tests/test_qa_probes_permissions.py:103: AssertionError
+----------------------------- Captured stderr call -----------------------------
+2026-11-04 14:20:27,534 WARNING django.request Not Found: /api/v1/announcements/3703aa3b-5a78-408b-9d53-224895105607
+2026-11-04 14:20:27,541 WARNING django.request Forbidden: /api/v1/announcements/3703aa3b-5a78-408b-9d53-224895105607
+2026-11-04 14:20:27,549 WARNING django.request Forbidden: /api/v1/announcements/3703aa3b-5a78-408b-9d53-224895105607
+------------------------------ Captured log call -------------------------------
+WARNING  django.request:log.py:283 Not Found: /api/v1/announcements/3703aa3b-5a78-408b-9d53-224895105607
+WARNING  django.request:log.py:283 Forbidden: /api/v1/announcements/3703aa3b-5a78-408b-9d53-224895105607
+WARNING  django.request:log.py:283 Forbidden: /api/v1/announcements/3703aa3b-5a78-408b-9d53-224895105607
+______________ test_probe_d4_events_manager_deletes_the_site_logo ______________
+
+api = <function api.<locals>.client at 0x10c813560>
+users = {Role.SYSTEM_ADMIN: <User: مستخدم 47 <user47@ecst.test>>, Role.HEAD_REGISTRAR: <User: مستخدم 48 <user48@ecst.test>>, Role.REGISTRAR: <User: مستخدم 49 <user49@ecst.test>>, Role.RESULTS_OFFICER: <User: مستخدم 50 <user50@ecst.test>>, ...}
+
+    def test_probe_d4_events_manager_deletes_the_site_logo(api, users):
+        sm = api(users[R.SITE_MANAGER])
+        uploaded = sm.post(
+            "/api/v1/content/media", {"file": _png(), "alt_ar": "شعار الكلية"}, format="multipart"
+        )
+        assert uploaded.status_code == 201, uploaded.data
+        logo = MediaAsset.objects.get(public_id=uploaded.data["public_id"])
+        site = SiteSettings.load()
+        site.logo = logo
+        site.save()
+    
+        em = api(users[R.EVENTS_MANAGER])
+        url = f"/api/v1/content/media/{logo.public_id}"
+>       assert em.patch(url, {"alt_ar": "x"}, format="json").status_code == 200  # faulty
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       assert 403 == 200
+E        +  where 403 = <Response status_code=403, "application/problem+json">.status_code
+E        +    where <Response status_code=403, "application/problem+json"> = patch('/api/v1/content/media/1edeee48-ce97-4567-ac06-18eb39dc0c3f', {'alt_ar': 'x'}, format='json')
+E        +      where patch = <rest_framework.test.APIClient object at 0x10d24b020>.patch
+
+core/tests/test_qa_probes_permissions.py:127: AssertionError
+----------------------------- Captured stderr call -----------------------------
+2026-11-04 14:20:29,150 WARNING django.request Forbidden: /api/v1/content/media/1edeee48-ce97-4567-ac06-18eb39dc0c3f
+------------------------------ Captured log call -------------------------------
+WARNING  django.request:log.py:283 Forbidden: /api/v1/content/media/1edeee48-ce97-4567-ac06-18eb39dc0c3f
+_______ test_probe_d5_head_registrar_sees_general_inquiry_audit_entries ________
+
+api = <function api.<locals>.client at 0x10d936d40>
+users = {Role.SYSTEM_ADMIN: <User: مستخدم 61 <user61@ecst.test>>, Role.HEAD_REGISTRAR: <User: مستخدم 62 <user62@ecst.test>>, Role.REGISTRAR: <User: مستخدم 63 <user63@ecst.test>>, Role.RESULTS_OFFICER: <User: مستخدم 64 <user64@ecst.test>>, ...}
+
+    def test_probe_d5_head_registrar_sees_general_inquiry_audit_entries(api, users):
+        from inquiries import services as inquiries
+    
+        inquiry = inquiries.submit(
+            name="زائر",
+            email="visitor@x.test",
+            phone="",
+            type="general",
+            department=None,
+            subject="الرسوم",
+            message="كم الرسوم؟",
+        )
+        head = api(users[R.HEAD_REGISTRAR])
+        listed = {row["reference_no"] for row in head.get("/api/v1/inquiries").data["results"]}
+        assert inquiry.reference_no not in listed  # not theirs …
+        logged = head.get("/api/v1/audit-logs?page_size=100").data["results"]
+>       assert any(
+            row["action"].startswith("inquiry.") and row["target_repr"] == inquiry.reference_no
+            for row in logged
+        )  # faulty: … yet its audit trail is
+E       assert False
+E        +  where False = any(<generator object test_probe_d5_head_registrar_sees_general_inquiry_audit_entries.<locals>.<genexpr> at 0x10bc6a960>)
+
+core/tests/test_qa_probes_permissions.py:154: AssertionError
+________ test_probe_d6_head_registrar_does_not_see_status_change_source ________
+
+api = <function api.<locals>.client at 0x10d937ce0>
+users = {Role.SYSTEM_ADMIN: <User: مستخدم 75 <user75@ecst.test>>, Role.HEAD_REGISTRAR: <User: مستخدم 76 <user76@ecst.test>>, Role.REGISTRAR: <User: مستخدم 77 <user77@ecst.test>>, Role.RESULTS_OFFICER: <User: مستخدم 78 <user78@ecst.test>>, ...}
+it_program = <Program: بكالوريوس تقانة المعلومات>
+make_student = <function make_student.<locals>.make at 0x10d29e5c0>
+
+    def test_probe_d6_head_registrar_does_not_see_status_change_source(
+        api, users, it_program, make_student
+    ):
+        record = make_student(it_program, "26-IT-0950")
+        done = api(users[R.STUDENT_AFFAIRS]).post(
+            f"/api/v1/students/{record.public_id}/status",
+            {"status": "suspended", "reason": "قرار لجنة"},
+            format="json",
+        )
+        assert done.status_code == 200, done.data
+        assert AuditLog.objects.filter(action="student.status").exists()
+        head = api(users[R.HEAD_REGISTRAR])
+        actions = {
+            row["action"] for row in head.get("/api/v1/audit-logs?page_size=100").data["results"]
+        }
+>       assert "student.status" not in actions  # faulty per §3.14
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: assert 'student.status' not in {'student.status'}
+
+core/tests/test_qa_probes_permissions.py:181: AssertionError
+==================================== PASSES ====================================
+________________ test_probe_d7_site_manager_cannot_read_intakes ________________
+----------------------------- Captured stderr call -----------------------------
+2026-11-04 14:20:29,206 WARNING django.request Forbidden: /api/v1/intakes
+2026-11-04 14:20:29,207 WARNING django.request Forbidden: /api/v1/admission-cycles
+------------------------------ Captured log call -------------------------------
+WARNING  django.request:log.py:283 Forbidden: /api/v1/intakes
+WARNING  django.request:log.py:283 Forbidden: /api/v1/admission-cycles
+=========================== short test summary info ============================
+PASSED core/tests/test_qa_probes_permissions.py::test_probe_d7_site_manager_cannot_read_intakes
+FAILED core/tests/test_qa_probes_permissions.py::test_probe_d1_events_manager_deletes_site_managers_general_announcement
+FAILED core/tests/test_qa_probes_permissions.py::test_probe_d2_academic_affairs_deletes_admins_staff_announcement
+FAILED core/tests/test_qa_probes_permissions.py::test_probe_d3_aa_plus_teacher_member_deletes_department_managers_announcement
+FAILED core/tests/test_qa_probes_permissions.py::test_probe_d4_events_manager_deletes_the_site_logo
+FAILED core/tests/test_qa_probes_permissions.py::test_probe_d5_head_registrar_sees_general_inquiry_audit_entries
+FAILED core/tests/test_qa_probes_permissions.py::test_probe_d6_head_registrar_does_not_see_status_change_source
+6 failed, 1 passed in 10.38s
