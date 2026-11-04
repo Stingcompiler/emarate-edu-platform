@@ -1,0 +1,138 @@
+FFFF.                                                                    [100%]
+=================================== FAILURES ===================================
+_________ test_probe_webp_signature_lets_postscript_reach_ghostscript __________
+
+api = <function api.<locals>.client at 0x10ea34c20>
+make_user = <function make_user.<locals>.make at 0x10dd9cb80>
+
+    def test_probe_webp_signature_lets_postscript_reach_ghostscript(api, make_user):
+        """DEFECT: format confusion. validation.check accepts EPS bytes named .webp, and
+        accounts/photos.normalize opens them with Image.open(...) without `formats=`, so Pillow picks
+        its EPS plugin and image.convert() hands the attacker's PostScript to Ghostscript (`gs`).
+        Locally gs is absent (the upload then fails with 400); on a server where Ghostscript is
+        installed the PostScript is executed. Ghostscript is stubbed here to prove it is reached."""
+        upload = SimpleUploadedFile("me.webp", EPS_AS_WEBP, "image/webp")
+>       assert validation.check(upload, allowed={"webp"}, max_mb=3).mime == "image/webp"
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+core/tests/test_qa_probes_photos.py:56: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+upload = <SimpleUploadedFile: me.webp (image/webp)>
+allowed = frozenset({'webp'}), max_mb = 3
+
+    def check(upload, *, allowed: frozenset[str] | set[str] | None, max_mb: int) -> Kind:
+        """Validate an uploaded file; return its kind (with the trusted MIME type)."""
+        ext = extension_of(upload.name)
+        allowed = frozenset(allowed or DEFAULT_EXTENSIONS) & DEFAULT_EXTENSIONS
+        if ext not in allowed:
+            raise UploadError(gettext("File type .%(ext)s is not allowed here.") % {"ext": ext or "?"})
+        if upload.size > max_mb * 1024 * 1024:
+            raise UploadError(gettext("The file is larger than %(max_mb)s MB.") % {"max_mb": max_mb})
+        kind = KINDS[ext]
+        upload.seek(0)
+        head = upload.read(4096)
+        upload.seek(0)
+        if kind.signatures:
+            matches = [head[o : o + len(sig)] == sig for o, sig in kind.signatures]
+            if not (all(matches) if kind.all_signatures else any(matches)):
+>               raise UploadError(gettext("The file content does not match its extension."))
+E               files.validation.UploadError: محتوى الملف لا يطابق امتداده — تأكد أنه ملف صحيح بهذا النوع.
+
+files/validation.py:88: UploadError
+_______ test_probe_decompression_bomb_below_pillow_hard_limit_is_decoded _______
+
+api = <function api.<locals>.client at 0x10dd4dbc0>
+make_user = <function make_user.<locals>.make at 0x10dd4fb00>
+
+    def test_probe_decompression_bomb_below_pillow_hard_limit_is_decoded(api, make_user):
+        """DEFECT: only Pillow's default guard applies (no MAX_IMAGE_PIXELS, no dimension check in
+        files/validation.py or accounts/photos.py). Pillow *errors* only above 2 x 89,478,485 px;
+        between 89.5 M and 179 M px it merely warns and decodes the whole bitmap. An ~11 KB PNG of
+        9,500 x 9,500 px (90.25 M px) is accepted from any signed-in user and fully decoded
+        (measured: peak RSS of the test process rises by ~410 MB); near 13,000 x 13,000 RGBA a
+        single upload costs over 1 GB of worker memory. The 20,000 x 20,000 case is refused
+        (verified)."""
+        bomb = _png(9_500, 9_500, mode="1")
+        assert len(bomb) < 64 * 1024  # tiny on the wire, far under the 3 MB limit
+        assert Image.MAX_IMAGE_PIXELS < 9_500 * 9_500  # over Pillow's warning threshold
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter("always")
+            response = _upload(api(make_user(Role.STUDENT)), "big.png", bomb)
+>       assert response.status_code == 201, response.data
+E       AssertionError: {'type': 'about:blank', 'title': 'طلب غير صالح', 'status': 400, 'detail': 'بعض الحقول غير صحيحة.', ...}
+E       assert 400 == 201
+E        +  where 400 = <Response status_code=400, "application/problem+json">.status_code
+
+core/tests/test_qa_probes_photos.py:87: AssertionError
+----------------------------- Captured stderr call -----------------------------
+2026-11-04 13:57:19,421 WARNING django.request Bad Request: /api/v1/files
+------------------------------ Captured log call -------------------------------
+WARNING  django.request:log.py:283 Bad Request: /api/v1/files
+___ test_probe_public_photo_still_served_after_member_leaves_teaching_staff ____
+
+api = <function api.<locals>.client at 0x10dd4f740>
+make_user = <function make_user.<locals>.make at 0x10e722c00>
+it_dept = <Department: تقانة المعلومات>
+
+    def test_probe_public_photo_still_served_after_member_leaves_teaching_staff(
+        api, make_user, it_dept
+    ):
+        """DEFECT: PublicStaffPhotoView (organization/public.py:532-556) checks only the user's
+        flags, not that they are still a teacher / TA / department manager. A member who gave
+        consent and later lost the role and the department membership (moved to another job, or a
+        student account that once held a TA role) disappears from «الكوادر», but their photo stays
+        downloadable by anyone at /api/public/staff-photos/<id>.webp — a URL already published in
+        earlier builds."""
+        member = _public_member(api, make_user, it_dept)
+        url = f"/api/public/staff-photos/{member.public_id}.webp"
+        assert api().get(url).status_code == 200
+    
+        DepartmentMembership.objects.filter(user=member).delete()
+        RoleAssignment.objects.filter(user=member).update(role=Role.HR)
+        cache.clear()
+        listed = api().get(f"/api/public/departments/{it_dept.code}").data["faculty"]
+        assert listed == []  # no longer on the site …
+>       assert api().get(url).status_code == 200  # … but the photo is still public
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       assert 404 == 200
+E        +  where 404 = <Response status_code=404, "application/problem+json">.status_code
+E        +    where <Response status_code=404, "application/problem+json"> = get('/api/public/staff-photos/8483b2aa-43ad-478f-89fb-b3e7bba72b8c.webp')
+E        +      where get = <rest_framework.test.APIClient object at 0x10e88a520>.get
+E        +        where <rest_framework.test.APIClient object at 0x10e88a520> = <function api.<locals>.client at 0x10dd4f740>()
+
+core/tests/test_qa_probes_photos.py:126: AssertionError
+----------------------------- Captured stderr call -----------------------------
+2026-11-04 13:57:19,536 WARNING django.request Not Found: /api/public/staff-photos/8483b2aa-43ad-478f-89fb-b3e7bba72b8c.webp
+------------------------------ Captured log call -------------------------------
+WARNING  django.request:log.py:283 Not Found: /api/public/staff-photos/8483b2aa-43ad-478f-89fb-b3e7bba72b8c.webp
+________ test_probe_public_staff_photo_is_cacheable_publicly_for_a_day _________
+
+api = <function api.<locals>.client at 0x10e722840>
+make_user = <function make_user.<locals>.make at 0x10e80d9e0>
+it_dept = <Department: تقانة المعلومات>
+
+    def test_probe_public_staff_photo_is_cacheable_publicly_for_a_day(api, make_user, it_dept):
+        """MINOR: withdrawing consent stops the URL on the server at once (verified), but the
+        response was sent as `public, max-age=86400`, so any shared cache and every browser that
+        saw it may keep showing the photo for up to 24 h after the member withdrew consent."""
+        member = _public_member(api, make_user, it_dept)
+        response = api().get(f"/api/public/staff-photos/{member.public_id}.webp")
+        assert response.status_code == 200
+>       assert response["Cache-Control"] == "public, max-age=86400"
+E       AssertionError: assert 'public, max-age=300' == 'public, max-age=86400'
+E         
+E         - public, max-age=86400
+E         ?                 ^^^
+E         + public, max-age=300
+E         ?                 ^
+
+core/tests/test_qa_probes_photos.py:136: AssertionError
+==================================== PASSES ====================================
+=========================== short test summary info ============================
+PASSED core/tests/test_qa_probes_photos.py::test_probe_department_manager_name_public_without_consent
+FAILED core/tests/test_qa_probes_photos.py::test_probe_webp_signature_lets_postscript_reach_ghostscript
+FAILED core/tests/test_qa_probes_photos.py::test_probe_decompression_bomb_below_pillow_hard_limit_is_decoded
+FAILED core/tests/test_qa_probes_photos.py::test_probe_public_photo_still_served_after_member_leaves_teaching_staff
+FAILED core/tests/test_qa_probes_photos.py::test_probe_public_staff_photo_is_cacheable_publicly_for_a_day
+4 failed, 1 passed in 5.73s

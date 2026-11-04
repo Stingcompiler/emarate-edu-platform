@@ -48,10 +48,14 @@ def upload(meta: RequestMeta, *, purpose: str, offering, uploaded) -> StoredFile
         raise ValidationError({"file": [str(error)]}) from None
     if purpose == "photo":
         # Profile photos are stored cropped and compressed (accounts/photos.py).
-        from accounts.photos import normalize
+        from accounts.photos import TooLarge, normalize
 
         try:
             uploaded = normalize(uploaded)
+        except TooLarge:
+            raise ValidationError(
+                {"file": [gettext("The image has too many pixels. Use a smaller photo.")]}
+            ) from None
         except Exception:
             raise ValidationError({"file": [gettext("The image could not be read.")]}) from None
         kind = validation.KINDS["webp"]
