@@ -31,6 +31,11 @@ HIGH_RISK_APPS = {
     "core",
     "files",
     "audit",
+    # Structure edits, deletes and moves run on real production data, and the site's
+    # publishing rules decide what visitors see (review plan 2026-11, step 0).
+    "organization",
+    "academic",
+    "content",
 }
 # Patterns in changed lines that raise the risk whatever the app (lessons of R01–R11).
 RISK_PATTERNS = {
