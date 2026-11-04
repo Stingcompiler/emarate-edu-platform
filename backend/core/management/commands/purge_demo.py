@@ -36,6 +36,8 @@ from django.db.models import ProtectedError, Q, RestrictedError
 from django.utils import timezone
 
 DEMO_DOMAIN = "demo.ecst.test"
+# seed_demo's fees (diploma, bachelor): SDG per year, USD per year.
+DEMO_FEES = {(900_000, 700), (1_600_000, 1_200)}
 EXAMPLE = "(مثال)"
 # What seed_demo writes into the site settings (core/management/commands/seed_demo.py).
 DEMO_CONTACT = {
@@ -204,7 +206,14 @@ class Command(BaseCommand):
         for label, fields in (
             (
                 "organization.Program",
-                ("description_ar", "description_en", "outcomes_en", "careers_en"),
+                (
+                    "description_ar",
+                    "description_en",
+                    "outcomes_ar",
+                    "outcomes_en",
+                    "careers_ar",
+                    "careers_en",
+                ),
             ),
             ("organization.Department", ("description",)),
         ):
@@ -217,8 +226,19 @@ class Command(BaseCommand):
                         EXAMPLE in (getattr(row, f) or "") or "(Example)" in (getattr(row, f) or "")
                     )
                 ]
+                # The demo fees were seeded beside the example outcomes (seed_demo): when a
+                # programme still had those and its fees are exactly the seeded pair, they go
+                # too — never a fee the college typed (review 2026-11 I2).
+                if (
+                    label == "organization.Program"
+                    and {"outcomes_ar", "careers_ar"} & set(changed)
+                    and (row.annual_fee_sdg, row.annual_fee_usd) in DEMO_FEES
+                ):
+                    row.annual_fee_sdg = row.annual_fee_usd = None
+                    changed += ["annual_fee_sdg", "annual_fee_usd"]
                 for f in changed:
-                    setattr(row, f, "")
+                    if f not in ("annual_fee_sdg", "annual_fee_usd"):
+                        setattr(row, f, "")
                 if changed:
                     row.save(update_fields=changed)
                     cleared += len(changed)

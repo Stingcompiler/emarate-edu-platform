@@ -84,6 +84,8 @@ def add_link(meta: RequestMeta, user: User, **data) -> StaffLink:
     """An account elsewhere; on the site only once the member switches it on (2026-10-31)."""
     _member(user)
     with transaction.atomic():
+        # The member's row is the lock: two quick adds counted 9 each and made 11 (I6).
+        User.objects.select_for_update().filter(pk=user.pk).first()
         if StaffLink.objects.filter(user=user).count() >= StaffLink.MAX:
             raise ValidationError(gettext("At most ten links."))
         link = StaffLink.objects.create(user=user, **{f: data[f] for f in LINK_FIELDS if f in data})
