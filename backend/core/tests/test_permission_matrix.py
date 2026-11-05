@@ -129,6 +129,12 @@ READS: dict[str, tuple[str, frozenset, frozenset]] = {
     "college-detail": ("/api/v1/colleges/{college}", STRUCTURE, frozenset()),
     "department-list": ("/api/v1/departments", STRUCTURE, frozenset()),
     "department-detail": ("/api/v1/departments/{dept}", STRUCTURE, frozenset()),
+    # What blocks deleting or merging a department: the system admin's structure page only.
+    "department-usage": (
+        "/api/v1/departments/{dept}/usage",
+        frozenset({R.SYSTEM_ADMIN}),
+        frozenset(),
+    ),
     "program-list": ("/api/v1/programs", STRUCTURE, frozenset()),
     "program-detail": ("/api/v1/programs/{program}", STRUCTURE, frozenset()),
     "academic-year-list": ("/api/v1/academic-years", STRUCTURE, frozenset()),
@@ -407,6 +413,10 @@ _CT = "content.tests.test_content::"
 _RS = "results.tests.test_results::"
 _SA = "student_affairs.tests.test_student_affairs::"
 COVERED_ELSEWHERE = {
+    # POST only: a department's programmes into another, then it goes (owner, 2026-11-05).
+    "department-merge": (
+        "organization.tests.test_structure_edit::test_a_department_is_merged_into_another"
+    ),
     # «الكوادر» (owner, 2026-10-30): a member's own degrees; academic affairs' review.
     "me-qualifications": _STAFF + "test_staff_degrees_and_photo_on_the_site_with_consent",
     "me-qualification": _STAFF + "test_staff_degrees_and_photo_on_the_site_with_consent",

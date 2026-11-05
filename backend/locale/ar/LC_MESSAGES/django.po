@@ -1014,6 +1014,15 @@ msgstr "لا يعدّل هذه الصورة إلا فريق الموقع."
 msgid "The site uses this picture. Choose another in the site settings first."
 msgstr "الموقع يستعمل هذه الصورة. اختر غيرها من إعدادات الموقع أولًا."
 
+msgid "The department still has courses, students, or programmes with students, courses or applications. Stop it instead, or move those first."
+msgstr "ما زال في القسم مواد أو طلاب، أو برامج عليها طلاب أو مواد أو طلبات تقديم. أوقفه مؤقتًا بدلًا من ذلك، أو انقل هذه أولًا."
+
+msgid "Choose another department."
+msgstr "اختر قسمًا آخر."
+
+msgid "The department has entries in the audit log, which keeps them for good: stop it instead, or merge it into another department."
+msgstr "للقسم سجل في التدقيق، والسجل لا يُحذف أبدًا: أوقفه مؤقتًا بدلًا من ذلك، أو ادمجه في قسم آخر."
+
 msgid "A backup is being made; wait for it to finish."
 msgstr "تُنشأ نسخة احتياطية الآن؛ انتظر حتى تكتمل."
 

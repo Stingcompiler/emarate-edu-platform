@@ -4,11 +4,14 @@ from django.conf import settings
 from django.db import transaction
 from django.utils.translation import gettext
 from drf_spectacular.utils import extend_schema
-from rest_framework import generics, serializers
+from rest_framework import generics, serializers, status
+from rest_framework.decorators import action
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from accounts import rbac
 from audit.services import RequestMeta, record, snapshot
 from content.services import request_site_rebuild
 from core.permissions import capability
@@ -22,6 +25,40 @@ from .serializers import (
     ProgramSerializer,
     SystemSettingsSerializer,
 )
+
+
+class DepartmentUsageProgramSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    code = serializers.CharField()
+    name_ar = serializers.CharField()
+    students = serializers.IntegerField()
+    courses = serializers.IntegerField()
+    applications = serializers.IntegerField()
+    free = serializers.BooleanField()
+
+
+class DepartmentUsageRoleSerializer(serializers.Serializer):
+    user = serializers.CharField()
+    role = serializers.CharField()
+
+
+class DepartmentUsageSerializer(serializers.Serializer):
+    programs = DepartmentUsageProgramSerializer(many=True)
+    courses = serializers.IntegerField()
+    students = serializers.IntegerField()
+    members = serializers.IntegerField()
+    roles = DepartmentUsageRoleSerializer(many=True)
+    history = serializers.IntegerField()
+    can_delete = serializers.BooleanField()
+    can_merge = serializers.BooleanField()
+
+
+class DepartmentMergeSerializer(serializers.Serializer):
+    into = serializers.PrimaryKeyRelatedField(queryset=Department.objects.all())
+
+
+class DepartmentMergeResultSerializer(serializers.Serializer):
+    result = serializers.ChoiceField(choices=["deleted", "stopped"])
 
 
 class _StructureViewSet(ScopedModelViewSet):
@@ -79,6 +116,34 @@ class DepartmentViewSet(_CodedViewSet):
     site_section = "departments"
     filterset_fields = ["college", "is_active"]
     search_fields = ["name_ar", "name_en", "code"]
+
+    def _manager(self):
+        if not rbac.can(self.request.user, "structure.manage"):
+            raise PermissionDenied()
+
+    @extend_schema(responses=DepartmentUsageSerializer)
+    @action(detail=True, methods=["get"])
+    def usage(self, request, pk=None):
+        """What is on the department, and whether it can be merged or deleted (admin only)."""
+        self._manager()
+        return Response(DepartmentUsageSerializer(services.usage(self.get_object())).data)
+
+    @extend_schema(request=DepartmentMergeSerializer, responses=DepartmentMergeResultSerializer)
+    @action(detail=True, methods=["post"])
+    def merge(self, request, pk=None):
+        """Its programmes into another department, then it is deleted."""
+        self._manager()
+        body = DepartmentMergeSerializer(data=request.data)
+        body.is_valid(raise_exception=True)
+        result = services.merge(self.meta, self.get_object(), body.validated_data["into"])
+        return Response({"result": result})
+
+    def destroy(self, request, *args, **kwargs):
+        # ?with_programs=1: the department and its free programmes in one step.
+        if request.query_params.get("with_programs") == "1":
+            services.delete_with_programs(self.meta, self.get_object())
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        return super().destroy(request, *args, **kwargs)
 
 
 class ProgramViewSet(_CodedViewSet):
