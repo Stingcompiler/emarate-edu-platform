@@ -33,7 +33,9 @@ def create_backup(actor_id: int | None = None) -> list[str]:
             from django.core.management import call_command
 
             call_command(
-                "notify_ops", unit="ecst-backup.service", detail="طُلبت من إعدادات النظام في البوابة."
+                "notify_ops",
+                unit="ecst-backup.service",
+                detail="طُلبت من إعدادات النظام في البوابة.",
             )
         except Exception:
             logging.getLogger(__name__).exception("could not send the backup alert")
