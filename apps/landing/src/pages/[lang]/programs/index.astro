@@ -245,4 +245,12 @@ const lead =
   });
   narrow.addEventListener("change", fold_);
   fold_();
+  // «كل المفتوحة» on the home page lands here already narrowed to the open programmes.
+  if (
+    new URLSearchParams(location.search).get("open") === "1" &&
+    finder.querySelector('[data-facet="open"]')
+  ) {
+    setFacet("open");
+    apply();
+  }
 </script>

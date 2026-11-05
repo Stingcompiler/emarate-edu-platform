@@ -404,7 +404,10 @@ const jsonLd = {
       </h2>
       <span class="flex flex-wrap gap-x-4">
         {open.length > 0 && open.length < all.length && (
-          <a href={href(lang, "programs/?open=1")} class="tap-44 text-sm font-semibold text-primary">
+          <a
+            href={href(lang, "programs/?open=1")}
+            class="tap-44 text-sm font-semibold text-primary"
+          >
             {lang === "ar" ? "كل المفتوحة" : "All open"} · {num(lang, open.length)}
           </a>
         )}
@@ -497,7 +500,6 @@ const jsonLd = {
       </ul>
     </section>
   )}
-
 
   {dean && deanExcerpt && (
     <section class="mx-auto max-w-6xl px-4 pt-12 lg:px-8">
