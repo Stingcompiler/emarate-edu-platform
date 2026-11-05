@@ -69,16 +69,19 @@ const next = upcoming
   .filter((e) => new Date(e.ends_at) > new Date())
   .sort((a, b) => a.starts_at.localeCompare(b.starts_at))[0];
 const name = pick(lang, s.name_ar, s.name_en);
-const lead =
-  lang === "ar"
-    ? `تعليم تقني يبدأ من هنا: ${count(lang, st.departments, N.department)}، وتقديم إلكتروني بالكامل ومتابعة للطلب من هاتفك.`
-    : `Technical education starts here: ${count(lang, st.departments, N.department)}, a fully online application you can follow from your phone.`;
 // What search results show for the home (review: the name alone, and a 55-character
 // description, left the page's subject to guesswork): the degrees offered, and the owner's
 // own description completed with the programme and department counts when it is short.
 const degrees = [
   ...new Set(all.map((p) => degree(lang, p.degree, p.degree_label)).filter(Boolean)),
 ];
+const programCount = st.programs || all.length;
+// The figures live in the supporting line, not the headline (UX review 2026-11-04: with four
+// degrees the headline became a block of text on a phone).
+const lead =
+  lang === "ar"
+    ? `${count(lang, programCount, N.program)}${degrees.length ? ` (${degrees.join("، ")})` : ""} في ${count(lang, st.departments, N.department)}، والتقديم إلكتروني بالكامل وتتابع طلبك من هاتفك.`
+    : `${count(lang, programCount, N.program)}${degrees.length ? ` (${degrees.join(", ")})` : ""} in ${count(lang, st.departments, N.department)}; apply fully online and follow your application from your phone.`;
 const seoTitle = degrees.length
   ? lang === "ar"
     ? `${name} — برامج ${degrees.join(" و")}`
@@ -91,20 +94,13 @@ const homeDescription =
     : ownDescription
       ? `${ownDescription.replace(/[.،]+$/, "")}. ${lead}`
       : `${name} — ${lead}`;
-// «11 برنامجًا بكالوريوس ودبلوم — قدّم من هاتفك في دقائق»: what is offered, to whom, how (design
-// review B4); the numbers and degrees come from the data. «تعليم تقني يبدأ من هنا» stays as the
-// supporting line.
-const programCount = st.programs || all.length;
+// A short promise and how to act on it (UX review 2026-11-04); what is offered is the line
+// under it.
+const shortName = name.split(" ").slice(0, 2).join(" ");
 const heroLines =
   lang === "ar"
-    ? [
-        `${count(lang, programCount, N.program)}${degrees.length ? ` ${degrees.join(" و")}` : ""}`,
-        "قدّم من هاتفك في دقائق.",
-      ]
-    : [
-        `${count(lang, programCount, N.program)}${degrees.length ? `: ${degrees.join(" and ")}` : ""}`,
-        "apply from your phone in minutes.",
-      ];
+    ? [`ابدأ مستقبلك في ${shortName}،`, "وقدّم من هاتفك في دقائق."]
+    : [`Start your future at ${shortName},`, "apply from your phone in minutes."];
 const heroSet = (format: "avif" | "webp") =>
   HERO_WIDTHS.map((width) => `/img/hero-${width}.${format} ${width}w`).join(", ");
 const heroSizes = "(min-width: 1280px) 560px, (min-width: 1024px) 45vw, 100vw";
@@ -399,6 +395,34 @@ const jsonLd = {
     </div>
   </section>
 
+  {/* What the visitor came for, right after «who are you» (UX review 2026-11-04: it came after
+      the departments and the staff). The link says where it goes and how many. */}
+  <section class="mx-auto max-w-6xl px-4 pt-10 lg:px-8">
+    <div class="flex flex-wrap items-end justify-between gap-x-4">
+      <h2 class="font-display text-2xl font-bold">
+        {open.length ? t(lang, "openPrograms") : t(lang, "programs")}
+      </h2>
+      <span class="flex flex-wrap gap-x-4">
+        {open.length > 0 && open.length < all.length && (
+          <a
+            href={href(lang, "programs/?open=1")}
+            class="tap-44 text-sm font-semibold text-primary"
+          >
+            {lang === "ar" ? "كل المفتوحة" : "All open"} · {num(lang, open.length)}
+          </a>
+        )}
+        <a href={href(lang, "programs/")} class="tap-44 text-sm font-semibold text-primary">
+          {lang === "ar" ? "كل البرامج" : "All programmes"} · {num(lang, all.length)}
+        </a>
+      </span>
+    </div>
+    <div class="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      {(open.length ? open : all).slice(0, 4).map((p) => (
+        <ProgramCard lang={lang} program={p} />
+      ))}
+    </div>
+  </section>
+
   {/* The portal as an app on the phone (owner, 2026-10-30). It installs from the portal's own
       address (a browser installs an app only from its origin): the button opens the portal's
       install page, which guides iPhone and Android and asks to sign in first. */}
@@ -434,11 +458,12 @@ const jsonLd = {
     <div class="flex items-end justify-between">
       <h2 class="font-display text-2xl font-bold">{t(lang, "departments")}</h2>
       <a href={href(lang, "departments/")} class="tap-44 text-sm font-semibold text-primary">
-        {t(lang, "all")} · {num(lang, depts.length)}
+        {lang === "ar" ? "كل الأقسام" : "All departments"} · {num(lang, depts.length)}
       </a>
     </div>
+    {/* Eight at most; the directory has the rest (UX review 2026-11-04). */}
     <div class="mt-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
-      {depts.map((d, i) => (
+      {depts.slice(0, 8).map((d, i) => (
         <a
           data-reveal
           style={`--i:${i}`}
@@ -475,20 +500,6 @@ const jsonLd = {
       </ul>
     </section>
   )}
-
-  <section class="mx-auto max-w-6xl px-4 pt-10 lg:px-8">
-    <div class="flex items-end justify-between">
-      <h2 class="font-display text-2xl font-bold">{t(lang, "openPrograms")}</h2>
-      <a href={href(lang, "programs/")} class="tap-44 text-sm font-semibold text-primary">
-        {t(lang, "all")} · {num(lang, all.length)}
-      </a>
-    </div>
-    <div class="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-      {(open.length ? open : all).slice(0, 4).map((p) => (
-        <ProgramCard lang={lang} program={p} />
-      ))}
-    </div>
-  </section>
 
   {dean && deanExcerpt && (
     <section class="mx-auto max-w-6xl px-4 pt-12 lg:px-8">

@@ -1121,3 +1121,9 @@ msgstr "لا مواد في هذا الفصل."
 
 msgid "Only an unpublished draft can be deleted."
 msgstr "لا يُحذف إلا مسودة لم تُنشر."
+
+msgid "Set the last date for late work."
+msgstr "حدّد آخر موعد لتسليم المتأخر."
+
+msgid "The exam is published; its questions are locked."
+msgstr "نُشر الاختبار؛ لا تُعدَّل أسئلته بعد النشر."

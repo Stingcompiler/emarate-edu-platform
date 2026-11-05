@@ -176,6 +176,13 @@ class AssignmentSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         get = lambda name: attrs.get(name, getattr(self.instance, name, None))  # noqa: E731
         due, late_until = get("due_at"), get("late_until")
+        policy = get("late_policy")
+        if policy and policy != "none" and not late_until:
+            # Late work needs an end: without one the server took it forever while the page
+            # said «أُغلق التسليم» (review 2026-11).
+            raise serializers.ValidationError(
+                {"late_until": [gettext("Set the last date for late work.")]}
+            )
         if late_until and due and late_until < due:
             raise serializers.ValidationError(
                 {"late_until": [gettext("Must be after the due date.")]}
