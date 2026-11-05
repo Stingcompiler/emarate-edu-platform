@@ -103,9 +103,9 @@ class CourseViewSet(ScopedModelViewSet):
     write_capability = "courses.manage"
     delete_capability = "courses.delete"
     audit_name = "course"
-    filterset_fields = ["department", "program", "default_level", "is_active"]
+    filterset_fields = ["department", "program", "default_level", "default_term_order", "is_active"]
     search_fields = ["code", "name_ar", "name_en"]
-    ordering_fields = ["code", "default_level"]
+    ordering_fields = ["code", "default_level", "default_term_order"]
 
 
 class OfferingViewSet(ScopedModelViewSet):

@@ -19,7 +19,7 @@ import {
 } from "../../components/ui";
 import { api, ok } from "../../lib/api";
 import { num } from "../../lib/reports";
-import { count, N, fmtDate } from "../../lib/format";
+import { count, N, SEMESTERS, fmtDate, termName } from "../../lib/format";
 import { ALL } from "../../components/Pager";
 import { useConfirm } from "../../components/Confirm";
 import { useUnsavedChanges } from "../../lib/useUnsavedChanges";
@@ -159,6 +159,15 @@ export function Structure() {
     starts_on: "",
     ends_on: "",
   });
+  const yearName = (id: string) => years.data?.find((y) => String(y.id) === id)?.name;
+  /** Year and semester fill the name («الفصل الدراسي الأول 2026/2027») until it is typed over. */
+  const pickTerm = (change: Partial<typeof tForm>) => {
+    const next = { ...tForm, ...change };
+    const suggested = termName(tForm.order, yearName(tForm.academic_year));
+    if (!tForm.name_ar || tForm.name_ar === suggested)
+      next.name_ar = next.academic_year ? termName(next.order, yearName(next.academic_year)) : "";
+    setT(next);
+  };
   const addTerm = useMutation({
     mutationFn: async () => {
       const { data, error } = await api.POST("/api/v1/terms", {
@@ -318,39 +327,41 @@ export function Structure() {
           <YearForm onDone={() => void refresh("academic-years")} />
           <Card className="space-y-2 p-3">
             <p className="text-sm font-semibold">+ فصل</p>
-            <select
-              value={tForm.academic_year}
-              onChange={(e) => setT({ ...tForm, academic_year: e.target.value })}
-              aria-label="العام"
-              className={`${input} w-full`}
-            >
-              <option value="">العام الأكاديمي</option>
-              {(years.data ?? []).map((y) => (
-                <option key={y.id} value={y.id}>
-                  {y.name}
-                </option>
-              ))}
-            </select>
-            <div className="grid grid-cols-[minmax(0,1fr)_70px] gap-2">
-              <Labeled label="اسم الفصل">
-                <input
-                  value={tForm.name_ar}
-                  onChange={(e) => setT({ ...tForm, name_ar: e.target.value })}
-                  placeholder="ربيع 2027"
-                  className={input}
-                />
-              </Labeled>
-              <Labeled label="الترتيب">
-                <input
-                  type="number"
-                  min={1}
-                  max={3}
-                  value={tForm.order}
-                  onChange={(e) => setT({ ...tForm, order: Number(e.target.value) })}
-                  className={input}
-                />
-              </Labeled>
+            <div className="grid grid-cols-2 gap-2">
+              <select
+                value={tForm.academic_year}
+                onChange={(e) => pickTerm({ academic_year: e.target.value })}
+                aria-label="العام"
+                className={`${input} w-full`}
+              >
+                <option value="">العام الأكاديمي</option>
+                {(years.data ?? []).map((y) => (
+                  <option key={y.id} value={y.id}>
+                    {y.name}
+                  </option>
+                ))}
+              </select>
+              <select
+                value={tForm.order}
+                onChange={(e) => pickTerm({ order: Number(e.target.value) })}
+                aria-label="الفصل الدراسي"
+                className={`${input} w-full`}
+              >
+                {SEMESTERS.map((s) => (
+                  <option key={s.value} value={s.value}>
+                    {s.label}
+                  </option>
+                ))}
+              </select>
             </div>
+            <Labeled label="اسم الفصل">
+              <input
+                value={tForm.name_ar}
+                onChange={(e) => setT({ ...tForm, name_ar: e.target.value })}
+                placeholder="الفصل الدراسي الأول 2026/2027"
+                className={input}
+              />
+            </Labeled>
             <div className="grid grid-cols-2 gap-2">
               <Labeled label="البداية">
                 <input
@@ -1307,7 +1318,7 @@ function TermForm({ term, onDone }: { term: Schemas["Term"]; onDone: () => void 
       }}
       className="space-y-2 border-t border-border-soft bg-surface-alt/50 p-3"
     >
-      <div className="grid grid-cols-[minmax(0,1fr)_70px] gap-2">
+      <div className="grid gap-2 sm:grid-cols-2">
         <Labeled label="اسم الفصل">
           <input
             value={form.name_ar}
@@ -1315,15 +1326,18 @@ function TermForm({ term, onDone }: { term: Schemas["Term"]; onDone: () => void 
             className={INPUT}
           />
         </Labeled>
-        <Labeled label="الترتيب">
-          <input
-            type="number"
-            min={1}
-            max={3}
+        <Labeled label="الفصل الدراسي">
+          <select
             value={form.order}
             onChange={(e) => setForm({ ...form, order: e.target.value })}
             className={INPUT}
-          />
+          >
+            {SEMESTERS.map((s) => (
+              <option key={s.value} value={s.value}>
+                {s.label}
+              </option>
+            ))}
+          </select>
         </Labeled>
       </div>
       <div className="grid grid-cols-2 gap-2">

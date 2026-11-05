@@ -24,7 +24,7 @@ import { useCurrentTerm, useDepartment, useOfferings } from "../../lib/departmen
 import { can } from "../../lib/nav";
 import { num } from "../../lib/reports";
 import { ALL } from "../../components/Pager";
-import { count, N } from "../../lib/format";
+import { count, N, semester } from "../../lib/format";
 import { useConfirm } from "../../components/Confirm";
 
 /** Board: DesktopDeptDashboard «المواد والتعيينات» — assign teachers from the same screen (docs/02 §4.15). */
@@ -227,7 +227,8 @@ export function Offerings() {
                     {o.course_detail.name_ar}
                   </Link>
                   <span className="text-xs text-text-muted">
-                    شعبة <bdi>{o.section}</bdi> · المستوى {num(o.course_detail.default_level ?? 1)}
+                    شعبة <bdi>{o.section}</bdi> · المستوى {num(o.course_detail.default_level ?? 1)}{" "}
+                    · {semester(o.course_detail.default_term_order)}
                   </span>
                 </span>
               </span>
@@ -336,7 +337,14 @@ export function Offerings() {
           )
         )}
       </Card>
-      {manage && <NewOffering department={id} term={term.data!.id} onDone={refresh} />}
+      {manage && (
+        <NewOffering
+          department={id}
+          term={term.data!.id}
+          termOrder={term.data!.order}
+          onDone={refresh}
+        />
+      )}
     </PortalShell>
   );
 }
@@ -406,6 +414,7 @@ function EditOffering({
     name_ar: c.name_ar,
     credit_hours: c.credit_hours ?? 3,
     default_level: c.default_level ?? 1,
+    default_term_order: c.default_term_order ?? 1,
     section: offering.section,
   });
   const save = useMutation({
@@ -417,6 +426,7 @@ function EditOffering({
           name_ar: f.name_ar.trim(),
           credit_hours: f.credit_hours,
           default_level: f.default_level,
+          default_term_order: f.default_term_order,
         } as never,
       });
       if (!course.data) throw course.error;
@@ -437,7 +447,7 @@ function EditOffering({
         e.preventDefault();
         save.mutate();
       }}
-      className="col-span-full grid gap-2 rounded-xl bg-surface-alt p-3 sm:grid-cols-[110px_minmax(0,1fr)_90px_90px_70px_auto]"
+      className="col-span-full grid gap-2 rounded-xl bg-surface-alt p-3 sm:grid-cols-[110px_minmax(0,1fr)_90px_90px_110px_70px_auto]"
     >
       <Labeled label="رمز المادة">
         <input
@@ -476,6 +486,18 @@ function EditOffering({
           className="w-12 rounded border border-border bg-surface px-1 py-1"
         />
       </label>
+      <label className="flex items-center gap-1 text-xs text-text-muted">
+        فصل
+        <select
+          aria-label="الفصل الدراسي"
+          value={f.default_term_order}
+          onChange={(e) => setF({ ...f, default_term_order: Number(e.target.value) })}
+          className="min-w-0 rounded border border-border bg-surface px-1 py-1"
+        >
+          <option value={1}>الأول</option>
+          <option value={2}>الثاني</option>
+        </select>
+      </label>
       <Labeled label="الشعبة">
         <input
           dir="ltr"
@@ -499,10 +521,13 @@ function EditOffering({
 function NewOffering({
   department,
   term,
+  termOrder,
   onDone,
 }: {
   department: number;
   term: number;
+  /** The term's semester: a course added now defaults to it. */
+  termOrder: number;
   onDone: () => void;
 }) {
   const programs = useQuery({
@@ -516,6 +541,7 @@ function NewOffering({
     name_ar: "",
     credit_hours: 3,
     default_level: 1,
+    default_term_order: termOrder === 2 ? 2 : 1,
     program: "",
     section: "A",
   });
@@ -528,6 +554,7 @@ function NewOffering({
           name_ar: f.name_ar,
           credit_hours: f.credit_hours,
           default_level: f.default_level,
+          default_term_order: f.default_term_order,
           program: f.program ? Number(f.program) : null,
         } as never,
       });
@@ -546,7 +573,7 @@ function NewOffering({
   return (
     <section id="new-offering" className="mt-6">
       <SectionLabel>مادة جديدة هذا الفصل</SectionLabel>
-      <Card className="grid gap-2 p-4 sm:grid-cols-[110px_minmax(0,1fr)_minmax(0,1fr)_90px_90px_70px_auto]">
+      <Card className="grid gap-2 p-4 sm:grid-cols-[110px_minmax(0,1fr)_minmax(0,1fr)_90px_90px_110px_70px_auto]">
         <input
           dir="ltr"
           value={f.code}
@@ -566,7 +593,7 @@ function NewOffering({
           <select
             value={f.program}
             onChange={(e) => setF({ ...f, program: e.target.value })}
-            className={input}
+            className={`${input} w-full min-w-0`}
           >
             <option value="">كل البرامج</option>
             {(programs.data ?? []).map((p) => (
@@ -597,6 +624,18 @@ function NewOffering({
             onChange={(e) => setF({ ...f, default_level: Number(e.target.value) })}
             className="w-12 rounded border border-border px-1 py-1"
           />
+        </label>
+        <label className="flex items-center gap-1 text-xs text-text-muted">
+          فصل
+          <select
+            aria-label="الفصل الدراسي"
+            value={f.default_term_order}
+            onChange={(e) => setF({ ...f, default_term_order: Number(e.target.value) })}
+            className="min-w-0 rounded border border-border bg-surface px-1 py-1"
+          >
+            <option value={1}>الأول</option>
+            <option value={2}>الثاني</option>
+          </select>
         </label>
         <input
           dir="ltr"

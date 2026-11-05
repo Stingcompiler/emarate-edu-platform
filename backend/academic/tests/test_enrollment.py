@@ -48,6 +48,44 @@ def test_bulk_enroll_is_idempotent(api, manager, term, it_program, it_offering, 
     assert AuditLog.objects.filter(action="enrollment.bulk").count() == 2
 
 
+def test_bulk_enroll_takes_only_the_terms_semester(
+    api, manager, term, it_program, it_offering, cohort
+):
+    """A level has two semesters: the first term enrolls only first-semester courses."""
+    second = Course.objects.create(
+        department=it_program.department,
+        program=it_program,
+        code="IT103",
+        name_ar="البرمجة الكائنية",
+        default_term_order=2,
+    )
+    CourseOffering.objects.create(course=second, term=term)  # offered early, still semester 2
+    body = {"term": term.pk, "program": it_program.pk, "level": 1}
+    done = api(manager).post("/api/v1/enrollments/bulk", body).data
+    assert done["offerings"] == 1
+    assert not Enrollment.objects.filter(offering__course=second).exists()
+
+
+@pytest.mark.parametrize("value", [0, 3])
+def test_course_semester_is_one_or_two(api, manager, it_dept, value):
+    body = {
+        "department": it_dept.pk,
+        "code": "IT999",
+        "name_ar": "مادة",
+        "default_term_order": value,
+    }
+    made = api(manager).post("/api/v1/courses", body)
+    assert made.status_code == 400
+    assert "default_term_order" in made.data["errors"]
+
+
+def test_course_semester_two_is_kept(api, manager, it_dept):
+    body = {"department": it_dept.pk, "code": "IT998", "name_ar": "مادة", "default_term_order": 2}
+    made = api(manager).post("/api/v1/courses", body)
+    assert made.status_code == 201, made.data
+    assert Course.objects.get(code="IT998").default_term_order == 2
+
+
 def test_bulk_enroll_outside_scope_is_forbidden(api, manager, term, ba_program, ba_offering):
     body = {"term": term.pk, "program": ba_program.pk, "level": 1}
     assert api(manager).post("/api/v1/enrollments/bulk", body).status_code == 403

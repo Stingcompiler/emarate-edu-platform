@@ -56,6 +56,12 @@ class TermSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ["is_current", "name"]
 
+    def validate_order(self, value):
+        # Two semesters a year, no summer term (owner, 2026-11-05).
+        if value not in (1, 2):
+            raise serializers.ValidationError(gettext("The semester is 1 or 2."))
+        return value
+
     def validate(self, attrs):
         return _dates_in_order(self, attrs)
 
@@ -77,6 +83,11 @@ class CourseSerializer(serializers.ModelSerializer):
             "is_active",
         ]
         read_only_fields = ["name"]
+
+    def validate_default_term_order(self, value):
+        if value not in (1, 2):
+            raise serializers.ValidationError(gettext("The semester is 1 or 2."))
+        return value
 
     def validate(self, attrs):
         department = attrs.get("department", getattr(self.instance, "department", None))
@@ -124,7 +135,16 @@ class InstructorAddSerializer(serializers.Serializer):
 class CourseSummarySerializer(serializers.ModelSerializer):
     class Meta:
         model = Course
-        fields = ["id", "code", "name_ar", "name_en", "name", "credit_hours", "default_level"]
+        fields = [
+            "id",
+            "code",
+            "name_ar",
+            "name_en",
+            "name",
+            "credit_hours",
+            "default_level",
+            "default_term_order",
+        ]
 
 
 class OfferingSerializer(serializers.ModelSerializer):

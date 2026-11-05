@@ -1008,6 +1008,9 @@ msgstr "أبعاد الصورة كبيرة جدًا. اختر صورة أصغر.
 msgid "The end must be after the start."
 msgstr "يجب أن يكون تاريخ النهاية بعد تاريخ البداية."
 
+msgid "The semester is 1 or 2."
+msgstr "الفصل الدراسي إما الأول (1) أو الثاني (2)."
+
 msgid "Only the site team changes this picture."
 msgstr "لا يعدّل هذه الصورة إلا فريق الموقع."
 
