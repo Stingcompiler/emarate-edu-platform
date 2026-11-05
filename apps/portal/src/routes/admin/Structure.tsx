@@ -90,6 +90,16 @@ export function Structure() {
     if (key === "departments" || key === "programs") setSaved(true);
     return client.invalidateQueries({ queryKey: [key] });
   };
+  const toggleDept = useMutation({
+    mutationFn: async ({ id, is_active }: { id: number; is_active: boolean }) => {
+      const { data, error } = await api.PATCH("/api/v1/departments/{id}", {
+        params: { path: { id } },
+        body: { is_active },
+      });
+      if (!data) throw error;
+    },
+    onSuccess: () => void refresh("departments"),
+  });
   const openIntake = useMutation({
     mutationFn: (program: number) => addIntake(cycle!.id, program),
     onSuccess: () => {
@@ -141,7 +151,8 @@ export function Structure() {
       void refresh("terms");
     },
   });
-  const err = setCurrent.error ?? addDept.error ?? addTerm.error ?? openIntake.error;
+  const err =
+    setCurrent.error ?? addDept.error ?? addTerm.error ?? openIntake.error ?? toggleDept.error;
   // min-w-0 w-full: a field never sets its row's width (a text field's default is ~200px).
   const input = "min-h-10 w-full min-w-0 rounded-lg border border-border bg-surface px-3 text-sm";
   return (
@@ -355,25 +366,55 @@ export function Structure() {
               قسم {dept?.name_ar ?? ""} — البرامج · {num(deptPrograms.length)}
             </SectionLabel>
             {dept && (
-              <Button
-                variant="secondary"
-                aria-expanded={editingDept}
-                className="mb-2 min-h-10 shrink-0 px-3 text-sm"
-                onClick={() => setEditingDept(!editingDept)}
-              >
-                <Pencil size={16} aria-hidden />
-                تعديل القسم
-              </Button>
+              <span className="mb-2 flex shrink-0 flex-wrap gap-2">
+                {/* Stopping is the temporary way out (owner, 2026-11-05): one tap, undone the same
+                    way; deleting or merging is in «تعديل القسم». */}
+                <Button
+                  variant="ghost"
+                  className="min-h-10 px-3 text-sm"
+                  disabled={toggleDept.isPending}
+                  onClick={async () => {
+                    const stop = dept.is_active !== false;
+                    if (
+                      await confirm({
+                        title: stop
+                          ? `إيقاف «${dept.name_ar}» مؤقتًا؟`
+                          : `إعادة تفعيل «${dept.name_ar}»؟`,
+                        body: stop
+                          ? "يختفي القسم وبرامجه من الموقع ومن التقديم، وتبقى مواده وطلابه وسجلاته كما هي. تعيد تفعيله متى شئت."
+                          : "يعود القسم وبرامجه النشطة إلى الموقع وإلى التقديم.",
+                        confirm: stop ? "إيقاف مؤقت" : "إعادة التفعيل",
+                        tone: "primary",
+                      })
+                    )
+                      toggleDept.mutate({ id: dept.id, is_active: !stop });
+                  }}
+                >
+                  {dept.is_active === false ? "إعادة تفعيل" : "إيقاف مؤقت"}
+                </Button>
+                <Button
+                  variant="secondary"
+                  aria-expanded={editingDept}
+                  data-opener="dept"
+                  className="min-h-10 px-3 text-sm"
+                  onClick={() => setEditingDept(!editingDept)}
+                >
+                  <Pencil size={16} aria-hidden />
+                  تعديل القسم
+                </Button>
+              </span>
             )}
           </div>
           {dept && editingDept && (
             <DepartmentForm
               key={dept.id}
               department={dept}
+              departments={departments.data ?? []}
               onDone={(deleted) => {
                 setEditingDept(false);
                 if (deleted) setPicked(null);
                 void refresh("departments");
+                void refresh("programs");
               }}
             />
           )}
@@ -698,9 +739,11 @@ function useRemove(path: "/api/v1/departments/{id}" | "/api/v1/programs/{id}", i
  */
 function DepartmentForm({
   department,
+  departments,
   onDone,
 }: {
   department: Schemas["Department"];
+  departments: Schemas["Department"][];
   onDone: (deleted?: boolean) => void;
 }) {
   const confirm = useConfirm();
@@ -725,9 +768,8 @@ function DepartmentForm({
       onDone();
     },
   });
-  const remove = useRemove("/api/v1/departments/{id}", department.id);
   const missing = !form.code.trim() || !form.name_ar.trim();
-  const error = save.error ?? remove.error;
+  const error = save.error;
   return (
     <Card className="mb-3">
       <form
@@ -801,25 +843,10 @@ function DepartmentForm({
             label="القسم نشط"
           />
         </div>
+        <DepartmentEnd department={department} departments={departments} onGone={onDone} />
         {error ? <Notice>{problemMessage(error)}</Notice> : null}
         <div className="flex flex-wrap items-center gap-2">
-          <Button
-            variant="ghost"
-            className="me-auto text-danger-strong"
-            disabled={remove.isPending}
-            onClick={async () => {
-              if (
-                await confirm({
-                  title: `حذف قسم «${department.name_ar}»؟`,
-                  body: "يُحذف القسم فقط إن لم يكن له برامج أو مواد أو طلاب أو أعضاء. وإلا فأوقفه بدل حذفه.",
-                  confirm: "حذف القسم",
-                })
-              )
-                remove.mutate(undefined, { onSuccess: () => onDone(true) });
-            }}
-          >
-            حذف القسم
-          </Button>
+          <span className="me-auto" />
           <Button variant="secondary" onClick={() => onDone()}>
             إلغاء
           </Button>
@@ -1298,4 +1325,169 @@ function TermForm({ term, onDone }: { term: Schemas["Term"]; onDone: () => void 
       </div>
     </form>
   );
+}
+
+/**
+ * What is on a department and the ways out (owner, 2026-11-05: «القسم لا يمكن حذفه إذا كان
+ * يحتوي على برامج… كيف يمكن تسهيل حذفه أو تعطيله مؤقتًا»): merge it into another department
+ * (its programmes and teaching members move; it is deleted, or stopped when the audit log
+ * holds its history), or delete it with its programmes when none is in use. Stopping it is
+ * the switch above, and «إيقاف مؤقت» beside its name.
+ */
+function DepartmentEnd({
+  department,
+  departments,
+  onGone,
+}: {
+  department: Schemas["Department"];
+  departments: Schemas["Department"][];
+  onGone: (deleted?: boolean) => void;
+}) {
+  const confirm = useConfirm();
+  const usage = useQuery({
+    queryKey: ["department-usage", department.id],
+    queryFn: async () =>
+      ok(
+        await api.GET("/api/v1/departments/{id}/usage", {
+          params: { path: { id: department.id } },
+        }),
+      ),
+  });
+  const [into, setInto] = useState("");
+  const merge = useMutation({
+    mutationFn: async () => {
+      const { data, error } = await api.POST("/api/v1/departments/{id}/merge", {
+        params: { path: { id: department.id } },
+        body: { into: Number(into) },
+      });
+      if (!data) throw error;
+      return data.result;
+    },
+    onSuccess: () => onGone(true),
+  });
+  const removeAll = useMutation({
+    mutationFn: async () => {
+      const { error, response } = await api.DELETE("/api/v1/departments/{id}", {
+        params: { path: { id: department.id }, query: { with_programs: "1" } as never },
+      });
+      if (!response.ok) throw error;
+    },
+    onSuccess: () => onGone(true),
+  });
+  const u = usage.data;
+  if (!u) return null;
+  const busy = u.programs.filter((p) => !p.free);
+  const roles = u.roles.map((r) => `${r.role}: ${r.user}`).join("، ");
+  const others = departments.filter((d) => d.id !== department.id);
+  const target = others.find((d) => String(d.id) === into);
+  const blocked = [
+    u.courses ? count(u.courses, N.course) : "",
+    u.students ? `${num(u.students)} طالب` : "",
+    busy.length ? `${count(busy.length, N.program)} عليها طلاب أو مواد أو طلبات` : "",
+  ].filter(Boolean);
+  return (
+    <div className="space-y-3 rounded-lg border border-border-soft p-3 text-sm">
+      <p className="font-semibold">ما في القسم</p>
+      <ul className="space-y-1 text-text-muted">
+        <li>
+          {u.programs.length
+            ? `البرامج: ${u.programs.map((p) => p.name_ar).join("، ")}`
+            : "لا برامج"}
+        </li>
+        {u.courses > 0 && <li>المواد: {num(u.courses)}</li>}
+        {u.students > 0 && <li>الطلاب: {num(u.students)}</li>}
+        {u.members > 0 && <li>أعضاء هيئة التدريس: {num(u.members)}</li>}
+        {roles && <li>الأدوار: {roles}</li>}
+      </ul>
+      {error(merge.error ?? removeAll.error)}
+      {u.can_merge ? (
+        <div className="flex flex-wrap items-end gap-2">
+          <label className={`${LABEL} min-w-48 flex-1`}>
+            دمج في قسم آخر
+            <select value={into} onChange={(e) => setInto(e.target.value)} className={INPUT}>
+              <option value="">اختر القسم…</option>
+              {others.map((d) => (
+                <option key={d.id} value={d.id}>
+                  {d.name_ar}
+                </option>
+              ))}
+            </select>
+          </label>
+          <Button
+            variant="secondary"
+            className="min-h-10"
+            disabled={!target || merge.isPending}
+            why={target ? undefined : "اختر القسم أولًا"}
+            onClick={async () => {
+              if (
+                target &&
+                (await confirm({
+                  title: `دمج «${department.name_ar}» في «${target.name_ar}»؟`,
+                  body: [
+                    u.programs.length
+                      ? `تنتقل البرامج (${u.programs.map((p) => p.name_ar).join("، ")}) وأعضاء هيئة التدريس إلى «${target.name_ar}».`
+                      : `ينتقل أعضاء هيئة التدريس إلى «${target.name_ar}».`,
+                    roles ? `تُلغى أدوار هذا القسم: ${roles}.` : "",
+                    u.history
+                      ? "للقسم سجل في التدقيق، فيبقى موقوفًا مخفيًا بدل حذفه."
+                      : "ثم يُحذف القسم، ويحوَّل رابطه في الموقع إلى القسم الجديد.",
+                  ]
+                    .filter(Boolean)
+                    .join(" "),
+                  confirm: "دمج القسم",
+                  tone: "primary",
+                }))
+              )
+                merge.mutate();
+            }}
+          >
+            دمج
+          </Button>
+        </div>
+      ) : (
+        <p className="text-xs text-text-muted">
+          لا يُدمج ولا يُحذف وفيه {blocked.join(" و")}؛ أوقفه مؤقتًا بدلًا من ذلك، أو انقل هذه
+          أولًا.
+        </p>
+      )}
+      {u.can_delete && (
+        <Button
+          variant="ghost"
+          className="text-danger-strong"
+          disabled={removeAll.isPending}
+          onClick={async () => {
+            if (
+              await confirm({
+                title: u.programs.length
+                  ? `حذف «${department.name_ar}» وبرامجه (${num(u.programs.length)})؟`
+                  : `حذف قسم «${department.name_ar}»؟`,
+                body: [
+                  u.programs.length
+                    ? `تُحذف معه البرامج: ${u.programs.map((p) => p.name_ar).join("، ")}.`
+                    : "",
+                  roles ? `وتُلغى أدوار هذا القسم: ${roles}.` : "",
+                  "لا يمكن التراجع.",
+                ]
+                  .filter(Boolean)
+                  .join(" "),
+                confirm: "حذف نهائيًا",
+              })
+            )
+              removeAll.mutate();
+          }}
+        >
+          {u.programs.length ? "حذف القسم مع برامجه" : "حذف القسم"}
+        </Button>
+      )}
+      {u.can_merge && !u.can_delete && (
+        <p className="text-xs text-text-muted">
+          للقسم سجل في التدقيق، والسجل لا يُحذف: يُدمج أو يُوقف، ولا يُحذف.
+        </p>
+      )}
+    </div>
+  );
+}
+
+function error(e: unknown) {
+  return e ? <Notice>{problemMessage(e)}</Notice> : null;
 }

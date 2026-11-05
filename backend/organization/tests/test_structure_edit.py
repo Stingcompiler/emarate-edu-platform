@@ -174,3 +174,97 @@ def test_r29_years_and_terms_with_reversed_dates_get_a_message(api, make_user, t
         f"/api/v1/terms/{term.pk}", {"name_ar": "خريف 2026 (معدّل)"}, format="json"
     )
     assert renamed.status_code == 200
+
+
+# ── merging and deleting a department (owner 2026-11-05) ─────────────────────────────────
+
+
+def test_a_department_is_merged_into_another(api, make_user, college, it_dept):
+    from academic.models import DepartmentMembership
+    from organization.models import Program
+
+    wrong = Department.objects.create(college=college, code="NUR", name_ar="بكالوريوس التمريض")
+    program = Program.objects.create(
+        department=wrong,
+        code="BNUR",
+        name_ar="بكالوريوس التمريض",
+        degree="bachelor",
+        levels_count=4,
+        duration_terms=8,
+    )
+    teacher = make_user(Role.TEACHER)
+    DepartmentMembership.objects.create(department=wrong, user=teacher, kind="teacher")
+    make_user(Role.DEPARTMENT_MANAGER, department=wrong)
+    admin = api(make_user(Role.SYSTEM_ADMIN))
+    found = admin.get(f"/api/v1/departments/{wrong.pk}/usage").data
+    assert found["can_merge"] and found["can_delete"] and len(found["roles"]) == 1
+    assert (
+        api(make_user(Role.ACADEMIC_AFFAIRS))
+        .post(f"/api/v1/departments/{wrong.pk}/merge", {"into": it_dept.pk})
+        .status_code
+        == 403
+    )
+    merged = admin.post(f"/api/v1/departments/{wrong.pk}/merge", {"into": it_dept.pk})
+    assert merged.status_code == 200 and merged.data["result"] == "deleted"
+    program.refresh_from_db()
+    assert program.department_id == it_dept.pk
+    assert not Department.objects.filter(pk=wrong.pk).exists()
+    assert DepartmentMembership.objects.filter(department=it_dept, user=teacher).exists()
+    assert Redirect.objects.get(from_path="/ar/departments/NUR/").to_path == "/ar/departments/IT/"
+    assert AuditLog.objects.filter(action="department.merge").exists()
+
+
+def test_a_department_in_use_is_neither_merged_nor_deleted(
+    api, make_user, it_dept, ba_dept, it_program, make_student
+):
+    make_student(it_program, "26-IT-0990")
+    admin = api(make_user(Role.SYSTEM_ADMIN))
+    found = admin.get(f"/api/v1/departments/{it_dept.pk}/usage").data
+    assert not found["can_merge"] and found["programs"][0]["students"] == 1
+    merged = admin.post(f"/api/v1/departments/{it_dept.pk}/merge", {"into": ba_dept.pk})
+    assert merged.status_code == 409 and merged.data["code"] == "in_use"
+    assert admin.delete(f"/api/v1/departments/{it_dept.pk}?with_programs=1").status_code == 409
+
+
+def test_a_department_goes_with_its_free_programmes(api, make_user, college):
+    from organization.models import Program
+
+    wrong = Department.objects.create(college=college, code="X1", name_ar="تجريبي")
+    Program.objects.create(
+        department=wrong,
+        code="PX1",
+        name_ar="برنامج تجريبي",
+        degree="diploma",
+        levels_count=2,
+        duration_terms=4,
+    )
+    admin = api(make_user(Role.SYSTEM_ADMIN))
+    assert admin.delete(f"/api/v1/departments/{wrong.pk}").status_code == 409  # plain: in use
+    assert admin.delete(f"/api/v1/departments/{wrong.pk}?with_programs=1").status_code == 204
+    assert not Program.objects.filter(code="PX1").exists()
+
+
+def test_a_department_with_history_is_stopped_not_deleted(api, make_user, college, it_dept):
+    from audit.services import RequestMeta, record
+    from organization.models import Program
+
+    wrong = Department.objects.create(college=college, code="H1", name_ar="بتاريخ")
+    Program.objects.create(
+        department=wrong,
+        code="PH1",
+        name_ar="برنامج",
+        degree="diploma",
+        levels_count=2,
+        duration_terms=4,
+    )
+    admin_user = make_user(Role.SYSTEM_ADMIN)
+    record(RequestMeta(actor=admin_user), "intake.create", wrong, department_id=wrong.pk)
+    admin = api(admin_user)
+    found = admin.get(f"/api/v1/departments/{wrong.pk}/usage").data
+    assert found["history"] == 1 and not found["can_delete"] and found["can_merge"]
+    deleted = admin.delete(f"/api/v1/departments/{wrong.pk}?with_programs=1")
+    assert deleted.status_code == 409 and deleted.data["code"] == "has_history"
+    merged = admin.post(f"/api/v1/departments/{wrong.pk}/merge", {"into": it_dept.pk})
+    assert merged.data["result"] == "stopped"
+    wrong.refresh_from_db()
+    assert wrong.is_active is False and not wrong.programs.exists()
