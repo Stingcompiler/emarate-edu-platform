@@ -632,3 +632,37 @@ def test_an_application_decided_after_the_expiry_job_picked_it_keeps_the_decisio
     assert Application.objects.get(pk=picked.pk).status == "eligible"
     assert Application.objects.get(pk=expiring.pk).status == "expired"
     assert AuditLog.objects.filter(action="admissions.expire").count() == 1
+
+
+def test_a_cycle_is_edited_and_deleted_until_someone_applies(intake, make_user):
+    """Owner, 2026-11-05: «حذف وتعديل الدورة». Edit any time; delete (with its programmes) only
+    while it has no applications — then stop it; the system supervisor never deletes."""
+    from audit.models import AuditLog
+    from contacts.models import Contact
+
+    head = make_user(Role.HEAD_REGISTRAR)
+    supervisor = make_user(Role.SYSTEM_SUPERVISOR)
+    url = f"/api/v1/admission-cycles/{intake.cycle_id}"
+    client = APIClient()
+    client.force_authenticate(head)
+    edited = client.patch(url, {"name": "قبول 2026/2027", "is_active": False}, format="json")
+    assert edited.status_code == 200, edited.data
+    assert (edited.data["name"], edited.data["is_active"]) == ("قبول 2026/2027", False)
+    backwards = client.patch(url, {"closes_at": intake.cycle.opens_at.isoformat()}, format="json")
+    assert backwards.status_code == 400 and "closes_at" in backwards.data["errors"]
+
+    application = Application.objects.create(
+        reference_no="APP-CYCLE",
+        contact=Contact.objects.create(name="متقدم", email="cycle@example.test"),
+        intake=intake,
+        full_name="متقدم",
+    )
+    assert client.delete(url).status_code == 409
+    application.delete()
+    other = APIClient()
+    other.force_authenticate(supervisor)
+    assert other.delete(url).status_code == 403
+    assert client.delete(url).status_code == 204
+    assert not AdmissionCycle.objects.exists() and not ProgramIntake.objects.exists()
+    entry = AuditLog.objects.get(action="admissions.cycle_delete")
+    assert entry.old["programs"] == ["BIT"]

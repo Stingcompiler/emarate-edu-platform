@@ -1163,3 +1163,9 @@ msgstr "رُفِّع الطلاب في نهاية هذا الفصل من قبل.
 
 msgid "Invalid department."
 msgstr "قسم غير صالح."
+
+msgid "The cycle must close after it opens."
+msgstr "يجب أن تُغلق الدورة بعد أن تُفتح."
+
+msgid "Applications exist in this cycle; stop it instead."
+msgstr "في هذه الدورة طلبات؛ أوقفها بدل حذفها."

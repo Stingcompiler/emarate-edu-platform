@@ -1,6 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Pencil, Trash2 } from "lucide-react";
 import { useState } from "react";
 
+import { useConfirm } from "../../components/Confirm";
 import { PortalShell } from "../../components/PortalShell";
 import {
   Button,
@@ -13,12 +15,18 @@ import {
   StatusBadge,
 } from "../../components/ui";
 import { api, ok } from "../../lib/api";
+import { hasRole, useMe } from "../../lib/auth";
 import { count, N, fmtDate } from "../../lib/format";
 import { ALL } from "../../components/Pager";
 
 /** Board: HeadRegistrarCycles (phone); desktop derived — cycles + a table of intakes. */
 export function Cycles() {
   const client = useQueryClient();
+  const me = useMe();
+  const confirm = useConfirm();
+  // Deleting is the admin's and the head registrar's; the system supervisor never deletes.
+  const deletes = hasRole(me.data, "system_admin", "head_registrar");
+  const [editing, setEditing] = useState(false);
   const cycles = useQuery({
     queryKey: ["admissions", "cycles"],
     queryFn: async () =>
@@ -116,6 +124,29 @@ export function Cycles() {
     },
   });
   const used = new Set((intakes.data ?? []).map((i) => i.program));
+  const applied = (intakes.data ?? []).reduce((n, i) => n + (i.applications_count ?? 0), 0);
+  const removeCycle = useMutation({
+    mutationFn: async (id: number) => {
+      const { error, response } = await api.DELETE("/api/v1/admission-cycles/{id}", {
+        params: { path: { id } },
+      });
+      if (!response.ok) throw error;
+    },
+    onSuccess: () => {
+      setPicked(null);
+      setEditing(false);
+      void client.invalidateQueries({ queryKey: ["admissions"] });
+    },
+  });
+  const removeIntake = useMutation({
+    mutationFn: async (id: number) => {
+      const { error, response } = await api.DELETE("/api/v1/intakes/{id}", {
+        params: { path: { id } },
+      });
+      if (!response.ok) throw error;
+    },
+    onSuccess: () => client.invalidateQueries({ queryKey: ["admissions", "intakes"] }),
+  });
   return (
     <PortalShell
       title="دورات القبول"
@@ -174,17 +205,66 @@ export function Cycles() {
       </details>
       {cycle && (
         <>
-          <Card className="mt-4 flex flex-wrap gap-x-6 gap-y-1 p-4 text-sm">
-            <span>
-              يفتح: <b>{fmtDate(cycle.opens_at)}</b>
-            </span>
-            <span>
-              يُغلق: <b>{fmtDate(cycle.closes_at)}</b>
-            </span>
-            <StatusBadge
-              status={cycle.is_active ? "approved" : "closed"}
-              label={cycle.is_active ? "جارية" : "مغلقة"}
-            />
+          <Card className="mt-4 p-4 text-sm">
+            <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
+              <span>
+                يفتح: <b>{fmtDate(cycle.opens_at)}</b>
+              </span>
+              <span>
+                يُغلق: <b>{fmtDate(cycle.closes_at)}</b>
+              </span>
+              <StatusBadge
+                status={cycle.is_active ? "approved" : "closed"}
+                label={cycle.is_active ? "جارية" : "موقوفة"}
+              />
+              <span className="ms-auto flex flex-wrap gap-2">
+                <Button
+                  variant="secondary"
+                  className="min-h-10 px-3 sm:min-h-9"
+                  aria-expanded={editing}
+                  onClick={() => setEditing(!editing)}
+                >
+                  <Pencil size={16} aria-hidden />
+                  تعديل
+                </Button>
+                {deletes && (
+                  <Button
+                    variant="ghost"
+                    className="min-h-10 px-3 text-danger-strong sm:min-h-9"
+                    disabled={applied > 0 || removeCycle.isPending}
+                    why={applied > 0 ? "في الدورة طلبات؛ أوقفها من «تعديل» بدل حذفها" : undefined}
+                    onClick={async () => {
+                      if (
+                        await confirm({
+                          title: `حذف الدورة «${cycle.name}»؟`,
+                          body: `تُحذف معها برامجها (${(intakes.data?.length ?? 0).toLocaleString("ar-u-nu-latn")}). لا طلبات فيها، ولا يمكن التراجع.`,
+                          confirm: "حذف الدورة",
+                        })
+                      )
+                        removeCycle.mutate(cycle.id);
+                    }}
+                  >
+                    <Trash2 size={16} aria-hidden />
+                    حذف
+                  </Button>
+                )}
+              </span>
+            </div>
+            {editing && (
+              <CycleForm
+                key={cycle.id}
+                cycle={cycle}
+                onDone={() => {
+                  setEditing(false);
+                  void client.invalidateQueries({ queryKey: ["admissions", "cycles"] });
+                }}
+              />
+            )}
+            {removeCycle.isError && (
+              <div className="mt-3">
+                <Notice>{problemMessage(removeCycle.error)}</Notice>
+              </div>
+            )}
           </Card>
           <SectionLabel>
             البرامج في هذه الدورة · {(intakes.data?.length ?? 0).toLocaleString("ar-u-nu-latn")}
@@ -265,14 +345,36 @@ export function Cycles() {
                 </span>
 
                 {/* Top-aligned beside the name: centred, it sat over the seats percentage. */}
-                <Button
-                  variant={i.is_open ? "secondary" : "primary"}
-                  className="min-h-10 shrink-0 px-3 sm:min-h-9"
-                  disabled={toggle.isPending}
-                  onClick={() => toggle.mutate({ id: i.id, is_open: !i.is_open })}
-                >
-                  {i.is_open ? "إغلاق" : "فتح"}
-                </Button>
+                <span className="flex shrink-0 flex-col items-end gap-1">
+                  <Button
+                    variant={i.is_open ? "secondary" : "primary"}
+                    className="min-h-10 px-3 sm:min-h-9"
+                    disabled={toggle.isPending}
+                    onClick={() => toggle.mutate({ id: i.id, is_open: !i.is_open })}
+                  >
+                    {i.is_open ? "إغلاق" : "فتح"}
+                  </Button>
+                  {/* A programme added by mistake leaves the cycle while no one has applied. */}
+                  {deletes && !i.applications_count && (
+                    <Button
+                      variant="ghost"
+                      className="min-h-10 px-2 text-xs text-danger-strong sm:min-h-8"
+                      disabled={removeIntake.isPending}
+                      onClick={async () => {
+                        if (
+                          await confirm({
+                            title: `إزالة «${i.program_name}» من الدورة؟`,
+                            body: "لا طلبات عليه؛ يمكن إضافته مجددًا.",
+                            confirm: "إزالة",
+                          })
+                        )
+                          removeIntake.mutate(i.id);
+                      }}
+                    >
+                      إزالة
+                    </Button>
+                  )}
+                </span>
               </div>
             ))}
           </Card>
@@ -289,13 +391,102 @@ export function Cycles() {
               <p className="text-sm text-text-muted">كل البرامج مضافة إلى هذه الدورة.</p>
             )}
           </div>
-          {(toggle.isError || add.isError || linkForm.isError) && (
+          {(toggle.isError || add.isError || linkForm.isError || removeIntake.isError) && (
             <div className="mt-3">
-              <Notice>{problemMessage(toggle.error ?? add.error ?? linkForm.error)}</Notice>
+              <Notice>
+                {problemMessage(toggle.error ?? add.error ?? linkForm.error ?? removeIntake.error)}
+              </Notice>
             </div>
           )}
         </>
       )}
     </PortalShell>
+  );
+}
+
+type Cycle = { id: number; name: string; opens_at: string; closes_at: string; is_active?: boolean };
+
+/** A cycle's name, window and state, corrected in place (owner, 2026-11-05). */
+function CycleForm({ cycle, onDone }: { cycle: Cycle; onDone: () => void }) {
+  const [f, setF] = useState({
+    name: cycle.name,
+    opens: cycle.opens_at.slice(0, 10),
+    closes: cycle.closes_at.slice(0, 10),
+    is_active: cycle.is_active ?? true,
+  });
+  const save = useMutation({
+    mutationFn: async () => {
+      const { data, error } = await api.PATCH("/api/v1/admission-cycles/{id}", {
+        params: { path: { id: cycle.id } },
+        body: {
+          name: f.name.trim(),
+          opens_at: new Date(f.opens).toISOString(),
+          closes_at: new Date(f.closes).toISOString(),
+          is_active: f.is_active,
+        },
+      });
+      if (!data) throw error;
+    },
+    onSuccess: onDone,
+  });
+  const missing = !f.name.trim() || !f.opens || !f.closes;
+  return (
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        save.mutate();
+      }}
+      className="mt-3 grid gap-2 border-t border-border-soft pt-3 sm:grid-cols-[minmax(0,1fr)_170px_170px]"
+    >
+      <Labeled label="اسم الدورة">
+        <input
+          value={f.name}
+          onChange={(e) => setF({ ...f, name: e.target.value })}
+          className="min-h-10 w-full rounded-lg border border-border bg-surface px-3"
+        />
+      </Labeled>
+      <Labeled label="يفتح">
+        <input
+          type="date"
+          value={f.opens}
+          onChange={(e) => setF({ ...f, opens: e.target.value })}
+          className="min-h-10 w-full rounded-lg border border-border bg-surface px-2"
+        />
+      </Labeled>
+      <Labeled label="يُغلق">
+        <input
+          type="date"
+          value={f.closes}
+          onChange={(e) => setF({ ...f, closes: e.target.value })}
+          className="min-h-10 w-full rounded-lg border border-border bg-surface px-2"
+        />
+      </Labeled>
+      <label className="flex min-h-11 items-center gap-2 text-sm sm:col-span-3">
+        <input
+          type="checkbox"
+          className="size-4 accent-primary"
+          checked={f.is_active}
+          onChange={(e) => setF({ ...f, is_active: e.target.checked })}
+        />
+        الدورة جارية (أزل العلامة لإيقافها دون حذف)
+      </label>
+      {save.isError && (
+        <div className="sm:col-span-3">
+          <Notice>{problemMessage(save.error)}</Notice>
+        </div>
+      )}
+      <div className="flex gap-2 sm:col-span-3">
+        <Button
+          type="submit"
+          disabled={missing || save.isPending}
+          why={missing ? "أكمل الاسم والتاريخين" : undefined}
+        >
+          حفظ
+        </Button>
+        <Button type="button" variant="secondary" onClick={onDone}>
+          إلغاء
+        </Button>
+      </div>
+    </form>
   );
 }

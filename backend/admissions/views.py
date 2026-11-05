@@ -128,6 +128,28 @@ class CycleViewSet(_Audited):
     serializer_class = CycleSerializer
     audit_name = "cycle"
 
+    def perform_destroy(self, instance):
+        """A cycle goes with its programmes only while no one has applied in it; after that it
+        is stopped (``is_active``), not deleted (owner, 2026-11-05). Deleting is the admin's or
+        the head registrar's, never the system supervisor's (rbac.DELETING)."""
+        from core.errors import Conflict
+
+        if Application.objects.filter(intake__cycle=instance).exists():
+            raise Conflict(
+                gettext("Applications exist in this cycle; stop it instead."), code="in_use"
+            )
+        with transaction.atomic():
+            record(
+                _meta(self.request),
+                "admissions.cycle_delete",
+                instance,
+                old={
+                    "name": instance.name,
+                    "programs": list(instance.intakes.values_list("program__code", flat=True)),
+                },
+            )
+            instance.delete()  # its programmes (intakes) go with it
+
     def get_queryset(self):
         # Department roles see the cycles their departments' programmes open in, nothing of
         # the others (docs/03 §3.6: «دورات القبول … مقصورة على قسمه»; review 2026-10-25 R13).
