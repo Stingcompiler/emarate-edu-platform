@@ -78,7 +78,9 @@ self.addEventListener("push", (event) => {
       self.registration.showNotification(title, {
         body: data.body || "",
         icon: "/api/public/portal-icon/192.png",
-        badge: "/icons/icon-192.png",
+        // White on transparent, cut from the college's logo: Android draws the badge in one
+        // colour from its alpha, so the full-colour icon showed as a white square.
+        badge: "/api/public/portal-icon/badge.png",
         tag: data.tag,
         lang: "ar",
         dir: "rtl",
