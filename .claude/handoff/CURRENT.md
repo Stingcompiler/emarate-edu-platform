@@ -1,323 +1,77 @@
-# Handoff — system admin review, structure editing — 2026-11-02
+# Handoff — November review, round 1 done; site UX round — 2026-11-05
 
-- #218–#221 exams/assignments test findings (partial marks, edit draft question, notification
-  links, offline auto-submit, late-penalty wording).
-- Admin review report: `Claude outputs/تقرير-مراجعة-مدير-النظام-2026-11-02.md` (not in git).
-- #222 «الهيكل الأكاديمي»: edit/stop/delete departments and programmes (409 `in_use` → stop
-  instead); levels 1–10 / terms 1–20 in the serializer (was a 500); structure writes call
-  `request_site_rebuild`.
-- #223 new programme can open its intake in the active cycle at once; rows show «مفتوح/غير
-  مفتوح للتقديم» with a button; a programme moves department only with no students, courses
-  or applications; rebuild debounce 2 min → 30 s. Live 2026-11-02 17:14 UTC; site shows 28.
-- Owner's production data: 15 programmes were each added as their own department; owner can
-  now move them and delete the empty departments. 17 programmes had no intake.
-- Next (recommended): «+ عام أكاديمي» and editing terms on the structure page (no UI to
-  create an academic year); small notes: admin home audit link → `/audit`, user-group rows
-  → `/system/users?role=…`.
-- Gotcha: `gh pr merge` failed with a GraphQL error → `gh api -X PUT …/pulls/<n>/merge`.
+Older rounds (2026-10-24 → 11-02): `.claude/handoff/archive/2026-10-24_to_2026-11-02.md`.
 
-# Handoff — admission form (owner spec 2026-11-01), staff pages — 2026-11-01
+## State
 
-Owner's spec `~/Downloads/college-admission-form-spec.md`; decisions in chat 2026-11-01: identity
-from the site (no colour/font editor), religion required, English name required, previous
-university required only for تجسير/تحويل (field «مسار التقديم» added), everything down to the
-closest contact's phone is the applicant's and required; university number, admitted level,
-admission type = `release` (staff fill, shown to the applicant only when released **and**
-filled); from the bridging/transfer cohort down = `staff`. The registration staff type the
-university number.
+- **November review** (owner's work order `docs/qa/comprehensive-review-plan-2026-11.md`),
+  round 1 report `docs/qa/comprehensive-review-2026-11.md`: baseline + axes 1.1, 1.2, 1.3, 2, 3
+  and part of 4. Findings R26–R56; fixed and merged in #225–#233. Evidence and probes:
+  `docs/qa/evidence/review-2026-11/` (one folder per axis; `bash scripts/qa/probe.sh <dir> sqlite`).
+- **Running (round 2, no server needed):** axes 1.4/1.5 (exams, notifications), 5 (performance),
+  8 (keyboard, contrast in warm/dark, Arabic text) — background audits, then fix PRs.
+- **Site UX review** (owner, 2026-11-04, `~/Documents/Codex/2026-11-04/.../website-design-ux-review-ar.md`):
+  code items in #234 (small fixes), #235 (programme finder), #236 (home order). Content items
+  are the owner's (below).
 
-- #205 admin edits users' profiles; #206 «الكوادر» on the home page + /staff/<id>;
-  #207 site settings `staff_intro_ar/en`; #208 theme icon off the phone title, edit
-  qualifications; #209 `StaffLink` (/api/v1/me/links) with a per-link «show on site» switch.
-- #210 phase 1: field `audience` applicant|release|staff, `width`, `help`+`example`, types
-  year/money/consent, `show_if.in`; `public_schema()` for the applicant; 400 on staff keys;
-  applicant form with sections, bold labels, «تعليمات», in-form guide; builder «استمارات
-  التقديم» keeps sections, loads `lib/admissionPreset.ts`, saves before publishing.
-- #211 phase 2: `Application.staff_answers` + `released_fields`, PATCH
-  `/api/v1/applications/<id>/staff-answers`; registration uses the typed number when the form
-  has `university_number`; `/applications/<id>/print`.
-- Phase 3 (this PR): `/apply/guide` public guide, print/PDF via the browser (checked: Arabic
-  shaping fine in Chromium's PDF); linked from the form and the site's admissions page.
-- To do (phase 4): copy a template, UI for conditions (show_if) in the builder, drag & drop;
-  the published «default» on production still has the old fields until the head registrar
-  loads the college template into a new version and publishes it.
-- Gotcha: probes that count file inputs must wait for the documents step to render.
+## Waiting on the owner
 
-# Handoff — photos, «الكوادر», uploads, player — 2026-10-31
-
-- #197 site header attached to the top; theme chosen from a menu of three; no site nav in the
-  installed app (`isStandalone`), site links open in the browser (`siteLink()`).
-- #198 `siteUrl(path)`: SITE_URL ends in `/ar/`, joining gave `/ar//ar/…` 404s.
-- #199 «موادي» cards (students_count on /me/courses); `components/LecturePlayer.tsx`.
-- #200 `postWithProgress` (XHR) + `components/UploadStatus.tsx` on submissions, lecture files,
-  applicant documents; upload errors translated (files/validation.py → gettext, .po/.mo);
-  loading screen uses `LOGO_ICON` (/api/public/portal-icon/192.png); YouTube iframe in page.
-- #201 roles matrix: horizontal headers, Arabic names for every capability.
-- #202 profile photo for every user: 3 MB, stored as 512 px WebP (`accounts/photos.py`),
-  `/api/v1/photos/<id>` (302 to signed link); `Avatar photo=`; docs/03 note.
-- #203 `Qualification` model + `/api/v1/me/qualifications`, `public_photo` consent,
-  `research_interests`; academic affairs page `/staff-profiles` (`staff_profiles.moderate`)
-  hides a photo or degree; department page section renamed «الكوادر» with photo/degrees;
-  `/api/public/staff-photos/<id>.webp`; profile changes request a site rebuild.
-- Gotchas: GitHub GraphQL failed for `gh pr create` on 2026-10-30 → use
-  `gh api repos/<owner>/<repo>/pulls -f …`; the session scratchpad (merge watcher) can be
-  wiped — recreate it; under a loaded Mac use `E2E_BOOT_MS=480000`; the landing dev server
-  caches API responses in memory (restart it to see new data).
-
-# Handoff — after the redesign, owner follow-ups — 2026-10-30
-
-- **Restore drill passed 2026-10-30** (owner ran it): backup `20261030T012118Z` restored into a
-  scratch DB, counts match live, 32 files in the archive; result in runbook §5. The `ecst`
-  role cannot create databases (kept): `postgres` makes `ecst_drill` (#196). Still to test:
-  the off-site copy. Dependabot alerts turned on 2026-10-30. Open: real `OPS_ALERT_EMAIL`.
-
-- #181 site header: short college name between 1024 and 1279 (the full one was cut off).
-- #182 «الوضع الفاتح لا يعمل» was **Phoenix** (Android, auto-darkens pages): `tokens.css`
-  `color-scheme: only light` stops the repaint (verified with Chromium forced dark; a
-  `<meta name=color-scheme>` alone does not help). Deployed CSS reads `light only` (minifier).
-  Also the next-step button text is navy (primary-700 turns pale in dark).
-- #183 phone tab bar docked to the bottom edge (owner); docs/06, docs/09, responsive-page skill.
-- #184 visitor home band «بوابة الكلية تطبيقًا على هاتفك» → `portal/install` (a PWA installs
-  only from its own origin; `/login?next=/install` returns there).
-- #185 `NavIcon`: the current page's icon filled (tabs, «المزيد» sheet, sidebar), all roles.
-  Owner asked about glass icons: advised against (flat surfaces, low-end phones, `lint:ui`).
-- #186 lucide-react 1.63 (1.64 is under pnpm's minimum release age; no exception kept).
-- Production verified 2026-10-30 after `2bbe31f`: app band and floating header on the site,
-  portal health 200, both CSS bundles carry the light-only colour scheme.
-- Owner confirmed 2026-10-30: light mode works on Phoenix after #182.
-- #189 academic affairs opens with «يحتاج قرارك» at every size; affairs/results side cards
-  are panels. #190 `SideFigures` → quiet rows with the heading inside (4 pages).
-- e2e parts take 12/12/8 min (2026-10-30): rebalancing no longer worth it.
-- Later: lucide 1.64 once past pnpm's minimum release age (no exception).
-- #192 visitor pages: `VisitorLayout` (apply/track) form + side column (steps, help) on large
-  screens; `components/VisitorNav.tsx` (site sections, sign-in, apply, track) on apply, track and
-  every `AuthLayout` page; `useHideOnScroll` + the site header script hide the header while
-  scrolling down, back after 400 ms still or on scrolling up.
-- #193 three modes: light, warm (`data-theme="warm"`, dim grey-brown, only by choice), dark
-  softened (slate navy, ≈11:1). Switch cycles light → warm → dark (`lib/theme.ts` `Mode`,
-  `MODE_LABEL`); Settings has فاتح · دافئ · داكن · النظام (own line on phones — fit test).
-  a11y spec audits warm too. Comparison: `~/Desktop/before-after-1030/index.html`.
-- Comparison page `~/Desktop/redesign-before-after/index.html`: 13 screens, after = production.
-
-# Handoff — redesign from the owner's mockups (2026-10-29), all phases merged — 2026-10-30
-
-Plan and decisions: `docs/qa/redesign-plan-2026-10-29.md` (owner: «نفذ جميع توصياتك»).
-
-- #174 shell: navy full-height sidebar (college mark on top), white top bar with «ابحث عن صفحة»
-  (`components/PageSearch.tsx`, searches the person's own nav, Arabic letters folded), bell,
-  account initials → `/settings`. Every role at once.
-- #175 dashboard kit `components/dashboard.tsx`: `Panel` (heading inside the card),
-  `NextStepCard` (the one filled card; its title links too — `exam.spec` taps the exam name),
-  `AckBanner`, `QuickLinks`; `Inbox` count in a neutral square + optional inner heading.
-  Student «اليوم» and system admin home (status line + «يحتاج إجراءك» from health/backups/
-  students without accounts/test-mode email) built on it.
-- #176 other homes: teacher («التالي في يومك»), registrar, results, affairs, academic, HR,
-  department (D20: only the heading moved inside). #179 site manager and events manager homes.
-- #177 visitor site: floating rounded header (`.motion-header-bar`, `overHero` on the home),
-  college photo beside the hero words, deadline band under both, audience icons.
-- #178 `StatusBadge` dot.
-- Not adopted from the mockups (decisions in the plan): tinted course cards (rows stay),
-  tinted icon squares (`lint:ui`), generated photos, mockup text.
-- Before/after page for the owner: `~/Desktop/redesign-before-after/index.html` (9 screens).
-  Before = `bdf9e84`; shots via `SHOTS=<label> pnpm e2e shots.spec.ts -g "... \(light"`.
-
-## Still open (owner)
-
-- Programme pages: structure exists, college content missing. Restore-drill result, real
-  `OPS_ALERT_EMAIL`, SEO steps after the domain move, Dependabot alerts off.
-
-# Handoff — review 2026-10-25 and its decisions, all implemented — 2026-10-26
-
-## Review `docs/qa/comprehensive-review-2026-10-25.md` (R12–R25)
-
-- Fixed, each with a test that fails on the old code: #156 R12/R14/R15 + course deletion
-  (`courses.unassign`), #157 R16–R18 (lock then re-read), #158 R13/R22–R25, #159 R19/R20/R21
-  (admissions key), #168 R21 shared `Idempotency-Key` store (`core.IdempotencyRecord`,
-  `core/idempotency.py`; exam submit repeated after a reopen → 409 `stale`, owner decision).
-- R13: cycles follow docs/03 §3.6 (department roles see their departments' cycles only); the
-  doc was NOT changed — docs/03 line 88 names admission cycles explicitly.
-- Decision table `docs/qa/review-2026-10-25-open-differences.md` (#160), owner approved all
-  recommendations: docs amended (#163: items 1–4, 10, 12); implemented — #161 items 4/9/11
-  (aa sees live sessions without joining, delete draft regulation, registrar fallback switch),
-  #162 item 5 (events manager writes news linked to an event; migration content/0009),
-  #164 item 7 (admissions report scoped for reg/dm/ds), #165 item 6 («أدائي» /me/teaching),
-  #166 item 8 (audit log by field of work, `audit.views.DOMAINS`), #167 item 13 (student
-  email with a code, phone, photo; migrations accounts/0007, files/0003).
-- Also this round: emails carry the college design (#154, `notifications/mail.py`), security
-  updates (#155, Pillow 13), «طلباتي» overflow fix and the `offscreen()` e2e guard (#152/#153).
-
-## Gotchas learned
-
-- Merge a PR only after its four checks exist AND pass: the watcher in the session scratchpad
-  (`merge-when-green.sh`) waits 45 s first; an early version merged #152 before CI started.
-- Parallel PRs appending tests to the same file conflict after each merge: merge `main` in and
-  keep both sides (never rebase). Regenerate the API client (`pnpm api:generate`) after merging
-  before trusting a local typecheck.
-- e2e `lastCode` skips `#`-prefixed six-digit colours (the branded emails contain `#576075`).
-- Port 8001 is used by another local project: run e2e with `E2E_API_PORT=8011
-  E2E_PORTAL_PORT=5184 E2E_SITE_PORT=4332`; `CI=1` uses Playwright's Chromium (local Chrome
-  crashes under load). Local Postgres was down on 2026-10-25 (not started on purpose).
-- Query-count tests: clear `connection.queries_log` first (it keeps 9000 entries).
-
-## Still open (owner)
-
-- Restore-drill result, real `OPS_ALERT_EMAIL`, college content, SEO launch steps after the
-  domain move (runbook §11), Dependabot alerts are off on the repo.
-
-# Handoff — design-gaps work order B1–B10 — 2026-10-24
-
-## Work order `ecst-design-gaps-work-order.md` (2026-10-23)
-
-- Merged: B1/B2/B3 #144 (offline-first drafts, connectivity bar, email-only OTP), B4 #145 (one
-  red action on the public site, `docs/06 §2.7`), B5 #146 (ops category, demo contact guard).
-- Also merged on 2026-10-24: #147 B8, #148 B6, #149 B7, #150 B9/B10. The grey "cancelled"
-  CI runs for #147–#149 are by design (each merge cancels the previous `main` run); the run
-  for #150 (`ec03160`) is green and deployed everything.
-- Verified on production: AVIF/WebP hero at 3 widths, `/site-logo.webp`; home page weight
-  326 KB (budget 500 KB, was 487 KB) via `node scripts/page-weight.mjs https://ecst.stingdev.pro/ar/`.
-  Not verified: autodeploy state file (needs `ECST_SSH`), folded sidebar/density toggle by eye.
-- Gotchas: macOS has no `sed -i`/`timeout` (use python); local Chrome crashes under load
-  ("Target page ... closed") are not code failures; e2e CI takes ~30 min.
-- Owner items still open: restore-drill result, real `OPS_ALERT_EMAIL`, college content,
-  SEO launch steps after the domain move (runbook §11).
-
-## Where things stand
-
-- The 8 October review (`docs/qa/comprehensive-review-2026-10-08.md`, PR #118) was verified
-  first: its probes reproduced every finding on SQLite and PostgreSQL (9/9) and in Vitest (3/3).
-- Every finding is fixed, one PR per group, each probe turned into a permanent regression test
-  that fails on the old code:
-  - #119 exam integrity: R11 sync in the attempt's order, R09 refused answers kept and shown
-    (`rejectedStore`), R10 `GET /exam-attempts/{id}/clock` polled every 30 s and asked again
-    at the deadline, R04 active enrollment needed to save an answer.
-  - #120 R01 admissions `update`/`submit` lock and re-read the row (`_locked`, in place).
-  - #121 R02 registration decision locks the request; R03 `invalidate` and manual close use
-    the attempt lock.
-  - #122 R08 new document stored first, old file deleted on commit; R07 backup format
-    `ECSTBAK2` (numbered records with a file id + sealed end), `BackupCorrupt`.
-  - #123 R05 `User.token_version` («tv» claim; reset/disable raise it), R06 unique index on
-    `COALESCE(program, 0)` + 400 + migration keeping the default in use.
-  - #124 `source-map-js` 1.2.2, `sharp` 0.35.5 via pnpm overrides; `pnpm audit` clean.
-- README phase table and the report's «حالة الإصلاح» section updated (docs PR).
-- #118–#124 all merged with green CI. Deployed `4d558e6` (backend, portal, site) on
-  2026-10-09: health 200, `/clock` answers 401 without a session, migrations
-  `accounts/0006_user_token_version` and `results/0002_one_default_grading_scale` applied
-  (production had no grading scales, so the R06 cleanup removed nothing), api and worker active.
-
-- **Auto-deploy (#126, owner request «when it's merged it must be auto deployed»):** the VPS
-  pulls. `ecst-autodeploy.timer` (every 2 min) runs `/opt/ecst/bin/autodeploy`; once the four
-  CI jobs pass on a new `main` commit it builds everything in a temp folder, then runs that
-  commit's `scripts/vps/release.sh` (shared with `deploy-vps.sh`). State in
-  `/opt/ecst/deployed/autodeploy`; failures alert via `ecst-alert@`; settings in
-  `/opt/ecst/autodeploy.env`. Installed and enabled 2026-10-09 (runbook §3).
-  **So: never deploy by hand after a merge; just merge and check the state file.**
-
-- **Site logo and redirects page (owner, 2026-10-09):** `SiteSettings.logo` (media library
-  image, migration `content/0008_site_logo`), `logo_url` in the public settings; the site
-  header, footer, favicon, schema.org logo and the share-image fallback use it, the portal top
-  bar and sign-in screen too (`useSiteLogo`, `lib/site.ts`); chosen in «إعدادات الموقع». The
-  redirects page stacks its form on phones and shows both paths in full.
-
-- **Admin password reset (owner, 2026-10-13):** `POST /users/{id}/reset-password` (system admin only,
-  capability `users.reset_password`) returns a random 12-character temporary password once
-  (`no-store`, never logged), sets `must_change_password`, ends the account's sessions
-  (`token_version`). `POST /auth/change-password` is the account's own change (also the forced
-  step); `RequireAuth` holds such accounts at `/change-password`. Portal: button + one-time panel
-  on the admin user page, «تغيير كلمة المرور» in Settings. `core/exceptions.py` now turns a stray
-  Django `ValidationError` into a 400. Gotcha: port 8000 may belong to another project on this
-  Mac: build the site with `PUBLIC_API_URL=http://127.0.0.1:1 pnpm build`.
-
-- **Delete account (owner, 2026-10-13):** `DELETE /users/{id}` (system admin, `users.delete`) deletes
-  only an account nothing points at; `ProtectedError` (audit log actor, content, grades…) → 409
-  `has_history`, disable instead. Never one's own account. Logged as `account.delete`. Button
-  at the bottom of the admin user page.
-
-- **Rename users (owner, 2026-10-13):** `PATCH /users/{id}` (system admin, `users.rename`): Arabic name required, English optional, logged as `account.rename`; student accounts refused (name lives on the student record). «الاسم» card on the admin user page.
-
-- **Design review 2026-10-16 (`docs/qa/ui-design-review-2026-10-16.md`, plan `…-plan-2026-10-16.md`):** all
-  deployed (production on `53a324a` at 2026-10-17). PR-1 #134 empty/loading/failed states (`Inbox`+`inboxState`,
-  `ListStatus` incl. «جارٍ تحميل المزيد…»), portal link on phones, two-line task titles; PR-2 #135 visible labels
-  (`Field`/`SelectField`/`Labeled`) and login wording; PR-3 #136 media alt editing (`PATCH /content/media/{id}`,
-  audit `media.update`), folded phone menu, WhatsApp steps aside; PR-4 #137 partial-plan notice; SEO #138
-  (dated sitemap, `/site-icon.png` via `sharp`, home title/description, `pnpm seo:check`, runbook §11);
-  #139 **sample content hidden from visitors** (`apps/landing/src/lib/sample.mjs`: marks «(مثال)», «(نص تجريبي)»,
-  demo note; `SITE_SHOW_SAMPLE=1` shows it; CI runs `E2E_HIDE_SAMPLE=1 pnpm e2e hidden-sample.spec.ts`);
-  `journeys.spec.ts` (visitor/student/teacher/registrar, phone + desktop).
-  Still open: U03/U04 real content (plans, photo, contacts, dean text: the college), U10 (task sessions with real
-  staff before any table view), label-less add-rows left alone in PR-2 (form builder, site media, page editor,
-  lecture/assignment link rows), the search launch when the college's domain is ready (runbook §11: domain first,
-  drop `SITE_NOINDEX`, `pnpm seo:check`, Search Console).
-  Gotchas: CI cancels the previous `main` run on every merge, and the server deploys only a commit whose CI passed
-  (a failed one is recorded `ci-failed` and skipped): merge one PR, wait for main's CI, then the next. Two `astro dev`
-  servers on one project break the full crawl: never add a second site server to the e2e config. The phone menu
-  e2e taps the widest gap of the top bar (`emptyTopBarX`). `node --test` needs a glob on Node 22.
-  **DNS (2026-10-17):** a Brevo «branded links» CNAME on host `ecst` next to the `A ecst` record took the site down on
-  some resolvers; the owner deleted it. Never add a CNAME on `ecst`. Restore drill from the 2026-10-16 backup is still
-  not run: the production-read command was refused by the permission classifier (needs a Bash rule), and the SSH key
-  must be re-added each day (`ssh-add --apple-use-keychain ~/.ssh/ovh_vps_ed25519`).
-
-- **UI cards review (owner, 2026-10-15; guide `ui-cards-review-guide`):** direction «الأولوية أولًا» (C) with
-  quiet list rows (A), recorded in `docs/ui-profile.md`. Shared: `Inbox` (big plain count + action button;
-  first row primary), `Summary` (flat figures, status in words, `wide` = 2 columns on lg), `ActionLinks`
-  (list instead of 3 equal tiles), `Avatar` (the one initials avatar), `Skeleton`. Migrated: admin,
-  department (D20: all sections kept, the 12-tile «اللوحة» became a quiet link list «صفحات القسم»),
-  registrar, results, affairs, academic homes. `pnpm lint:ui` now runs in CI; exceptions need a
-  `ui-allow: <reason>` comment on the line or within 3 lines above. Screens: `SHOTS=<label> pnpm e2e
-  shots.spec.ts` (resumable; `E2E_BOOT_MS=300000` and ports 8011/5184/4332 on a busy Mac).
-  Not redone: AcademicHome has no screenshot (typecheck only); the public site keeps its date/code tiles
-  and gradient page head as documented exceptions; inner pages (lists, forms) were not restyled.
-
-## In progress
-
-- Nothing. This docs PR (README, report status, this handoff) is the last of the round.
-
-## Next steps (ordered)
-
-1. After the next nightly backup (03:15), run a restore drill with that `ECSTBAK2` file
-   (`restore_database --name … --out …`, then `pg_restore` into a scratch database).
-2. Owner items still open: off-server backup copy (A3), the backup key kept offline (A4),
-   external monitoring and `OPS_ALERT_EMAIL` (A9), hosting choice (A8), permission
-   differences B9/B10, the college's content (UX11), load test (D3), real devices (H).
+1. Department head's name on the site without `public_profile` (R34): hide until consent, or
+   institutional (then write it in docs/03).
+2. docs/03 wording (recommend: edit the doc): site manager reads cycles/intakes (D7); academic
+   affairs hides a staff photo/qualification; head registrar deletes a cycle/intake without
+   applications.
+3. CSP for site and portal (R56): a line in `/etc/caddy/ecst.caddy` (the owner runs it), start
+   with `Content-Security-Policy-Report-Only`.
+4. Round 2 on the server: load the SSH key (read-only checks), approve restoring the latest
+   backup into a local DB (moves, migrations, `purge_demo` on real data), a real `OPS_ALERT_EMAIL`.
+5. Production content: publish the college admission form (blocks applying); move the 15
+   programmes entered as departments and delete the empty ones; the duplicate IT diploma;
+   2027/2028 year and terms; phone/email/address/hours in site settings (contact page and
+   footer show them once filled); a hero image without text; «عن الكلية», full regulations,
+   study plans, department descriptions.
 
 ## Decisions made (don't revisit)
 
-- Official college name: كلية الإمارات للعلوم والتكنولوجيا. docs/03 wins conflicts; D20 (the
-  department dashboard takes additions only); no Docker, no Zustand.
-- A withdrawn enrollment closes a running exam like a suspension: saved answers stay.
-- Refused answers do not block submission (they can never be accepted); the student is told
-  under the question, in the submit dialog and on the result page.
-- Tokens without «tv» count as version 0, so the R05 deploy signs nobody out.
-- R06 migration keeps the oldest default scale (the one `for_program` applied).
-- `ECSTBAK1` and single-token backups remain readable.
+- docs/03 wins conflicts; D20 (department dashboard: additions only); no Docker, no Zustand.
+- Structure: a programme moves department only with no students, courses or applications; a
+  code change writes CMS redirects; stopped programme/department takes no applications.
+- Announcements: addressing an audience is not owning it — sys all, sm the college's, em event
+  ones and own, hreg/aa own. Media: em changes/deletes own uploads; in-use picture → 409.
+- Photos: JPEG/PNG/WebP only (`Image.open(formats=…)`), WebP needs RIFF+WEBP, ≤ 50 Mpx; public
+  photo only while on «الكوادر»; cache 5 min.
+- Site rebuild debounce 30 s; structure writes trigger it.
+- Admission form: conditions name an applicant field above; `university_number` is staff/
+  release, ≤ 30 chars, unique across applications, frozen after registration.
 
-## Gotchas found
+## Gotchas
 
-- `admissions._locked` refreshes the caller's object in place: callers such as `seed_demo`
-  keep using their instance after `submit`.
-- Polling hooks: depend on `query.refetch` (stable), never the query object, or intervals reset
-  every render.
-- Vitest + fake timers: advance a second at a time inside separate `act` calls so React renders
-  between steps.
-- `core/tests/test_backups.py`: stub `media_archive_to` when shrinking `CHUNK`, or the local
-  media folder is encrypted in 4-byte records.
-- E2E on ports 8011/5184/4332 (8001 belongs to another project). Playwright screenshot paths
-  are relative to the repository root (`.scratch/shots/x.png`). Temporary visual specs: keep the
-  source in `.scratch/` and copy it into `e2e/tests/` only for the run. When the Mac is loaded
-  (load average ~20), sign-in can exceed 5 s; rerun before suspecting the code.
-- `/api/public/*` answers carry `Cache-Control: max-age=60`: the portal fetches the site
-  settings with `cache: "no-cache"` so a new logo shows after a reload.
-- macOS has no `timeout`; use pytest `-o faulthandler_timeout=…` to locate hangs.
+- Merge one PR, wait for `main`'s CI, then the next (CI cancels the previous main run; the server
+  deploys only a commit whose CI passed). Chained watcher: `.scratch/merge-when-green.sh <n>`
+  (the session scratchpad gets wiped; a copy lives in `.scratch/`). `gh pr merge` GraphQL errors
+  → `gh api -X PUT repos/…/pulls/<n>/merge -f merge_method=merge`.
+- Parallel PRs that add to `backend/locale/ar/LC_MESSAGES/django.po` conflict: merge `main` in,
+  keep both sides, rebuild the `.mo` with `msgfmt`.
+- CI infra failures (GitHub API timeouts installing tools) → `gh run rerun <id> --failed` after
+  the run completes.
+- Fix work in separate worktrees (`git worktree add ../ecst-wt-<name> origin/main`, then
+  `uv sync` / `pnpm install --frozen-lockfile --prefer-offline && pnpm api:generate`) so a long
+  baseline in the main checkout isn't disturbed.
+- E2E on ports 8011/5184/4332 (8001 belongs to another project); `E2E_BOOT_MS=480000` under load.
+- Local Postgres stops between sessions: `brew services start postgresql@16`.
+- Old probes R03/R11 (review-2026-10-08) still "pass": they inject a write after the locked
+  re-read, which real locking prevents — not a regression; their regression tests pass.
 
 ## Verify
 
-- Backend: `cd backend && uv run pytest` and `DATABASE_URL=postgres:///ecst uv run pytest --create-db`.
-- Portal: `pnpm typecheck && pnpm test && pnpm build`; `pnpm format:check`; `pnpm audit`.
-- E2E: `E2E_API_PORT=8011 E2E_PORTAL_PORT=5184 E2E_SITE_PORT=4332 pnpm e2e exam.spec.ts`.
+- Backend: `cd backend && uv run pytest` and `DATABASE_URL=postgres:///ecst uv run pytest`.
+- Frontend: `pnpm typecheck && pnpm test && pnpm build`; `pnpm lint:ui`; `pnpm format:check`.
+- Baseline: `bash scripts/qa/run.sh <dir> lint migrations openapi typecheck backend-sqlite backend-pg frontend lint-ui build seo scripts audit pip-audit e2e` (`QA_PG_URL=postgres:///ecst`).
 
 ## Owner's standing rules
 
-- One branch/PR per change, merge with `gh pr merge --merge` when CI is green; never
-  force-push or rebase. Tests on SQLite and Postgres. Verify UI at 390 and 1440.
+- One branch/PR per change; merge when CI is green; never force-push or rebase.
 - RBAC in `accounts/rbac.py`; every new endpoint gets a permission-matrix row; writes audited.
+- Responsive at 390 and 1280 (`responsive-page` skill).
 - Never read or repeat the demo password, `/opt/ecst/env` values or the SMTP key; never touch
   other projects on the shared VPS; no server address in this public repository.

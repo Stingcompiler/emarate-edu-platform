@@ -64,7 +64,7 @@ def instructor_assigned(instructor) -> None:
         category=Category.COURSE,
         title=f"عُيّنت على مادة {offering.course.code}",
         body=f"{offering.course.name_ar} · {offering.term.name_ar}",
-        action_url=f"/courses/{offering.public_id}",
+        action_url=f"/courses/{offering.pk}",
     )
 
 

@@ -207,61 +207,82 @@ def _shape_problems(schema: dict) -> list[str]:
     problems = []
     for step in schema["steps"]:
         if not isinstance(step, dict) or not isinstance(step.get("sections", []), list):
-            problems.append("Each step must be an object with a list of sections.")
+            problems.append(gettext("Each step must be an object with a list of sections."))
             continue
         for section in step.get("sections", []):
             if not isinstance(section, dict) or not isinstance(section.get("fields", []), list):
-                problems.append("Each section must be an object with a list of fields.")
+                problems.append(gettext("Each section must be an object with a list of fields."))
                 continue
             if any(not isinstance(f, dict) for f in section.get("fields", [])):
-                problems.append("Each field must be an object.")
+                problems.append(gettext("Each field must be an object."))
     return problems
 
 
 def check_schema(schema: dict) -> list[str]:
     keys, seen = set(), []
     if not isinstance(schema, dict) or not isinstance(schema.get("steps"), list):
-        return ["The schema needs a list of steps."]
+        return [gettext("The schema needs a list of steps.")]
     problems = _shape_problems(schema)
     for field in schema_fields(schema):
         key = field.get("key")
+        # The head registrar reads the field's label, not its key (review 2026-11: «school: …»).
+        name = f"«{field.get('label') or key}»"
         if not key or not re.fullmatch(r"[a-z][a-z0-9_]{0,40}", str(key)):
-            problems.append(f"Field key {key!r} must be lowercase letters, digits or _.")
+            problems.append(
+                gettext("Field key %(key)s must be lowercase letters, digits or _.")
+                % {"key": repr(key)}
+            )
         elif key in keys:
-            problems.append(f"Field key {key!r} is used twice.")
+            problems.append(gettext("Field key %(key)s is used twice.") % {"key": repr(key)})
         keys.add(key)
         kind = field.get("type")
         if not isinstance(kind, str) or kind not in FIELD_TYPES:
-            problems.append(f"{key}: unknown type {kind!r}.")
+            problems.append(
+                gettext("%(field)s: unknown type %(type)s.") % {"field": name, "type": repr(kind)}
+            )
         if field.get("type") in ("select", "multiselect") and not field.get("options"):
-            problems.append(f"{key}: add the options.")
+            problems.append(gettext("%(field)s: add the options.") % {"field": name})
         if field.get("pattern") is not None:
             try:
                 re.compile(str(field["pattern"]))
             except re.error:
-                problems.append(f"{key}: the pattern is not a valid regular expression.")
+                problems.append(
+                    gettext("%(field)s: the pattern is not a valid regular expression.")
+                    % {"field": name}
+                )
         if not isinstance(audience(field), str) or audience(field) not in AUDIENCES:
-            problems.append(f"{key}: audience must be one of {sorted(AUDIENCES)}.")
+            problems.append(gettext("%(field)s: choose who fills this field.") % {"field": name})
         elif key == "university_number" and audience(field) == "applicant":
             # The registration staff type it (docs/03 §5); an applicant's copy would be ignored.
-            problems.append(f"{key}: the university number is filled by the college.")
+            problems.append(
+                gettext("%(field)s: the university number is filled by the college.")
+                % {"field": name}
+            )
         if field.get("width") is not None and field.get("width") not in WIDTHS:
-            problems.append(f"{key}: width must be full or half.")
+            problems.append(gettext("%(field)s: width must be full or half.") % {"field": name})
         condition = field.get("show_if")
         if condition and not isinstance(condition, dict):
-            problems.append(f"{key}: show_if must be an object.")
+            problems.append(gettext("%(field)s: the condition is not valid.") % {"field": name})
         elif condition:
             # Only on a field the applicant fills, above it: no loops, and nobody is held to a
             # field they cannot see (spec §4.3, §5.1; docs/03 §5 — college fields too).
             target = next((f for f in seen if f.get("key") == condition.get("key")), None)
             if target is None:
-                problems.append(f"{key}: show_if must name a field above it.")
+                problems.append(
+                    gettext("%(field)s: the condition must name a field above it.")
+                    % {"field": name}
+                )
             elif ("in" not in condition and "equals" not in condition) or (
                 "in" in condition and not (isinstance(condition["in"], list) and condition["in"])
             ):
-                problems.append(f"{key}: choose the answers that show this field.")
+                problems.append(
+                    gettext("%(field)s: choose the answers that show this field.") % {"field": name}
+                )
             elif audience(target) != "applicant":
-                problems.append(f"{key}: show_if must name a field the applicant fills.")
+                problems.append(
+                    gettext("%(field)s: the condition must name a field the applicant fills.")
+                    % {"field": name}
+                )
         seen.append(field)
         accept = field.get("accept")
         if accept is not None and not (
@@ -270,7 +291,10 @@ def check_schema(schema: dict) -> list[str]:
             and all(isinstance(a, str) for a in accept)
             and set(accept) <= UPLOAD_TYPES
         ):
-            problems.append(f"{key}: accept must list some of {sorted(UPLOAD_TYPES)}.")
+            problems.append(
+                gettext("%(field)s: accepted files must be some of %(types)s.")
+                % {"field": name, "types": ", ".join(sorted(UPLOAD_TYPES))}
+            )
     return problems
 
 
@@ -627,7 +651,7 @@ def _submit(application: Application) -> Application:
     if not application.full_name:
         errors["full_name"] = "Required."
     if not application.email and not application.phone_e164:
-        errors["email"] = "Give an email or a phone number."
+        errors["email"] = gettext("Give an email or a phone number.")
     documents = set(application.documents.values_list("doc_type", flat=True))
     template = application.form_template
     if template is not None:
