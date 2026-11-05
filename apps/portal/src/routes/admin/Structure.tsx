@@ -383,12 +383,13 @@ export function Structure() {
         {/* Its layout follows its own width (container query), not the screen's: beside the
             320px column at 1024–1279 it is narrow even on a laptop (owner, 2026-10-02). */}
         <section className="@container min-w-0">
-          <div className="flex items-center justify-between gap-3">
+          {/* Wraps: the name and two buttons do not fit a 360px phone with larger text. */}
+          <div className="flex flex-wrap items-center justify-between gap-x-3">
             <SectionLabel>
               قسم {dept?.name_ar ?? ""} — البرامج · {num(deptPrograms.length)}
             </SectionLabel>
             {dept && (
-              <span className="mb-2 flex shrink-0 flex-wrap gap-2">
+              <span className="mb-2 flex min-w-0 flex-wrap gap-2">
                 {/* Stopping is the temporary way out (owner, 2026-11-05): one tap, undone the same
                     way; deleting or merging is in «تعديل القسم». */}
                 <Button
