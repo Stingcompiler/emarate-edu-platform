@@ -14,7 +14,7 @@ import {
   WithSide,
 } from "../../components/ui";
 import { api, ok } from "../../lib/api";
-import { when, count, N, fileName } from "../../lib/format";
+import { when, count, N, fileName, semester } from "../../lib/format";
 import { downloadCsv, num } from "../../lib/reports";
 import { asForm, formData } from "../../lib/upload";
 import { Pager, useServerPages } from "../../components/Pager";
@@ -42,6 +42,7 @@ const TEMPLATE = [
   "الاسم",
   "رمز البرنامج",
   "المستوى",
+  "الفصل الدراسي",
   "البريد",
   "الهاتف",
   "الجنس",
@@ -132,7 +133,8 @@ export function StudentImports() {
             <FileUp size={28} aria-hidden />
             {upload.isPending ? "يُتحقق من الملف…" : "اختر ملف .xlsx أو .csv"}
             <span className="text-xs">
-              الأعمدة: الرقم الجامعي، الاسم، البرنامج، المستوى، البريد… يُتحقق منها قبل أي تغيير.
+              الأعمدة: الرقم الجامعي، الاسم، البرنامج، المستوى، الفصل الدراسي (1 أو 2؛ إن تُرك
+              فالفصل الحالي)، البريد… يُتحقق منها قبل أي تغيير.
             </span>
           </button>
           <input
@@ -296,7 +298,7 @@ function ImportDetailBody({ id }: { id: string }) {
                       "الرقم الجامعي",
                       "الاسم",
                       "البرنامج",
-                      "المستوى",
+                      "المستوى والفصل",
                       "البريد",
                       "الإجراء",
                     ].map((h) => (
@@ -333,9 +335,15 @@ function ImportDetailBody({ id }: { id: string }) {
                         </td>
                         <td className="px-3 py-2">
                           {String(n.level ?? "")}
+                          {n.semester ? ` · ${semester(Number(n.semester))}` : ""}
                           {changes.level ? (
                             <span className="block text-xs text-text-muted">
                               كان: {String(changes.level[0])}
+                            </span>
+                          ) : null}
+                          {changes.semester ? (
+                            <span className="block text-xs text-text-muted">
+                              كان: {semester(Number(changes.semester[0]))}
                             </span>
                           ) : null}
                         </td>

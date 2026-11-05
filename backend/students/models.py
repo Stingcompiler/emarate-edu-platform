@@ -33,6 +33,9 @@ class StudentRecord(PublicIdModel, TimestampedModel):
         "organization.Department", on_delete=models.PROTECT, related_name="students"
     )
     level = models.PositiveSmallIntegerField()
+    # Where the student is in the study plan: the level (a year) and its semester, 1 or 2
+    # (owner, 2026-11-05). Set on adding, importing and registering; promotion advances it.
+    semester = models.PositiveSmallIntegerField(default=1)
     status = models.CharField(max_length=12, choices=Status.choices, default=Status.ACTIVE)
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL,
@@ -61,7 +64,10 @@ class StudentRecord(PublicIdModel, TimestampedModel):
         constraints = [
             models.CheckConstraint(
                 condition=models.Q(level__gte=1, level__lte=10), name="student_level_range"
-            )
+            ),
+            models.CheckConstraint(
+                condition=models.Q(semester__gte=1, semester__lte=2), name="student_semester_range"
+            ),
         ]
 
     def __str__(self) -> str:

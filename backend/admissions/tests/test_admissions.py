@@ -209,8 +209,10 @@ def test_full_journey(api, intake, make_user, it_dept, ba_dept, django_capture_o
         )
     assert review.post(f"{url}/register").status_code == 403
     with django_capture_on_commit_callbacks(execute=True):
-        registered = api(head).post(f"{url}/register")
+        registered = api(head).post(f"{url}/register", {"semester": 2}, format="json")
     number = registered.data["university_number"]
+    # Admitted mid-year: the registrar starts the student in the level's second semester.
+    assert StudentRecord.objects.get(university_number=number).semester == 2
     assert registered.data["status"] == "registered" and number.startswith(
         f"{timezone.now().year % 100:02d}-IT-"
     )

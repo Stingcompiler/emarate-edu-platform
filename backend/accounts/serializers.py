@@ -37,6 +37,7 @@ class MeStudentSerializer(serializers.Serializer):
     program = serializers.CharField()
     department = serializers.CharField()
     level = serializers.IntegerField()
+    semester = serializers.IntegerField()
     status = serializers.CharField()
     status_label = serializers.CharField()
 
@@ -98,6 +99,7 @@ class MeSerializer(serializers.ModelSerializer):
             "program": record_.program.name_ar,
             "department": record_.department.name_ar,
             "level": record_.level,
+            "semester": record_.semester,
             "status": record_.status,
             "status_label": record_.get_status_display(),
         }

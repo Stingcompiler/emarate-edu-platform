@@ -397,6 +397,12 @@ class StatusOnlySerializer(serializers.Serializer):
     status_label = serializers.CharField()
 
 
+class RegisterApplicantSerializer(serializers.Serializer):
+    """The semester of the level the new student starts in (owner, 2026-11-05)."""
+
+    semester = serializers.ChoiceField(choices=[1, 2], default=1)
+
+
 class ApplicationStaffAnswersSerializer(serializers.Serializer):
     answers = serializers.DictField()
     released = serializers.ListField(child=serializers.CharField(), required=False)

@@ -30,6 +30,7 @@ from audit.services import RequestMeta, record
 from organization.models import Program
 
 from .models import StudentImportBatch, StudentImportRow, StudentRecord
+from .services import current_semester
 
 MAX_ROWS = 10_000
 MAX_BYTES = 5 * 1024 * 1024
@@ -40,6 +41,7 @@ COLUMN_LABELS = {
     "full_name_ar": gettext_lazy("Name in Arabic"),
     "program_code": gettext_lazy("Program code"),
     "level": gettext_lazy("Level"),
+    "semester": gettext_lazy("Semester"),
     "course_code": gettext_lazy("Course code"),
 }
 
@@ -63,6 +65,9 @@ HEADERS = {
     "البرنامج": "program_code",
     "level": "level",
     "المستوى": "level",
+    "semester": "semester",
+    "الفصل": "semester",
+    "الفصل الدراسي": "semester",
     "email": "email",
     "البريد": "email",
     "البريد الإلكتروني": "email",
@@ -76,6 +81,17 @@ HEADERS = {
     "الرقم الوطني": "national_id",
 }
 REQUIRED = ("university_number", "full_name_ar", "program_code", "level")
+SEMESTERS = {
+    "1": 1,
+    "1.0": 1,
+    "الأول": 1,
+    "الاول": 1,
+    "first": 1,
+    "2": 2,
+    "2.0": 2,
+    "الثاني": 2,
+    "second": 2,
+}
 GENDERS = {
     "male": "male",
     "m": "male",
@@ -91,6 +107,7 @@ UPDATABLE = (
     "full_name_en",
     "program_id",
     "level",
+    "semester",
     "email",
     "phone_e164",
     "gender",
@@ -201,6 +218,13 @@ def _normalize(raw: dict, programs: dict[str, Program]) -> tuple[dict, list[str]
             % {"levels_count": program.levels_count}
         )
     out["level"] = level
+
+    # Optional (owner, 2026-11-05): blank keeps an existing record's semester, and a new
+    # record takes the current term's.
+    semester_raw = str(raw.get("semester", "")).strip()
+    out["semester"] = SEMESTERS.get(semester_raw)
+    if semester_raw and out["semester"] is None:
+        errors.append(gettext("semester: use 1 or 2 (الأول/الثاني)"))
 
     email = str(raw.get("email", "")).strip().lower()
     if email:
@@ -333,6 +357,7 @@ def commit(meta: RequestMeta, batch: StudentImportBatch) -> StudentImportBatch:
             for r in StudentRecord.objects.select_for_update().filter(university_number__in=numbers)
         }
         programs = {p.pk: p for p in Program.objects.all()}
+        semester = current_semester()
         for row in rows:
             data = row.normalized
             current = existing.get(data["university_number"])
@@ -343,6 +368,7 @@ def commit(meta: RequestMeta, batch: StudentImportBatch) -> StudentImportBatch:
                     full_name_en=data["full_name_en"],
                     program=programs[data["program_id"]],
                     level=data["level"],
+                    semester=data.get("semester") or semester,
                     email=data["email"],
                     phone_e164=data["phone_e164"],
                     gender=data["gender"],

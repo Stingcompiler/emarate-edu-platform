@@ -14,7 +14,7 @@ import {
 } from "../../components/ui";
 import { api, ok, openAfter } from "../../lib/api";
 import { useMe } from "../../lib/auth";
-import { when } from "../../lib/format";
+import { SEMESTERS, when } from "../../lib/format";
 import { can } from "../../lib/nav";
 import { type Field, STATUS_LABEL, STATUS_TONE } from "../../lib/visitor";
 import { StaffFields } from "./StaffFields";
@@ -43,6 +43,8 @@ export function ApplicationDetail() {
   });
   const [note, setNote] = useState("");
   const [message, setMessage] = useState("");
+  // Where the new student starts in the level: the registrar picks it (owner, 2026-11-05).
+  const [startSemester, setStartSemester] = useState<1 | 2>(1);
   const done = () => {
     setNote("");
     setMessage("");
@@ -55,7 +57,10 @@ export function ApplicationDetail() {
         kind === "claim"
           ? await api.POST("/api/v1/applications/{public_id}/claim", path)
           : kind === "register"
-            ? await api.POST("/api/v1/applications/{public_id}/register", path)
+            ? await api.POST("/api/v1/applications/{public_id}/register", {
+                ...path,
+                body: { semester: startSemester },
+              })
             : kind.startsWith("msg:")
               ? await api.POST("/api/v1/applications/{public_id}/messages", {
                   ...path,
@@ -378,13 +383,29 @@ export function ApplicationDetail() {
                     ))}
                   </div>
                   {a.status === "accepted" && can(me.data, "admissions.manage") && (
-                    <Button
-                      className="w-full"
-                      onClick={() => act.mutate("register")}
-                      disabled={act.isPending}
-                    >
-                      تحويل إلى طالب وإصدار الرقم الجامعي
-                    </Button>
+                    <>
+                      <label className="block text-sm">
+                        <span className="mb-1 block text-xs text-text-muted">يبدأ الطالب في</span>
+                        <select
+                          value={startSemester}
+                          onChange={(e) => setStartSemester(e.target.value === "2" ? 2 : 1)}
+                          className="min-h-11 w-full rounded-lg border border-border bg-surface px-3 text-sm"
+                        >
+                          {SEMESTERS.map((x) => (
+                            <option key={x.value} value={x.value}>
+                              {x.label}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+                      <Button
+                        className="w-full"
+                        onClick={() => act.mutate("register")}
+                        disabled={act.isPending}
+                      >
+                        تحويل إلى طالب وإصدار الرقم الجامعي
+                      </Button>
+                    </>
                   )}
                 </Card>
               )}

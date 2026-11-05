@@ -21,6 +21,7 @@ import { isWide } from "../../lib/media";
 import { useMe } from "../../lib/auth";
 import { useDepartment } from "../../lib/department";
 import { can } from "../../lib/nav";
+import { SEMESTERS, levelSemester, semester } from "../../lib/format";
 import { initials, num } from "../../lib/reports";
 import { ALL, Pager } from "../../components/Pager";
 import { useConfirm } from "../../components/Confirm";
@@ -167,8 +168,8 @@ export function DepartmentStudents() {
                 <span className="min-w-0 flex-1">
                   <b className="block truncate text-sm text-text">{r.full_name_ar}</b>
                   <span className="text-xs text-text-muted">
-                    <bdi className="num">{r.university_number}</bdi> · {r.program_name} · المستوى{" "}
-                    {num(r.level)}
+                    <bdi className="num">{r.university_number}</bdi> · {r.program_name} ·{" "}
+                    {levelSemester(r.level, r.semester)}
                   </span>
                 </span>
                 <StatusBadge
@@ -229,6 +230,7 @@ export function DepartmentStudents() {
                 ],
                 ["البرنامج", s.program_name],
                 ["المستوى", num(s.level)],
+                ["الفصل الدراسي", semester(s.semester)],
                 ["الحالة", STATUS[s.status] ?? s.status],
                 ["البريد", s.email ? <bdi key="e">{s.email}</bdi> : "—"],
                 ["الهاتف", s.phone_e164 ? <bdi key="p">{s.phone_e164}</bdi> : "—"],
@@ -307,6 +309,7 @@ function StudentForm({
     full_name_en: student?.full_name_en ?? "",
     program: student?.program ? String(student.program) : "",
     level: student?.level ?? 1,
+    semester: student?.semester ?? 1,
     email: student?.email ?? "",
     phone_e164: student?.phone_e164 ?? "",
   });
@@ -389,6 +392,23 @@ function StudentForm({
           </select>
           {errors.level?.[0] && (
             <span className="mt-1 block text-xs text-danger-strong">{errors.level[0]}</span>
+          )}
+        </label>
+        <label className="block border-b border-border-soft px-4 py-2.5">
+          <span className="block text-xs text-text-muted">الفصل الدراسي</span>
+          <select
+            value={f.semester}
+            onChange={(e) => setF({ ...f, semester: Number(e.target.value) })}
+            className="mt-0.5 block min-h-9 w-full bg-transparent text-base text-text outline-none"
+          >
+            {SEMESTERS.map((x) => (
+              <option key={x.value} value={x.value}>
+                {x.label}
+              </option>
+            ))}
+          </select>
+          {errors.semester?.[0] && (
+            <span className="mt-1 block text-xs text-danger-strong">{errors.semester[0]}</span>
           )}
         </label>
         <Field
