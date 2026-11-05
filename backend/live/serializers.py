@@ -47,11 +47,35 @@ class LiveSessionSerializer(serializers.ModelSerializer):
         read_only_fields = ["public_id", "status", "host_name"]
 
     def get_can_join(self, obj) -> bool:
-        """Whether the link is theirs to open (an observer sees the session without it)."""
-        from .services import may_join
+        """Whether the link is theirs to open (an observer sees the session without it).
+
+        services.may_join per row cost about five queries a session on the student's «اليوم»
+        (review 2026-11): a list works out the same answer from what the user attends and
+        teaches, read once, and asks can_manage once per course or programme."""
+        from academic.models import OfferingInstructor
+
+        from .models import LiveSession
+        from .services import _attending_q, can_manage
 
         request = self.context.get("request")
-        return request is not None and may_join(request.user, obj)
+        if request is None:
+            return False
+        user = request.user
+        memo = self.__dict__.setdefault("_join_memo", {})
+        if not memo:
+            memo["attending"] = set(
+                LiveSession.objects.filter(_attending_q(user)).values_list("pk", flat=True)
+            )
+            memo["teaching"] = set(
+                OfferingInstructor.objects.filter(user=user).values_list("offering_id", flat=True)
+            )
+            memo["manage"] = {}
+        if obj.pk in memo["attending"] or (obj.offering_id and obj.offering_id in memo["teaching"]):
+            return True
+        key = ("offering", obj.offering_id) if obj.offering_id else ("program", obj.program_id)
+        if key not in memo["manage"]:
+            memo["manage"][key] = can_manage(user, obj)
+        return memo["manage"][key]
 
     def validate(self, attrs):
         scope = attrs.get("scope", getattr(self.instance, "scope", None))
