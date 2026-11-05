@@ -46,7 +46,11 @@ class ScopedModelViewSet(viewsets.ModelViewSet):
         return self.write_capability or self.read_capability
 
     def scope(self, name: str | None = None) -> rbac.Scope:
-        return rbac.scope_for(self.request.user, name or self._capability())
+        return rbac.scope_for(
+            self.request.user,
+            name or self._capability(),
+            deleting=self.request.method == "DELETE",
+        )
 
     def get_queryset(self):
         queryset = super().get_queryset()

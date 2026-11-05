@@ -23,7 +23,8 @@ def capability(read: str, write: str | None = None, delete: str | None = None):
                 name = delete
             else:
                 name = write
-            return rbac.can(request.user, name)
+            # Deleting never counts the system supervisor's role (rbac.scope_for).
+            return rbac.can(request.user, name, deleting=request.method == "DELETE")
 
     _Capability.__name__ = f"Can_{read.replace('.', '_')}"
     return _Capability

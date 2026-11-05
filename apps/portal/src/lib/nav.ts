@@ -35,6 +35,7 @@ import {
   UserRound,
   Users,
   UsersRound,
+  Trash2,
 } from "lucide-react";
 
 import type { NavItem } from "../components/AppShell";
@@ -43,6 +44,7 @@ import { hasRole, type Me } from "./auth";
 /** Roles that can compose notifications (docs/03 §8). HR writes HR notices instead. */
 const SENDERS = [
   "system_admin",
+  "system_supervisor",
   "head_registrar",
   "academic_affairs",
   "student_affairs",
@@ -101,7 +103,7 @@ function departmentNav(me: Me | null | undefined, unread: number): NavItem[] {
 export function navFor(me: Me | null | undefined, unread: number): NavItem[] {
   if (hasRole(me, "department_manager", "department_supervisor")) return departmentNav(me, unread);
   const items: NavItem[] = [];
-  if (hasRole(me, "system_admin")) {
+  if (hasRole(me, "system_admin", "system_supervisor")) {
     items.push({ label: "إدارة النظام", short: "الرئيسية", to: "/system", icon: LayoutDashboard });
     items.push({ label: "المستخدمون", to: "/system/users", icon: Users, end: false });
     items.push({
@@ -124,6 +126,8 @@ export function navFor(me: Me | null | undefined, unread: number): NavItem[] {
       desktopOnly: true,
     });
     items.push({ label: "التدقيق", to: "/audit", icon: History });
+    // Deletion requests to decide (owner, 2026-11-05).
+    items.push({ label: "طلبات الحذف", to: "/system/deletions", icon: Trash2 });
   }
   if (me?.student) {
     // The phone keeps exactly five tabs; large screens also list what «أنا» leads to
@@ -157,7 +161,8 @@ export function navFor(me: Me | null | undefined, unread: number): NavItem[] {
   if (hasRole(me, "student_affairs"))
     items.push({ label: "الرئيسية", to: "/affairs", icon: LayoutDashboard });
   // HR starts on its own home (review 2026-09-29), not after the shared items.
-  const hrHome = can(me, "hr.view") && !hasRole(me, "system_admin", "academic_affairs");
+  const hrHome =
+    can(me, "hr.view") && !hasRole(me, "system_admin", "system_supervisor", "academic_affairs");
   if (hrHome) items.push({ label: "الرئيسية", to: "/hr", icon: LayoutDashboard });
   // Admissions staff start on admissions: home, then applications, before notifications —
   // so «الطلبات» is a tab on the phone (review 2026-09-29).
@@ -184,12 +189,15 @@ export function navFor(me: Me | null | undefined, unread: number): NavItem[] {
     "department_supervisor",
     "academic_affairs",
     "system_admin",
+    "system_supervisor",
   );
   if (me?.student || teaches)
     items.push({ label: "الاختبارات", to: "/exams", icon: ClipboardList, end: false });
   if (me?.student || teaches) items.push({ label: "البث", to: "/live", icon: Radio, end: false });
   items.push({ label: "الإعلانات", to: "/announcements", icon: Megaphone, end: false });
-  if (hasRole(me, "site_manager", "head_registrar", "registrar", "system_admin")) {
+  if (
+    hasRole(me, "site_manager", "head_registrar", "registrar", "system_admin", "system_supervisor")
+  ) {
     items.push({ label: "الاستفسارات", to: "/inquiries", icon: Inbox, end: false });
   }
   if (can(me, "content.manage"))
@@ -209,7 +217,10 @@ export function navFor(me: Me | null | undefined, unread: number): NavItem[] {
     items.push({ label: "سجل الطلاب", to: "/students", icon: Users, end: false });
     items.push({ label: "استيراد الطلاب", to: "/student-imports", icon: FileUp, end: false });
   }
-  if (can(me, "admissions.manage") && hasRole(me, "head_registrar", "system_admin"))
+  if (
+    can(me, "admissions.manage") &&
+    hasRole(me, "head_registrar", "system_admin", "system_supervisor")
+  )
     items.push({ label: "المسجلون", to: "/registrars", icon: UserCheck });
   if (can(me, "admissions.manage")) {
     items.push({ label: "دورات القبول", to: "/admissions/cycles", icon: CalendarRange });
@@ -258,9 +269,9 @@ export function navFor(me: Me | null | undefined, unread: number): NavItem[] {
   items.push({ label: "الإعدادات", to: "/settings", icon: Settings });
   items.push({ label: "تثبيت التطبيق", to: "/install", icon: Download });
   // The log of one's field of work (decisions item 8); last, so phone tabs stay as they were.
-  if (can(me, "audit.domain") && !hasRole(me, "system_admin"))
+  if (can(me, "audit.domain") && !hasRole(me, "system_admin", "system_supervisor"))
     items.push({ label: "سجل العمليات", to: "/audit", icon: History });
-  return hasRole(me, "system_admin") ? grouped(items) : items;
+  return hasRole(me, "system_admin", "system_supervisor") ? grouped(items) : items;
 }
 
 /** The system admin sees nearly every page: the sidebar groups them under headings

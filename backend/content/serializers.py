@@ -4,6 +4,7 @@ from rest_framework import serializers
 
 from .models import (
     Announcement,
+    DeletionRequest,
     Event,
     MediaAsset,
     Menu,
@@ -141,10 +142,56 @@ class PageSerializer(serializers.ModelSerializer):
         return clean_blocks(value)
 
 
+class DeletionRequestSerializer(serializers.ModelSerializer):
+    requested_by_name = serializers.CharField(source="requested_by.full_name_ar", read_only=True)
+    decided_by_name = serializers.CharField(
+        source="decided_by.full_name_ar", read_only=True, default=None
+    )
+
+    class Meta:
+        model = DeletionRequest
+        fields = [
+            "id",
+            "kind",
+            "title",
+            "reason",
+            "state",
+            "requested_by_name",
+            "decided_by_name",
+            "decided_at",
+            "decision_note",
+            "created_at",
+        ]
+        read_only_fields = fields
+
+
+class DeletionDecisionSerializer(serializers.Serializer):
+    note = serializers.CharField(required=False, allow_blank=True, max_length=2000)
+
+
 class AnnouncementSerializer(serializers.ModelSerializer):
     cover = CoverField()
     cover_url = serializers.SerializerMethodField()
     author = serializers.CharField(source="created_by.full_name_ar", read_only=True)
+    mine = serializers.SerializerMethodField()
+    deletion_pending = serializers.SerializerMethodField()
+
+    def get_mine(self, obj) -> bool:
+        """The reader wrote it: «إعلاناتي» and its delete request (owner, 2026-11-05)."""
+        request = self.context.get("request")
+        return bool(request and obj.created_by_id == request.user.pk)
+
+    def get_deletion_pending(self, obj) -> bool:
+        """A deletion request waits for the system admin or supervisor (owner, 2026-11-05).
+        Read once for a whole list."""
+        from content import deletions
+
+        root = self.parent if isinstance(self.parent, serializers.ListSerializer) else self
+        if not hasattr(root, "_deletion_pending"):
+            rows = root.instance if root is not self else [obj]
+            ids = [o.pk for o in (rows if hasattr(rows, "__iter__") else [rows])]
+            root._deletion_pending = deletions.pending(deletions.K.ANNOUNCEMENT, ids)
+        return obj.pk in root._deletion_pending
 
     class Meta:
         model = Announcement
@@ -164,6 +211,8 @@ class AnnouncementSerializer(serializers.ModelSerializer):
             "cover_url",
             "author",
             "created_at",
+            "mine",
+            "deletion_pending",
         ]
         read_only_fields = ["public_id", "status", "author", "created_at"]
 

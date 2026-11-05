@@ -35,6 +35,7 @@ const GROUPS: { label: string; roles: string[] }[] = [
     label: "أدوار إدارية أخرى",
     roles: [
       "system_admin",
+      "system_supervisor",
       "results_officer",
       "academic_affairs",
       "student_affairs",
@@ -97,6 +98,16 @@ export function AdminHome() {
       ok(await api.GET("/api/v1/audit-logs", { params: { query: { page_size: 6 } } }))?.results ??
       [],
   });
+  // Deletion requests waiting for the admin or supervisor (owner, 2026-11-05).
+  const deletions = useQuery({
+    queryKey: ["deletion-requests", "pending", "count"],
+    queryFn: async () =>
+      ok(
+        await api.GET("/api/v1/deletion-requests", {
+          params: { query: { state: "pending", page_size: 1 } as never },
+        }),
+      )?.count ?? 0,
+  });
   const toggle = useMutation({
     mutationFn: async (value: boolean) => {
       const { data, error } = await api.PATCH("/api/v1/system-settings", {
@@ -119,6 +130,13 @@ export function AdminHome() {
   const failing = Object.values(checks).filter((v) => v && v !== "ok").length;
   // «يحتاج إجراءك» (mockups 2026-10-29): what in the system's state waits on the administrator.
   const inbox: InboxItem[] = [
+    {
+      n: deletions.data ?? 0,
+      title: "طلبات حذف تنتظر قرارك",
+      meta: "إعلانات وإشعارات طلب أصحابها حذفها",
+      to: "/system/deletions",
+      action: "طلبات الحذف",
+    },
     {
       n: health.data && !healthy ? Math.max(failing, 1) : 0,
       title: "خدمة لا تعمل كما ينبغي",

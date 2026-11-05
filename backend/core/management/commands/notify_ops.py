@@ -62,7 +62,10 @@ class Command(BaseCommand):
         from notifications.services import notify
 
         admins = list(
-            User.objects.filter(is_active=True, role_assignments__role=Role.SYSTEM_ADMIN).distinct()
+            User.objects.filter(
+                is_active=True,
+                role_assignments__role__in=[Role.SYSTEM_ADMIN, Role.SYSTEM_SUPERVISOR],
+            ).distinct()
         )
         recipients = sorted({u.email for u in admins if u.email})
         if getattr(settings, "OPS_ALERT_EMAIL", ""):

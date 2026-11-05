@@ -68,7 +68,7 @@ def handlers_q(inquiry_type: str, department_id: int | None) -> Q:
 def visible_q(user) -> Q:
     """Inquiries a staff user may see (docs/03 §7 «استفسارات»)."""
     roles = rbac.roles_of(user)
-    if Role.SYSTEM_ADMIN in roles:
+    if Role.SYSTEM_ADMIN in roles or Role.SYSTEM_SUPERVISOR in roles:
         return Q(pk__isnull=False)
     q = Q(pk__in=[])
     if Role.SITE_MANAGER in roles:
@@ -87,7 +87,7 @@ def visible_q(user) -> Q:
 
 def can_reply(user, inquiry: Inquiry) -> bool:
     roles = rbac.roles_of(user)
-    if Role.SYSTEM_ADMIN in roles:
+    if rbac.is_admin(user):
         return True
     if inquiry.type in ADMISSION_TYPES:
         if Role.HEAD_REGISTRAR in roles:
@@ -232,7 +232,7 @@ def assign(meta: RequestMeta, inquiry: Inquiry, user) -> Inquiry:
         and not get_user_model()
         .objects.filter(handlers_q(inquiry.type, inquiry.department_id), pk=user.pk)
         .exists()
-        and not rbac.has_role(user, Role.SYSTEM_ADMIN)
+        and not rbac.is_admin(user)
     ):
         raise ValidationError(
             {"user": [gettext("This person does not handle this kind of inquiry.")]}
@@ -251,7 +251,7 @@ def assign(meta: RequestMeta, inquiry: Inquiry, user) -> Inquiry:
 
 def reroute(meta: RequestMeta, inquiry: Inquiry, *, type: str, department) -> Inquiry:
     """The site manager (or admin) corrects the type/department; handlers change accordingly."""
-    if not rbac.has_role(meta.actor, Role.SITE_MANAGER, Role.SYSTEM_ADMIN):
+    if not (rbac.has_role(meta.actor, Role.SITE_MANAGER) or rbac.is_admin(meta.actor)):
         raise PermissionDenied()
     with transaction.atomic():
         old = {"type": inquiry.type, "department": inquiry.department_id}

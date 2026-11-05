@@ -1,5 +1,6 @@
 export const ROLE_LABEL: Record<string, string> = {
   system_admin: "مدير النظام",
+  system_supervisor: "مشرف النظام",
   head_registrar: "مسؤول المسجلين",
   registrar: "مسجل",
   results_officer: "مسؤول النتائج",
@@ -37,5 +38,6 @@ export const ROLE_ORDER = [
   "results_officer",
   "academic_affairs",
   "head_registrar",
+  "system_supervisor",
   "system_admin",
 ];

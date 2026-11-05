@@ -25,6 +25,7 @@ from core.throttles import PublicReadThrottle
 from . import portal_icons, services
 from .models import (
     Announcement,
+    DeletionRequest,
     Event,
     MediaAsset,
     Menu,
@@ -37,6 +38,8 @@ from .models import (
 )
 from .serializers import (
     AnnouncementSerializer,
+    DeletionDecisionSerializer,
+    DeletionRequestSerializer,
     EventSerializer,
     MediaAltSerializer,
     MediaAssetSerializer,
@@ -378,24 +381,30 @@ class AnnouncementViewSet(viewsets.ModelViewSet):
         self._owned(obj)
         services.require_announce(self.request.user, obj.scope, obj.scope_id, obj.audience)
 
-    def perform_destroy(self, instance):
-        self._owned(instance)
-        if not services.may_delete_announcement(self.request.user, instance):
+    @extend_schema(responses={204: None, 202: DeletionRequestSerializer})
+    def destroy(self, request, *args, **kwargs):
+        """The system admin, and the site manager, delete at once; anyone else who may delete
+        it (its author first) asks, and the system admin or supervisor decides (owner,
+        2026-11-05). Body: {"reason": "…"} (optional)."""
+        from . import deletions
+
+        instance = self.get_object()
+        user = request.user
+        if not (
+            instance.created_by_id == user.pk
+            or services.may_delete_announcement(user, instance)
+            or rbac.is_admin(user)
+        ):
             raise PermissionDenied(gettext("You may not delete this announcement."))
-        record(
-            _meta(self.request),
-            "announcement.delete",
-            instance,
-            old=snapshot(instance),
-            department_id=_department(instance),
-        )
-        was_public = (
-            instance.audience == Announcement.Audience.PUBLIC
-            and instance.status == Status.PUBLISHED
-        )
-        instance.delete()
-        if was_public:
-            services.request_site_rebuild()
+        kind = deletions.K.ANNOUNCEMENT
+        if deletions.deletes_at_once(user, kind) and (
+            rbac.is_admin(user, deleting=True) or services.may_delete_announcement(user, instance)
+        ):
+            with transaction.atomic():
+                deletions.delete_now(_meta(request), kind, instance)
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        req = deletions.request(_meta(request), kind, instance, request.data.get("reason", ""))
+        return Response(DeletionRequestSerializer(req).data, status=status.HTTP_202_ACCEPTED)
 
     @extend_schema(request=None, responses=AnnouncementSerializer)
     @action(detail=True, methods=["post"])
@@ -565,3 +574,38 @@ class PublicRedirectView(_PublicRead):
         redirect = get_object_or_404(Redirect, from_path=request.query_params.get("path", ""))
         Redirect.objects.filter(pk=redirect.pk).update(hits=F("hits") + 1)
         return Response(RedirectSerializer(redirect).data, status=status.HTTP_200_OK)
+
+
+@extend_schema(tags=["content"])
+class DeletionRequestViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
+    """Requests to delete an announcement or a sent notification, for the system admin and
+    supervisor to decide (owner, 2026-11-05); ?state=pending for the waiting ones."""
+
+    serializer_class = DeletionRequestSerializer
+    queryset = DeletionRequest.objects.select_related("requested_by", "decided_by")
+    filterset_fields = ["state", "kind"]
+
+    def get_permissions(self):
+        return [IsAuthenticated(), capability("deletions.approve")()]
+
+    def _decide(self, request, approve: bool):
+        from . import deletions
+
+        body = DeletionDecisionSerializer(data=request.data)
+        body.is_valid(raise_exception=True)
+        req = self.get_object()
+        deletions.decide(
+            _meta(request), req, approve=approve, note=body.validated_data.get("note", "")
+        )
+        req.refresh_from_db()
+        return Response(DeletionRequestSerializer(req).data)
+
+    @extend_schema(request=DeletionDecisionSerializer, responses=DeletionRequestSerializer)
+    @action(detail=True, methods=["post"])
+    def approve(self, request, pk=None):
+        return self._decide(request, True)
+
+    @extend_schema(request=DeletionDecisionSerializer, responses=DeletionRequestSerializer)
+    @action(detail=True, methods=["post"])
+    def reject(self, request, pk=None):
+        return self._decide(request, False)

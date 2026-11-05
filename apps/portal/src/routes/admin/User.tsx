@@ -231,21 +231,24 @@ export function AdminUser() {
                 )}
               </>
             )}
-            <Button
-              variant="secondary"
-              className="min-h-11 w-full text-danger-strong"
-              disabled={remove.isPending}
-              onClick={async () =>
-                (await confirm({
-                  title: `حذف حساب ${u.full_name_ar} نهائيًا؟`,
-                  body: "يُحذف الحساب ولا يمكن التراجع. يصلح هذا لحساب أُنشئ بالخطأ ولم يُستعمل؛ أما الحساب الذي له سجل (عمليات أو درجات أو محتوى) فيرفض النظام حذفه ويُعطَّل بدل ذلك.",
-                  confirm: "حذف الحساب",
-                })) && remove.mutate()
-              }
-            >
-              <Trash2 size={18} aria-hidden />
-              حذف الحساب
-            </Button>
+            {/* The system supervisor never deletes (owner, 2026-11-05). */}
+            {can(me.data, "users.delete") && (
+              <Button
+                variant="secondary"
+                className="min-h-11 w-full text-danger-strong"
+                disabled={remove.isPending}
+                onClick={async () =>
+                  (await confirm({
+                    title: `حذف حساب ${u.full_name_ar} نهائيًا؟`,
+                    body: "يُحذف الحساب ولا يمكن التراجع. يصلح هذا لحساب أُنشئ بالخطأ ولم يُستعمل؛ أما الحساب الذي له سجل (عمليات أو درجات أو محتوى) فيرفض النظام حذفه ويُعطَّل بدل ذلك.",
+                    confirm: "حذف الحساب",
+                  })) && remove.mutate()
+                }
+              >
+                <Trash2 size={18} aria-hidden />
+                حذف الحساب
+              </Button>
+            )}
           </div>
           <div className="mt-6 space-y-4 lg:mt-0">
             <SectionLabel>الأدوار والنطاقات</SectionLabel>

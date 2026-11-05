@@ -28,6 +28,7 @@ const teaching = either(role("teacher", "ta"), cap("learning.manage"));
 const learning = either(student, role("teacher", "ta"), cap("learning.view"));
 const announcers = role(
   "system_admin",
+  "system_supervisor",
   "head_registrar",
   "registrar",
   "academic_affairs",
@@ -39,7 +40,13 @@ const announcers = role(
   "events_manager",
 );
 const departmentPages = either(
-  role("department_manager", "department_supervisor", "academic_affairs", "system_admin"),
+  role(
+    "department_manager",
+    "department_supervisor",
+    "academic_affairs",
+    "system_admin",
+    "system_supervisor",
+  ),
 );
 const anyReport = cap(
   "reports.department",
@@ -92,8 +99,20 @@ export const ROUTE_ACCESS: Record<string, Allow> = {
   "/live/new": teaching,
   "/announcements": anyone,
   "/announcements/new": announcers,
-  "/inquiries": role("site_manager", "head_registrar", "registrar", "system_admin"),
-  "/inquiries/:id": role("site_manager", "head_registrar", "registrar", "system_admin"),
+  "/inquiries": role(
+    "site_manager",
+    "head_registrar",
+    "registrar",
+    "system_admin",
+    "system_supervisor",
+  ),
+  "/inquiries/:id": role(
+    "site_manager",
+    "head_registrar",
+    "registrar",
+    "system_admin",
+    "system_supervisor",
+  ),
   "/site": cap("content.manage"),
   "/site/pages/:id": cap("content.manage"),
   // The events manager writes news about its events (docs/03 §3.13).
@@ -113,7 +132,7 @@ export const ROUTE_ACCESS: Record<string, Allow> = {
   "/students/:id": cap("students.view"),
   "/student-imports": cap("students.import"),
   "/student-imports/:id": cap("students.import"),
-  "/registrars": role("head_registrar", "system_admin"),
+  "/registrars": role("head_registrar", "system_admin", "system_supervisor"),
   "/department": departmentPages,
   "/department/courses": departmentPages,
   "/department/lectures": departmentPages,
@@ -144,5 +163,6 @@ export const ROUTE_ACCESS: Record<string, Allow> = {
   "/system/roles": cap("users.view"),
   "/system/structure": cap("structure.manage"),
   "/system/settings": cap("settings.manage"),
+  "/system/deletions": cap("deletions.approve"),
   "/audit": cap("audit.view", "audit.domain"),
 };

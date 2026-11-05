@@ -26,6 +26,9 @@ from django.db.models import Q, QuerySet
 
 class Role(models.TextChoices):
     SYSTEM_ADMIN = "system_admin", "مدير النظام"
+    # Stands in for the system admin (owner, 2026-11-05): every capability of the admin except
+    # deleting anything; approves deletion requests (announcements, sent notifications).
+    SYSTEM_SUPERVISOR = "system_supervisor", "مشرف النظام"
     HEAD_REGISTRAR = "head_registrar", "مسؤول المسجلين"
     REGISTRAR = "registrar", "مسجل قسم"
     RESULTS_OFFICER = "results_officer", "مسؤول النتائج"
@@ -228,9 +231,23 @@ CAPABILITIES: dict[str, frozenset[Role]] = {
     ),
 }
 
+# Approves (or refuses) a request to delete an announcement or a sent notification.
+CAPABILITIES["deletions.approve"] = frozenset({R.SYSTEM_ADMIN})
+
+# The system supervisor holds what the admin holds, but no capability that deletes; and the
+# DELETE method never counts its role (scope_for(..., deleting=True)).
+DELETING = frozenset(name for name in CAPABILITIES if name.endswith(".delete"))
+for _name, _roles in list(CAPABILITIES.items()):
+    if R.SYSTEM_ADMIN in _roles and _name not in DELETING:
+        CAPABILITIES[_name] = _roles | {R.SYSTEM_SUPERVISOR}
+
+# Roles above the supervisor: it never grants them or acts on their accounts.
+TOP_ROLES = frozenset({R.SYSTEM_ADMIN, R.SYSTEM_SUPERVISOR})
+
 # Who may grant (and revoke) which role (docs/03 §6).
 GRANTS: dict[Role, frozenset[Role]] = {
     R.SYSTEM_ADMIN: frozenset(Role),
+    R.SYSTEM_SUPERVISOR: frozenset(Role) - TOP_ROLES,
     R.HEAD_REGISTRAR: frozenset({R.REGISTRAR}),
     R.ACADEMIC_AFFAIRS: frozenset({R.DEPARTMENT_MANAGER, R.DEPARTMENT_SUPERVISOR, R.TEACHER, R.TA}),
     R.SITE_MANAGER: frozenset({R.EVENTS_MANAGER}),
@@ -239,6 +256,7 @@ GRANTS: dict[Role, frozenset[Role]] = {
 # Staff accounts each role may create (docs/03 §7 "المستخدمون").
 CREATABLE_ACCOUNTS: dict[Role, frozenset[Role]] = {
     R.SYSTEM_ADMIN: frozenset(Role) - {R.STUDENT},  # students come from records
+    R.SYSTEM_SUPERVISOR: frozenset(Role) - {R.STUDENT} - TOP_ROLES,
     R.ACADEMIC_AFFAIRS: frozenset({R.TEACHER, R.TA}),
 }
 
@@ -296,6 +314,12 @@ def roles_of(user) -> set[str]:
     return {role for role, _ in _assignments(user)}
 
 
+def is_admin(user, *, deleting: bool = False) -> bool:
+    """The system admin, or (unless deleting) the system supervisor who stands in for them."""
+    roles = (Role.SYSTEM_ADMIN,) if deleting else (Role.SYSTEM_ADMIN, Role.SYSTEM_SUPERVISOR)
+    return has_role(user, *roles)
+
+
 def has_role(user, *roles: Role) -> bool:
     held = roles_of(user)
     return any(role in held for role in roles)
@@ -306,11 +330,13 @@ def has_role_in(user, role: Role, department_id: int | None) -> bool:
     return department_id is not None and (role, department_id) in _assignments(user)
 
 
-def scope_for(user, capability: str) -> Scope:
+def scope_for(user, capability: str, *, deleting: bool = False) -> Scope:
+    """`deleting`: the request deletes something; the system supervisor's role does not count
+    (it stands in for the admin in everything but deleting — owner, 2026-11-05)."""
     allowed = CAPABILITIES[capability]
     departments: set[int] = set()
     for role, department_id in _assignments(user):
-        if role not in allowed:
+        if role not in allowed or (deleting and role == Role.SYSTEM_SUPERVISOR):
             continue
         if role in DEPARTMENT_SCOPED_ROLES:
             if department_id is not None:
@@ -320,9 +346,9 @@ def scope_for(user, capability: str) -> Scope:
     return Scope(departments=frozenset(departments))
 
 
-def can(user, capability: str, department_id: int | None = None) -> bool:
+def can(user, capability: str, department_id: int | None = None, *, deleting: bool = False) -> bool:
     """True if ``user`` holds ``capability`` for ``department_id`` (or anywhere, if None)."""
-    scope = scope_for(user, capability)
+    scope = scope_for(user, capability, deleting=deleting)
     if department_id is None:
         return not scope.none
     return scope.allows(department_id)

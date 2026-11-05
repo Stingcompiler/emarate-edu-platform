@@ -114,7 +114,7 @@ def _students(audience: dict) -> bool:
 def is_allowed(sender, audience: dict) -> bool:
     roles = rbac.roles_of(sender)
     kind = audience["type"]
-    if Role.SYSTEM_ADMIN in roles:
+    if roles & {Role.SYSTEM_ADMIN, Role.SYSTEM_SUPERVISOR}:
         return True
     departments = _departments_of(audience)
 
@@ -237,11 +237,16 @@ def options(sender) -> list[dict]:
         if count or keep_empty:
             found.append({"group": group, "label": label, "audience": clean, "count": count})
 
-    if roles & {Role.SYSTEM_ADMIN, Role.SITE_MANAGER, Role.EVENTS_MANAGER}:
+    if roles & {Role.SYSTEM_ADMIN, Role.SYSTEM_SUPERVISOR, Role.SITE_MANAGER, Role.EVENTS_MANAGER}:
         add("college", "كل مستخدمي الكلية", {"type": "college", "members": "all"})
-    if roles & {Role.SYSTEM_ADMIN, Role.HEAD_REGISTRAR, Role.STUDENT_AFFAIRS}:
+    if roles & {
+        Role.SYSTEM_ADMIN,
+        Role.SYSTEM_SUPERVISOR,
+        Role.HEAD_REGISTRAR,
+        Role.STUDENT_AFFAIRS,
+    }:
         add("college", "كل طلاب الكلية", {"type": "college", "members": "students"})
-    if roles & {Role.SYSTEM_ADMIN, Role.ACADEMIC_AFFAIRS}:
+    if roles & {Role.SYSTEM_ADMIN, Role.SYSTEM_SUPERVISOR, Role.ACADEMIC_AFFAIRS}:
         add("staff", "كل الأساتذة والمعيدين", {"type": "role", "roles": ["teacher", "ta"]})
 
     scope = rbac.scope_for(sender, "learning.manage")

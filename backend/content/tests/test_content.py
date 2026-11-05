@@ -495,27 +495,29 @@ def test_image_layout_is_chosen_by_the_page_editors(api, site, make_user):
 
 
 def test_deleting_announcements_is_narrower_than_writing_them(api, classroom, make_user, it_dept):
-    """docs/03 §3.7, §3.9: a supervisor or a TA never deletes; a teacher deletes their own
-    course announcement; publishing re-checks the author's authority today."""
+    """Owner, 2026-11-05: an author keeps their announcements and asks to delete them; the
+    system admin or supervisor decides (202, a request). A department manager asks too for the
+    department's. Nobody else may ask. Publishing re-checks the author's authority today."""
     from academic.models import OfferingInstructor
 
     dept = {"scope": "department", "scope_id": it_dept.pk, "audience": "all_internal"}
     supervisor = make_user(Role.DEPARTMENT_SUPERVISOR, department=it_dept)
     manager = make_user(Role.DEPARTMENT_MANAGER, department=it_dept)
     made = api(supervisor).post(A, {**dept, "title": "t", "body": "b"}, format="json").data
-    assert api(supervisor).delete(f"{A}/{made['public_id']}").status_code == 403
+    assert api(supervisor).delete(f"{A}/{made['public_id']}").status_code == 202  # own: asks
     api(supervisor).post(f"{A}/{made['public_id']}/publish")  # the manager sees it once published
-    assert api(manager).delete(f"{A}/{made['public_id']}").status_code == 204
+    pending = api(manager).delete(f"{A}/{made['public_id']}")
+    assert pending.status_code == 409 and pending.data["code"] == "pending"  # one at a time
 
     classroom.offering.ta_can_notify = True
     classroom.offering.save(update_fields=["ta_can_notify"])
     course = {"scope": "offering", "scope_id": classroom.offering.pk, "audience": "students"}
     by_ta = api(classroom.ta).post(A, {**course, "title": "t", "body": "b"}, format="json").data
-    assert api(classroom.ta).delete(f"{A}/{by_ta['public_id']}").status_code == 403
+    assert api(classroom.ta).delete(f"{A}/{by_ta['public_id']}").status_code == 202
     by_teacher = api(classroom.teacher).post(
         A, {**course, "title": "t", "body": "b"}, format="json"
     )
-    assert api(classroom.teacher).delete(f"{A}/{by_teacher.data['public_id']}").status_code == 204
+    assert api(classroom.teacher).delete(f"{A}/{by_teacher.data['public_id']}").status_code == 202
 
     draft = (
         api(classroom.teacher).post(A, {**course, "title": "t", "body": "b"}, format="json").data
@@ -548,7 +550,8 @@ def test_two_roles_do_not_add_up_to_a_delete_neither_has(api, make_user, it_dept
     for user in (supervisor, both):
         made = api(user).post(A, {**dept, "title": "t", "body": "b"}, format="json")
         assert made.status_code == 201, made.data
-        assert api(user).delete(f"{A}/{made.data['public_id']}").status_code == 403
+        # Its author asks (owner, 2026-11-05); neither role deletes it at once.
+        assert api(user).delete(f"{A}/{made.data['public_id']}").status_code == 202
     for user in (site, both):
         made = api(user).post(A, {**college, "title": "t", "body": "b"}, format="json")
         assert api(user).delete(f"{A}/{made.data['public_id']}").status_code == 204

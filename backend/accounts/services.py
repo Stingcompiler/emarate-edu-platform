@@ -318,6 +318,7 @@ def admin_reset_password(meta: RequestMeta, user: User) -> str:
     """The system admin gives an account a temporary password (returned once, never stored in
     the clear or in the log). The account must change it at the next sign-in, and every open
     session of it ends now (review 2026-10-08 R05's token version)."""
+    _not_above(meta.actor, user)
     if not rbac.can(meta.actor, "users.reset_password"):
         raise PermissionDenied()
     if user.pk == meta.actor.pk:
@@ -581,6 +582,7 @@ def rename_account(
 ) -> User:
     """The system admin corrects a staff member's name. A student's name belongs to the student
     record (the registrar edits it), so a student account is refused here."""
+    _not_above(meta.actor, user)
     if not rbac.can(meta.actor, "users.rename"):
         raise PermissionDenied()
     if StudentRecord.objects.filter(user=user).exists():
@@ -623,6 +625,7 @@ def update_profile(meta: RequestMeta, user: User, **data) -> User:
     from files.models import Purpose, StoredFile
     from inquiries.services import normalize_phone
 
+    _not_above(meta.actor, user)
     if not rbac.can(meta.actor, "users.rename"):
         raise PermissionDenied()
     student = StudentRecord.objects.filter(user=user).exists()
@@ -691,6 +694,15 @@ def update_profile(meta: RequestMeta, user: User, **data) -> User:
 
     site_changed()
     return user
+
+
+def _not_above(actor, user) -> None:
+    """The system supervisor stands in for the admin, never over them: an admin's or another
+    supervisor's account (password, name, profile) is the admin's (owner, 2026-11-05)."""
+    if rbac.has_role(actor, Role.SYSTEM_ADMIN):
+        return
+    if rbac.roles_of(user) & rbac.TOP_ROLES:
+        raise PermissionDenied(gettext("Only the system admin changes this account."))
 
 
 def set_active(meta: RequestMeta, user: User, active: bool) -> User:
