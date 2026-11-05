@@ -60,12 +60,24 @@ const DEGREE_EN: Record<string, string> = {
 };
 const initial = (name: string) =>
   (name.replace(/^(د|أ|م|Dr|Prof|Mr|Ms)\.?\s+/u, "").trim()[0] ?? "").toUpperCase();
-const others = all
-  .filter((o) => o.code !== d.code)
-  .map((o) => ({
+// Five others at most, then the whole directory (UX review 2026-11-04: twenty names took the
+// side column).
+const OTHERS = 5;
+const rest = all.filter((o) => o.code !== d.code);
+const others = [
+  ...rest.slice(0, OTHERS).map((o) => ({
     label: pick(lang, o.name_ar, o.name_en),
     href: href(lang, `departments/${o.code}/`),
-  }));
+  })),
+  ...(rest.length > OTHERS
+    ? [
+        {
+          label: L(`كل الأقسام (${num(lang, all.length)})`, `All departments (${all.length})`),
+          href: href(lang, "departments/"),
+        },
+      ]
+    : []),
+];
 ---
 
 <Base lang={lang} title={name} path={`departments/${d.code}/`} description={summary}>
@@ -176,7 +188,7 @@ const others = all
                         {lang === "ar" ? "في" : "in"} {q.field}
                         <span class="block text-xs text-text-muted">
                           {q.institution}
-                          {q.year ? ` · ${num(lang, q.year)}` : ""}
+                          {q.year ? ` · ${q.year}` : ""}
                         </span>
                       </li>
                     ))}

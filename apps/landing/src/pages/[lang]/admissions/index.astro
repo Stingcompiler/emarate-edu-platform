@@ -1,6 +1,7 @@
 ---
 import Faq from "../../../components/Faq.astro";
 import PageHead from "../../../components/PageHead.astro";
+import { applySteps } from "../../../lib/steps";
 import Base from "../../../layouts/Base.astro";
 import { PORTAL, intakes, programs } from "../../../lib/api";
 import {
@@ -51,36 +52,7 @@ for (const intake of open)
   }
 const general = [...docs.values()].filter((d) => d.count === open.length);
 
-const steps = [
-  [
-    L("تحقّق من بريدك", "Verify your email"),
-    L(
-      "أدخل بريدك وأكّد الرمز المرسل إليه — يُحفظ طلبك كمسودة بعد كل خطوة.",
-      "Enter your email and confirm the code we send — your application is saved as a draft after every step.",
-    ),
-  ],
-  [
-    L("اختر البرنامج", "Choose the programme"),
-    L(
-      "برنامج واحد لكل طلب؛ يمكنك تقديم طلب آخر لبرنامج ثانٍ بالبريد نفسه.",
-      "One programme per application; you can apply to another one with the same email.",
-    ),
-  ],
-  [
-    L("أكمل النموذج وارفع المستندات", "Fill in the form and upload documents"),
-    L(
-      "الأسئلة حسب البرنامج، وتكفي صورة واضحة بالهاتف للمستندات.",
-      "Questions depend on the programme; a clear phone photo of each document is enough.",
-    ),
-  ],
-  [
-    L("راجع وأرسل", "Review and submit"),
-    L(
-      "تستلم رقمًا مرجعيًا فورًا، ويصلك كل تحديث على بريدك.",
-      "You get a reference number at once, and every update reaches your email.",
-    ),
-  ],
-];
+const steps = applySteps(lang);
 
 const faq = [
   [
@@ -134,9 +106,20 @@ const lead = L(
     feature
   >
     {cycle && (
-      <p class="mt-4 inline-block rounded-full bg-accent-soft px-3 py-1 text-xs font-semibold text-accent-hover">
-        {cycleName(lang, cycle.cycle)}
-      </p>
+      <div class="mt-4 flex flex-wrap items-center gap-3">
+        <p class="inline-block rounded-full bg-accent-soft px-3 py-1 text-xs font-semibold text-accent-hover">
+          {cycleName(lang, cycle.cycle)}
+        </p>
+        {/* Start right where the dates are (UX review 2026-11-04), not only at the page's end. */}
+        {open.length > 0 && (
+          <a
+            href={`${PORTAL}/apply`}
+            class="inline-flex min-h-11 items-center rounded-lg bg-accent px-5 text-sm font-semibold text-on-primary hover:bg-accent-hover"
+          >
+            {L("ابدأ التقديم", "Start your application")} {arrow(lang)}
+          </a>
+        )}
+      </div>
     )}
   </PageHead>
 

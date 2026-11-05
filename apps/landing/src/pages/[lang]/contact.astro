@@ -109,15 +109,26 @@ const answers = await related(lang, ["admissions", "fees", "programs", "calendar
           ))}
         </div>
       </fieldset>
+      {/* Which fields are needed, said before them (UX review 2026-11-04). */}
+      <p class="text-sm text-text-muted">
+        {L(
+          "المعلَّم بـ * مطلوب، ومعه بريد أو هاتف لنرد عليك. البقية اختيارية.",
+          "Fields marked * are required, with an email or a phone for the reply. The rest are optional.",
+        )}
+      </p>
       <div class="grid gap-4 sm:grid-cols-2">
         <label class="block text-sm font-semibold">
-          {L("الاسم الكامل", "Full name")}
+          {L("الاسم", "Name")}
+          <span aria-hidden="true" class="text-danger-strong">
+            {" "}
+            *
+          </span>
           <input
             name="name"
             required
             maxlength="200"
             autocomplete="name"
-            placeholder={L("الاسم كما في الشهادة", "Your full name")}
+            placeholder={L("أدخل اسمك", "Your name")}
             aria-describedby="e-name"
             class="field"
           />
@@ -125,6 +136,7 @@ const answers = await related(lang, ["admissions", "fees", "programs", "calendar
         </label>
         <label class="block text-sm font-semibold">
           {L("البريد الإلكتروني", "Email")}
+          <span class="font-normal text-text-muted">{L(" (أو الهاتف)", " (or phone)")}</span>
           <input
             name="email"
             type="email"
@@ -138,6 +150,7 @@ const answers = await related(lang, ["admissions", "fees", "programs", "calendar
         </label>
         <label class="block text-sm font-semibold">
           {L("الهاتف (واتساب إن أمكن)", "Phone (WhatsApp if possible)")}
+          <span class="font-normal text-text-muted">{L(" (أو البريد)", " (or email)")}</span>
           <input
             name="phone"
             type="tel"
@@ -151,6 +164,9 @@ const answers = await related(lang, ["admissions", "fees", "programs", "calendar
         </label>
         <label class="block text-sm font-semibold">
           {L("القسم", "Department")}
+          <span class="font-normal text-text-muted">
+            {L(" — إن كان سؤالك عن قسم بعينه", " — if your question is about one")}
+          </span>
           <select name="department" class="field">
             <option value="">{L("غير محدد", "Not specific")}</option>
             {depts.map((d) => (
@@ -161,6 +177,10 @@ const answers = await related(lang, ["admissions", "fees", "programs", "calendar
       </div>
       <label class="block text-sm font-semibold">
         {L("عنوان الاستفسار", "Subject")}
+        <span aria-hidden="true" class="text-danger-strong">
+          {" "}
+          *
+        </span>
         <input
           name="subject"
           required
@@ -176,6 +196,10 @@ const answers = await related(lang, ["admissions", "fees", "programs", "calendar
       </label>
       <label class="block text-sm font-semibold">
         {L("رسالتك", "Message")}
+        <span aria-hidden="true" class="text-danger-strong">
+          {" "}
+          *
+        </span>
         <textarea
           name="message"
           required
@@ -200,6 +224,12 @@ const answers = await related(lang, ["admissions", "fees", "programs", "calendar
         role="alert"
         class="hidden rounded-lg bg-danger-soft p-3 text-sm text-danger-strong"
       ></p>
+      <p class="text-xs text-text-muted">
+        {L(
+          "نستعمل بريدك أو هاتفك للرد على هذا الاستفسار فقط.",
+          "We use your email or phone only to answer this message.",
+        )}
+      </p>
       <button
         type="submit"
         class="min-h-12 w-full rounded-lg bg-accent px-6 py-3 text-sm font-semibold text-on-primary hover:bg-accent-hover disabled:opacity-60 sm:w-auto"

@@ -84,14 +84,17 @@ const answers: Answer[] = [
                 "الرسوم وطرق الدفع والمنح في صفحة الرسوم.",
                 "Fees, payment and scholarships are on the fees page.",
               ),
-          links: [
-            ...(official("admissions/fees")
-              ? ([[L("الرسوم والمنح", "Fees and scholarships"), official("admissions/fees")!]] as [
-                  string,
-                  string,
-                ][])
-              : []),
-          ],
+          // Every answer links its source (the page's promise): the fees page when the college
+          // has published it, else the programmes, where each one shows its own fee.
+          links: official("admissions/fees")
+            ? ([[L("الرسوم والمنح", "Fees and scholarships"), official("admissions/fees")!]] as [
+                string,
+                string,
+              ][])
+            : ([[L("رسوم كل برنامج", "Each programme's fee"), href(lang, "programs/")]] as [
+                string,
+                string,
+              ][]),
         },
       ]
     : []),

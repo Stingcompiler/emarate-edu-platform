@@ -30,34 +30,42 @@ const more = await related(lang, ["calendar", "news", "announcements"]);
     crumbs={[[L("الفعاليات", "Events"), "events/"]]}
   />
   <WithAside>
-    <section>
-      <h2 class="font-display text-2xl font-bold">{L("القادمة", "Upcoming")}</h2>
-      <ul class="mt-4 grid gap-3 xl:grid-cols-2 xl:[&>li:last-child:nth-child(odd)]:col-span-2">
-        {upcoming.map((e) => (
-          <EventRow lang={lang} event={e} />
-        ))}
-        {!upcoming.length && (
-          <li class="text-sm text-text-muted">
-            {L("لا فعاليات قادمة الآن.", "No upcoming events.")}
-          </li>
+    {/* Nothing upcoming: one quiet line, and the archive takes the page (UX review
+        2026-11-04: an empty section and a «0» tile said the same thing twice). */}
+    {upcoming.length ? (
+      <section>
+        <h2 class="font-display text-2xl font-bold">{L("القادمة", "Upcoming")}</h2>
+        <ul class="mt-4 grid gap-3 xl:grid-cols-2 xl:[&>li:last-child:nth-child(odd)]:col-span-2">
+          {upcoming.map((e) => (
+            <EventRow lang={lang} event={e} />
+          ))}
+        </ul>
+      </section>
+    ) : (
+      <p class="rounded-xl bg-bg-subtle px-4 py-3 text-sm text-text-muted">
+        {L(
+          "لا فعاليات قادمة الآن؛ تُعلن هنا وفي التقويم حين تُحدَّد.",
+          "No upcoming events right now; they are announced here and in the calendar.",
         )}
-      </ul>
-    </section>
+      </p>
+    )}
     {past.length > 0 && (
       <section class="mt-10">
         <h2 class="font-display text-2xl font-bold">{L("فعاليات سابقة", "Past events")}</h2>
         <ul class="mt-4 grid gap-3 xl:grid-cols-2 xl:[&>li:last-child:nth-child(odd)]:col-span-2">
           {past.map((e) => (
-            <EventRow lang={lang} event={e} />
+            <EventRow lang={lang} event={e} past />
           ))}
         </ul>
       </section>
     )}
     <Fragment slot="aside">
-      <div class="rounded-2xl bg-bg-subtle p-4">
-        <p class="font-display text-3xl font-bold text-primary">{num(lang, upcoming.length)}</p>
-        <p class="text-sm text-text-muted">{word(lang, upcoming.length, N.upcomingEvent)}</p>
-      </div>
+      {upcoming.length > 0 && (
+        <div class="rounded-2xl bg-bg-subtle p-4">
+          <p class="font-display text-3xl font-bold text-primary">{num(lang, upcoming.length)}</p>
+          <p class="text-sm text-text-muted">{word(lang, upcoming.length, N.upcomingEvent)}</p>
+        </div>
+      )}
       <SideLinks lang={lang} title={L("ذو صلة", "Related")} links={more} />
     </Fragment>
   </WithAside>
