@@ -4,6 +4,7 @@ import StaffCard from "../../components/StaffCard.astro";
 import { HERO_WIDTHS } from "../../lib/images";
 import TrustStrip from "../../components/TrustStrip.astro";
 import Base from "../../layouts/Base.astro";
+import { applySteps } from "../../lib/steps";
 import {
   PORTAL,
   announcements,
@@ -304,10 +305,7 @@ const jsonLd = {
           <ol
             class={`mt-5 hidden space-y-2 text-sm text-navy-100 lg:block ${s.hero_image_url ? "lg:mt-0 lg:flex lg:flex-1 lg:gap-6 lg:space-y-0" : ""}`}
           >
-            {(lang === "ar"
-              ? ["تحقّق من بريدك", "اختر البرنامج", "أكمل النموذج وارفع المستندات"]
-              : ["Verify your email", "Choose a programme", "Fill in the form and upload"]
-            ).map((step, i) => (
+            {applySteps(lang).map(([step], i) => (
               <li class="flex items-center gap-3">
                 <span class="grid size-6 shrink-0 place-items-center rounded-full bg-white/15 text-xs font-bold">
                   {num(lang, i + 1)}

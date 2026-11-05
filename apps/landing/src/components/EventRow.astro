@@ -5,8 +5,10 @@ import { type Lang, fmtDate, href } from "../lib/i18n";
 interface Props {
   lang: Lang;
   event: Event;
+  /** An archived event shows its year, or last year's looks like this year's. */
+  past?: boolean;
 }
-const { lang, event: e } = Astro.props;
+const { lang, event: e, past = false } = Astro.props;
 ---
 
 <li>
@@ -18,6 +20,7 @@ const { lang, event: e } = Astro.props;
     <span class="grid w-14 shrink-0 place-items-center rounded-xl bg-primary-soft py-1.5 text-center text-primary-700">
       <b class="block text-xl">{fmtDate(lang, e.starts_at, { day: "numeric" })}</b>
       <span class="text-[11px]">{fmtDate(lang, e.starts_at, { month: "short" })}</span>
+      {past && <span class="text-[11px]">{fmtDate(lang, e.starts_at, { year: "numeric" })}</span>}
     </span>
     <span class="min-w-0">
       <b class="block text-sm text-text">{e.title}</b>

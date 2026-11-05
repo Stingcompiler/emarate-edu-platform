@@ -160,10 +160,11 @@ export const degree = (lang: Lang, key: string, label: string) =>
  *  without it the bidi algorithm shows «15:00–8:00». */
 export const isolateNumbers = (text: string) =>
   text.replace(/\d[\d:.,]*(?:\s*[–-]\s*\d[\d:.,]*)+/g, (run) => `\u2066${run}\u2069`);
-/** A yearly fee as the college states it: «1,600,000 جنيه» · «SDG 1,600,000». */
+/** A yearly fee as the college states it: «1,600,000 جنيه سوداني» · «SDG 1,600,000» (the
+ * currency in full: «جنيه» alone left visitors asking which pound — UX review 2026-11-04). */
 export const money = (lang: Lang, n: number, currency: "SDG" | "USD") =>
   lang === "ar"
-    ? `${num(lang, n)} ${currency === "SDG" ? "جنيه" : "دولار"}`
+    ? `${num(lang, n)} ${currency === "SDG" ? "جنيه سوداني" : "دولار أمريكي"}`
     : `${currency === "SDG" ? "SDG" : "US$"} ${num(lang, n)}`;
 export const arrow = (lang: Lang) => (lang === "ar" ? "←" : "→");
 /** schema.org FAQPage for the same questions a page shows (rich results). */

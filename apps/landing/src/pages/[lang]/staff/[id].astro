@@ -2,7 +2,7 @@
 import PageHead from "../../../components/PageHead.astro";
 import Base from "../../../layouts/Base.astro";
 import { type StaffMember, staff } from "../../../lib/api";
-import { LANGS, type Lang, href, num, pick, t } from "../../../lib/i18n";
+import { LANGS, type Lang, href, pick, t } from "../../../lib/i18n";
 import { DEGREE_EN, ROLE_LABEL, initialOf } from "../../../lib/staff";
 
 // A staff member's page (owner, 2026-10-30): photo, title, departments, degrees, interests.
@@ -105,7 +105,7 @@ const links = (m.links ?? []).filter((l) => l.url.startsWith("https://"));
                 </b>
                 <span class="mt-0.5 block text-sm text-text-muted">
                   {q.institution}
-                  {q.year ? ` · ${num(lang, q.year)}` : ""}
+                  {q.year ? ` · ${q.year}` : ""}
                 </span>
               </li>
             ))}
