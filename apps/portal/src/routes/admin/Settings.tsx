@@ -7,6 +7,7 @@ import { api, ok } from "../../lib/api";
 import { count, N } from "../../lib/format";
 import { useUnsavedChanges } from "../../lib/useUnsavedChanges";
 import { useToast } from "../../components/Toast";
+import { Backups } from "./Backups";
 
 type S = {
   student_registration_requires_approval: boolean;
@@ -152,6 +153,7 @@ export function AdminSettings() {
           </Card>
         </div>
       </div>
+      <Backups />
       {save.isError && (
         <div className="mt-4">
           <Notice>{problemMessage(save.error)}</Notice>

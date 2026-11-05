@@ -1014,6 +1014,9 @@ msgstr "لا يعدّل هذه الصورة إلا فريق الموقع."
 msgid "The site uses this picture. Choose another in the site settings first."
 msgstr "الموقع يستعمل هذه الصورة. اختر غيرها من إعدادات الموقع أولًا."
 
+msgid "A backup is being made; wait for it to finish."
+msgstr "تُنشأ نسخة احتياطية الآن؛ انتظر حتى تكتمل."
+
 # Form builder checks (review 2026-11 axis 8): the head registrar reads them as they are.
 msgid "The schema needs a list of steps."
 msgstr "الاستمارة تحتاج قائمة خطوات."
