@@ -210,18 +210,31 @@ test("the programme finder narrows by name, spelling-tolerant, and by department
   await page.goto(`${SITE}/ar/programs/`);
   const rows = page.locator("[data-degree]:visible");
   const total = await rows.count();
-  // «ادارة» without the hamza still finds «إدارة الأعمال».
+  const counted = page.locator("[data-result-count]");
+  // «ادارة» without the hamza still finds «إدارة الأعمال»; the count follows.
   await page.getByRole("searchbox").fill("ادارة الاعمال");
   await expect(rows.first()).toBeVisible();
   expect(await rows.count()).toBeLessThan(total);
   for (const text of await rows.allTextContents()) expect(text).toContain("الأعمال");
+  await expect(counted).not.toContainText(String(total));
   await page.getByRole("searchbox").fill("");
-  await page.getByRole("button", { name: "الهندسة", exact: true }).click();
+  // Phones fold the filters behind «تصفية» (UX review 2026-11-04); the first programme is on
+  // the first screen.
+  const toggle = page.getByRole("button", { name: /^تصفية/ });
+  if (await toggle.isVisible()) {
+    const first = await rows.first().boundingBox();
+    expect(first!.y).toBeLessThan(page.viewportSize()!.height);
+    await toggle.click();
+  }
+  await page.getByLabel("القسم").selectOption({ label: "الهندسة" });
   await expect(rows.first()).toBeVisible();
   for (const text of await page.locator("[data-group]:visible h2").allTextContents())
     expect(text).toContain("الهندسة");
+  await expect(toggle.or(page.getByRole("button", { name: "مسح التصفية" })).first()).toBeVisible();
   await page.getByRole("searchbox").fill("لا يوجد برنامج بهذا الاسم");
-  await expect(page.getByText("لا برامج تطابق البحث.")).toBeVisible();
+  await expect(page.getByText("لا برامج تطابق بحثك.")).toBeVisible();
+  await page.getByRole("button", { name: "عرض كل البرامج" }).click();
+  await expect(rows).toHaveCount(total);
 });
 
 test("WhatsApp is one tap away, and parents have their own page", async ({ page }) => {
