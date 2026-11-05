@@ -265,7 +265,9 @@ def _hidden_terms(record_) -> set[int]:
 
 
 def plan_progress(record_) -> dict | None:
-    """Credit hours earned against the study plan, per level (board DesktopStudentResults).
+    """Credit hours earned against the study plan, per level and its two semesters.
+
+    (Board DesktopStudentResults.)
 
     The plan is the program's active courses plus the department's shared ones, by their
     ``default_level``. Earned hours count each passed course once, from published results in
@@ -276,9 +278,12 @@ def plan_progress(record_) -> dict | None:
     plan = Course.objects.filter(is_active=True, department_id=program.department_id).filter(
         models.Q(program=program) | models.Q(program__isnull=True)
     )
-    required: dict[int, int] = {}
-    for level, hours in plan.values_list("default_level", "credit_hours"):
-        required[level] = required.get(level, 0) + hours
+    # Keyed (level, semester): a level is a year of two semesters (owner, 2026-11-05).
+    required: dict[tuple[int, int], int] = {}
+    for level, semester, hours in plan.values_list(
+        "default_level", "default_term_order", "credit_hours"
+    ):
+        required[(level, semester)] = required.get((level, semester), 0) + hours
     if not required:
         return None
     passed = set(
@@ -286,17 +291,37 @@ def plan_progress(record_) -> dict | None:
             student_record=record_, is_published=True, status=AcademicResult.Status.PASS
         )
         .exclude(term_id__in=_hidden_terms(record_))
-        .values_list("offering__course_id", "offering__course__default_level")
+        .values_list("offering__course_id", flat=True)
         .order_by()
     )
+    place = {
+        pk: (level, semester)
+        for pk, level, semester in plan.values_list("pk", "default_level", "default_term_order")
+    }
     hours_of = dict(plan.values_list("pk", "credit_hours"))
-    earned: dict[int, int] = {}
-    for course_id, level in passed:
+    earned: dict[tuple[int, int], int] = {}
+    for course_id in passed:
         if course_id in hours_of:
-            earned[level] = earned.get(level, 0) + hours_of[course_id]
-    rows = [
-        {"level": n, "required": required[n], "earned": earned.get(n, 0)} for n in sorted(required)
-    ]
+            earned[place[course_id]] = earned.get(place[course_id], 0) + hours_of[course_id]
+    rows = []
+    for level in sorted({lv for lv, _ in required}):
+        semesters = [
+            {
+                "semester": sem,
+                "required": required[(level, sem)],
+                "earned": earned.get((level, sem), 0),
+            }
+            for sem in (1, 2)
+            if (level, sem) in required
+        ]
+        rows.append(
+            {
+                "level": level,
+                "required": sum(x["required"] for x in semesters),
+                "earned": sum(x["earned"] for x in semesters),
+                "semesters": semesters,
+            }
+        )
     return {
         "total_hours": program.total_credit_hours or sum(required.values()),
         "earned_hours": sum(earned.values()),

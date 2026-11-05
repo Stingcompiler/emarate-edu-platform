@@ -18,7 +18,7 @@ import {
 } from "../../components/ui";
 import { api, ok } from "../../lib/api";
 import { useMe } from "../../lib/auth";
-import { count, N, ltr } from "../../lib/format";
+import { count, N, levelSemester, ltr, semester } from "../../lib/format";
 
 type Term = Schemas["MyTerm"];
 type Plan = Schemas["MyPlanProgress"];
@@ -60,7 +60,7 @@ export function MyResults() {
       title="النتائج"
       subtitle={
         student
-          ? `${ltr(student.university_number)} · ${student.program} · المستوى ${student.level}`
+          ? `${ltr(student.university_number)} · ${student.program} · ${levelSemester(student.level, student.semester)}`
           : undefined
       }
       titleAction={
@@ -184,6 +184,18 @@ function PlanProgress({ plan }: { plan: Plan }) {
                 style={{ width: `${Math.min(100, (100 * l.earned) / l.required)}%` }}
               />
             </div>
+            {(l.semesters?.length ?? 0) > 1 && (
+              <p className="mt-1 flex flex-wrap gap-x-3 text-xs text-text-muted">
+                {l.semesters.map((x) => (
+                  <span key={x.semester}>
+                    {semester(x.semester)}{" "}
+                    <span dir="ltr">
+                      {n(x.earned)}/{n(x.required)}
+                    </span>
+                  </span>
+                ))}
+              </p>
+            )}
           </li>
         ))}
       </ul>

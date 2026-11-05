@@ -1,8 +1,26 @@
-# Handoff — November review, round 1 done; site UX round — 2026-11-05
+# Handoff — levels and semesters (3 phases); November review — 2026-11-05
 
 Older rounds (2026-10-24 → 11-02): `.claude/handoff/archive/2026-10-24_to_2026-11-02.md`.
 
 ## State
+
+- **Levels and semesters** (owner, 2026-11-05: levels 1–5, two semesters a level, no summer;
+  option B — the student's semester is stored and advanced by promotion):
+  - Phase 1 #246 merged: course semester (1|2) on /department/courses, terms named
+    «الفصل الدراسي الأول/الثاني <year>» in /system/structure, bulk enroll by `term.order`.
+  - Phase 2 #247 (branch `feat/semesters-student`): `StudentRecord.semester`, forms, import
+    column, «يبدأ الطالب في» on registering an applicant, bulk enroll by student semester.
+  - Phase 3 (branch `feat/semesters-promotion`, on top of phase 2): `/student-promotion`
+    (`students.promote`: admin + head registrar; supervisor via admin), `PromotionRun` once per
+    term per scope; results «التقدم في الخطة» per semester; public study plan by semester.
+  - Owner's decisions: failing students move with their cohort (registrar unticks who stays);
+    mid-year admissions: the registrar picks the semester; department heads correct the
+    semester of existing production courses (all default to 1).
+- **Production department merges** (owner clicks «دمج القسم» in /system/structure, says «تم»):
+  11 left — into تقنية المعلومات: نظم المعلومات، دبلوم تقنية معلومات، دبلوم نظم المعلومات،
+  دبلوم شبكات الحاسوب؛ into علوم الحاسوب: علوم الحاسوب الشرف؛ into إدارة الأعمال: العلوم
+  الإدارية، نظم معلومات إدارية، محاسبية، مصرفية، دبلوم تقنية معلومات محاسبية مصرفية، الاقتصاد
+  والعلوم المصرفية. Production terms: rename «خريف/ربيع» to «الفصل الدراسي الأول/الثاني» there.
 
 - **November review** (owner's work order `docs/qa/comprehensive-review-plan-2026-11.md`),
   round 1 report `docs/qa/comprehensive-review-2026-11.md`: baseline + axes 1.1, 1.2, 1.3, 2, 3

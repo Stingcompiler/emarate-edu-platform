@@ -34,6 +34,7 @@ def test_departments_programs_and_plan(
     assert program.data["description_ar"] == "برنامج تطبيقي"
     level3 = next(level for level in program.data["plan"] if level["level"] == 3)
     assert level3["courses"][0]["code"] == "IT301"
+    assert level3["courses"][0]["semester"] == 1  # the semester of the level
     # Never a sum of the courses entered so far: only the total the college states.
     assert program.data["credit_hours"] is None and program.data["intake"] is None
     it_program.total_credit_hours = 132

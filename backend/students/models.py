@@ -141,3 +141,22 @@ class UniversityNumberSequence(models.Model):
 
     def __str__(self) -> str:
         return f"{self.year}-{self.prefix}"
+
+
+class PromotionRun(PublicIdModel, TimestampedModel):
+    """Students moved on a semester at the end of a term (owner, 2026-11-05).
+
+    (level, 1) → (level, 2) → (level + 1, 1); the last semester of the programme stays. One run
+    per term for the college or per department, so a second click does not move them twice.
+    """
+
+    term = models.ForeignKey("academic.Term", on_delete=models.CASCADE, related_name="+")
+    # None = the whole college; else the department's id (not a key: merges move departments).
+    department_id = models.PositiveIntegerField(null=True, blank=True)
+    run_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="+"
+    )
+    summary = models.JSONField(default=dict)
+
+    class Meta:
+        ordering = ["-created_at"]
