@@ -48,6 +48,7 @@ from .serializers import (
     OTPStartSerializer,
     OTPVerifySerializer,
     PublicIntakeSerializer,
+    RegisterApplicantSerializer,
     StaffApplicationSerializer,
     StatusOnlySerializer,
     TemplateSerializer,
@@ -271,11 +272,13 @@ class ApplicationViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, views
             services.set_staff_answers(_meta(request), self.get_object(), **data.validated_data)
         )
 
-    @extend_schema(request=None, responses=StaffApplicationSerializer)
+    @extend_schema(request=RegisterApplicantSerializer, responses=StaffApplicationSerializer)
     @action(detail=True, methods=["post"])
     def register(self, request, public_id=None):
         application = self.get_object()
-        services.register_applicant(_meta(request), application)
+        data = RegisterApplicantSerializer(data=request.data)
+        data.is_valid(raise_exception=True)
+        services.register_applicant(_meta(request), application, **data.validated_data)
         return self._done(application)
 
     @extend_schema(responses=DocumentLinkSerializer)

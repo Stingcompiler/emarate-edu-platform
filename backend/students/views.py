@@ -42,9 +42,9 @@ class StudentRecordViewSet(
         capability("students.view", "students.manage", "students.delete"),
     ]
     lookup_field = "public_id"
-    filterset_fields = ["program", "department", "level", "status"]
+    filterset_fields = ["program", "department", "level", "semester", "status"]
     search_fields = ["university_number", "full_name_ar", "full_name_en", "email"]
-    ordering_fields = ["university_number", "level", "full_name_ar"]
+    ordering_fields = ["university_number", "level", "semester", "full_name_ar"]
     http_method_names = ["get", "post", "patch", "delete", "head", "options"]
 
     def get_queryset(self):

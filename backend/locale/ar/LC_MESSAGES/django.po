@@ -1148,3 +1148,9 @@ msgstr "لا يعدّل هذا الحساب إلا مدير النظام."
 
 msgid "A deletion request is already waiting."
 msgstr "طلب الحذف بانتظار الموافقة بالفعل."
+
+msgid "Semester"
+msgstr "الفصل الدراسي"
+
+msgid "semester: use 1 or 2 (الأول/الثاني)"
+msgstr "الفصل الدراسي: 1 أو 2 (الأول/الثاني)"

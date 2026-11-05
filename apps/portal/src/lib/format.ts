@@ -180,3 +180,8 @@ export function termName(order: number, year: string | null | undefined): string
   const label = SEMESTERS.find((s) => s.value === order)?.label ?? SEMESTERS[0].label;
   return year ? `${label} ${year}` : label;
 }
+
+/** «المستوى 2 · الفصل الأول»: where a student is in the study plan. */
+export function levelSemester(level: number | null | undefined, order?: number | null): string {
+  return `المستوى ${(level ?? 1).toLocaleString("ar-u-nu-latn")} · ${semester(order)}`;
+}

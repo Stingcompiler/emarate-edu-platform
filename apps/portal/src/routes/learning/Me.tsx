@@ -20,7 +20,7 @@ import { Avatar, Button, Card, SectionLabel } from "../../components/ui";
 import { api, ok } from "../../lib/api";
 import { useMe, useSignOut } from "../../lib/auth";
 import { initials, num } from "../../lib/reports";
-import { count, N } from "../../lib/format";
+import { count, N, levelSemester } from "../../lib/format";
 import { ALL } from "../../components/Pager";
 
 function Row({
@@ -77,7 +77,7 @@ export function Me() {
           <b className="block text-lg text-text">{me.data?.full_name_ar}</b>
           {s && (
             <span className="text-sm text-text-muted">
-              {s.program} · المستوى {num(s.level)}
+              {s.program} · {levelSemester(s.level, s.semester)}
             </span>
           )}
         </span>
@@ -187,7 +187,7 @@ export function MyStatus() {
       <Card className="bg-success-soft p-4 text-success-strong">
         <b className="text-lg">{s?.status_label ?? "منتظم"}</b>
         <p className="text-sm">
-          {courses.data?.[0]?.term ?? ""} · المستوى {num(s?.level ?? 0)} · الساعات المسجلة{" "}
+          {courses.data?.[0]?.term ?? ""} · {levelSemester(s?.level, s?.semester)} · الساعات المسجلة{" "}
           {num(hours)}
         </p>
       </Card>

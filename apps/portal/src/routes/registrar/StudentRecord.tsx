@@ -8,7 +8,7 @@ import { useMe } from "../../lib/auth";
 import { can } from "../../lib/nav";
 import { initials, num } from "../../lib/reports";
 import { STUDENT_STATUS } from "./StudentRecords";
-import { count, N, ltr } from "../../lib/format";
+import { count, N, levelSemester, ltr } from "../../lib/format";
 import { ALL } from "../../components/Pager";
 
 /** Board: HeadRegistrarStudent (phone); desktop derived — data beside enrolment. */
@@ -51,7 +51,9 @@ export function StudentRecord() {
     <PortalShell
       title={s?.full_name_ar ?? "ملف طالب"}
       subtitle={
-        s ? `${ltr(s.university_number)} · ${s.program_name} · المستوى ${num(s.level)}` : undefined
+        s
+          ? `${ltr(s.university_number)} · ${s.program_name} · ${levelSemester(s.level, s.semester)}`
+          : undefined
       }
       back={{ label: "سجل الطلاب", to: "/students" }}
     >

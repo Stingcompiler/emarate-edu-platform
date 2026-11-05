@@ -27,6 +27,7 @@ class StudentRecordSerializer(serializers.ModelSerializer):
             "department",
             "department_name",
             "level",
+            "semester",
             "status",
             "email",
             "phone_e164",
@@ -54,12 +55,14 @@ class StudentRecordWriteSerializer(serializers.ModelSerializer):
             "full_name_en",
             "program",
             "level",
+            "semester",
             "email",
             "phone_e164",
             "gender",
             "birth_date",
         ]
         extra_kwargs = {
+            "semester": {"required": False},
             "full_name_en": {"required": False},
             "email": {"required": False},
             "phone_e164": {"required": False},

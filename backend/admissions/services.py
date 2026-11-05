@@ -1036,8 +1036,16 @@ def _registration_details(locked: Application, program) -> dict:
     return details
 
 
-def register_applicant(meta: RequestMeta, application: Application) -> StudentRecord:
-    """Accepted applicant → StudentRecord with a university number (docs/01 K.5). Atomic."""
+def register_applicant(
+    meta: RequestMeta, application: Application, semester: int = 1
+) -> StudentRecord:
+    """Accepted applicant → StudentRecord with a university number (docs/01 K.5). Atomic.
+
+    ``semester`` is where the student starts in the level, 1 or 2: the registrar picks it, for
+    one admitted in the middle of the year (owner, 2026-11-05).
+    """
+    if semester not in (1, 2):
+        raise ValidationError({"semester": [gettext("The semester is 1 or 2.")]})
     if not rbac.can(meta.actor, "admissions.manage"):
         raise PermissionDenied(gettext("Only the head registrar registers applicants."))
     with transaction.atomic():
@@ -1053,6 +1061,7 @@ def register_applicant(meta: RequestMeta, application: Application) -> StudentRe
         number = details.pop("university_number", None) or _university_number(program)
         record_ = StudentRecord.objects.create(
             **{"level": 1, **details},
+            semester=semester,
             university_number=number,
             full_name_ar=locked.full_name,
             program=program,

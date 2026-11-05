@@ -5,6 +5,7 @@ import { Link } from "react-router";
 import { PortalShell } from "../../components/PortalShell";
 import { Avatar, Card, Chip, FilterBar, StatusBadge } from "../../components/ui";
 import { api, ok } from "../../lib/api";
+import { levelSemester } from "../../lib/format";
 import { Picker, initials, num, useDepartments } from "../../lib/reports";
 import { Pager } from "../../components/Pager";
 
@@ -85,11 +86,13 @@ export function StudentRecords() {
         <table className="w-full text-sm">
           <thead className="bg-surface-alt text-xs text-text-muted">
             <tr>
-              {["الطالب", "الرقم الجامعي", "البرنامج", "المستوى", "الحساب", "الحالة"].map((h) => (
-                <th key={h} scope="col" className="px-4 py-2 text-start font-medium">
-                  {h}
-                </th>
-              ))}
+              {["الطالب", "الرقم الجامعي", "البرنامج", "المستوى والفصل", "الحساب", "الحالة"].map(
+                (h) => (
+                  <th key={h} scope="col" className="px-4 py-2 text-start font-medium">
+                    {h}
+                  </th>
+                ),
+              )}
             </tr>
           </thead>
           <tbody className="divide-y divide-border-soft">
@@ -108,7 +111,7 @@ export function StudentRecords() {
                   <bdi className="num">{r.university_number}</bdi>
                 </td>
                 <td className="px-4 py-2.5 text-text-muted">{r.program_name}</td>
-                <td className="px-4 py-2.5">{num(r.level)}</td>
+                <td className="px-4 py-2.5">{levelSemester(r.level, r.semester)}</td>
                 <td
                   className={`px-4 py-2.5 text-xs ${r.has_account ? "text-success-strong" : "text-text-muted"}`}
                 >
@@ -143,8 +146,8 @@ export function StudentRecords() {
             <span className="min-w-0 flex-1">
               <b className="block truncate text-sm text-text">{r.full_name_ar}</b>
               <span className="text-xs text-text-muted">
-                <bdi className="num">{r.university_number}</bdi> · {r.program_name} · المستوى{" "}
-                {num(r.level)}
+                <bdi className="num">{r.university_number}</bdi> · {r.program_name} ·{" "}
+                {levelSemester(r.level, r.semester)}
                 {r.has_account ? "" : " · لم يفعّل حسابه"}
               </span>
             </span>

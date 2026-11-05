@@ -52,10 +52,25 @@ def _check_level(program, level: int) -> None:
         )
 
 
+def current_semester() -> int:
+    """The semester of the current term (1 or 2); 1 when there is none."""
+    from academic.models import Term
+
+    term = Term.current()
+    return 2 if term is not None and term.order == 2 else 1
+
+
+def _check_semester(semester: int) -> None:
+    if semester not in (1, 2):
+        raise ValidationError({"semester": gettext("The semester is 1 or 2.")})
+
+
 def create_record(meta: RequestMeta, **data) -> StudentRecord:
     program = data["program"]
     _require(meta, "students.manage", program.department_id)
     _check_level(program, data["level"])
+    data.setdefault("semester", current_semester())
+    _check_semester(data["semester"])
     with transaction.atomic():
         number = data.pop("university_number", "") or issue_university_number(program)
         if StudentRecord.objects.filter(university_number=number).exists():
@@ -77,6 +92,7 @@ def update_record(meta: RequestMeta, obj: StudentRecord, **data) -> StudentRecor
         # Moving a student to another department's program needs scope there too.
         _require(meta, "students.manage", program.department_id)
     _check_level(program, data.get("level", obj.level))
+    _check_semester(data.get("semester", obj.semester))
     number = data.pop("university_number", "")
     if number and number != obj.university_number:
         if obj.user_id is not None:

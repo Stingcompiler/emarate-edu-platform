@@ -187,8 +187,9 @@ def drop(meta: RequestMeta, enrollment: Enrollment) -> Enrollment:
 def bulk_enroll(meta: RequestMeta, term: Term, program: Program, level: int) -> dict:
     """Enroll every active student of (program, level) in that level's offerings this term.
 
-    Only the courses of the term's semester (``default_term_order == term.order``): a level has
-    two semesters, and the second's courses are not taken in the first (owner, 2026-11-05).
+    Only the courses of the term's semester (``default_term_order == term.order``) and the
+    students in that semester: a level has two semesters, and the second's courses are not
+    taken in the first (owner, 2026-11-05). Promote the students before enrolling them.
 
     Idempotent: existing enrollments are left untouched, so running it again
     only picks up students or offerings added since.
@@ -207,7 +208,10 @@ def bulk_enroll(meta: RequestMeta, term: Term, program: Program, level: int) -> 
     )
     students = list(
         StudentRecord.objects.filter(
-            program=program, level=level, status=StudentRecord.Status.ACTIVE
+            program=program,
+            level=level,
+            semester=term.order,
+            status=StudentRecord.Status.ACTIVE,
         )
     )
     existing = set(
