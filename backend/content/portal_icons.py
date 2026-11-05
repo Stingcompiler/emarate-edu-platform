@@ -12,7 +12,7 @@ from dataclasses import dataclass
 from io import BytesIO
 
 from django.core.cache import cache
-from PIL import Image, ImageOps
+from PIL import Image, ImageChops, ImageOps
 
 
 @dataclass(frozen=True)
@@ -25,6 +25,9 @@ class IconSpec:
     opaque: bool
     # The portal's own file used while no logo is set.
     fallback: str
+    # A notification badge: Android draws only its alpha, in one colour (an opaque logo became
+    # a white square in the status bar — owner, 2026-11-05). White ink on transparent.
+    monochrome: bool = False
 
 
 ICONS: dict[str, IconSpec] = {
@@ -32,6 +35,7 @@ ICONS: dict[str, IconSpec] = {
     "512": IconSpec(512, 0.92, False, "/icons/icon-512.png"),
     "maskable-512": IconSpec(512, 0.64, True, "/icons/maskable-512.png"),
     "apple-touch": IconSpec(180, 0.84, True, "/icons/apple-touch-icon.png"),
+    "badge": IconSpec(96, 0.9, False, "/icons/badge-96.png", monochrome=True),
 }
 
 CACHE_SECONDS = 24 * 60 * 60
@@ -53,6 +57,37 @@ def render(source: Image.Image, spec: IconSpec) -> bytes:
     return out.getvalue()
 
 
+def render_badge(source: Image.Image, spec: IconSpec) -> bytes:
+    """The logo's drawing as white on transparent: the pixels that stand out from its main
+    colour (dark lines on a light logo, light ones on a dark logo) are kept, the rest goes."""
+    big = spec.size * 4  # worked at 4×, then scaled down for smooth edges
+    logo = ImageOps.contain(
+        ImageOps.exif_transpose(source).convert("RGBA"), (big, big), Image.Resampling.LANCZOS
+    )
+    light = logo.convert("L")
+    solid = logo.getchannel("A").point(lambda a: 255 if a > 128 else 0)
+    counts = light.histogram(mask=solid)
+    total, seen, main = sum(counts), 0, 255
+    for level, n in enumerate(counts):  # the median brightness of the logo's solid pixels
+        seen += n
+        if seen * 2 >= total:
+            main = level
+            break
+    if main >= 128:
+        ink = light.point(lambda v: 255 if v < main - 60 else 0)
+    else:
+        ink = light.point(lambda v: 255 if v > main + 60 else 0)
+    ink = ImageChops.multiply(ink, solid)
+    box = round(spec.size * spec.fill)
+    ink = ImageOps.contain(ink, (box, box), Image.Resampling.LANCZOS)
+    canvas = Image.new("RGBA", (spec.size, spec.size), (255, 255, 255, 0))
+    white = Image.new("RGBA", ink.size, (255, 255, 255, 255))
+    canvas.paste(white, ((spec.size - ink.width) // 2, (spec.size - ink.height) // 2), ink)
+    out = BytesIO()
+    canvas.save(out, "PNG", optimize=True)
+    return out.getvalue()
+
+
 def icon_png(logo, kind: str) -> bytes:
     """The PNG for `kind` from a MediaAsset logo; rendered once, then served from the cache.
 
@@ -65,6 +100,6 @@ def icon_png(logo, kind: str) -> bytes:
     if png is None:
         # Only the image formats media accepts: never the plugin a file's bytes happen to fit.
         with logo.file.open("rb") as handle, Image.open(handle, formats=IMAGE_FORMATS) as image:
-            png = render(image, spec)
+            png = render_badge(image, spec) if spec.monochrome else render(image, spec)
         cache.set(key, png, CACHE_SECONDS)
     return png

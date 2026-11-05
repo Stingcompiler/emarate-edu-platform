@@ -640,3 +640,33 @@ def test_the_site_shows_what_the_editor_says_and_rebuilds_on_take_down(api, site
     calls.clear()
     assert tasks.rebuild_when_due() is True and calls
     assert tasks.rebuild_when_due() is False  # already handled
+
+
+def test_the_notification_badge_is_the_logos_drawing_in_white(api, site, make_user):
+    """Android draws a notification badge from its alpha only, in one colour: the full-colour
+    icon came out as a white square (owner, 2026-11-05). The badge keeps the logo's lines."""
+    import io
+
+    from django.core.cache import cache
+    from PIL import Image, ImageDraw
+
+    cache.clear()
+    response = api().get("/api/public/portal-icon/badge.png")
+    assert response.status_code == 302 and response["Location"] == "/icons/badge-96.png"
+    owner = make_user(Role.SITE_MANAGER)
+    buffer = io.BytesIO()
+    drawn = Image.new("RGB", (200, 200), "white")  # a light logo with a dark cross
+    ImageDraw.Draw(drawn).line((0, 100, 200, 100), fill=(20, 40, 120), width=30)
+    drawn.save(buffer, "PNG")
+    uploaded = api(owner).post(
+        "/api/v1/content/media",
+        {"file": SimpleUploadedFile("logo.png", buffer.getvalue(), "image/png")},
+        format="multipart",
+    )
+    api(owner).patch(
+        "/api/v1/content/site-settings", {"logo": uploaded.data["public_id"]}, format="json"
+    )
+    badge = Image.open(io.BytesIO(api().get("/api/public/portal-icon/badge.png").content))
+    assert badge.size == (96, 96) and badge.mode == "RGBA"
+    assert badge.getpixel((48, 48)) == (255, 255, 255, 255)  # the line: white ink
+    assert badge.getpixel((48, 15))[3] == 0  # the logo's white ground: transparent
