@@ -104,6 +104,8 @@ CAPABILITIES: dict[str, frozenset[Role]] = {
         }
     ),
     "students.import": frozenset({R.SYSTEM_ADMIN, R.HEAD_REGISTRAR}),
+    # Move the students on a semester at the end of a term (owner, 2026-11-05).
+    "students.promote": frozenset({R.SYSTEM_ADMIN, R.HEAD_REGISTRAR}),
     # Add and correct records by hand; a department role in its departments only
     # (owner 2026-09-29: the department manager runs their department's students).
     "students.manage": frozenset(

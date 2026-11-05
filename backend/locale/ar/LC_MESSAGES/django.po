@@ -1154,3 +1154,12 @@ msgstr "الفصل الدراسي"
 
 msgid "semester: use 1 or 2 (الأول/الثاني)"
 msgstr "الفصل الدراسي: 1 أو 2 (الأول/الثاني)"
+
+msgid "There is no current term."
+msgstr "لا يوجد فصل حالي."
+
+msgid "The students were already promoted at the end of this term."
+msgstr "رُفِّع الطلاب في نهاية هذا الفصل من قبل."
+
+msgid "Invalid department."
+msgstr "قسم غير صالح."

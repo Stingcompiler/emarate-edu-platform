@@ -12,6 +12,7 @@ import {
   Download,
   FileText,
   FileUp,
+  TrendingUp,
   FolderLock,
   Gauge,
   Globe,
@@ -217,6 +218,8 @@ export function navFor(me: Me | null | undefined, unread: number): NavItem[] {
     items.push({ label: "سجل الطلاب", to: "/students", icon: Users, end: false });
     items.push({ label: "استيراد الطلاب", to: "/student-imports", icon: FileUp, end: false });
   }
+  if (can(me, "students.promote"))
+    items.push({ label: "ترفيع الطلاب", to: "/student-promotion", icon: TrendingUp });
   if (
     can(me, "admissions.manage") &&
     hasRole(me, "head_registrar", "system_admin", "system_supervisor")

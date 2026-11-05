@@ -33,6 +33,7 @@ const BUILT = [
   "/registrar",
   "/students",
   "/student-imports",
+  "/student-promotion",
   "/registrars",
   "/system",
   "/audit",

@@ -132,6 +132,7 @@ backend/
 
 ### students
 - **StudentRecord**: university_number[u], full_name_ar/en, program→, department→ (denormalized), level, semester (1|2، الفصل الدراسي داخل المستوى: يُحدَّد عند الإضافة والاستيراد — فارغًا = فصل Term الحالي — وعند التحويل من القبول يختاره المسجّل؛ والهجرة أعطت السجلات القائمة فصل Term الحالي)، status {active|suspended|graduated|withdrawn}, user⇄(null), application→(null), email, phone_e164, birth_date, gender, nationality, national_id_hash, admitted_term→, notes. (idx program, level, status)
+- **PromotionRun**: term→ (CASCADE), department_id (null = الكلية؛ رقم لا مفتاح لأن الدمج ينقل الأقسام)، run_by→(SET_NULL)، summary {promoted, kept, last_semester, moves}. ترفيع واحد لكل فصل لكل نطاق (`students/promotion.py`).
 - **StudentImportBatch**: file, uploaded_by→, status {uploaded|validated|has_errors|committed|rejected}, summary JSON. **StudentImportRow**: batch→, row_no, raw JSON, normalized JSON, action {create|update|skip|error}, errors JSON.
 - **UniversityNumberSequence**: college→, year, prefix, last_value; [u (college, year, prefix)].
 

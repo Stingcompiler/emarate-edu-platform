@@ -135,6 +135,7 @@ const MyStatus = page(() => import("./routes/learning/Me"), "MyStatus");
 const RegistrarHome = page(() => import("./routes/registrar/Home"), "RegistrarHome");
 const StudentImportDetail = page(() => import("./routes/registrar/Imports"), "StudentImportDetail");
 const StudentImports = page(() => import("./routes/registrar/Imports"), "StudentImports");
+const Promotion = page(() => import("./routes/registrar/Promotion"), "Promotion");
 const Registrars = page(() => import("./routes/registrar/Registrars"), "Registrars");
 const StudentRecord = page(() => import("./routes/registrar/StudentRecord"), "StudentRecord");
 const StudentRecords = page(() => import("./routes/registrar/StudentRecords"), "StudentRecords");
@@ -284,6 +285,7 @@ const router = createBrowserRouter([
   { path: "/students", element: signedIn(<StudentRecords />, "/students") },
   { path: "/students/:id", element: signedIn(<StudentRecord />, "/students/:id") },
   { path: "/student-imports", element: signedIn(<StudentImports />, "/student-imports") },
+  { path: "/student-promotion", element: signedIn(<Promotion />, "/student-promotion") },
   {
     path: "/student-imports/:id",
     element: signedIn(<StudentImportDetail />, "/student-imports/:id"),

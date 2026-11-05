@@ -164,6 +164,12 @@ READS: dict[str, tuple[str, frozenset, frozenset]] = {
     "student-list": ("/api/v1/students", STUDENTS, frozenset()),
     "student-detail": ("/api/v1/students/{student}", STUDENTS, frozenset()),
     "student-import-list": ("/api/v1/student-imports", IMPORTS, frozenset()),
+    # Promotion at the end of a term: preview (GET) and apply (POST, test_promotion).
+    "student-promotion": (
+        "/api/v1/student-promotion",
+        frozenset({R.SYSTEM_ADMIN, R.HEAD_REGISTRAR}),
+        frozenset(),
+    ),
     "student-import-detail": ("/api/v1/student-imports/{batch}", IMPORTS, frozenset()),
     "student-import-rows": ("/api/v1/student-imports/{batch}/rows", IMPORTS, frozenset()),
     "roles": (

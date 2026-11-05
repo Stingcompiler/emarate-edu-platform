@@ -65,6 +65,8 @@ class PlanCourseSerializer(S.Serializer):
     name_ar = S.CharField()
     name_en = S.CharField()
     credit_hours = S.IntegerField()
+    # The semester of the level, 1 or 2 (owner, 2026-11-05).
+    semester = S.IntegerField(source="default_term_order")
 
 
 class PlanLevelSerializer(S.Serializer):

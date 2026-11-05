@@ -219,10 +219,17 @@ class MyTermSerializer(serializers.Serializer):
     results = MyResultRowSerializer(many=True)
 
 
+class MyPlanSemesterSerializer(serializers.Serializer):
+    semester = serializers.IntegerField()
+    required = serializers.IntegerField()
+    earned = serializers.IntegerField()
+
+
 class MyPlanLevelSerializer(serializers.Serializer):
     level = serializers.IntegerField()
     required = serializers.IntegerField()
     earned = serializers.IntegerField()
+    semesters = MyPlanSemesterSerializer(many=True)
 
 
 class MyPlanProgressSerializer(serializers.Serializer):

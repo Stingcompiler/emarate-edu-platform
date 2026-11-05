@@ -79,6 +79,7 @@ urlpatterns = [
         "auth/change-password", accounts.ChangePasswordView.as_view(), name="auth-change-password"
     ),
     path("me", accounts.MeView.as_view(), name="me"),
+    path("student-promotion", students.StudentPromotionView.as_view(), name="student-promotion"),
     path("me/email", accounts.MyEmailView.as_view(), name="me-email"),
     path("me/email/confirm", accounts.MyEmailConfirmView.as_view(), name="me-email-confirm"),
     path("me/public-profile", accounts.MyPublicProfileView.as_view(), name="me-public-profile"),

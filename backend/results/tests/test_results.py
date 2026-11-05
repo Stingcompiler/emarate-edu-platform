@@ -256,7 +256,7 @@ def test_plan_progress_per_level(
     # Plan: IT101 (level 1, 3h, the fixture), a shared department course (level 1, 2h), a level 2
     # course (4h); an inactive course and another department's course don't count.
     shared = Course.objects.create(
-        department=it_dept, code="GEN1", name_ar="مهارات", credit_hours=2
+        department=it_dept, code="GEN1", name_ar="مهارات", credit_hours=2, default_term_order=2
     )
     Course.objects.create(
         department=it_dept,
@@ -274,8 +274,21 @@ def test_plan_progress_per_level(
         "total_hours": 9,
         "earned_hours": 0,
         "levels": [
-            {"level": 1, "required": 5, "earned": 0},
-            {"level": 2, "required": 4, "earned": 0},
+            {
+                "level": 1,
+                "required": 5,
+                "earned": 0,
+                "semesters": [
+                    {"semester": 1, "required": 3, "earned": 0},
+                    {"semester": 2, "required": 2, "earned": 0},
+                ],
+            },
+            {
+                "level": 2,
+                "required": 4,
+                "earned": 0,
+                "semesters": [{"semester": 1, "required": 4, "earned": 0}],
+            },
         ],
     }
     # A published pass counts once even with a retake; a fail doesn't count.
@@ -298,7 +311,8 @@ def test_plan_progress_per_level(
     it_program.save()
     plan = api(classroom.student).get("/api/v1/me/results").data["plan"]
     assert (plan["total_hours"], plan["earned_hours"]) == (132, 3)
-    assert plan["levels"][0] == {"level": 1, "required": 5, "earned": 3}
+    assert plan["levels"][0]["earned"] == 3
+    assert plan["levels"][0]["semesters"][0] == {"semester": 1, "required": 3, "earned": 3}
     # A term the results officer has hidden doesn't count.
     TermResultRelease.objects.create(term=term, is_visible=False)
     TermResultRelease.objects.create(term=later, is_visible=False)

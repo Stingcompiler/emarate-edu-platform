@@ -1,11 +1,12 @@
 from django.utils.translation import gettext
-from drf_spectacular.utils import extend_schema
+from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
 from rest_framework.parsers import JSONParser, MultiPartParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from accounts import rbac
 from audit.services import RequestMeta
@@ -13,12 +14,15 @@ from core.errors import Conflict
 from core.idempotency import run_once
 from core.permissions import capability
 
-from . import importer, services
+from . import importer, promotion, services
 from .models import StudentImportBatch, StudentRecord
 from .serializers import (
     ImportBatchSerializer,
     ImportRowSerializer,
     ImportUploadSerializer,
+    PromotionPreviewSerializer,
+    PromotionRequestSerializer,
+    PromotionResultSerializer,
     StudentRecordSerializer,
     StudentRecordWriteSerializer,
 )
@@ -134,3 +138,43 @@ class StudentImportViewSet(
         except ValueError as error:
             raise Conflict(str(error), code="batch_closed") from None
         return Response(ImportBatchSerializer(batch).data)
+
+
+class StudentPromotionView(APIView):
+    """«ترفيع الطلاب»: preview, then move the active students on a semester (owner, 2026-11-05).
+
+    GET ``?department=`` lists who goes where; POST applies it once per term, leaving out
+    ``exclude`` (public ids) — those who stay.
+    """
+
+    permission_classes = [IsAuthenticated, capability("students.promote")]
+
+    @extend_schema(
+        operation_id="student_promotion_preview",
+        parameters=[OpenApiParameter("department", int, required=False)],
+        responses=PromotionPreviewSerializer,
+    )
+    def get(self, request):
+        department = request.query_params.get("department")
+        try:
+            department_id = int(department) if department else None
+        except ValueError:
+            raise ValidationError({"department": [gettext("Invalid department.")]}) from None
+        return Response(
+            PromotionPreviewSerializer(promotion.preview(request.user, department_id)).data
+        )
+
+    @extend_schema(
+        operation_id="student_promotion_apply",
+        request=PromotionRequestSerializer,
+        responses=PromotionResultSerializer,
+    )
+    def post(self, request):
+        data = PromotionRequestSerializer(data=request.data)
+        data.is_valid(raise_exception=True)
+        done = promotion.promote(
+            RequestMeta.from_request(request),
+            department_id=data.validated_data.get("department"),
+            exclude=data.validated_data["exclude"],
+        )
+        return Response(PromotionResultSerializer(done).data)

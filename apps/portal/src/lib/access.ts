@@ -131,6 +131,7 @@ export const ROUTE_ACCESS: Record<string, Allow> = {
   "/students": cap("students.view"),
   "/students/:id": cap("students.view"),
   "/student-imports": cap("students.import"),
+  "/student-promotion": cap("students.promote"),
   "/student-imports/:id": cap("students.import"),
   "/registrars": role("head_registrar", "system_admin", "system_supervisor"),
   "/department": departmentPages,

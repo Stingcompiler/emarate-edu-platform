@@ -133,3 +133,34 @@ class ImportRowSerializer(serializers.ModelSerializer):
         model = StudentImportRow
         fields = ["row_no", "action", "normalized", "changes", "errors"]
         read_only_fields = fields
+
+
+class PromotionStudentSerializer(serializers.Serializer):
+    public_id = serializers.UUIDField()
+    university_number = serializers.CharField()
+    full_name_ar = serializers.CharField()
+    program_name = serializers.CharField()
+    department_name = serializers.CharField()
+    level = serializers.IntegerField()
+    semester = serializers.IntegerField()
+    to_level = serializers.IntegerField(allow_null=True)
+    to_semester = serializers.IntegerField(allow_null=True)
+
+
+class PromotionPreviewSerializer(serializers.Serializer):
+    term = serializers.IntegerField()
+    term_name = serializers.CharField()
+    done_at = serializers.DateTimeField(allow_null=True)
+    students = PromotionStudentSerializer(many=True)
+
+
+class PromotionRequestSerializer(serializers.Serializer):
+    department = serializers.IntegerField(required=False, allow_null=True)
+    exclude = serializers.ListField(child=serializers.UUIDField(), required=False, default=list)
+
+
+class PromotionResultSerializer(serializers.Serializer):
+    term_name = serializers.CharField()
+    promoted = serializers.IntegerField()
+    kept = serializers.IntegerField()
+    last_semester = serializers.IntegerField()

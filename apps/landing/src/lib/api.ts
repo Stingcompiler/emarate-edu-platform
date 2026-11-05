@@ -148,7 +148,14 @@ export type ProgramDetail = Program & {
   required_documents: { key: string; label: string; required: boolean }[];
   plan: {
     level: number;
-    courses: { code: string; name_ar: string; name_en: string; credit_hours: number }[];
+    courses: {
+      code: string;
+      name_ar: string;
+      name_en: string;
+      credit_hours: number;
+      /** The semester of the level, 1 or 2 (owner, 2026-11-05). */
+      semester?: number;
+    }[];
   }[];
 };
 export type Department = {
