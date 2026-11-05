@@ -203,7 +203,12 @@ class StaffApplicationSerializer(serializers.ModelSerializer):
         return services.can_review(user, obj)
 
     def get_allowed_transitions(self, obj) -> list[str]:
-        return services.allowed_transitions(self.context["request"].user, obj)
+        # The delegation switch read once per list, not per row (review 2026-11, an N+1).
+        if not hasattr(self, "_delegated"):
+            from organization.models import SystemSettings
+
+            self._delegated = SystemSettings.load().delegate_decisions_to_registrars
+        return services.allowed_transitions(self.context["request"].user, obj, self._delegated)
 
     def get_labels(self, obj) -> dict[str, str]:
         """Readable labels for answer keys and document types (the form the applicant filled)."""
