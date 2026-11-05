@@ -8,9 +8,9 @@ Older rounds (2026-10-24 → 11-02): `.claude/handoff/archive/2026-10-24_to_2026
   option B — the student's semester is stored and advanced by promotion):
   - Phase 1 #246 merged: course semester (1|2) on /department/courses, terms named
     «الفصل الدراسي الأول/الثاني <year>» in /system/structure, bulk enroll by `term.order`.
-  - Phase 2 #247 (branch `feat/semesters-student`): `StudentRecord.semester`, forms, import
+  - Phase 2 #247 merged: `StudentRecord.semester`, forms, import
     column, «يبدأ الطالب في» on registering an applicant, bulk enroll by student semester.
-  - Phase 3 (branch `feat/semesters-promotion`, on top of phase 2): `/student-promotion`
+  - Phase 3 #248 merged: `/student-promotion`
     (`students.promote`: admin + head registrar; supervisor via admin), `PromotionRun` once per
     term per scope; results «التقدم في الخطة» per semester; public study plan by semester.
   - Owner's decisions: failing students move with their cohort (registrar unticks who stays);

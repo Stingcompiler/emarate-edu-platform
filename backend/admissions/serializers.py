@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from django.utils.translation import gettext
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
@@ -23,6 +24,15 @@ class CycleSerializer(serializers.ModelSerializer):
     class Meta:
         model = AdmissionCycle
         fields = ["id", "academic_year", "name", "opens_at", "closes_at", "is_active"]
+
+    def validate(self, attrs):
+        opens = attrs.get("opens_at", getattr(self.instance, "opens_at", None))
+        closes = attrs.get("closes_at", getattr(self.instance, "closes_at", None))
+        if opens and closes and closes <= opens:
+            raise serializers.ValidationError(
+                {"closes_at": [gettext("The cycle must close after it opens.")]}
+            )
+        return attrs
 
 
 class TemplateSerializer(serializers.ModelSerializer):
