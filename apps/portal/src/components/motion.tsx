@@ -181,6 +181,25 @@ export function Segmented<T extends string>({
       role="radiogroup"
       aria-label={label}
       className={`relative flex rounded-lg bg-surface-alt p-0.5 ${className}`}
+      // Radio pattern (review 2026-11): one Tab stop, the arrows choose; in RTL ArrowLeft is
+      // the next option.
+      onKeyDown={(event) => {
+        const rtl = getComputedStyle(event.currentTarget).direction === "rtl";
+        const step: Record<string, number> = {
+          ArrowDown: 1,
+          ArrowUp: -1,
+          ArrowLeft: rtl ? 1 : -1,
+          ArrowRight: rtl ? -1 : 1,
+        };
+        if (!(event.key in step)) return;
+        event.preventDefault();
+        const at = options.findIndex((o) => o.key === value);
+        const next = options[(at + step[event.key]! + options.length) % options.length]!;
+        onChange(next.key);
+        requestAnimationFrame(() =>
+          box.current?.querySelector<HTMLElement>('[aria-checked="true"]')?.focus(),
+        );
+      }}
     >
       {thumb && (
         <span
@@ -199,6 +218,7 @@ export function Segmented<T extends string>({
           type="button"
           role="radio"
           aria-checked={value === o.key}
+          tabIndex={value === o.key ? 0 : -1}
           onClick={() => onChange(o.key)}
           className={`relative min-h-9 flex-1 rounded-md px-3 text-sm transition-colors ${value === o.key ? "font-semibold text-text" : "text-text-muted"}`}
         >

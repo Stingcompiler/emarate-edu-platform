@@ -18,3 +18,12 @@
     animation: none;
   }
 }
+
+/* A file picker drawn as a button keeps its real <input> visually hidden (sr-only): the focus
+   ring goes on the label around it, or a keyboard user cannot see where they are (review
+   2026-11, WCAG 2.4.7 — profile photo, applicant documents, submissions, regulations…). */
+label:has(> input[type="file"]:focus-visible),
+label:has(input[type="file"].sr-only:focus-visible) {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}

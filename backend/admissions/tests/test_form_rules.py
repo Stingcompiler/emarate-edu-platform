@@ -75,7 +75,7 @@ def test_a_schema_with_a_broken_pattern_or_file_rule_is_refused():
         ]
     }
     problems = " ".join(services.check_schema(broken))
-    assert "regular expression" in problems and "accept" in problems
+    assert "نمط التحقق غير صحيح" in problems and "الملفات المقبولة" in problems
 
 
 def test_an_intake_only_offers_a_published_template(api, intake, make_user):  # noqa: F811
@@ -273,14 +273,14 @@ def test_a_condition_must_name_an_earlier_applicant_field():
             {"key": "b", "type": "text", "label": "ب"},
         ]
     )
-    assert any("above" in p for p in services.check_schema(later))
+    assert any("حقل قبله" in p for p in services.check_schema(later))
     hidden = schema(
         [
             {"key": "s", "type": "text", "label": "س", "audience": "staff"},
             {"key": "a", "type": "text", "label": "أ", "show_if": {"key": "s", "equals": "x"}},
         ]
     )
-    assert any("applicant fills" in p for p in services.check_schema(hidden))
+    assert any("يعبئه المتقدم" in p for p in services.check_schema(hidden))
     odd = schema([{"key": "a", "type": "text", "label": "أ", "audience": "x", "width": "wide"}])
     assert len(services.check_schema(odd)) == 2
 
@@ -461,7 +461,7 @@ def test_a_condition_needs_answers_and_an_unpublished_copy_falls_back(
             }
         ]
     }
-    assert any("choose the answers" in p for p in services.check_schema(empty))
+    assert any("اختر الإجابات التي تُظهر" in p for p in services.check_schema(empty))
     head = make_user(Role.HEAD_REGISTRAR)
     copy = ApplicationFormTemplate.objects.create(
         name="استمارة التجسير", schema=COLLEGE, created_by=head

@@ -571,6 +571,22 @@ export function FormStep({
   onChangeProgram: () => void;
 }) {
   const confirm = useConfirm();
+  // Back from a refused submission: straight to the first field to fix, once the form is drawn
+  // (review 2026-11: the focus fell to the page and a keyboard user started from the top).
+  useEffect(() => {
+    if (!Object.keys(problems).length) return;
+    let tries = 0;
+    let frame = 0;
+    const look = () => {
+      const field = document.querySelector<HTMLElement>('[aria-invalid="true"]');
+      if (field) field.focus();
+      else if (tries++ < 30) frame = requestAnimationFrame(look);
+    };
+    frame = requestAnimationFrame(look);
+    return () => cancelAnimationFrame(frame);
+    // Once, when the step opens with the server's problems.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   // Another programme means another form (its own template): the draft is withdrawn so it
   // does not count against the per-cycle limit, and the visitor starts the new one (review
   // 2026-10-04 UX10).
