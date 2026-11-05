@@ -36,7 +36,9 @@ class Term(BilingualNameModel, TimestampedModel):
         CLOSED = "closed", "مغلق"
 
     academic_year = models.ForeignKey(AcademicYear, on_delete=models.PROTECT, related_name="terms")
-    order = models.PositiveSmallIntegerField()  # 1 = autumn, 2 = spring, 3 = summer
+    # The college's year has two semesters (owner, 2026-11-05): 1 = «الفصل الدراسي الأول»,
+    # 2 = «الفصل الدراسي الثاني»; no summer term. New terms take 1 or 2 (TermSerializer).
+    order = models.PositiveSmallIntegerField()
     starts_on = models.DateField()
     ends_on = models.DateField()
     is_current = models.BooleanField(default=False)
@@ -76,6 +78,8 @@ class Course(BilingualNameModel, TimestampedModel):
     code = models.CharField(max_length=20)
     credit_hours = models.PositiveSmallIntegerField(default=3)
     default_level = models.PositiveSmallIntegerField(default=1)
+    # Where the course sits in the study plan: level 1–5 (a year), and the semester of that
+    # level, 1 or 2 (owner, 2026-11-05). Bulk enrollment in a term takes the term's semester.
     default_term_order = models.PositiveSmallIntegerField(default=1)
     is_active = models.BooleanField(default=True)
 
@@ -86,6 +90,10 @@ class Course(BilingualNameModel, TimestampedModel):
             models.CheckConstraint(
                 condition=models.Q(credit_hours__gte=1, credit_hours__lte=12),
                 name="course_credit_hours_range",
+            ),
+            models.CheckConstraint(
+                condition=models.Q(default_term_order__gte=1, default_term_order__lte=2),
+                name="course_semester_range",
             ),
         ]
 

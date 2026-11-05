@@ -117,7 +117,7 @@ backend/
 ### academic
 - **AcademicYear**: name "2026/2027"[u], starts_on, ends_on, is_current.
 - **Term**: academic_year→, name_ar/en, order, starts_on, ends_on, is_current (واحد فقط)، status {planned|active|closed}.
-- **Course**: department→, program→(nullable), code, name_ar/en, credit_hours, default_level, default_term_order; [u (department, code)].
+- **Course**: department→, program→(nullable), code, name_ar/en, credit_hours, default_level, default_term_order; [u (department, code)]. موضع المادة في الخطة: المستوى 1–5 (سنة دراسية) والفصل الدراسي 1 أو 2 داخله (المالك 2026-11-05؛ لا فصل صيفي)، و`Term.order` هو الفصل الدراسي نفسه (1 الأول، 2 الثاني)، فيسجّل Enrollment الجماعي مواد `default_term_order = term.order` فقط.
 - **CourseOffering**: course→, term→, section "A", capacity, ta_can_grade, status {draft|active|closed}; [u (course, term, section)].
 - **OfferingInstructor**: offering→, user→, role {teacher|ta}; [u (offering, user)].
 - **DepartmentMembership**: department→, user→, kind {teacher|ta}, added_by→; [u (department, user)].

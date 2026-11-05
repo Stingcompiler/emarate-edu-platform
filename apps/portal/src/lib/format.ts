@@ -160,3 +160,23 @@ export function slugify(title: string, max = 100): string {
     .replace(/^-|-$/g, "")
     .slice(0, max);
 }
+
+/**
+ * The college's study plan (owner, 2026-11-05): levels 1–5, each a year of two semesters.
+ * A course and a term carry the semester as 1 or 2; there is no summer term.
+ */
+export const SEMESTERS = [
+  { value: 1, label: "الفصل الدراسي الأول" },
+  { value: 2, label: "الفصل الدراسي الثاني" },
+] as const;
+
+/** «الفصل الأول» / «الفصل الثاني», short for cards and lists. */
+export function semester(order: number | null | undefined): string {
+  return order === 2 ? "الفصل الثاني" : "الفصل الأول";
+}
+
+/** The suggested name of a term: «الفصل الدراسي الأول 2026/2027». */
+export function termName(order: number, year: string | null | undefined): string {
+  const label = SEMESTERS.find((s) => s.value === order)?.label ?? SEMESTERS[0].label;
+  return year ? `${label} ${year}` : label;
+}

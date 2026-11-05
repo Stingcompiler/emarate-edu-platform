@@ -258,12 +258,12 @@ class Command(BaseCommand):
         )
         if not AcademicYear.objects.filter(is_current=True).exists():
             AcademicYear.objects.filter(pk=year.pk).update(is_current=True)
-        autumn, _ = Term.objects.get_or_create(
+        semester_one, _ = Term.objects.get_or_create(
             academic_year=year,
             order=1,
             defaults={
-                "name_ar": "خريف 2026",
-                "name_en": "Autumn 2026",
+                "name_ar": "الفصل الدراسي الأول 2026/2027",
+                "name_en": "First semester 2026/2027",
                 "starts_on": date(2026, 9, 1),
                 "ends_on": date(2027, 1, 31),
                 "status": Term.Status.ACTIVE,
@@ -273,14 +273,14 @@ class Command(BaseCommand):
             academic_year=year,
             order=2,
             defaults={
-                "name_ar": "ربيع 2027",
-                "name_en": "Spring 2027",
+                "name_ar": "الفصل الدراسي الثاني 2026/2027",
+                "name_en": "Second semester 2026/2027",
                 "starts_on": date(2027, 2, 15),
                 "ends_on": date(2027, 7, 15),
             },
         )
         if not Term.objects.filter(is_current=True).exists():
-            Term.objects.filter(pk=autumn.pk).update(is_current=True)
+            Term.objects.filter(pk=semester_one.pk).update(is_current=True)
 
         users: dict[Role, User] = {}
         for role, handle, name in STAFF:
@@ -307,8 +307,8 @@ class Command(BaseCommand):
                     "default_term_order": term_order,
                 },
             )
-            if term_order == autumn.order:
-                offering, _ = CourseOffering.objects.get_or_create(course=course, term=autumn)
+            if term_order == semester_one.order:
+                offering, _ = CourseOffering.objects.get_or_create(course=course, term=semester_one)
                 if dept == "IT" and program in (None, "BIT"):
                     offering.instructors.get_or_create(
                         user=users[Role.TEACHER], defaults={"role": "teacher"}
@@ -340,9 +340,9 @@ class Command(BaseCommand):
                     },
                 )
         for program_code, level in {(p, lv) for p, lv, _ in COHORTS}:
-            academic_services.bulk_enroll(meta, autumn, programs[program_code], level)
+            academic_services.bulk_enroll(meta, semester_one, programs[program_code], level)
 
-        self._learning(users, autumn)
+        self._learning(users, semester_one)
 
         # A ready-made student account on the first IT record.
         record = StudentRecord.objects.get(university_number="26-IT-0001")
@@ -352,18 +352,18 @@ class Command(BaseCommand):
             )
             record.save(update_fields=["user", "updated_at"])
 
-        self._phase4(users, autumn)
-        self._exam(users, autumn)
-        self._phase6(users, autumn)
+        self._phase4(users, semester_one)
+        self._exam(users, semester_one)
+        self._phase6(users, semester_one)
         self._phase7(users, meta, year)
-        self._phase8(users, autumn)
+        self._phase8(users, semester_one)
         # Sample site content (licence, figures, pictures, news …), each marked as an example.
         sample_site.seed(users)
         return {
             "departments": Department.objects.count(),
             "programs": Program.objects.count(),
             "courses": Course.objects.count(),
-            "offerings": CourseOffering.objects.filter(term=autumn).count(),
+            "offerings": CourseOffering.objects.filter(term=semester_one).count(),
             "students": StudentRecord.objects.count(),
             "users": User.objects.count(),
             "lectures": Lecture.objects.count(),
