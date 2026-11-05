@@ -432,6 +432,10 @@ COVERED_ELSEWHERE = {
     "deletion-request-reject": _DELETIONS + "test_a_rejected_request_keeps_the_announcement",
     "notification-sent-detail": _DELETIONS
     + "test_a_sent_notification_is_kept_and_deleted_by_request",
+    "notification-sent-hide": _DELETIONS
+    + "test_a_sender_hides_a_notification_at_once_and_restores_it",
+    "notification-sent-restore": _DELETIONS
+    + "test_a_sender_hides_a_notification_at_once_and_restores_it",
     # POST only: a department's programmes into another, then it goes (owner, 2026-11-05).
     "department-merge": (
         "organization.tests.test_structure_edit::test_a_department_is_merged_into_another"

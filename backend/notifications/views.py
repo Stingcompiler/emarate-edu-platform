@@ -10,7 +10,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from accounts import rbac
-from audit.services import RequestMeta
+from audit.services import RequestMeta, record
 from core.idempotency import run_once
 
 from . import audience as audiences
@@ -50,9 +50,9 @@ class InboxViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     def get_queryset(self):
         if getattr(self, "swagger_fake_view", False):
             return NotificationRecipient.objects.none()
-        rows = NotificationRecipient.objects.filter(user=self.request.user).select_related(
-            "notification__sender"
-        )
+        rows = NotificationRecipient.objects.filter(
+            user=self.request.user, notification__hidden_at__isnull=True
+        ).select_related("notification__sender")
         # Platform alerts are for the people who run it (design review B5).
         if not rbac.is_admin(self.request.user):
             rows = rows.exclude(notification__category=Category.OPS)
@@ -132,6 +132,34 @@ class SentViewSet(mixins.ListModelMixin, mixins.DestroyModelMixin, viewsets.Gene
             )
 
         return run_once(request, perform)
+
+    def _hide(self, request, hidden: bool):
+        notification = self.get_object()  # the caller's own only (get_queryset)
+        with transaction.atomic():
+            notification.hidden_at = timezone.now() if hidden else None
+            notification.hidden_by = request.user if hidden else None
+            notification.save(update_fields=["hidden_at", "hidden_by"])
+            record(
+                RequestMeta.from_request(request),
+                "notification.hide" if hidden else "notification.restore",
+                notification,
+                new={"title": notification.title},
+            )
+        return Response(self.get_serializer(self._annotated(notification)).data)
+
+    def _annotated(self, notification):
+        return self.get_queryset().get(pk=notification.pk)
+
+    @extend_schema(request=None, responses=SentNotificationSerializer)
+    @action(detail=True, methods=["post"])
+    def hide(self, request, public_id=None):
+        """Soft delete: off every inbox now, kept and restorable (owner, 2026-11-05)."""
+        return self._hide(request, True)
+
+    @extend_schema(request=None, responses=SentNotificationSerializer)
+    @action(detail=True, methods=["post"])
+    def restore(self, request, public_id=None):
+        return self._hide(request, False)
 
     @extend_schema(request=AudienceSerializer, responses=AudienceCountSerializer)
     @action(detail=False, methods=["post"], url_path="preview")

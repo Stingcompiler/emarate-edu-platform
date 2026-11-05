@@ -49,6 +49,16 @@ class Notification(PublicIdModel, TimestampedModel):
     audience = models.JSONField(default=dict)
     channels = models.JSONField(default=list)
     recipients_count = models.PositiveIntegerField(default=0)
+    # Soft deletion by its sender (owner, 2026-11-05): gone from every inbox at once, kept here
+    # (and restorable) until the system admin or supervisor approves deleting it for good.
+    hidden_at = models.DateTimeField(null=True, blank=True)
+    hidden_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="+",
+    )
     fanned_out_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:

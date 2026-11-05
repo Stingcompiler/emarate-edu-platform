@@ -116,6 +116,7 @@ class SentNotificationSerializer(serializers.ModelSerializer):
             "recipients_count",
             "read_count",
             "created_at",
+            "hidden_at",
             "deletion_pending",
         ]
         read_only_fields = fields

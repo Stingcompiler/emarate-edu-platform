@@ -1,5 +1,5 @@
 import type { Schemas } from "@ecst/api";
-import { useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Award, BellOff, BookOpen, Briefcase, Megaphone, Server, UserCheck } from "lucide-react";
 import { useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router";
@@ -53,10 +53,20 @@ export function Notifications() {
   const me = useMe();
   const isAdmin = hasRole(me.data, "system_admin", "system_supervisor");
   const [params] = useSearchParams();
-  const sender = canCompose(me.data);
+  // «المرسلة» for anyone who can send, or who ever sent one (owner, 2026-11-05).
+  const sentAny = useQuery({
+    queryKey: ["notifications", "sent", "any"],
+    queryFn: async () =>
+      ((
+        await api.GET("/api/v1/notifications/sent", {
+          params: { query: { page_size: 1 } as never },
+        })
+      ).data?.count ?? 0) > 0,
+  });
+  const sender = canCompose(me.data) || !!sentAny.data;
   // «المرسلة» (owner, 2026-11-05): what one sent, kept; ?tab=sent from a deletion decision.
   const [filter, setFilter] = useState<Filter>(
-    params.get("tab") === "sent" && sender ? "sent" : "all",
+    params.get("tab") === "sent" ? "sent" : "all",
   );
   const client = useQueryClient();
   const navigate = useNavigate();
