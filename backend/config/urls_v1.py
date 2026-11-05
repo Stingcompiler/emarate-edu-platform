@@ -104,6 +104,7 @@ urlpatterns = [
     path("me/courses", academic.MyCoursesView.as_view(), name="me-courses"),
     path("system-settings", organization.SystemSettingsView.as_view(), name="system-settings"),
     path("system-status", organization.SystemStatusView.as_view(), name="system-status"),
+    path("backups", organization.BackupsView.as_view(), name="backups"),
     path(
         "departments/<int:department_id>/members",
         academic.DepartmentMembersView.as_view(),
