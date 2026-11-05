@@ -1,7 +1,7 @@
 import type { Schemas } from "@ecst/api";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Pencil } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { PortalShell } from "../../components/PortalShell";
 import {
@@ -30,6 +30,26 @@ const DEGREE: Record<string, string> = {
   honours: "بكالوريوس مرتبة الشرف",
   master: "ماجستير",
 };
+
+/** Back to the button that opened a form, once it closes (review 2026-11: the focus fell to
+ * the page, and a keyboard user started again from the top). */
+const focusOpener = (name: string) =>
+  requestAnimationFrame(() =>
+    document.querySelector<HTMLElement>(`[data-opener="${CSS.escape(name)}"]`)?.focus(),
+  );
+
+/** An edit form that opens takes the focus and comes into view (it may open below a list). */
+function useOpenFocus<T extends HTMLElement>(active = true) {
+  const ref = useRef<T>(null);
+  useEffect(() => {
+    if (!active || !ref.current) return;
+    ref.current.scrollIntoView({ block: "nearest" });
+    ref.current
+      .querySelector<HTMLElement>("input, select, textarea")
+      ?.focus({ preventScroll: true });
+  }, [active]);
+  return ref;
+}
 
 /** Board: DesktopSystemStructure — college tree, years and terms, department programs. */
 export function Structure() {
@@ -264,6 +284,7 @@ export function Structure() {
                     type="button"
                     aria-label={`تعديل الفصل ${t.name_ar}`}
                     aria-expanded={editingTerm === t.id}
+                    data-opener={`term:${t.id}`}
                     onClick={() => setEditingTerm(editingTerm === t.id ? null : t.id)}
                     className="tap-44 grid size-8 place-items-center rounded-lg text-text-muted hover:bg-surface-alt hover:text-primary"
                   >
@@ -275,6 +296,7 @@ export function Structure() {
                     term={t}
                     onDone={() => {
                       setEditingTerm(null);
+                      focusOpener(`term:${t.id}`);
                       void refresh("terms");
                     }}
                   />
@@ -358,6 +380,7 @@ export function Structure() {
               <Button
                 variant="secondary"
                 aria-expanded={editingDept}
+                data-opener="dept"
                 className="mb-2 min-h-10 shrink-0 px-3 text-sm"
                 onClick={() => setEditingDept(!editingDept)}
               >
@@ -373,6 +396,7 @@ export function Structure() {
               onDone={(deleted) => {
                 setEditingDept(false);
                 if (deleted) setPicked(null);
+                else focusOpener("dept");
                 void refresh("departments");
               }}
             />
@@ -408,6 +432,7 @@ export function Structure() {
                           key={part}
                           type="button"
                           aria-expanded={open}
+                          data-opener={`program:${p.id}:${part}`}
                           onClick={() => setEditing(open ? null : { id: p.id, part })}
                           className="tap-44 text-xs font-semibold text-primary hover:underline"
                         >
@@ -457,6 +482,7 @@ export function Structure() {
             .map((p) => {
               const done = () => {
                 setEditing(null);
+                focusOpener(`program:${p.id}:${editing!.part}`);
                 void refresh("programs");
               };
               return editing?.part === "page" ? (
@@ -504,6 +530,7 @@ type PageKey = (typeof PAGE_FIELDS)[number] | "annual_fee_sdg" | "annual_fee_usd
  * the description, yearly fees, outcomes and careers. Blank fields stay off the site.
  */
 function ProgramPageForm({ program, onDone }: { program: Schemas["Program"]; onDone: () => void }) {
+  const opened = useOpenFocus<HTMLFormElement>();
   const [form, setForm] = useState<Record<PageKey, string>>(
     () =>
       ({
@@ -535,6 +562,7 @@ function ProgramPageForm({ program, onDone }: { program: Schemas["Program"]; onD
   return (
     <Card className="mt-3">
       <form
+        ref={opened}
         onInput={unsaved.onInput}
         onSubmit={(e) => {
           e.preventDefault();
@@ -703,6 +731,7 @@ function DepartmentForm({
   department: Schemas["Department"];
   onDone: (deleted?: boolean) => void;
 }) {
+  const opened = useOpenFocus<HTMLFormElement>();
   const confirm = useConfirm();
   const unsaved = useUnsavedChanges();
   const [form, setForm] = useState({
@@ -731,6 +760,7 @@ function DepartmentForm({
   return (
     <Card className="mb-3">
       <form
+        ref={opened}
         onInput={unsaved.onInput}
         onSubmit={async (e) => {
           e.preventDefault();
@@ -854,6 +884,7 @@ function ProgramForm({
   cycle?: Schemas["Cycle"];
   onDone: () => void;
 }) {
+  const opened = useOpenFocus<HTMLFormElement>(!!program);
   const confirm = useConfirm();
   const unsaved = useUnsavedChanges();
   const blank = {
@@ -915,6 +946,7 @@ function ProgramForm({
     // A labelled form (it was a row of bare boxes whose placeholders were the only hint).
     <Card className="mt-3">
       <form
+        ref={opened}
         onInput={unsaved.onInput}
         onSubmit={async (e) => {
           e.preventDefault();
@@ -1216,6 +1248,7 @@ function YearForm({ onDone }: { onDone: () => void }) {
 
 /** A term's name, order and dates, corrected in place (admin review 2026-11-02, item 6). */
 function TermForm({ term, onDone }: { term: Schemas["Term"]; onDone: () => void }) {
+  const opened = useOpenFocus<HTMLFormElement>();
   const unsaved = useUnsavedChanges();
   const [form, setForm] = useState({
     name_ar: term.name_ar,
@@ -1239,6 +1272,7 @@ function TermForm({ term, onDone }: { term: Schemas["Term"]; onDone: () => void 
   const missing = !form.name_ar.trim() || !form.starts_on || !form.ends_on;
   return (
     <form
+      ref={opened}
       onInput={unsaved.onInput}
       onSubmit={(e) => {
         e.preventDefault();
