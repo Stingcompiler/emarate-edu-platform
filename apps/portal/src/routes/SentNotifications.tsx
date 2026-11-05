@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Send, Trash2 } from "lucide-react";
+import { EyeOff, RotateCcw, Send, Trash2 } from "lucide-react";
 
 import { useConfirm } from "../components/Confirm";
 import { Button, Card, EmptyState, Notice, StatusBadge, problemMessage } from "../components/ui";
@@ -9,8 +9,8 @@ import { when } from "../lib/format";
 
 /**
  * «المرسلة»: the notifications one sent stay here, with how many read them (owner, 2026-11-05).
- * Deleting one removes it from every recipient; the system admin does it at once, anyone else
- * asks and the system admin or supervisor decides.
+ * «حذف» is soft and immediate: off every inbox, kept here, «استعادة» brings it back. Deleting
+ * for good is the system admin's at once, anyone else's by request (admin or supervisor).
  */
 export function SentNotifications() {
   const me = useMe();
@@ -35,6 +35,16 @@ export function SentNotifications() {
     },
     onSuccess: () => client.invalidateQueries({ queryKey: ["notifications", "sent"] }),
   });
+  const hide = useMutation({
+    mutationFn: async ({ id, hidden }: { id: string; hidden: boolean }) => {
+      const path = hidden
+        ? "/api/v1/notifications/sent/{public_id}/hide"
+        : "/api/v1/notifications/sent/{public_id}/restore";
+      const { data, error } = await api.POST(path, { params: { path: { public_id: id } } });
+      if (!data) throw error;
+    },
+    onSuccess: () => client.invalidateQueries({ queryKey: ["notifications"] }),
+  });
   const rows = sent.data ?? [];
   if (sent.isSuccess && !rows.length)
     return (
@@ -44,7 +54,9 @@ export function SentNotifications() {
     );
   return (
     <div className="space-y-3">
-      {remove.isError && <Notice>{problemMessage(remove.error)}</Notice>}
+      {(remove.isError || hide.isError) && (
+        <Notice>{problemMessage(remove.error ?? hide.error)}</Notice>
+      )}
       {rows.map((n) => (
         <Card key={n.public_id} className="p-4">
           <h2 className="font-bold text-text">{n.title}</h2>
@@ -53,30 +65,63 @@ export function SentNotifications() {
             {when(n.created_at)} · قرأه {(n.read_count ?? 0).toLocaleString("ar-u-nu-latn")} من{" "}
             {(n.recipients_count ?? 0).toLocaleString("ar-u-nu-latn")}
           </p>
-          <div className="mt-3 border-t border-border-soft pt-3">
-            {n.deletion_pending ? (
-              <StatusBadge status="pending" label="طلب الحذف بانتظار الموافقة" />
+          <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-border-soft pt-3">
+            {n.hidden_at ? (
+              <>
+                <StatusBadge status="closed" label="محذوف — مخفي عن المستلمين" />
+                <Button
+                  variant="secondary"
+                  className="min-h-10 px-3 text-sm"
+                  disabled={hide.isPending}
+                  onClick={() => hide.mutate({ id: n.public_id, hidden: false })}
+                >
+                  <RotateCcw size={16} aria-hidden />
+                  استعادة
+                </Button>
+                {n.deletion_pending ? (
+                  <StatusBadge status="pending" label="الحذف النهائي بانتظار الموافقة" />
+                ) : (
+                  <Button
+                    variant="ghost"
+                    className="min-h-10 px-2 text-sm text-danger-strong"
+                    disabled={remove.isPending}
+                    onClick={async () => {
+                      if (
+                        await confirm({
+                          title: `حذف «${n.title}» نهائيًا؟`,
+                          body: atOnce
+                            ? "يُحذف الإشعار نهائيًا ولا يمكن استعادته."
+                            : "يُرسل طلب إلى مدير النظام أو مشرف النظام؛ بعد موافقته لا يمكن استعادة الإشعار.",
+                          confirm: atOnce ? "حذف نهائي" : "إرسال الطلب",
+                          tone: atOnce ? "danger" : "primary",
+                        })
+                      )
+                        remove.mutate(n.public_id);
+                    }}
+                  >
+                    <Trash2 size={16} aria-hidden />
+                    {atOnce ? "حذف نهائي" : "طلب حذف نهائي"}
+                  </Button>
+                )}
+              </>
             ) : (
               <Button
                 variant="ghost"
                 className="min-h-10 px-2 text-sm text-danger-strong"
-                disabled={remove.isPending}
+                disabled={hide.isPending}
                 onClick={async () => {
                   if (
                     await confirm({
-                      title: atOnce ? `حذف «${n.title}»؟` : `طلب حذف «${n.title}»؟`,
-                      body: atOnce
-                        ? "يُحذف الإشعار من صناديق كل من وصلهم."
-                        : "يبقى الإشعار حتى يوافق مدير النظام أو مشرف النظام على حذفه من صناديق من وصلهم، ويصلك إشعار بالقرار.",
-                      confirm: atOnce ? "حذف" : "إرسال الطلب",
-                      tone: atOnce ? "danger" : "primary",
+                      title: `حذف «${n.title}»؟`,
+                      body: "يختفي الآن من صناديق كل من وصلهم، ويبقى هنا لتستعيده متى شئت.",
+                      confirm: "حذف",
                     })
                   )
-                    remove.mutate(n.public_id);
+                    hide.mutate({ id: n.public_id, hidden: true });
                 }}
               >
-                <Trash2 size={16} aria-hidden />
-                {atOnce ? "حذف" : "طلب حذف"}
+                <EyeOff size={16} aria-hidden />
+                حذف
               </Button>
             )}
           </div>

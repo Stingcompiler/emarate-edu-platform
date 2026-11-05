@@ -104,3 +104,28 @@ def test_a_sent_notification_is_kept_and_deleted_by_request(api, make_user):
     req = DeletionRequest.objects.get(kind="notification")
     assert api(supervisor).post(f"{R}/{req.pk}/approve").status_code == 200
     assert not Notification.objects.filter(pk=note.pk).exists()
+
+
+def test_a_sender_hides_a_notification_at_once_and_restores_it(api, make_user):
+    """Soft deletion (owner, 2026-11-05): gone from every inbox now, kept and restorable."""
+    from notifications.models import NotificationRecipient
+
+    sender, reader, stranger = (
+        make_user(Role.STUDENT_AFFAIRS),
+        make_user(Role.STUDENT),
+        make_user(Role.STUDENT_AFFAIRS),
+    )
+    note = Notification.objects.create(category="college", title="تنبيه", sender=sender)
+    NotificationRecipient.objects.create(notification=note, user=reader)
+    url = f"/api/v1/notifications/sent/{note.public_id}"
+    assert api(reader).get("/api/v1/notifications/unread-count").data["count"] == 1
+    assert api(stranger).post(f"{url}/hide").status_code == 404
+    hidden = api(sender).post(f"{url}/hide")
+    assert hidden.status_code == 200 and hidden.data["hidden_at"]
+    assert api(reader).get("/api/v1/notifications").data["results"] == []
+    assert api(reader).get("/api/v1/notifications/unread-count").data["count"] == 0
+    assert AuditLog.objects.filter(action="notification.hide", actor=sender).exists()
+    # Still in the sender's «المرسلة», and back on restoring.
+    assert api(sender).get("/api/v1/notifications/sent").data["results"][0]["hidden_at"]
+    assert api(sender).post(f"{url}/restore").data["hidden_at"] is None
+    assert api(reader).get("/api/v1/notifications/unread-count").data["count"] == 1
