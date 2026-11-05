@@ -83,19 +83,22 @@ def can_review(user, application: Application) -> bool:
     return rbac.can(user, "admissions.review", application.department_id)
 
 
-def can_decide(user, application: Application) -> bool:
+def can_decide(user, application: Application, delegated: bool | None = None) -> bool:
     if rbac.can(user, "admissions.manage"):
         return True
-    return SystemSettings.load().delegate_decisions_to_registrars and can_review(user, application)
+    if delegated is None:
+        delegated = SystemSettings.load().delegate_decisions_to_registrars
+    return delegated and can_review(user, application)
 
 
-def allowed_transitions(user, application: Application) -> list[str]:
+def allowed_transitions(user, application: Application, delegated: bool | None = None) -> list[str]:
+    """`delegated` (the delegation switch) may be read once by a caller listing many rows."""
     out = []
     for (source, target), who in TRANSITIONS.items():
         if source != application.status:
             continue
         if (who == "reviewer" and can_review(user, application)) or (
-            who == "decider" and can_decide(user, application)
+            who == "decider" and can_decide(user, application, delegated)
         ):
             out.append(target)
     return sorted(out)
