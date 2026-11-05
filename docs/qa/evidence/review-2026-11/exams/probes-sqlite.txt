@@ -1,0 +1,164 @@
+FFFFF.                                                                   [100%]
+=================================== FAILURES ===================================
+____________ test_probe_published_exam_question_is_edited_in_place _____________
+
+api = <function api.<locals>.client at 0x111306ca0>
+classroom = <class 'conftest.Classroom'>, exam = <Exam: اختبار قصير 1>
+
+    def test_probe_published_exam_question_is_edited_in_place(api, classroom, exam):  # noqa: F811
+        """The portal offers «تعديل» on draft exams only, but the server's _editable() locks
+        questions only when the exam is not a draft AND has attempts: a published exam nobody has
+        started yet accepts PATCH (and POST/DELETE/reorder) of its questions."""
+        assert exam.status == Exam.Status.PUBLISHED and not exam.attempts.exists()
+        question = exam.questions.get(type="single")
+        edited = api(classroom.teacher).patch(
+            f"{URL}/{exam.public_id}/questions/{question.pk}", {"text": "نص جديد"}, format="json"
+        )
+>       assert edited.status_code == 200  # FAULT: expected 409 (locked once published)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       assert 409 == 200
+E        +  where 409 = <Response status_code=409, "application/problem+json">.status_code
+
+core/tests/test_qa_probes_exams.py:39: AssertionError
+---------------------------- Captured stderr setup -----------------------------
+2026-11-05 09:50:42,927 WARNING kombu.connection No hostname was supplied. Reverting to default 'localhost'
+2026-11-05 09:50:42,935 INFO celery.app.trace Task notifications.tasks.fan_out[3ba8c3ca-b3e4-43b9-9f43-f7eca6575574] succeeded in 0.004904749999695923s: 1
+------------------------------ Captured log setup ------------------------------
+WARNING  kombu.connection:connection.py:671 No hostname was supplied. Reverting to default 'localhost'
+INFO     celery.app.trace:trace.py:128 Task notifications.tasks.fan_out[3ba8c3ca-b3e4-43b9-9f43-f7eca6575574] succeeded in 0.004904749999695923s: 1
+----------------------------- Captured stderr call -----------------------------
+2026-11-05 09:50:43,041 WARNING django.request Conflict: /api/v1/exams/61d473db-9e67-45ad-8372-264fedd10b96/questions/1
+------------------------------ Captured log call -------------------------------
+WARNING  django.request:log.py:283 Conflict: /api/v1/exams/61d473db-9e67-45ad-8372-264fedd10b96/questions/1
+________________ test_probe_published_exam_edit_breaks_grading _________________
+
+api = <function api.<locals>.client at 0x111305260>
+classroom = <class 'conftest.Classroom'>, exam = <Exam: اختبار قصير 1>
+
+    def test_probe_published_exam_edit_breaks_grading(api, classroom, exam):  # noqa: F811
+        """problems() runs only at publish. After it, a PATCH can leave a partial-credit multiple
+        question with no correct choice; the exam stays published, and grading divides by
+        len(correct) == 0, so the student's submit raises instead of grading."""
+        question = exam.questions.get(type="multiple")
+        edited = api(classroom.teacher).patch(
+            f"{URL}/{exam.public_id}/questions/{question.pk}",
+            {"choices": [{"text": "أ"}, {"text": "ب"}]},  # none marked correct
+            format="json",
+        )
+>       assert edited.status_code == 200
+E       assert 409 == 200
+E        +  where 409 = <Response status_code=409, "application/problem+json">.status_code
+
+core/tests/test_qa_probes_exams.py:54: AssertionError
+---------------------------- Captured stderr setup -----------------------------
+2026-11-05 09:50:43,141 INFO celery.app.trace Task notifications.tasks.fan_out[c3f10936-f99f-42e5-af5b-a95c4251ca65] succeeded in 0.0014974999999139982s: 1
+------------------------------ Captured log setup ------------------------------
+INFO     celery.app.trace:trace.py:128 Task notifications.tasks.fan_out[c3f10936-f99f-42e5-af5b-a95c4251ca65] succeeded in 0.0014974999999139982s: 1
+----------------------------- Captured stderr call -----------------------------
+2026-11-05 09:50:43,147 WARNING django.request Conflict: /api/v1/exams/6d76e52a-5566-49bf-9e31-a5c7a1de3682/questions/2
+------------------------------ Captured log call -------------------------------
+WARNING  django.request:log.py:283 Conflict: /api/v1/exams/6d76e52a-5566-49bf-9e31-a5c7a1de3682/questions/2
+___________ test_probe_one_ungradeable_attempt_stops_the_minute_beat ___________
+
+api = <function api.<locals>.client at 0x1113054e0>
+classroom = <class 'conftest.Classroom'>, exam = <Exam: اختبار قصير 1>
+
+    def test_probe_one_ungradeable_attempt_stops_the_minute_beat(api, classroom, exam):  # noqa: F811
+        """close_expired() has no per-attempt guard: the same attempt, once past its deadline,
+        raises out of the beat task, so the exam is never auto-closed and the attempt stays open
+        (and every attempt listed after it, college-wide, waits too)."""
+        question = exam.questions.get(type="multiple")
+        api(classroom.teacher).patch(
+            f"{URL}/{exam.public_id}/questions/{question.pk}",
+            {"choices": [{"text": "أ"}, {"text": "ب"}]},
+            format="json",
+        )
+        meta = RequestMeta(actor=classroom.student)
+        attempt = services.start(meta, exam)
+        services.save_answer(meta, attempt, question.pk, [question.choices.first().pk])
+        past = timezone.now() - timedelta(hours=1)
+        ExamAttempt.objects.filter(pk=attempt.pk).update(deadline_at=past)
+        Exam.objects.filter(pk=exam.pk).update(opens_at=past - timedelta(hours=1), closes_at=past)
+>       with pytest.raises(ArithmeticError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ArithmeticError
+
+core/tests/test_qa_probes_exams.py:83: Failed
+---------------------------- Captured stderr setup -----------------------------
+2026-11-05 09:50:43,193 INFO celery.app.trace Task notifications.tasks.fan_out[0841b500-f15a-4965-b4cc-3d7aaaaa6e4e] succeeded in 0.001472459000069648s: 1
+------------------------------ Captured log setup ------------------------------
+INFO     celery.app.trace:trace.py:128 Task notifications.tasks.fan_out[0841b500-f15a-4965-b4cc-3d7aaaaa6e4e] succeeded in 0.001472459000069648s: 1
+----------------------------- Captured stderr call -----------------------------
+2026-11-05 09:50:43,198 WARNING django.request Conflict: /api/v1/exams/a016174d-6935-4085-bd3e-85e2e9157ec4/questions/2
+------------------------------ Captured log call -------------------------------
+WARNING  django.request:log.py:283 Conflict: /api/v1/exams/a016174d-6935-4085-bd3e-85e2e9157ec4/questions/2
+_______ test_probe_penalty_without_late_until_is_accepted_by_the_server ________
+
+api = <function api.<locals>.client at 0x1104c62a0>
+classroom = <class 'conftest.Classroom'>
+
+    def test_probe_penalty_without_late_until_is_accepted_by_the_server(api, classroom):
+        """The editor lets a teacher pick «يُقبل بخصم» and leave «آخر موعد للمتأخر» empty
+        (late_until = null). The server then accepts late work with no end; the portal's
+        Assignment page computes hardEnd = due when late_until is null and shows «أُغلق التسليم»
+        (see apps/portal/src/routes/learning/Assignment.probe.test.tsx)."""
+        body = {
+            "offering": classroom.offering.pk,
+            "title": "واجب متأخر",
+            "due_at": (timezone.now() + timedelta(days=3)).isoformat(),
+            "submission_types": ["text"],
+            "max_grade": "10",
+            "late_policy": "penalty",
+            "late_penalty_percent": 20,
+            "late_until": None,
+        }
+        created = api(classroom.teacher).post("/api/v1/assignments", body, format="json")
+>       assert created.status_code == 201, created.data
+E       AssertionError: {'type': 'about:blank', 'title': 'طلب غير صالح', 'status': 400, 'detail': 'بعض الحقول غير صحيحة.', ...}
+E       assert 400 == 201
+E        +  where 400 = <Response status_code=400, "application/problem+json">.status_code
+
+core/tests/test_qa_probes_exams.py:110: AssertionError
+----------------------------- Captured stderr call -----------------------------
+2026-11-05 09:50:43,221 WARNING django.request Bad Request: /api/v1/assignments
+------------------------------ Captured log call -------------------------------
+WARNING  django.request:log.py:283 Bad Request: /api/v1/assignments
+__________ test_probe_instructor_assigned_links_to_the_offering_uuid ___________
+
+api = <function api.<locals>.client at 0x1102d4860>
+make_user = <function make_user.<locals>.make at 0x1102d45e0>
+it_dept = <Department: تقانة المعلومات>
+it_offering = <CourseOffering: IT101-A · الفصل الأول>
+
+    def test_probe_instructor_assigned_links_to_the_offering_uuid(api, make_user, it_dept, it_offering):
+        """events.instructor_assigned sends /courses/<offering.public_id>. The portal's
+        /courses/:id page does Number(id) and queries ?offering=<pk>; a UUID gives NaN, so the
+        page the notification opens shows an empty course."""
+        supervisor = make_user(Role.DEPARTMENT_SUPERVISOR, department=it_dept)
+        teacher = make_user(Role.TEACHER)
+        members = f"/api/v1/departments/{it_dept.pk}/members"
+        added = api(supervisor).post(members, {"user": str(teacher.public_id), "kind": "teacher"})
+        assert added.status_code == 201, added.data
+        assigned = api(supervisor).post(
+            f"/api/v1/offerings/{it_offering.pk}/instructors",
+            {"user": str(teacher.public_id), "role": "teacher"},
+        )
+        assert assigned.status_code == 201, assigned.data
+        link = Notification.objects.get(title__startswith="عُيّنت على مادة").action_url
+>       assert link == f"/courses/{it_offering.public_id}"  # FAULT: expected /courses/{pk}
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: assert '/courses/1' == '/courses/d56...-558b903a70f6'
+E         
+E         - /courses/d56f2a76-5d54-4e73-887f-558b903a70f6
+E         + /courses/1
+
+core/tests/test_qa_probes_exams.py:141: AssertionError
+==================================== PASSES ====================================
+=========================== short test summary info ============================
+PASSED core/tests/test_qa_probes_exams.py::test_every_server_notification_link_has_a_portal_route
+FAILED core/tests/test_qa_probes_exams.py::test_probe_published_exam_question_is_edited_in_place
+FAILED core/tests/test_qa_probes_exams.py::test_probe_published_exam_edit_breaks_grading
+FAILED core/tests/test_qa_probes_exams.py::test_probe_one_ungradeable_attempt_stops_the_minute_beat
+FAILED core/tests/test_qa_probes_exams.py::test_probe_penalty_without_late_until_is_accepted_by_the_server
+FAILED core/tests/test_qa_probes_exams.py::test_probe_instructor_assigned_links_to_the_offering_uuid
+5 failed, 1 passed in 4.75s

@@ -1022,3 +1022,120 @@ msgstr "اختر قسمًا آخر."
 
 msgid "The department has entries in the audit log, which keeps them for good: stop it instead, or merge it into another department."
 msgstr "للقسم سجل في التدقيق، والسجل لا يُحذف أبدًا: أوقفه مؤقتًا بدلًا من ذلك، أو ادمجه في قسم آخر."
+
+msgid "A backup is being made; wait for it to finish."
+msgstr "تُنشأ نسخة احتياطية الآن؛ انتظر حتى تكتمل."
+
+# Form builder checks (review 2026-11 axis 8): the head registrar reads them as they are.
+msgid "The schema needs a list of steps."
+msgstr "الاستمارة تحتاج قائمة خطوات."
+
+msgid "Each step must be an object with a list of sections."
+msgstr "كل خطوة يجب أن تحوي قائمة أقسام."
+
+msgid "Each section must be an object with a list of fields."
+msgstr "كل قسم يجب أن يحوي قائمة حقول."
+
+msgid "Each field must be an object."
+msgstr "كل حقل يجب أن يكون عنصرًا مستقلًا."
+
+#, python-format
+msgid "Field key %(key)s must be lowercase letters, digits or _."
+msgstr "مفتاح الحقل %(key)s يُكتب بحروف لاتينية صغيرة وأرقام و_ فقط."
+
+#, python-format
+msgid "Field key %(key)s is used twice."
+msgstr "مفتاح الحقل %(key)s مستعمل مرتين."
+
+#, python-format
+msgid "%(field)s: unknown type %(type)s."
+msgstr "%(field)s: نوع غير معروف (%(type)s)."
+
+#, python-format
+msgid "%(field)s: add the options."
+msgstr "%(field)s: أضف الخيارات."
+
+#, python-format
+msgid "%(field)s: the pattern is not a valid regular expression."
+msgstr "%(field)s: نمط التحقق غير صحيح."
+
+#, python-format
+msgid "%(field)s: choose who fills this field."
+msgstr "%(field)s: اختر من يعبئ هذا الحقل."
+
+#, python-format
+msgid "%(field)s: the university number is filled by the college."
+msgstr "%(field)s: الرقم الجامعي يعبئه موظف التسجيل؛ اجعله «للموظفين» أو «يُتاح للمتقدم»."
+
+#, python-format
+msgid "%(field)s: width must be full or half."
+msgstr "%(field)s: العرض كامل أو نصف."
+
+#, python-format
+msgid "%(field)s: the condition is not valid."
+msgstr "%(field)s: شرط الظهور غير صالح."
+
+#, python-format
+msgid "%(field)s: the condition must name a field above it."
+msgstr "%(field)s: شرط الظهور يجب أن يشير إلى حقل قبله."
+
+#, python-format
+msgid "%(field)s: choose the answers that show this field."
+msgstr "%(field)s: اختر الإجابات التي تُظهر هذا الحقل."
+
+#, python-format
+msgid "%(field)s: the condition must name a field the applicant fills."
+msgstr "%(field)s: شرط الظهور يجب أن يشير إلى حقل يعبئه المتقدم."
+
+#, python-format
+msgid "%(field)s: accepted files must be some of %(types)s."
+msgstr "%(field)s: الملفات المقبولة يجب أن تكون من %(types)s."
+
+# Strings added since 2026-10-25 without Arabic (review 2026-11 axis 8).
+msgid "Only a student edits these details here."
+msgstr "هذه البيانات يعدّلها الطالب وحده هنا."
+
+msgid "Upload your photo first."
+msgstr "ارفع صورتك أولًا."
+
+msgid "Upload the photo first."
+msgstr "ارفع الصورة أولًا."
+
+msgid "Choose the event this news is about."
+msgstr "اختر الفعالية التي يتناولها هذا الخبر."
+
+msgid "This Idempotency-Key was used for another request."
+msgstr "استُعمل هذا الطلب من قبل لعملية أخرى؛ أعد المحاولة."
+
+msgid "The first request with this key is still running."
+msgstr "الطلب الأول ما زال قيد التنفيذ؛ انتظر قليلًا."
+
+msgid "This changed since the first request; send it again with a new key."
+msgstr "تغيّر هذا منذ الطلب الأول؛ أعد المحاولة."
+
+msgid "You cannot delete questions of this exam."
+msgstr "لا يمكنك حذف أسئلة هذا الاختبار."
+
+msgid "This attempt was invalidated."
+msgstr "أُبطلت هذه المحاولة."
+
+msgid "The image could not be read."
+msgstr "تعذّرت قراءة الصورة."
+
+msgid "You cannot remove files from this lecture."
+msgstr "لا يمكنك حذف ملفات هذه المحاضرة."
+
+msgid "You can see this session but not join it."
+msgstr "يمكنك رؤية هذه الجلسة دون الانضمام إليها."
+
+msgid "No courses this term."
+msgstr "لا مواد في هذا الفصل."
+
+msgid "Only an unpublished draft can be deleted."
+msgstr "لا يُحذف إلا مسودة لم تُنشر."
+
+msgid "Set the last date for late work."
+msgstr "حدّد آخر موعد لتسليم المتأخر."
+
+msgid "The exam is published; its questions are locked."
+msgstr "نُشر الاختبار؛ لا تُعدَّل أسئلته بعد النشر."

@@ -371,9 +371,11 @@ export function AssignmentEditor() {
               )}
               {f.late !== "none" && (
                 <label className="block text-xs text-text-muted">
-                  آخر موعد للمتأخر
+                  آخر موعد للمتأخر (مطلوب)
                   <input
                     type="datetime-local"
+                    required
+                    aria-required="true"
                     value={f.late_until}
                     onChange={(e) => set("late_until", e.target.value)}
                     className={input}

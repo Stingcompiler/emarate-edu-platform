@@ -252,7 +252,13 @@ def test_deadline_policies(api, classroom):
     assert response.status_code == 400
     assert response.data["code"] == "deadline_passed"
 
-    lenient = _assignment(api, classroom, late_policy="penalty", late_penalty_percent=20)
+    lenient = _assignment(
+        api,
+        classroom,
+        late_policy="penalty",
+        late_penalty_percent=20,
+        late_until=(timezone.now() + timedelta(days=30)).isoformat(),
+    )
     Assignment.objects.filter(public_id=lenient).update(due_at=past)
     late = api(classroom.student).post(
         f"/api/v1/assignments/{lenient}/submit", {"content": "متأخر"}, format="json"

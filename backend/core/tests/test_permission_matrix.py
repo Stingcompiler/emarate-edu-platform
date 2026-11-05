@@ -124,6 +124,7 @@ READS: dict[str, tuple[str, frozenset, frozenset]] = {
     "me-courses": ("/api/v1/me/courses", EVERYONE, frozenset()),
     "system-settings": ("/api/v1/system-settings", frozenset({R.SYSTEM_ADMIN}), frozenset()),
     "system-status": ("/api/v1/system-status", frozenset({R.SYSTEM_ADMIN}), frozenset()),
+    "backups": ("/api/v1/backups", frozenset({R.SYSTEM_ADMIN}), frozenset()),
     "college-list": ("/api/v1/colleges", STRUCTURE, frozenset()),
     "college-detail": ("/api/v1/colleges/{college}", STRUCTURE, frozenset()),
     "department-list": ("/api/v1/departments", STRUCTURE, frozenset()),
@@ -954,6 +955,7 @@ def test_audit_log_is_scoped_and_read_only(api, users, it_dept, ba_dept):
 # B7). An empty body is enough: a role without the write capability is refused (403) before
 # validation; a writer gets past the gate (400 for the empty body, never 403).
 WRITE_GATES: dict[str, tuple[str, frozenset]] = {
+    "backups": ("/api/v1/backups", frozenset({R.SYSTEM_ADMIN})),
     "admission cycles": ("/api/v1/admission-cycles", frozenset({R.SYSTEM_ADMIN, R.HEAD_REGISTRAR})),
     "intakes": ("/api/v1/intakes", frozenset({R.SYSTEM_ADMIN, R.HEAD_REGISTRAR})),
     "grading scales": (

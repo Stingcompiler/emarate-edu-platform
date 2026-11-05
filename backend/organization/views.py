@@ -2,6 +2,7 @@ from datetime import UTC, datetime
 
 from django.conf import settings
 from django.db import transaction
+from django.utils.translation import gettext
 from drf_spectacular.utils import extend_schema
 from rest_framework import generics, serializers, status
 from rest_framework.decorators import action
@@ -239,3 +240,86 @@ class SystemStatusView(APIView):
                 },
             }
         )
+
+
+class BackupSerializer(serializers.Serializer):
+    name = serializers.CharField()
+    kind = serializers.ChoiceField(choices=["database", "files"])
+    at = serializers.DateTimeField(allow_null=True)
+    size = serializers.IntegerField(allow_null=True)
+
+
+class BackupsSerializer(serializers.Serializer):
+    running = serializers.BooleanField()
+    last_failed = serializers.BooleanField()
+    items = BackupSerializer(many=True)
+
+
+def _stamp(name: str):
+    stamp = name.rsplit("-", 1)[-1].split(".", 1)[0]
+    try:
+        return datetime.strptime(stamp, "%Y%m%dT%H%M%SZ").replace(tzinfo=UTC)
+    except ValueError:
+        return None
+
+
+@extend_schema(tags=["system"])
+class BackupsView(APIView):
+    """The encrypted backups, newest first, and «إنشاء نسخة الآن» (owner, 2026-11-05). A copy
+    is made by the worker, like the daily timer's; one at a time. Restoring stays a server
+    operation (docs/runbook.md §5): from the web it would let a taken-over admin account
+    replace the college's data, which is what the backups protect."""
+
+    permission_classes = [IsAuthenticated, capability("settings.manage")]
+
+    @extend_schema(responses=BackupsSerializer)
+    def get(self, request):
+        from django.core.cache import cache
+        from django.core.files.storage import default_storage
+
+        from core import backups
+        from core.tasks import LAST_ERROR, RUNNING
+
+        items = []
+        for kind, suffix in (("database", backups.DB_SUFFIX), ("files", backups.MEDIA_SUFFIX)):
+            for name in backups.existing(suffix):
+                try:
+                    size = default_storage.size(name)
+                except (OSError, NotImplementedError):
+                    size = None
+                items.append(
+                    {
+                        "name": name.rsplit("/", 1)[-1],
+                        "kind": kind,
+                        "at": _stamp(name),
+                        "size": size,
+                    }
+                )
+        items.sort(key=lambda i: (i["at"] is None, i["at"]), reverse=True)
+        return Response(
+            BackupsSerializer(
+                {
+                    "running": bool(cache.get(RUNNING)),
+                    "last_failed": bool(cache.get(LAST_ERROR)),
+                    "items": items,
+                }
+            ).data
+        )
+
+    @extend_schema(request=None, responses={202: BackupsSerializer})
+    def post(self, request):
+        from django.core.cache import cache
+
+        from core.errors import Conflict
+        from core.tasks import RUNNING, create_backup
+
+        # An hour at most: a crashed worker never blocks the button for good.
+        if not cache.add(RUNNING, request.user.pk, timeout=3600):
+            raise Conflict(
+                gettext("A backup is being made; wait for it to finish."), code="running"
+            )
+        record(RequestMeta.from_request(request), "backup.request", request.user)
+        create_backup.delay(request.user.pk)
+        response = self.get(request)
+        response.status_code = 202
+        return response

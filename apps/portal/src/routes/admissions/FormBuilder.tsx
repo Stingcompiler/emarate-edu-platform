@@ -359,6 +359,7 @@ export function FormBuilder() {
       void refresh();
     },
   });
+  const [adding, setAdding] = useState<Record<number, string>>({});
   const draft = !template || template.status === "draft";
   const locked = !draft || !editor;
   // Drag and drop between rows (the arrows stay, for keyboards and phones).
@@ -389,8 +390,40 @@ export function FormBuilder() {
     next.splice(i + d, 0, x!);
     return next;
   };
+  // Up/down by keyboard (review 2026-11, WCAG 2.1.1): within the section, and past its edge
+  // into the previous or next one — what dragging does. The focus stays on the moved field's
+  // arrow (the rows are keyed by field, so it is the same button), or the other one at an end.
+  const moveField = (si: number, fi: number, d: -1 | 1, key: string) => {
+    setSections((ss) => {
+      const next = ss.map((s) => ({ ...s, fields: [...(s.fields ?? [])] }));
+      const list = next[si]!.fields!;
+      if (fi + d >= 0 && fi + d < list.length) {
+        const [moved] = list.splice(fi, 1);
+        list.splice(fi + d, 0, moved!);
+      } else if (next[si + d]) {
+        const [moved] = list.splice(fi, 1);
+        const target = next[si + d]!.fields!;
+        if (d < 0) target.push(moved!);
+        else target.unshift(moved!);
+      }
+      return next;
+    });
+    requestAnimationFrame(() => {
+      const mine = document.querySelector<HTMLButtonElement>(
+        `[data-move="${CSS.escape(key)}:${d}"]`,
+      );
+      const other = document.querySelector<HTMLButtonElement>(
+        `[data-move="${CSS.escape(key)}:${-d}"]`,
+      );
+      (mine && !mine.disabled ? mine : other)?.focus();
+    });
+  };
   const addField = (si: number, type: Field["type"]) => {
-    const key = `field_${all.length + 1}`;
+    // A key no other field has (after a delete, «field_n+1» could already exist).
+    const used = new Set(all.map((f) => f.key));
+    let n = all.length + 1;
+    while (used.has(`field_${n}`)) n++;
+    const key = `field_${n}`;
     setSections((ss) =>
       ss.map((s, j) =>
         j === si
@@ -415,12 +448,16 @@ export function FormBuilder() {
   return (
     <PortalShell
       title="استمارات التقديم"
-      subtitle={template ? `${template.name} · الإصدار ${template.version}` : "لا قوالب بعد"}
+      subtitle={
+        template
+          ? `${template.name === "default" ? "الاستمارة الافتراضية" : template.name} · الإصدار ${template.version}`
+          : "لا قوالب بعد"
+      }
     >
       <div className="flex flex-wrap items-center gap-2">
         {(templates.data ?? []).map((t) => (
           <Chip key={t.id} active={t.id === template?.id} onClick={() => setPicked(t.id)}>
-            {t.name === "default" ? "الاستمارة الافتراضية" : t.name} v{t.version}
+            {t.name === "default" ? "الاستمارة الافتراضية" : t.name} · الإصدار {t.version}
           </Chip>
         ))}
         {template && (
@@ -541,7 +578,7 @@ export function FormBuilder() {
                   const expanded = open === f.key;
                   return (
                     <div
-                      key={`${f.key}-${fi}`}
+                      key={f.key}
                       className={`border-b border-border-soft last:border-b-0 ${
                         dragged && (dragged.si !== si || dragged.fi !== fi)
                           ? "data-[over=true]:bg-primary-soft/40"
@@ -591,22 +628,31 @@ export function FormBuilder() {
                           <>
                             <button
                               type="button"
-                              aria-label={`نقل «${f.label}» للأعلى`}
-                              disabled={fi === 0}
-                              onClick={() =>
-                                setSection(si, { fields: moveIn(section.fields ?? [], fi, -1) })
+                              data-move={`${f.key}:-1`}
+                              aria-label={
+                                fi === 0 && si > 0
+                                  ? `نقل «${f.label}» إلى القسم السابق`
+                                  : `نقل «${f.label}» للأعلى`
                               }
+                              disabled={fi === 0 && si === 0}
+                              onClick={() => moveField(si, fi, -1, f.key)}
                               className="grid size-11 place-items-center text-text-muted disabled:opacity-30"
                             >
                               <ArrowUp size={16} aria-hidden />
                             </button>
                             <button
                               type="button"
-                              aria-label={`نقل «${f.label}» للأسفل`}
-                              disabled={fi === (section.fields ?? []).length - 1}
-                              onClick={() =>
-                                setSection(si, { fields: moveIn(section.fields ?? [], fi, 1) })
+                              data-move={`${f.key}:1`}
+                              aria-label={
+                                fi === (section.fields ?? []).length - 1 && si < sections.length - 1
+                                  ? `نقل «${f.label}» إلى القسم التالي`
+                                  : `نقل «${f.label}» للأسفل`
                               }
+                              disabled={
+                                fi === (section.fields ?? []).length - 1 &&
+                                si === sections.length - 1
+                              }
+                              onClick={() => moveField(si, fi, 1, f.key)}
                               className="grid size-11 place-items-center text-text-muted disabled:opacity-30"
                             >
                               <ArrowDown size={16} aria-hidden />
@@ -651,24 +697,38 @@ export function FormBuilder() {
                   );
                 })}
                 {!locked && (
-                  <label className="flex flex-wrap items-center gap-2 px-4 py-2.5 text-sm text-text-muted">
-                    <Plus size={16} aria-hidden />
-                    أضف حقلًا:
-                    <select
-                      value=""
-                      onChange={(e) =>
-                        e.target.value && addField(si, e.target.value as Field["type"])
-                      }
-                      className="min-h-11 rounded-lg border border-border bg-surface px-2 text-sm text-text"
+                  // Choose, then add: browsing the list with the arrow keys no longer adds a field
+                  // on the first key (review 2026-11).
+                  <div className="flex flex-wrap items-center gap-2 px-4 py-2.5 text-sm text-text-muted">
+                    <label className="flex flex-wrap items-center gap-2">
+                      أضف حقلًا:
+                      <select
+                        value={adding[si] ?? ""}
+                        onChange={(e) => setAdding((a) => ({ ...a, [si]: e.target.value }))}
+                        className="min-h-11 rounded-lg border border-border bg-surface px-2 text-sm text-text"
+                      >
+                        <option value="">اختر النوع…</option>
+                        {TYPES.map((t) => (
+                          <option key={t.key} value={t.key}>
+                            {t.label}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                    <Button
+                      variant="secondary"
+                      className="min-h-11 px-3"
+                      disabled={!adding[si]}
+                      why={adding[si] ? undefined : "اختر النوع أولًا"}
+                      onClick={() => {
+                        addField(si, adding[si] as Field["type"]);
+                        setAdding((a) => ({ ...a, [si]: "" }));
+                      }}
                     >
-                      <option value="">اختر النوع…</option>
-                      {TYPES.map((t) => (
-                        <option key={t.key} value={t.key}>
-                          {t.label}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
+                      <Plus size={16} aria-hidden />
+                      إضافة
+                    </Button>
+                  </div>
                 )}
               </Card>
             </div>
