@@ -87,9 +87,8 @@ it("Escape on the confirm dialog calls off a submit waiting for the connection",
     await new Promise((r) => setTimeout(r, 50));
   });
   expect(screen.queryByText("submitted")).toBeNull();
-  const submits = vi
-    .mocked(api.POST)
-    .mock.calls.filter(([path]) => String(path).endsWith("/submit"));
+  const calls = vi.mocked(api.POST).mock.calls as unknown as [string][];
+  const submits = calls.filter(([path]) => String(path).endsWith("/submit"));
   expect(submits.length).toBe(0);
   // The queued answer still reached the server.
   expect(api.PUT).toHaveBeenCalled();
