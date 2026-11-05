@@ -65,9 +65,7 @@ export function Notifications() {
   });
   const sender = canCompose(me.data) || !!sentAny.data;
   // «المرسلة» (owner, 2026-11-05): what one sent, kept; ?tab=sent from a deletion decision.
-  const [filter, setFilter] = useState<Filter>(
-    params.get("tab") === "sent" ? "sent" : "all",
-  );
+  const [filter, setFilter] = useState<Filter>(params.get("tab") === "sent" ? "sent" : "all");
   const client = useQueryClient();
   const navigate = useNavigate();
   const unread = useUnreadCount();
