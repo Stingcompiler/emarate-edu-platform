@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 import random
 import statistics
 from datetime import timedelta
@@ -29,15 +30,18 @@ OPEN_STATES = (A.IN_PROGRESS,)
 DONE_STATES = (A.SUBMITTED, A.AUTO_SUBMITTED)
 
 
+log = logging.getLogger(__name__)
+
+
 def _dept(exam: Exam) -> int:
     return exam.offering.course.department_id
 
 
 def _editable(exam: Exam) -> None:
-    if exam.status != Exam.Status.DRAFT and exam.attempts.exists():
-        raise Conflict(
-            gettext("Students have started this exam; questions are locked."), code="locked"
-        )
+    # Questions change only while the exam is a draft (review 2026-11): publishing checked them
+    # (problems()), and an edit after it could leave a question no attempt can be graded on.
+    if exam.status != Exam.Status.DRAFT:
+        raise Conflict(gettext("The exam is published; its questions are locked."), code="locked")
 
 
 # ─── Building ─────────────────────────────────────────────────────────────
@@ -394,29 +398,38 @@ def submit(meta: RequestMeta, attempt: ExamAttempt) -> ExamAttempt:
     return locked
 
 
+def _auto_submit(attempt: ExamAttempt, now) -> int:
+    with transaction.atomic():
+        locked = _locked(attempt)
+        # Re-checked under the lock: the student may have submitted, or the teacher extended
+        # the time, since the list was read.
+        grace = timedelta(seconds=locked.exam.grace_seconds)
+        if locked.status != A.IN_PROGRESS or now <= locked.deadline_at + grace:
+            return 0
+        _finish(locked, A.AUTO_SUBMITTED)
+        # In the log like a student's own submission (review 2026-10-25 R25).
+        record(
+            SYSTEM,
+            "exam.attempt_auto_submit",
+            locked,
+            new={"score": str(locked.score)},
+            department_id=_dept(locked.exam),
+        )
+    return 1
+
+
 def close_expired() -> int:
     """Beat, every minute: submit attempts past deadline + grace; close ended exams."""
     now = timezone.now()
     count = 0
     for attempt in ExamAttempt.objects.filter(status=A.IN_PROGRESS).select_related("exam"):
         if now > attempt.deadline_at + timedelta(seconds=attempt.exam.grace_seconds):
-            with transaction.atomic():
-                locked = _locked(attempt)
-                # Re-checked under the lock: the student may have submitted, or the teacher
-                # extended the time, since the list was read.
-                grace = timedelta(seconds=locked.exam.grace_seconds)
-                if locked.status != A.IN_PROGRESS or now <= locked.deadline_at + grace:
-                    continue
-                _finish(locked, A.AUTO_SUBMITTED)
-                # In the log like a student's own submission (review 2026-10-25 R25).
-                record(
-                    SYSTEM,
-                    "exam.attempt_auto_submit",
-                    locked,
-                    new={"score": str(locked.score)},
-                    department_id=_dept(locked.exam),
-                )
-            count += 1
+            try:
+                count += _auto_submit(attempt, now)
+            except Exception:
+                # One attempt that cannot be graded never holds up the others or the closing
+                # of ended exams (review 2026-11): logged, retried on the next run.
+                log.exception("auto-submit failed for attempt %s", attempt.pk)
     ended = Exam.objects.filter(
         status=Exam.Status.PUBLISHED, closes_at__lt=now - timedelta(minutes=5)
     ).select_related("offering__course")

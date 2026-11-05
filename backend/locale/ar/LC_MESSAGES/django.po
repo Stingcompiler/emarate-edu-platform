@@ -1013,3 +1013,9 @@ msgstr "لا يعدّل هذه الصورة إلا فريق الموقع."
 
 msgid "The site uses this picture. Choose another in the site settings first."
 msgstr "الموقع يستعمل هذه الصورة. اختر غيرها من إعدادات الموقع أولًا."
+
+msgid "Set the last date for late work."
+msgstr "حدّد آخر موعد لتسليم المتأخر."
+
+msgid "The exam is published; its questions are locked."
+msgstr "نُشر الاختبار؛ لا تُعدَّل أسئلته بعد النشر."

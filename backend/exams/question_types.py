@@ -93,6 +93,9 @@ class Multiple(QuestionType):
             return Graded(True, _q(question.marks))
         if not question.config.get("partial"):
             return Graded(False, _q(0))
+        if not correct:
+            # No right choice to share the marks over (publishing refuses it; never divide by 0).
+            return Graded(False, _q(0))
         # Partial credit: +1 per right pick, −1 per wrong pick, never below zero.
         hits = len(picked & correct) - len(picked - correct)
         share = max(Decimal(hits) / Decimal(len(correct)), Decimal(0))

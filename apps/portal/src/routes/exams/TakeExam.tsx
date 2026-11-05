@@ -372,7 +372,12 @@ function ExamRunner({ attempt }: { attempt: AttemptPayload }) {
   // Keyboard: focus moves into the open dialog, stays there, Escape closes it (review G1).
   const confirmPanel = useRef<HTMLDivElement>(null);
   const sheetPanel = useRef<HTMLDivElement>(null);
-  const closeConfirm = useCallback(() => setConfirm(false), []);
+  // Closing the dialog any way (Escape, the backdrop) means «not yet», like «متابعة الحل»: a
+  // submit waiting for the connection is called off (review 2026-11).
+  const closeConfirm = useCallback(() => {
+    wantsSubmit.current = false;
+    setConfirm(false);
+  }, []);
   const closeSheet = useCallback(() => setSheet(false), []);
   useDialogFocus(confirm, confirmPanel, closeConfirm);
   useDialogFocus(sheet && !confirm, sheetPanel, closeSheet);

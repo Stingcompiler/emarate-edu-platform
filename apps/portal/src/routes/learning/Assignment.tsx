@@ -84,12 +84,20 @@ function StudentView({ a }: { a: A }) {
   const s = mine.data;
   const now = Date.now();
   const due = new Date(a.due_at).getTime();
+  // A late window saved without an end (before the editor required one) stays open, as the
+  // server takes the work (review 2026-11); new ones always have an end.
   const hardEnd =
-    a.late_policy === "none" ? due : a.late_until ? new Date(a.late_until).getTime() : due;
+    a.late_policy === "none"
+      ? due
+      : a.late_until
+        ? new Date(a.late_until).getTime()
+        : Number.POSITIVE_INFINITY;
   const closed = a.status === "closed" || now > hardEnd;
   const canSubmit = !closed && (!s || (a.allow_resubmission && !s.grade));
   // Past the due date in a late window: the time left is to the window's end.
   const left = Math.max(0, (due < now ? hardEnd : due) - now);
+  // Past due with a window that has no end: nothing to count down.
+  const openEnded = due < now && !Number.isFinite(hardEnd);
   const types = a.submission_types ?? [];
   return (
     <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_380px] lg:items-start lg:gap-6">
@@ -105,28 +113,32 @@ function StudentView({ a }: { a: A }) {
           </div>
         ) : (
           <div className="flex items-center gap-4 rounded-2xl bg-header p-4 text-white shadow-sm">
-            <div className="text-center">
-              <p className="text-2xl font-bold">
-                {Math.floor(left / 86_400_000).toLocaleString("ar-u-nu-latn")}
-              </p>
-              <p className="text-[11px] text-navy-200">يوم</p>
-            </div>
-            <div className="text-center">
-              <p className="text-2xl font-bold">
-                {Math.floor((left % 86_400_000) / 3_600_000).toLocaleString("ar-u-nu-latn")}
-              </p>
-              <p className="text-[11px] text-navy-200">ساعة</p>
-            </div>
-            {/* Minutes too: under an hour left read «0 يوم 0 ساعة» (test 2026-11-02). */}
-            <div className="text-center">
-              <p className="text-2xl font-bold">
-                {Math.floor((left % 3_600_000) / 60_000).toLocaleString("ar-u-nu-latn")}
-              </p>
-              <p className="text-[11px] text-navy-200">دقيقة</p>
-            </div>
+            {!openEnded && (
+              <>
+                <div className="text-center">
+                  <p className="text-2xl font-bold">
+                    {Math.floor(left / 86_400_000).toLocaleString("ar-u-nu-latn")}
+                  </p>
+                  <p className="text-[11px] text-navy-200">يوم</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-2xl font-bold">
+                    {Math.floor((left % 86_400_000) / 3_600_000).toLocaleString("ar-u-nu-latn")}
+                  </p>
+                  <p className="text-[11px] text-navy-200">ساعة</p>
+                </div>
+                {/* Minutes too: under an hour left read «0 يوم 0 ساعة» (test 2026-11-02). */}
+                <div className="text-center">
+                  <p className="text-2xl font-bold">
+                    {Math.floor((left % 3_600_000) / 60_000).toLocaleString("ar-u-nu-latn")}
+                  </p>
+                  <p className="text-[11px] text-navy-200">دقيقة</p>
+                </div>
+              </>
+            )}
             <p className="flex-1 text-sm text-navy-100">
               {due < now
-                ? `بعد الموعد — ${a.late_policy === "penalty" ? `يُقبل بخصم ${a.late_penalty_percent}٪` : "يُقبل ويُعلَّم متأخرًا"} حتى ${absolute(new Date(hardEnd).toISOString())}`
+                ? `بعد الموعد — ${a.late_policy === "penalty" ? `يُقبل بخصم ${a.late_penalty_percent}٪` : "يُقبل ويُعلَّم متأخرًا"}${openEnded ? "" : ` حتى ${absolute(new Date(hardEnd).toISOString())}`}`
                 : `متبقٍ على التسليم · ${dueLabel(a.due_at)}`}
               {a.allow_resubmission
                 ? due < now
