@@ -160,6 +160,26 @@ def api():
     return client
 
 
+@pytest.fixture
+def count_queries(api):
+    """Queries of one GET (performance probes, review 2026-11 axis 5). The cache is cleared
+    and the user read afresh, so neither a cached public answer nor the per-instance rbac
+    cache from an earlier request hides a query."""
+    from django.db import connection
+    from django.test.utils import CaptureQueriesContext
+
+    def count(user: User | None, url: str) -> int:
+        cache.clear()
+        fresh = User.objects.get(pk=user.pk) if user is not None else None
+        with CaptureQueriesContext(connection) as ctx:
+            response = api(fresh).get(url)
+        if response.status_code != 200:
+            pytest.fail(f"{url}: {response.status_code}")
+        return len(ctx.captured_queries)
+
+    return count
+
+
 def last_code() -> str:
     """The 6-digit code in the most recent email."""
     return re.search(r"\b(\d{6})\b", mail.outbox[-1].body).group(1)

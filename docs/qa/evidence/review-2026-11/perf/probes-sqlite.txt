@@ -1,0 +1,106 @@
+FFFF                                                                     [100%]
+=================================== FAILURES ===================================
+__ test_probe_applications_list_grows_per_row_for_department_roles[registrar] __
+
+count_queries = <function count_queries.<locals>.count at 0x10dfac860>
+grow_applications = <function grow_applications.<locals>.grow at 0x10f2c6840>
+make_user = <function make_user.<locals>.make at 0x10f2c4180>
+it_dept = <Department: تقانة المعلومات>, role = Role.REGISTRAR
+
+    @pytest.mark.parametrize("role", [Role.REGISTRAR, Role.DEPARTMENT_MANAGER])
+    def test_probe_applications_list_grows_per_row_for_department_roles(
+        count_queries, grow_applications, make_user, it_dept, role
+    ):
+        """The registrar dashboard («غير موزعة» / «طلباتي») and the applications list. The head
+        registrar's list is constant (8 queries): rbac 'admissions.manage' short-circuits
+        can_decide. For a role without it, every decider transition of every row loads
+        SystemSettings again (admissions/services.py can_decide)."""
+        user = make_user(role, department=it_dept)
+        url = "/api/v1/applications?page_size=100"
+        grow_applications(N)
+        at_n = count_queries(user, url)
+        grow_applications(2 * N)
+        at_3n = count_queries(user, url)
+>       assert at_3n > at_n, f"constant now ({at_n} → {at_3n}): the N+1 is fixed"
+E       AssertionError: constant now (12 → 9): the N+1 is fixed
+E       assert 9 > 12
+
+core/tests/test_qa_probes_perf.py:133: AssertionError
+_ test_probe_applications_list_grows_per_row_for_department_roles[department_manager] _
+
+count_queries = <function count_queries.<locals>.count at 0x10f2c4ea0>
+grow_applications = <function grow_applications.<locals>.grow at 0x10e735f80>
+make_user = <function make_user.<locals>.make at 0x10e735620>
+it_dept = <Department: تقانة المعلومات>, role = Role.DEPARTMENT_MANAGER
+
+    @pytest.mark.parametrize("role", [Role.REGISTRAR, Role.DEPARTMENT_MANAGER])
+    def test_probe_applications_list_grows_per_row_for_department_roles(
+        count_queries, grow_applications, make_user, it_dept, role
+    ):
+        """The registrar dashboard («غير موزعة» / «طلباتي») and the applications list. The head
+        registrar's list is constant (8 queries): rbac 'admissions.manage' short-circuits
+        can_decide. For a role without it, every decider transition of every row loads
+        SystemSettings again (admissions/services.py can_decide)."""
+        user = make_user(role, department=it_dept)
+        url = "/api/v1/applications?page_size=100"
+        grow_applications(N)
+        at_n = count_queries(user, url)
+        grow_applications(2 * N)
+        at_3n = count_queries(user, url)
+>       assert at_3n > at_n, f"constant now ({at_n} → {at_3n}): the N+1 is fixed"
+E       AssertionError: constant now (12 → 9): the N+1 is fixed
+E       assert 9 > 12
+
+core/tests/test_qa_probes_perf.py:133: AssertionError
+_____________ test_probe_live_sessions_list_grows_per_row[student] _____________
+
+count_queries = <function count_queries.<locals>.count at 0x10e735580>
+classroom = <class 'conftest.Classroom'>
+grow_live_sessions = <function grow_live_sessions.<locals>.grow at 0x10e75dbc0>
+who = 'student'
+
+    @pytest.mark.parametrize("who", ["student", "teacher"])
+    def test_probe_live_sessions_list_grows_per_row(count_queries, classroom, grow_live_sessions, who):
+        """The student «اليوم» and the teacher's today both list live sessions. The serializer's
+        can_join runs may_join for every row: for_offering (2 queries), _hosting (1) and, for a
+        student, _attending_q + exists (2) — ~5 queries a row for a student, ~2 for a teacher."""
+        user = classroom.student if who == "student" else classroom.teacher
+        url = "/api/v1/live-sessions?page_size=100"
+        grow_live_sessions(N)
+        at_n = count_queries(user, url)
+        grow_live_sessions(2 * N)
+        at_3n = count_queries(user, url)
+>       assert at_3n > at_n, f"constant now ({at_n} → {at_3n}): the N+1 is fixed"
+E       AssertionError: constant now (7 → 7): the N+1 is fixed
+E       assert 7 > 7
+
+core/tests/test_qa_probes_perf.py:175: AssertionError
+_____________ test_probe_live_sessions_list_grows_per_row[teacher] _____________
+
+count_queries = <function count_queries.<locals>.count at 0x10e6ea0c0>
+classroom = <class 'conftest.Classroom'>
+grow_live_sessions = <function grow_live_sessions.<locals>.grow at 0x10e6eb060>
+who = 'teacher'
+
+    @pytest.mark.parametrize("who", ["student", "teacher"])
+    def test_probe_live_sessions_list_grows_per_row(count_queries, classroom, grow_live_sessions, who):
+        """The student «اليوم» and the teacher's today both list live sessions. The serializer's
+        can_join runs may_join for every row: for_offering (2 queries), _hosting (1) and, for a
+        student, _attending_q + exists (2) — ~5 queries a row for a student, ~2 for a teacher."""
+        user = classroom.student if who == "student" else classroom.teacher
+        url = "/api/v1/live-sessions?page_size=100"
+        grow_live_sessions(N)
+        at_n = count_queries(user, url)
+        grow_live_sessions(2 * N)
+        at_3n = count_queries(user, url)
+>       assert at_3n > at_n, f"constant now ({at_n} → {at_3n}): the N+1 is fixed"
+E       AssertionError: constant now (6 → 6): the N+1 is fixed
+E       assert 6 > 6
+
+core/tests/test_qa_probes_perf.py:175: AssertionError
+=========================== short test summary info ============================
+FAILED core/tests/test_qa_probes_perf.py::test_probe_applications_list_grows_per_row_for_department_roles[registrar]
+FAILED core/tests/test_qa_probes_perf.py::test_probe_applications_list_grows_per_row_for_department_roles[department_manager]
+FAILED core/tests/test_qa_probes_perf.py::test_probe_live_sessions_list_grows_per_row[student]
+FAILED core/tests/test_qa_probes_perf.py::test_probe_live_sessions_list_grows_per_row[teacher]
+4 failed in 4.10s
