@@ -1,3 +1,4 @@
+from django.db import transaction
 from django.db.models import Count, Q
 from django.utils import timezone
 from drf_spectacular.utils import extend_schema
@@ -53,7 +54,7 @@ class InboxViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
             "notification__sender"
         )
         # Platform alerts are for the people who run it (design review B5).
-        if not rbac.has_role(self.request.user, rbac.Role.SYSTEM_ADMIN):
+        if not rbac.is_admin(self.request.user):
             rows = rows.exclude(notification__category=Category.OPS)
         return rows
 
@@ -87,11 +88,29 @@ class InboxViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
 
 
 @extend_schema(tags=["notifications"])
-class SentViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
-    """Notifications the caller sent, with how many recipients read them."""
+class SentViewSet(mixins.ListModelMixin, mixins.DestroyModelMixin, viewsets.GenericViewSet):
+    """Notifications the caller sent, with how many recipients read them. Deleting one is a
+    request the system admin or supervisor approves; the system admin deletes at once (owner,
+    2026-11-05)."""
 
     serializer_class = SentNotificationSerializer
     permission_classes = [IsAuthenticated]
+    lookup_field = "public_id"
+
+    @extend_schema(responses={204: None, 202: None})
+    def destroy(self, request, *args, **kwargs):
+        from content import deletions
+        from content.serializers import DeletionRequestSerializer
+
+        notification = self.get_object()  # the caller's own only (get_queryset)
+        meta = RequestMeta.from_request(request)
+        kind = deletions.K.NOTIFICATION
+        if deletions.deletes_at_once(request.user, kind):
+            with transaction.atomic():
+                deletions.delete_now(meta, kind, notification)
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        req = deletions.request(meta, kind, notification, request.data.get("reason", ""))
+        return Response(DeletionRequestSerializer(req).data, status=status.HTTP_202_ACCEPTED)
 
     def get_queryset(self):
         if getattr(self, "swagger_fake_view", False):
@@ -136,7 +155,7 @@ class PreferencesView(APIView):
         saved = {p.category: p for p in NotificationPreference.objects.filter(user=user)}
         rows = []
         for category in Category.values:
-            if category == Category.OPS and not rbac.has_role(user, rbac.Role.SYSTEM_ADMIN):
+            if category == Category.OPS and not rbac.is_admin(user):
                 continue
             pref = saved.get(category) or services._default(category)
             rows.append(

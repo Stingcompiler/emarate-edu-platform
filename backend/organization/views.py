@@ -117,8 +117,9 @@ class DepartmentViewSet(_CodedViewSet):
     filterset_fields = ["college", "is_active"]
     search_fields = ["name_ar", "name_en", "code"]
 
-    def _manager(self):
-        if not rbac.can(self.request.user, "structure.manage"):
+    def _manager(self, *, deleting: bool = False):
+        # Merging deletes the department: never the system supervisor's (rbac.scope_for).
+        if not rbac.can(self.request.user, "structure.manage", deleting=deleting):
             raise PermissionDenied()
 
     @extend_schema(responses=DepartmentUsageSerializer)
@@ -132,7 +133,7 @@ class DepartmentViewSet(_CodedViewSet):
     @action(detail=True, methods=["post"])
     def merge(self, request, pk=None):
         """Its programmes into another department, then it is deleted."""
-        self._manager()
+        self._manager(deleting=True)
         body = DepartmentMergeSerializer(data=request.data)
         body.is_valid(raise_exception=True)
         result = services.merge(self.meta, self.get_object(), body.validated_data["into"])

@@ -645,7 +645,7 @@ class UserViewSet(
         role = self.request.query_params.get("role")
         if role in Role.values:
             queryset = queryset.filter(role_assignments__role=role).distinct()
-        if rbac.has_role(user, Role.SYSTEM_ADMIN):
+        if rbac.is_admin(user):
             return queryset
         visible: set[str] = set()
         if rbac.has_role(user, Role.ACADEMIC_AFFAIRS):

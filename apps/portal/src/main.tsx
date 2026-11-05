@@ -119,6 +119,7 @@ const ResultImports = page(() => import("./routes/results/Imports"), "ResultImpo
 const MyResults = page(() => import("./routes/results/MyResults"), "MyResults");
 const AdminHome = page(() => import("./routes/admin/Home"), "AdminHome");
 const AdminSettings = page(() => import("./routes/admin/Settings"), "AdminSettings");
+const Deletions = page(() => import("./routes/admin/Deletions"), "Deletions");
 const Roles = page(() => import("./routes/admin/RolesMatrix"), "Roles");
 const Structure = page(() => import("./routes/admin/Structure"), "Structure");
 const AdminUser = page(() => import("./routes/admin/User"), "AdminUser");
@@ -327,6 +328,7 @@ const router = createBrowserRouter([
   { path: "/system/roles", element: signedIn(<Roles />, "/system/roles") },
   { path: "/system/structure", element: signedIn(<Structure />, "/system/structure") },
   { path: "/system/settings", element: signedIn(<AdminSettings />, "/system/settings") },
+  { path: "/system/deletions", element: signedIn(<Deletions />, "/system/deletions") },
   { path: "/audit", element: signedIn(<Audit />, "/audit") },
   { path: "*", element: <NotFound /> },
 ]);

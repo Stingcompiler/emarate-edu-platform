@@ -14,5 +14,7 @@ def test_the_roles_matrix_is_read_from_rbac(api, make_user):
     assert roles["teacher"]["department_scoped"] is False
     caps = {c["key"]: set(c["roles"]) for c in data["capabilities"]}
     assert caps.keys() == rbac.CAPABILITIES.keys()
-    assert caps["structure.manage"] == {"system_admin"}
+    assert caps["structure.manage"] == {"system_admin", "system_supervisor"}
+    # The system supervisor holds no capability that deletes (owner, 2026-11-05).
+    assert caps["users.delete"] == {"system_admin"}
     assert api(admin).post("/api/v1/roles", {}).status_code == 405

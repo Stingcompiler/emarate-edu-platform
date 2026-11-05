@@ -2,7 +2,7 @@ import type { Schemas } from "@ecst/api";
 import { useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Award, BellOff, BookOpen, Briefcase, Megaphone, Server, UserCheck } from "lucide-react";
 import { useState } from "react";
-import { Link, useNavigate } from "react-router";
+import { Link, useNavigate, useSearchParams } from "react-router";
 
 import { PortalShell, useUnreadCount } from "../components/PortalShell";
 import {
@@ -20,9 +20,11 @@ import { api } from "../lib/api";
 import { hasRole, useMe } from "../lib/auth";
 import { DAY_LABELS, type DayGroup, dayGroup, when } from "../lib/format";
 import { isBuiltPath } from "../lib/links";
+import { canCompose } from "../lib/nav";
+import { SentNotifications } from "./SentNotifications";
 
 type Item = Schemas["InboxItem"];
-type Filter = "all" | "unread" | "course" | "college" | "results" | "ops";
+type Filter = "all" | "unread" | "course" | "college" | "results" | "ops" | "sent";
 
 const FILTERS: { key: Filter; label: string }[] = [
   { key: "all", label: "الكل" },
@@ -49,14 +51,20 @@ const CATEGORY = {
  */
 export function Notifications() {
   const me = useMe();
-  const isAdmin = hasRole(me.data, "system_admin");
-  const [filter, setFilter] = useState<Filter>("all");
+  const isAdmin = hasRole(me.data, "system_admin", "system_supervisor");
+  const [params] = useSearchParams();
+  const sender = canCompose(me.data);
+  // «المرسلة» (owner, 2026-11-05): what one sent, kept; ?tab=sent from a deletion decision.
+  const [filter, setFilter] = useState<Filter>(
+    params.get("tab") === "sent" && sender ? "sent" : "all",
+  );
   const client = useQueryClient();
   const navigate = useNavigate();
   const unread = useUnreadCount();
 
   const list = useInfiniteQuery({
     queryKey: ["notifications", "list", filter],
+    enabled: filter !== "sent",
     initialPageParam: 1,
     queryFn: async ({ pageParam }) => {
       const query: Record<string, string | number | boolean> = { page: pageParam };
@@ -126,20 +134,24 @@ export function Notifications() {
             role="toolbar"
             aria-label="تصفية"
           >
-            {(isAdmin ? [...FILTERS, { key: "ops" as const, label: "تشغيل" }] : FILTERS).map(
-              ({ key, label }) => (
-                <Chip key={key} active={filter === key} onClick={() => setFilter(key)}>
-                  {label}
-                  {key === "unread" && unreadCount > 0 && (
-                    <span>{unreadCount.toLocaleString("ar-u-nu-latn")}</span>
-                  )}
-                </Chip>
-              ),
-            )}
+            {[
+              ...FILTERS,
+              ...(isAdmin ? [{ key: "ops" as const, label: "تشغيل" }] : []),
+              ...(sender ? [{ key: "sent" as const, label: "المرسلة" }] : []),
+            ].map(({ key, label }) => (
+              <Chip key={key} active={filter === key} onClick={() => setFilter(key)}>
+                {label}
+                {key === "unread" && unreadCount > 0 && (
+                  <span>{unreadCount.toLocaleString("ar-u-nu-latn")}</span>
+                )}
+              </Chip>
+            ))}
           </div>
         </FilterBar>
 
-        {list.isPending ? (
+        {filter === "sent" ? (
+          <SentNotifications />
+        ) : list.isPending ? (
           <ListSkeleton />
         ) : items.length === 0 ? (
           <EmptyState icon={<BellOff size={24} aria-hidden />} title="لا إشعارات هنا">

@@ -265,3 +265,46 @@ class Redirect(TimestampedModel):
 
     def __str__(self) -> str:
         return f"{self.from_path} → {self.to_path}"
+
+
+class DeletionRequest(models.Model):
+    """A request to delete an announcement or a sent notification (owner, 2026-11-05): the
+    author keeps their history and asks; the system admin or the system supervisor approves.
+    The system admin and the site manager delete their own way, at once."""
+
+    class Kind(models.TextChoices):
+        ANNOUNCEMENT = "announcement", "إعلان"
+        NOTIFICATION = "notification", "إشعار"
+
+    class State(models.TextChoices):
+        PENDING = "pending", "بانتظار الموافقة"
+        APPROVED = "approved", "حُذف"
+        REJECTED = "rejected", "رُفض"
+
+    kind = models.CharField(max_length=20, choices=Kind.choices)
+    object_id = models.PositiveBigIntegerField()
+    title = models.CharField(max_length=200)  # what it was, kept after the deletion
+    reason = models.TextField(blank=True)
+    state = models.CharField(max_length=10, choices=State.choices, default=State.PENDING)
+    requested_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="+"
+    )
+    decided_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.PROTECT, null=True, blank=True, related_name="+"
+    )
+    decided_at = models.DateTimeField(null=True, blank=True)
+    decision_note = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at", "-id"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["kind", "object_id"],
+                condition=models.Q(state="pending"),
+                name="one_pending_deletion_per_item",
+            )
+        ]
+
+    def __str__(self) -> str:
+        return f"{self.get_kind_display()}: {self.title}"

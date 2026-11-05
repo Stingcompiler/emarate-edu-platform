@@ -115,6 +115,7 @@ COURSES = [
 # One account per role; department roles belong to IT (the prototype's department).
 STAFF = [
     (Role.SYSTEM_ADMIN, "admin", "م. عثمان الطيب"),
+    (Role.SYSTEM_SUPERVISOR, "supervisor", "م. هالة الطيب"),
     (Role.HEAD_REGISTRAR, "head.registrar", "أ. سعاد إبراهيم"),
     (Role.REGISTRAR, "registrar", "أ. نزار عوض"),
     (Role.RESULTS_OFFICER, "results", "أ. منى الفاضل"),

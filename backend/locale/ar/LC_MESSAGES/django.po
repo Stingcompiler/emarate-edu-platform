@@ -1139,3 +1139,9 @@ msgstr "حدّد آخر موعد لتسليم المتأخر."
 
 msgid "The exam is published; its questions are locked."
 msgstr "نُشر الاختبار؛ لا تُعدَّل أسئلته بعد النشر."
+
+msgid "Only the system admin changes this account."
+msgstr "لا يعدّل هذا الحساب إلا مدير النظام."
+
+msgid "A deletion request is already waiting."
+msgstr "طلب الحذف بانتظار الموافقة بالفعل."

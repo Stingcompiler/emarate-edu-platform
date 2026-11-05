@@ -40,7 +40,7 @@ def department_of(scope: str, scope_id: int | None) -> int | None:
 
 def _college_grant(roles, scope: str, audience: str) -> bool:
     """What a college-wide role may address on its own (docs/03 §7 «إعلانات»)."""
-    if Role.SYSTEM_ADMIN in roles:
+    if roles & {Role.SYSTEM_ADMIN, Role.SYSTEM_SUPERVISOR}:
         return True
     college = scope == A.Scope.COLLEGE
     if college and Role.SITE_MANAGER in roles:

@@ -117,6 +117,13 @@ ADMISSIONS = frozenset(
 )
 ADMISSION_REVIEW = frozenset({R.SYSTEM_ADMIN, R.HEAD_REGISTRAR, R.REGISTRAR})
 
+
+def _with_supervisor(roles: frozenset) -> frozenset:
+    """The system supervisor reads and writes wherever the admin does; only deleting differs
+    (owner, 2026-11-05; test_the_system_supervisor_never_deletes)."""
+    return roles | {R.SYSTEM_SUPERVISOR} if R.SYSTEM_ADMIN in roles else roles
+
+
 # url name → (path template, roles allowed to read, roles that get 404 instead of 403)
 READS: dict[str, tuple[str, frozenset, frozenset]] = {
     "me": ("/api/v1/me", EVERYONE, frozenset()),
@@ -125,6 +132,12 @@ READS: dict[str, tuple[str, frozenset, frozenset]] = {
     "system-settings": ("/api/v1/system-settings", frozenset({R.SYSTEM_ADMIN}), frozenset()),
     "system-status": ("/api/v1/system-status", frozenset({R.SYSTEM_ADMIN}), frozenset()),
     "backups": ("/api/v1/backups", frozenset({R.SYSTEM_ADMIN}), frozenset()),
+    # Requests to delete an announcement or a sent notification (owner, 2026-11-05).
+    "deletion-request-list": (
+        "/api/v1/deletion-requests",
+        frozenset({R.SYSTEM_ADMIN}),
+        frozenset(),
+    ),
     "college-list": ("/api/v1/colleges", STRUCTURE, frozenset()),
     "college-detail": ("/api/v1/colleges/{college}", STRUCTURE, frozenset()),
     "department-list": ("/api/v1/departments", STRUCTURE, frozenset()),
@@ -412,7 +425,13 @@ _IQ = "inquiries.tests.test_inquiries::"
 _CT = "content.tests.test_content::"
 _RS = "results.tests.test_results::"
 _SA = "student_affairs.tests.test_student_affairs::"
+_DELETIONS = "content.tests.test_deletion_requests::"
 COVERED_ELSEWHERE = {
+    # Deciding a deletion request; a sender's own notification (owner, 2026-11-05).
+    "deletion-request-approve": _DELETIONS + "test_an_author_asks_and_the_supervisor_approves",
+    "deletion-request-reject": _DELETIONS + "test_a_rejected_request_keeps_the_announcement",
+    "notification-sent-detail": _DELETIONS
+    + "test_a_sent_notification_is_kept_and_deleted_by_request",
     # POST only: a department's programmes into another, then it goes (owner, 2026-11-05).
     "department-merge": (
         "organization.tests.test_structure_edit::test_a_department_is_merged_into_another"
@@ -773,6 +792,7 @@ def _learning_world(users, offering, student):
 @pytest.mark.parametrize("name", sorted(READS))
 def test_read_matrix(name, api, users, world):
     template, allowed, hidden = READS[name]
+    allowed = _with_supervisor(allowed)
     url = template.format(**world)
     wrong = []
     anonymous = api().get(url).status_code
@@ -839,7 +859,13 @@ def test_course_moves_into_another_department_are_refused(api, users, it_course,
 
 
 def test_course_write_matrix(api, users, it_dept):
-    writers = {R.SYSTEM_ADMIN, R.ACADEMIC_AFFAIRS, R.DEPARTMENT_MANAGER, R.DEPARTMENT_SUPERVISOR}
+    writers = {
+        R.SYSTEM_ADMIN,
+        R.SYSTEM_SUPERVISOR,
+        R.ACADEMIC_AFFAIRS,
+        R.DEPARTMENT_MANAGER,
+        R.DEPARTMENT_SUPERVISOR,
+    }
     wrong = []
     for n, role in enumerate(Role):
         body = {"department": it_dept.pk, "code": f"IT9{n:02d}", "name_ar": "مقرر"}
@@ -872,7 +898,7 @@ def test_structure_is_written_by_the_system_admin_only(path, api, users, college
         else {"name": "2027/2028", "starts_on": "2027-09-01", "ends_on": "2028-07-31"}
     )
     for role in Role:
-        if role == R.SYSTEM_ADMIN:
+        if role in (R.SYSTEM_ADMIN, R.SYSTEM_SUPERVISOR):
             continue
         assert api(users[role]).post(f"/api/v1/{path}", body).status_code == 403, role
     assert api(users[R.SYSTEM_ADMIN]).post(f"/api/v1/{path}", body).status_code == 201
@@ -968,6 +994,7 @@ WRITE_GATES: dict[str, tuple[str, frozenset]] = {
 @pytest.mark.parametrize("name", sorted(WRITE_GATES))
 def test_write_gate(name, api, users):
     path, writers = WRITE_GATES[name]
+    writers = _with_supervisor(writers)
     wrong = []
     for role in Role:
         got = api(users[role]).post(path, {}, format="json").status_code

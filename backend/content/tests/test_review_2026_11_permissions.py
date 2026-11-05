@@ -48,9 +48,9 @@ def test_the_events_manager_keeps_to_events_and_their_own(api, users):
         created_by=users[R.EVENTS_MANAGER],
     )
     about_event = _published(users[R.SITE_MANAGER], event=event)
-    assert em.delete(_url(about_event)).status_code == 204
+    assert em.delete(_url(about_event)).status_code == 202  # a request since 2026-11-05
     own = _published(users[R.EVENTS_MANAGER])
-    assert em.delete(_url(own)).status_code == 204
+    assert em.delete(_url(own)).status_code == 202  # a request since 2026-11-05
     # The site manager still removes any college announcement.
     assert api(users[R.SITE_MANAGER]).delete(_url(general)).status_code == 204
 
@@ -60,7 +60,7 @@ def test_academic_affairs_deletes_only_its_own_staff_announcements(api, users):
     others = _published(users[R.SYSTEM_ADMIN], audience="staff")
     assert aa.delete(_url(others)).status_code == 403
     own = _published(users[R.ACADEMIC_AFFAIRS], audience="staff")
-    assert aa.delete(_url(own)).status_code == 204
+    assert aa.delete(_url(own)).status_code == 202  # a request since 2026-11-05
 
 
 def test_two_roles_do_not_add_up_to_a_third_right(api, users, make_user, ba_dept):
@@ -69,7 +69,7 @@ def test_two_roles_do_not_add_up_to_a_third_right(api, users, make_user, ba_dept
     both = make_user(R.ACADEMIC_AFFAIRS, R.TEACHER)
     DepartmentMembership.objects.create(user=both, department=ba_dept, kind="teacher")
     assert api(both).delete(_url(news)).status_code == 403
-    assert api(manager).delete(_url(news)).status_code == 204
+    assert api(manager).delete(_url(news)).status_code == 202  # a request since 2026-11-05
 
 
 def _png():

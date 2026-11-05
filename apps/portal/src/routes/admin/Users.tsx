@@ -28,7 +28,7 @@ import { Pager } from "../../components/Pager";
 /** Board: SystemAdminUsers (phone); desktop derived — list beside "new staff account". */
 export function AdminUsers() {
   const me = useMe();
-  const admin = hasRole(me.data, "system_admin");
+  const admin = hasRole(me.data, "system_admin", "system_supervisor");
   const [search, setSearch] = useState("");
   const [active, setActive] = useState<boolean | undefined>(true);
   const [page, setPage] = useState(1);

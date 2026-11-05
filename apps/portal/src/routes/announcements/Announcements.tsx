@@ -1,6 +1,6 @@
 import type { Schemas } from "@ecst/api";
-import { useQuery } from "@tanstack/react-query";
-import { Megaphone, Pin, Plus } from "lucide-react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Megaphone, Pin, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router";
 
@@ -11,19 +11,23 @@ import {
   Card,
   Chip,
   EmptyState,
+  Notice,
+  problemMessage,
   SideFigures,
   SideNote,
   StatusBadge,
   WithSide,
 } from "../../components/ui";
 import { api, ok } from "../../lib/api";
-import { useMe } from "../../lib/auth";
+import { hasRole, useMe } from "../../lib/auth";
+import { useConfirm } from "../../components/Confirm";
 import { when } from "../../lib/format";
 import { ALL, Pager, useLocalPages } from "../../components/Pager";
 
 type Item = Schemas["Announcement"];
 const SCOPES = [
   { key: "", label: "الكل" },
+  { key: "mine", label: "إعلاناتي" },
   { key: "offering", label: "موادي" },
   { key: "department", label: "القسم" },
   { key: "college", label: "الكلية" },
@@ -38,7 +42,10 @@ export function Announcements() {
     queryFn: async () =>
       ok(await api.GET("/api/v1/announcements", { params: { query: ALL } }))?.results ?? [],
   });
-  const items = (feed.data ?? []).filter((a) => !scope || a.scope === scope);
+  // «إعلاناتي»: what one wrote stays here, to read again or ask to delete (owner, 2026-11-05).
+  const items = (feed.data ?? []).filter(
+    (a) => !scope || (scope === "mine" ? a.mine : a.scope === scope),
+  );
   const paged = useLocalPages(items, scope);
   const author = !me.data?.student;
   return (
@@ -62,7 +69,9 @@ export function Announcements() {
               title="حسب النطاق"
               rows={SCOPES.map((s) => [
                 s.label,
-                (feed.data ?? []).filter((a) => !s.key || a.scope === s.key).length,
+                (feed.data ?? []).filter(
+                  (a) => !s.key || (s.key === "mine" ? a.mine : a.scope === s.key),
+                ).length,
               ])}
             />
             <SideNote title="من يرى الإعلان؟">
@@ -100,6 +109,22 @@ export function Announcements() {
 }
 
 function AnnouncementCard({ item }: { item: Item }) {
+  const me = useMe();
+  const confirm = useConfirm();
+  const client = useQueryClient();
+  // The system admin and the site manager delete at once; anyone else asks, and the system
+  // admin or supervisor decides (owner, 2026-11-05).
+  const atOnce = hasRole(me.data, "system_admin", "site_manager");
+  const remove = useMutation({
+    mutationFn: async (reason: string) => {
+      const { error, response } = await api.DELETE("/api/v1/announcements/{public_id}", {
+        params: { path: { public_id: item.public_id } },
+        body: { reason } as never,
+      });
+      if (!response.ok) throw error;
+    },
+    onSuccess: () => client.invalidateQueries({ queryKey: ["announcements"] }),
+  });
   const label = { college: "الكلية", department: "القسم", program: "البرنامج", offering: "المادة" }[
     item.scope ?? "college"
   ];
@@ -126,6 +151,36 @@ function AnnouncementCard({ item }: { item: Item }) {
         <p className="mt-2 text-xs text-text-muted">
           {item.author} · {when(item.publish_at ?? item.created_at)}
         </p>
+        {(item.mine || atOnce) && (
+          <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-border-soft pt-3">
+            {item.deletion_pending ? (
+              <StatusBadge status="pending" label="طلب الحذف بانتظار الموافقة" />
+            ) : (
+              <Button
+                variant="ghost"
+                className="min-h-10 px-2 text-sm text-danger-strong"
+                disabled={remove.isPending}
+                onClick={async () => {
+                  if (
+                    await confirm({
+                      title: atOnce ? `حذف «${item.title}»؟` : `طلب حذف «${item.title}»؟`,
+                      body: atOnce
+                        ? "يُحذف الإعلان نهائيًا من البوابة والموقع."
+                        : "يبقى الإعلان كما هو حتى يوافق مدير النظام أو مشرف النظام على حذفه، ويصلك إشعار بالقرار.",
+                      confirm: atOnce ? "حذف" : "إرسال الطلب",
+                      tone: atOnce ? "danger" : "primary",
+                    })
+                  )
+                    remove.mutate("");
+                }}
+              >
+                <Trash2 size={16} aria-hidden />
+                {atOnce ? "حذف" : "طلب حذف"}
+              </Button>
+            )}
+            {remove.isError && <Notice>{problemMessage(remove.error)}</Notice>}
+          </div>
+        )}
       </div>
     </Card>
   );

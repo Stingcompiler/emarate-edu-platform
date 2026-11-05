@@ -88,6 +88,19 @@ class AudienceOptionSerializer(serializers.Serializer):
 
 class SentNotificationSerializer(serializers.ModelSerializer):
     read_count = serializers.IntegerField(read_only=True, default=0)
+    deletion_pending = serializers.SerializerMethodField()
+
+    def get_deletion_pending(self, obj) -> bool:
+        """A deletion request waits for the system admin or supervisor (owner, 2026-11-05).
+        Read once for a whole list."""
+        from content import deletions
+
+        root = self.parent if isinstance(self.parent, serializers.ListSerializer) else self
+        if not hasattr(root, "_deletion_pending"):
+            rows = root.instance if root is not self else [obj]
+            ids = [o.pk for o in (rows if hasattr(rows, "__iter__") else [rows])]
+            root._deletion_pending = deletions.pending(deletions.K.NOTIFICATION, ids)
+        return obj.pk in root._deletion_pending
 
     class Meta:
         model = Notification
@@ -103,6 +116,7 @@ class SentNotificationSerializer(serializers.ModelSerializer):
             "recipients_count",
             "read_count",
             "created_at",
+            "deletion_pending",
         ]
         read_only_fields = fields
 
