@@ -5,11 +5,12 @@ from drf_spectacular.utils import extend_schema
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import NotFound
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import BasePermission, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from accounts import rbac
+from accounts.rbac import Role
 from audit.services import RequestMeta, record
 from core.idempotency import run_once
 
@@ -256,6 +257,18 @@ class PushUnsubscribeView(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
+class _HRNoticeReader(BasePermission):
+    """HR staff, and the teachers and TAs the notices are addressed to."""
+
+    def has_permission(self, request, view):
+        user = request.user
+        return (
+            rbac.can(user, "hr.view")
+            or rbac.has_role(user, Role.TEACHER, Role.TA)
+            or HRNotice.objects.filter(teacher=user).exists()
+        )
+
+
 @extend_schema(tags=["notifications"])
 class HRNoticeViewSet(
     mixins.ListModelMixin,
@@ -263,10 +276,11 @@ class HRNoticeViewSet(
     mixins.CreateModelMixin,
     viewsets.GenericViewSet,
 ):
-    """HR sees every notice; a teacher sees the notices addressed to them."""
+    """HR sees every notice; a teacher sees the notices addressed to them. Anyone else gets
+    403, not an empty list (docs/roles-matrix.md «hr.manage»; roles review 2026-11-06)."""
 
     serializer_class = HRNoticeSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, _HRNoticeReader]
     lookup_field = "public_id"
     filterset_fields = ["teacher__public_id", "requires_ack"]
 

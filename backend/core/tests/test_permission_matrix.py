@@ -89,6 +89,11 @@ LEARNING_STAFF = frozenset(
 )
 LEARNING = LEARNING_STAFF | {R.STUDENT}
 OUTSIDERS = EVERYONE - LEARNING  # learning objects outside your courses are 404
+# Course lists and their objects (lectures, assignments, exams, results) are closed to roles that
+# neither hold the capability nor teach, assist or study: 403, not an empty list or a 404
+# (docs/roles-matrix.md «-»; roles review 2026-11-06). The rest of the course pages still 404.
+SHUT = frozenset()
+HR_READERS = frozenset({R.SYSTEM_ADMIN, R.HR, R.ACADEMIC_AFFAIRS, R.TEACHER, R.TA})
 RESULTS = frozenset(
     {
         R.SYSTEM_ADMIN,
@@ -183,10 +188,11 @@ READS: dict[str, tuple[str, frozenset, frozenset]] = {
         frozenset(),
     ),
     # The head registrar sees registrars only, so a teacher is hidden (404).
+    # Every holder of users.view reads every account (docs/roles-matrix.md `all`).
     "user-detail": (
         "/api/v1/users/{teacher}",
-        frozenset({R.SYSTEM_ADMIN, R.ACADEMIC_AFFAIRS}),
-        frozenset({R.HEAD_REGISTRAR}),
+        frozenset({R.SYSTEM_ADMIN, R.ACADEMIC_AFFAIRS, R.HEAD_REGISTRAR}),
+        frozenset(),
     ),
     "role-assignment-list": (
         "/api/v1/role-assignments",
@@ -206,19 +212,19 @@ READS: dict[str, tuple[str, frozenset, frozenset]] = {
     ),
     "audit-log-list": ("/api/v1/audit-logs", AUDIT | AUDIT_DOMAIN, frozenset()),
     "audit-log-detail": ("/api/v1/audit-logs/{audit}", AUDIT, AUDIT_DOMAIN),
-    "lecture-list": ("/api/v1/lectures", EVERYONE, frozenset()),
-    "lecture-detail": ("/api/v1/lectures/{lecture}", LEARNING, OUTSIDERS),
-    "assignment-list": ("/api/v1/assignments", EVERYONE, frozenset()),
-    "assignment-detail": ("/api/v1/assignments/{assignment}", LEARNING, OUTSIDERS),
+    "lecture-list": ("/api/v1/lectures", LEARNING, frozenset()),
+    "lecture-detail": ("/api/v1/lectures/{lecture}", LEARNING, SHUT),
+    "assignment-list": ("/api/v1/assignments", LEARNING, frozenset()),
+    "assignment-detail": ("/api/v1/assignments/{assignment}", LEARNING, SHUT),
     "assignment-submissions": (
         "/api/v1/assignments/{assignment}/submissions",
         LEARNING_STAFF,
-        OUTSIDERS,  # the enrolled student gets 403
+        SHUT,  # the enrolled student gets 403 too
     ),
     "assignment-my-submission": (
         "/api/v1/assignments/{assignment}/my-submission",
         frozenset({R.STUDENT}),
-        EVERYONE - {R.STUDENT},
+        (LEARNING - {R.STUDENT}) | {R.SYSTEM_SUPERVISOR},  # past the gate, not a student
     ),
     "submission-detail": ("/api/v1/submissions/{submission}", LEARNING, OUTSIDERS),
     "file-url": ("/api/v1/files/{file}/url", LEARNING, OUTSIDERS),
@@ -234,16 +240,16 @@ READS: dict[str, tuple[str, frozenset, frozenset]] = {
         frozenset(),
     ),
     "push-config": ("/api/v1/push/config", EVERYONE, frozenset()),
-    "hr-notice-list": ("/api/v1/hr-notices", EVERYONE, frozenset()),
+    "hr-notice-list": ("/api/v1/hr-notices", HR_READERS, frozenset()),
     # Results (the world's teacher teaches IT101, whose result is below)
     "result-import-list": ("/api/v1/result-imports", RESULTS, frozenset()),
     "result-import-detail": ("/api/v1/result-imports/{result_batch}", RESULTS, frozenset()),
     "result-import-rows": ("/api/v1/result-imports/{result_batch}/rows", RESULTS, frozenset()),
-    "result-list": ("/api/v1/results", EVERYONE, frozenset()),
+    "result-list": ("/api/v1/results", RESULTS | {R.TEACHER, R.TA, R.STUDENT}, frozenset()),
     "result-detail": (
         "/api/v1/results/{result}",
         RESULTS | {R.TEACHER},
-        EVERYONE - RESULTS - {R.TEACHER},
+        frozenset({R.TA, R.STUDENT}),  # past the gate, not theirs
     ),
     "result-export": ("/api/v1/results/export?term={term}", RESULTS | {R.TEACHER}, frozenset()),
     "result-correction-list": ("/api/v1/result-corrections", CORRECTIONS, frozenset()),
@@ -257,12 +263,12 @@ READS: dict[str, tuple[str, frozenset, frozenset]] = {
     "term-release-list": ("/api/v1/results/term-releases", RESULT_SETTINGS, frozenset()),
     "me-results": ("/api/v1/me/results", ONLY_STUDENT, EVERYONE - ONLY_STUDENT),
     # Exams (the world's exam is published in IT101; the student has a submitted attempt)
-    "exam-list": ("/api/v1/exams", EVERYONE, frozenset()),
-    "exam-detail": ("/api/v1/exams/{exam}", LEARNING, OUTSIDERS),
-    "exam-questions": ("/api/v1/exams/{exam}/questions", LEARNING_STAFF, OUTSIDERS),
-    "exam-problems": ("/api/v1/exams/{exam}/problems", LEARNING_STAFF, OUTSIDERS),
-    "exam-attempts": ("/api/v1/exams/{exam}/attempts", LEARNING_STAFF, OUTSIDERS),
-    "exam-stats": ("/api/v1/exams/{exam}/stats", LEARNING_STAFF, OUTSIDERS),
+    "exam-list": ("/api/v1/exams", LEARNING, frozenset()),
+    "exam-detail": ("/api/v1/exams/{exam}", LEARNING, SHUT),
+    "exam-questions": ("/api/v1/exams/{exam}/questions", LEARNING_STAFF, SHUT),
+    "exam-problems": ("/api/v1/exams/{exam}/problems", LEARNING_STAFF, SHUT),
+    "exam-attempts": ("/api/v1/exams/{exam}/attempts", LEARNING_STAFF, SHUT),
+    "exam-stats": ("/api/v1/exams/{exam}/stats", LEARNING_STAFF, SHUT),
     "exam-attempt-detail": ("/api/v1/exam-attempts/{attempt}", LEARNING, OUTSIDERS),
     "exam-attempt-result": (
         "/api/v1/exam-attempts/{attempt}/result",
@@ -343,7 +349,7 @@ READS: dict[str, tuple[str, frozenset, frozenset]] = {
     "hr-notice-detail": (
         "/api/v1/hr-notices/{hr_notice}",
         frozenset({R.SYSTEM_ADMIN, R.HR, R.ACADEMIC_AFFAIRS, R.TEACHER}),
-        EVERYONE - {R.SYSTEM_ADMIN, R.HR, R.ACADEMIC_AFFAIRS, R.TEACHER},
+        frozenset({R.TA}),  # a TA reads notices, not another's
     ),
     # Reports (docs/02 §4.14)
     "report-department": ("/api/v1/reports/department", REPORTS_DEPARTMENT, frozenset()),

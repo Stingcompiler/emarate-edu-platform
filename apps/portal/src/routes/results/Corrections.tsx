@@ -140,7 +140,12 @@ function CorrectionRow({ correction: c, approver }: { correction: Correction; ap
           </p>
         </div>
       </div>
-      {approver && c.status === "pending" && (
+      {approver && c.status === "pending" && c.is_mine && (
+        <p className="mt-2 text-xs text-text-muted">
+          طلبتَ هذا التعديل بنفسك؛ يقرّر فيه معتمد آخر.
+        </p>
+      )}
+      {approver && c.status === "pending" && !c.is_mine && (
         <div className="mt-3 flex flex-wrap items-center gap-2">
           <input
             value={note}

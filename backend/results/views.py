@@ -16,7 +16,7 @@ from academic.models import OfferingInstructor
 from accounts import rbac
 from audit.services import RequestMeta, record, snapshot
 from core.idempotency import run_once
-from core.permissions import capability
+from core.permissions import capability, capability_or_participant
 from students.importer import ImportFileError
 from students.models import StudentRecord
 
@@ -145,7 +145,7 @@ class ResultViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.G
     """Committed results: results staff by scope; teachers for the courses they teach."""
 
     serializer_class = ResultSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, capability_or_participant("results.view")]
     filterset_fields = ["term", "offering", "is_published", "status", "student_record__public_id"]
     search_fields = ["student_record__university_number", "student_record__full_name_ar"]
 

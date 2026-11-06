@@ -27,8 +27,8 @@ from .models import (
 )
 
 
-def _require(user, capability: str, department_id=None) -> None:
-    if not rbac.can(user, capability, department_id):
+def _require(user, capability: str, department_id=None, *, deleting: bool = False) -> None:
+    if not rbac.can(user, capability, department_id, deleting=deleting):
         raise PermissionDenied()
 
 
@@ -88,8 +88,8 @@ def new_version(meta: RequestMeta, regulation: Regulation) -> Regulation:
 
 def delete_draft(meta: RequestMeta, regulation: Regulation) -> None:
     """Only an unpublished draft is deleted (docs/03 §3.14); a published one is superseded by a
-    new version, never removed."""
-    _require(meta.actor, "regulations.manage")
+    new version, never removed. The system supervisor does not delete (owner, 2026-11-05)."""
+    _require(meta.actor, "regulations.manage", deleting=True)
     with transaction.atomic():
         locked = Regulation.objects.select_for_update().get(pk=regulation.pk)
         if locked.status != Regulation.Status.DRAFT:

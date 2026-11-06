@@ -110,6 +110,7 @@ class CorrectionSerializer(serializers.ModelSerializer):
     decided_by = serializers.CharField(
         source="decided_by.full_name_ar", read_only=True, default=None
     )
+    is_mine = serializers.SerializerMethodField()
 
     class Meta:
         model = ResultCorrection
@@ -121,12 +122,18 @@ class CorrectionSerializer(serializers.ModelSerializer):
             "reason",
             "status",
             "requested_by",
+            "is_mine",
             "created_at",
             "decided_by",
             "decided_at",
             "decision_note",
         ]
         read_only_fields = fields
+
+    def get_is_mine(self, obj) -> bool:
+        """The caller asked for it: someone else decides (roles review 2026-11-06)."""
+        request = self.context.get("request")
+        return bool(request and obj.requested_by_id == request.user.pk)
 
 
 class CorrectionDecisionSerializer(serializers.Serializer):

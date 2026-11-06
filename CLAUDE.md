@@ -1,7 +1,8 @@
 # Working in this repository
 
 Platform for the Emirates College for Science & Technology. Plans and specs
-live in `docs/` (01–09); `docs/03-roles-and-permissions.md` wins any conflict.
+live in `docs/` (01–09); `docs/03-roles-and-permissions.md` wins any conflict, except who may
+do what: that is `docs/roles-matrix.md` (the owner's approved matrix), which wins over docs/03.
 
 ## Rules
 
@@ -21,7 +22,10 @@ live in `docs/` (01–09); `docs/03-roles-and-permissions.md` wins any conflict.
 - The department manager dashboard keeps the old sections and workflows; only
   additions are allowed (docs/02 D20).
 - **No Zustand.** Server state lives in TanStack Query; UI state is a small Context.
-- **Authorization lives in `accounts/rbac.py`** (capabilities + department scope).
+- **Authorization lives in `accounts/rbac.py`** (capabilities + department scope) and must
+  match `docs/roles-matrix.md`; `backend/tests/permissions` reads the matrix and tests the code
+  against it (it must stay green — change the code, never its expectations, unless the owner
+  changes the matrix).
   Every new `/api/v1` endpoint needs a row in `core/tests/test_permission_matrix.py`;
   the suite fails otherwise. Writes go through a service that records an audit entry.
 

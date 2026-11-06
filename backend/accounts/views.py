@@ -623,8 +623,8 @@ class UserViewSet(
     mixins.DestroyModelMixin,
     viewsets.GenericViewSet,
 ):
-    """Staff accounts. System admin sees everyone; academic affairs sees teachers
-    and TAs; the head registrar sees registrars (docs/03 §7 «المستخدمون»)."""
+    """The college's accounts, read by every holder of users.view (docs/roles-matrix.md);
+    changes follow who-appoints-whom (docs/03 §6)."""
 
     serializer_class = UserSerializer
     permission_classes = [IsAuthenticated, capability("users.view")]
@@ -637,7 +637,6 @@ class UserViewSet(
         return super().list(request, *args, **kwargs)
 
     def get_queryset(self):
-        user = self.request.user
         queryset = User.objects.select_related("student_record", "photo").prefetch_related(
             "role_assignments__department"
         )
@@ -645,14 +644,11 @@ class UserViewSet(
         role = self.request.query_params.get("role")
         if role in Role.values:
             queryset = queryset.filter(role_assignments__role=role).distinct()
-        if rbac.is_admin(user):
-            return queryset
-        visible: set[str] = set()
-        if rbac.has_role(user, Role.ACADEMIC_AFFAIRS):
-            visible |= {Role.TEACHER, Role.TA, Role.DEPARTMENT_MANAGER, Role.DEPARTMENT_SUPERVISOR}
-        if rbac.has_role(user, Role.HEAD_REGISTRAR):
-            visible |= {Role.REGISTRAR}
-        return queryset.filter(role_assignments__role__in=visible).distinct()
+        # Everyone who holds users.view reads every account: the admin and the supervisor, the
+        # head registrar and academic affairs (docs/roles-matrix.md `all`; owner, 2026-11-06).
+        # Reading only: changing an account is still who-appoints-whom (rbac.CREATABLE_ACCOUNTS,
+        # GRANTS), checked in each write's service.
+        return queryset
 
     @extend_schema(request=UserCreateSerializer, responses={201: UserSerializer})
     def create(self, request):

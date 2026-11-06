@@ -1,0 +1,901 @@
+........................................................................ [ 75%]
+....FFFFFF..FFFFFF..FFFF                                                 [100%]
+=================================== FAILURES ===================================
+__________________ test_admissions_and_hr[hr.manage-REG-own] ___________________
+
+key = 'hr.manage', code = 'REG', side = 'own'
+api = <function api.<locals>.client at 0x10f395760>
+make_user = <function make_user.<locals>.make at 0x10f3422a0>
+users = {Role.SYSTEM_ADMIN: <User: مستخدم 1217 <user1217@ecst.test>>, Role.SYSTEM_SUPERVISOR: <User: مستخدم 1218 <user1218@ecs...EAD_REGISTRAR: <User: مستخدم 1219 <user1219@ecst.test>>, Role.REGISTRAR: <User: مستخدم 1220 <user1220@ecst.test>>, ...}
+it_dept = <Department: تقانة المعلومات>, ba_dept = <Department: إدارة الأعمال>
+world = {'college': 1, 'dept': 1, 'program': 1, 'year': 1, ...}
+record_property = <function record_property.<locals>.append_property at 0x10fe218a0>
+
+    @pytest.mark.parametrize("key,code,side", CASES, ids=[f"{k}-{c}-{s}" for k, c, s in CASES])
+    def test_admissions_and_hr(
+        key, code, side, api, make_user, users, it_dept, ba_dept, world, record_property
+    ):
+        actor = make_user(ROLES[code], department=it_dept if side == "own" else ba_dept)
+        application = Application.objects.get(public_id=world["application"])
+        cycle = application.intake.cycle
+        models = [Application, AdmissionCycle, HRNotice]
+        before = [list(m.objects.order_by("pk").values()) for m in models]
+        client = api(actor)
+        if key == "admissions.manage":
+            response = client.patch(
+                f"/api/v1/admission-cycles/{cycle.pk}", {"name": "Audit cycle"}, format="json"
+            )
+        elif key == "admissions.review":
+            response = client.post(
+                f"/api/v1/applications/{application.public_id}/transition",
+                {"to": "under_review", "note": "Audit review"},
+                format="json",
+            )
+        elif key == "hr.notify_faculty":
+            response = client.post(
+                "/api/v1/hr-notices",
+                {
+                    "teacher": str(users[Role.TEACHER].public_id),
+                    "topic": "grading",
+                    "body": "Audit notice",
+                },
+                format="json",
+            )
+        else:
+            response = client.get("/api/v1/hr-notices")
+        record_property("http", response.status_code)
+        if isinstance(response.data, dict) and "results" in response.data:
+            record_property("returned_rows", len(response.data["results"]))
+        expected = MATRIX[key]["values"][code]
+        allowed = expected == "all" or (expected == "dept" and side == "own")
+        if not allowed:
+            assert before == [list(m.objects.order_by("pk").values()) for m in models]
+>           assert response.status_code in (403, 404), response.data
+E           AssertionError: {'count': 0, 'next': None, 'previous': None, 'results': []}
+E           assert 200 in (403, 404)
+E            +  where 200 = <Response status_code=200, "application/json">.status_code
+
+tests/permissions/test_admissions_hr_policy.py:62: AssertionError
+_________________ test_admissions_and_hr[hr.manage-REG-other] __________________
+
+key = 'hr.manage', code = 'REG', side = 'other'
+api = <function api.<locals>.client at 0x10fe325c0>
+make_user = <function make_user.<locals>.make at 0x10fe35da0>
+users = {Role.SYSTEM_ADMIN: <User: مستخدم 1233 <user1233@ecst.test>>, Role.SYSTEM_SUPERVISOR: <User: مستخدم 1234 <user1234@ecs...EAD_REGISTRAR: <User: مستخدم 1235 <user1235@ecst.test>>, Role.REGISTRAR: <User: مستخدم 1236 <user1236@ecst.test>>, ...}
+it_dept = <Department: تقانة المعلومات>, ba_dept = <Department: إدارة الأعمال>
+world = {'college': 1, 'dept': 1, 'program': 1, 'year': 1, ...}
+record_property = <function record_property.<locals>.append_property at 0x10feeef20>
+
+    @pytest.mark.parametrize("key,code,side", CASES, ids=[f"{k}-{c}-{s}" for k, c, s in CASES])
+    def test_admissions_and_hr(
+        key, code, side, api, make_user, users, it_dept, ba_dept, world, record_property
+    ):
+        actor = make_user(ROLES[code], department=it_dept if side == "own" else ba_dept)
+        application = Application.objects.get(public_id=world["application"])
+        cycle = application.intake.cycle
+        models = [Application, AdmissionCycle, HRNotice]
+        before = [list(m.objects.order_by("pk").values()) for m in models]
+        client = api(actor)
+        if key == "admissions.manage":
+            response = client.patch(
+                f"/api/v1/admission-cycles/{cycle.pk}", {"name": "Audit cycle"}, format="json"
+            )
+        elif key == "admissions.review":
+            response = client.post(
+                f"/api/v1/applications/{application.public_id}/transition",
+                {"to": "under_review", "note": "Audit review"},
+                format="json",
+            )
+        elif key == "hr.notify_faculty":
+            response = client.post(
+                "/api/v1/hr-notices",
+                {
+                    "teacher": str(users[Role.TEACHER].public_id),
+                    "topic": "grading",
+                    "body": "Audit notice",
+                },
+                format="json",
+            )
+        else:
+            response = client.get("/api/v1/hr-notices")
+        record_property("http", response.status_code)
+        if isinstance(response.data, dict) and "results" in response.data:
+            record_property("returned_rows", len(response.data["results"]))
+        expected = MATRIX[key]["values"][code]
+        allowed = expected == "all" or (expected == "dept" and side == "own")
+        if not allowed:
+            assert before == [list(m.objects.order_by("pk").values()) for m in models]
+>           assert response.status_code in (403, 404), response.data
+E           AssertionError: {'count': 0, 'next': None, 'previous': None, 'results': []}
+E           assert 200 in (403, 404)
+E            +  where 200 = <Response status_code=200, "application/json">.status_code
+
+tests/permissions/test_admissions_hr_policy.py:62: AssertionError
+__________________ test_admissions_and_hr[hr.manage-DREG-own] __________________
+
+key = 'hr.manage', code = 'DREG', side = 'own'
+api = <function api.<locals>.client at 0x10feee8e0>
+make_user = <function make_user.<locals>.make at 0x10fe35080>
+users = {Role.SYSTEM_ADMIN: <User: مستخدم 1249 <user1249@ecst.test>>, Role.SYSTEM_SUPERVISOR: <User: مستخدم 1250 <user1250@ecs...EAD_REGISTRAR: <User: مستخدم 1251 <user1251@ecst.test>>, Role.REGISTRAR: <User: مستخدم 1252 <user1252@ecst.test>>, ...}
+it_dept = <Department: تقانة المعلومات>, ba_dept = <Department: إدارة الأعمال>
+world = {'college': 1, 'dept': 1, 'program': 1, 'year': 1, ...}
+record_property = <function record_property.<locals>.append_property at 0x10fef4a40>
+
+    @pytest.mark.parametrize("key,code,side", CASES, ids=[f"{k}-{c}-{s}" for k, c, s in CASES])
+    def test_admissions_and_hr(
+        key, code, side, api, make_user, users, it_dept, ba_dept, world, record_property
+    ):
+        actor = make_user(ROLES[code], department=it_dept if side == "own" else ba_dept)
+        application = Application.objects.get(public_id=world["application"])
+        cycle = application.intake.cycle
+        models = [Application, AdmissionCycle, HRNotice]
+        before = [list(m.objects.order_by("pk").values()) for m in models]
+        client = api(actor)
+        if key == "admissions.manage":
+            response = client.patch(
+                f"/api/v1/admission-cycles/{cycle.pk}", {"name": "Audit cycle"}, format="json"
+            )
+        elif key == "admissions.review":
+            response = client.post(
+                f"/api/v1/applications/{application.public_id}/transition",
+                {"to": "under_review", "note": "Audit review"},
+                format="json",
+            )
+        elif key == "hr.notify_faculty":
+            response = client.post(
+                "/api/v1/hr-notices",
+                {
+                    "teacher": str(users[Role.TEACHER].public_id),
+                    "topic": "grading",
+                    "body": "Audit notice",
+                },
+                format="json",
+            )
+        else:
+            response = client.get("/api/v1/hr-notices")
+        record_property("http", response.status_code)
+        if isinstance(response.data, dict) and "results" in response.data:
+            record_property("returned_rows", len(response.data["results"]))
+        expected = MATRIX[key]["values"][code]
+        allowed = expected == "all" or (expected == "dept" and side == "own")
+        if not allowed:
+            assert before == [list(m.objects.order_by("pk").values()) for m in models]
+>           assert response.status_code in (403, 404), response.data
+E           AssertionError: {'count': 0, 'next': None, 'previous': None, 'results': []}
+E           assert 200 in (403, 404)
+E            +  where 200 = <Response status_code=200, "application/json">.status_code
+
+tests/permissions/test_admissions_hr_policy.py:62: AssertionError
+_________________ test_admissions_and_hr[hr.manage-DREG-other] _________________
+
+key = 'hr.manage', code = 'DREG', side = 'other'
+api = <function api.<locals>.client at 0x10feeeb60>
+make_user = <function make_user.<locals>.make at 0x10fe22980>
+users = {Role.SYSTEM_ADMIN: <User: مستخدم 1265 <user1265@ecst.test>>, Role.SYSTEM_SUPERVISOR: <User: مستخدم 1266 <user1266@ecs...EAD_REGISTRAR: <User: مستخدم 1267 <user1267@ecst.test>>, Role.REGISTRAR: <User: مستخدم 1268 <user1268@ecst.test>>, ...}
+it_dept = <Department: تقانة المعلومات>, ba_dept = <Department: إدارة الأعمال>
+world = {'college': 1, 'dept': 1, 'program': 1, 'year': 1, ...}
+record_property = <function record_property.<locals>.append_property at 0x10fef6200>
+
+    @pytest.mark.parametrize("key,code,side", CASES, ids=[f"{k}-{c}-{s}" for k, c, s in CASES])
+    def test_admissions_and_hr(
+        key, code, side, api, make_user, users, it_dept, ba_dept, world, record_property
+    ):
+        actor = make_user(ROLES[code], department=it_dept if side == "own" else ba_dept)
+        application = Application.objects.get(public_id=world["application"])
+        cycle = application.intake.cycle
+        models = [Application, AdmissionCycle, HRNotice]
+        before = [list(m.objects.order_by("pk").values()) for m in models]
+        client = api(actor)
+        if key == "admissions.manage":
+            response = client.patch(
+                f"/api/v1/admission-cycles/{cycle.pk}", {"name": "Audit cycle"}, format="json"
+            )
+        elif key == "admissions.review":
+            response = client.post(
+                f"/api/v1/applications/{application.public_id}/transition",
+                {"to": "under_review", "note": "Audit review"},
+                format="json",
+            )
+        elif key == "hr.notify_faculty":
+            response = client.post(
+                "/api/v1/hr-notices",
+                {
+                    "teacher": str(users[Role.TEACHER].public_id),
+                    "topic": "grading",
+                    "body": "Audit notice",
+                },
+                format="json",
+            )
+        else:
+            response = client.get("/api/v1/hr-notices")
+        record_property("http", response.status_code)
+        if isinstance(response.data, dict) and "results" in response.data:
+            record_property("returned_rows", len(response.data["results"]))
+        expected = MATRIX[key]["values"][code]
+        allowed = expected == "all" or (expected == "dept" and side == "own")
+        if not allowed:
+            assert before == [list(m.objects.order_by("pk").values()) for m in models]
+>           assert response.status_code in (403, 404), response.data
+E           AssertionError: {'count': 0, 'next': None, 'previous': None, 'results': []}
+E           assert 200 in (403, 404)
+E            +  where 200 = <Response status_code=200, "application/json">.status_code
+
+tests/permissions/test_admissions_hr_policy.py:62: AssertionError
+__________________ test_admissions_and_hr[hr.manage-RES-own] ___________________
+
+key = 'hr.manage', code = 'RES', side = 'own'
+api = <function api.<locals>.client at 0x10fe22ca0>
+make_user = <function make_user.<locals>.make at 0x10fef4360>
+users = {Role.SYSTEM_ADMIN: <User: مستخدم 1281 <user1281@ecst.test>>, Role.SYSTEM_SUPERVISOR: <User: مستخدم 1282 <user1282@ecs...EAD_REGISTRAR: <User: مستخدم 1283 <user1283@ecst.test>>, Role.REGISTRAR: <User: مستخدم 1284 <user1284@ecst.test>>, ...}
+it_dept = <Department: تقانة المعلومات>, ba_dept = <Department: إدارة الأعمال>
+world = {'college': 1, 'dept': 1, 'program': 1, 'year': 1, ...}
+record_property = <function record_property.<locals>.append_property at 0x10fef84a0>
+
+    @pytest.mark.parametrize("key,code,side", CASES, ids=[f"{k}-{c}-{s}" for k, c, s in CASES])
+    def test_admissions_and_hr(
+        key, code, side, api, make_user, users, it_dept, ba_dept, world, record_property
+    ):
+        actor = make_user(ROLES[code], department=it_dept if side == "own" else ba_dept)
+        application = Application.objects.get(public_id=world["application"])
+        cycle = application.intake.cycle
+        models = [Application, AdmissionCycle, HRNotice]
+        before = [list(m.objects.order_by("pk").values()) for m in models]
+        client = api(actor)
+        if key == "admissions.manage":
+            response = client.patch(
+                f"/api/v1/admission-cycles/{cycle.pk}", {"name": "Audit cycle"}, format="json"
+            )
+        elif key == "admissions.review":
+            response = client.post(
+                f"/api/v1/applications/{application.public_id}/transition",
+                {"to": "under_review", "note": "Audit review"},
+                format="json",
+            )
+        elif key == "hr.notify_faculty":
+            response = client.post(
+                "/api/v1/hr-notices",
+                {
+                    "teacher": str(users[Role.TEACHER].public_id),
+                    "topic": "grading",
+                    "body": "Audit notice",
+                },
+                format="json",
+            )
+        else:
+            response = client.get("/api/v1/hr-notices")
+        record_property("http", response.status_code)
+        if isinstance(response.data, dict) and "results" in response.data:
+            record_property("returned_rows", len(response.data["results"]))
+        expected = MATRIX[key]["values"][code]
+        allowed = expected == "all" or (expected == "dept" and side == "own")
+        if not allowed:
+            assert before == [list(m.objects.order_by("pk").values()) for m in models]
+>           assert response.status_code in (403, 404), response.data
+E           AssertionError: {'count': 0, 'next': None, 'previous': None, 'results': []}
+E           assert 200 in (403, 404)
+E            +  where 200 = <Response status_code=200, "application/json">.status_code
+
+tests/permissions/test_admissions_hr_policy.py:62: AssertionError
+_________________ test_admissions_and_hr[hr.manage-RES-other] __________________
+
+key = 'hr.manage', code = 'RES', side = 'other'
+api = <function api.<locals>.client at 0x10fef4fe0>
+make_user = <function make_user.<locals>.make at 0x10fef6de0>
+users = {Role.SYSTEM_ADMIN: <User: مستخدم 1297 <user1297@ecst.test>>, Role.SYSTEM_SUPERVISOR: <User: مستخدم 1298 <user1298@ecs...EAD_REGISTRAR: <User: مستخدم 1299 <user1299@ecst.test>>, Role.REGISTRAR: <User: مستخدم 1300 <user1300@ecst.test>>, ...}
+it_dept = <Department: تقانة المعلومات>, ba_dept = <Department: إدارة الأعمال>
+world = {'college': 1, 'dept': 1, 'program': 1, 'year': 1, ...}
+record_property = <function record_property.<locals>.append_property at 0x10fef9e40>
+
+    @pytest.mark.parametrize("key,code,side", CASES, ids=[f"{k}-{c}-{s}" for k, c, s in CASES])
+    def test_admissions_and_hr(
+        key, code, side, api, make_user, users, it_dept, ba_dept, world, record_property
+    ):
+        actor = make_user(ROLES[code], department=it_dept if side == "own" else ba_dept)
+        application = Application.objects.get(public_id=world["application"])
+        cycle = application.intake.cycle
+        models = [Application, AdmissionCycle, HRNotice]
+        before = [list(m.objects.order_by("pk").values()) for m in models]
+        client = api(actor)
+        if key == "admissions.manage":
+            response = client.patch(
+                f"/api/v1/admission-cycles/{cycle.pk}", {"name": "Audit cycle"}, format="json"
+            )
+        elif key == "admissions.review":
+            response = client.post(
+                f"/api/v1/applications/{application.public_id}/transition",
+                {"to": "under_review", "note": "Audit review"},
+                format="json",
+            )
+        elif key == "hr.notify_faculty":
+            response = client.post(
+                "/api/v1/hr-notices",
+                {
+                    "teacher": str(users[Role.TEACHER].public_id),
+                    "topic": "grading",
+                    "body": "Audit notice",
+                },
+                format="json",
+            )
+        else:
+            response = client.get("/api/v1/hr-notices")
+        record_property("http", response.status_code)
+        if isinstance(response.data, dict) and "results" in response.data:
+            record_property("returned_rows", len(response.data["results"]))
+        expected = MATRIX[key]["values"][code]
+        allowed = expected == "all" or (expected == "dept" and side == "own")
+        if not allowed:
+            assert before == [list(m.objects.order_by("pk").values()) for m in models]
+>           assert response.status_code in (403, 404), response.data
+E           AssertionError: {'count': 0, 'next': None, 'previous': None, 'results': []}
+E           assert 200 in (403, 404)
+E            +  where 200 = <Response status_code=200, "application/json">.status_code
+
+tests/permissions/test_admissions_hr_policy.py:62: AssertionError
+__________________ test_admissions_and_hr[hr.manage-STU-own] ___________________
+
+key = 'hr.manage', code = 'STU', side = 'own'
+api = <function api.<locals>.client at 0x10fefbec0>
+make_user = <function make_user.<locals>.make at 0x10fef9b20>
+users = {Role.SYSTEM_ADMIN: <User: مستخدم 1345 <user1345@ecst.test>>, Role.SYSTEM_SUPERVISOR: <User: مستخدم 1346 <user1346@ecs...EAD_REGISTRAR: <User: مستخدم 1347 <user1347@ecst.test>>, Role.REGISTRAR: <User: مستخدم 1348 <user1348@ecst.test>>, ...}
+it_dept = <Department: تقانة المعلومات>, ba_dept = <Department: إدارة الأعمال>
+world = {'college': 1, 'dept': 1, 'program': 1, 'year': 1, ...}
+record_property = <function record_property.<locals>.append_property at 0x10f4c36a0>
+
+    @pytest.mark.parametrize("key,code,side", CASES, ids=[f"{k}-{c}-{s}" for k, c, s in CASES])
+    def test_admissions_and_hr(
+        key, code, side, api, make_user, users, it_dept, ba_dept, world, record_property
+    ):
+        actor = make_user(ROLES[code], department=it_dept if side == "own" else ba_dept)
+        application = Application.objects.get(public_id=world["application"])
+        cycle = application.intake.cycle
+        models = [Application, AdmissionCycle, HRNotice]
+        before = [list(m.objects.order_by("pk").values()) for m in models]
+        client = api(actor)
+        if key == "admissions.manage":
+            response = client.patch(
+                f"/api/v1/admission-cycles/{cycle.pk}", {"name": "Audit cycle"}, format="json"
+            )
+        elif key == "admissions.review":
+            response = client.post(
+                f"/api/v1/applications/{application.public_id}/transition",
+                {"to": "under_review", "note": "Audit review"},
+                format="json",
+            )
+        elif key == "hr.notify_faculty":
+            response = client.post(
+                "/api/v1/hr-notices",
+                {
+                    "teacher": str(users[Role.TEACHER].public_id),
+                    "topic": "grading",
+                    "body": "Audit notice",
+                },
+                format="json",
+            )
+        else:
+            response = client.get("/api/v1/hr-notices")
+        record_property("http", response.status_code)
+        if isinstance(response.data, dict) and "results" in response.data:
+            record_property("returned_rows", len(response.data["results"]))
+        expected = MATRIX[key]["values"][code]
+        allowed = expected == "all" or (expected == "dept" and side == "own")
+        if not allowed:
+            assert before == [list(m.objects.order_by("pk").values()) for m in models]
+>           assert response.status_code in (403, 404), response.data
+E           AssertionError: {'count': 0, 'next': None, 'previous': None, 'results': []}
+E           assert 200 in (403, 404)
+E            +  where 200 = <Response status_code=200, "application/json">.status_code
+
+tests/permissions/test_admissions_hr_policy.py:62: AssertionError
+_________________ test_admissions_and_hr[hr.manage-STU-other] __________________
+
+key = 'hr.manage', code = 'STU', side = 'other'
+api = <function api.<locals>.client at 0x10fefbce0>
+make_user = <function make_user.<locals>.make at 0x10f4c1760>
+users = {Role.SYSTEM_ADMIN: <User: مستخدم 1361 <user1361@ecst.test>>, Role.SYSTEM_SUPERVISOR: <User: مستخدم 1362 <user1362@ecs...EAD_REGISTRAR: <User: مستخدم 1363 <user1363@ecst.test>>, Role.REGISTRAR: <User: مستخدم 1364 <user1364@ecst.test>>, ...}
+it_dept = <Department: تقانة المعلومات>, ba_dept = <Department: إدارة الأعمال>
+world = {'college': 1, 'dept': 1, 'program': 1, 'year': 1, ...}
+record_property = <function record_property.<locals>.append_property at 0x10f400400>
+
+    @pytest.mark.parametrize("key,code,side", CASES, ids=[f"{k}-{c}-{s}" for k, c, s in CASES])
+    def test_admissions_and_hr(
+        key, code, side, api, make_user, users, it_dept, ba_dept, world, record_property
+    ):
+        actor = make_user(ROLES[code], department=it_dept if side == "own" else ba_dept)
+        application = Application.objects.get(public_id=world["application"])
+        cycle = application.intake.cycle
+        models = [Application, AdmissionCycle, HRNotice]
+        before = [list(m.objects.order_by("pk").values()) for m in models]
+        client = api(actor)
+        if key == "admissions.manage":
+            response = client.patch(
+                f"/api/v1/admission-cycles/{cycle.pk}", {"name": "Audit cycle"}, format="json"
+            )
+        elif key == "admissions.review":
+            response = client.post(
+                f"/api/v1/applications/{application.public_id}/transition",
+                {"to": "under_review", "note": "Audit review"},
+                format="json",
+            )
+        elif key == "hr.notify_faculty":
+            response = client.post(
+                "/api/v1/hr-notices",
+                {
+                    "teacher": str(users[Role.TEACHER].public_id),
+                    "topic": "grading",
+                    "body": "Audit notice",
+                },
+                format="json",
+            )
+        else:
+            response = client.get("/api/v1/hr-notices")
+        record_property("http", response.status_code)
+        if isinstance(response.data, dict) and "results" in response.data:
+            record_property("returned_rows", len(response.data["results"]))
+        expected = MATRIX[key]["values"][code]
+        allowed = expected == "all" or (expected == "dept" and side == "own")
+        if not allowed:
+            assert before == [list(m.objects.order_by("pk").values()) for m in models]
+>           assert response.status_code in (403, 404), response.data
+E           AssertionError: {'count': 0, 'next': None, 'previous': None, 'results': []}
+E           assert 200 in (403, 404)
+E            +  where 200 = <Response status_code=200, "application/json">.status_code
+
+tests/permissions/test_admissions_hr_policy.py:62: AssertionError
+___________________ test_admissions_and_hr[hr.manage-DH-own] ___________________
+
+key = 'hr.manage', code = 'DH', side = 'own'
+api = <function api.<locals>.client at 0x10f4c1e40>
+make_user = <function make_user.<locals>.make at 0x10f4c1580>
+users = {Role.SYSTEM_ADMIN: <User: مستخدم 1377 <user1377@ecst.test>>, Role.SYSTEM_SUPERVISOR: <User: مستخدم 1378 <user1378@ecs...EAD_REGISTRAR: <User: مستخدم 1379 <user1379@ecst.test>>, Role.REGISTRAR: <User: مستخدم 1380 <user1380@ecst.test>>, ...}
+it_dept = <Department: تقانة المعلومات>, ba_dept = <Department: إدارة الأعمال>
+world = {'college': 1, 'dept': 1, 'program': 1, 'year': 1, ...}
+record_property = <function record_property.<locals>.append_property at 0x10f401da0>
+
+    @pytest.mark.parametrize("key,code,side", CASES, ids=[f"{k}-{c}-{s}" for k, c, s in CASES])
+    def test_admissions_and_hr(
+        key, code, side, api, make_user, users, it_dept, ba_dept, world, record_property
+    ):
+        actor = make_user(ROLES[code], department=it_dept if side == "own" else ba_dept)
+        application = Application.objects.get(public_id=world["application"])
+        cycle = application.intake.cycle
+        models = [Application, AdmissionCycle, HRNotice]
+        before = [list(m.objects.order_by("pk").values()) for m in models]
+        client = api(actor)
+        if key == "admissions.manage":
+            response = client.patch(
+                f"/api/v1/admission-cycles/{cycle.pk}", {"name": "Audit cycle"}, format="json"
+            )
+        elif key == "admissions.review":
+            response = client.post(
+                f"/api/v1/applications/{application.public_id}/transition",
+                {"to": "under_review", "note": "Audit review"},
+                format="json",
+            )
+        elif key == "hr.notify_faculty":
+            response = client.post(
+                "/api/v1/hr-notices",
+                {
+                    "teacher": str(users[Role.TEACHER].public_id),
+                    "topic": "grading",
+                    "body": "Audit notice",
+                },
+                format="json",
+            )
+        else:
+            response = client.get("/api/v1/hr-notices")
+        record_property("http", response.status_code)
+        if isinstance(response.data, dict) and "results" in response.data:
+            record_property("returned_rows", len(response.data["results"]))
+        expected = MATRIX[key]["values"][code]
+        allowed = expected == "all" or (expected == "dept" and side == "own")
+        if not allowed:
+            assert before == [list(m.objects.order_by("pk").values()) for m in models]
+>           assert response.status_code in (403, 404), response.data
+E           AssertionError: {'count': 0, 'next': None, 'previous': None, 'results': []}
+E           assert 200 in (403, 404)
+E            +  where 200 = <Response status_code=200, "application/json">.status_code
+
+tests/permissions/test_admissions_hr_policy.py:62: AssertionError
+__________________ test_admissions_and_hr[hr.manage-DH-other] __________________
+
+key = 'hr.manage', code = 'DH', side = 'other'
+api = <function api.<locals>.client at 0x10f4c1120>
+make_user = <function make_user.<locals>.make at 0x10f4c2ca0>
+users = {Role.SYSTEM_ADMIN: <User: مستخدم 1393 <user1393@ecst.test>>, Role.SYSTEM_SUPERVISOR: <User: مستخدم 1394 <user1394@ecs...EAD_REGISTRAR: <User: مستخدم 1395 <user1395@ecst.test>>, Role.REGISTRAR: <User: مستخدم 1396 <user1396@ecst.test>>, ...}
+it_dept = <Department: تقانة المعلومات>, ba_dept = <Department: إدارة الأعمال>
+world = {'college': 1, 'dept': 1, 'program': 1, 'year': 1, ...}
+record_property = <function record_property.<locals>.append_property at 0x10fef67a0>
+
+    @pytest.mark.parametrize("key,code,side", CASES, ids=[f"{k}-{c}-{s}" for k, c, s in CASES])
+    def test_admissions_and_hr(
+        key, code, side, api, make_user, users, it_dept, ba_dept, world, record_property
+    ):
+        actor = make_user(ROLES[code], department=it_dept if side == "own" else ba_dept)
+        application = Application.objects.get(public_id=world["application"])
+        cycle = application.intake.cycle
+        models = [Application, AdmissionCycle, HRNotice]
+        before = [list(m.objects.order_by("pk").values()) for m in models]
+        client = api(actor)
+        if key == "admissions.manage":
+            response = client.patch(
+                f"/api/v1/admission-cycles/{cycle.pk}", {"name": "Audit cycle"}, format="json"
+            )
+        elif key == "admissions.review":
+            response = client.post(
+                f"/api/v1/applications/{application.public_id}/transition",
+                {"to": "under_review", "note": "Audit review"},
+                format="json",
+            )
+        elif key == "hr.notify_faculty":
+            response = client.post(
+                "/api/v1/hr-notices",
+                {
+                    "teacher": str(users[Role.TEACHER].public_id),
+                    "topic": "grading",
+                    "body": "Audit notice",
+                },
+                format="json",
+            )
+        else:
+            response = client.get("/api/v1/hr-notices")
+        record_property("http", response.status_code)
+        if isinstance(response.data, dict) and "results" in response.data:
+            record_property("returned_rows", len(response.data["results"]))
+        expected = MATRIX[key]["values"][code]
+        allowed = expected == "all" or (expected == "dept" and side == "own")
+        if not allowed:
+            assert before == [list(m.objects.order_by("pk").values()) for m in models]
+>           assert response.status_code in (403, 404), response.data
+E           AssertionError: {'count': 0, 'next': None, 'previous': None, 'results': []}
+E           assert 200 in (403, 404)
+E            +  where 200 = <Response status_code=200, "application/json">.status_code
+
+tests/permissions/test_admissions_hr_policy.py:62: AssertionError
+___________________ test_admissions_and_hr[hr.manage-DS-own] ___________________
+
+key = 'hr.manage', code = 'DS', side = 'own'
+api = <function api.<locals>.client at 0x10f4c2d40>
+make_user = <function make_user.<locals>.make at 0x10fef6340>
+users = {Role.SYSTEM_ADMIN: <User: مستخدم 1409 <user1409@ecst.test>>, Role.SYSTEM_SUPERVISOR: <User: مستخدم 1410 <user1410@ecs...EAD_REGISTRAR: <User: مستخدم 1411 <user1411@ecst.test>>, Role.REGISTRAR: <User: مستخدم 1412 <user1412@ecst.test>>, ...}
+it_dept = <Department: تقانة المعلومات>, ba_dept = <Department: إدارة الأعمال>
+world = {'college': 1, 'dept': 1, 'program': 1, 'year': 1, ...}
+record_property = <function record_property.<locals>.append_property at 0x10feee8e0>
+
+    @pytest.mark.parametrize("key,code,side", CASES, ids=[f"{k}-{c}-{s}" for k, c, s in CASES])
+    def test_admissions_and_hr(
+        key, code, side, api, make_user, users, it_dept, ba_dept, world, record_property
+    ):
+        actor = make_user(ROLES[code], department=it_dept if side == "own" else ba_dept)
+        application = Application.objects.get(public_id=world["application"])
+        cycle = application.intake.cycle
+        models = [Application, AdmissionCycle, HRNotice]
+        before = [list(m.objects.order_by("pk").values()) for m in models]
+        client = api(actor)
+        if key == "admissions.manage":
+            response = client.patch(
+                f"/api/v1/admission-cycles/{cycle.pk}", {"name": "Audit cycle"}, format="json"
+            )
+        elif key == "admissions.review":
+            response = client.post(
+                f"/api/v1/applications/{application.public_id}/transition",
+                {"to": "under_review", "note": "Audit review"},
+                format="json",
+            )
+        elif key == "hr.notify_faculty":
+            response = client.post(
+                "/api/v1/hr-notices",
+                {
+                    "teacher": str(users[Role.TEACHER].public_id),
+                    "topic": "grading",
+                    "body": "Audit notice",
+                },
+                format="json",
+            )
+        else:
+            response = client.get("/api/v1/hr-notices")
+        record_property("http", response.status_code)
+        if isinstance(response.data, dict) and "results" in response.data:
+            record_property("returned_rows", len(response.data["results"]))
+        expected = MATRIX[key]["values"][code]
+        allowed = expected == "all" or (expected == "dept" and side == "own")
+        if not allowed:
+            assert before == [list(m.objects.order_by("pk").values()) for m in models]
+>           assert response.status_code in (403, 404), response.data
+E           AssertionError: {'count': 0, 'next': None, 'previous': None, 'results': []}
+E           assert 200 in (403, 404)
+E            +  where 200 = <Response status_code=200, "application/json">.status_code
+
+tests/permissions/test_admissions_hr_policy.py:62: AssertionError
+__________________ test_admissions_and_hr[hr.manage-DS-other] __________________
+
+key = 'hr.manage', code = 'DS', side = 'other'
+api = <function api.<locals>.client at 0x10f4c2660>
+make_user = <function make_user.<locals>.make at 0x10fef7f60>
+users = {Role.SYSTEM_ADMIN: <User: مستخدم 1425 <user1425@ecst.test>>, Role.SYSTEM_SUPERVISOR: <User: مستخدم 1426 <user1426@ecs...EAD_REGISTRAR: <User: مستخدم 1427 <user1427@ecst.test>>, Role.REGISTRAR: <User: مستخدم 1428 <user1428@ecst.test>>, ...}
+it_dept = <Department: تقانة المعلومات>, ba_dept = <Department: إدارة الأعمال>
+world = {'college': 1, 'dept': 1, 'program': 1, 'year': 1, ...}
+record_property = <function record_property.<locals>.append_property at 0x10fe200e0>
+
+    @pytest.mark.parametrize("key,code,side", CASES, ids=[f"{k}-{c}-{s}" for k, c, s in CASES])
+    def test_admissions_and_hr(
+        key, code, side, api, make_user, users, it_dept, ba_dept, world, record_property
+    ):
+        actor = make_user(ROLES[code], department=it_dept if side == "own" else ba_dept)
+        application = Application.objects.get(public_id=world["application"])
+        cycle = application.intake.cycle
+        models = [Application, AdmissionCycle, HRNotice]
+        before = [list(m.objects.order_by("pk").values()) for m in models]
+        client = api(actor)
+        if key == "admissions.manage":
+            response = client.patch(
+                f"/api/v1/admission-cycles/{cycle.pk}", {"name": "Audit cycle"}, format="json"
+            )
+        elif key == "admissions.review":
+            response = client.post(
+                f"/api/v1/applications/{application.public_id}/transition",
+                {"to": "under_review", "note": "Audit review"},
+                format="json",
+            )
+        elif key == "hr.notify_faculty":
+            response = client.post(
+                "/api/v1/hr-notices",
+                {
+                    "teacher": str(users[Role.TEACHER].public_id),
+                    "topic": "grading",
+                    "body": "Audit notice",
+                },
+                format="json",
+            )
+        else:
+            response = client.get("/api/v1/hr-notices")
+        record_property("http", response.status_code)
+        if isinstance(response.data, dict) and "results" in response.data:
+            record_property("returned_rows", len(response.data["results"]))
+        expected = MATRIX[key]["values"][code]
+        allowed = expected == "all" or (expected == "dept" and side == "own")
+        if not allowed:
+            assert before == [list(m.objects.order_by("pk").values()) for m in models]
+>           assert response.status_code in (403, 404), response.data
+E           AssertionError: {'count': 0, 'next': None, 'previous': None, 'results': []}
+E           assert 200 in (403, 404)
+E            +  where 200 = <Response status_code=200, "application/json">.status_code
+
+tests/permissions/test_admissions_hr_policy.py:62: AssertionError
+__________________ test_admissions_and_hr[hr.manage-WEB-own] ___________________
+
+key = 'hr.manage', code = 'WEB', side = 'own'
+api = <function api.<locals>.client at 0x10fefb600>
+make_user = <function make_user.<locals>.make at 0x10fefaa20>
+users = {Role.SYSTEM_ADMIN: <User: مستخدم 1473 <user1473@ecst.test>>, Role.SYSTEM_SUPERVISOR: <User: مستخدم 1474 <user1474@ecs...EAD_REGISTRAR: <User: مستخدم 1475 <user1475@ecst.test>>, Role.REGISTRAR: <User: مستخدم 1476 <user1476@ecst.test>>, ...}
+it_dept = <Department: تقانة المعلومات>, ba_dept = <Department: إدارة الأعمال>
+world = {'college': 1, 'dept': 1, 'program': 1, 'year': 1, ...}
+record_property = <function record_property.<locals>.append_property at 0x10fe22ca0>
+
+    @pytest.mark.parametrize("key,code,side", CASES, ids=[f"{k}-{c}-{s}" for k, c, s in CASES])
+    def test_admissions_and_hr(
+        key, code, side, api, make_user, users, it_dept, ba_dept, world, record_property
+    ):
+        actor = make_user(ROLES[code], department=it_dept if side == "own" else ba_dept)
+        application = Application.objects.get(public_id=world["application"])
+        cycle = application.intake.cycle
+        models = [Application, AdmissionCycle, HRNotice]
+        before = [list(m.objects.order_by("pk").values()) for m in models]
+        client = api(actor)
+        if key == "admissions.manage":
+            response = client.patch(
+                f"/api/v1/admission-cycles/{cycle.pk}", {"name": "Audit cycle"}, format="json"
+            )
+        elif key == "admissions.review":
+            response = client.post(
+                f"/api/v1/applications/{application.public_id}/transition",
+                {"to": "under_review", "note": "Audit review"},
+                format="json",
+            )
+        elif key == "hr.notify_faculty":
+            response = client.post(
+                "/api/v1/hr-notices",
+                {
+                    "teacher": str(users[Role.TEACHER].public_id),
+                    "topic": "grading",
+                    "body": "Audit notice",
+                },
+                format="json",
+            )
+        else:
+            response = client.get("/api/v1/hr-notices")
+        record_property("http", response.status_code)
+        if isinstance(response.data, dict) and "results" in response.data:
+            record_property("returned_rows", len(response.data["results"]))
+        expected = MATRIX[key]["values"][code]
+        allowed = expected == "all" or (expected == "dept" and side == "own")
+        if not allowed:
+            assert before == [list(m.objects.order_by("pk").values()) for m in models]
+>           assert response.status_code in (403, 404), response.data
+E           AssertionError: {'count': 0, 'next': None, 'previous': None, 'results': []}
+E           assert 200 in (403, 404)
+E            +  where 200 = <Response status_code=200, "application/json">.status_code
+
+tests/permissions/test_admissions_hr_policy.py:62: AssertionError
+_________________ test_admissions_and_hr[hr.manage-WEB-other] __________________
+
+key = 'hr.manage', code = 'WEB', side = 'other'
+api = <function api.<locals>.client at 0x10fef9b20>
+make_user = <function make_user.<locals>.make at 0x10fef5440>
+users = {Role.SYSTEM_ADMIN: <User: مستخدم 1489 <user1489@ecst.test>>, Role.SYSTEM_SUPERVISOR: <User: مستخدم 1490 <user1490@ecs...EAD_REGISTRAR: <User: مستخدم 1491 <user1491@ecst.test>>, Role.REGISTRAR: <User: مستخدم 1492 <user1492@ecst.test>>, ...}
+it_dept = <Department: تقانة المعلومات>, ba_dept = <Department: إدارة الأعمال>
+world = {'college': 1, 'dept': 1, 'program': 1, 'year': 1, ...}
+record_property = <function record_property.<locals>.append_property at 0x10f401620>
+
+    @pytest.mark.parametrize("key,code,side", CASES, ids=[f"{k}-{c}-{s}" for k, c, s in CASES])
+    def test_admissions_and_hr(
+        key, code, side, api, make_user, users, it_dept, ba_dept, world, record_property
+    ):
+        actor = make_user(ROLES[code], department=it_dept if side == "own" else ba_dept)
+        application = Application.objects.get(public_id=world["application"])
+        cycle = application.intake.cycle
+        models = [Application, AdmissionCycle, HRNotice]
+        before = [list(m.objects.order_by("pk").values()) for m in models]
+        client = api(actor)
+        if key == "admissions.manage":
+            response = client.patch(
+                f"/api/v1/admission-cycles/{cycle.pk}", {"name": "Audit cycle"}, format="json"
+            )
+        elif key == "admissions.review":
+            response = client.post(
+                f"/api/v1/applications/{application.public_id}/transition",
+                {"to": "under_review", "note": "Audit review"},
+                format="json",
+            )
+        elif key == "hr.notify_faculty":
+            response = client.post(
+                "/api/v1/hr-notices",
+                {
+                    "teacher": str(users[Role.TEACHER].public_id),
+                    "topic": "grading",
+                    "body": "Audit notice",
+                },
+                format="json",
+            )
+        else:
+            response = client.get("/api/v1/hr-notices")
+        record_property("http", response.status_code)
+        if isinstance(response.data, dict) and "results" in response.data:
+            record_property("returned_rows", len(response.data["results"]))
+        expected = MATRIX[key]["values"][code]
+        allowed = expected == "all" or (expected == "dept" and side == "own")
+        if not allowed:
+            assert before == [list(m.objects.order_by("pk").values()) for m in models]
+>           assert response.status_code in (403, 404), response.data
+E           AssertionError: {'count': 0, 'next': None, 'previous': None, 'results': []}
+E           assert 200 in (403, 404)
+E            +  where 200 = <Response status_code=200, "application/json">.status_code
+
+tests/permissions/test_admissions_hr_policy.py:62: AssertionError
+__________________ test_admissions_and_hr[hr.manage-EVT-own] ___________________
+
+key = 'hr.manage', code = 'EVT', side = 'own'
+api = <function api.<locals>.client at 0x10f340900>
+make_user = <function make_user.<locals>.make at 0x10f403c40>
+users = {Role.SYSTEM_ADMIN: <User: مستخدم 1505 <user1505@ecst.test>>, Role.SYSTEM_SUPERVISOR: <User: مستخدم 1506 <user1506@ecs...EAD_REGISTRAR: <User: مستخدم 1507 <user1507@ecst.test>>, Role.REGISTRAR: <User: مستخدم 1508 <user1508@ecst.test>>, ...}
+it_dept = <Department: تقانة المعلومات>, ba_dept = <Department: إدارة الأعمال>
+world = {'college': 1, 'dept': 1, 'program': 1, 'year': 1, ...}
+record_property = <function record_property.<locals>.append_property at 0x10f460860>
+
+    @pytest.mark.parametrize("key,code,side", CASES, ids=[f"{k}-{c}-{s}" for k, c, s in CASES])
+    def test_admissions_and_hr(
+        key, code, side, api, make_user, users, it_dept, ba_dept, world, record_property
+    ):
+        actor = make_user(ROLES[code], department=it_dept if side == "own" else ba_dept)
+        application = Application.objects.get(public_id=world["application"])
+        cycle = application.intake.cycle
+        models = [Application, AdmissionCycle, HRNotice]
+        before = [list(m.objects.order_by("pk").values()) for m in models]
+        client = api(actor)
+        if key == "admissions.manage":
+            response = client.patch(
+                f"/api/v1/admission-cycles/{cycle.pk}", {"name": "Audit cycle"}, format="json"
+            )
+        elif key == "admissions.review":
+            response = client.post(
+                f"/api/v1/applications/{application.public_id}/transition",
+                {"to": "under_review", "note": "Audit review"},
+                format="json",
+            )
+        elif key == "hr.notify_faculty":
+            response = client.post(
+                "/api/v1/hr-notices",
+                {
+                    "teacher": str(users[Role.TEACHER].public_id),
+                    "topic": "grading",
+                    "body": "Audit notice",
+                },
+                format="json",
+            )
+        else:
+            response = client.get("/api/v1/hr-notices")
+        record_property("http", response.status_code)
+        if isinstance(response.data, dict) and "results" in response.data:
+            record_property("returned_rows", len(response.data["results"]))
+        expected = MATRIX[key]["values"][code]
+        allowed = expected == "all" or (expected == "dept" and side == "own")
+        if not allowed:
+            assert before == [list(m.objects.order_by("pk").values()) for m in models]
+>           assert response.status_code in (403, 404), response.data
+E           AssertionError: {'count': 0, 'next': None, 'previous': None, 'results': []}
+E           assert 200 in (403, 404)
+E            +  where 200 = <Response status_code=200, "application/json">.status_code
+
+tests/permissions/test_admissions_hr_policy.py:62: AssertionError
+_________________ test_admissions_and_hr[hr.manage-EVT-other] __________________
+
+key = 'hr.manage', code = 'EVT', side = 'other'
+api = <function api.<locals>.client at 0x10f4039c0>
+make_user = <function make_user.<locals>.make at 0x10f4602c0>
+users = {Role.SYSTEM_ADMIN: <User: مستخدم 1521 <user1521@ecst.test>>, Role.SYSTEM_SUPERVISOR: <User: مستخدم 1522 <user1522@ecs...EAD_REGISTRAR: <User: مستخدم 1523 <user1523@ecst.test>>, Role.REGISTRAR: <User: مستخدم 1524 <user1524@ecst.test>>, ...}
+it_dept = <Department: تقانة المعلومات>, ba_dept = <Department: إدارة الأعمال>
+world = {'college': 1, 'dept': 1, 'program': 1, 'year': 1, ...}
+record_property = <function record_property.<locals>.append_property at 0x10f462660>
+
+    @pytest.mark.parametrize("key,code,side", CASES, ids=[f"{k}-{c}-{s}" for k, c, s in CASES])
+    def test_admissions_and_hr(
+        key, code, side, api, make_user, users, it_dept, ba_dept, world, record_property
+    ):
+        actor = make_user(ROLES[code], department=it_dept if side == "own" else ba_dept)
+        application = Application.objects.get(public_id=world["application"])
+        cycle = application.intake.cycle
+        models = [Application, AdmissionCycle, HRNotice]
+        before = [list(m.objects.order_by("pk").values()) for m in models]
+        client = api(actor)
+        if key == "admissions.manage":
+            response = client.patch(
+                f"/api/v1/admission-cycles/{cycle.pk}", {"name": "Audit cycle"}, format="json"
+            )
+        elif key == "admissions.review":
+            response = client.post(
+                f"/api/v1/applications/{application.public_id}/transition",
+                {"to": "under_review", "note": "Audit review"},
+                format="json",
+            )
+        elif key == "hr.notify_faculty":
+            response = client.post(
+                "/api/v1/hr-notices",
+                {
+                    "teacher": str(users[Role.TEACHER].public_id),
+                    "topic": "grading",
+                    "body": "Audit notice",
+                },
+                format="json",
+            )
+        else:
+            response = client.get("/api/v1/hr-notices")
+        record_property("http", response.status_code)
+        if isinstance(response.data, dict) and "results" in response.data:
+            record_property("returned_rows", len(response.data["results"]))
+        expected = MATRIX[key]["values"][code]
+        allowed = expected == "all" or (expected == "dept" and side == "own")
+        if not allowed:
+            assert before == [list(m.objects.order_by("pk").values()) for m in models]
+>           assert response.status_code in (403, 404), response.data
+E           AssertionError: {'count': 0, 'next': None, 'previous': None, 'results': []}
+E           assert 200 in (403, 404)
+E            +  where 200 = <Response status_code=200, "application/json">.status_code
+
+tests/permissions/test_admissions_hr_policy.py:62: AssertionError
+=========================== short test summary info ============================
+FAILED tests/permissions/test_admissions_hr_policy.py::test_admissions_and_hr[hr.manage-REG-own]
+FAILED tests/permissions/test_admissions_hr_policy.py::test_admissions_and_hr[hr.manage-REG-other]
+FAILED tests/permissions/test_admissions_hr_policy.py::test_admissions_and_hr[hr.manage-DREG-own]
+FAILED tests/permissions/test_admissions_hr_policy.py::test_admissions_and_hr[hr.manage-DREG-other]
+FAILED tests/permissions/test_admissions_hr_policy.py::test_admissions_and_hr[hr.manage-RES-own]
+FAILED tests/permissions/test_admissions_hr_policy.py::test_admissions_and_hr[hr.manage-RES-other]
+FAILED tests/permissions/test_admissions_hr_policy.py::test_admissions_and_hr[hr.manage-STU-own]
+FAILED tests/permissions/test_admissions_hr_policy.py::test_admissions_and_hr[hr.manage-STU-other]
+FAILED tests/permissions/test_admissions_hr_policy.py::test_admissions_and_hr[hr.manage-DH-own]
+FAILED tests/permissions/test_admissions_hr_policy.py::test_admissions_and_hr[hr.manage-DH-other]
+FAILED tests/permissions/test_admissions_hr_policy.py::test_admissions_and_hr[hr.manage-DS-own]
+FAILED tests/permissions/test_admissions_hr_policy.py::test_admissions_and_hr[hr.manage-DS-other]
+FAILED tests/permissions/test_admissions_hr_policy.py::test_admissions_and_hr[hr.manage-WEB-own]
+FAILED tests/permissions/test_admissions_hr_policy.py::test_admissions_and_hr[hr.manage-WEB-other]
+FAILED tests/permissions/test_admissions_hr_policy.py::test_admissions_and_hr[hr.manage-EVT-own]
+FAILED tests/permissions/test_admissions_hr_policy.py::test_admissions_and_hr[hr.manage-EVT-other]
+16 failed, 80 passed in 7.66s

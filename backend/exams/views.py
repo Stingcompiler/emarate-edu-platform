@@ -10,6 +10,7 @@ from rest_framework.response import Response
 
 from audit.services import RequestMeta
 from core.idempotency import run_once
+from core.permissions import capability_or_participant
 from learning import access
 from learning.services import require
 from students.models import StudentRecord
@@ -53,7 +54,7 @@ class ExamViewSet(viewsets.ModelViewSet):
     """Exams of the caller's courses. Students see published and closed exams only."""
 
     serializer_class = ExamSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, capability_or_participant("learning.view")]
     lookup_field = "public_id"
     filterset_fields = ["offering", "status"]
     search_fields = ["title"]

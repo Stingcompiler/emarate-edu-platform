@@ -11,6 +11,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from audit.services import RequestMeta
+from core.permissions import capability_or_participant
 
 from . import access, services
 from .models import Assignment, Lecture, LectureResource, Submission, SubmissionGrade
@@ -36,7 +37,7 @@ class LectureViewSet(viewsets.ModelViewSet):
     """Lectures of the caller's courses. Students see published lectures only."""
 
     serializer_class = LectureSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, capability_or_participant("learning.view")]
     lookup_field = "public_id"
     filterset_fields = ["offering", "is_published", "type"]
     search_fields = ["title_ar", "title_en"]
@@ -136,7 +137,7 @@ class LectureViewSet(viewsets.ModelViewSet):
 @extend_schema(tags=["learning"])
 class AssignmentViewSet(viewsets.ModelViewSet):
     serializer_class = AssignmentSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, capability_or_participant("learning.view")]
     lookup_field = "public_id"
     filterset_fields = ["offering", "status", "lecture"]
     search_fields = ["title"]
