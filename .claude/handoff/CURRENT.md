@@ -4,6 +4,17 @@ Older rounds (2026-10-24 → 11-02): `.claude/handoff/archive/2026-10-24_to_2026
 
 ## State
 
+- **Roles audit** (owner, 2026-11-06; report `docs/مراجعه الادوار.md`, approved matrix
+  `docs/roles-matrix.md`, suite `backend/tests/permissions` reading the matrix): all confirmed gaps
+  fixed on `fix/roles-matrix-audit` with the owner's decisions — supervisor unlinks (members,
+  course instructors) but deletes nothing (draft regulations too); no one decides their own
+  deletion request or result correction (`is_mine` hides the buttons); `users.view` reads every
+  account; lectures/assignments/exams/results/HR-notice lists 403 for roles that neither hold the
+  capability nor teach/assist/study (`rbac.takes_part`, `core.permissions.capability_or_participant`).
+  The matrix now wins over docs/03 on who may do what (CLAUDE.md). Open for the owner: rows for the
+  operations outside the matrix (user creation, grants, deletion approval, news, staff profiles)
+  and PROF/TA/STD columns (`own`).
+
 - **Levels and semesters** (owner, 2026-11-05: levels 1–5, two semesters a level, no summer;
   option B — the student's semester is stored and advanced by promotion):
   - Phase 1 #246 merged: course semester (1|2) on /department/courses, terms named

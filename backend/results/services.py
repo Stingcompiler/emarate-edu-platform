@@ -206,6 +206,9 @@ def decide_correction(
         )
         if correction.status != ResultCorrection.Status.PENDING:
             raise Conflict(gettext("Already decided."), code="already_decided")
+        if correction.requested_by_id == meta.actor.pk:
+            # Separation of duties (roles review 2026-11-06, owner's decision).
+            raise PermissionDenied(gettext("Someone else decides on your own request."))
         result = AcademicResult.objects.select_for_update().get(pk=correction.result_id)
         correction.status = (
             ResultCorrection.Status.APPROVED if approve else ResultCorrection.Status.REJECTED

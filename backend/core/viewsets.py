@@ -45,12 +45,10 @@ class ScopedModelViewSet(viewsets.ModelViewSet):
             return self.delete_capability or self.write_capability or self.read_capability
         return self.write_capability or self.read_capability
 
-    def scope(self, name: str | None = None) -> rbac.Scope:
-        return rbac.scope_for(
-            self.request.user,
-            name or self._capability(),
-            deleting=self.request.method == "DELETE",
-        )
+    def scope(self, name: str | None = None, *, deleting: bool | None = None) -> rbac.Scope:
+        if deleting is None:
+            deleting = self.request.method == "DELETE"
+        return rbac.scope_for(self.request.user, name or self._capability(), deleting=deleting)
 
     def get_queryset(self):
         queryset = super().get_queryset()
@@ -58,7 +56,11 @@ class ScopedModelViewSet(viewsets.ModelViewSet):
             return queryset
         # Reads are limited to what the user may read; writes additionally
         # need write scope, checked per object below.
-        return self.scope(self.read_capability).filter(queryset, self.department_lookup)
+        # Finding the object is reading: a DELETE that unlinks (an instructor off a course) is
+        # the supervisor's too; deleting itself is checked on the delete capability.
+        return self.scope(self.read_capability, deleting=False).filter(
+            queryset, self.department_lookup
+        )
 
     def department_of(self, obj) -> int | None:
         return obj.department_id

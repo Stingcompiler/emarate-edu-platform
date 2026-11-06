@@ -1,0 +1,244 @@
+..........................FF......................FF.................... [100%]
+=================================== FAILURES ===================================
+______________ test_membership_policy[dept.members.remove-SS-own] ______________
+
+key = 'dept.members.remove', code = 'SS', side = 'own'
+api = <function api.<locals>.client at 0x10eaafd80>
+make_user = <function make_user.<locals>.make at 0x10ea81ee0>
+it_dept = <Department: تقانة المعلومات>, ba_dept = <Department: إدارة الأعمال>
+it_offering = <CourseOffering: IT101-A · الفصل الأول>
+ba_offering = <CourseOffering: BA101-A · الفصل الأول>
+record_property = <function record_property.<locals>.append_property at 0x10ea80c20>
+
+    @pytest.mark.parametrize("key,code,side", CASES, ids=[f"{k}-{c}-{s}" for k, c, s in CASES])
+    def test_membership_policy(
+        key, code, side, api, make_user, it_dept, ba_dept, it_offering, ba_offering, record_property
+    ):
+        for own, foreign in [(it_dept, ba_dept), (ba_dept, it_dept)]:
+            target = own if side == "own" else foreign
+            offering = it_offering if target == it_dept else ba_offering
+            actor = make_user(ROLES[code], department=own)
+            teacher = make_user(Role.TEACHER)
+            member = None
+            instructor = None
+            if key != "dept.members.add":
+                member = DepartmentMembership.objects.create(
+                    department=target, user=teacher, kind="teacher", added_by=actor
+                )
+                instructor = OfferingInstructor.objects.create(
+                    offering=offering, user=teacher, role="teacher"
+                )
+            before = (
+                list(DepartmentMembership.objects.values()),
+                list(OfferingInstructor.objects.values()),
+            )
+            client = api(actor)
+            if key == "dept.members.add":
+                response = client.post(
+                    f"/api/v1/departments/{target.pk}/members",
+                    {"user": str(teacher.public_id), "kind": "teacher"},
+                    format="json",
+                )
+            elif key == "dept.members.remove":
+                response = client.delete(f"/api/v1/departments/{target.pk}/members/{member.pk}")
+            else:
+                response = client.delete(f"/api/v1/offerings/{offering.pk}/instructors/{instructor.pk}")
+            expected = MATRIX[key]["values"][code]
+            allowed = expected == "all" or (expected == "dept" and side == "own")
+            record_property(f"{own.code}_status", response.status_code)
+            if allowed:
+>               assert response.status_code == (201 if key == "dept.members.add" else 204), (
+                    response.data
+                )
+E               AssertionError: {'type': 'about:blank', 'title': 'غير مسموح', 'status': 403, 'detail': 'ليس لديك صلاحية للقيام بهذا الإجراء.', ...}
+E               assert 403 == 204
+E                +  where 403 = <Response status_code=403, "application/problem+json">.status_code
+
+tests/permissions/test_approved_membership.py:57: AssertionError
+----------------------------- Captured stderr call -----------------------------
+2026-11-06 13:14:27,197 WARNING django.request Forbidden: /api/v1/departments/1/members/1
+------------------------------ Captured log call -------------------------------
+WARNING  django.request:log.py:283 Forbidden: /api/v1/departments/1/members/1
+_____________ test_membership_policy[dept.members.remove-SS-other] _____________
+
+key = 'dept.members.remove', code = 'SS', side = 'other'
+api = <function api.<locals>.client at 0x10ea80540>
+make_user = <function make_user.<locals>.make at 0x10ea82fc0>
+it_dept = <Department: تقانة المعلومات>, ba_dept = <Department: إدارة الأعمال>
+it_offering = <CourseOffering: IT101-A · الفصل الأول>
+ba_offering = <CourseOffering: BA101-A · الفصل الأول>
+record_property = <function record_property.<locals>.append_property at 0x10eaaf1a0>
+
+    @pytest.mark.parametrize("key,code,side", CASES, ids=[f"{k}-{c}-{s}" for k, c, s in CASES])
+    def test_membership_policy(
+        key, code, side, api, make_user, it_dept, ba_dept, it_offering, ba_offering, record_property
+    ):
+        for own, foreign in [(it_dept, ba_dept), (ba_dept, it_dept)]:
+            target = own if side == "own" else foreign
+            offering = it_offering if target == it_dept else ba_offering
+            actor = make_user(ROLES[code], department=own)
+            teacher = make_user(Role.TEACHER)
+            member = None
+            instructor = None
+            if key != "dept.members.add":
+                member = DepartmentMembership.objects.create(
+                    department=target, user=teacher, kind="teacher", added_by=actor
+                )
+                instructor = OfferingInstructor.objects.create(
+                    offering=offering, user=teacher, role="teacher"
+                )
+            before = (
+                list(DepartmentMembership.objects.values()),
+                list(OfferingInstructor.objects.values()),
+            )
+            client = api(actor)
+            if key == "dept.members.add":
+                response = client.post(
+                    f"/api/v1/departments/{target.pk}/members",
+                    {"user": str(teacher.public_id), "kind": "teacher"},
+                    format="json",
+                )
+            elif key == "dept.members.remove":
+                response = client.delete(f"/api/v1/departments/{target.pk}/members/{member.pk}")
+            else:
+                response = client.delete(f"/api/v1/offerings/{offering.pk}/instructors/{instructor.pk}")
+            expected = MATRIX[key]["values"][code]
+            allowed = expected == "all" or (expected == "dept" and side == "own")
+            record_property(f"{own.code}_status", response.status_code)
+            if allowed:
+>               assert response.status_code == (201 if key == "dept.members.add" else 204), (
+                    response.data
+                )
+E               AssertionError: {'type': 'about:blank', 'title': 'غير مسموح', 'status': 403, 'detail': 'ليس لديك صلاحية للقيام بهذا الإجراء.', ...}
+E               assert 403 == 204
+E                +  where 403 = <Response status_code=403, "application/problem+json">.status_code
+
+tests/permissions/test_approved_membership.py:57: AssertionError
+----------------------------- Captured stderr call -----------------------------
+2026-11-06 13:14:27,298 WARNING django.request Forbidden: /api/v1/departments/2/members/1
+------------------------------ Captured log call -------------------------------
+WARNING  django.request:log.py:283 Forbidden: /api/v1/departments/2/members/1
+_______________ test_membership_policy[courses.unassign-SS-own] ________________
+
+key = 'courses.unassign', code = 'SS', side = 'own'
+api = <function api.<locals>.client at 0x10ed79260>
+make_user = <function make_user.<locals>.make at 0x10ed4d940>
+it_dept = <Department: تقانة المعلومات>, ba_dept = <Department: إدارة الأعمال>
+it_offering = <CourseOffering: IT101-A · الفصل الأول>
+ba_offering = <CourseOffering: BA101-A · الفصل الأول>
+record_property = <function record_property.<locals>.append_property at 0x10ed02340>
+
+    @pytest.mark.parametrize("key,code,side", CASES, ids=[f"{k}-{c}-{s}" for k, c, s in CASES])
+    def test_membership_policy(
+        key, code, side, api, make_user, it_dept, ba_dept, it_offering, ba_offering, record_property
+    ):
+        for own, foreign in [(it_dept, ba_dept), (ba_dept, it_dept)]:
+            target = own if side == "own" else foreign
+            offering = it_offering if target == it_dept else ba_offering
+            actor = make_user(ROLES[code], department=own)
+            teacher = make_user(Role.TEACHER)
+            member = None
+            instructor = None
+            if key != "dept.members.add":
+                member = DepartmentMembership.objects.create(
+                    department=target, user=teacher, kind="teacher", added_by=actor
+                )
+                instructor = OfferingInstructor.objects.create(
+                    offering=offering, user=teacher, role="teacher"
+                )
+            before = (
+                list(DepartmentMembership.objects.values()),
+                list(OfferingInstructor.objects.values()),
+            )
+            client = api(actor)
+            if key == "dept.members.add":
+                response = client.post(
+                    f"/api/v1/departments/{target.pk}/members",
+                    {"user": str(teacher.public_id), "kind": "teacher"},
+                    format="json",
+                )
+            elif key == "dept.members.remove":
+                response = client.delete(f"/api/v1/departments/{target.pk}/members/{member.pk}")
+            else:
+                response = client.delete(f"/api/v1/offerings/{offering.pk}/instructors/{instructor.pk}")
+            expected = MATRIX[key]["values"][code]
+            allowed = expected == "all" or (expected == "dept" and side == "own")
+            record_property(f"{own.code}_status", response.status_code)
+            if allowed:
+>               assert response.status_code == (201 if key == "dept.members.add" else 204), (
+                    response.data
+                )
+E               AssertionError: {'type': 'about:blank', 'title': 'غير مسموح', 'status': 403, 'detail': 'ليس لديك صلاحية للقيام بهذا الإجراء.', ...}
+E               assert 403 == 204
+E                +  where 403 = <Response status_code=403, "application/problem+json">.status_code
+
+tests/permissions/test_approved_membership.py:57: AssertionError
+----------------------------- Captured stderr call -----------------------------
+2026-11-06 13:14:27,562 WARNING django.request Forbidden: /api/v1/offerings/1/instructors/1
+------------------------------ Captured log call -------------------------------
+WARNING  django.request:log.py:283 Forbidden: /api/v1/offerings/1/instructors/1
+______________ test_membership_policy[courses.unassign-SS-other] _______________
+
+key = 'courses.unassign', code = 'SS', side = 'other'
+api = <function api.<locals>.client at 0x10ed4c400>
+make_user = <function make_user.<locals>.make at 0x10edaa8e0>
+it_dept = <Department: تقانة المعلومات>, ba_dept = <Department: إدارة الأعمال>
+it_offering = <CourseOffering: IT101-A · الفصل الأول>
+ba_offering = <CourseOffering: BA101-A · الفصل الأول>
+record_property = <function record_property.<locals>.append_property at 0x10ed79da0>
+
+    @pytest.mark.parametrize("key,code,side", CASES, ids=[f"{k}-{c}-{s}" for k, c, s in CASES])
+    def test_membership_policy(
+        key, code, side, api, make_user, it_dept, ba_dept, it_offering, ba_offering, record_property
+    ):
+        for own, foreign in [(it_dept, ba_dept), (ba_dept, it_dept)]:
+            target = own if side == "own" else foreign
+            offering = it_offering if target == it_dept else ba_offering
+            actor = make_user(ROLES[code], department=own)
+            teacher = make_user(Role.TEACHER)
+            member = None
+            instructor = None
+            if key != "dept.members.add":
+                member = DepartmentMembership.objects.create(
+                    department=target, user=teacher, kind="teacher", added_by=actor
+                )
+                instructor = OfferingInstructor.objects.create(
+                    offering=offering, user=teacher, role="teacher"
+                )
+            before = (
+                list(DepartmentMembership.objects.values()),
+                list(OfferingInstructor.objects.values()),
+            )
+            client = api(actor)
+            if key == "dept.members.add":
+                response = client.post(
+                    f"/api/v1/departments/{target.pk}/members",
+                    {"user": str(teacher.public_id), "kind": "teacher"},
+                    format="json",
+                )
+            elif key == "dept.members.remove":
+                response = client.delete(f"/api/v1/departments/{target.pk}/members/{member.pk}")
+            else:
+                response = client.delete(f"/api/v1/offerings/{offering.pk}/instructors/{instructor.pk}")
+            expected = MATRIX[key]["values"][code]
+            allowed = expected == "all" or (expected == "dept" and side == "own")
+            record_property(f"{own.code}_status", response.status_code)
+            if allowed:
+>               assert response.status_code == (201 if key == "dept.members.add" else 204), (
+                    response.data
+                )
+E               AssertionError: {'type': 'about:blank', 'title': 'غير مسموح', 'status': 403, 'detail': 'ليس لديك صلاحية للقيام بهذا الإجراء.', ...}
+E               assert 403 == 204
+E                +  where 403 = <Response status_code=403, "application/problem+json">.status_code
+
+tests/permissions/test_approved_membership.py:57: AssertionError
+----------------------------- Captured stderr call -----------------------------
+2026-11-06 13:14:27,573 WARNING django.request Forbidden: /api/v1/offerings/2/instructors/1
+------------------------------ Captured log call -------------------------------
+WARNING  django.request:log.py:283 Forbidden: /api/v1/offerings/2/instructors/1
+=========================== short test summary info ============================
+FAILED tests/permissions/test_approved_membership.py::test_membership_policy[dept.members.remove-SS-own]
+FAILED tests/permissions/test_approved_membership.py::test_membership_policy[dept.members.remove-SS-other]
+FAILED tests/permissions/test_approved_membership.py::test_membership_policy[courses.unassign-SS-own]
+FAILED tests/permissions/test_approved_membership.py::test_membership_policy[courses.unassign-SS-other]
+4 failed, 68 passed in 5.94s

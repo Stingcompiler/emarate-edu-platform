@@ -243,6 +243,10 @@ for _name, _roles in list(CAPABILITIES.items()):
     if R.SYSTEM_ADMIN in _roles and _name not in DELETING:
         CAPABILITIES[_name] = _roles | {R.SYSTEM_SUPERVISOR}
 
+# Removing a member from a department or a teacher from a course unlinks; nothing is deleted.
+# The DELETE method that does it counts the supervisor (docs/roles-matrix.md: SS `all`).
+UNLINKING = frozenset({"courses.unassign", "membership.remove"})
+
 # Roles above the supervisor: it never grants them or acts on their accounts.
 TOP_ROLES = frozenset({R.SYSTEM_ADMIN, R.SYSTEM_SUPERVISOR})
 
@@ -327,6 +331,20 @@ def has_role(user, *roles: Role) -> bool:
     return any(role in held for role in roles)
 
 
+def takes_part(user) -> bool:
+    """Teaches, assists or studies: a course's own pages open by assignment or enrollment,
+    whatever the central capabilities say (docs/roles-matrix.md leaves PROF/TA/STD to that)."""
+    if has_role(user, Role.TEACHER, Role.TA, Role.STUDENT):
+        return True
+    from academic.models import OfferingInstructor
+    from students.models import StudentRecord
+
+    return (
+        OfferingInstructor.objects.filter(user=user).exists()
+        or StudentRecord.objects.filter(user=user).exists()
+    )
+
+
 def has_role_in(user, role: Role, department_id: int | None) -> bool:
     """True if ``user`` holds ``role`` for exactly this department."""
     return department_id is not None and (role, department_id) in _assignments(user)
@@ -336,6 +354,7 @@ def scope_for(user, capability: str, *, deleting: bool = False) -> Scope:
     """`deleting`: the request deletes something; the system supervisor's role does not count
     (it stands in for the admin in everything but deleting — owner, 2026-11-05)."""
     allowed = CAPABILITIES[capability]
+    deleting = deleting and capability not in UNLINKING
     departments: set[int] = set()
     for role, department_id in _assignments(user):
         if role not in allowed or (deleting and role == Role.SYSTEM_SUPERVISOR):

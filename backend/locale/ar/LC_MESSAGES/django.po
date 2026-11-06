@@ -1169,3 +1169,6 @@ msgstr "يجب أن تُغلق الدورة بعد أن تُفتح."
 
 msgid "Applications exist in this cycle; stop it instead."
 msgstr "في هذه الدورة طلبات؛ أوقفها بدل حذفها."
+
+msgid "Someone else decides on your own request."
+msgstr "لا تعتمد طلبًا قدّمته؛ يقرّر فيه غيرك."

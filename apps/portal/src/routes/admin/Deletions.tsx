@@ -101,7 +101,12 @@ export function Deletions() {
                     {r.decided_at ? ` · ${when(r.decided_at)}` : ""}
                   </p>
                 )}
-                {r.state === "pending" && (
+                {r.state === "pending" && r.is_mine && (
+                  <p className="mt-3 border-t border-border-soft pt-3 text-xs text-text-muted">
+                    طلبتَه بنفسك؛ يقرّر فيه معتمد آخر.
+                  </p>
+                )}
+                {r.state === "pending" && !r.is_mine && (
                   <div className="mt-3 flex flex-wrap gap-2 border-t border-border-soft pt-3">
                     <Button
                       className="min-h-10"

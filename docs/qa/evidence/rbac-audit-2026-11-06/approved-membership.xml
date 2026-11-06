@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="4" skipped="0" tests="72" time="5.942" timestamp="2026-11-06T13:14:21.888024+02:00" hostname="MacBooks-MacBook-Air.local"><testcase classname="tests.permissions.test_approved_membership" name="test_membership_policy[dept.members.add-SA-own]" file="tests/permissions/test_approved_membership.py" line="19" time="4.998"><properties><property name="IT_status" value="201" /><property name="BA_status" value="201" /></properties></testcase><testcase classname="tests.permissions.test_approved_membership" name="test_membership_policy[dept.members.add-SA-other]" file="tests/permissions/test_approved_membership.py" line="19" time="0.011"><properties><property name="IT_status" value="201" /><property name="BA_status" value="201" /></properties></testcase><testcase classname="tests.permissions.test_approved_membership" name="test_membership_policy[dept.members.add-SS-own]" file="tests/permissions/test_approved_membership.py" line="19" time="0.012"><properties><property name="IT_status" value="201" /><property name="BA_status" value="201" /></properties></testcase><testcase classname="tests.permissions.test_approved_membership" name="test_membership_policy[dept.members.add-SS-other]" file="tests/permissions/test_approved_membership.py" line="19" time="0.012"><properties><property name="IT_status" value="201" /><property name="BA_status" value="201" /></properties></testcase><testcase classname="tests.permissions.test_approved_membership" name="test_membership_policy[dept.members.add-REG-own]" file="tests/permissions/test_approved_membership.py" line="19" time="0.009"><properties><property name="IT_status" value="403" /><property name="BA_status" value="403" /></properties></testcase><testcase classname="tests.permissions.test_approved_membership" name="test_membership_policy[dept.members.add-REG-other]" file="tests/permissions/test_approved_membership.py" line="19" time="0.010"><properties><property name="IT_status" value="403" /><property name="BA_status" value="403" /></properties></testcase><testcase classname="tests.permissions.test_approved_membership" name="test_membership_policy[dept.members.add-DREG-own]" file="tests/permissions/test_approved_membership.py" line="19" time="0.009"><properties><property name="IT_status" value="403" /><property name="BA_status" value="403" /></properties></testcase><testcase classname="tests.permissions.test_approved_membership" name="test_membership_policy[dept.members.add-DREG-other]" file="tests/permissions/test_approved_membership.py" line="19" time="0.009"><properties><property name="IT_status" value="403" /><property name="BA_status" value="403" /></properties></testcase><testcase classname="tests.permissions.test_approved_membership" name="test_membership_policy[dept.members.add-RES-own]" file="tests/permissions/test_approved_membership.py" line="19" time="0.010"><properties><property name="IT_status" value="403" /><property name="BA_status" value="403" /></properties></testcase><testcase classname="tests.permissions.test_approved_membership" name="test_membership_policy[dept.members.add-RES-other]" file="tests/permissions/test_approved_membership.py" line="19" time="0.008"><properties><property name="IT_status" value="403" /><property name="BA_status" value="403" /></properties></testcase><testcase classname="tests.permissions.test_approved_membership" name="test_membership_policy[dept.members.add-ACA-own]" file="tests/permissions/test_approved_membership.py" line="19" time="0.012"><properties><property name="IT_status" value="201" /><property name="BA_status" value="201" /></properties></testcase><testcase classname="tests.permissions.test_approved_membership" name="test_membership_policy[dept.members.add-ACA-other]" file="tests/permissions/test_approved_membership.py" line="19" time="0.011"><properties><property name="IT_status" value="201" /><property name="BA_status" value="201" /></properties></testcase><testcase classname="tests.permissions.test_approved_membership" name="test_membership_policy[dept.members.add-STU-own]" file="tests/permissions/test_approved_membership.py" line="19" time="0.010"><properties><property name="IT_status" value="403" /><property name="BA_status" value="403" /></properties></testcase><testcase classname="tests.permissions.test_approved_membership" name="test_membership_policy[dept.members.add-STU-other]" file="tests/permissions/test_approved_membership.py" line="19" time="0.009"><properties><property name="IT_status" value="403" /><property name="BA_status" value="403" /></properties></testcase><testcase classname="tests.permissions.test_approved_membership" name="test_membership_policy[dept.members.add-DH-own]" file="tests/permissions/test_approved_membership.py" line="19" time="0.012"><properties><property name="IT_status" value="201" /><property name="BA_status" value="201" /></properties></testcase><testcase classname="tests.permissions.test_approved_membership" name="test_membership_policy[dept.members.add-DH-other]" file="tests/permissions/test_approved_membership.py" line="19" time="0.010"><properties><property name="IT_status" value="404" /><property name="BA_status" value="404" /></properties></testcase><testcase classname="tests.permissions.test_approved_membership" name="test_membership_policy[dept.members.add-DS-own]" file="tests/permissions/test_approved_membership.py" line="19" time="0.011"><properties><property name="IT_status" value="201" /><property name="BA_status" value="201" /></properties></testcase><testcase classname="tests.permissions.test_approved_membership" name="test_membership_policy[dept.members.add-DS-other]" file="tests/permissions/test_approved_membership.py" line="19" time="0.012"><properties><property name="IT_status" value="404" /><property name="BA_status" value="404" /></properties></testcase><testcase classname="tests.permissions.test_approved_membership" name="test_membership_policy[dept.members.add-HR-own]" file="tests/permissions/test_approved_membership.py" line="19" time="0.010"><properties><property name="IT_status" value="403" /><property name="BA_status" value="403" /></properties></testcase><testcase classname="tests.permissions.test_approved_membership" name="test_membership_policy[dept.members.add-HR-other]" file="tests/permissions/test_approved_membership.py" line="19" time="0.011"><properties><property name="IT_status" value="403" /><property name="BA_status" value="403" /></properties></testcase><testcase classname="tests.permissions.test_approved_membership" name="test_membership_policy[dept.members.add-WEB-own]" file="tests/permissions/test_approved_membership.py" line="19" time="0.011"><properties><property name="IT_status" value="403" /><property name="BA_status" value="403" /></properties></testcase><testcase classname="tests.permissions.test_approved_membership" name="test_membership_policy[dept.members.add-WEB-other]" file="tests/permissions/test_approved_membership.py" line="19" time="0.010"><properties><property name="IT_status" value="403" /><property name="BA_status" value="403" /></properties></testcase><testcase classname="tests.permissions.test_approved_membership" name="test_membership_policy[dept.members.add-EVT-own]" file="tests/permissions/test_approved_membership.py" line="19" time="0.011"><properties><property name="IT_status" value="403" /><property name="BA_status" value="403" /></properties></testcase><testcase classname="tests.permissions.test_approved_membership" name="test_membership_policy[dept.members.add-EVT-other]" file="tests/permissions/test_approved_membership.py" line="19" time="0.011"><properties><property name="IT_status" value="403" /><property name="BA_status" value="403" /></properties></testcase><testcase classname="tests.permissions.test_approved_membership" name="test_membership_policy[dept.members.remove-SA-own]" file="tests/permissions/test_approved_membership.py" line="19" time="0.015"><properties><property name="IT_status" value="204" /><property name="BA_status" value="204" /></properties></testcase><testcase classname="tests.permissions.test_approved_membership" name="test_membership_policy[dept.members.remove-SA-other]" file="tests/permissions/test_approved_membership.py" line="19" time="0.012"><properties><property name="IT_status" value="204" /><property name="BA_status" value="204" /></properties></testcase><testcase classname="tests.permissions.test_approved_membership" name="test_membership_policy[dept.members.remove-SS-own]" file="tests/permissions/test_approved_membership.py" line="19" time="0.008"><properties><property name="IT_status" value="403" /></properties><failure message="AssertionError: {'type': 'about:blank', 'title': 'غير مسموح', 'status': 403, 'detail': 'ليس لديك صلاحية للقيام بهذا الإجراء.', ...}&#10;assert 403 == 204&#10; +  where 403 = &lt;Response status_code=403, &quot;application/problem+json&quot;&gt;.status_code">key = 'dept.members.remove', code = 'SS', side = 'own'
+api = &lt;function api.&lt;locals&gt;.client at 0x10eaafd80&gt;
+make_user = &lt;function make_user.&lt;locals&gt;.make at 0x10ea81ee0&gt;
+it_dept = &lt;Department: تقانة المعلومات&gt;, ba_dept = &lt;Department: إدارة الأعمال&gt;
+it_offering = &lt;CourseOffering: IT101-A · الفصل الأول&gt;
+ba_offering = &lt;CourseOffering: BA101-A · الفصل الأول&gt;
+record_property = &lt;function record_property.&lt;locals&gt;.append_property at 0x10ea80c20&gt;
+
+    @pytest.mark.parametrize("key,code,side", CASES, ids=[f"{k}-{c}-{s}" for k, c, s in CASES])
+    def test_membership_policy(
+        key, code, side, api, make_user, it_dept, ba_dept, it_offering, ba_offering, record_property
+    ):
+        for own, foreign in [(it_dept, ba_dept), (ba_dept, it_dept)]:
+            target = own if side == "own" else foreign
+            offering = it_offering if target == it_dept else ba_offering
+            actor = make_user(ROLES[code], department=own)
+            teacher = make_user(Role.TEACHER)
+            member = None
+            instructor = None
+            if key != "dept.members.add":
+                member = DepartmentMembership.objects.create(
+                    department=target, user=teacher, kind="teacher", added_by=actor
+                )
+                instructor = OfferingInstructor.objects.create(
+                    offering=offering, user=teacher, role="teacher"
+                )
+            before = (
+                list(DepartmentMembership.objects.values()),
+                list(OfferingInstructor.objects.values()),
+            )
+            client = api(actor)
+            if key == "dept.members.add":
+                response = client.post(
+                    f"/api/v1/departments/{target.pk}/members",
+                    {"user": str(teacher.public_id), "kind": "teacher"},
+                    format="json",
+                )
+            elif key == "dept.members.remove":
+                response = client.delete(f"/api/v1/departments/{target.pk}/members/{member.pk}")
+            else:
+                response = client.delete(f"/api/v1/offerings/{offering.pk}/instructors/{instructor.pk}")
+            expected = MATRIX[key]["values"][code]
+            allowed = expected == "all" or (expected == "dept" and side == "own")
+            record_property(f"{own.code}_status", response.status_code)
+            if allowed:
+&gt;               assert response.status_code == (201 if key == "dept.members.add" else 204), (
+                    response.data
+                )
+E               AssertionError: {'type': 'about:blank', 'title': 'غير مسموح', 'status': 403, 'detail': 'ليس لديك صلاحية للقيام بهذا الإجراء.', ...}
+E               assert 403 == 204
+E                +  where 403 = &lt;Response status_code=403, "application/problem+json"&gt;.status_code
+
+tests/permissions/test_approved_membership.py:57: AssertionError</failure></testcase><testcase classname="tests.permissions.test_approved_membership" name="test_membership_policy[dept.members.remove-SS-other]" file="tests/permissions/test_approved_membership.py" line="19" time="0.008"><properties><property name="IT_status" value="403" /></properties><failure message="AssertionError: {'type': 'about:blank', 'title': 'غير مسموح', 'status': 403, 'detail': 'ليس لديك صلاحية للقيام بهذا الإجراء.', ...}&#10;assert 403 == 204&#10; +  where 403 = &lt;Response status_code=403, &quot;application/problem+json&quot;&gt;.status_code">key = 'dept.members.remove', code = 'SS', side = 'other'
+api = &lt;function api.&lt;locals&gt;.client at 0x10ea80540&gt;
+make_user = &lt;function make_user.&lt;locals&gt;.make at 0x10ea82fc0&gt;
+it_dept = &lt;Department: تقانة المعلومات&gt;, ba_dept = &lt;Department: إدارة الأعمال&gt;
+it_offering = &lt;CourseOffering: IT101-A · الفصل الأول&gt;
+ba_offering = &lt;CourseOffering: BA101-A · الفصل الأول&gt;
+record_property = &lt;function record_property.&lt;locals&gt;.append_property at 0x10eaaf1a0&gt;
+
+    @pytest.mark.parametrize("key,code,side", CASES, ids=[f"{k}-{c}-{s}" for k, c, s in CASES])
+    def test_membership_policy(
+        key, code, side, api, make_user, it_dept, ba_dept, it_offering, ba_offering, record_property
+    ):
+        for own, foreign in [(it_dept, ba_dept), (ba_dept, it_dept)]:
+            target = own if side == "own" else foreign
+            offering = it_offering if target == it_dept else ba_offering
+            actor = make_user(ROLES[code], department=own)
+            teacher = make_user(Role.TEACHER)
+            member = None
+            instructor = None
+            if key != "dept.members.add":
+                member = DepartmentMembership.objects.create(
+                    department=target, user=teacher, kind="teacher", added_by=actor
+                )
+                instructor = OfferingInstructor.objects.create(
+                    offering=offering, user=teacher, role="teacher"
+                )
+            before = (
+                list(DepartmentMembership.objects.values()),
+                list(OfferingInstructor.objects.values()),
+            )
+            client = api(actor)
+            if key == "dept.members.add":
+                response = client.post(
+                    f"/api/v1/departments/{target.pk}/members",
+                    {"user": str(teacher.public_id), "kind": "teacher"},
+                    format="json",
+                )
+            elif key == "dept.members.remove":
+                response = client.delete(f"/api/v1/departments/{target.pk}/members/{member.pk}")
+            else:
+                response = client.delete(f"/api/v1/offerings/{offering.pk}/instructors/{instructor.pk}")
+            expected = MATRIX[key]["values"][code]
+            allowed = expected == "all" or (expected == "dept" and side == "own")
+            record_property(f"{own.code}_status", response.status_code)
+            if allowed:
+&gt;               assert response.status_code == (201 if key == "dept.members.add" else 204), (
+                    response.data
+                )
+E               AssertionError: {'type': 'about:blank', 'title': 'غير مسموح', 'status': 403, 'detail': 'ليس لديك صلاحية للقيام بهذا الإجراء.', ...}
+E               assert 403 == 204
+E                +  where 403 = &lt;Response status_code=403, "application/problem+json"&gt;.status_code
+
+tests/permissions/test_approved_membership.py:57: AssertionError</failure></testcase><testcase classname="tests.permissions.test_approved_membership" name="test_membership_policy[dept.members.remove-REG-own]" file="tests/permissions/test_approved_membership.py" line="19" time="0.011"><properties><property name="IT_status" value="403" /><property name="BA_status" value="403" /></properties></testcase><testcase classname="tests.permissions.test_approved_membership" name="test_membership_policy[dept.members.remove-REG-other]" file="tests/permissions/test_approved_membership.py" line="19" time="0.009"><properties><property name="IT_status" value="403" /><property name="BA_status" value="403" /></properties></testcase><testcase classname="tests.permissions.test_approved_membership" name="test_membership_policy[dept.members.remove-DREG-own]" file="tests/permissions/test_approved_membership.py" line="19" time="0.010"><properties><property name="IT_status" value="403" /><property name="BA_status" value="403" /></properties></testcase><testcase classname="tests.permissions.test_approved_membership" name="test_membership_policy[dept.members.remove-DREG-other]" file="tests/permissions/test_approved_membership.py" line="19" time="0.011"><properties><property name="IT_status" value="403" /><property name="BA_status" value="403" /></properties></testcase><testcase classname="tests.permissions.test_approved_membership" name="test_membership_policy[dept.members.remove-RES-own]" file="tests/permissions/test_approved_membership.py" line="19" time="0.009"><properties><property name="IT_status" value="403" /><property name="BA_status" value="403" /></properties></testcase><testcase classname="tests.permissions.test_approved_membership" name="test_membership_policy[dept.members.remove-RES-other]" file="tests/permissions/test_approved_membership.py" line="19" time="0.010"><properties><property name="IT_status" value="403" /><property name="BA_status" value="403" /></properties></testcase><testcase classname="tests.permissions.test_approved_membership" name="test_membership_policy[dept.members.remove-ACA-own]" file="tests/permissions/test_approved_membership.py" line="19" time="0.012"><properties><property name="IT_status" value="204" /><property name="BA_status" value="204" /></properties></testcase><testcase classname="tests.permissions.test_approved_membership" name="test_membership_policy[dept.members.remove-ACA-other]" file="tests/permissions/test_approved_membership.py" line="19" time="0.011"><properties><property name="IT_status" value="204" /><property name="BA_status" value="204" /></properties></testcase><testcase classname="tests.permissions.test_approved_membership" name="test_membership_policy[dept.members.remove-STU-own]" file="tests/permissions/test_approved_membership.py" line="19" time="0.010"><properties><property name="IT_status" value="403" /><property name="BA_status" value="403" /></properties></testcase><testcase classname="tests.permissions.test_approved_membership" name="test_membership_policy[dept.members.remove-STU-other]" file="tests/permissions/test_approved_membership.py" line="19" time="0.010"><properties><property name="IT_status" value="403" /><property name="BA_status" value="403" /></properties></testcase><testcase classname="tests.permissions.test_approved_membership" name="test_membership_policy[dept.members.remove-DH-own]" file="tests/permissions/test_approved_membership.py" line="19" time="0.012"><properties><property name="IT_status" value="204" /><property name="BA_status" value="204" /></properties></testcase><testcase classname="tests.permissions.test_approved_membership" name="test_membership_policy[dept.members.remove-DH-other]" file="tests/permissions/test_approved_membership.py" line="19" time="0.011"><properties><property name="IT_status" value="404" /><property name="BA_status" value="404" /></properties></testcase><testcase classname="tests.permissions.test_approved_membership" name="test_membership_policy[dept.members.remove-DS-own]" file="tests/permissions/test_approved_membership.py" line="19" time="0.010"><properties><property name="IT_status" value="403" /><property name="BA_status" value="403" /></properties></testcase><testcase classname="tests.permissions.test_approved_membership" name="test_membership_policy[dept.members.remove-DS-other]" file="tests/permissions/test_approved_membership.py" line="19" time="0.009"><properties><property name="IT_status" value="403" /><property name="BA_status" value="403" /></properties></testcase><testcase classname="tests.permissions.test_approved_membership" name="test_membership_policy[dept.members.remove-HR-own]" file="tests/permissions/test_approved_membership.py" line="19" time="0.010"><properties><property name="IT_status" value="403" /><property name="BA_status" value="403" /></properties></testcase><testcase classname="tests.permissions.test_approved_membership" name="test_membership_policy[dept.members.remove-HR-other]" file="tests/permissions/test_approved_membership.py" line="19" time="0.009"><properties><property name="IT_status" value="403" /><property name="BA_status" value="403" /></properties></testcase><testcase classname="tests.permissions.test_approved_membership" name="test_membership_policy[dept.members.remove-WEB-own]" file="tests/permissions/test_approved_membership.py" line="19" time="0.011"><properties><property name="IT_status" value="403" /><property name="BA_status" value="403" /></properties></testcase><testcase classname="tests.permissions.test_approved_membership" name="test_membership_policy[dept.members.remove-WEB-other]" file="tests/permissions/test_approved_membership.py" line="19" time="0.010"><properties><property name="IT_status" value="403" /><property name="BA_status" value="403" /></properties></testcase><testcase classname="tests.permissions.test_approved_membership" name="test_membership_policy[dept.members.remove-EVT-own]" file="tests/permissions/test_approved_membership.py" line="19" time="0.010"><properties><property name="IT_status" value="403" /><property name="BA_status" value="403" /></properties></testcase><testcase classname="tests.permissions.test_approved_membership" name="test_membership_policy[dept.members.remove-EVT-other]" file="tests/permissions/test_approved_membership.py" line="19" time="0.010"><properties><property name="IT_status" value="403" /><property name="BA_status" value="403" /></properties></testcase><testcase classname="tests.permissions.test_approved_membership" name="test_membership_policy[courses.unassign-SA-own]" file="tests/permissions/test_approved_membership.py" line="19" time="0.020"><properties><property name="IT_status" value="204" /><property name="BA_status" value="204" /></properties></testcase><testcase classname="tests.permissions.test_approved_membership" name="test_membership_policy[courses.unassign-SA-other]" file="tests/permissions/test_approved_membership.py" line="19" time="0.018"><properties><property name="IT_status" value="204" /><property name="BA_status" value="204" /></properties></testcase><testcase classname="tests.permissions.test_approved_membership" name="test_membership_policy[courses.unassign-SS-own]" file="tests/permissions/test_approved_membership.py" line="19" time="0.008"><properties><property name="IT_status" value="403" /></properties><failure message="AssertionError: {'type': 'about:blank', 'title': 'غير مسموح', 'status': 403, 'detail': 'ليس لديك صلاحية للقيام بهذا الإجراء.', ...}&#10;assert 403 == 204&#10; +  where 403 = &lt;Response status_code=403, &quot;application/problem+json&quot;&gt;.status_code">key = 'courses.unassign', code = 'SS', side = 'own'
+api = &lt;function api.&lt;locals&gt;.client at 0x10ed79260&gt;
+make_user = &lt;function make_user.&lt;locals&gt;.make at 0x10ed4d940&gt;
+it_dept = &lt;Department: تقانة المعلومات&gt;, ba_dept = &lt;Department: إدارة الأعمال&gt;
+it_offering = &lt;CourseOffering: IT101-A · الفصل الأول&gt;
+ba_offering = &lt;CourseOffering: BA101-A · الفصل الأول&gt;
+record_property = &lt;function record_property.&lt;locals&gt;.append_property at 0x10ed02340&gt;
+
+    @pytest.mark.parametrize("key,code,side", CASES, ids=[f"{k}-{c}-{s}" for k, c, s in CASES])
+    def test_membership_policy(
+        key, code, side, api, make_user, it_dept, ba_dept, it_offering, ba_offering, record_property
+    ):
+        for own, foreign in [(it_dept, ba_dept), (ba_dept, it_dept)]:
+            target = own if side == "own" else foreign
+            offering = it_offering if target == it_dept else ba_offering
+            actor = make_user(ROLES[code], department=own)
+            teacher = make_user(Role.TEACHER)
+            member = None
+            instructor = None
+            if key != "dept.members.add":
+                member = DepartmentMembership.objects.create(
+                    department=target, user=teacher, kind="teacher", added_by=actor
+                )
+                instructor = OfferingInstructor.objects.create(
+                    offering=offering, user=teacher, role="teacher"
+                )
+            before = (
+                list(DepartmentMembership.objects.values()),
+                list(OfferingInstructor.objects.values()),
+            )
+            client = api(actor)
+            if key == "dept.members.add":
+                response = client.post(
+                    f"/api/v1/departments/{target.pk}/members",
+                    {"user": str(teacher.public_id), "kind": "teacher"},
+                    format="json",
+                )
+            elif key == "dept.members.remove":
+                response = client.delete(f"/api/v1/departments/{target.pk}/members/{member.pk}")
+            else:
+                response = client.delete(f"/api/v1/offerings/{offering.pk}/instructors/{instructor.pk}")
+            expected = MATRIX[key]["values"][code]
+            allowed = expected == "all" or (expected == "dept" and side == "own")
+            record_property(f"{own.code}_status", response.status_code)
+            if allowed:
+&gt;               assert response.status_code == (201 if key == "dept.members.add" else 204), (
+                    response.data
+                )
+E               AssertionError: {'type': 'about:blank', 'title': 'غير مسموح', 'status': 403, 'detail': 'ليس لديك صلاحية للقيام بهذا الإجراء.', ...}
+E               assert 403 == 204
+E                +  where 403 = &lt;Response status_code=403, "application/problem+json"&gt;.status_code
+
+tests/permissions/test_approved_membership.py:57: AssertionError</failure></testcase><testcase classname="tests.permissions.test_approved_membership" name="test_membership_policy[courses.unassign-SS-other]" file="tests/permissions/test_approved_membership.py" line="19" time="0.007"><properties><property name="IT_status" value="403" /></properties><failure message="AssertionError: {'type': 'about:blank', 'title': 'غير مسموح', 'status': 403, 'detail': 'ليس لديك صلاحية للقيام بهذا الإجراء.', ...}&#10;assert 403 == 204&#10; +  where 403 = &lt;Response status_code=403, &quot;application/problem+json&quot;&gt;.status_code">key = 'courses.unassign', code = 'SS', side = 'other'
+api = &lt;function api.&lt;locals&gt;.client at 0x10ed4c400&gt;
+make_user = &lt;function make_user.&lt;locals&gt;.make at 0x10edaa8e0&gt;
+it_dept = &lt;Department: تقانة المعلومات&gt;, ba_dept = &lt;Department: إدارة الأعمال&gt;
+it_offering = &lt;CourseOffering: IT101-A · الفصل الأول&gt;
+ba_offering = &lt;CourseOffering: BA101-A · الفصل الأول&gt;
+record_property = &lt;function record_property.&lt;locals&gt;.append_property at 0x10ed79da0&gt;
+
+    @pytest.mark.parametrize("key,code,side", CASES, ids=[f"{k}-{c}-{s}" for k, c, s in CASES])
+    def test_membership_policy(
+        key, code, side, api, make_user, it_dept, ba_dept, it_offering, ba_offering, record_property
+    ):
+        for own, foreign in [(it_dept, ba_dept), (ba_dept, it_dept)]:
+            target = own if side == "own" else foreign
+            offering = it_offering if target == it_dept else ba_offering
+            actor = make_user(ROLES[code], department=own)
+            teacher = make_user(Role.TEACHER)
+            member = None
+            instructor = None
+            if key != "dept.members.add":
+                member = DepartmentMembership.objects.create(
+                    department=target, user=teacher, kind="teacher", added_by=actor
+                )
+                instructor = OfferingInstructor.objects.create(
+                    offering=offering, user=teacher, role="teacher"
+                )
+            before = (
+                list(DepartmentMembership.objects.values()),
+                list(OfferingInstructor.objects.values()),
+            )
+            client = api(actor)
+            if key == "dept.members.add":
+                response = client.post(
+                    f"/api/v1/departments/{target.pk}/members",
+                    {"user": str(teacher.public_id), "kind": "teacher"},
+                    format="json",
+                )
+            elif key == "dept.members.remove":
+                response = client.delete(f"/api/v1/departments/{target.pk}/members/{member.pk}")
+            else:
+                response = client.delete(f"/api/v1/offerings/{offering.pk}/instructors/{instructor.pk}")
+            expected = MATRIX[key]["values"][code]
+            allowed = expected == "all" or (expected == "dept" and side == "own")
+            record_property(f"{own.code}_status", response.status_code)
+            if allowed:
+&gt;               assert response.status_code == (201 if key == "dept.members.add" else 204), (
+                    response.data
+                )
+E               AssertionError: {'type': 'about:blank', 'title': 'غير مسموح', 'status': 403, 'detail': 'ليس لديك صلاحية للقيام بهذا الإجراء.', ...}
+E               assert 403 == 204
+E                +  where 403 = &lt;Response status_code=403, "application/problem+json"&gt;.status_code
+
+tests/permissions/test_approved_membership.py:57: AssertionError</failure></testcase><testcase classname="tests.permissions.test_approved_membership" name="test_membership_policy[courses.unassign-REG-own]" file="tests/permissions/test_approved_membership.py" line="19" time="0.010"><properties><property name="IT_status" value="403" /><property name="BA_status" value="403" /></properties></testcase><testcase classname="tests.permissions.test_approved_membership" name="test_membership_policy[courses.unassign-REG-other]" file="tests/permissions/test_approved_membership.py" line="19" time="0.012"><properties><property name="IT_status" value="403" /><property name="BA_status" value="403" /></properties></testcase><testcase classname="tests.permissions.test_approved_membership" name="test_membership_policy[courses.unassign-DREG-own]" file="tests/permissions/test_approved_membership.py" line="19" time="0.012"><properties><property name="IT_status" value="403" /><property name="BA_status" value="403" /></properties></testcase><testcase classname="tests.permissions.test_approved_membership" name="test_membership_policy[courses.unassign-DREG-other]" file="tests/permissions/test_approved_membership.py" line="19" time="0.010"><properties><property name="IT_status" value="403" /><property name="BA_status" value="403" /></properties></testcase><testcase classname="tests.permissions.test_approved_membership" name="test_membership_policy[courses.unassign-RES-own]" file="tests/permissions/test_approved_membership.py" line="19" time="0.014"><properties><property name="IT_status" value="403" /><property name="BA_status" value="403" /></properties></testcase><testcase classname="tests.permissions.test_approved_membership" name="test_membership_policy[courses.unassign-RES-other]" file="tests/permissions/test_approved_membership.py" line="19" time="0.012"><properties><property name="IT_status" value="403" /><property name="BA_status" value="403" /></properties></testcase><testcase classname="tests.permissions.test_approved_membership" name="test_membership_policy[courses.unassign-ACA-own]" file="tests/permissions/test_approved_membership.py" line="19" time="0.018"><properties><property name="IT_status" value="204" /><property name="BA_status" value="204" /></properties></testcase><testcase classname="tests.permissions.test_approved_membership" name="test_membership_policy[courses.unassign-ACA-other]" file="tests/permissions/test_approved_membership.py" line="19" time="0.017"><properties><property name="IT_status" value="204" /><property name="BA_status" value="204" /></properties></testcase><testcase classname="tests.permissions.test_approved_membership" name="test_membership_policy[courses.unassign-STU-own]" file="tests/permissions/test_approved_membership.py" line="19" time="0.011"><properties><property name="IT_status" value="403" /><property name="BA_status" value="403" /></properties></testcase><testcase classname="tests.permissions.test_approved_membership" name="test_membership_policy[courses.unassign-STU-other]" file="tests/permissions/test_approved_membership.py" line="19" time="0.009"><properties><property name="IT_status" value="403" /><property name="BA_status" value="403" /></properties></testcase><testcase classname="tests.permissions.test_approved_membership" name="test_membership_policy[courses.unassign-DH-own]" file="tests/permissions/test_approved_membership.py" line="19" time="0.017"><properties><property name="IT_status" value="204" /><property name="BA_status" value="204" /></properties></testcase><testcase classname="tests.permissions.test_approved_membership" name="test_membership_policy[courses.unassign-DH-other]" file="tests/permissions/test_approved_membership.py" line="19" time="0.015"><properties><property name="IT_status" value="404" /><property name="BA_status" value="404" /></properties></testcase><testcase classname="tests.permissions.test_approved_membership" name="test_membership_policy[courses.unassign-DS-own]" file="tests/permissions/test_approved_membership.py" line="19" time="0.011"><properties><property name="IT_status" value="403" /><property name="BA_status" value="403" /></properties></testcase><testcase classname="tests.permissions.test_approved_membership" name="test_membership_policy[courses.unassign-DS-other]" file="tests/permissions/test_approved_membership.py" line="19" time="0.012"><properties><property name="IT_status" value="403" /><property name="BA_status" value="403" /></properties></testcase><testcase classname="tests.permissions.test_approved_membership" name="test_membership_policy[courses.unassign-HR-own]" file="tests/permissions/test_approved_membership.py" line="19" time="0.010"><properties><property name="IT_status" value="403" /><property name="BA_status" value="403" /></properties></testcase><testcase classname="tests.permissions.test_approved_membership" name="test_membership_policy[courses.unassign-HR-other]" file="tests/permissions/test_approved_membership.py" line="19" time="0.010"><properties><property name="IT_status" value="403" /><property name="BA_status" value="403" /></properties></testcase><testcase classname="tests.permissions.test_approved_membership" name="test_membership_policy[courses.unassign-WEB-own]" file="tests/permissions/test_approved_membership.py" line="19" time="0.012"><properties><property name="IT_status" value="403" /><property name="BA_status" value="403" /></properties></testcase><testcase classname="tests.permissions.test_approved_membership" name="test_membership_policy[courses.unassign-WEB-other]" file="tests/permissions/test_approved_membership.py" line="19" time="0.010"><properties><property name="IT_status" value="403" /><property name="BA_status" value="403" /></properties></testcase><testcase classname="tests.permissions.test_approved_membership" name="test_membership_policy[courses.unassign-EVT-own]" file="tests/permissions/test_approved_membership.py" line="19" time="0.011"><properties><property name="IT_status" value="403" /><property name="BA_status" value="403" /></properties></testcase><testcase classname="tests.permissions.test_approved_membership" name="test_membership_policy[courses.unassign-EVT-other]" file="tests/permissions/test_approved_membership.py" line="19" time="0.011"><properties><property name="IT_status" value="403" /><property name="BA_status" value="403" /></properties></testcase></testsuite></testsuites>

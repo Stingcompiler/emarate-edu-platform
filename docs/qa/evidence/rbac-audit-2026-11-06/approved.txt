@@ -1,0 +1,893 @@
+........................................................................ [  5%]
+........................................................................ [ 11%]
+........................................................................ [ 17%]
+........................................................................ [ 23%]
+........................................................................ [ 29%]
+........................................................................ [ 35%]
+........................................................................ [ 40%]
+........................................................................ [ 46%]
+........................................................................ [ 52%]
+..........................F............................................. [ 58%]
+........................................................................ [ 64%]
+..................................................FFF.F..FFF............ [ 70%]
+..FFF.F..FFF..............FFF.F..FFF...............F.FF..FFF............ [ 76%]
+........................................................................ [ 81%]
+........................................................................ [ 87%]
+........................................................................ [ 93%]
+........................................................................ [ 99%]
+.......                                                                  [100%]
+=================================== FAILURES ===================================
+______________ test_approved_read_api[users.view-user-detail-REG] ______________
+
+key = 'users.view', endpoint = 'user-detail', code = 'REG'
+users = {Role.SYSTEM_ADMIN: <User: مستخدم 10111 <user10111@ecst.test>>, Role.SYSTEM_SUPERVISOR: <User: مستخدم 10112 <user10112...REGISTRAR: <User: مستخدم 10113 <user10113@ecst.test>>, Role.REGISTRAR: <User: مستخدم 10114 <user10114@ecst.test>>, ...}
+api = <function api.<locals>.client at 0x111451080>
+world = {'college': 1, 'dept': 1, 'program': 1, 'year': 1, ...}
+record_property = <function record_property.<locals>.append_property at 0x1114d0e00>
+
+    @pytest.mark.parametrize(
+        "key,endpoint,code", READ_CASES, ids=[f"{k}-{e}-{r}" for k, e, r in READ_CASES]
+    )
+    def test_approved_read_api(key, endpoint, code, users, api, world, record_property):
+        url = READS[endpoint][0].format(**world)
+        response = api(users[ROLES[code]]).get(url)
+        expected = MATRIX[key]["values"][code]
+        record_property("url", url)
+        record_property("expected", expected)
+        record_property("http", response.status_code)
+        record_property("policy_line", MATRIX[key]["line"])
+        body = getattr(response, "data", None)
+        if isinstance(body, dict) and "results" in body:
+            record_property("returned_rows", len(body["results"]))
+>       assert response.status_code in ((403, 404) if expected == "-" else (200,)), (
+            f"{key} {code}: expected {expected}, GET {url} returned {response.status_code}"
+        )
+E       AssertionError: users.view REG: expected all, GET /api/v1/users/c594a4db-c67e-4253-8e7a-a01bce995459 returned 404
+E       assert 404 in (200,)
+E        +  where 404 = <Response status_code=404, "application/problem+json">.status_code
+
+tests/permissions/test_approved_matrix.py:48: AssertionError
+----------------------------- Captured stderr call -----------------------------
+2026-11-06 07:57:54,772 WARNING django.request Not Found: /api/v1/users/c594a4db-c67e-4253-8e7a-a01bce995459
+------------------------------ Captured log call -------------------------------
+WARNING  django.request:log.py:283 Not Found: /api/v1/users/c594a4db-c67e-4253-8e7a-a01bce995459
+____________ test_approved_read_api[content.view-lecture-list-REG] _____________
+
+key = 'content.view', endpoint = 'lecture-list', code = 'REG'
+users = {Role.SYSTEM_ADMIN: <User: مستخدم 12631 <user12631@ecst.test>>, Role.SYSTEM_SUPERVISOR: <User: مستخدم 12632 <user12632...REGISTRAR: <User: مستخدم 12633 <user12633@ecst.test>>, Role.REGISTRAR: <User: مستخدم 12634 <user12634@ecst.test>>, ...}
+api = <function api.<locals>.client at 0x11162c5e0>
+world = {'college': 1, 'dept': 1, 'program': 1, 'year': 1, ...}
+record_property = <function record_property.<locals>.append_property at 0x1116eea20>
+
+    @pytest.mark.parametrize(
+        "key,endpoint,code", READ_CASES, ids=[f"{k}-{e}-{r}" for k, e, r in READ_CASES]
+    )
+    def test_approved_read_api(key, endpoint, code, users, api, world, record_property):
+        url = READS[endpoint][0].format(**world)
+        response = api(users[ROLES[code]]).get(url)
+        expected = MATRIX[key]["values"][code]
+        record_property("url", url)
+        record_property("expected", expected)
+        record_property("http", response.status_code)
+        record_property("policy_line", MATRIX[key]["line"])
+        body = getattr(response, "data", None)
+        if isinstance(body, dict) and "results" in body:
+            record_property("returned_rows", len(body["results"]))
+>       assert response.status_code in ((403, 404) if expected == "-" else (200,)), (
+            f"{key} {code}: expected {expected}, GET {url} returned {response.status_code}"
+        )
+E       AssertionError: content.view REG: expected -, GET /api/v1/lectures returned 200
+E       assert 200 in (403, 404)
+E        +  where 200 = <Response status_code=200, "application/json">.status_code
+
+tests/permissions/test_approved_matrix.py:48: AssertionError
+____________ test_approved_read_api[content.view-lecture-list-DREG] ____________
+
+key = 'content.view', endpoint = 'lecture-list', code = 'DREG'
+users = {Role.SYSTEM_ADMIN: <User: مستخدم 12646 <user12646@ecst.test>>, Role.SYSTEM_SUPERVISOR: <User: مستخدم 12647 <user12647...REGISTRAR: <User: مستخدم 12648 <user12648@ecst.test>>, Role.REGISTRAR: <User: مستخدم 12649 <user12649@ecst.test>>, ...}
+api = <function api.<locals>.client at 0x1118de340>
+world = {'college': 1, 'dept': 1, 'program': 1, 'year': 1, ...}
+record_property = <function record_property.<locals>.append_property at 0x111511e40>
+
+    @pytest.mark.parametrize(
+        "key,endpoint,code", READ_CASES, ids=[f"{k}-{e}-{r}" for k, e, r in READ_CASES]
+    )
+    def test_approved_read_api(key, endpoint, code, users, api, world, record_property):
+        url = READS[endpoint][0].format(**world)
+        response = api(users[ROLES[code]]).get(url)
+        expected = MATRIX[key]["values"][code]
+        record_property("url", url)
+        record_property("expected", expected)
+        record_property("http", response.status_code)
+        record_property("policy_line", MATRIX[key]["line"])
+        body = getattr(response, "data", None)
+        if isinstance(body, dict) and "results" in body:
+            record_property("returned_rows", len(body["results"]))
+>       assert response.status_code in ((403, 404) if expected == "-" else (200,)), (
+            f"{key} {code}: expected {expected}, GET {url} returned {response.status_code}"
+        )
+E       AssertionError: content.view DREG: expected -, GET /api/v1/lectures returned 200
+E       assert 200 in (403, 404)
+E        +  where 200 = <Response status_code=200, "application/json">.status_code
+
+tests/permissions/test_approved_matrix.py:48: AssertionError
+____________ test_approved_read_api[content.view-lecture-list-RES] _____________
+
+key = 'content.view', endpoint = 'lecture-list', code = 'RES'
+users = {Role.SYSTEM_ADMIN: <User: مستخدم 12661 <user12661@ecst.test>>, Role.SYSTEM_SUPERVISOR: <User: مستخدم 12662 <user12662...REGISTRAR: <User: مستخدم 12663 <user12663@ecst.test>>, Role.REGISTRAR: <User: مستخدم 12664 <user12664@ecst.test>>, ...}
+api = <function api.<locals>.client at 0x111863560>
+world = {'college': 1, 'dept': 1, 'program': 1, 'year': 1, ...}
+record_property = <function record_property.<locals>.append_property at 0x1104ec7c0>
+
+    @pytest.mark.parametrize(
+        "key,endpoint,code", READ_CASES, ids=[f"{k}-{e}-{r}" for k, e, r in READ_CASES]
+    )
+    def test_approved_read_api(key, endpoint, code, users, api, world, record_property):
+        url = READS[endpoint][0].format(**world)
+        response = api(users[ROLES[code]]).get(url)
+        expected = MATRIX[key]["values"][code]
+        record_property("url", url)
+        record_property("expected", expected)
+        record_property("http", response.status_code)
+        record_property("policy_line", MATRIX[key]["line"])
+        body = getattr(response, "data", None)
+        if isinstance(body, dict) and "results" in body:
+            record_property("returned_rows", len(body["results"]))
+>       assert response.status_code in ((403, 404) if expected == "-" else (200,)), (
+            f"{key} {code}: expected {expected}, GET {url} returned {response.status_code}"
+        )
+E       AssertionError: content.view RES: expected -, GET /api/v1/lectures returned 200
+E       assert 200 in (403, 404)
+E        +  where 200 = <Response status_code=200, "application/json">.status_code
+
+tests/permissions/test_approved_matrix.py:48: AssertionError
+____________ test_approved_read_api[content.view-lecture-list-STU] _____________
+
+key = 'content.view', endpoint = 'lecture-list', code = 'STU'
+users = {Role.SYSTEM_ADMIN: <User: مستخدم 12691 <user12691@ecst.test>>, Role.SYSTEM_SUPERVISOR: <User: مستخدم 12692 <user12692...REGISTRAR: <User: مستخدم 12693 <user12693@ecst.test>>, Role.REGISTRAR: <User: مستخدم 12694 <user12694@ecst.test>>, ...}
+api = <function api.<locals>.client at 0x1104eeca0>
+world = {'college': 1, 'dept': 1, 'program': 1, 'year': 1, ...}
+record_property = <function record_property.<locals>.append_property at 0x1116293a0>
+
+    @pytest.mark.parametrize(
+        "key,endpoint,code", READ_CASES, ids=[f"{k}-{e}-{r}" for k, e, r in READ_CASES]
+    )
+    def test_approved_read_api(key, endpoint, code, users, api, world, record_property):
+        url = READS[endpoint][0].format(**world)
+        response = api(users[ROLES[code]]).get(url)
+        expected = MATRIX[key]["values"][code]
+        record_property("url", url)
+        record_property("expected", expected)
+        record_property("http", response.status_code)
+        record_property("policy_line", MATRIX[key]["line"])
+        body = getattr(response, "data", None)
+        if isinstance(body, dict) and "results" in body:
+            record_property("returned_rows", len(body["results"]))
+>       assert response.status_code in ((403, 404) if expected == "-" else (200,)), (
+            f"{key} {code}: expected {expected}, GET {url} returned {response.status_code}"
+        )
+E       AssertionError: content.view STU: expected -, GET /api/v1/lectures returned 200
+E       assert 200 in (403, 404)
+E        +  where 200 = <Response status_code=200, "application/json">.status_code
+
+tests/permissions/test_approved_matrix.py:48: AssertionError
+_____________ test_approved_read_api[content.view-lecture-list-HR] _____________
+
+key = 'content.view', endpoint = 'lecture-list', code = 'HR'
+users = {Role.SYSTEM_ADMIN: <User: مستخدم 12736 <user12736@ecst.test>>, Role.SYSTEM_SUPERVISOR: <User: مستخدم 12737 <user12737...REGISTRAR: <User: مستخدم 12738 <user12738@ecst.test>>, Role.REGISTRAR: <User: مستخدم 12739 <user12739@ecst.test>>, ...}
+api = <function api.<locals>.client at 0x111628ae0>
+world = {'college': 1, 'dept': 1, 'program': 1, 'year': 1, ...}
+record_property = <function record_property.<locals>.append_property at 0x1116a49a0>
+
+    @pytest.mark.parametrize(
+        "key,endpoint,code", READ_CASES, ids=[f"{k}-{e}-{r}" for k, e, r in READ_CASES]
+    )
+    def test_approved_read_api(key, endpoint, code, users, api, world, record_property):
+        url = READS[endpoint][0].format(**world)
+        response = api(users[ROLES[code]]).get(url)
+        expected = MATRIX[key]["values"][code]
+        record_property("url", url)
+        record_property("expected", expected)
+        record_property("http", response.status_code)
+        record_property("policy_line", MATRIX[key]["line"])
+        body = getattr(response, "data", None)
+        if isinstance(body, dict) and "results" in body:
+            record_property("returned_rows", len(body["results"]))
+>       assert response.status_code in ((403, 404) if expected == "-" else (200,)), (
+            f"{key} {code}: expected {expected}, GET {url} returned {response.status_code}"
+        )
+E       AssertionError: content.view HR: expected -, GET /api/v1/lectures returned 200
+E       assert 200 in (403, 404)
+E        +  where 200 = <Response status_code=200, "application/json">.status_code
+
+tests/permissions/test_approved_matrix.py:48: AssertionError
+____________ test_approved_read_api[content.view-lecture-list-WEB] _____________
+
+key = 'content.view', endpoint = 'lecture-list', code = 'WEB'
+users = {Role.SYSTEM_ADMIN: <User: مستخدم 12751 <user12751@ecst.test>>, Role.SYSTEM_SUPERVISOR: <User: مستخدم 12752 <user12752...REGISTRAR: <User: مستخدم 12753 <user12753@ecst.test>>, Role.REGISTRAR: <User: مستخدم 12754 <user12754@ecst.test>>, ...}
+api = <function api.<locals>.client at 0x11162a980>
+world = {'college': 1, 'dept': 1, 'program': 1, 'year': 1, ...}
+record_property = <function record_property.<locals>.append_property at 0x1116a5120>
+
+    @pytest.mark.parametrize(
+        "key,endpoint,code", READ_CASES, ids=[f"{k}-{e}-{r}" for k, e, r in READ_CASES]
+    )
+    def test_approved_read_api(key, endpoint, code, users, api, world, record_property):
+        url = READS[endpoint][0].format(**world)
+        response = api(users[ROLES[code]]).get(url)
+        expected = MATRIX[key]["values"][code]
+        record_property("url", url)
+        record_property("expected", expected)
+        record_property("http", response.status_code)
+        record_property("policy_line", MATRIX[key]["line"])
+        body = getattr(response, "data", None)
+        if isinstance(body, dict) and "results" in body:
+            record_property("returned_rows", len(body["results"]))
+>       assert response.status_code in ((403, 404) if expected == "-" else (200,)), (
+            f"{key} {code}: expected {expected}, GET {url} returned {response.status_code}"
+        )
+E       AssertionError: content.view WEB: expected -, GET /api/v1/lectures returned 200
+E       assert 200 in (403, 404)
+E        +  where 200 = <Response status_code=200, "application/json">.status_code
+
+tests/permissions/test_approved_matrix.py:48: AssertionError
+____________ test_approved_read_api[content.view-lecture-list-EVT] _____________
+
+key = 'content.view', endpoint = 'lecture-list', code = 'EVT'
+users = {Role.SYSTEM_ADMIN: <User: مستخدم 12766 <user12766@ecst.test>>, Role.SYSTEM_SUPERVISOR: <User: مستخدم 12767 <user12767...REGISTRAR: <User: مستخدم 12768 <user12768@ecst.test>>, Role.REGISTRAR: <User: مستخدم 12769 <user12769@ecst.test>>, ...}
+api = <function api.<locals>.client at 0x1116a71a0>
+world = {'college': 1, 'dept': 1, 'program': 1, 'year': 1, ...}
+record_property = <function record_property.<locals>.append_property at 0x1116a7ba0>
+
+    @pytest.mark.parametrize(
+        "key,endpoint,code", READ_CASES, ids=[f"{k}-{e}-{r}" for k, e, r in READ_CASES]
+    )
+    def test_approved_read_api(key, endpoint, code, users, api, world, record_property):
+        url = READS[endpoint][0].format(**world)
+        response = api(users[ROLES[code]]).get(url)
+        expected = MATRIX[key]["values"][code]
+        record_property("url", url)
+        record_property("expected", expected)
+        record_property("http", response.status_code)
+        record_property("policy_line", MATRIX[key]["line"])
+        body = getattr(response, "data", None)
+        if isinstance(body, dict) and "results" in body:
+            record_property("returned_rows", len(body["results"]))
+>       assert response.status_code in ((403, 404) if expected == "-" else (200,)), (
+            f"{key} {code}: expected {expected}, GET {url} returned {response.status_code}"
+        )
+E       AssertionError: content.view EVT: expected -, GET /api/v1/lectures returned 200
+E       assert 200 in (403, 404)
+E        +  where 200 = <Response status_code=200, "application/json">.status_code
+
+tests/permissions/test_approved_matrix.py:48: AssertionError
+___________ test_approved_read_api[content.view-assignment-list-REG] ___________
+
+key = 'content.view', endpoint = 'assignment-list', code = 'REG'
+users = {Role.SYSTEM_ADMIN: <User: مستخدم 12991 <user12991@ecst.test>>, Role.SYSTEM_SUPERVISOR: <User: مستخدم 12992 <user12992...REGISTRAR: <User: مستخدم 12993 <user12993@ecst.test>>, Role.REGISTRAR: <User: مستخدم 12994 <user12994@ecst.test>>, ...}
+api = <function api.<locals>.client at 0x11162af20>
+world = {'college': 1, 'dept': 1, 'program': 1, 'year': 1, ...}
+record_property = <function record_property.<locals>.append_property at 0x1115c4cc0>
+
+    @pytest.mark.parametrize(
+        "key,endpoint,code", READ_CASES, ids=[f"{k}-{e}-{r}" for k, e, r in READ_CASES]
+    )
+    def test_approved_read_api(key, endpoint, code, users, api, world, record_property):
+        url = READS[endpoint][0].format(**world)
+        response = api(users[ROLES[code]]).get(url)
+        expected = MATRIX[key]["values"][code]
+        record_property("url", url)
+        record_property("expected", expected)
+        record_property("http", response.status_code)
+        record_property("policy_line", MATRIX[key]["line"])
+        body = getattr(response, "data", None)
+        if isinstance(body, dict) and "results" in body:
+            record_property("returned_rows", len(body["results"]))
+>       assert response.status_code in ((403, 404) if expected == "-" else (200,)), (
+            f"{key} {code}: expected {expected}, GET {url} returned {response.status_code}"
+        )
+E       AssertionError: content.view REG: expected -, GET /api/v1/assignments returned 200
+E       assert 200 in (403, 404)
+E        +  where 200 = <Response status_code=200, "application/json">.status_code
+
+tests/permissions/test_approved_matrix.py:48: AssertionError
+__________ test_approved_read_api[content.view-assignment-list-DREG] ___________
+
+key = 'content.view', endpoint = 'assignment-list', code = 'DREG'
+users = {Role.SYSTEM_ADMIN: <User: مستخدم 13006 <user13006@ecst.test>>, Role.SYSTEM_SUPERVISOR: <User: مستخدم 13007 <user13007...REGISTRAR: <User: مستخدم 13008 <user13008@ecst.test>>, Role.REGISTRAR: <User: مستخدم 13009 <user13009@ecst.test>>, ...}
+api = <function api.<locals>.client at 0x1115c58a0>
+world = {'college': 1, 'dept': 1, 'program': 1, 'year': 1, ...}
+record_property = <function record_property.<locals>.append_property at 0x1115c5f80>
+
+    @pytest.mark.parametrize(
+        "key,endpoint,code", READ_CASES, ids=[f"{k}-{e}-{r}" for k, e, r in READ_CASES]
+    )
+    def test_approved_read_api(key, endpoint, code, users, api, world, record_property):
+        url = READS[endpoint][0].format(**world)
+        response = api(users[ROLES[code]]).get(url)
+        expected = MATRIX[key]["values"][code]
+        record_property("url", url)
+        record_property("expected", expected)
+        record_property("http", response.status_code)
+        record_property("policy_line", MATRIX[key]["line"])
+        body = getattr(response, "data", None)
+        if isinstance(body, dict) and "results" in body:
+            record_property("returned_rows", len(body["results"]))
+>       assert response.status_code in ((403, 404) if expected == "-" else (200,)), (
+            f"{key} {code}: expected {expected}, GET {url} returned {response.status_code}"
+        )
+E       AssertionError: content.view DREG: expected -, GET /api/v1/assignments returned 200
+E       assert 200 in (403, 404)
+E        +  where 200 = <Response status_code=200, "application/json">.status_code
+
+tests/permissions/test_approved_matrix.py:48: AssertionError
+___________ test_approved_read_api[content.view-assignment-list-RES] ___________
+
+key = 'content.view', endpoint = 'assignment-list', code = 'RES'
+users = {Role.SYSTEM_ADMIN: <User: مستخدم 13021 <user13021@ecst.test>>, Role.SYSTEM_SUPERVISOR: <User: مستخدم 13022 <user13022...REGISTRAR: <User: مستخدم 13023 <user13023@ecst.test>>, Role.REGISTRAR: <User: مستخدم 13024 <user13024@ecst.test>>, ...}
+api = <function api.<locals>.client at 0x1115c7ba0>
+world = {'college': 1, 'dept': 1, 'program': 1, 'year': 1, ...}
+record_property = <function record_property.<locals>.append_property at 0x1115442c0>
+
+    @pytest.mark.parametrize(
+        "key,endpoint,code", READ_CASES, ids=[f"{k}-{e}-{r}" for k, e, r in READ_CASES]
+    )
+    def test_approved_read_api(key, endpoint, code, users, api, world, record_property):
+        url = READS[endpoint][0].format(**world)
+        response = api(users[ROLES[code]]).get(url)
+        expected = MATRIX[key]["values"][code]
+        record_property("url", url)
+        record_property("expected", expected)
+        record_property("http", response.status_code)
+        record_property("policy_line", MATRIX[key]["line"])
+        body = getattr(response, "data", None)
+        if isinstance(body, dict) and "results" in body:
+            record_property("returned_rows", len(body["results"]))
+>       assert response.status_code in ((403, 404) if expected == "-" else (200,)), (
+            f"{key} {code}: expected {expected}, GET {url} returned {response.status_code}"
+        )
+E       AssertionError: content.view RES: expected -, GET /api/v1/assignments returned 200
+E       assert 200 in (403, 404)
+E        +  where 200 = <Response status_code=200, "application/json">.status_code
+
+tests/permissions/test_approved_matrix.py:48: AssertionError
+___________ test_approved_read_api[content.view-assignment-list-STU] ___________
+
+key = 'content.view', endpoint = 'assignment-list', code = 'STU'
+users = {Role.SYSTEM_ADMIN: <User: مستخدم 13051 <user13051@ecst.test>>, Role.SYSTEM_SUPERVISOR: <User: مستخدم 13052 <user13052...REGISTRAR: <User: مستخدم 13053 <user13053@ecst.test>>, Role.REGISTRAR: <User: مستخدم 13054 <user13054@ecst.test>>, ...}
+api = <function api.<locals>.client at 0x1115459e0>
+world = {'college': 1, 'dept': 1, 'program': 1, 'year': 1, ...}
+record_property = <function record_property.<locals>.append_property at 0x111528e00>
+
+    @pytest.mark.parametrize(
+        "key,endpoint,code", READ_CASES, ids=[f"{k}-{e}-{r}" for k, e, r in READ_CASES]
+    )
+    def test_approved_read_api(key, endpoint, code, users, api, world, record_property):
+        url = READS[endpoint][0].format(**world)
+        response = api(users[ROLES[code]]).get(url)
+        expected = MATRIX[key]["values"][code]
+        record_property("url", url)
+        record_property("expected", expected)
+        record_property("http", response.status_code)
+        record_property("policy_line", MATRIX[key]["line"])
+        body = getattr(response, "data", None)
+        if isinstance(body, dict) and "results" in body:
+            record_property("returned_rows", len(body["results"]))
+>       assert response.status_code in ((403, 404) if expected == "-" else (200,)), (
+            f"{key} {code}: expected {expected}, GET {url} returned {response.status_code}"
+        )
+E       AssertionError: content.view STU: expected -, GET /api/v1/assignments returned 200
+E       assert 200 in (403, 404)
+E        +  where 200 = <Response status_code=200, "application/json">.status_code
+
+tests/permissions/test_approved_matrix.py:48: AssertionError
+___________ test_approved_read_api[content.view-assignment-list-HR] ____________
+
+key = 'content.view', endpoint = 'assignment-list', code = 'HR'
+users = {Role.SYSTEM_ADMIN: <User: مستخدم 13096 <user13096@ecst.test>>, Role.SYSTEM_SUPERVISOR: <User: مستخدم 13097 <user13097...REGISTRAR: <User: مستخدم 13098 <user13098@ecst.test>>, Role.REGISTRAR: <User: مستخدم 13099 <user13099@ecst.test>>, ...}
+api = <function api.<locals>.client at 0x111544040>
+world = {'college': 1, 'dept': 1, 'program': 1, 'year': 1, ...}
+record_property = <function record_property.<locals>.append_property at 0x11157d6c0>
+
+    @pytest.mark.parametrize(
+        "key,endpoint,code", READ_CASES, ids=[f"{k}-{e}-{r}" for k, e, r in READ_CASES]
+    )
+    def test_approved_read_api(key, endpoint, code, users, api, world, record_property):
+        url = READS[endpoint][0].format(**world)
+        response = api(users[ROLES[code]]).get(url)
+        expected = MATRIX[key]["values"][code]
+        record_property("url", url)
+        record_property("expected", expected)
+        record_property("http", response.status_code)
+        record_property("policy_line", MATRIX[key]["line"])
+        body = getattr(response, "data", None)
+        if isinstance(body, dict) and "results" in body:
+            record_property("returned_rows", len(body["results"]))
+>       assert response.status_code in ((403, 404) if expected == "-" else (200,)), (
+            f"{key} {code}: expected {expected}, GET {url} returned {response.status_code}"
+        )
+E       AssertionError: content.view HR: expected -, GET /api/v1/assignments returned 200
+E       assert 200 in (403, 404)
+E        +  where 200 = <Response status_code=200, "application/json">.status_code
+
+tests/permissions/test_approved_matrix.py:48: AssertionError
+___________ test_approved_read_api[content.view-assignment-list-WEB] ___________
+
+key = 'content.view', endpoint = 'assignment-list', code = 'WEB'
+users = {Role.SYSTEM_ADMIN: <User: مستخدم 13111 <user13111@ecst.test>>, Role.SYSTEM_SUPERVISOR: <User: مستخدم 13112 <user13112...REGISTRAR: <User: مستخدم 13113 <user13113@ecst.test>>, Role.REGISTRAR: <User: مستخدم 13114 <user13114@ecst.test>>, ...}
+api = <function api.<locals>.client at 0x11157cae0>
+world = {'college': 1, 'dept': 1, 'program': 1, 'year': 1, ...}
+record_property = <function record_property.<locals>.append_property at 0x11157c220>
+
+    @pytest.mark.parametrize(
+        "key,endpoint,code", READ_CASES, ids=[f"{k}-{e}-{r}" for k, e, r in READ_CASES]
+    )
+    def test_approved_read_api(key, endpoint, code, users, api, world, record_property):
+        url = READS[endpoint][0].format(**world)
+        response = api(users[ROLES[code]]).get(url)
+        expected = MATRIX[key]["values"][code]
+        record_property("url", url)
+        record_property("expected", expected)
+        record_property("http", response.status_code)
+        record_property("policy_line", MATRIX[key]["line"])
+        body = getattr(response, "data", None)
+        if isinstance(body, dict) and "results" in body:
+            record_property("returned_rows", len(body["results"]))
+>       assert response.status_code in ((403, 404) if expected == "-" else (200,)), (
+            f"{key} {code}: expected {expected}, GET {url} returned {response.status_code}"
+        )
+E       AssertionError: content.view WEB: expected -, GET /api/v1/assignments returned 200
+E       assert 200 in (403, 404)
+E        +  where 200 = <Response status_code=200, "application/json">.status_code
+
+tests/permissions/test_approved_matrix.py:48: AssertionError
+___________ test_approved_read_api[content.view-assignment-list-EVT] ___________
+
+key = 'content.view', endpoint = 'assignment-list', code = 'EVT'
+users = {Role.SYSTEM_ADMIN: <User: مستخدم 13126 <user13126@ecst.test>>, Role.SYSTEM_SUPERVISOR: <User: مستخدم 13127 <user13127...REGISTRAR: <User: مستخدم 13128 <user13128@ecst.test>>, Role.REGISTRAR: <User: مستخدم 13129 <user13129@ecst.test>>, ...}
+api = <function api.<locals>.client at 0x111528860>
+world = {'college': 1, 'dept': 1, 'program': 1, 'year': 1, ...}
+record_property = <function record_property.<locals>.append_property at 0x11152b060>
+
+    @pytest.mark.parametrize(
+        "key,endpoint,code", READ_CASES, ids=[f"{k}-{e}-{r}" for k, e, r in READ_CASES]
+    )
+    def test_approved_read_api(key, endpoint, code, users, api, world, record_property):
+        url = READS[endpoint][0].format(**world)
+        response = api(users[ROLES[code]]).get(url)
+        expected = MATRIX[key]["values"][code]
+        record_property("url", url)
+        record_property("expected", expected)
+        record_property("http", response.status_code)
+        record_property("policy_line", MATRIX[key]["line"])
+        body = getattr(response, "data", None)
+        if isinstance(body, dict) and "results" in body:
+            record_property("returned_rows", len(body["results"]))
+>       assert response.status_code in ((403, 404) if expected == "-" else (200,)), (
+            f"{key} {code}: expected {expected}, GET {url} returned {response.status_code}"
+        )
+E       AssertionError: content.view EVT: expected -, GET /api/v1/assignments returned 200
+E       assert 200 in (403, 404)
+E        +  where 200 = <Response status_code=200, "application/json">.status_code
+
+tests/permissions/test_approved_matrix.py:48: AssertionError
+______________ test_approved_read_api[content.view-exam-list-REG] ______________
+
+key = 'content.view', endpoint = 'exam-list', code = 'REG'
+users = {Role.SYSTEM_ADMIN: <User: مستخدم 13351 <user13351@ecst.test>>, Role.SYSTEM_SUPERVISOR: <User: مستخدم 13352 <user13352...REGISTRAR: <User: مستخدم 13353 <user13353@ecst.test>>, Role.REGISTRAR: <User: مستخدم 13354 <user13354@ecst.test>>, ...}
+api = <function api.<locals>.client at 0x111552ac0>
+world = {'college': 1, 'dept': 1, 'program': 1, 'year': 1, ...}
+record_property = <function record_property.<locals>.append_property at 0x111590c20>
+
+    @pytest.mark.parametrize(
+        "key,endpoint,code", READ_CASES, ids=[f"{k}-{e}-{r}" for k, e, r in READ_CASES]
+    )
+    def test_approved_read_api(key, endpoint, code, users, api, world, record_property):
+        url = READS[endpoint][0].format(**world)
+        response = api(users[ROLES[code]]).get(url)
+        expected = MATRIX[key]["values"][code]
+        record_property("url", url)
+        record_property("expected", expected)
+        record_property("http", response.status_code)
+        record_property("policy_line", MATRIX[key]["line"])
+        body = getattr(response, "data", None)
+        if isinstance(body, dict) and "results" in body:
+            record_property("returned_rows", len(body["results"]))
+>       assert response.status_code in ((403, 404) if expected == "-" else (200,)), (
+            f"{key} {code}: expected {expected}, GET {url} returned {response.status_code}"
+        )
+E       AssertionError: content.view REG: expected -, GET /api/v1/exams returned 200
+E       assert 200 in (403, 404)
+E        +  where 200 = <Response status_code=200, "application/json">.status_code
+
+tests/permissions/test_approved_matrix.py:48: AssertionError
+_____________ test_approved_read_api[content.view-exam-list-DREG] ______________
+
+key = 'content.view', endpoint = 'exam-list', code = 'DREG'
+users = {Role.SYSTEM_ADMIN: <User: مستخدم 13366 <user13366@ecst.test>>, Role.SYSTEM_SUPERVISOR: <User: مستخدم 13367 <user13367...REGISTRAR: <User: مستخدم 13368 <user13368@ecst.test>>, Role.REGISTRAR: <User: مستخدم 13369 <user13369@ecst.test>>, ...}
+api = <function api.<locals>.client at 0x111543240>
+world = {'college': 1, 'dept': 1, 'program': 1, 'year': 1, ...}
+record_property = <function record_property.<locals>.append_property at 0x111591260>
+
+    @pytest.mark.parametrize(
+        "key,endpoint,code", READ_CASES, ids=[f"{k}-{e}-{r}" for k, e, r in READ_CASES]
+    )
+    def test_approved_read_api(key, endpoint, code, users, api, world, record_property):
+        url = READS[endpoint][0].format(**world)
+        response = api(users[ROLES[code]]).get(url)
+        expected = MATRIX[key]["values"][code]
+        record_property("url", url)
+        record_property("expected", expected)
+        record_property("http", response.status_code)
+        record_property("policy_line", MATRIX[key]["line"])
+        body = getattr(response, "data", None)
+        if isinstance(body, dict) and "results" in body:
+            record_property("returned_rows", len(body["results"]))
+>       assert response.status_code in ((403, 404) if expected == "-" else (200,)), (
+            f"{key} {code}: expected {expected}, GET {url} returned {response.status_code}"
+        )
+E       AssertionError: content.view DREG: expected -, GET /api/v1/exams returned 200
+E       assert 200 in (403, 404)
+E        +  where 200 = <Response status_code=200, "application/json">.status_code
+
+tests/permissions/test_approved_matrix.py:48: AssertionError
+______________ test_approved_read_api[content.view-exam-list-RES] ______________
+
+key = 'content.view', endpoint = 'exam-list', code = 'RES'
+users = {Role.SYSTEM_ADMIN: <User: مستخدم 13381 <user13381@ecst.test>>, Role.SYSTEM_SUPERVISOR: <User: مستخدم 13382 <user13382...REGISTRAR: <User: مستخدم 13383 <user13383@ecst.test>>, Role.REGISTRAR: <User: مستخدم 13384 <user13384@ecst.test>>, ...}
+api = <function api.<locals>.client at 0x111592fc0>
+world = {'college': 1, 'dept': 1, 'program': 1, 'year': 1, ...}
+record_property = <function record_property.<locals>.append_property at 0x111568360>
+
+    @pytest.mark.parametrize(
+        "key,endpoint,code", READ_CASES, ids=[f"{k}-{e}-{r}" for k, e, r in READ_CASES]
+    )
+    def test_approved_read_api(key, endpoint, code, users, api, world, record_property):
+        url = READS[endpoint][0].format(**world)
+        response = api(users[ROLES[code]]).get(url)
+        expected = MATRIX[key]["values"][code]
+        record_property("url", url)
+        record_property("expected", expected)
+        record_property("http", response.status_code)
+        record_property("policy_line", MATRIX[key]["line"])
+        body = getattr(response, "data", None)
+        if isinstance(body, dict) and "results" in body:
+            record_property("returned_rows", len(body["results"]))
+>       assert response.status_code in ((403, 404) if expected == "-" else (200,)), (
+            f"{key} {code}: expected {expected}, GET {url} returned {response.status_code}"
+        )
+E       AssertionError: content.view RES: expected -, GET /api/v1/exams returned 200
+E       assert 200 in (403, 404)
+E        +  where 200 = <Response status_code=200, "application/json">.status_code
+
+tests/permissions/test_approved_matrix.py:48: AssertionError
+______________ test_approved_read_api[content.view-exam-list-STU] ______________
+
+key = 'content.view', endpoint = 'exam-list', code = 'STU'
+users = {Role.SYSTEM_ADMIN: <User: مستخدم 13411 <user13411@ecst.test>>, Role.SYSTEM_SUPERVISOR: <User: مستخدم 13412 <user13412...REGISTRAR: <User: مستخدم 13413 <user13413@ecst.test>>, Role.REGISTRAR: <User: مستخدم 13414 <user13414@ecst.test>>, ...}
+api = <function api.<locals>.client at 0x11162af20>
+world = {'college': 1, 'dept': 1, 'program': 1, 'year': 1, ...}
+record_property = <function record_property.<locals>.append_property at 0x1115528e0>
+
+    @pytest.mark.parametrize(
+        "key,endpoint,code", READ_CASES, ids=[f"{k}-{e}-{r}" for k, e, r in READ_CASES]
+    )
+    def test_approved_read_api(key, endpoint, code, users, api, world, record_property):
+        url = READS[endpoint][0].format(**world)
+        response = api(users[ROLES[code]]).get(url)
+        expected = MATRIX[key]["values"][code]
+        record_property("url", url)
+        record_property("expected", expected)
+        record_property("http", response.status_code)
+        record_property("policy_line", MATRIX[key]["line"])
+        body = getattr(response, "data", None)
+        if isinstance(body, dict) and "results" in body:
+            record_property("returned_rows", len(body["results"]))
+>       assert response.status_code in ((403, 404) if expected == "-" else (200,)), (
+            f"{key} {code}: expected {expected}, GET {url} returned {response.status_code}"
+        )
+E       AssertionError: content.view STU: expected -, GET /api/v1/exams returned 200
+E       assert 200 in (403, 404)
+E        +  where 200 = <Response status_code=200, "application/json">.status_code
+
+tests/permissions/test_approved_matrix.py:48: AssertionError
+______________ test_approved_read_api[content.view-exam-list-HR] _______________
+
+key = 'content.view', endpoint = 'exam-list', code = 'HR'
+users = {Role.SYSTEM_ADMIN: <User: مستخدم 13456 <user13456@ecst.test>>, Role.SYSTEM_SUPERVISOR: <User: مستخدم 13457 <user13457...REGISTRAR: <User: مستخدم 13458 <user13458@ecst.test>>, Role.REGISTRAR: <User: مستخدم 13459 <user13459@ecst.test>>, ...}
+api = <function api.<locals>.client at 0x11152a7a0>
+world = {'college': 1, 'dept': 1, 'program': 1, 'year': 1, ...}
+record_property = <function record_property.<locals>.append_property at 0x111590b80>
+
+    @pytest.mark.parametrize(
+        "key,endpoint,code", READ_CASES, ids=[f"{k}-{e}-{r}" for k, e, r in READ_CASES]
+    )
+    def test_approved_read_api(key, endpoint, code, users, api, world, record_property):
+        url = READS[endpoint][0].format(**world)
+        response = api(users[ROLES[code]]).get(url)
+        expected = MATRIX[key]["values"][code]
+        record_property("url", url)
+        record_property("expected", expected)
+        record_property("http", response.status_code)
+        record_property("policy_line", MATRIX[key]["line"])
+        body = getattr(response, "data", None)
+        if isinstance(body, dict) and "results" in body:
+            record_property("returned_rows", len(body["results"]))
+>       assert response.status_code in ((403, 404) if expected == "-" else (200,)), (
+            f"{key} {code}: expected {expected}, GET {url} returned {response.status_code}"
+        )
+E       AssertionError: content.view HR: expected -, GET /api/v1/exams returned 200
+E       assert 200 in (403, 404)
+E        +  where 200 = <Response status_code=200, "application/json">.status_code
+
+tests/permissions/test_approved_matrix.py:48: AssertionError
+______________ test_approved_read_api[content.view-exam-list-WEB] ______________
+
+key = 'content.view', endpoint = 'exam-list', code = 'WEB'
+users = {Role.SYSTEM_ADMIN: <User: مستخدم 13471 <user13471@ecst.test>>, Role.SYSTEM_SUPERVISOR: <User: مستخدم 13472 <user13472...REGISTRAR: <User: مستخدم 13473 <user13473@ecst.test>>, Role.REGISTRAR: <User: مستخدم 13474 <user13474@ecst.test>>, ...}
+api = <function api.<locals>.client at 0x111541760>
+world = {'college': 1, 'dept': 1, 'program': 1, 'year': 1, ...}
+record_property = <function record_property.<locals>.append_property at 0x1115698a0>
+
+    @pytest.mark.parametrize(
+        "key,endpoint,code", READ_CASES, ids=[f"{k}-{e}-{r}" for k, e, r in READ_CASES]
+    )
+    def test_approved_read_api(key, endpoint, code, users, api, world, record_property):
+        url = READS[endpoint][0].format(**world)
+        response = api(users[ROLES[code]]).get(url)
+        expected = MATRIX[key]["values"][code]
+        record_property("url", url)
+        record_property("expected", expected)
+        record_property("http", response.status_code)
+        record_property("policy_line", MATRIX[key]["line"])
+        body = getattr(response, "data", None)
+        if isinstance(body, dict) and "results" in body:
+            record_property("returned_rows", len(body["results"]))
+>       assert response.status_code in ((403, 404) if expected == "-" else (200,)), (
+            f"{key} {code}: expected {expected}, GET {url} returned {response.status_code}"
+        )
+E       AssertionError: content.view WEB: expected -, GET /api/v1/exams returned 200
+E       assert 200 in (403, 404)
+E        +  where 200 = <Response status_code=200, "application/json">.status_code
+
+tests/permissions/test_approved_matrix.py:48: AssertionError
+______________ test_approved_read_api[content.view-exam-list-EVT] ______________
+
+key = 'content.view', endpoint = 'exam-list', code = 'EVT'
+users = {Role.SYSTEM_ADMIN: <User: مستخدم 13486 <user13486@ecst.test>>, Role.SYSTEM_SUPERVISOR: <User: مستخدم 13487 <user13487...REGISTRAR: <User: مستخدم 13488 <user13488@ecst.test>>, Role.REGISTRAR: <User: مستخدم 13489 <user13489@ecst.test>>, ...}
+api = <function api.<locals>.client at 0x11156a980>
+world = {'college': 1, 'dept': 1, 'program': 1, 'year': 1, ...}
+record_property = <function record_property.<locals>.append_property at 0x111600220>
+
+    @pytest.mark.parametrize(
+        "key,endpoint,code", READ_CASES, ids=[f"{k}-{e}-{r}" for k, e, r in READ_CASES]
+    )
+    def test_approved_read_api(key, endpoint, code, users, api, world, record_property):
+        url = READS[endpoint][0].format(**world)
+        response = api(users[ROLES[code]]).get(url)
+        expected = MATRIX[key]["values"][code]
+        record_property("url", url)
+        record_property("expected", expected)
+        record_property("http", response.status_code)
+        record_property("policy_line", MATRIX[key]["line"])
+        body = getattr(response, "data", None)
+        if isinstance(body, dict) and "results" in body:
+            record_property("returned_rows", len(body["results"]))
+>       assert response.status_code in ((403, 404) if expected == "-" else (200,)), (
+            f"{key} {code}: expected {expected}, GET {url} returned {response.status_code}"
+        )
+E       AssertionError: content.view EVT: expected -, GET /api/v1/exams returned 200
+E       assert 200 in (403, 404)
+E        +  where 200 = <Response status_code=200, "application/json">.status_code
+
+tests/permissions/test_approved_matrix.py:48: AssertionError
+____________ test_approved_read_api[results.view-result-list-DREG] _____________
+
+key = 'results.view', endpoint = 'result-list', code = 'DREG'
+users = {Role.SYSTEM_ADMIN: <User: مستخدم 13726 <user13726@ecst.test>>, Role.SYSTEM_SUPERVISOR: <User: مستخدم 13727 <user13727...REGISTRAR: <User: مستخدم 13728 <user13728@ecst.test>>, Role.REGISTRAR: <User: مستخدم 13729 <user13729@ecst.test>>, ...}
+api = <function api.<locals>.client at 0x11157e200>
+world = {'college': 1, 'dept': 1, 'program': 1, 'year': 1, ...}
+record_property = <function record_property.<locals>.append_property at 0x11152ad40>
+
+    @pytest.mark.parametrize(
+        "key,endpoint,code", READ_CASES, ids=[f"{k}-{e}-{r}" for k, e, r in READ_CASES]
+    )
+    def test_approved_read_api(key, endpoint, code, users, api, world, record_property):
+        url = READS[endpoint][0].format(**world)
+        response = api(users[ROLES[code]]).get(url)
+        expected = MATRIX[key]["values"][code]
+        record_property("url", url)
+        record_property("expected", expected)
+        record_property("http", response.status_code)
+        record_property("policy_line", MATRIX[key]["line"])
+        body = getattr(response, "data", None)
+        if isinstance(body, dict) and "results" in body:
+            record_property("returned_rows", len(body["results"]))
+>       assert response.status_code in ((403, 404) if expected == "-" else (200,)), (
+            f"{key} {code}: expected {expected}, GET {url} returned {response.status_code}"
+        )
+E       AssertionError: results.view DREG: expected -, GET /api/v1/results returned 200
+E       assert 200 in (403, 404)
+E        +  where 200 = <Response status_code=200, "application/json">.status_code
+
+tests/permissions/test_approved_matrix.py:48: AssertionError
+_____________ test_approved_read_api[results.view-result-list-ACA] _____________
+
+key = 'results.view', endpoint = 'result-list', code = 'ACA'
+users = {Role.SYSTEM_ADMIN: <User: مستخدم 13756 <user13756@ecst.test>>, Role.SYSTEM_SUPERVISOR: <User: مستخدم 13757 <user13757...REGISTRAR: <User: مستخدم 13758 <user13758@ecst.test>>, Role.REGISTRAR: <User: مستخدم 13759 <user13759@ecst.test>>, ...}
+api = <function api.<locals>.client at 0x111758e00>
+world = {'college': 1, 'dept': 1, 'program': 1, 'year': 1, ...}
+record_property = <function record_property.<locals>.append_property at 0x11156b420>
+
+    @pytest.mark.parametrize(
+        "key,endpoint,code", READ_CASES, ids=[f"{k}-{e}-{r}" for k, e, r in READ_CASES]
+    )
+    def test_approved_read_api(key, endpoint, code, users, api, world, record_property):
+        url = READS[endpoint][0].format(**world)
+        response = api(users[ROLES[code]]).get(url)
+        expected = MATRIX[key]["values"][code]
+        record_property("url", url)
+        record_property("expected", expected)
+        record_property("http", response.status_code)
+        record_property("policy_line", MATRIX[key]["line"])
+        body = getattr(response, "data", None)
+        if isinstance(body, dict) and "results" in body:
+            record_property("returned_rows", len(body["results"]))
+>       assert response.status_code in ((403, 404) if expected == "-" else (200,)), (
+            f"{key} {code}: expected {expected}, GET {url} returned {response.status_code}"
+        )
+E       AssertionError: results.view ACA: expected -, GET /api/v1/results returned 200
+E       assert 200 in (403, 404)
+E        +  where 200 = <Response status_code=200, "application/json">.status_code
+
+tests/permissions/test_approved_matrix.py:48: AssertionError
+_____________ test_approved_read_api[results.view-result-list-STU] _____________
+
+key = 'results.view', endpoint = 'result-list', code = 'STU'
+users = {Role.SYSTEM_ADMIN: <User: مستخدم 13771 <user13771@ecst.test>>, Role.SYSTEM_SUPERVISOR: <User: مستخدم 13772 <user13772...REGISTRAR: <User: مستخدم 13773 <user13773@ecst.test>>, Role.REGISTRAR: <User: مستخدم 13774 <user13774@ecst.test>>, ...}
+api = <function api.<locals>.client at 0x111758180>
+world = {'college': 1, 'dept': 1, 'program': 1, 'year': 1, ...}
+record_property = <function record_property.<locals>.append_property at 0x111601760>
+
+    @pytest.mark.parametrize(
+        "key,endpoint,code", READ_CASES, ids=[f"{k}-{e}-{r}" for k, e, r in READ_CASES]
+    )
+    def test_approved_read_api(key, endpoint, code, users, api, world, record_property):
+        url = READS[endpoint][0].format(**world)
+        response = api(users[ROLES[code]]).get(url)
+        expected = MATRIX[key]["values"][code]
+        record_property("url", url)
+        record_property("expected", expected)
+        record_property("http", response.status_code)
+        record_property("policy_line", MATRIX[key]["line"])
+        body = getattr(response, "data", None)
+        if isinstance(body, dict) and "results" in body:
+            record_property("returned_rows", len(body["results"]))
+>       assert response.status_code in ((403, 404) if expected == "-" else (200,)), (
+            f"{key} {code}: expected {expected}, GET {url} returned {response.status_code}"
+        )
+E       AssertionError: results.view STU: expected -, GET /api/v1/results returned 200
+E       assert 200 in (403, 404)
+E        +  where 200 = <Response status_code=200, "application/json">.status_code
+
+tests/permissions/test_approved_matrix.py:48: AssertionError
+_____________ test_approved_read_api[results.view-result-list-HR] ______________
+
+key = 'results.view', endpoint = 'result-list', code = 'HR'
+users = {Role.SYSTEM_ADMIN: <User: مستخدم 13816 <user13816@ecst.test>>, Role.SYSTEM_SUPERVISOR: <User: مستخدم 13817 <user13817...REGISTRAR: <User: مستخدم 13818 <user13818@ecst.test>>, Role.REGISTRAR: <User: مستخدم 13819 <user13819@ecst.test>>, ...}
+api = <function api.<locals>.client at 0x1117a0680>
+world = {'college': 1, 'dept': 1, 'program': 1, 'year': 1, ...}
+record_property = <function record_property.<locals>.append_property at 0x1117a2e80>
+
+    @pytest.mark.parametrize(
+        "key,endpoint,code", READ_CASES, ids=[f"{k}-{e}-{r}" for k, e, r in READ_CASES]
+    )
+    def test_approved_read_api(key, endpoint, code, users, api, world, record_property):
+        url = READS[endpoint][0].format(**world)
+        response = api(users[ROLES[code]]).get(url)
+        expected = MATRIX[key]["values"][code]
+        record_property("url", url)
+        record_property("expected", expected)
+        record_property("http", response.status_code)
+        record_property("policy_line", MATRIX[key]["line"])
+        body = getattr(response, "data", None)
+        if isinstance(body, dict) and "results" in body:
+            record_property("returned_rows", len(body["results"]))
+>       assert response.status_code in ((403, 404) if expected == "-" else (200,)), (
+            f"{key} {code}: expected {expected}, GET {url} returned {response.status_code}"
+        )
+E       AssertionError: results.view HR: expected -, GET /api/v1/results returned 200
+E       assert 200 in (403, 404)
+E        +  where 200 = <Response status_code=200, "application/json">.status_code
+
+tests/permissions/test_approved_matrix.py:48: AssertionError
+_____________ test_approved_read_api[results.view-result-list-WEB] _____________
+
+key = 'results.view', endpoint = 'result-list', code = 'WEB'
+users = {Role.SYSTEM_ADMIN: <User: مستخدم 13831 <user13831@ecst.test>>, Role.SYSTEM_SUPERVISOR: <User: مستخدم 13832 <user13832...REGISTRAR: <User: مستخدم 13833 <user13833@ecst.test>>, Role.REGISTRAR: <User: مستخدم 13834 <user13834@ecst.test>>, ...}
+api = <function api.<locals>.client at 0x11153ede0>
+world = {'college': 1, 'dept': 1, 'program': 1, 'year': 1, ...}
+record_property = <function record_property.<locals>.append_property at 0x11176ccc0>
+
+    @pytest.mark.parametrize(
+        "key,endpoint,code", READ_CASES, ids=[f"{k}-{e}-{r}" for k, e, r in READ_CASES]
+    )
+    def test_approved_read_api(key, endpoint, code, users, api, world, record_property):
+        url = READS[endpoint][0].format(**world)
+        response = api(users[ROLES[code]]).get(url)
+        expected = MATRIX[key]["values"][code]
+        record_property("url", url)
+        record_property("expected", expected)
+        record_property("http", response.status_code)
+        record_property("policy_line", MATRIX[key]["line"])
+        body = getattr(response, "data", None)
+        if isinstance(body, dict) and "results" in body:
+            record_property("returned_rows", len(body["results"]))
+>       assert response.status_code in ((403, 404) if expected == "-" else (200,)), (
+            f"{key} {code}: expected {expected}, GET {url} returned {response.status_code}"
+        )
+E       AssertionError: results.view WEB: expected -, GET /api/v1/results returned 200
+E       assert 200 in (403, 404)
+E        +  where 200 = <Response status_code=200, "application/json">.status_code
+
+tests/permissions/test_approved_matrix.py:48: AssertionError
+_____________ test_approved_read_api[results.view-result-list-EVT] _____________
+
+key = 'results.view', endpoint = 'result-list', code = 'EVT'
+users = {Role.SYSTEM_ADMIN: <User: مستخدم 13846 <user13846@ecst.test>>, Role.SYSTEM_SUPERVISOR: <User: مستخدم 13847 <user13847...REGISTRAR: <User: مستخدم 13848 <user13848@ecst.test>>, Role.REGISTRAR: <User: مستخدم 13849 <user13849@ecst.test>>, ...}
+api = <function api.<locals>.client at 0x11176e200>
+world = {'college': 1, 'dept': 1, 'program': 1, 'year': 1, ...}
+record_property = <function record_property.<locals>.append_property at 0x11176e660>
+
+    @pytest.mark.parametrize(
+        "key,endpoint,code", READ_CASES, ids=[f"{k}-{e}-{r}" for k, e, r in READ_CASES]
+    )
+    def test_approved_read_api(key, endpoint, code, users, api, world, record_property):
+        url = READS[endpoint][0].format(**world)
+        response = api(users[ROLES[code]]).get(url)
+        expected = MATRIX[key]["values"][code]
+        record_property("url", url)
+        record_property("expected", expected)
+        record_property("http", response.status_code)
+        record_property("policy_line", MATRIX[key]["line"])
+        body = getattr(response, "data", None)
+        if isinstance(body, dict) and "results" in body:
+            record_property("returned_rows", len(body["results"]))
+>       assert response.status_code in ((403, 404) if expected == "-" else (200,)), (
+            f"{key} {code}: expected {expected}, GET {url} returned {response.status_code}"
+        )
+E       AssertionError: results.view EVT: expected -, GET /api/v1/results returned 200
+E       assert 200 in (403, 404)
+E        +  where 200 = <Response status_code=200, "application/json">.status_code
+
+tests/permissions/test_approved_matrix.py:48: AssertionError
+=========================== short test summary info ============================
+FAILED tests/permissions/test_approved_matrix.py::test_approved_read_api[users.view-user-detail-REG]
+FAILED tests/permissions/test_approved_matrix.py::test_approved_read_api[content.view-lecture-list-REG]
+FAILED tests/permissions/test_approved_matrix.py::test_approved_read_api[content.view-lecture-list-DREG]
+FAILED tests/permissions/test_approved_matrix.py::test_approved_read_api[content.view-lecture-list-RES]
+FAILED tests/permissions/test_approved_matrix.py::test_approved_read_api[content.view-lecture-list-STU]
+FAILED tests/permissions/test_approved_matrix.py::test_approved_read_api[content.view-lecture-list-HR]
+FAILED tests/permissions/test_approved_matrix.py::test_approved_read_api[content.view-lecture-list-WEB]
+FAILED tests/permissions/test_approved_matrix.py::test_approved_read_api[content.view-lecture-list-EVT]
+FAILED tests/permissions/test_approved_matrix.py::test_approved_read_api[content.view-assignment-list-REG]
+FAILED tests/permissions/test_approved_matrix.py::test_approved_read_api[content.view-assignment-list-DREG]
+FAILED tests/permissions/test_approved_matrix.py::test_approved_read_api[content.view-assignment-list-RES]
+FAILED tests/permissions/test_approved_matrix.py::test_approved_read_api[content.view-assignment-list-STU]
+FAILED tests/permissions/test_approved_matrix.py::test_approved_read_api[content.view-assignment-list-HR]
+FAILED tests/permissions/test_approved_matrix.py::test_approved_read_api[content.view-assignment-list-WEB]
+FAILED tests/permissions/test_approved_matrix.py::test_approved_read_api[content.view-assignment-list-EVT]
+FAILED tests/permissions/test_approved_matrix.py::test_approved_read_api[content.view-exam-list-REG]
+FAILED tests/permissions/test_approved_matrix.py::test_approved_read_api[content.view-exam-list-DREG]
+FAILED tests/permissions/test_approved_matrix.py::test_approved_read_api[content.view-exam-list-RES]
+FAILED tests/permissions/test_approved_matrix.py::test_approved_read_api[content.view-exam-list-STU]
+FAILED tests/permissions/test_approved_matrix.py::test_approved_read_api[content.view-exam-list-HR]
+FAILED tests/permissions/test_approved_matrix.py::test_approved_read_api[content.view-exam-list-WEB]
+FAILED tests/permissions/test_approved_matrix.py::test_approved_read_api[content.view-exam-list-EVT]
+FAILED tests/permissions/test_approved_matrix.py::test_approved_read_api[results.view-result-list-DREG]
+FAILED tests/permissions/test_approved_matrix.py::test_approved_read_api[results.view-result-list-ACA]
+FAILED tests/permissions/test_approved_matrix.py::test_approved_read_api[results.view-result-list-STU]
+FAILED tests/permissions/test_approved_matrix.py::test_approved_read_api[results.view-result-list-HR]
+FAILED tests/permissions/test_approved_matrix.py::test_approved_read_api[results.view-result-list-WEB]
+FAILED tests/permissions/test_approved_matrix.py::test_approved_read_api[results.view-result-list-EVT]
+28 failed, 1203 passed in 60.62s (0:01:00)

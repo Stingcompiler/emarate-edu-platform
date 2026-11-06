@@ -107,6 +107,10 @@ def decide(meta: RequestMeta, req: DeletionRequest, *, approve: bool, note: str 
         req = DeletionRequest.objects.select_for_update().get(pk=req.pk)
         if req.state != DeletionRequest.State.PENDING:
             raise Conflict(gettext("This request was already decided."), code="decided")
+        if req.requested_by_id == meta.actor.pk:
+            # No one decides their own request: the supervisor would delete by approving
+            # itself (roles review 2026-11-06, owner's decision).
+            raise PermissionDenied(gettext("Someone else decides on your own request."))
         if approve:
             target = _target(req)
             if target is not None:
