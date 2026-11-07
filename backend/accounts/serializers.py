@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from django.utils.translation import gettext
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
@@ -6,7 +8,14 @@ from files.models import StoredFile
 from organization.models import Department
 
 from . import rbac
-from .models import Qualification, RegistrationRequest, RoleAssignment, StaffLink, User
+from .models import (
+    IdentityReport,
+    Qualification,
+    RegistrationRequest,
+    RoleAssignment,
+    StaffLink,
+    User,
+)
 from .rbac import Role
 
 
@@ -111,7 +120,15 @@ class MeSerializer(serializers.ModelSerializer):
 class RegistrationStartSerializer(serializers.Serializer):
     university_number = serializers.CharField(max_length=30)
     full_name = serializers.CharField(max_length=200)
+    # The programme's code, picked from the public list (owner, 2026-11-07).
+    program = serializers.CharField(max_length=20)
     email = serializers.EmailField()
+
+
+class IdentityReportCreateSerializer(RegistrationStartSerializer):
+    """Same details as registering; ``email`` is where the department replies."""
+
+    note = serializers.CharField(required=False, allow_blank=True, max_length=1000)
 
 
 class RegistrationStartResponseSerializer(serializers.Serializer):
@@ -240,6 +257,54 @@ class RegistrationRequestSerializer(serializers.ModelSerializer):
     def get_email_matches_record(self, obj) -> bool:
         official = (obj.student_record.email or "").lower()
         return bool(official) and official == obj.email.lower()
+
+
+class IdentityReportSerializer(serializers.ModelSerializer):
+    university_number = serializers.CharField(source="student_record.university_number")
+    full_name_ar = serializers.CharField(source="student_record.full_name_ar")
+    program = serializers.CharField(source="student_record.program.name_ar")
+    level = serializers.IntegerField(source="student_record.level")
+    official_email = serializers.CharField(source="student_record.email")
+    account_email = serializers.SerializerMethodField()
+    account_created_at = serializers.SerializerMethodField()
+
+    class Meta:
+        model = IdentityReport
+        fields = [
+            "public_id",
+            "university_number",
+            "full_name_ar",
+            "program",
+            "level",
+            "official_email",
+            "account_email",
+            "account_created_at",
+            "contact_email",
+            "note",
+            "status",
+            "created_at",
+            "decided_at",
+            "reason",
+        ]
+        read_only_fields = fields
+
+    def get_account_email(self, obj) -> str | None:
+        return obj.account.email if obj.account else None
+
+    def get_account_created_at(self, obj) -> datetime | None:
+        return obj.account.date_joined if obj.account else None
+
+
+class IdentityDecisionSerializer(serializers.Serializer):
+    uphold = serializers.BooleanField()
+    reason = serializers.CharField(required=False, allow_blank=True, max_length=500)
+
+    def validate(self, attrs):
+        if not attrs["uphold"] and not attrs.get("reason"):
+            raise serializers.ValidationError(
+                {"reason": [gettext("Give a reason when dismissing.")]}
+            )
+        return attrs
 
 
 class RegistrationDecisionSerializer(serializers.Serializer):

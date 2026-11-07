@@ -88,6 +88,26 @@ def registration_pending(request) -> None:
     )
 
 
+def identity_reported(report) -> None:
+    """Same approvers as a pending registration: they decide the report."""
+    from accounts.rbac import Role
+
+    student = report.student_record
+    User = get_user_model()
+    approvers = User.objects.filter(
+        is_active=True,
+        role_assignments__role__in=[Role.DEPARTMENT_MANAGER, Role.DEPARTMENT_SUPERVISOR],
+        role_assignments__department=student.department_id,
+    ) | User.objects.filter(is_active=True, role_assignments__role=Role.HEAD_REGISTRAR)
+    notify(
+        approvers.distinct(),
+        category=Category.ACCOUNT,
+        title="بلاغ انتحال على حساب طالب",
+        body=f"{student.full_name_ar} · {student.university_number}",
+        action_url="/department/approvals",
+    )
+
+
 def registration_approved(user) -> None:
     notify(
         [user],

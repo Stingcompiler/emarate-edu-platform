@@ -4,6 +4,15 @@ Older rounds (2026-10-24 → 11-02): `.claude/handoff/archive/2026-10-24_to_2026
 
 ## State
 
+- **Student self-registration** (owner, 2026-11-07; `feat/registration-program-check`): the
+  student picks the programme from the list; the record must match number + programme + name
+  (Arabic or English, as in the record). A record that already has an account answers 409
+  `already_registered` and the page offers «ليس حسابي — أبلّغ عن انتحال» →
+  `IdentityReport`; approvers decide on /department/approvals (uphold = disable that account,
+  drop the student role, free the record). The official email is alerted when an account is made
+  with another address. Level is not asked (the owner listed only name, programme and number).
+- **Plan numbering** #251 merged: semesters shown 1–10 through the programme.
+
 - **Roles audit** (owner, 2026-11-06; report `docs/مراجعه الادوار.md`, approved matrix
   `docs/roles-matrix.md`, suite `backend/tests/permissions` reading the matrix): all confirmed gaps
   fixed on `fix/roles-matrix-audit` with the owner's decisions — supervisor unlinks (members,

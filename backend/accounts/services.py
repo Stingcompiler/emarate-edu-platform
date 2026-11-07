@@ -31,7 +31,14 @@ from organization.models import SystemSettings
 from students.models import StudentRecord
 
 from . import emails, otp, rbac
-from .models import ActivationToken, OneTimeCode, RegistrationRequest, RoleAssignment, User
+from .models import (
+    ActivationToken,
+    IdentityReport,
+    OneTimeCode,
+    RegistrationRequest,
+    RoleAssignment,
+    User,
+)
 from .rbac import DEPARTMENT_SCOPED_ROLES, Role
 
 ACTIVATION_DAYS = 7
@@ -44,24 +51,45 @@ def _email(value: str) -> str:
 # ─── Registration (docs/05 §8.1) ──────────────────────────────────────────
 
 
-def start_registration(university_number: str, full_name: str, email: str) -> RegistrationRequest:
+def _identity(university_number: str, full_name: str, program: str) -> StudentRecord | None:
+    """The record these details name: number, programme and name all match it.
+
+    The details are public (owner, 2026-11-07); the email code then proves the inbox, and a
+    student whose record was claimed by someone else reports it (``report_identity``). The
+    name may be typed as in the record in Arabic or in English.
+    """
+    record_ = (
+        StudentRecord.objects.filter(university_number=university_number.strip())
+        .select_related("user", "program")
+        .first()
+    )
+    if record_ is None or record_.program.code.casefold() != program.strip().casefold():
+        return None
+    names = [record_.full_name_ar, record_.full_name_en]
+    if not any(name and names_match(full_name, name) for name in names):
+        return None
+    return record_
+
+
+def start_registration(
+    university_number: str, full_name: str, program: str, email: str
+) -> RegistrationRequest:
     """Step 1. Always returns a request; only a real match gets an email.
 
     A request with no student_record behaves exactly like a real one for the
-    caller (verify will just fail), so the endpoint can't confirm who studies here.
+    caller (verify will just fail). Details that name a record already holding an
+    account get 409, so its student can report the account (owner, 2026-11-07).
     """
     email = _email(email)
-    record_ = (
-        StudentRecord.objects.filter(university_number=university_number.strip())
-        .select_related("user")
-        .first()
-    )
-    matched = (
-        record_ is not None
-        and record_.user_id is None
-        and record_.status == StudentRecord.Status.ACTIVE
-        and names_match(full_name, record_.full_name_ar)
-    )
+    record_ = _identity(university_number, full_name, program)
+    if record_ is not None and record_.user_id is not None:
+        raise Conflict(
+            gettext(
+                "This university number already has an account. If it is not yours, report it."
+            ),
+            code="already_registered",
+        )
+    matched = record_ is not None and record_.status == StudentRecord.Status.ACTIVE
     with transaction.atomic():
         request = RegistrationRequest.objects.create(
             student_record=record_ if matched else None, email=email
@@ -145,6 +173,11 @@ def complete_registration(request: RegistrationRequest, password: str) -> User:
         if needs_approval:
             transaction.on_commit(lambda: emails.registration_pending(user.email))
             events.registration_pending(request)
+        if official_email and official_email != request.email:
+            # The college's address for this student hears of it at once: if it was not them,
+            # they report it from the registration page (owner, 2026-11-07).
+            used = request.email
+            transaction.on_commit(lambda: emails.registered_elsewhere(official_email, used))
     return user
 
 
@@ -201,6 +234,98 @@ def decide_registration(
         )
         transaction.on_commit(lambda: emails.registration_decided(request.email, approve, reason))
     return request
+
+
+# ─── Identity reports (owner, 2026-11-07) ─────────────────────────────────
+
+
+def report_identity(
+    university_number: str, full_name: str, program: str, email: str, note: str = ""
+) -> IdentityReport:
+    """The student whose record already has an account says it is not theirs."""
+    record_ = _identity(university_number, full_name, program)
+    if record_ is None or record_.user_id is None:
+        raise Invalid(
+            {"university_number": [gettext("These details do not match an existing account.")]},
+            code="no_account",
+        )
+    email = _email(email)
+    open_ = IdentityReport.objects.filter(
+        student_record=record_, account=record_.user, status=IdentityReport.Status.OPEN
+    )
+    same = open_.filter(contact_email=email).first()
+    if same is not None:
+        return same  # sent twice: one report is enough
+    with transaction.atomic():
+        report = IdentityReport.objects.create(
+            student_record=record_, account=record_.user, contact_email=email, note=note.strip()
+        )
+        record(
+            SYSTEM,
+            "registration.identity_report",
+            record_,
+            new={"contact_email": email},
+            department_id=record_.department_id,
+        )
+        events.identity_reported(report)
+    return report
+
+
+def decide_identity_report(
+    meta: RequestMeta, report: IdentityReport, uphold: bool, reason: str = ""
+) -> IdentityReport:
+    """Uphold: the account is disabled and the record freed, so its student registers.
+
+    The account is disabled, never deleted: what was done with it stays on record.
+    """
+    student = report.student_record
+    if not rbac.can(meta.actor, "registration.approve", student.department_id):
+        raise PermissionDenied()
+    already = Conflict(gettext("This report was already decided."), code="already_decided")
+    with transaction.atomic():
+        report = IdentityReport.objects.select_for_update().get(pk=report.pk)
+        if report.status != IdentityReport.Status.OPEN:
+            raise already
+        student = StudentRecord.objects.select_for_update().get(pk=student.pk)
+        account = report.account
+        if uphold:
+            if account is None or student.user_id != account.pk:
+                raise already  # the account was already removed or replaced
+            if account.pk == meta.actor.pk:
+                raise PermissionDenied()
+            student.user = None
+            student.save(update_fields=["user", "updated_at"])
+            account.is_active = False
+            account.save(update_fields=["is_active"])
+            account.role_assignments.filter(role=Role.STUDENT).delete()
+            _revoke_refresh_tokens(account)
+            # Every other open report on this account is settled by the same decision.
+            others = IdentityReport.objects.filter(
+                account=account, status=IdentityReport.Status.OPEN
+            ).exclude(pk=report.pk)
+            others.update(
+                status=IdentityReport.Status.UPHELD,
+                decided_by=meta.actor,
+                decided_at=timezone.now(),
+                reason=reason,
+                updated_at=timezone.now(),
+            )
+        report.status = IdentityReport.Status.UPHELD if uphold else IdentityReport.Status.DISMISSED
+        report.decided_by = meta.actor
+        report.decided_at = timezone.now()
+        report.reason = reason
+        report.save(update_fields=["status", "decided_by", "decided_at", "reason", "updated_at"])
+        record(
+            meta,
+            "registration.identity_upheld" if uphold else "registration.identity_dismissed",
+            student,
+            old={"account": account.email if account else None},
+            new={"status": report.status, "reason": reason},
+            department_id=student.department_id,
+        )
+        to = report.contact_email
+        transaction.on_commit(lambda: emails.identity_report_decided(to, uphold, reason))
+    return report
 
 
 # ─── Login (docs/05 §8.2) ─────────────────────────────────────────────────

@@ -1180,3 +1180,18 @@ msgstr "الفصل الدراسي: المستوى %(level)s فصلاه %(first)s
 
 msgid "A programme has 1 to 5 levels."
 msgstr "للبرنامج من مستوى واحد إلى خمسة مستويات."
+
+msgid "This university number already has an account. If it is not yours, report it."
+msgstr "هذا الرقم الجامعي مرتبط بحساب. إن لم يكن حسابك فأبلغ عن انتحال."
+
+msgid "These details do not match an existing account."
+msgstr "هذه البيانات لا تطابق حسابًا قائمًا."
+
+msgid "This report was already decided."
+msgstr "سبق البتّ في هذا البلاغ."
+
+msgid "Your report reached the department. They will reply by email."
+msgstr "وصل بلاغك إلى القسم، وسيردّ عليك بالبريد."
+
+msgid "Give a reason when dismissing."
+msgstr "اكتب سبب رفض البلاغ."

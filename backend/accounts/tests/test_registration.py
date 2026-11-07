@@ -19,10 +19,11 @@ def student(make_student, it_program):
     return make_student(it_program, "26-IT-0001", name="أحمد محمد علي", email="ahmed@college.test")
 
 
-def _start(api, capture, number, name, email):
+def _start(api, capture, number, name, email, program="BIT"):
     with capture(execute=True):
         response = api().post(
-            START, {"university_number": number, "full_name": name, "email": email}
+            START,
+            {"university_number": number, "full_name": name, "program": program, "email": email},
         )
     assert response.status_code == 200
     return response.data["request_id"]
@@ -40,22 +41,53 @@ def _register(api, capture, email, name="احمد محمد علي"):
 def test_unknown_details_get_the_same_answer_and_no_email(
     api, django_capture_on_commit_callbacks, student
 ):
+    def start(number, name, email, program="BIT"):
+        body = {"university_number": number, "full_name": name, "program": program}
+        return api().post(START, {**body, "email": email})
+
     with django_capture_on_commit_callbacks(execute=True):
-        real = api().post(
-            START,
-            {"university_number": "26-IT-0001", "full_name": "أحمد محمد علي", "email": "a@x.test"},
-        )
-        fake = api().post(
-            START, {"university_number": "99-XX-0000", "full_name": "لا أحد", "email": "b@x.test"}
-        )
-        wrong_name = api().post(
-            START,
-            {"university_number": "26-IT-0001", "full_name": "سارة عمر", "email": "c@x.test"},
-        )
-    assert real.status_code == fake.status_code == wrong_name.status_code == 200
-    assert real.data["detail"] == fake.data["detail"] == wrong_name.data["detail"]
+        real = start("26-IT-0001", "أحمد محمد علي", "a@x.test")
+        fake = start("99-XX-0000", "لا أحد", "b@x.test")
+        wrong_name = start("26-IT-0001", "سارة عمر", "c@x.test")
+        # The programme is checked too (owner, 2026-11-07).
+        wrong_program = start("26-IT-0001", "أحمد محمد علي", "d@x.test", program="BBA")
+    responses = [real, fake, wrong_name, wrong_program]
+    assert {r.status_code for r in responses} == {200}
+    assert len({r.data["detail"] for r in responses}) == 1
     assert len(mail.outbox) == 1
     assert mail.outbox[0].to == ["a@x.test"]
+
+
+def test_the_programme_is_required(api, student):
+    body = {"university_number": "26-IT-0001", "full_name": "أحمد محمد علي", "email": "a@x.test"}
+    response = api().post(START, body)
+    assert response.status_code == 400
+    assert "program" in str(response.data)
+
+
+def test_the_name_may_be_typed_as_in_the_record_in_english(
+    api, django_capture_on_commit_callbacks, student
+):
+    student.full_name_en = "Ahmed Mohamed Ali"
+    student.save()
+    _start(api, django_capture_on_commit_callbacks, "26-IT-0001", "ahmed  mohamed ali", "a@x.test")
+    assert mail.outbox[-1].to == ["a@x.test"]
+
+
+def test_an_account_with_another_email_alerts_the_official_address(
+    api, django_capture_on_commit_callbacks, student
+):
+    _register(api, django_capture_on_commit_callbacks, "someone@gmail.test")
+    alert = next(m for m in mail.outbox if m.to == ["ahmed@college.test"])
+    assert "so***@gmail.test" in alert.body and "someone@" not in alert.body
+    assert "/register" in alert.body
+
+
+def test_the_official_address_is_not_alerted_when_it_registers(
+    api, django_capture_on_commit_callbacks, student
+):
+    _register(api, django_capture_on_commit_callbacks, "ahmed@college.test")
+    assert all("أُنشئ حساب" not in m.subject for m in mail.outbox)
 
 
 def test_fake_request_can_never_be_verified(api, django_capture_on_commit_callbacks, db):
@@ -157,8 +189,92 @@ def test_cannot_complete_before_verifying(api, django_capture_on_commit_callback
 def test_registered_student_cannot_register_twice(api, django_capture_on_commit_callbacks, student):
     _register(api, django_capture_on_commit_callbacks, "ahmed@college.test")
     mail.outbox.clear()
-    _start(api, django_capture_on_commit_callbacks, "26-IT-0001", "أحمد محمد علي", "new@x.test")
+    body = {"university_number": "26-IT-0001", "full_name": "أحمد محمد علي", "program": "BIT"}
+    response = api().post(START, {**body, "email": "new@x.test"})
+    assert response.status_code == 409
+    assert response.data["code"] == "already_registered"
     assert mail.outbox == []
+
+
+REPORT = "/api/public/registration/report"
+REPORTS = "/api/v1/identity-reports"
+DETAILS = {"university_number": "26-IT-0001", "full_name": "أحمد محمد علي", "program": "BIT"}
+
+
+def test_a_stolen_record_is_reported_and_freed(
+    api, django_capture_on_commit_callbacks, student, make_user, it_dept, ba_dept
+):
+    """Owner, 2026-11-07: a classmate registers on someone else's record; its student reports
+    it and the department disables that account, so the student can register."""
+    config = SystemSettings.load()
+    config.student_registration_requires_approval = False
+    config.save()
+    _register(api, django_capture_on_commit_callbacks, "classmate@gmail.test")
+    impostor = User.objects.get(email="classmate@gmail.test")
+    assert impostor.is_active
+    manager = make_user(Role.DEPARTMENT_MANAGER, department=it_dept)
+
+    with django_capture_on_commit_callbacks(execute=True):
+        sent = api().post(REPORT, {**DETAILS, "email": "ahmed@me.test", "note": "ليس حسابي"})
+        api().post(REPORT, {**DETAILS, "email": "ahmed@me.test"})  # sent twice
+    assert sent.status_code == 201
+    listing = api(manager).get(REPORTS, {"status": "open"})
+    assert listing.data["count"] == 1
+    row = listing.data["results"][0]
+    assert row["account_email"] == "classmate@gmail.test"
+    assert row["contact_email"] == "ahmed@me.test" and row["note"] == "ليس حسابي"
+    notified = api(manager).get("/api/v1/notifications").data["results"]
+    assert notified[0]["title"] == "بلاغ انتحال على حساب طالب"
+
+    url = f"{REPORTS}/{row['public_id']}"
+    other_manager = make_user(Role.DEPARTMENT_MANAGER, department=ba_dept)
+    assert api(other_manager).get(url).status_code == 404
+    assert api(other_manager).post(f"{url}/decide", {"uphold": True}).status_code == 404
+
+    with django_capture_on_commit_callbacks(execute=True):
+        decided = api(manager).post(f"{url}/decide", {"uphold": True})
+    assert decided.status_code == 200 and decided.data["status"] == "upheld"
+    assert mail.outbox[-1].to == ["ahmed@me.test"] and "/register" in mail.outbox[-1].body
+    impostor.refresh_from_db()
+    student.refresh_from_db()
+    assert not impostor.is_active and student.user is None
+    assert not impostor.role_assignments.filter(role=Role.STUDENT).exists()
+    assert (
+        api().post(LOGIN, {"identifier": "classmate@gmail.test", "password": PASSWORD}).status_code
+        != 200
+    )
+    assert api(manager).post(f"{url}/decide", {"uphold": True}).status_code == 409
+
+    _, status = _register(api, django_capture_on_commit_callbacks, "ahmed@college.test")
+    assert status == "active"
+
+
+def test_a_report_is_dismissed_with_a_reason(
+    api, django_capture_on_commit_callbacks, student, make_user
+):
+    _register(api, django_capture_on_commit_callbacks, "me@gmail.test")
+    head = make_user(Role.HEAD_REGISTRAR)
+    api().post(REPORT, {**DETAILS, "email": "other@x.test"})
+    url = f"{REPORTS}/{api(head).get(REPORTS).data['results'][0]['public_id']}"
+    assert api(head).post(f"{url}/decide", {"uphold": False}).status_code == 400
+    with django_capture_on_commit_callbacks(execute=True):
+        decided = api(head).post(f"{url}/decide", {"uphold": False, "reason": "تحققنا منه حضوريًا"})
+    assert decided.data["status"] == "dismissed"
+    assert "تحققنا منه حضوريًا" in mail.outbox[-1].body
+    student.refresh_from_db()
+    assert student.user.email == "me@gmail.test"
+
+
+def test_a_report_needs_details_of_an_existing_account(api, student):
+    response = api().post(REPORT, {**DETAILS, "email": "a@x.test"})
+    assert response.status_code == 400
+    wrong = api().post(REPORT, {**DETAILS, "program": "BBA", "email": "a@x.test"})
+    assert wrong.status_code == 400
+
+
+def test_students_and_teachers_cannot_read_reports(api, make_user):
+    for role in (Role.STUDENT, Role.TEACHER):
+        assert api(make_user(role)).get(REPORTS).status_code == 403
 
 
 def test_a_stale_rejection_cannot_delete_an_approved_account(make_user, make_student, it_program):

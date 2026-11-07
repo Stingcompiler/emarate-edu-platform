@@ -315,6 +315,7 @@ def test_registration_pending_reaches_the_department(
                 "/api/public/registration/start",
                 {
                     "university_number": "26-IT-0300",
+                    "program": "BIT",
                     "full_name": "سلمى عمر",
                     "email": "s@gmail.test",
                 },
