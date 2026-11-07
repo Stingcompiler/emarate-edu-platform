@@ -135,6 +135,16 @@
 .motion-backdrop {
   animation: fade var(--dur-1) ease-out both;
 }
+/* A menu dropping from its trigger (the pick-one control on large screens). */
+.motion-menu {
+  animation: rise-small var(--dur-1) var(--ease-out) both;
+}
+@keyframes rise-small {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
 
 /* A check mark that draws itself (success). */
 .motion-check {
