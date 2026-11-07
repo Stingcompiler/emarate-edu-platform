@@ -10,10 +10,10 @@ import {
   Notice,
   problemMessage,
   PasswordField,
-  SelectField,
   TextArea,
 } from "../components/ui";
 import { api } from "../lib/api";
+import { type Choice, ChoiceField } from "../components/ChoiceField";
 import { OtpInput } from "../components/OtpInput";
 
 type Step = "details" | "code" | "password" | "done" | "taken" | "reported";
@@ -43,11 +43,13 @@ export function Register() {
     queryFn: async () => (await api.GET("/api/public/programs")).data ?? [],
     staleTime: 5 * 60_000,
   });
-  // One group per department, in the list's order.
-  const groups = new Map<string, NonNullable<typeof programs.data>>();
-  for (const p of programs.data ?? []) {
-    groups.set(p.department_name, [...(groups.get(p.department_name) ?? []), p]);
-  }
+  const choices: Choice[] = (programs.data ?? []).map((p) => ({
+    value: p.code,
+    label: p.name_ar,
+    hint: p.name_en,
+    group: p.department_name,
+    badge: p.degree_label,
+  }));
 
   useEffect(() => {
     document.title = "إنشاء حساب طالب — بوابة كلية الإمارات";
@@ -234,26 +236,18 @@ export function Register() {
         <Card>
           {step === "details" && (
             <>
-              <SelectField
+              <ChoiceField
                 label="التخصص"
                 value={program}
-                onChange={(e) => setProgram(e.target.value)}
+                onChange={setProgram}
+                options={choices}
+                loading={programs.isPending}
+                placeholder="اختر تخصصك"
+                searchPlaceholder="ابحث باسم التخصص أو القسم"
+                empty="لا تخصص بهذا الاسم"
                 required
                 autoFocus
-              >
-                <option value="" disabled>
-                  {programs.isPending ? "جارٍ التحميل…" : "اختر تخصصك"}
-                </option>
-                {[...groups].map(([department, list]) => (
-                  <optgroup key={department} label={department}>
-                    {list.map((p) => (
-                      <option key={p.code} value={p.code}>
-                        {p.name_ar}
-                      </option>
-                    ))}
-                  </optgroup>
-                ))}
-              </SelectField>
+              />
               <Field
                 label="الرقم الجامعي"
                 dir="ltr"
