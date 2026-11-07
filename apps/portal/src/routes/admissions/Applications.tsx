@@ -21,6 +21,7 @@ import { can } from "../../lib/nav";
 import { api, ok } from "../../lib/api";
 import { when, count, N } from "../../lib/format";
 import { STATUS_LABEL, STATUS_TONE } from "../../lib/visitor";
+import { Select } from "../../components/Select";
 
 const FILTERS = [
   { key: "", label: "الكل" },
@@ -124,7 +125,7 @@ export function Applications() {
   const bulkBar = (
     <Card className="mt-4 flex flex-wrap items-center gap-2 p-3 text-sm">
       <span className="font-semibold">{count(picked.size, N.application)} محددة</span>
-      <select
+      <Select
         aria-label="المسجل"
         value={target}
         onChange={(e) => setTarget(e.target.value)}
@@ -136,7 +137,7 @@ export function Applications() {
             {u.full_name_ar}
           </option>
         ))}
-      </select>
+      </Select>
       <Button
         className="min-h-11 px-4"
         disabled={!target || distribute.isPending}

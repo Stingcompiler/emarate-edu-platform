@@ -17,6 +17,7 @@ import {
   problemMessage,
 } from "../components/ui";
 import { api, ok } from "../lib/api";
+import { Select } from "../components/Select";
 
 type Option = Schemas["AudienceOption"];
 type Category = Schemas["SendCategoryEnum"];
@@ -229,7 +230,7 @@ function AudiencePicker({
                 {first.option.count.toLocaleString("ar-u-nu-latn")}
               </span>
             ) : (
-              <select
+              <Select
                 aria-label={label}
                 className="min-h-10 w-full rounded-lg border border-border bg-surface px-3 text-sm text-text sm:w-auto sm:max-w-72"
                 value={chosen?.index ?? ""}
@@ -243,7 +244,7 @@ function AudiencePicker({
                     {option.label} · {option.count.toLocaleString("ar-u-nu-latn")}
                   </option>
                 ))}
-              </select>
+              </Select>
             )}
           </div>
         );

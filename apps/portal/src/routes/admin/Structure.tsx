@@ -23,6 +23,7 @@ import { count, N, SEMESTERS, fmtDate, termName } from "../../lib/format";
 import { ALL } from "../../components/Pager";
 import { useConfirm } from "../../components/Confirm";
 import { useUnsavedChanges } from "../../lib/useUnsavedChanges";
+import { Select } from "../../components/Select";
 
 const DEGREE: Record<string, string> = {
   diploma: "دبلوم",
@@ -328,7 +329,7 @@ export function Structure() {
           <Card className="space-y-2 p-3">
             <p className="text-sm font-semibold">+ فصل</p>
             <div className="grid grid-cols-2 gap-2">
-              <select
+              <Select
                 value={tForm.academic_year}
                 onChange={(e) => pickTerm({ academic_year: e.target.value })}
                 aria-label="العام"
@@ -340,8 +341,8 @@ export function Structure() {
                     {y.name}
                   </option>
                 ))}
-              </select>
-              <select
+              </Select>
+              <Select
                 value={tForm.order}
                 onChange={(e) => pickTerm({ order: Number(e.target.value) })}
                 aria-label="الفصل الدراسي"
@@ -352,7 +353,7 @@ export function Structure() {
                     {s.label}
                   </option>
                 ))}
-              </select>
+              </Select>
             </div>
             <Labeled label="اسم الفصل">
               <input
@@ -1080,7 +1081,7 @@ function ProgramForm({
         {program && (
           <label className={`${LABEL} @lg:max-w-md`}>
             القسم
-            <select
+            <Select
               value={form.department}
               onChange={(e) => set({ department: Number(e.target.value) })}
               className={INPUT}
@@ -1090,7 +1091,7 @@ function ProgramForm({
                   {d.name_ar}
                 </option>
               ))}
-            </select>
+            </Select>
             <span className="font-normal">
               يُنقل إلى قسم آخر ما دام لا طلاب عليه ولا مواد ولا طلبات تقديم.
             </span>
@@ -1323,7 +1324,7 @@ function TermForm({ term, onDone }: { term: Schemas["Term"]; onDone: () => void 
           />
         </Labeled>
         <Labeled label="الفصل الدراسي">
-          <select
+          <Select
             value={form.order}
             onChange={(e) => setForm({ ...form, order: e.target.value })}
             className={INPUT}
@@ -1333,7 +1334,7 @@ function TermForm({ term, onDone }: { term: Schemas["Term"]; onDone: () => void 
                 {s.label}
               </option>
             ))}
-          </select>
+          </Select>
         </Labeled>
       </div>
       <div className="grid grid-cols-2 gap-2">
@@ -1448,14 +1449,14 @@ function DepartmentEnd({
         <div className="flex flex-wrap items-end gap-2">
           <label className={`${LABEL} min-w-48 flex-1`}>
             دمج في قسم آخر
-            <select value={into} onChange={(e) => setInto(e.target.value)} className={INPUT}>
+            <Select value={into} onChange={(e) => setInto(e.target.value)} className={INPUT}>
               <option value="">اختر القسم…</option>
               {others.map((d) => (
                 <option key={d.id} value={d.id}>
                   {d.name_ar}
                 </option>
               ))}
-            </select>
+            </Select>
           </label>
           <Button
             variant="secondary"

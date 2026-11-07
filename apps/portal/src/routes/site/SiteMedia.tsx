@@ -21,6 +21,7 @@ import { asForm, formData } from "../../lib/upload";
 import { Pager, useServerPages } from "../../components/Pager";
 import { useConfirm } from "../../components/Confirm";
 import { useToast } from "../../components/Toast";
+import { Select } from "../../components/Select";
 
 type Tab = "media" | "menus" | "settings";
 
@@ -717,7 +718,7 @@ function SiteSettingsForm() {
                         className={`size-12 shrink-0 rounded-lg ${key === "logo" ? "bg-surface-alt object-contain p-1" : "object-cover"}`}
                       />
                     )}
-                    <select
+                    <Select
                       value={form[key]}
                       onChange={(e) => set({ [key]: e.target.value })}
                       className="min-h-11 w-full rounded-lg border border-border bg-surface px-3 text-sm"
@@ -728,7 +729,7 @@ function SiteSettingsForm() {
                           {m.alt_ar || m.url.split("/").pop()}
                         </option>
                       ))}
-                    </select>
+                    </Select>
                   </span>
                   {key === "hero_image" && picked && altNeedsWork(picked.alt_ar) && (
                     <span

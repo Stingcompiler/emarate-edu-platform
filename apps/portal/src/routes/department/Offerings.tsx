@@ -33,6 +33,7 @@ import {
   planSemesters,
 } from "../../lib/format";
 import { useConfirm } from "../../components/Confirm";
+import { Select } from "../../components/Select";
 
 /** Board: DesktopDeptDashboard «المواد والتعيينات» — assign teachers from the same screen (docs/02 §4.15). */
 export function Offerings() {
@@ -392,7 +393,7 @@ function Slot({
       </span>
     );
   return (
-    <select
+    <Select
       aria-label={`تعيين ${label}`}
       value=""
       onChange={(e) => e.target.value && onAssign(e.target.value)}
@@ -404,7 +405,7 @@ function Slot({
           {o.name}
         </option>
       ))}
-    </select>
+    </Select>
   );
 }
 
@@ -583,7 +584,7 @@ function NewOffering({
           className={input}
         />
         <Labeled label="البرنامج">
-          <select
+          <Select
             value={f.program}
             onChange={(e) => setF({ ...f, program: e.target.value })}
             className={`${input} w-full min-w-0`}
@@ -594,7 +595,7 @@ function NewOffering({
                 {p.name_ar}
               </option>
             ))}
-          </select>
+          </Select>
         </Labeled>
         <label className="flex items-center gap-1 text-xs text-text-muted">
           ساعات
@@ -653,7 +654,7 @@ function PlanSemesterPick({
   return (
     <label className="flex items-center gap-1 text-xs text-text-muted">
       الفصل
-      <select
+      <Select
         aria-label="الفصل الدراسي"
         value={planSemester(level, order)}
         onChange={(e) => {
@@ -667,7 +668,7 @@ function PlanSemesterPick({
             {x.label}
           </option>
         ))}
-      </select>
+      </Select>
     </label>
   );
 }

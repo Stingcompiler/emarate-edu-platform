@@ -31,6 +31,7 @@ import {
 } from "../../lib/visitor";
 import { ALL } from "../../components/Pager";
 import { FieldInput } from "../visitor/Apply";
+import { Select } from "../../components/Select";
 
 const TYPES: { key: Field["type"]; label: string }[] = [
   { key: "text", label: "نص قصير" },
@@ -702,7 +703,7 @@ export function FormBuilder() {
                   <div className="flex flex-wrap items-center gap-2 px-4 py-2.5 text-sm text-text-muted">
                     <label className="flex flex-wrap items-center gap-2">
                       أضف حقلًا:
-                      <select
+                      <Select
                         value={adding[si] ?? ""}
                         onChange={(e) => setAdding((a) => ({ ...a, [si]: e.target.value }))}
                         className="min-h-11 rounded-lg border border-border bg-surface px-2 text-sm text-text"
@@ -713,7 +714,7 @@ export function FormBuilder() {
                             {t.label}
                           </option>
                         ))}
-                      </select>
+                      </Select>
                     </label>
                     <Button
                       variant="secondary"

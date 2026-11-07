@@ -3,8 +3,8 @@ import type {
   ButtonHTMLAttributes,
   HTMLAttributes,
   InputHTMLAttributes,
+  ComponentProps,
   ReactNode,
-  SelectHTMLAttributes,
   TextareaHTMLAttributes,
 } from "react";
 
@@ -15,6 +15,7 @@ import { Link } from "react-router";
 import { SITE_URL, useSiteLogo } from "../lib/site";
 import { VisitorNav, siteLink } from "./VisitorNav";
 import { CountUp } from "./motion";
+import { Select } from "./Select";
 
 /** Small shared primitives for portal pages; tokens only (docs/06). */
 
@@ -138,7 +139,7 @@ export function SelectField({
   requiredMark = false,
   children,
   ...props
-}: SelectHTMLAttributes<HTMLSelectElement> & {
+}: Omit<ComponentProps<typeof Select>, "className"> & {
   label: string;
   hint?: string;
   requiredMark?: boolean;
@@ -153,12 +154,12 @@ export function SelectField({
           </span>
         )}
       </span>
-      <select
+      <Select
         {...props}
         className="mt-0.5 block min-h-9 w-full bg-transparent text-base text-text outline-none"
       >
         {children}
-      </select>
+      </Select>
       {hint && <span className="mt-1 block text-xs text-text-muted">{hint}</span>}
     </label>
   );

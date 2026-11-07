@@ -19,6 +19,7 @@ import { useMe } from "../../lib/auth";
 import { when, count, N } from "../../lib/format";
 import { can } from "../../lib/nav";
 import { ALL, Pager, useLocalPages } from "../../components/Pager";
+import { Select } from "../../components/Select";
 
 export const KIND = {
   exam_misconduct: { short: "غش", label: "غش امتحان" },
@@ -98,7 +99,7 @@ export function Cases() {
             مقفلة {all.length - open.length}
           </Chip>
           {tab !== "reports" && (
-            <select
+            <Select
               aria-label="النوع"
               value={kind}
               onChange={(e) => setKind(e.target.value)}
@@ -110,7 +111,7 @@ export function Cases() {
                   {k.label}
                 </option>
               ))}
-            </select>
+            </Select>
           )}
         </div>
       </FilterBar>

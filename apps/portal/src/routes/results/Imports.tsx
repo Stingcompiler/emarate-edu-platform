@@ -20,6 +20,7 @@ import { useMe } from "../../lib/auth";
 import { when, count, N, fileName } from "../../lib/format";
 import { asForm, formData } from "../../lib/upload";
 import { ALL, Pager, useServerPages } from "../../components/Pager";
+import { Select } from "../../components/Select";
 
 /** Boards: ResultsOfficerHome (phone), DesktopResultsImport step 1 (desktop). */
 export function ResultImports() {
@@ -82,7 +83,7 @@ export function ResultImports() {
             <form onSubmit={submit} className="space-y-3">
               <label className="block text-sm">
                 <span className="text-xs text-text-muted">الفصل</span>
-                <select
+                <Select
                   className="mt-1 block min-h-11 w-full rounded-lg border border-border bg-surface px-3"
                   value={term || currentTerm?.id || ""}
                   onChange={(e) => setTerm(e.target.value)}
@@ -92,11 +93,11 @@ export function ResultImports() {
                       {t.name_ar}
                     </option>
                   ))}
-                </select>
+                </Select>
               </label>
               <label className="block text-sm">
                 <span className="text-xs text-text-muted">القسم</span>
-                <select
+                <Select
                   className="mt-1 block min-h-11 w-full rounded-lg border border-border bg-surface px-3"
                   value={department}
                   onChange={(e) => setDepartment(e.target.value)}
@@ -107,7 +108,7 @@ export function ResultImports() {
                       {d.name_ar}
                     </option>
                   ))}
-                </select>
+                </Select>
               </label>
               <label className="flex min-h-24 cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed border-border bg-surface-alt px-4 py-4 text-center text-sm text-text-muted hover:border-primary">
                 <FileUp size={22} aria-hidden className="text-primary" />

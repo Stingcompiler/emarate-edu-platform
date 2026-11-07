@@ -24,6 +24,7 @@ import { when } from "../../lib/format";
 import { initials, num, useDepartments } from "../../lib/reports";
 import { DEPARTMENT_ROLES, ROLE_LABEL } from "./roles";
 import { Pager } from "../../components/Pager";
+import { Select } from "../../components/Select";
 
 /** Board: SystemAdminUsers (phone); desktop derived — list beside "new staff account". */
 export function AdminUsers() {
@@ -155,7 +156,7 @@ export function AdminUsers() {
                 </Chip>
               </div>
               {Object.keys(counts.data ?? {}).length > 0 && (
-                <select
+                <Select
                   value={role}
                   onChange={(e) => {
                     const next = new URLSearchParams(params);
@@ -175,7 +176,7 @@ export function AdminUsers() {
                         {ROLE_LABEL[k] ?? k} · {num(n)}
                       </option>
                     ))}
-                </select>
+                </Select>
               )}
             </div>
           </FilterBar>

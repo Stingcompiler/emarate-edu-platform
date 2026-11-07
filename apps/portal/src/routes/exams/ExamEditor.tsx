@@ -21,6 +21,7 @@ import { useUnsavedChanges } from "../../lib/useUnsavedChanges";
 import { type QType, TYPE_LABEL } from "../../lib/exam";
 import { count, N } from "../../lib/format";
 import { useConfirm } from "../../components/Confirm";
+import { Select } from "../../components/Select";
 
 type Question = Omit<Schemas["Question"], "choices"> & {
   choices?: { id?: number; text: string; is_correct?: boolean }[];
@@ -164,7 +165,7 @@ export function ExamEditor() {
               {creating && (
                 <label className="block border-b border-border-soft px-4 py-2.5">
                   <span className="block text-xs text-text-muted">المادة</span>
-                  <select
+                  <Select
                     className="mt-1 block min-h-10 w-full bg-transparent text-base text-text"
                     value={form.offering}
                     onChange={(ev) => set({ offering: ev.target.value })}
@@ -177,7 +178,7 @@ export function ExamEditor() {
                           {c.code} — {c.name_ar}
                         </option>
                       ))}
-                  </select>
+                  </Select>
                 </label>
               )}
               <Field

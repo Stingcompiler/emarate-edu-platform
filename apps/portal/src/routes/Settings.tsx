@@ -26,6 +26,7 @@ import { hasRole, useMe, useSignOut } from "../lib/auth";
 import { disablePush, enablePush, pushState, type PushState } from "../lib/push";
 import { type Density, useDensity } from "../lib/density";
 import { type Theme, useTheme } from "../lib/theme";
+import { Select } from "../components/Select";
 
 type Preference = Schemas["Preference"];
 
@@ -487,7 +488,7 @@ function Qualifications() {
         >
           <label className="text-xs text-text-muted">
             الدرجة
-            <select
+            <Select
               value={form.degree}
               onChange={(e) =>
                 setForm({ ...form, degree: e.target.value as Schemas["QualificationDegreeEnum"] })
@@ -499,7 +500,7 @@ function Qualifications() {
                   {d.label}
                 </option>
               ))}
-            </select>
+            </Select>
           </label>
           <label className="text-xs text-text-muted">
             التخصص

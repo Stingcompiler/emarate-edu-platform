@@ -4,6 +4,11 @@ Older rounds (2026-10-24 → 11-02): `.claude/handoff/archive/2026-10-24_to_2026
 
 ## State
 
+- **Pick-one control** (owner, 2026-11-07: «modernize the dropdowns, system-wide»):
+  `apps/portal/src/components/Select.tsx` — `Select` (drop-in for `<select>`, used by every former
+  select and by `SelectField`) and `ChoiceField` (form-card row, /register programme). Sheet on
+  phones, anchored menu on ≥1024, search from 9 options. e2e drive it with `choose()` in
+  `e2e/tests/helpers.ts`. The public site keeps native selects, restyled in `global.css`.
 - **Student self-registration** (owner, 2026-11-07; `feat/registration-program-check`): the
   student picks the programme from the list; the record must match number + programme + name
   (Arabic or English, as in the record). A record that already has an account answers 409

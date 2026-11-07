@@ -75,3 +75,19 @@ body:has(details[data-menu][open]) [data-whatsapp-float] {
     scale: 0.4;
   }
 }
+
+/* The portal's pick-one look on the public site (owner, 2026-11-07): no browser chrome, a
+   chevron at the end. The site keeps the native list (no script); the portal uses Select. */
+select {
+  appearance: none;
+  /* A mid grey readable on both themes; a data URI cannot take a token. */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%238a94a6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-size: 1rem;
+  background-position: left 0.75rem center;
+  padding-inline-end: 2.25rem;
+  cursor: pointer;
+}
+[dir="ltr"] select {
+  background-position: right 0.75rem center;
+}

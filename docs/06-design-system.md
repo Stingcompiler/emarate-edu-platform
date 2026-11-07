@@ -189,7 +189,7 @@ Tailwind 4: `@theme { --color-primary: var(--primary); ... }` فتُستخدم `
 | Button | primary, secondary (primary-soft), outline, ghost, danger, link؛ sm/md/lg؛ icon-start/end | default, hover, active, focus, disabled, loading | نص دائمًا (أو `aria-label` لأيقونة فقط)؛ loading يعطّل ويُظهر Spinner |
 | IconButton | نفس الأعلى | – | `aria-label` إلزامي، tooltip |
 | Input / Textarea | md/lg؛ prefix/suffix؛ عدّاد أحرف | default, focus, error, disabled, readonly | يرتبط بـ `FormField` |
-| Select / Combobox | مفرد/متعدد، بحث، غير متزامن | – | Radix Select/Popover + `aria-activedescendant` |
+| Select / Combobox | مفرد، بحث للقوائم ≥ 9 خيارات (يتجاهل اختلاف الإملاء العربي)، مجموعات، سطر ثانٍ وشارة لكل خيار | – | `components/Select.tsx` (المالك، 2026-11-07: على مستوى النظام): `Select` بديل مباشر لـ `<select>` (نفس `<option>/<optgroup>` و`value`/`onChange(e)`/`name`/`required`)، و`ChoiceField` صفًّا في بطاقة النموذج؛ Sheet من الأسفل على < `lg` وقائمة ملتصقة بالزر على ≥ `lg`؛ `role=combobox` + `listbox` + `aria-activedescendant`، الأسهم وEnter وEsc وحرف للقفز. لا `<select>` أصلي في البوابة؛ الموقع العام يُبقيه أصليًا بمظهر موحَّد. |
 | DatePicker / DateTimePicker | تاريخ، تاريخ+وقت، مدى | – | كتابة يدوية + تقويم؛ تقويم ميلادي |
 | PhoneInput | رمز الدولة (افتراضي SD +249) | error | تطبيع E.164 على الخادم |
 | OTPInput | 6 خانات | error, resend-countdown | لصق كامل مدعوم |

@@ -1,6 +1,6 @@
 import { type Locator, type Page, expect, test } from "@playwright/test";
 
-import { lastCode, signIn } from "./helpers";
+import { choose, lastCode, signIn } from "./helpers";
 
 // Keyboard use and Arabic messages after review 2026-11 axis 8 (the probes, each expecting the
 // old fault, are in docs/qa/evidence/review-2026-11/a11y).
@@ -105,9 +105,7 @@ test.describe("form builder by keyboard", () => {
 
   test("a refused publish speaks Arabic and names the field", async ({ page }) => {
     await page.getByRole("button", { name: /^المدرسة/ }).click();
-    await page
-      .getByRole("combobox", { name: "الظهور" })
-      .selectOption({ label: "يظهر حسب «نوع الشهادة»" });
+    await choose(page.getByRole("combobox", { name: "الظهور" }), "يظهر حسب «نوع الشهادة»");
     await page.getByRole("button", { name: "نشر القالب" }).click();
     await expect(
       page.getByRole("alert").filter({ hasText: "اختر الإجابات التي تُظهر" }),
