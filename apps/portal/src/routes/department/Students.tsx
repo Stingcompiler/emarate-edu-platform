@@ -21,7 +21,13 @@ import { isWide } from "../../lib/media";
 import { useMe } from "../../lib/auth";
 import { useDepartment } from "../../lib/department";
 import { can } from "../../lib/nav";
-import { SEMESTERS, levelSemester, semester } from "../../lib/format";
+import {
+  fromPlanSemester,
+  levelSemester,
+  planSemester,
+  planSemesters,
+  semester,
+} from "../../lib/format";
 import { initials, num } from "../../lib/reports";
 import { ALL, Pager } from "../../components/Pager";
 import { useConfirm } from "../../components/Confirm";
@@ -230,7 +236,7 @@ export function DepartmentStudents() {
                 ],
                 ["البرنامج", s.program_name],
                 ["المستوى", num(s.level)],
-                ["الفصل الدراسي", semester(s.semester)],
+                ["الفصل الدراسي", semester(s.level, s.semester)],
                 ["الحالة", STATUS[s.status] ?? s.status],
                 ["البريد", s.email ? <bdi key="e">{s.email}</bdi> : "—"],
                 ["الهاتف", s.phone_e164 ? <bdi key="p">{s.phone_e164}</bdi> : "—"],
@@ -377,38 +383,24 @@ function StudentForm({
             <span className="mt-1 block text-xs text-danger-strong">{errors.program[0]}</span>
           )}
         </label>
-        <label className="block border-b border-border-soft px-4 py-2.5">
-          <span className="block text-xs text-text-muted">المستوى</span>
-          <select
-            value={f.level}
-            onChange={(e) => setF({ ...f, level: Number(e.target.value) })}
-            className="mt-0.5 block min-h-9 w-full bg-transparent text-base text-text outline-none"
-          >
-            {Array.from({ length: levels }, (_, i) => i + 1).map((l) => (
-              <option key={l} value={l}>
-                المستوى {num(l)}
-              </option>
-            ))}
-          </select>
-          {errors.level?.[0] && (
-            <span className="mt-1 block text-xs text-danger-strong">{errors.level[0]}</span>
-          )}
-        </label>
+        {/* One choice: the plan's semester (1–10) carries the level (owner, 2026-11-07). */}
         <label className="block border-b border-border-soft px-4 py-2.5">
           <span className="block text-xs text-text-muted">الفصل الدراسي</span>
           <select
-            value={f.semester}
-            onChange={(e) => setF({ ...f, semester: Number(e.target.value) })}
+            value={planSemester(f.level, f.semester)}
+            onChange={(e) => setF({ ...f, ...fromPlanSemester(Number(e.target.value)) })}
             className="mt-0.5 block min-h-9 w-full bg-transparent text-base text-text outline-none"
           >
-            {SEMESTERS.map((x) => (
-              <option key={x.value} value={x.value}>
+            {planSemesters(levels).map((x) => (
+              <option key={x.n} value={x.n}>
                 {x.label}
               </option>
             ))}
           </select>
-          {errors.semester?.[0] && (
-            <span className="mt-1 block text-xs text-danger-strong">{errors.semester[0]}</span>
+          {(errors.level?.[0] || errors.semester?.[0]) && (
+            <span className="mt-1 block text-xs text-danger-strong">
+              {errors.level?.[0] ?? errors.semester?.[0]}
+            </span>
           )}
         </label>
         <Field

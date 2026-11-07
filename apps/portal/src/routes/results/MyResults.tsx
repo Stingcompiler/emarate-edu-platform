@@ -188,7 +188,7 @@ function PlanProgress({ plan }: { plan: Plan }) {
               <p className="mt-1 flex flex-wrap gap-x-3 text-xs text-text-muted">
                 {l.semesters.map((x) => (
                   <span key={x.semester}>
-                    {semester(x.semester)}{" "}
+                    {semester(l.level, x.semester)}{" "}
                     <span dir="ltr">
                       {n(x.earned)}/{n(x.required)}
                     </span>

@@ -162,17 +162,54 @@ export function slugify(title: string, max = 100): string {
 }
 
 /**
- * The college's study plan (owner, 2026-11-05): levels 1–5, each a year of two semesters.
- * A course and a term carry the semester as 1 or 2; there is no summer term.
+ * A term of the academic year: the first or the second (no summer term). Not the plan's
+ * semester, which runs 1–10 through the programme (planSemester).
  */
 export const SEMESTERS = [
   { value: 1, label: "الفصل الدراسي الأول" },
   { value: 2, label: "الفصل الدراسي الثاني" },
 ] as const;
 
-/** «الفصل الأول» / «الفصل الثاني», short for cards and lists. */
-export function semester(order: number | null | undefined): string {
-  return order === 2 ? "الفصل الثاني" : "الفصل الأول";
+const ORDINALS = [
+  "الأول",
+  "الثاني",
+  "الثالث",
+  "الرابع",
+  "الخامس",
+  "السادس",
+  "السابع",
+  "الثامن",
+  "التاسع",
+  "العاشر",
+];
+
+/**
+ * The study plan's semesters run through the programme (owner, 2026-11-07): level 1 holds
+ * semesters 1–2, level 2 holds 3–4 … level 5 (engineering, medicine) holds 9–10. Stored as
+ * (level, 1|2); this is the number people use.
+ */
+export function planSemester(level: number | null | undefined, order: number | null | undefined) {
+  return ((level ?? 1) - 1) * 2 + (order === 2 ? 2 : 1);
+}
+
+/** Back from the plan's number: semester 3 → level 2, its first semester. */
+export function fromPlanSemester(n: number): { level: number; semester: 1 | 2 } {
+  return { level: Math.ceil(n / 2), semester: n % 2 === 0 ? 2 : 1 };
+}
+
+/** «الفصل الثالث»: the plan semester of (level, semester-in-level). */
+export function semester(level: number | null | undefined, order: number | null | undefined) {
+  const n = planSemester(level, order);
+  return `الفصل ${ORDINALS[n - 1] ?? n.toLocaleString("ar-u-nu-latn")}`;
+}
+
+/** The plan's semesters of a programme with ``levels`` levels, for a select. */
+export function planSemesters(levels: number | null | undefined) {
+  return Array.from({ length: 2 * Math.min(Math.max(levels ?? 5, 1), 5) }, (_, i) => {
+    const n = i + 1;
+    const { level, semester: order } = fromPlanSemester(n);
+    return { n, level, semester: order, label: `${semester(level, order)} — المستوى ${level}` };
+  });
 }
 
 /** The suggested name of a term: «الفصل الدراسي الأول 2026/2027». */
@@ -181,7 +218,7 @@ export function termName(order: number, year: string | null | undefined): string
   return year ? `${label} ${year}` : label;
 }
 
-/** «المستوى 2 · الفصل الأول»: where a student is in the study plan. */
+/** «المستوى 2 · الفصل الثالث»: where a student or a course is in the study plan. */
 export function levelSemester(level: number | null | undefined, order?: number | null): string {
-  return `المستوى ${(level ?? 1).toLocaleString("ar-u-nu-latn")} · ${semester(order)}`;
+  return `المستوى ${(level ?? 1).toLocaleString("ar-u-nu-latn")} · ${semester(level, order)}`;
 }

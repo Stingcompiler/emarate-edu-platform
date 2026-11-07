@@ -84,3 +84,35 @@ def test_bulk_enroll_takes_the_students_in_the_terms_semester(
     body = {"term": term.pk, "program": it_program.pk, "level": 1}
     assert api(manager).post("/api/v1/enrollments/bulk", body).data["students"] == 1
     assert list(Enrollment.objects.values_list("student_record", flat=True)) == [on_time.pk]
+
+
+def test_import_reads_the_plans_semester_number(api, head, it_program):
+    """Owner, 2026-11-07: semesters run 1–10 through the programme; level 2 holds 3 and 4."""
+    file = _csv(
+        "الرقم الجامعي,الاسم,رمز البرنامج,المستوى,الفصل الدراسي",
+        "26-IT-0011,أحمد,BIT,2,3",
+        "26-IT-0012,منى,BIT,2,الرابع",
+        "26-IT-0013,علي,BIT,3,الفصل الخامس",
+        "26-IT-0014,هند,BIT,2,5",
+    )
+    batch = api(head).post("/api/v1/student-imports", {"file": file}, format="multipart").data
+    rows = api(head).get(f"/api/v1/student-imports/{batch['public_id']}/rows").data["results"]
+    errors = {r["row_no"]: " ".join(r["errors"]) for r in rows if r["errors"]}
+    assert list(errors) == [5] and "3" in errors[5] and "4" in errors[5]
+    api(head).post(f"/api/v1/student-imports/{batch['public_id']}/commit")
+    places = {
+        number: (level, semester)
+        for number, level, semester in StudentRecord.objects.values_list(
+            "university_number", "level", "semester"
+        )
+    }
+    assert places == {"26-IT-0011": (2, 1), "26-IT-0012": (2, 2), "26-IT-0013": (3, 1)}
+
+
+def test_a_programmes_semesters_are_twice_its_levels(api, make_user, it_program):
+    admin = make_user(Role.SYSTEM_ADMIN)
+    url = f"/api/v1/programs/{it_program.pk}"
+    done = api(admin).patch(url, {"levels_count": 5, "duration_terms": 3}, format="json")
+    assert done.status_code == 200, done.data
+    assert (done.data["levels_count"], done.data["duration_terms"]) == (5, 10)
+    assert api(admin).patch(url, {"levels_count": 6}, format="json").status_code == 400

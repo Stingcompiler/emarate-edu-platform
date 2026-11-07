@@ -24,7 +24,14 @@ import { useCurrentTerm, useDepartment, useOfferings } from "../../lib/departmen
 import { can } from "../../lib/nav";
 import { num } from "../../lib/reports";
 import { ALL } from "../../components/Pager";
-import { count, N, semester } from "../../lib/format";
+import {
+  count,
+  N,
+  fromPlanSemester,
+  levelSemester,
+  planSemester,
+  planSemesters,
+} from "../../lib/format";
 import { useConfirm } from "../../components/Confirm";
 
 /** Board: DesktopDeptDashboard «المواد والتعيينات» — assign teachers from the same screen (docs/02 §4.15). */
@@ -227,8 +234,11 @@ export function Offerings() {
                     {o.course_detail.name_ar}
                   </Link>
                   <span className="text-xs text-text-muted">
-                    شعبة <bdi>{o.section}</bdi> · المستوى {num(o.course_detail.default_level ?? 1)}{" "}
-                    · {semester(o.course_detail.default_term_order)}
+                    شعبة <bdi>{o.section}</bdi> ·{" "}
+                    {levelSemester(
+                      o.course_detail.default_level,
+                      o.course_detail.default_term_order,
+                    )}
                   </span>
                 </span>
               </span>
@@ -447,7 +457,7 @@ function EditOffering({
         e.preventDefault();
         save.mutate();
       }}
-      className="col-span-full grid gap-2 rounded-xl bg-surface-alt p-3 sm:grid-cols-[110px_minmax(0,1fr)_90px_90px_110px_70px_auto]"
+      className="col-span-full grid gap-2 rounded-xl bg-surface-alt p-3 sm:grid-cols-[110px_minmax(0,1fr)_90px_190px_70px_auto]"
     >
       <Labeled label="رمز المادة">
         <input
@@ -475,29 +485,12 @@ function EditOffering({
           className="w-12 rounded border border-border bg-surface px-1 py-1"
         />
       </label>
-      <label className="flex items-center gap-1 text-xs text-text-muted">
-        مستوى
-        <input
-          type="number"
-          min={1}
-          max={10}
-          value={f.default_level}
-          onChange={(e) => setF({ ...f, default_level: Number(e.target.value) })}
-          className="w-12 rounded border border-border bg-surface px-1 py-1"
-        />
-      </label>
-      <label className="flex items-center gap-1 text-xs text-text-muted">
-        فصل
-        <select
-          aria-label="الفصل الدراسي"
-          value={f.default_term_order}
-          onChange={(e) => setF({ ...f, default_term_order: Number(e.target.value) })}
-          className="min-w-0 rounded border border-border bg-surface px-1 py-1"
-        >
-          <option value={1}>الأول</option>
-          <option value={2}>الثاني</option>
-        </select>
-      </label>
+      <PlanSemesterPick
+        levels={5}
+        level={f.default_level}
+        order={f.default_term_order}
+        onChange={(level, order) => setF({ ...f, default_level: level, default_term_order: order })}
+      />
       <Labeled label="الشعبة">
         <input
           dir="ltr"
@@ -573,7 +566,7 @@ function NewOffering({
   return (
     <section id="new-offering" className="mt-6">
       <SectionLabel>مادة جديدة هذا الفصل</SectionLabel>
-      <Card className="grid gap-2 p-4 sm:grid-cols-[110px_minmax(0,1fr)_minmax(0,1fr)_90px_90px_110px_70px_auto]">
+      <Card className="grid gap-2 p-4 sm:grid-cols-[110px_minmax(0,1fr)_minmax(0,1fr)_90px_190px_70px_auto]">
         <input
           dir="ltr"
           value={f.code}
@@ -614,29 +607,14 @@ function NewOffering({
             className="w-12 rounded border border-border px-1 py-1"
           />
         </label>
-        <label className="flex items-center gap-1 text-xs text-text-muted">
-          مستوى
-          <input
-            type="number"
-            min={1}
-            max={10}
-            value={f.default_level}
-            onChange={(e) => setF({ ...f, default_level: Number(e.target.value) })}
-            className="w-12 rounded border border-border px-1 py-1"
-          />
-        </label>
-        <label className="flex items-center gap-1 text-xs text-text-muted">
-          فصل
-          <select
-            aria-label="الفصل الدراسي"
-            value={f.default_term_order}
-            onChange={(e) => setF({ ...f, default_term_order: Number(e.target.value) })}
-            className="min-w-0 rounded border border-border bg-surface px-1 py-1"
-          >
-            <option value={1}>الأول</option>
-            <option value={2}>الثاني</option>
-          </select>
-        </label>
+        <PlanSemesterPick
+          levels={(programs.data ?? []).find((p) => String(p.id) === f.program)?.levels_count ?? 5}
+          level={f.default_level}
+          order={f.default_term_order}
+          onChange={(level, order) =>
+            setF({ ...f, default_level: level, default_term_order: order })
+          }
+        />
         <input
           dir="ltr"
           value={f.section}
@@ -657,5 +635,39 @@ function NewOffering({
         </div>
       )}
     </section>
+  );
+}
+
+/** The plan's semester (1–10) of a course; it carries the level (owner, 2026-11-07). */
+function PlanSemesterPick({
+  levels,
+  level,
+  order,
+  onChange,
+}: {
+  levels: number;
+  level: number;
+  order: number;
+  onChange: (level: number, order: 1 | 2) => void;
+}) {
+  return (
+    <label className="flex items-center gap-1 text-xs text-text-muted">
+      الفصل
+      <select
+        aria-label="الفصل الدراسي"
+        value={planSemester(level, order)}
+        onChange={(e) => {
+          const picked = fromPlanSemester(Number(e.target.value));
+          onChange(picked.level, picked.semester);
+        }}
+        className="min-h-10 min-w-0 flex-1 rounded border border-border bg-surface px-1 py-1 text-text"
+      >
+        {planSemesters(levels).map((x) => (
+          <option key={x.n} value={x.n}>
+            {x.label}
+          </option>
+        ))}
+      </select>
+    </label>
   );
 }

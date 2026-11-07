@@ -1152,8 +1152,6 @@ msgstr "طلب الحذف بانتظار الموافقة بالفعل."
 msgid "Semester"
 msgstr "الفصل الدراسي"
 
-msgid "semester: use 1 or 2 (الأول/الثاني)"
-msgstr "الفصل الدراسي: 1 أو 2 (الأول/الثاني)"
 
 msgid "There is no current term."
 msgstr "لا يوجد فصل حالي."
@@ -1172,3 +1170,13 @@ msgstr "في هذه الدورة طلبات؛ أوقفها بدل حذفها."
 
 msgid "Someone else decides on your own request."
 msgstr "لا تعتمد طلبًا قدّمته؛ يقرّر فيه غيرك."
+
+msgid "semester: a number from 1 to 10 (الأول … العاشر)"
+msgstr "الفصل الدراسي: رقم من 1 إلى 10 (الأول … العاشر)"
+
+#, python-format
+msgid "semester: level %(level)s holds semesters %(first)s and %(second)s"
+msgstr "الفصل الدراسي: المستوى %(level)s فصلاه %(first)s و%(second)s"
+
+msgid "A programme has 1 to 5 levels."
+msgstr "للبرنامج من مستوى واحد إلى خمسة مستويات."
