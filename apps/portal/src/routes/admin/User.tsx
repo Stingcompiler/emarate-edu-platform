@@ -351,8 +351,8 @@ type Profile = {
 
 /**
  * The system admin edits a user's profile (owner, 2026-10-30): name, email, phone, titles,
- * research interests and photo. A student's name stays with the student record; whether
- * someone appears on the site stays their own choice, so it is not here.
+ * research interests and photo. A student's name is corrected here too and the student record
+ * follows (owner, 2026-11-08); whether someone appears on the site stays their own choice.
  */
 function ProfileCard({ user, onSaved }: { user: Schemas["User"]; onSaved: () => void }) {
   const toast = useToast();
@@ -412,7 +412,7 @@ function ProfileCard({ user, onSaved }: { user: Schemas["User"]; onSaved: () => 
       onSaved();
     },
   });
-  const nameMissing = !student && !draft.full_name_ar.trim();
+  const nameMissing = !draft.full_name_ar.trim();
   return (
     <>
       <SectionLabel>الملف الشخصي</SectionLabel>
@@ -459,28 +459,21 @@ function ProfileCard({ user, onSaved }: { user: Schemas["User"]; onSaved: () => 
           }}
         >
           <div className="sm:grid sm:grid-cols-2">
-            {student ? (
-              <p className="px-4 py-3 text-sm text-text-muted sm:col-span-2">
-                اسم الطالب يُعدَّل من سجل الطالب لدى المسجل.
-              </p>
-            ) : (
-              <>
-                <Field
-                  label="الاسم بالعربية"
-                  value={draft.full_name_ar}
-                  onChange={(e) => set({ full_name_ar: e.target.value })}
-                  maxLength={200}
-                  required
-                />
-                <Field
-                  label="الاسم بالإنجليزية (اختياري)"
-                  dir="ltr"
-                  value={draft.full_name_en}
-                  onChange={(e) => set({ full_name_en: e.target.value })}
-                  maxLength={200}
-                />
-              </>
-            )}
+            <Field
+              label="الاسم بالعربية"
+              hint={student ? "يُصحَّح معه الاسم في سجل الطالب" : undefined}
+              value={draft.full_name_ar}
+              onChange={(e) => set({ full_name_ar: e.target.value })}
+              maxLength={200}
+              required
+            />
+            <Field
+              label="الاسم بالإنجليزية (اختياري)"
+              dir="ltr"
+              value={draft.full_name_en}
+              onChange={(e) => set({ full_name_en: e.target.value })}
+              maxLength={200}
+            />
             <Field
               label="البريد الإلكتروني"
               dir="ltr"

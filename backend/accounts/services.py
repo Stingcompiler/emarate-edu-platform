@@ -705,15 +705,11 @@ def delete_account(meta: RequestMeta, user: User) -> None:
 def rename_account(
     meta: RequestMeta, user: User, *, full_name_ar: str, full_name_en: str | None = None
 ) -> User:
-    """The system admin corrects a staff member's name. A student's name belongs to the student
-    record (the registrar edits it), so a student account is refused here."""
+    """The system admin corrects an account's name. A student's record takes the same name
+    (owner, 2026-11-08): the two never disagree."""
     _not_above(meta.actor, user)
     if not rbac.can(meta.actor, "users.rename"):
         raise PermissionDenied()
-    if StudentRecord.objects.filter(user=user).exists():
-        raise Conflict(
-            gettext("A student's name is edited from the student record."), code="student_account"
-        )
     old = {"full_name_ar": user.full_name_ar, "full_name_en": user.full_name_en}
     user.full_name_ar = full_name_ar
     if full_name_en is not None:
@@ -723,8 +719,16 @@ def rename_account(
         return user
     with transaction.atomic():
         user.save(update_fields=["full_name_ar", "full_name_en"])
+        _student_record_follows(user)
         record(meta, "account.rename", user, old=old, new=new)
     return user
+
+
+def _student_record_follows(user: User) -> None:
+    """A student account renamed by the admin: its student record carries the same name."""
+    StudentRecord.objects.filter(user=user).update(
+        full_name_ar=user.full_name_ar, full_name_en=user.full_name_en, updated_at=timezone.now()
+    )
 
 
 PROFILE_FIELDS = [
@@ -741,8 +745,8 @@ PROFILE_FIELDS = [
 
 def update_profile(meta: RequestMeta, user: User, **data) -> User:
     """The system admin edits a user's profile (owner, 2026-10-30): name, email, phone, titles,
-    research interests, photo. Two things stay the person's own: whether they appear on the
-    site (their consent), and — for a student — the name, which belongs to the student record.
+    research interests, photo. Whether they appear on the site stays the person's own consent.
+    A student's name is corrected here too and their record follows (owner, 2026-11-08).
     A changed email is unique, and the old address is told. Audited as one change."""
     from django.core.exceptions import ValidationError as DjangoValidationError
     from django.core.validators import validate_email
@@ -753,11 +757,6 @@ def update_profile(meta: RequestMeta, user: User, **data) -> User:
     _not_above(meta.actor, user)
     if not rbac.can(meta.actor, "users.rename"):
         raise PermissionDenied()
-    student = StudentRecord.objects.filter(user=user).exists()
-    if student and ({"full_name_ar", "full_name_en"} & set(data)):
-        raise Conflict(
-            gettext("A student's name is edited from the student record."), code="student_account"
-        )
 
     def shown(u: User) -> dict:
         snap = {f: getattr(u, f) for f in PROFILE_FIELDS if f != "photo"}
@@ -804,6 +803,8 @@ def update_profile(meta: RequestMeta, user: User, **data) -> User:
         # Only what this edit changed: a full-row save of the copy loaded for the request wrote
         # back a consent the member had just switched (review 2026-11 I5).
         user.save(update_fields=list(changed))
+        if {"full_name_ar", "full_name_en"} & set(changed):
+            _student_record_follows(user)
         # A name-only change keeps the action it has always had in the log.
         names_only = set(changed) <= {"full_name_ar", "full_name_en"}
         record(

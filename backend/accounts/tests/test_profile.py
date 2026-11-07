@@ -154,3 +154,39 @@ def test_everyone_has_a_photo_cropped_small_and_seen_by_colleagues(api, classroo
         ).status_code
         == 400
     )
+
+
+ME_NAME = "/api/v1/me/name"
+
+
+@pytest.mark.parametrize(
+    "role", [Role.TEACHER, Role.TA, Role.DEPARTMENT_MANAGER, Role.HEAD_REGISTRAR, Role.HR]
+)
+def test_staff_correct_their_own_name(api, make_user, it_dept, role):
+    """Owner, 2026-11-08: staff change their own name; it is audited."""
+    user = make_user(role, department=it_dept)
+    response = api(user).patch(
+        ME_NAME, {"full_name_ar": "  د.  سارة   عمر ", "full_name_en": "Sara Omar"}, format="json"
+    )
+    assert response.status_code == 200, response.data
+    assert response.data["full_name_ar"] == "د. سارة عمر"
+    user.refresh_from_db()
+    assert (user.full_name_ar, user.full_name_en) == ("د. سارة عمر", "Sara Omar")
+    entry = AuditLog.objects.get(action="account.rename_self")
+    assert entry.new["full_name_ar"] == "د. سارة عمر"
+
+
+def test_an_empty_name_is_refused(api, make_user):
+    user = make_user(Role.TEACHER)
+    assert api(user).patch(ME_NAME, {"full_name_ar": "   "}, format="json").status_code == 400
+
+
+def test_a_student_cannot_change_their_name(api, classroom):
+    """Their name belongs to the student record; the registrar corrects it."""
+    student = classroom.student
+    before = student.full_name_ar
+    response = api(student).patch(ME_NAME, {"full_name_ar": "اسم آخر"}, format="json")
+    assert response.status_code == 403
+    student.refresh_from_db()
+    assert student.full_name_ar == before
+    assert not AuditLog.objects.filter(action="account.rename_self").exists()
