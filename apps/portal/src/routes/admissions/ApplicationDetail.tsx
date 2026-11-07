@@ -14,7 +14,7 @@ import {
 } from "../../components/ui";
 import { api, ok, openAfter } from "../../lib/api";
 import { useMe } from "../../lib/auth";
-import { SEMESTERS, when } from "../../lib/format";
+import { when } from "../../lib/format";
 import { can } from "../../lib/nav";
 import { type Field, STATUS_LABEL, STATUS_TONE } from "../../lib/visitor";
 import { StaffFields } from "./StaffFields";
@@ -391,11 +391,9 @@ export function ApplicationDetail() {
                           onChange={(e) => setStartSemester(e.target.value === "2" ? 2 : 1)}
                           className="min-h-11 w-full rounded-lg border border-border bg-surface px-3 text-sm"
                         >
-                          {SEMESTERS.map((x) => (
-                            <option key={x.value} value={x.value}>
-                              {x.label}
-                            </option>
-                          ))}
+                          {/* Within the admitted level: level 2 → semester 3 or 4. */}
+                          <option value={1}>أول فصلي المستوى المقبول به</option>
+                          <option value={2}>ثاني فصلي المستوى المقبول به</option>
                         </select>
                       </label>
                       <Button

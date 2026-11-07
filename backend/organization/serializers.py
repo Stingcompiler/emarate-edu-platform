@@ -48,12 +48,22 @@ class ProgramSerializer(serializers.ModelSerializer):
         read_only_fields = ["name"]
         extra_kwargs = {
             # The database checks these too; without the bounds here a bad value was a 500.
-            "levels_count": {"min_value": 1, "max_value": 10},
-            "duration_terms": {"min_value": 1, "max_value": 20},
+            # Levels 1–5, two semesters each (owner, 2026-11-07): engineering and medicine
+            # have 5 levels and 10 semesters. duration_terms follows the levels (validate).
+            "levels_count": {"min_value": 1, "max_value": 5},
+            "duration_terms": {"required": False, "min_value": 1, "max_value": 10},
             "total_credit_hours": {"min_value": 1, "max_value": 300},
             "annual_fee_sdg": {"min_value": 1},
             "annual_fee_usd": {"min_value": 1},
         }
+
+    def validate(self, attrs):
+        # A level is a year of two semesters: the semesters are twice the levels, whatever
+        # was sent (owner, 2026-11-07).
+        levels = attrs.get("levels_count", getattr(self.instance, "levels_count", None))
+        if levels is not None:
+            attrs["duration_terms"] = 2 * levels
+        return attrs
 
     def validate_department(self, value):
         """A programme moves to another department only while nothing hangs on it: its

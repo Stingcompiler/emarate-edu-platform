@@ -133,8 +133,9 @@ export function StudentImports() {
             <FileUp size={28} aria-hidden />
             {upload.isPending ? "يُتحقق من الملف…" : "اختر ملف .xlsx أو .csv"}
             <span className="text-xs">
-              الأعمدة: الرقم الجامعي، الاسم، البرنامج، المستوى، الفصل الدراسي (1 أو 2؛ إن تُرك
-              فالفصل الحالي)، البريد… يُتحقق منها قبل أي تغيير.
+              الأعمدة: الرقم الجامعي، الاسم، البرنامج، المستوى، الفصل الدراسي (رقمه في الخطة 1–10
+              ويوافق المستوى: المستوى 2 ← 3 أو 4؛ إن تُرك فالفصل الحالي)، البريد… يُتحقق منها قبل أي
+              تغيير.
             </span>
           </button>
           <input
@@ -335,7 +336,7 @@ function ImportDetailBody({ id }: { id: string }) {
                         </td>
                         <td className="px-3 py-2">
                           {String(n.level ?? "")}
-                          {n.semester ? ` · ${semester(Number(n.semester))}` : ""}
+                          {n.semester ? ` · ${semester(Number(n.level), Number(n.semester))}` : ""}
                           {changes.level ? (
                             <span className="block text-xs text-text-muted">
                               كان: {String(changes.level[0])}
@@ -343,7 +344,7 @@ function ImportDetailBody({ id }: { id: string }) {
                           ) : null}
                           {changes.semester ? (
                             <span className="block text-xs text-text-muted">
-                              كان: {semester(Number(changes.semester[0]))}
+                              كان: {semester(Number(n.level), Number(changes.semester[0]))}
                             </span>
                           ) : null}
                         </td>

@@ -962,7 +962,7 @@ function ProgramForm({
         name_ar: form.name_ar.trim(),
         degree: form.degree as never,
         levels_count: Number(form.levels_count),
-        duration_terms: Number(form.duration_terms),
+        duration_terms: 2 * Number(form.levels_count),
         total_credit_hours: form.total_credit_hours ? Number(form.total_credit_hours) : null,
       };
       const { data, error } = program
@@ -1051,23 +1051,19 @@ function ProgramForm({
             <input
               type="number"
               min={1}
-              max={10}
+              max={5}
               value={form.levels_count}
               onChange={(e) => set({ levels_count: e.target.value })}
               className={INPUT}
             />
           </label>
-          <label className={LABEL}>
+          {/* Two semesters a level, numbered 1–10 through the programme (owner, 2026-11-07). */}
+          <p className={LABEL}>
             فصول
-            <input
-              type="number"
-              min={1}
-              max={20}
-              value={form.duration_terms}
-              onChange={(e) => set({ duration_terms: e.target.value })}
-              className={INPUT}
-            />
-          </label>
+            <span className="flex min-h-10 items-center text-sm text-text">
+              {count(2 * (Number(form.levels_count) || 0), N.term)}
+            </span>
+          </p>
           <label className={LABEL}>
             ساعات للتخرج
             <input

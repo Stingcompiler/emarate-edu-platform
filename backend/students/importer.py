@@ -81,17 +81,45 @@ HEADERS = {
     "الرقم الوطني": "national_id",
 }
 REQUIRED = ("university_number", "full_name_ar", "program_code", "level")
-SEMESTERS = {
-    "1": 1,
-    "1.0": 1,
+# The study plan's semesters run through the programme (owner, 2026-11-07): level 1 holds 1–2,
+# level 2 holds 3–4 … level 5 holds 9–10. Written as the number or its Arabic ordinal.
+ORDINALS = {
     "الأول": 1,
     "الاول": 1,
-    "first": 1,
-    "2": 2,
-    "2.0": 2,
     "الثاني": 2,
-    "second": 2,
+    "الثالث": 3,
+    "الرابع": 4,
+    "الخامس": 5,
+    "السادس": 6,
+    "السابع": 7,
+    "الثامن": 8,
+    "التاسع": 9,
+    "العاشر": 10,
 }
+
+
+def plan_semester(value: str) -> int | None:
+    """«3», «3.0», «الثالث» or «الفصل الثالث» → 3; anything else → None."""
+    text = " ".join(value.split()).removeprefix("الفصل الدراسي").removeprefix("الفصل").strip()
+    if text in ORDINALS:
+        return ORDINALS[text]
+    try:
+        number = float(text)
+    except ValueError:
+        return None
+    return int(number) if number.is_integer() and 1 <= number <= 10 else None
+
+
+def semester_in_level(number: int, level: int) -> int | None:
+    """The plan's semester → 1 or 2 within ``level``: level 2 takes 3 → 1 and 4 → 2. A file of
+    the earlier form (1 or 2 within the level) still reads."""
+    if number in (2 * level - 1, 2 * level):
+        return number - 2 * (level - 1)
+    if number in (1, 2):
+        return number
+    return None
+
+
 GENDERS = {
     "male": "male",
     "m": "male",
@@ -222,9 +250,18 @@ def _normalize(raw: dict, programs: dict[str, Program]) -> tuple[dict, list[str]
     # Optional (owner, 2026-11-05): blank keeps an existing record's semester, and a new
     # record takes the current term's.
     semester_raw = str(raw.get("semester", "")).strip()
-    out["semester"] = SEMESTERS.get(semester_raw)
-    if semester_raw and out["semester"] is None:
-        errors.append(gettext("semester: use 1 or 2 (الأول/الثاني)"))
+    out["semester"] = None
+    if semester_raw:
+        number = plan_semester(semester_raw)
+        if number is None:
+            errors.append(gettext("semester: a number from 1 to 10 (الأول … العاشر)"))
+        elif level is not None:
+            out["semester"] = semester_in_level(number, level)
+            if out["semester"] is None:
+                errors.append(
+                    gettext("semester: level %(level)s holds semesters %(first)s and %(second)s")
+                    % {"level": level, "first": 2 * level - 1, "second": 2 * level}
+                )
 
     email = str(raw.get("email", "")).strip().lower()
     if email:
