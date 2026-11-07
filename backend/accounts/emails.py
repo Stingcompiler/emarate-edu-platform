@@ -47,6 +47,35 @@ def registration_decided(to: str, approved: bool, reason: str = "") -> None:
     _send(to, subject, body)
 
 
+def _mask(email: str) -> str:
+    """«ah***@gmail.com»: enough for the owner to recognise, not to reuse."""
+    local, _, domain = email.partition("@")
+    return f"{local[:2]}***@{domain}"
+
+
+def registered_elsewhere(to: str, used: str) -> None:
+    """To the college's address for a student whose record got an account with another email."""
+    _send(
+        to,
+        "أُنشئ حساب على رقمك الجامعي — بوابة كلية الإمارات",
+        f"أُنشئ حساب طالب على رقمك الجامعي بالبريد {_mask(used)}.\n\n"
+        "إن كنت أنت فلا تفعل شيئًا. وإن لم تكن أنت فأبلغ عن انتحال من صفحة إنشاء الحساب: "
+        f"{settings.PORTAL_BASE_URL}/register",
+    )
+
+
+def identity_report_decided(to: str, upheld: bool, reason: str = "") -> None:
+    if upheld:
+        body = (
+            "راجع القسم بلاغك وأوقف الحساب الذي أُنشئ على رقمك الجامعي.\n"
+            f"يمكنك الآن إنشاء حسابك: {settings.PORTAL_BASE_URL}/register"
+        )
+    else:
+        body = "راجع القسم بلاغك ولم يوقف الحساب." + (f"\nالسبب: {reason}" if reason else "")
+        body += "\nإن كان الحساب ليس لك فراجع شؤون الطلاب بإثبات هويتك."
+    _send(to, "بلاغ الانتحال — بوابة كلية الإمارات", body)
+
+
 def email_change_code(to: str, code: str, minutes: int) -> None:
     _send(
         to,

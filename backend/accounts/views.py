@@ -27,7 +27,7 @@ from audit.services import RequestMeta, record, snapshot
 from core.permissions import capability
 
 from . import profile, rbac, services, staff_profile
-from .models import RegistrationRequest, RoleAssignment, User
+from .models import IdentityReport, RegistrationRequest, RoleAssignment, User
 from .rbac import Role
 from .serializers import (
     ActivateSerializer,
@@ -36,6 +36,9 @@ from .serializers import (
     EmailChangeSerializer,
     EmailConfirmSerializer,
     HiddenSerializer,
+    IdentityDecisionSerializer,
+    IdentityReportCreateSerializer,
+    IdentityReportSerializer,
     LoginSerializer,
     MeSerializer,
     MyContactSerializer,
@@ -546,6 +549,28 @@ class RegistrationCompleteView(APIView):
         )
 
 
+class RegistrationReportView(APIView):
+    """The student says the account on their record is not theirs (owner, 2026-11-07)."""
+
+    permission_classes = [AllowAny]
+    authentication_classes = []
+    throttle_classes = [OTPIPThrottle]
+
+    @extend_schema(
+        request=IdentityReportCreateSerializer,
+        responses={201: DetailSerializer},
+        tags=["registration"],
+    )
+    def post(self, request):
+        data = IdentityReportCreateSerializer(data=request.data)
+        data.is_valid(raise_exception=True)
+        services.report_identity(**data.validated_data)
+        return Response(
+            {"detail": gettext("Your report reached the department. They will reply by email.")},
+            status=status.HTTP_201_CREATED,
+        )
+
+
 class PasswordForgotView(APIView):
     permission_classes = [AllowAny]
     authentication_classes = []
@@ -796,3 +821,33 @@ class RegistrationRequestViewSet(
             data.validated_data.get("reason", ""),
         )
         return Response(RegistrationRequestSerializer(reg).data)
+
+
+class IdentityReportViewSet(
+    mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet
+):
+    """Reports that an account was made on someone else's record; same deciders as approvals."""
+
+    serializer_class = IdentityReportSerializer
+    permission_classes = [IsAuthenticated, capability("registration.approve")]
+    lookup_field = "public_id"
+    filterset_fields = ["status"]
+    search_fields = ["student_record__university_number", "student_record__full_name_ar"]
+
+    def get_queryset(self):
+        queryset = IdentityReport.objects.select_related("student_record__program", "account")
+        scope = rbac.scope_for(self.request.user, "registration.approve")
+        return scope.filter(queryset, "student_record__department")
+
+    @extend_schema(request=IdentityDecisionSerializer, responses={200: IdentityReportSerializer})
+    @action(detail=True, methods=["post"])
+    def decide(self, request, public_id=None):
+        data = IdentityDecisionSerializer(data=request.data)
+        data.is_valid(raise_exception=True)
+        report = services.decide_identity_report(
+            RequestMeta.from_request(request),
+            self.get_object(),
+            data.validated_data["uphold"],
+            data.validated_data.get("reason", ""),
+        )
+        return Response(IdentityReportSerializer(report).data)

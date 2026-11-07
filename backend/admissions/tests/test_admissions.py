@@ -226,6 +226,7 @@ def test_full_journey(api, intake, make_user, it_dept, ba_dept, django_capture_o
             "/api/public/registration/start",
             {
                 "university_number": number,
+                "program": "BIT",
                 "full_name": "مريم الطيب",
                 "email": "applicant@example.test",
             },

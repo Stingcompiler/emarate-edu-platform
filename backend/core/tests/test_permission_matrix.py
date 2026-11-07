@@ -15,7 +15,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.urls import URLResolver
 
 from academic.models import Enrollment
-from accounts.models import RegistrationRequest, User
+from accounts.models import IdentityReport, RegistrationRequest, User
 from accounts.rbac import Role
 from audit.models import AuditLog
 from students.models import StudentImportBatch
@@ -207,6 +207,12 @@ READS: dict[str, tuple[str, frozenset, frozenset]] = {
     "registration-request-list": ("/api/v1/registration-requests", ENROLLMENT, frozenset()),
     "registration-request-detail": (
         "/api/v1/registration-requests/{registration}",
+        ENROLLMENT,
+        frozenset(),
+    ),
+    "identity-report-list": ("/api/v1/identity-reports", ENROLLMENT, frozenset()),
+    "identity-report-detail": (
+        "/api/v1/identity-reports/{identity_report}",
         ENROLLMENT,
         frozenset(),
     ),
@@ -568,6 +574,9 @@ COVERED_ELSEWHERE = {
     "registration-request-decide": (
         "accounts.tests.test_registration::test_other_email_waits_for_the_department"
     ),
+    "identity-report-decide": (
+        "accounts.tests.test_registration::test_a_stolen_record_is_reported_and_freed"
+    ),
 }
 
 
@@ -614,6 +623,9 @@ def world(users, college, it_dept, it_program, term, it_offering, make_student, 
         email="pending@x.test",
         status=RegistrationRequest.Status.PENDING_APPROVAL,
     )
+    identity_report = IdentityReport.objects.create(
+        student_record=applicant, account=applicant.user, contact_email="real@x.test"
+    )
     audit = AuditLog.objects.create(
         action="test", target_type="x", target_id="1", target_repr="x", department=it_dept
     )
@@ -631,6 +643,7 @@ def world(users, college, it_dept, it_program, term, it_offering, make_student, 
         "batch": batch.public_id,
         "teacher": users[R.TEACHER].public_id,
         "registration": registration.public_id,
+        "identity_report": identity_report.public_id,
         "audit": audit.pk,
         **learning,
     }

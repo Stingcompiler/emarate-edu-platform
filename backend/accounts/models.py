@@ -188,6 +188,40 @@ class RegistrationRequest(PublicIdModel, TimestampedModel):
         indexes = [models.Index(fields=["status", "created_at"])]
 
 
+class IdentityReport(PublicIdModel, TimestampedModel):
+    """A student says the account on their university number is not theirs (owner, 2026-11-07).
+
+    Registration checks only public details (number, name, programme), so a classmate could
+    claim someone else's record. The real student reports it from the registration page; the
+    department's approvers decide. Upholding disables that account and frees the record.
+    """
+
+    class Status(models.TextChoices):
+        OPEN = "open", "مفتوح"
+        UPHELD = "upheld", "أُوقف الحساب"
+        DISMISSED = "dismissed", "رُفض البلاغ"
+
+    student_record = models.ForeignKey(
+        "students.StudentRecord", on_delete=models.CASCADE, related_name="identity_reports"
+    )
+    # The account the report is about, as it was when reported.
+    account = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="+"
+    )
+    contact_email = models.EmailField()
+    note = models.TextField(blank=True)
+    status = models.CharField(max_length=10, choices=Status.choices, default=Status.OPEN)
+    decided_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="+"
+    )
+    decided_at = models.DateTimeField(null=True, blank=True)
+    reason = models.TextField(blank=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        indexes = [models.Index(fields=["status", "created_at"])]
+
+
 class ActivationToken(TimestampedModel):
     """Single-use link to set a password (new staff accounts; accepted applicants later)."""
 

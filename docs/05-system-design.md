@@ -216,11 +216,12 @@ backend/
 ## 8. التدفقات الرئيسية
 
 ### 8.1 تسجيل طالب حالي
-1. `POST /api/public/registration/start {university_number, full_name, email}` → مطابقة السجل (رسالة موحّدة عند الفشل) → إنشاء `RegistrationRequest(otp_pending)` + `OTP(email)` → بريد.
+1. `POST /api/public/registration/start {university_number, full_name, program, email}` → مطابقة السجل بالرقم الجامعي والتخصص (رمز البرنامج من القائمة المنسدلة) والاسم عربيًا أو إنجليزيًا كما في السجل (المالك، 2026-11-07؛ هذه بيانات عامة والبريد يُثبت ملكية العنوان فقط) — رسالة موحّدة عند عدم المطابقة؛ وإن طابقت سجلًا له حساب فـ 409 `already_registered` → إنشاء `RegistrationRequest(otp_pending)` + `OTP(email)` → بريد.
 2. `POST .../verify {request_id, code}` → تحقق (5 محاولات، 10 دقائق).
 3. `POST .../complete {password}` → إنشاء `User` مرتبط بـ `StudentRecord`؛ إن كان `student_registration_requires_approval` → `pending_approval` (إشعار لمدير/مشرف القسم ومسؤول المسجلين) وإلا `active`.
 4. الاعتماد: `POST /api/v1/registration-requests/{id}/decide {approve|reject, reason}` → تفعيل + إشعار الطالب.
 5. حساب واحد لكل سجل (قيد 1:1)، وكل خطوة في Audit.
+6. **الانتحال** (المالك، 2026-11-07): إن أُنشئ الحساب ببريد غير البريد الرسمي في السجل يصل تنبيه إلى البريد الرسمي (البريد المستخدم مقنَّع). صاحب السجل يبلّغ من صفحة التسجيل: `POST /api/public/registration/report {university_number, full_name, program, email, note}` → `IdentityReport(open)` + إشعار لمعتمدي القسم. يقرّر حاملو `registration.approve` في نطاق القسم من «طلبات التسجيل»: `POST /api/v1/identity-reports/{id}/decide {uphold, reason}` — الإيقاف يعطّل الحساب (لا يحذفه) ويسحب دور الطالب ويُبطل جلساته ويفكّه عن السجل فيسجّل صاحبه من جديد؛ الرفض بسبب. بريد للمبلّغ بالقرار، وكل ذلك في Audit.
 
 ### 8.2 الدخول والتجديد
 `POST /auth/login` (throttle، `django-axes`-like قفل مؤقت بعد 10 فشل) → كوكيز؛ `POST /auth/refresh` يدوّر ويُبطل القديم؛ `POST /auth/logout` يُبطل ويحذف؛ Silent refresh في الواجهة على 401 مرة واحدة.

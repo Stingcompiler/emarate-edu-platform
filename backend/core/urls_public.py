@@ -22,6 +22,9 @@ urlpatterns = [
         accounts.RegistrationCompleteView.as_view(),
         name="registration-complete",
     ),
+    path(
+        "registration/report", accounts.RegistrationReportView.as_view(), name="registration-report"
+    ),
     path("password/forgot", accounts.PasswordForgotView.as_view(), name="password-forgot"),
     path("password/reset", accounts.PasswordResetView.as_view(), name="password-reset"),
     path("activate", accounts.ActivateView.as_view(), name="activate"),

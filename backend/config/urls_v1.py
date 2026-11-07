@@ -36,6 +36,7 @@ router.register("role-assignments", accounts.RoleAssignmentViewSet, basename="ro
 router.register(
     "registration-requests", accounts.RegistrationRequestViewSet, basename="registration-request"
 )
+router.register("identity-reports", accounts.IdentityReportViewSet, basename="identity-report")
 router.register("audit-logs", audit.AuditLogViewSet, basename="audit-log")
 router.register("lectures", learning.LectureViewSet, basename="lecture")
 router.register("assignments", learning.AssignmentViewSet, basename="assignment")

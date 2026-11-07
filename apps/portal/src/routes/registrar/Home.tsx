@@ -70,6 +70,16 @@ export function RegistrarHome() {
         }),
       ) ?? null,
   });
+  const reports = useQuery({
+    queryKey: ["identity-reports", "open", "count"],
+    enabled: head,
+    queryFn: async () =>
+      ok(
+        await api.GET("/api/v1/identity-reports", {
+          params: { query: { status: "open", page_size: 1 } },
+        }),
+      )?.count ?? 0,
+  });
   // Registrars and their current load (board DesktopHeadRegistrar): the head's view only.
   const registrars = useQuery({
     queryKey: ["users", "registrars"],
@@ -135,6 +145,13 @@ export function RegistrarHome() {
             meta: "يعتمدها مديرو الأقسام؛ أنت بديل",
             to: "/department/approvals",
             action: "اعتماد",
+          },
+          {
+            n: reports.data ?? 0,
+            title: "بلاغات انتحال على حسابات طلاب",
+            meta: "يوقف الحسابَ مديرُ القسم أو أنت بعد التحقق",
+            to: "/department/approvals",
+            action: "مراجعة",
           },
         ]
       : []),

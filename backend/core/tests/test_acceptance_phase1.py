@@ -51,6 +51,7 @@ def test_import_register_approve_and_see_courses(
             "/api/public/registration/start",
             {
                 "university_number": "26-IT-0042",
+                "program": "BIT",
                 "full_name": "مريم عثمان الطيب",
                 "email": "mariam@gmail.test",
             },
