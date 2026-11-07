@@ -60,6 +60,7 @@ from .serializers import (
     TemporaryPasswordSerializer,
     UserActiveSerializer,
     UserCreateSerializer,
+    UserNameSerializer,
     UserProfileAdminSerializer,
     UserSerializer,
 )
@@ -222,6 +223,21 @@ class MeView(APIView):
         data = MyContactSerializer(data=request.data, partial=True)
         data.is_valid(raise_exception=True)
         user = profile.update_contact(
+            RequestMeta.from_request(request), request.user, **data.validated_data
+        )
+        return Response(MeSerializer(user).data)
+
+
+class MyNameView(APIView):
+    """Staff correct their own name; a student's is the registrar's (owner, 2026-11-08)."""
+
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(request=UserNameSerializer, responses=MeSerializer, tags=["me"])
+    def patch(self, request):
+        data = UserNameSerializer(data=request.data)
+        data.is_valid(raise_exception=True)
+        user = profile.rename_self(
             RequestMeta.from_request(request), request.user, **data.validated_data
         )
         return Response(MeSerializer(user).data)

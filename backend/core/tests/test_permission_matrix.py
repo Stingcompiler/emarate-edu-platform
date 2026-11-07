@@ -470,6 +470,7 @@ COVERED_ELSEWHERE = {
     # student's to the staff who may see their record; a redirect, not JSON.
     "photo": _PROFILE + "test_everyone_has_a_photo_cropped_small_and_seen_by_colleagues",
     # A student's own email change (decisions item 13): POST only.
+    "me-name": _PROFILE + "test_staff_correct_their_own_name",
     "me-email": _PROFILE + "test_a_student_changes_their_email_with_a_code",
     "me-email-confirm": _PROFILE
     + "test_a_taken_address_gets_no_code_and_a_code_is_for_one_account",

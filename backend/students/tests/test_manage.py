@@ -135,3 +135,20 @@ def test_other_roles_cannot_write(api, make_user, it_dept, it_program, role):
         URL, {"full_name_ar": "منى", "program": it_program.pk, "level": 1}, format="json"
     )
     assert response.status_code == 403
+
+
+def test_a_corrected_name_reaches_the_students_account(
+    api, manager, it_program, make_student, make_user
+):
+    """Owner, 2026-11-08: the student cannot change their name; the department corrects it in
+    the record and the account shows the same name."""
+    account = make_user(Role.STUDENT)
+    record_ = make_student(it_program, "26-IT-0909", user=account)
+    response = api(manager).patch(
+        f"{URL}/{record_.public_id}",
+        {"full_name_ar": "سارة  أحمد", "full_name_en": "Sara Ahmed"},
+        format="json",
+    )
+    assert response.status_code == 200, response.data
+    account.refresh_from_db()
+    assert (account.full_name_ar, account.full_name_en) == ("سارة أحمد", "Sara Ahmed")

@@ -118,6 +118,38 @@ def update_contact(meta: RequestMeta, user: User, **data) -> User:
     return user
 
 
+def rename_self(meta: RequestMeta, user: User, *, full_name_ar: str, full_name_en=None) -> User:
+    """A staff member corrects their own name (owner, 2026-11-08). A student cannot: their
+    name belongs to the student record, which the registrar edits (docs/03 §3.10)."""
+    from accounts.rbac import Role
+    from students.models import StudentRecord
+
+    if (
+        StudentRecord.objects.filter(user=user).exists()
+        or Role.STUDENT in rbac.roles_of(user)
+        or not rbac.roles_of(user)
+    ):
+        raise PermissionDenied(
+            gettext("A student's name is corrected by the registrar in the student record.")
+        )
+    old = {"full_name_ar": user.full_name_ar, "full_name_en": user.full_name_en}
+    user.full_name_ar = full_name_ar
+    if full_name_en is not None:
+        user.full_name_en = full_name_en
+    new = {"full_name_ar": user.full_name_ar, "full_name_en": user.full_name_en}
+    if new == old:
+        return user
+    with transaction.atomic():
+        user.save(update_fields=["full_name_ar", "full_name_en"])
+        record(meta, "account.rename_self", user, old=old, new=new)
+        if user.public_profile:
+            # Their department's page on the college site shows the name: rebuild it.
+            from . import staff_profile
+
+            staff_profile.site_changed()
+    return user
+
+
 def _photo_readable(user, stored) -> bool:
     """A student's photo: staff who may see their record. A staff member's: anyone signed in
     (colleagues, their students). The owner is let through by files.access."""

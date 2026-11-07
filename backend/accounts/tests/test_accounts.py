@@ -120,13 +120,20 @@ def test_the_admin_renames_a_staff_account(api, users, make_user, make_student, 
     assert AuditLog.objects.filter(action="account.rename").count() == 1
     assert api(admin).patch(url, {"full_name_ar": "   "}, format="json").status_code == 400
 
-    # A student account is renamed from the student record, not here.
+    # A student account too (owner, 2026-11-08): the student record takes the same name.
     student_user = make_user(Role.STUDENT)
-    make_student(it_program, "RN-0001", user=student_user)
-    refused = api(admin).patch(
-        f"/api/v1/users/{student_user.public_id}", {"full_name_ar": "اسم"}, format="json"
+    student_record = make_student(it_program, "RN-0001", user=student_user)
+    renamed = api(admin).patch(
+        f"/api/v1/users/{student_user.public_id}",
+        {"full_name_ar": "مريم  عثمان", "full_name_en": "Mariam Osman"},
+        format="json",
     )
-    assert refused.status_code == 409 and refused.data["code"] == "student_account"
+    assert renamed.status_code == 200, renamed.data
+    student_record.refresh_from_db()
+    assert (student_record.full_name_ar, student_record.full_name_en) == (
+        "مريم عثمان",
+        "Mariam Osman",
+    )
 
 
 def test_the_users_and_applications_lists_sort_by_the_columns_the_tables_offer(
@@ -158,8 +165,9 @@ def test_the_admin_edits_a_users_profile(
     api, users, make_user, make_student, it_program, django_capture_on_commit_callbacks
 ):
     """Owner, 2026-10-30: the system admin edits name, email, phone, titles, interests and photo
-    in one change; consent to appear on the site stays the person's; a student's name stays
-    with the record; the old address is told of a new email."""
+    in one change; consent to appear on the site stays the person's; a student's name is
+    corrected too and the record follows (owner, 2026-11-08); the old address is told of a new
+    email."""
     import io
 
     from django.core import mail
@@ -203,14 +211,16 @@ def test_the_admin_edits_a_users_profile(
     log = AuditLog.objects.get(action="account.profile_update", target_id=str(staff.pk))
     assert set(log.new) >= {"full_name_ar", "email", "phone_e164", "photo"}
 
-    # A taken email; another user's role cannot; a student's name stays with the record.
+    # A taken email; another user's role cannot; a student's record follows the name.
     other = make_user(Role.HR, email="taken@ecst.edu.sd")
     assert admin.patch(url, {"email": "taken@ecst.edu.sd"}, format="json").status_code == 400
     assert api(other).patch(url, {"academic_title_ar": "x"}, format="json").status_code == 403
     student_user = make_user(Role.STUDENT)
-    make_student(it_program, "PR-0001", user=student_user)
+    s_record = make_student(it_program, "PR-0001", user=student_user)
     s_url = f"/api/v1/users/{student_user.public_id}"
-    assert admin.patch(s_url, {"full_name_ar": "اسم"}, format="json").status_code == 409
+    assert admin.patch(s_url, {"full_name_ar": "اسم الطالب"}, format="json").status_code == 200
+    s_record.refresh_from_db()
+    assert s_record.full_name_ar == "اسم الطالب"
     assert admin.patch(s_url, {"phone_e164": "0911111111"}, format="json").status_code == 200
     # Removing the photo.
     assert admin.patch(url, {"photo": None}, format="json").data["photo"] is None

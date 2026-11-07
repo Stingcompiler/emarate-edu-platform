@@ -27,6 +27,7 @@ import { disablePush, enablePush, pushState, type PushState } from "../lib/push"
 import { type Density, useDensity } from "../lib/density";
 import { type Theme, useTheme } from "../lib/theme";
 import { Select } from "../components/Select";
+import { useToast } from "../components/Toast";
 
 type Preference = Schemas["Preference"];
 
@@ -97,6 +98,7 @@ export function Settings() {
             ) : (
               <Card className="divide-y divide-border-soft">
                 <PhotoRow />
+                <MyName />
                 <p className="px-4 py-3 text-sm text-text-muted" dir="ltr">
                   {me.data?.email}
                 </p>
@@ -838,6 +840,112 @@ function PhotoRow() {
         />
       )}
     </div>
+  );
+}
+
+/**
+ * Staff correct their own name (owner, 2026-11-08). A student's name belongs to the student
+ * record and the registrar corrects it, so students never see this row.
+ */
+function MyName() {
+  const me = useMe();
+  const client = useQueryClient();
+  const toast = useToast();
+  const [draft, setDraft] = useState<{ ar: string; en: string } | null>(null);
+  const save = useMutation({
+    mutationFn: async (body: { full_name_ar: string; full_name_en: string }) => {
+      const { data, error } = await api.PATCH("/api/v1/me/name", { body });
+      if (!data) throw error;
+      return data;
+    },
+    onSuccess: (data) => {
+      client.setQueryData(["me"], data);
+      void client.invalidateQueries({ queryKey: ["me"] });
+      setDraft(null);
+      toast("حُفظ اسمك");
+    },
+  });
+  if (!me.data) return null;
+  const nameAr = me.data.full_name_ar;
+  const nameEn = me.data.full_name_en ?? "";
+  if (!draft) {
+    return (
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 px-4 py-3">
+        <span className="min-w-0 flex-1">
+          <span className="block text-xs text-text-muted">الاسم</span>
+          <span className="block text-sm text-text">{nameAr}</span>
+          {nameEn && (
+            <span className="block text-xs text-text-muted" dir="ltr">
+              {nameEn}
+            </span>
+          )}
+        </span>
+        <button
+          type="button"
+          onClick={() => setDraft({ ar: nameAr, en: nameEn })}
+          className="min-h-11 text-sm font-semibold text-primary hover:underline"
+        >
+          تعديل الاسم
+        </button>
+      </div>
+    );
+  }
+  const changed = draft.ar.trim() !== nameAr || draft.en.trim() !== nameEn;
+  return (
+    <form
+      className="space-y-3 py-3"
+      onSubmit={(e) => {
+        e.preventDefault();
+        save.mutate({ full_name_ar: draft.ar, full_name_en: draft.en });
+      }}
+    >
+      <div className="overflow-hidden rounded-xl border border-border-soft mx-4">
+        <Field
+          label="الاسم بالعربية"
+          value={draft.ar}
+          onChange={(e) => setDraft({ ...draft, ar: e.target.value })}
+          required
+          autoFocus
+          autoComplete="name"
+        />
+        <Field
+          label="الاسم بالإنجليزية (اختياري)"
+          dir="ltr"
+          className="text-end"
+          value={draft.en}
+          onChange={(e) => setDraft({ ...draft, en: e.target.value })}
+        />
+      </div>
+      <p className="px-4 text-xs text-text-muted">
+        يظهر اسمك هكذا في البوابة، وفي صفحة قسمك على موقع الكلية إن اخترت الظهور فيها.
+      </p>
+      {save.isError && (
+        <div className="px-4">
+          <Notice>{problemMessage(save.error)}</Notice>
+        </div>
+      )}
+      <div className="flex flex-wrap gap-2 px-4">
+        <Button
+          type="submit"
+          className="min-h-11 px-5"
+          disabled={!draft.ar.trim() || !changed || save.isPending}
+          why={!draft.ar.trim() ? "اكتب اسمك بالعربية" : !changed ? "لم يتغير شيء" : undefined}
+        >
+          {save.isPending ? "لحظة…" : "حفظ الاسم"}
+        </Button>
+        <Button
+          type="button"
+          variant="secondary"
+          className="min-h-11 px-5"
+          onClick={() => {
+            setDraft(null);
+            save.reset();
+          }}
+        >
+          إلغاء
+        </Button>
+      </div>
+    </form>
   );
 }
 

@@ -108,6 +108,11 @@ def update_record(meta: RequestMeta, obj: StudentRecord, **data) -> StudentRecor
         for field, value in data.items():
             setattr(obj, field, value)
         obj.save()
+        if obj.user_id is not None and {"full_name_ar", "full_name_en"} & set(data):
+            # The account shows the record's name (owner, 2026-11-08): they never disagree.
+            type(obj.user).objects.filter(pk=obj.user_id).update(
+                full_name_ar=obj.full_name_ar, full_name_en=obj.full_name_en
+            )
         record(
             meta,
             "students.update",

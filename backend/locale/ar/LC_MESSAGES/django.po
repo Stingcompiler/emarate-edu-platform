@@ -1195,3 +1195,6 @@ msgstr "وصل بلاغك إلى القسم، وسيردّ عليك بالبري
 
 msgid "Give a reason when dismissing."
 msgstr "اكتب سبب رفض البلاغ."
+
+msgid "A student's name is corrected by the registrar in the student record."
+msgstr "اسم الطالب يصحّحه المسجّل في سجل الطالب."

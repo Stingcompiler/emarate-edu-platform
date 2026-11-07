@@ -4,6 +4,10 @@ Older rounds (2026-10-24 → 11-02): `.claude/handoff/archive/2026-10-24_to_2026
 
 ## State
 
+- **Own name** (owner, 2026-11-08): staff change their name in /settings («تعديل الاسم»,
+  `PATCH /api/v1/me/name`, audit `account.rename_self`, site rebuilt if they appear on it);
+  students get 403. The system admin renames any account from /system/users/:id, a student's
+  too (the record follows); a name corrected in the student record reaches the account.
 - **Pick-one control** (owner, 2026-11-07: «modernize the dropdowns, system-wide»):
   `apps/portal/src/components/Select.tsx` — `Select` (drop-in for `<select>`, used by every former
   select and by `SelectField`) and `ChoiceField` (form-card row, /register programme). Sheet on
