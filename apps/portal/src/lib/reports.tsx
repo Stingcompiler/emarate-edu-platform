@@ -8,6 +8,7 @@ import { CountUp } from "../components/motion";
 import { api, ok } from "./api";
 import { count, N, fmtDate } from "./format";
 import { ALL } from "../components/Pager";
+import { Select } from "../components/Select";
 
 /** Numbers: Arabic digits in prose, "—" when there is no data. */
 export const num = (n: number | null | undefined, digits = 0) =>
@@ -247,9 +248,9 @@ export function Picker<T extends { id: number }>({
   all?: string;
 }) {
   return (
-    <label className="flex items-center gap-2 text-xs text-text-muted">
+    <label className="flex min-w-0 max-w-full items-center gap-2 text-xs text-text-muted">
       {label}
-      <select
+      <Select
         value={value ?? ""}
         onChange={(e) => onChange(e.target.value ? Number(e.target.value) : undefined)}
         className="min-h-9 rounded-lg border border-border bg-surface px-2 text-sm text-text"
@@ -260,7 +261,7 @@ export function Picker<T extends { id: number }>({
             {name(t)}
           </option>
         ))}
-      </select>
+      </Select>
     </label>
   );
 }

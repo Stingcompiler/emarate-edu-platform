@@ -24,6 +24,7 @@ import { initials, useDepartments } from "../../lib/reports";
 import { DEPARTMENT_ROLES, ROLE_LABEL, ROLE_ORDER } from "./roles";
 import { useConfirm } from "../../components/Confirm";
 import { useToast } from "../../components/Toast";
+import { Select } from "../../components/Select";
 
 /** Board: SystemAdminUser (phone); desktop derived — account beside roles and scopes. */
 export function AdminUser() {
@@ -289,7 +290,7 @@ export function AdminUser() {
             {grantable.length > 0 && (
               <Card className="space-y-2 p-4">
                 <p className="text-sm font-semibold">+ إضافة دور أو نطاق</p>
-                <select
+                <Select
                   value={role}
                   onChange={(e) => setRole(e.target.value)}
                   className="block min-h-10 w-full rounded-lg border border-border bg-surface px-3 text-sm"
@@ -306,9 +307,9 @@ export function AdminUser() {
                       {ROLE_LABEL[k]}
                     </option>
                   ))}
-                </select>
+                </Select>
                 {DEPARTMENT_ROLES.has(role) && (
-                  <select
+                  <Select
                     value={department}
                     onChange={(e) => setDepartment(e.target.value)}
                     className="block min-h-10 w-full rounded-lg border border-border bg-surface px-3 text-sm"
@@ -320,7 +321,7 @@ export function AdminUser() {
                         {d.name_ar}
                       </option>
                     ))}
-                  </select>
+                  </Select>
                 )}
                 <Button
                   className="w-full"

@@ -7,6 +7,7 @@ import { api, ok } from "../../lib/api";
 import { initials, num, useDepartments } from "../../lib/reports";
 import { count, N } from "../../lib/format";
 import { useConfirm } from "../../components/Confirm";
+import { Select } from "../../components/Select";
 
 /** Board: HeadRegistrarRegistrars — link registrars to departments (what they see and are routed). */
 export function Registrars() {
@@ -128,7 +129,7 @@ export function Registrars() {
                 {!links.length && (
                   <span className="text-xs text-warning-strong">لم يُربط بقسم</span>
                 )}
-                <select
+                <Select
                   aria-label="ربط بقسم"
                   value=""
                   onChange={(e) =>
@@ -143,7 +144,7 @@ export function Registrars() {
                       {d.name_ar}
                     </option>
                   ))}
-                </select>
+                </Select>
               </span>
             </div>
           );

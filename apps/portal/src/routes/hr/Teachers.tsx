@@ -21,6 +21,7 @@ import {
   useTerms,
 } from "../../lib/reports";
 import { count, N } from "../../lib/format";
+import { Select } from "../../components/Select";
 
 export type TeacherRow = {
   public_id: string;
@@ -176,7 +177,7 @@ export function Teachers() {
           )}
           <label className="flex items-center gap-2 text-xs text-text-muted">
             الدور
-            <select
+            <Select
               value={kind}
               onChange={(e) => setKind(e.target.value)}
               className="min-h-9 rounded-lg border border-border bg-surface px-2 text-sm text-text"
@@ -184,7 +185,7 @@ export function Teachers() {
               <option value="">أساتذة + معيدون</option>
               <option value="teacher">أساتذة</option>
               <option value="ta">معيدون</option>
-            </select>
+            </Select>
           </label>
           {r && (
             <span className="text-xs text-text-muted">

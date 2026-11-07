@@ -31,6 +31,7 @@ import {
 import { initials, num } from "../../lib/reports";
 import { ALL, Pager } from "../../components/Pager";
 import { useConfirm } from "../../components/Confirm";
+import { Select } from "../../components/Select";
 
 type Student = Schemas["StudentRecord"];
 
@@ -368,7 +369,7 @@ function StudentForm({
         />
         <label className="block border-b border-border-soft px-4 py-2.5">
           <span className="block text-xs text-text-muted">البرنامج</span>
-          <select
+          <Select
             value={f.program || String(program?.id ?? "")}
             onChange={(e) => setF({ ...f, program: e.target.value })}
             className="mt-0.5 block min-h-9 w-full bg-transparent text-base text-text outline-none"
@@ -378,7 +379,7 @@ function StudentForm({
                 {p.name_ar}
               </option>
             ))}
-          </select>
+          </Select>
           {errors.program?.[0] && (
             <span className="mt-1 block text-xs text-danger-strong">{errors.program[0]}</span>
           )}
@@ -386,7 +387,7 @@ function StudentForm({
         {/* One choice: the plan's semester (1–10) carries the level (owner, 2026-11-07). */}
         <label className="block border-b border-border-soft px-4 py-2.5">
           <span className="block text-xs text-text-muted">الفصل الدراسي</span>
-          <select
+          <Select
             value={planSemester(f.level, f.semester)}
             onChange={(e) => setF({ ...f, ...fromPlanSemester(Number(e.target.value)) })}
             className="mt-0.5 block min-h-9 w-full bg-transparent text-base text-text outline-none"
@@ -396,7 +397,7 @@ function StudentForm({
                 {x.label}
               </option>
             ))}
-          </select>
+          </Select>
           {(errors.level?.[0] || errors.semester?.[0]) && (
             <span className="mt-1 block text-xs text-danger-strong">
               {errors.level?.[0] ?? errors.semester?.[0]}

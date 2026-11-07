@@ -14,6 +14,7 @@ import {
   WithSide,
 } from "../../components/ui";
 import { api, ok } from "../../lib/api";
+import { Select } from "../../components/Select";
 
 /** Board: TeacherLiveNew (phone); desktop derived. The link is visible only to those in scope. */
 export function LiveNew() {
@@ -99,7 +100,7 @@ export function LiveNew() {
           <Field label="العنوان" value={title} onChange={(e) => setTitle(e.target.value)} />
           <label className="block px-4 py-2.5">
             <span className="block text-xs text-text-muted">المادة</span>
-            <select
+            <Select
               className="mt-1 block min-h-10 w-full bg-transparent text-base text-text"
               value={offering}
               onChange={(e) => setOffering(e.target.value)}
@@ -109,7 +110,7 @@ export function LiveNew() {
                   {c.code} — {c.name_ar}
                 </option>
               ))}
-            </select>
+            </Select>
           </label>
         </Card>
         <SectionLabel>المزوّد</SectionLabel>

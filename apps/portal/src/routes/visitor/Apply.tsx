@@ -36,6 +36,7 @@ import { markSynced, readDraft, writeDraft } from "../../lib/localDraft";
 import { VisitorLayout } from "./VisitorLayout";
 import { fmtDate } from "../../lib/format";
 import { exampleText, explain } from "../../lib/guide";
+import { Select } from "../../components/Select";
 
 type Application = {
   public_id: string;
@@ -351,7 +352,7 @@ export function FieldInput({
   let input;
   if (field.type === "select") {
     input = (
-      <select
+      <Select
         {...common}
         value={(value as string) ?? ""}
         onChange={(e) => onChange(e.target.value)}
@@ -363,12 +364,12 @@ export function FieldInput({
             {o}
           </option>
         ))}
-      </select>
+      </Select>
     );
   } else if (field.type === "year") {
     const now = new Date().getFullYear();
     input = (
-      <select
+      <Select
         {...common}
         value={value == null ? "" : String(value)}
         onChange={(e) => onChange(e.target.value ? Number(e.target.value) : "")}
@@ -380,7 +381,7 @@ export function FieldInput({
             {y}
           </option>
         ))}
-      </select>
+      </Select>
     );
   } else if (field.type === "multiselect") {
     const picked = (value as string[]) ?? [];

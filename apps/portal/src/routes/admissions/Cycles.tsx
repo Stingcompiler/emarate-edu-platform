@@ -18,6 +18,7 @@ import { api, ok } from "../../lib/api";
 import { hasRole, useMe } from "../../lib/auth";
 import { count, N, fmtDate } from "../../lib/format";
 import { ALL } from "../../components/Pager";
+import { Select } from "../../components/Select";
 
 /** Board: HeadRegistrarCycles (phone); desktop derived — cycles + a table of intakes. */
 export function Cycles() {
@@ -315,7 +316,7 @@ export function Cycles() {
                   {forms.length > 0 && (
                     <label className="mt-1.5 flex items-center gap-2 text-xs text-text-muted">
                       الاستمارة:
-                      <select
+                      <Select
                         value={
                           forms.find(
                             (f) =>
@@ -339,7 +340,7 @@ export function Cycles() {
                             {f.name}
                           </option>
                         ))}
-                      </select>
+                      </Select>
                     </label>
                   )}
                 </span>

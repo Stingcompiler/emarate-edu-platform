@@ -167,7 +167,8 @@ it("the college's form: sections, bold labels tied to inputs, «تعليمات»
   expect(screen.getAllByText("اختر «تجسير» إن كنت تحمل دبلومًا.").length).toBeGreaterThan(0);
   // A conditional field appears only for its answer.
   expect(screen.queryByLabelText(/اسم الجامعة السابقة/)).toBeNull();
-  fireEvent.change(screen.getByLabelText(/مسار التقديم/), { target: { value: "تجسير" } });
+  fireEvent.click(screen.getByLabelText(/مسار التقديم/));
+  fireEvent.click(screen.getByRole("option", { name: "تجسير" }));
   expect(screen.getByLabelText(/اسم الجامعة السابقة/)).toBeTruthy();
   // The guide lists the same explanation and says when the conditional field applies.
   expect(screen.getByText("دليل تعبئة الاستمارة")).toBeTruthy();

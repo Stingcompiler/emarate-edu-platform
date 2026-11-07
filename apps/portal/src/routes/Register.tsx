@@ -13,7 +13,7 @@ import {
   TextArea,
 } from "../components/ui";
 import { api } from "../lib/api";
-import { type Choice, ChoiceField } from "../components/ChoiceField";
+import { type Choice, ChoiceField } from "../components/Select";
 import { OtpInput } from "../components/OtpInput";
 
 type Step = "details" | "code" | "password" | "done" | "taken" | "reported";

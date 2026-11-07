@@ -22,6 +22,7 @@ import { useLectures } from "../../lib/learning";
 import { can } from "../../lib/nav";
 import { Bars, Kpi, num, weeklyTitle } from "../../lib/reports";
 import { useConfirm } from "../../components/Confirm";
+import { Select } from "../../components/Select";
 
 /**
  * «المحاضرات»: the department's lectures by course with publish state. The manager and
@@ -140,7 +141,7 @@ export function DepartmentLectures() {
             aria-label="بحث بعنوان المحاضرة"
             className="block min-h-10 w-full rounded-full border border-border-soft bg-surface px-4 text-sm sm:max-w-sm"
           />
-          <select
+          <Select
             value={course}
             onChange={(e) => setCourse(e.target.value === "all" ? "all" : Number(e.target.value))}
             aria-label="المادة"
@@ -152,7 +153,7 @@ export function DepartmentLectures() {
                 {o.course_detail.code} · {o.course_detail.name_ar}
               </option>
             ))}
-          </select>
+          </Select>
         </div>
       </FilterBar>
       <WithSide

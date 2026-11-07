@@ -20,6 +20,7 @@ import { type Field, STATUS_LABEL, STATUS_TONE } from "../../lib/visitor";
 import { StaffFields } from "./StaffFields";
 import { useConfirm } from "../../components/Confirm";
 import { useToast } from "../../components/Toast";
+import { Select } from "../../components/Select";
 
 const ACTION: Record<string, string> = {
   under_review: "بدء المراجعة",
@@ -314,7 +315,7 @@ export function ApplicationDetail() {
                 <Card className="space-y-2 p-4">
                   <label className="block text-sm">
                     <span className="text-xs text-text-muted">المسجل المسؤول</span>
-                    <select
+                    <Select
                       value={a.assigned_registrar_id ?? ""}
                       onChange={(e) => assign.mutate(e.target.value || null)}
                       disabled={assign.isPending}
@@ -326,7 +327,7 @@ export function ApplicationDetail() {
                           {u.full_name_ar}
                         </option>
                       ))}
-                    </select>
+                    </Select>
                   </label>
                   {!forDepartment.length && registrars.isSuccess && (
                     <p className="text-xs text-text-muted">
@@ -386,7 +387,7 @@ export function ApplicationDetail() {
                     <>
                       <label className="block text-sm">
                         <span className="mb-1 block text-xs text-text-muted">يبدأ الطالب في</span>
-                        <select
+                        <Select
                           value={startSemester}
                           onChange={(e) => setStartSemester(e.target.value === "2" ? 2 : 1)}
                           className="min-h-11 w-full rounded-lg border border-border bg-surface px-3 text-sm"
@@ -394,7 +395,7 @@ export function ApplicationDetail() {
                           {/* Within the admitted level: level 2 → semester 3 or 4. */}
                           <option value={1}>أول فصلي المستوى المقبول به</option>
                           <option value={2}>ثاني فصلي المستوى المقبول به</option>
-                        </select>
+                        </Select>
                       </label>
                       <Button
                         className="w-full"

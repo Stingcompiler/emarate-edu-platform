@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-import { lastCode } from "./helpers";
+import { choose, lastCode } from "./helpers";
 
 const PDF = Buffer.from("%PDF-1.4\n1 0 obj<<>>endobj\ntrailer<<>>\n%%EOF\n");
 
@@ -36,7 +36,7 @@ test("a visitor verifies the email, fills the application, uploads documents and
   await expect(page.getByLabel("الاسم الكامل *")).toHaveValue("سلمى عثمان الأمين");
   await page.getByLabel("الهاتف").fill("+249912345678");
   await page.getByLabel(/^تاريخ الميلاد/).fill("2008-05-01");
-  await page.getByLabel(/^نوع الشهادة/).selectOption("سودانية");
+  await choose(page.getByLabel(/^نوع الشهادة/), "سودانية");
   await page.getByLabel(/^النسبة المئوية/).fill("82.5");
   await page.getByLabel("المدرسة").fill("مدرسة الخرطوم الثانوية");
   // The draft really is saved as the page says (review 2026-10-04 UX1): it survives a reload.

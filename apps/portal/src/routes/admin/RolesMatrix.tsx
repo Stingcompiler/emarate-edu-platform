@@ -6,6 +6,7 @@ import { PortalShell } from "../../components/PortalShell";
 import { Card, Notice, ScrollRegion, WithSide } from "../../components/ui";
 import { api, ok } from "../../lib/api";
 import { downloadCsv, num } from "../../lib/reports";
+import { Select } from "../../components/Select";
 
 /** What each capability lets a role do (accounts/rbac.py; docs/03 is the reference). */
 const CAPABILITY: Record<string, string> = {
@@ -157,7 +158,7 @@ export function Roles() {
             its card and permissions follow. */}
         <label className="block lg:hidden">
           <span className="block px-1 text-xs text-text-muted">الدور</span>
-          <select
+          <Select
             value={role?.key ?? ""}
             onChange={(e) => setPicked(e.target.value)}
             className="mt-1 block min-h-11 w-full rounded-xl border border-border bg-surface px-3 text-sm font-semibold"
@@ -167,7 +168,7 @@ export function Roles() {
                 {r.label} · {num(r.users)}
               </option>
             ))}
-          </select>
+          </Select>
         </label>
         <Card className="hidden overflow-hidden lg:block">
           <ScrollRegion label="مصفوفة الصلاحيات">

@@ -1,6 +1,6 @@
 import path from "node:path";
 
-import { type Page, expect } from "@playwright/test";
+import { type Locator, type Page, expect } from "@playwright/test";
 
 export const PASSWORD = process.env.DEMO_PASSWORD ?? "e2e-pass-2026";
 
@@ -95,4 +95,12 @@ export async function offscreen(page: Page): Promise<string[]> {
     }
     return out;
   });
+}
+
+/** Pick an option in the portal's Select (a combobox that opens a sheet or a menu). */
+export async function choose(trigger: Locator, option: string | RegExp) {
+  await trigger.click();
+  const page = trigger.page();
+  await page.getByRole("option", { name: option, exact: typeof option === "string" }).click();
+  await expect(page.getByRole("listbox")).toBeHidden();
 }

@@ -9,6 +9,7 @@ import { useSiteLogo } from "../../lib/site";
 import { fieldsOf, type FormSchema, visitorApi } from "../../lib/visitor";
 import { GuideSections } from "./Apply";
 import { VisitorLayout } from "./VisitorLayout";
+import { Select } from "../../components/Select";
 
 /**
  * «دليل تعبئة استمارة طلب الالتحاق بالكلية» (spec §7): a public page built from the published
@@ -70,7 +71,7 @@ export function Guide() {
         {rows.length > 1 && (
           <label className="flex items-center gap-2 text-sm text-text-muted">
             البرنامج:
-            <select
+            <Select
               value={chosen?.program_code ?? ""}
               onChange={(e) => setParams({ program: e.target.value })}
               className="min-h-11 rounded-lg border border-border bg-surface px-2 text-sm text-text"
@@ -80,7 +81,7 @@ export function Guide() {
                   {i.program_name}
                 </option>
               ))}
-            </select>
+            </Select>
           </label>
         )}
       </div>

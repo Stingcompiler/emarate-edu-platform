@@ -16,6 +16,7 @@ import {
 import { api, ok } from "../../lib/api";
 import { useUnsavedChanges } from "../../lib/useUnsavedChanges";
 import { useLectures, useCourse } from "../../lib/learning";
+import { Select } from "../../components/Select";
 
 const EXTENSIONS = ["pdf", "docx", "xlsx", "pptx", "sql", "zip", "jpg", "png", "txt"];
 type Types = "file" | "link" | "text";
@@ -171,7 +172,7 @@ export function AssignmentEditor() {
               </label>
               <label className="block text-sm font-semibold">
                 مرتبط بمحاضرة
-                <select
+                <Select
                   value={f.lecture}
                   onChange={(e) => set("lecture", e.target.value)}
                   className={input}
@@ -182,7 +183,7 @@ export function AssignmentEditor() {
                       {l.title_ar}
                     </option>
                   ))}
-                </select>
+                </Select>
               </label>
             </Card>
             <SectionLabel>2 · المواعيد والدرجة</SectionLabel>
