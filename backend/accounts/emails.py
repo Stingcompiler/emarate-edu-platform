@@ -64,6 +64,18 @@ def registered_elsewhere(to: str, used: str) -> None:
     )
 
 
+def account_moved(to: str, university_number: str, program: str) -> None:
+    """The student's account now belongs to their new record (owner, 2026-11-08)."""
+    _send(
+        to,
+        "انتقل حسابك إلى برنامجك الجديد — بوابة كلية الإمارات",
+        f"انتقل حسابك إلى برنامج «{program}» برقمك الجامعي الجديد {university_number}.\n"
+        "ادخل بهذا الرقم أو ببريدك وكلمة المرور التي اخترتها الآن. سجل مرحلتك السابقة محفوظ "
+        "لدى الكلية ولا يظهر في حسابك.\n\n"
+        "إن لم تكن أنت من فعل ذلك فراجع شؤون الطلاب فورًا.",
+    )
+
+
 def identity_report_decided(to: str, upheld: bool, reason: str = "") -> None:
     if upheld:
         body = (
