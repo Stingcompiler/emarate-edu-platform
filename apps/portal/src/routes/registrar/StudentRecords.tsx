@@ -1,10 +1,14 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { Plus } from "lucide-react";
 import { useState } from "react";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 
 import { PortalShell } from "../../components/PortalShell";
+import { StudentForm } from "../../components/StudentForm";
 import { Avatar, Card, Chip, FilterBar, StatusBadge } from "../../components/ui";
 import { api, ok } from "../../lib/api";
+import { useMe } from "../../lib/auth";
+import { can } from "../../lib/nav";
 import { levelSemester } from "../../lib/format";
 import { Picker, initials, num, useDepartments } from "../../lib/reports";
 import { Pager } from "../../components/Pager";
@@ -16,8 +20,11 @@ export const STUDENT_STATUS: Record<string, string> = {
   withdrawn: "منسحب",
 };
 
-/** «سجل الطلاب» for the head registrar (college-wide): search, filters, open a record. */
+/** «سجل الطلاب» for the head registrar (college-wide): search, filters, open a record; the
+ * holders of ``students.manage`` add a student by hand beside the import (owner, 2026-11-08). */
 export function StudentRecords() {
+  const me = useMe();
+  const canAdd = can(me.data, "students.manage");
   const departments = useDepartments();
   const [department, setDepartment] = useState<number>();
   const [search, setSearch] = useState("");
@@ -37,9 +44,20 @@ export function StudentRecords() {
     <PortalShell
       title={`سجل الطلاب · ${num(list.data?.count ?? 0)}`}
       titleAction={
-        <Link to="/student-imports" className="text-sm font-semibold text-primary">
-          استيراد
-        </Link>
+        <span className="flex items-center gap-3">
+          <Link to="/student-imports" className="text-sm font-semibold text-primary">
+            استيراد
+          </Link>
+          {canAdd && (
+            <Link
+              to="/students/new"
+              className="inline-flex min-h-10 items-center gap-1 rounded-full bg-primary px-3 text-sm font-semibold text-on-primary"
+            >
+              <Plus size={16} aria-hidden />
+              طالب
+            </Link>
+          )}
+        </span>
       }
     >
       <FilterBar>
@@ -166,6 +184,27 @@ export function StudentRecords() {
         {!rows.length && <p className="px-4 py-4 text-sm text-text-muted">لا نتائج.</p>}
       </Card>
       <Pager page={page} count={list.data?.count ?? 0} onPage={setPage} />
+    </PortalShell>
+  );
+}
+
+/** «طالب جديد» from the college-wide record (owner, 2026-11-08): any programme of any
+ * department; the saved record opens next. */
+export function NewStudent() {
+  const navigate = useNavigate();
+  const client = useQueryClient();
+  return (
+    <PortalShell title="طالب جديد" back={{ label: "سجل الطلاب", to: "/students" }}>
+      <div className="max-w-xl">
+        <StudentForm
+          heading={false}
+          onCancel={() => navigate("/students")}
+          onSaved={(saved) => {
+            client.invalidateQueries({ queryKey: ["students"] });
+            navigate(`/students/${saved.public_id}`, { replace: true });
+          }}
+        />
+      </div>
     </PortalShell>
   );
 }

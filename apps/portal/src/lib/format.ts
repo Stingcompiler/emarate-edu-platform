@@ -165,6 +165,14 @@ export function slugify(title: string, max = 100): string {
  * A term of the academic year: the first or the second (no summer term). Not the plan's
  * semester, which runs 1–10 through the programme (planSemester).
  */
+/** A programme's degree, as the college names it (organization Program.Degree). */
+export const DEGREE: Record<string, string> = {
+  diploma: "دبلوم",
+  bachelor: "بكالوريوس",
+  honours: "بكالوريوس مرتبة الشرف",
+  master: "ماجستير",
+};
+
 export const SEMESTERS = [
   { value: 1, label: "الفصل الدراسي الأول" },
   { value: 2, label: "الفصل الدراسي الثاني" },

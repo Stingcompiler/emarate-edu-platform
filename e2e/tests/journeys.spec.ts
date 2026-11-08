@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-import { signIn } from "./helpers";
+import { choose, signIn } from "./helpers";
 
 // The closing test of the design review (2026-10-16): a person arrives with a goal and gets
 // there, on the phone and on a desktop, without a placeholder or an empty message standing in
@@ -58,5 +58,31 @@ test.describe("journeys", () => {
     await first.click();
     await expect(page).not.toHaveURL(/\/$/);
     await expect(page.getByRole("heading").first()).toBeVisible();
+  });
+
+  test("the system admin adds a student by hand beside the import", async ({ page }, info) => {
+    // Owner, 2026-11-08: «سجل الطلاب» takes a student by hand, in any department's programme.
+    const name = `طالب يدوي ${info.project.name === "phone" ? "هاتف" : "مكتب"}`;
+    await signIn(page, "admin@demo.ecst.test");
+    await page.goto("/students");
+    await page.getByRole("link", { name: "طالب", exact: true }).click();
+    await expect(page).toHaveURL(/\/students\/new/);
+    const add = page.getByRole("button", { name: "إضافة الطالب" });
+    await expect(add).toBeDisabled();
+    await page.getByLabel("الاسم بالعربية").fill(name);
+    await choose(
+      page.getByRole("combobox", { name: "البرنامج الدراسي" }),
+      "بكالوريوس علوم الحاسوب",
+    );
+    expect(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)).toBe(0);
+    await add.click();
+    await expect(page).toHaveURL(/\/students\/[0-9a-f-]{36}/);
+    await expect(page.getByText(name).locator("visible=true").first()).toBeVisible();
+    await expect(
+      page
+        .getByText(/-CS-\d{4}/)
+        .locator("visible=true")
+        .first(),
+    ).toBeVisible();
   });
 });

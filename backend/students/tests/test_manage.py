@@ -152,3 +152,23 @@ def test_a_corrected_name_reaches_the_students_account(
     assert response.status_code == 200, response.data
     account.refresh_from_db()
     assert (account.full_name_ar, account.full_name_en) == ("سارة أحمد", "Sara Ahmed")
+
+
+@pytest.mark.parametrize("role", [Role.SYSTEM_ADMIN, Role.SYSTEM_SUPERVISOR, Role.HEAD_REGISTRAR])
+def test_the_college_wide_roles_add_a_student_in_any_department(
+    api, make_user, it_program, ba_program, role
+):
+    """Owner, 2026-11-08: the system admin and supervisor add a student by hand beside the
+    import, in any department's programme (the head registrar too: «سجل الطلاب»)."""
+    who = make_user(role)
+    for program in (it_program, ba_program):
+        response = api(who).post(
+            URL,
+            {"full_name_ar": f"طالب {program.code}", "program": program.pk, "level": 1},
+            format="json",
+        )
+        assert response.status_code == 201, response.data
+        made = StudentRecord.objects.get(university_number=response.data["university_number"])
+        assert made.department_id == program.department_id
+        entry = AuditLog.objects.filter(target_id=str(made.pk)).first()
+        assert entry is not None and entry.actor_id == who.pk
