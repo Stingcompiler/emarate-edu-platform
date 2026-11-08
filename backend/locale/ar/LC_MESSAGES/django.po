@@ -1204,3 +1204,8 @@ msgstr "على هذا الرقم الجامعي حساب ينتظر اعتماد
 
 msgid "The account was stopped after an impersonation report."
 msgstr "أُوقف الحساب بعد بلاغ انتحال."
+
+msgid ""
+"Your earlier account is disabled. Ask the registrar to enable it, then "
+"register again."
+msgstr "حسابك السابق معطّل. اطلب من المسجّل تفعيله، ثم أعد التسجيل."

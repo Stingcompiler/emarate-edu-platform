@@ -169,6 +169,10 @@ def complete_registration(request: RegistrationRequest, password: str) -> User:
             raise Conflict(
                 gettext("This student already has an account."), code="already_registered"
             )
+        existing = User.objects.select_for_update().filter(email=request.email).first()
+        if existing is not None:
+            # A graduate's own inbox on a new record (the master's): the account moves.
+            return _move_account(request, locked, existing, password, official_email)
         try:
             user = User.objects.create_user(
                 email=request.email,
@@ -212,6 +216,78 @@ def complete_registration(request: RegistrationRequest, password: str) -> User:
             used = request.email
             transaction.on_commit(lambda: emails.registered_elsewhere(official_email, used))
     return user
+
+
+# A student whose earlier stage is over: the account may move to their new record.
+FINISHED = frozenset({StudentRecord.Status.GRADUATED, StudentRecord.Status.WITHDRAWN})
+
+
+def _same_person(a: StudentRecord, b: StudentRecord) -> bool:
+    names_a = [n for n in (a.full_name_ar, a.full_name_en) if n]
+    names_b = [n for n in (b.full_name_ar, b.full_name_en) if n]
+    return any(names_match(x, y) for x in names_a for y in names_b)
+
+
+def _move_account(
+    request: RegistrationRequest,
+    record_: StudentRecord,
+    account: User,
+    password: str,
+    official_email: str,
+) -> User:
+    """The student registers on a new record (a master's, added by hand with a new university
+    number) with the email of their own earlier account: that account moves to the new record
+    instead of a second one (owner, 2026-11-08). Nothing comes over from the earlier record,
+    which stays in the archive without an account.
+
+    Only from a finished stage (graduated or withdrawn) under the same name, and only an active
+    account: one that staff disabled is not turned back on by a visitor. The code just sent to
+    this inbox proves it is theirs, as in a password reset. Runs inside complete_registration's
+    transaction, with ``record_`` locked.
+    """
+    taken = Conflict(gettext("This email is already used by another account."), code="email_taken")
+    earlier = StudentRecord.objects.select_for_update().filter(user=account).first()
+    if earlier is None or earlier.status not in FINISHED or not _same_person(earlier, record_):
+        raise taken
+    if not account.is_active:
+        raise Conflict(
+            gettext(
+                "Your earlier account is disabled. Ask the registrar to enable it, then "
+                "register again."
+            ),
+            code="account_disabled",
+        )
+    earlier.user = None
+    earlier.save(update_fields=["user", "updated_at"])
+    record_.user = account
+    record_.save(update_fields=["user", "updated_at"])
+    account.set_password(password)
+    account.full_name_ar = record_.full_name_ar
+    account.full_name_en = record_.full_name_en
+    account.save(update_fields=["password", "full_name_ar", "full_name_en"])
+    RoleAssignment.objects.get_or_create(user=account, role=Role.STUDENT, department=None)
+    _revoke_refresh_tokens(account)  # a new password: other sessions sign in again
+    from admissions.services import mark_activated
+
+    mark_activated(record_)
+    request.status = RegistrationRequest.Status.APPROVED
+    request.decided_at = timezone.now()
+    request.save(update_fields=["status", "decided_at", "updated_at"])
+    record(
+        SYSTEM,
+        "registration.account_moved",
+        record_,
+        old={"university_number": earlier.university_number, "program": earlier.program.code},
+        new={"email": account.email, "university_number": record_.university_number},
+        department_id=record_.department_id,
+    )
+    to, number, program = account.email, record_.university_number, record_.program.name_ar
+    transaction.on_commit(lambda: emails.account_moved(to, number, program))
+    if official_email and official_email != request.email:
+        used = request.email
+        transaction.on_commit(lambda: emails.registered_elsewhere(official_email, used))
+    account.moved = True  # tells the view to say so
+    return account
 
 
 def decide_registration(

@@ -15,12 +15,12 @@ Older rounds (2026-10-24 → 11-02): `.claude/handoff/archive/2026-10-24_to_2026
   programme's or a department's students (both exist in notifications/audience). Registration
   matches number + the programme picked by name (the code is only the internal key) + name.
   New students never self-verify until their record exists (admission → `register_applicant`,
-  or added by hand/import). **Open (owner's words):** a graduate who continues to a master's
-  keeps the old university number and their account is reactivated, and the master's is a new
-  stage with nothing carried over from the old record. That conflicts with
-  `StudentRecord.university_number unique` + `user` OneToOne (240 uses of `student_record`):
-  ask before building — same number on a new record needs a model change (records per user,
-  number unique per programme or per active record).
+  or added by hand/import). **Master's** (owner, decided): a graduate who continues to a master's
+  is added by hand on a new record with a **new** university number (numbers never repeat —
+  owner's decision). Registering on it with their own email **moves their account** to the new
+  record (`accounts/services._move_account`, `feat/registration-account-move`): only from a
+  graduated/withdrawn record with the same name and an active account; the old record stays in
+  the archive without an account; nothing carries over.
 - **Own name** (owner, 2026-11-08): staff change their name in /settings («تعديل الاسم»,
   `PATCH /api/v1/me/name`, audit `account.rename_self`, site rebuilt if they appear on it);
   students get 403. The system admin renames any account from /system/users/:id, a student's

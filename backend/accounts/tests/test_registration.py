@@ -375,3 +375,105 @@ def test_every_reporter_hears_the_decision(
     assert sorted(m.to[0] for m in mail.outbox) == ["one@x.test", "two@x.test"]
     assert api(head).get(REPORTS, {"status": "open"}).data["count"] == 0
     assert AuditLog.objects.filter(action="registration.identity_upheld").count() == 2
+
+
+@pytest.fixture
+def masters(make_student, it_dept):
+    """A graduate's master's record, added by hand with a new university number."""
+    from organization.models import Program
+
+    program = Program.objects.create(
+        department=it_dept,
+        code="MIT",
+        name_ar="ماجستير تقانة المعلومات",
+        degree=Program.Degree.MASTER,
+        levels_count=2,
+        duration_terms=4,
+    )
+    return make_student(program, "27-IT-M-0001", name="أحمد محمد علي")
+
+
+NEW_PASSWORD = "Masters-pass-2027"
+
+
+def _on_masters(api, capture, email, password=NEW_PASSWORD):
+    request_id = _start(api, capture, "27-IT-M-0001", "أحمد محمد علي", email, program="MIT")
+    assert api().post(VERIFY, {"request_id": request_id, "code": last_code()}).status_code == 200
+    with capture(execute=True):
+        return api().post(COMPLETE, {"request_id": request_id, "password": password})
+
+
+def test_a_graduates_account_moves_to_the_masters_record(
+    api, django_capture_on_commit_callbacks, student, masters
+):
+    """Owner, 2026-11-08: the master's is a new stage on a new record with a new number; the
+    graduate registers on it with their own email and their account moves there, carrying
+    nothing over from the bachelor's record, which stays in the archive."""
+    from audit.models import AuditLog
+    from students.models import StudentRecord
+
+    capture = django_capture_on_commit_callbacks
+    _register(api, capture, "ahmed@college.test")
+    account = User.objects.get(email="ahmed@college.test")
+    student.status = StudentRecord.Status.GRADUATED
+    student.save(update_fields=["status"])
+
+    mail.outbox.clear()
+    response = _on_masters(api, capture, "Ahmed@College.test")
+    assert response.status_code == 201, response.data
+    assert response.data["status"] == "moved"
+    assert User.objects.filter(email="ahmed@college.test").count() == 1
+    masters.refresh_from_db()
+    student.refresh_from_db()
+    assert masters.user_id == account.pk and student.user_id is None
+    assert student.status == StudentRecord.Status.GRADUATED  # the bachelor's record is untouched
+
+    # The new number and the new password sign in; the old number no longer does.
+    signed = api().post(LOGIN, {"identifier": "27-IT-M-0001", "password": NEW_PASSWORD})
+    assert signed.status_code == 200
+    assert signed.data["student"]["university_number"] == "27-IT-M-0001"
+    assert (
+        api().post(LOGIN, {"identifier": "26-IT-0001", "password": NEW_PASSWORD}).status_code != 200
+    )
+    entry = AuditLog.objects.get(action="registration.account_moved")
+    assert entry.old["university_number"] == "26-IT-0001"
+    assert entry.new["university_number"] == "27-IT-M-0001"
+    assert any("انتقل حسابك" in m.subject for m in mail.outbox)
+
+
+def test_an_account_moves_only_from_a_finished_stage_of_the_same_student(
+    api, django_capture_on_commit_callbacks, student, masters, make_user
+):
+    from students.models import StudentRecord
+
+    capture = django_capture_on_commit_callbacks
+    _register(api, capture, "ahmed@college.test")
+
+    # Still studying the bachelor's: the email is taken, as before.
+    refused = _on_masters(api, capture, "ahmed@college.test")
+    assert refused.status_code == 409 and refused.data["code"] == "email_taken"
+
+    # Graduated, but the account was disabled by staff: not turned back on by a visitor.
+    student.status = StudentRecord.Status.GRADUATED
+    student.save(update_fields=["status"])
+    User.objects.filter(email="ahmed@college.test").update(is_active=False)
+    disabled = _on_masters(api, capture, "ahmed@college.test")
+    assert disabled.status_code == 409 and disabled.data["code"] == "account_disabled"
+    masters.refresh_from_db()
+    assert masters.user_id is None
+
+    # Another person's name on the master's record: never someone else's account.
+    User.objects.filter(email="ahmed@college.test").update(is_active=True)
+    masters.full_name_ar = "سارة عمر"
+    masters.save(update_fields=["full_name_ar"])
+    request_id = _start(api, capture, "27-IT-M-0001", "سارة عمر", "ahmed@college.test", "MIT")
+    assert api().post(VERIFY, {"request_id": request_id, "code": last_code()}).status_code == 200
+    other = api().post(COMPLETE, {"request_id": request_id, "password": NEW_PASSWORD})
+    assert other.status_code == 409 and other.data["code"] == "email_taken"
+
+    # A staff account's email is never moved onto a student record.
+    make_user(Role.TEACHER, email="teacher@college.test")
+    masters.full_name_ar = "أحمد محمد علي"
+    masters.save(update_fields=["full_name_ar"])
+    staff = _on_masters(api, capture, "teacher@college.test")
+    assert staff.status_code == 409 and staff.data["code"] == "email_taken"

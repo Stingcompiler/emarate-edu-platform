@@ -36,7 +36,7 @@ export function Register() {
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
   const [password, setPassword] = useState("");
-  const [status, setStatus] = useState<"active" | "pending_approval">("active");
+  const [status, setStatus] = useState<"active" | "pending_approval" | "moved">("active");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
 
@@ -217,11 +217,22 @@ export function Register() {
 
   if (step === "done") {
     return (
-      <AuthLayout title={status === "active" ? "تم إنشاء حسابك" : "حسابك بانتظار الاعتماد"}>
-        <Notice tone={status === "active" ? "success" : "info"}>
-          {status === "active"
-            ? "يمكنك الدخول الآن برقمك الجامعي أو بريدك."
-            : "سيعتمد مدير قسمك الحساب قريبًا، وسنرسل لك بريدًا عند الاعتماد."}
+      <AuthLayout
+        title={
+          status === "moved"
+            ? "انتقل حسابك إلى برنامجك الجديد"
+            : status === "active"
+              ? "تم إنشاء حسابك"
+              : "حسابك بانتظار الاعتماد"
+        }
+      >
+        <Notice tone={status === "pending_approval" ? "info" : "success"}>
+          {status === "moved"
+            ? // A graduate's own account now holds the new record (owner, 2026-11-08).
+              "ادخل برقمك الجامعي الجديد أو ببريدك، وبكلمة المرور التي اخترتها الآن. سجل مرحلتك السابقة محفوظ لدى الكلية."
+            : status === "active"
+              ? "يمكنك الدخول الآن برقمك الجامعي أو بريدك."
+              : "سيعتمد مدير قسمك الحساب قريبًا، وسنرسل لك بريدًا عند الاعتماد."}
         </Notice>
         <Link to="/login" className="mt-4 block">
           <Button className="w-full">الذهاب إلى الدخول</Button>
