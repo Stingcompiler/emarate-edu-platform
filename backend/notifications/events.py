@@ -68,39 +68,54 @@ def instructor_assigned(instructor) -> None:
     )
 
 
-def registration_pending(request) -> None:
-    """Department manager/supervisor of the student's department and the head registrar."""
+def _approvers(department_id):
+    """Who decides a student's registration: the department manager and supervisor of the
+    student's department, and the head registrar."""
     from accounts.rbac import Role
 
-    student = request.student_record
     User = get_user_model()
-    approvers = User.objects.filter(
-        is_active=True,
-        role_assignments__role__in=[Role.DEPARTMENT_MANAGER, Role.DEPARTMENT_SUPERVISOR],
-        role_assignments__department=student.department_id,
-    ) | User.objects.filter(is_active=True, role_assignments__role=Role.HEAD_REGISTRAR)
+    return (
+        User.objects.filter(
+            is_active=True,
+            role_assignments__role__in=[Role.DEPARTMENT_MANAGER, Role.DEPARTMENT_SUPERVISOR],
+            role_assignments__department=department_id,
+        )
+        | User.objects.filter(is_active=True, role_assignments__role=Role.HEAD_REGISTRAR)
+    ).distinct()
+
+
+def registration_pending(request) -> None:
+    student = request.student_record
     notify(
-        approvers.distinct(),
+        _approvers(student.department_id),
         category=Category.ACCOUNT,
-        title="طلب تسجيل طالب بانتظار الاعتماد",
+        title=(
+            "طلب نقل حساب خريج بانتظار الاعتماد"
+            if request.moves_account
+            else "طلب تسجيل طالب بانتظار الاعتماد"
+        ),
         body=f"{student.full_name_ar} · {student.university_number}",
         action_url="/department/approvals",
     )
 
 
+def account_moved(record) -> None:
+    """A graduate's account moved to their new record with no card to decide (the official
+    email): the department hears of it all the same (review 2026-11-08)."""
+    notify(
+        _approvers(record.department_id),
+        category=Category.ACCOUNT,
+        title="انتقل حساب خريج إلى سجله الجديد",
+        body=f"{record.full_name_ar} · {record.university_number} · {record.program.name_ar}",
+        action_url=f"/students/{record.public_id}",
+    )
+
+
 def identity_reported(report) -> None:
     """Same approvers as a pending registration: they decide the report."""
-    from accounts.rbac import Role
-
     student = report.student_record
-    User = get_user_model()
-    approvers = User.objects.filter(
-        is_active=True,
-        role_assignments__role__in=[Role.DEPARTMENT_MANAGER, Role.DEPARTMENT_SUPERVISOR],
-        role_assignments__department=student.department_id,
-    ) | User.objects.filter(is_active=True, role_assignments__role=Role.HEAD_REGISTRAR)
     notify(
-        approvers.distinct(),
+        _approvers(student.department_id),
         category=Category.ACCOUNT,
         title="بلاغ انتحال على حساب طالب",
         body=f"{student.full_name_ar} · {student.university_number}",

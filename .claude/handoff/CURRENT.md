@@ -18,9 +18,12 @@ Older rounds (2026-10-24 → 11-02): `.claude/handoff/archive/2026-10-24_to_2026
   or added by hand/import). **Master's** (owner, decided): a graduate who continues to a master's
   is added by hand on a new record with a **new** university number (numbers never repeat —
   owner's decision). Registering on it with their own email **moves their account** to the new
-  record (`accounts/services._move_account`, `feat/registration-account-move`): only from a
-  graduated/withdrawn record with the same name and an active account; the old record stays in
-  the archive without an account; nothing carries over.
+  record (`accounts/services._request_move`/`_move`): only from a graduated/withdrawn record with
+  the same name and an active account. Review fixes (`fix/account-move-review`): an email other
+  than the new record's official one waits for approval (`RegistrationRequest.moves_account`,
+  card «نقل حساب خريج»; reject keeps the account where it was); a move with no card notifies the
+  department; the old record gets `account_moved_to` and is never offered an account again.
+  `/students/new` is for college-scope `students.manage` only (`canEverywhere`).
 - **Own name** (owner, 2026-11-08): staff change their name in /settings («تعديل الاسم»,
   `PATCH /api/v1/me/name`, audit `account.rename_self`, site rebuilt if they appear on it);
   students get 403. The system admin renames any account from /system/users/:id, a student's

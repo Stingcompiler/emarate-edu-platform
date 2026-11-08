@@ -217,7 +217,19 @@ export function Approvals() {
               <span className="rounded-full bg-neutral-soft px-2 py-0.5 text-neutral-strong">
                 المستوى {num(r.level)} · {r.program}
               </span>
+              {r.moves_account && (
+                <span className="rounded-full bg-info-soft px-2 py-0.5 text-info-strong">
+                  نقل حساب خريج
+                </span>
+              )}
             </div>
+            {r.moves_account && (
+              // A graduate's own account asks to move to this new record (owner, 2026-11-08).
+              <p className="text-xs text-text-muted">
+                حساب قائم لخريج بهذا البريد يطلب الانتقال إلى هذا السجل. تأكد أنه الطالب نفسه:
+                الاعتماد ينقل الحساب ويؤرشف سجله السابق، والرفض يُبقيه على سجله السابق.
+              </p>
+            )}
             {!r.email_matches_record && r.official_email && (
               <p className="text-xs text-text-muted">
                 البريد في السجل: <bdi>{r.official_email}</bdi> — راجع بطاقة الطالب قبل الاعتماد.

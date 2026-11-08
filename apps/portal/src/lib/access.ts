@@ -1,5 +1,5 @@
 import { hasRole, type Me } from "./auth";
-import { can, canCompose } from "./nav";
+import { can, canCompose, canEverywhere } from "./nav";
 
 /**
  * Who may open each portal page (review 2026-09-29, P2). The server enforces every read and
@@ -129,7 +129,9 @@ export const ROUTE_ACCESS: Record<string, Allow> = {
   "/admissions/forms": cap("admissions.review", "admissions.manage"),
   "/registrar": cap("admissions.review"),
   "/students": cap("students.view"),
-  "/students/new": cap("students.manage"),
+  // College-wide: the form lists every department's programmes (review 2026-11-08); a
+  // department role adds from /department/students.
+  "/students/new": (me) => canEverywhere(me, "students.manage"),
   "/students/:id": cap("students.view"),
   "/student-imports": cap("students.import"),
   "/student-promotion": cap("students.promote"),

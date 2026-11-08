@@ -44,6 +44,11 @@ class StudentRecord(PublicIdModel, TimestampedModel):
         blank=True,
         related_name="student_record",
     )
+    # The record this student's account moved to (a master's after the bachelor's; owner,
+    # 2026-11-08). Such a record is archived: registration never offers it an account again.
+    account_moved_to = models.ForeignKey(
+        "self", on_delete=models.SET_NULL, null=True, blank=True, related_name="+"
+    )
     email = models.EmailField(blank=True, help_text="Official email from the college file.")
     phone_e164 = models.CharField(max_length=20, blank=True)
     birth_date = models.DateField(null=True, blank=True)

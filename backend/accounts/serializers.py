@@ -248,6 +248,7 @@ class RegistrationRequestSerializer(serializers.ModelSerializer):
             "email",
             "official_email",
             "email_matches_record",
+            "moves_account",
             "status",
             "created_at",
             "decided_at",

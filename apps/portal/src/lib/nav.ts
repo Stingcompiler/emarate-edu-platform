@@ -65,6 +65,11 @@ export function can(me: Me | null | undefined, capability: string): boolean {
   return !!me?.capabilities?.[capability];
 }
 
+/** The capability across the whole college, not only in some departments. */
+export function canEverywhere(me: Me | null | undefined, capability: string): boolean {
+  return !!me?.capabilities?.[capability]?.everything;
+}
+
 /**
  * Destinations that exist today, in priority order (the phone shows the first
  * four as tabs and the rest under «المزيد»). Role dashboards join as their
