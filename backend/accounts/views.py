@@ -558,14 +558,7 @@ class RegistrationCompleteView(APIView):
         data = RegistrationCompleteSerializer(data=request.data)
         data.is_valid(raise_exception=True)
         reg = get_object_or_404(RegistrationRequest, public_id=data.validated_data["request_id"])
-        user = services.complete_registration(reg, data.validated_data["password"])
-        state = (
-            "moved"
-            if getattr(user, "moved", False)
-            else "active"
-            if user.is_active
-            else "pending_approval"
-        )
+        state = services.complete_registration(reg, data.validated_data["password"])
         return Response({"status": state}, status=status.HTTP_201_CREATED)
 
 

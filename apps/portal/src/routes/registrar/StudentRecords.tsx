@@ -8,7 +8,7 @@ import { StudentForm } from "../../components/StudentForm";
 import { Avatar, Card, Chip, FilterBar, StatusBadge } from "../../components/ui";
 import { api, ok } from "../../lib/api";
 import { useMe } from "../../lib/auth";
-import { can } from "../../lib/nav";
+import { canEverywhere } from "../../lib/nav";
 import { levelSemester } from "../../lib/format";
 import { Picker, initials, num, useDepartments } from "../../lib/reports";
 import { Pager } from "../../components/Pager";
@@ -24,7 +24,7 @@ export const STUDENT_STATUS: Record<string, string> = {
  * holders of ``students.manage`` add a student by hand beside the import (owner, 2026-11-08). */
 export function StudentRecords() {
   const me = useMe();
-  const canAdd = can(me.data, "students.manage");
+  const canAdd = canEverywhere(me.data, "students.manage");
   const departments = useDepartments();
   const [department, setDepartment] = useState<number>();
   const [search, setSearch] = useState("");

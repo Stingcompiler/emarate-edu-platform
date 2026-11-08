@@ -76,6 +76,17 @@ def account_moved(to: str, university_number: str, program: str) -> None:
     )
 
 
+def account_move_pending(to: str, program: str) -> None:
+    """The move waits for the department (review 2026-11-08)."""
+    _send(
+        to,
+        "طلب نقل حسابك بانتظار الاعتماد — بوابة كلية الإمارات",
+        f"طلبت نقل حسابك إلى برنامج «{program}». سيراجعه قسمك قريبًا، وسنرسل لك بريدًا عند "
+        "الاعتماد. حتى ذلك يبقى حسابك كما هو، وتدخل بكلمة المرور التي اخترتها الآن.\n\n"
+        "إن لم تكن أنت من فعل ذلك فراجع شؤون الطلاب فورًا.",
+    )
+
+
 def identity_report_decided(to: str, upheld: bool, reason: str = "") -> None:
     if upheld:
         body = (

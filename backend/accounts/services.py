@@ -122,7 +122,27 @@ def start_registration(
             ),
             code="already_registered",
         )
-    matched = record_ is not None and record_.status == StudentRecord.Status.ACTIVE
+    if (
+        record_ is not None
+        and record_.registration_requests.filter(
+            status=RegistrationRequest.Status.PENDING_APPROVAL, moves_account=True
+        ).exists()
+    ):
+        # A graduate's account waits to move here (owner, 2026-11-08): no second account.
+        raise Conflict(
+            gettext(
+                "An account on this university number is waiting for the department's "
+                "approval. If it is not yours, report it."
+            ),
+            code="pending_approval",
+        )
+    # A record whose account moved on (to a master's) is archived: never offered an account
+    # again, even if its status is later corrected (review 2026-11-08).
+    matched = (
+        record_ is not None
+        and record_.status == StudentRecord.Status.ACTIVE
+        and record_.account_moved_to_id is None
+    )
     with transaction.atomic():
         request = RegistrationRequest.objects.create(
             student_record=record_ if matched else None, email=email
@@ -151,8 +171,9 @@ def verify_registration(request: RegistrationRequest, code: str) -> None:
     request.save(update_fields=["status", "verified_at", "updated_at"])
 
 
-def complete_registration(request: RegistrationRequest, password: str) -> User:
-    """Step 3. Creates the account. Active immediately, or pending approval."""
+def complete_registration(request: RegistrationRequest, password: str) -> str:
+    """Step 3. Creates the account, active at once or pending approval, or moves a graduate's
+    own account to this record. Returns ``"active"``, ``"pending_approval"`` or ``"moved"``."""
     if request.status != RegistrationRequest.Status.VERIFIED:
         raise Invalid({"request_id": [gettext("Verify your email first.")]}, code="not_verified")
     student = request.student_record
@@ -172,7 +193,9 @@ def complete_registration(request: RegistrationRequest, password: str) -> User:
         existing = User.objects.select_for_update().filter(email=request.email).first()
         if existing is not None:
             # A graduate's own inbox on a new record (the master's): the account moves.
-            return _move_account(request, locked, existing, password, official_email)
+            return _request_move(
+                request, locked, existing, password, official_email, needs_approval
+            )
         try:
             user = User.objects.create_user(
                 email=request.email,
@@ -215,7 +238,7 @@ def complete_registration(request: RegistrationRequest, password: str) -> User:
             # they report it from the registration page (owner, 2026-11-07).
             used = request.email
             transaction.on_commit(lambda: emails.registered_elsewhere(official_email, used))
-    return user
+    return "active" if user.is_active else "pending_approval"
 
 
 # A student whose earlier stage is over: the account may move to their new record.
@@ -228,27 +251,15 @@ def _same_person(a: StudentRecord, b: StudentRecord) -> bool:
     return any(names_match(x, y) for x in names_a for y in names_b)
 
 
-def _move_account(
-    request: RegistrationRequest,
-    record_: StudentRecord,
-    account: User,
-    password: str,
-    official_email: str,
-) -> User:
-    """The student registers on a new record (a master's, added by hand with a new university
-    number) with the email of their own earlier account: that account moves to the new record
-    instead of a second one (owner, 2026-11-08). Nothing comes over from the earlier record,
-    which stays in the archive without an account.
-
-    Only from a finished stage (graduated or withdrawn) under the same name, and only an active
-    account: one that staff disabled is not turned back on by a visitor. The code just sent to
-    this inbox proves it is theirs, as in a password reset. Runs inside complete_registration's
-    transaction, with ``record_`` locked.
-    """
-    taken = Conflict(gettext("This email is already used by another account."), code="email_taken")
+def _check_move(record_: StudentRecord, account: User) -> StudentRecord:
+    """The account's own record, if it may move to ``record_``; else 409. Only from a finished
+    stage (graduated or withdrawn) under the same name, and only an active account: one that
+    staff disabled is not turned back on by a visitor. Call with both rows locked."""
     earlier = StudentRecord.objects.select_for_update().filter(user=account).first()
     if earlier is None or earlier.status not in FINISHED or not _same_person(earlier, record_):
-        raise taken
+        raise Conflict(
+            gettext("This email is already used by another account."), code="email_taken"
+        )
     if not account.is_active:
         raise Conflict(
             gettext(
@@ -257,24 +268,25 @@ def _move_account(
             ),
             code="account_disabled",
         )
+    return earlier
+
+
+def _move(meta: RequestMeta, record_: StudentRecord, account: User, earlier: StudentRecord):
+    """The account leaves ``earlier`` (archived: nothing comes over) for ``record_``."""
     earlier.user = None
-    earlier.save(update_fields=["user", "updated_at"])
+    earlier.account_moved_to = record_
+    earlier.save(update_fields=["user", "account_moved_to", "updated_at"])
     record_.user = account
     record_.save(update_fields=["user", "updated_at"])
-    account.set_password(password)
     account.full_name_ar = record_.full_name_ar
     account.full_name_en = record_.full_name_en
-    account.save(update_fields=["password", "full_name_ar", "full_name_en"])
+    account.save(update_fields=["full_name_ar", "full_name_en"])
     RoleAssignment.objects.get_or_create(user=account, role=Role.STUDENT, department=None)
-    _revoke_refresh_tokens(account)  # a new password: other sessions sign in again
     from admissions.services import mark_activated
 
     mark_activated(record_)
-    request.status = RegistrationRequest.Status.APPROVED
-    request.decided_at = timezone.now()
-    request.save(update_fields=["status", "decided_at", "updated_at"])
     record(
-        SYSTEM,
+        meta,
         "registration.account_moved",
         record_,
         old={"university_number": earlier.university_number, "program": earlier.program.code},
@@ -283,11 +295,72 @@ def _move_account(
     )
     to, number, program = account.email, record_.university_number, record_.program.name_ar
     transaction.on_commit(lambda: emails.account_moved(to, number, program))
+
+
+def _request_move(
+    request: RegistrationRequest,
+    record_: StudentRecord,
+    account: User,
+    password: str,
+    official_email: str,
+    needs_approval: bool,
+) -> str:
+    """The student registers on a new record (a master's, added by hand with a new university
+    number) with the email of their own earlier account: that account moves to the new record
+    instead of a second one being made (owner, 2026-11-08).
+
+    The code just sent to this inbox proves it is theirs, so the new password is set now, as in
+    a password reset. The move itself follows the rule of a new account: an email other than
+    the record's official one waits for the department (review 2026-11-08: two students may
+    share a name). Runs inside complete_registration's transaction, with ``record_`` locked.
+    """
+    earlier = _check_move(record_, account)
+    account.set_password(password)
+    account.save(update_fields=["password"])
+    _revoke_refresh_tokens(account)  # a new password: other sessions sign in again
     if official_email and official_email != request.email:
         used = request.email
         transaction.on_commit(lambda: emails.registered_elsewhere(official_email, used))
-    account.moved = True  # tells the view to say so
-    return account
+    if needs_approval:
+        request.status = RegistrationRequest.Status.PENDING_APPROVAL
+        request.moves_account = True
+        request.save(update_fields=["status", "moves_account", "updated_at"])
+        record(
+            SYSTEM,
+            "registration.move_requested",
+            record_,
+            old={"university_number": earlier.university_number},
+            new={"email": account.email, "status": request.status},
+            department_id=record_.department_id,
+        )
+        to, program = account.email, record_.program.name_ar
+        transaction.on_commit(lambda: emails.account_move_pending(to, program))
+        events.registration_pending(request)
+        return "pending_approval"
+    _move(SYSTEM, record_, account, earlier)
+    request.status = RegistrationRequest.Status.APPROVED
+    request.decided_at = timezone.now()
+    request.save(update_fields=["status", "decided_at", "updated_at"])
+    events.account_moved(record_)  # no card to decide: the department still hears of it
+    return "moved"
+
+
+def _decide_move(
+    meta: RequestMeta, request: RegistrationRequest, student: StudentRecord, approve: bool
+) -> None:
+    """A pending move (``moves_account``): approving moves the account, rejecting leaves it on
+    its earlier record. Inside decide_registration's transaction, request locked."""
+    already = Conflict(gettext("This request was already decided."), code="already_decided")
+    account = User.objects.select_for_update().filter(email=request.email).first()
+    record_ = StudentRecord.objects.select_for_update().get(pk=student.pk)
+    if account is None or record_.user_id is not None:
+        raise already  # the account is gone, or the record got an account meanwhile
+    if approve:
+        _move(meta, record_, account, _check_move(record_, account))
+        events.registration_approved(account)
+    else:
+        to, reason = request.email, request.reason
+        transaction.on_commit(lambda: emails.registration_decided(to, False, reason))
 
 
 def decide_registration(
@@ -311,6 +384,27 @@ def decide_registration(
         student.refresh_from_db()
         if request.status != RegistrationRequest.Status.PENDING_APPROVAL:
             raise already
+        if request.moves_account:
+            request.decided_by = meta.actor
+            request.decided_at = timezone.now()
+            request.reason = reason
+            _decide_move(meta, request, student, approve)
+            request.status = (
+                RegistrationRequest.Status.APPROVED
+                if approve
+                else RegistrationRequest.Status.REJECTED
+            )
+            request.save(
+                update_fields=["status", "decided_by", "decided_at", "reason", "updated_at"]
+            )
+            record(
+                meta,
+                "registration.approve" if approve else "registration.reject",
+                student,
+                new={"status": request.status, "reason": reason, "moves_account": True},
+                department_id=student.department_id,
+            )
+            return request
         user = student.user
         if user is None or user.is_active or user.email != request.email:
             # Approved or removed meanwhile, or the record now holds another account (an

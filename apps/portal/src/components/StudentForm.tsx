@@ -12,10 +12,12 @@ type Student = Schemas["StudentRecord"];
 type Program = Schemas["Program"];
 
 /** A programme with its degree: a department's bachelor and master may share a name. A name
- * that already says it («بكالوريوس تقنية المعلومات») is shown as it is. */
+ * that already says it («بكالوريوس تقنية المعلومات») is shown as it is; a stopped programme
+ * says so (review 2026-11-08: it still has students, so it stays on the list). */
 const programLabel = (p: Program) => {
   const degree = DEGREE[p.degree] ?? p.degree;
-  return p.name_ar.includes(degree) ? p.name_ar : `${p.name_ar} · ${degree}`;
+  const name = p.name_ar.includes(degree) ? p.name_ar : `${p.name_ar} · ${degree}`;
+  return p.is_active ? name : `${name} (موقوف)`;
 };
 
 /**

@@ -175,6 +175,9 @@ class RegistrationRequest(PublicIdModel, TimestampedModel):
     )
     email = models.EmailField()
     status = models.CharField(max_length=20, choices=Status.choices, default=Status.OTP_PENDING)
+    # Pending: a graduate's own account waits to move to this record rather than a new account
+    # (owner, 2026-11-08; review: the move needs the same approval as a new account).
+    moves_account = models.BooleanField(default=False)
     otp = models.ForeignKey(OneTimeCode, on_delete=models.SET_NULL, null=True, related_name="+")
     verified_at = models.DateTimeField(null=True, blank=True)
     decided_by = models.ForeignKey(

@@ -390,7 +390,8 @@ def masters(make_student, it_dept):
         levels_count=2,
         duration_terms=4,
     )
-    return make_student(program, "27-IT-M-0001", name="أحمد محمد علي")
+    # The college's file has the student's email: the move needs no approval.
+    return make_student(program, "27-IT-M-0001", name="أحمد محمد علي", email="ahmed@college.test")
 
 
 NEW_PASSWORD = "Masters-pass-2027"
@@ -427,6 +428,7 @@ def test_a_graduates_account_moves_to_the_masters_record(
     student.refresh_from_db()
     assert masters.user_id == account.pk and student.user_id is None
     assert student.status == StudentRecord.Status.GRADUATED  # the bachelor's record is untouched
+    assert student.account_moved_to_id == masters.pk
 
     # The new number and the new password sign in; the old number no longer does.
     signed = api().post(LOGIN, {"identifier": "27-IT-M-0001", "password": NEW_PASSWORD})
@@ -477,3 +479,118 @@ def test_an_account_moves_only_from_a_finished_stage_of_the_same_student(
     masters.save(update_fields=["full_name_ar"])
     staff = _on_masters(api, capture, "teacher@college.test")
     assert staff.status_code == 409 and staff.data["code"] == "email_taken"
+
+
+def test_the_department_hears_of_a_move_with_no_card(
+    api, django_capture_on_commit_callbacks, student, masters, make_user, it_dept
+):
+    """Review 2026-11-08: a move on the official email needs no approval, but the department
+    still hears of it."""
+    from notifications.models import Notification
+    from students.models import StudentRecord
+
+    manager = make_user(Role.DEPARTMENT_MANAGER, department=it_dept)
+    capture = django_capture_on_commit_callbacks
+    _register(api, capture, "ahmed@college.test")
+    StudentRecord.objects.filter(pk=student.pk).update(status=StudentRecord.Status.GRADUATED)
+    assert _on_masters(api, capture, "ahmed@college.test").data["status"] == "moved"
+    assert Notification.objects.filter(
+        recipients__user=manager, title__contains="انتقل حساب خريج"
+    ).exists()
+
+
+def test_a_move_on_another_email_waits_for_the_department(
+    api, django_capture_on_commit_callbacks, student, masters, make_user, it_dept
+):
+    """Review 2026-11-08: two students may share a name, so a move on an email other than the
+    new record's official one waits for approval, like a new account; the account stays where
+    it is until then, and a rejection leaves it there."""
+    from students.models import StudentRecord
+
+    capture = django_capture_on_commit_callbacks
+    StudentRecord.objects.filter(pk=masters.pk).update(email="")  # no official email on file
+    _register(api, capture, "ahmed@college.test")  # the bachelor's account (official email)
+    account = User.objects.get(email="ahmed@college.test")
+    StudentRecord.objects.filter(pk=student.pk).update(status=StudentRecord.Status.GRADUATED)
+
+    pending = _on_masters(api, capture, "ahmed@college.test")
+    assert pending.status_code == 201 and pending.data["status"] == "pending_approval"
+    masters.refresh_from_db()
+    student.refresh_from_db()
+    assert masters.user_id is None and student.user_id == account.pk
+    # The new password works at once (the inbox is proven); the account is still the old one.
+    signed = api().post(LOGIN, {"identifier": "ahmed@college.test", "password": NEW_PASSWORD})
+    assert signed.status_code == 200
+    assert signed.data["student"]["university_number"] == "26-IT-0001"
+    # Nobody else registers on the master's record meanwhile.
+    taken = api().post(
+        START,
+        {
+            "university_number": "27-IT-M-0001",
+            "full_name": "أحمد محمد علي",
+            "program": "MIT",
+            "email": "else@gmail.test",
+        },
+    )
+    assert taken.status_code == 409 and taken.data["code"] == "pending_approval"
+
+    manager = make_user(Role.DEPARTMENT_MANAGER, department=it_dept)
+    cards = api(manager).get("/api/v1/registration-requests").data["results"]
+    card = next(c for c in cards if c["university_number"] == "27-IT-M-0001")
+    assert card["moves_account"] is True
+    url = f"/api/v1/registration-requests/{card['public_id']}/decide"
+    with capture(execute=True):
+        assert api(manager).post(url, {"approve": True}).status_code == 200
+    masters.refresh_from_db()
+    student.refresh_from_db()
+    assert masters.user_id == account.pk and student.user_id is None
+    assert any("انتقل حسابك" in m.subject for m in mail.outbox)
+
+
+def test_a_rejected_move_leaves_the_account_where_it_was(
+    api, django_capture_on_commit_callbacks, student, masters, make_user, it_dept
+):
+    from students.models import StudentRecord
+
+    capture = django_capture_on_commit_callbacks
+    StudentRecord.objects.filter(pk=masters.pk).update(email="")
+    _register(api, capture, "ahmed@college.test")
+    account = User.objects.get(email="ahmed@college.test")
+    StudentRecord.objects.filter(pk=student.pk).update(status=StudentRecord.Status.GRADUATED)
+    assert _on_masters(api, capture, "ahmed@college.test").data["status"] == "pending_approval"
+
+    manager = make_user(Role.DEPARTMENT_MANAGER, department=it_dept)
+    card = next(
+        c
+        for c in api(manager).get("/api/v1/registration-requests").data["results"]
+        if c["moves_account"]
+    )
+    url = f"/api/v1/registration-requests/{card['public_id']}/decide"
+    with capture(execute=True):
+        decided = api(manager).post(url, {"approve": False, "reason": "ليس الطالب نفسه"})
+    assert decided.status_code == 200, decided.data
+    account.refresh_from_db()
+    student.refresh_from_db()
+    masters.refresh_from_db()
+    assert account.is_active and student.user_id == account.pk and masters.user_id is None
+    assert "لم يُعتمد" in mail.outbox[-1].body
+
+
+def test_an_archived_record_is_never_offered_an_account_again(
+    api, django_capture_on_commit_callbacks, student, masters
+):
+    """Review 2026-11-08: the bachelor's record left without an account stays archived even if
+    its status is corrected back to active."""
+    from students.models import StudentRecord
+
+    capture = django_capture_on_commit_callbacks
+    _register(api, capture, "ahmed@college.test")
+    StudentRecord.objects.filter(pk=student.pk).update(status=StudentRecord.Status.GRADUATED)
+    assert _on_masters(api, capture, "ahmed@college.test").data["status"] == "moved"
+    StudentRecord.objects.filter(pk=student.pk).update(status=StudentRecord.Status.ACTIVE)
+
+    mail.outbox.clear()
+    request_id = _start(api, capture, "26-IT-0001", "أحمد محمد علي", "thief@gmail.test")
+    assert mail.outbox == []  # the same quiet answer as unknown details
+    refused = api().post(VERIFY, {"request_id": request_id, "code": "000000"})
+    assert refused.status_code == 400
