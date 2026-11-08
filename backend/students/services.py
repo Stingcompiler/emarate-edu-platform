@@ -9,6 +9,7 @@ attempts, an application) cannot be deleted.
 
 from __future__ import annotations
 
+from django.contrib.auth import get_user_model
 from django.db import IntegrityError, transaction
 from django.db.models import ProtectedError
 from django.utils import timezone
@@ -110,7 +111,7 @@ def update_record(meta: RequestMeta, obj: StudentRecord, **data) -> StudentRecor
         obj.save()
         if obj.user_id is not None and {"full_name_ar", "full_name_en"} & set(data):
             # The account shows the record's name (owner, 2026-11-08): they never disagree.
-            type(obj.user).objects.filter(pk=obj.user_id).update(
+            get_user_model().objects.filter(pk=obj.user_id).update(
                 full_name_ar=obj.full_name_ar, full_name_en=obj.full_name_en
             )
         record(

@@ -15,6 +15,11 @@ urlpatterns = [
     path("csrf", accounts.CsrfView.as_view(), name="csrf"),
     path("registration/start", accounts.RegistrationStartView.as_view(), name="registration-start"),
     path(
+        "registration/programs",
+        accounts.RegistrationProgramsView.as_view(),
+        name="registration-programs",
+    ),
+    path(
         "registration/verify", accounts.RegistrationVerifyView.as_view(), name="registration-verify"
     ),
     path(
