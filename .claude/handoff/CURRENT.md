@@ -4,6 +4,23 @@ Older rounds (2026-10-24 → 11-02): `.claude/handoff/archive/2026-10-24_to_2026
 
 ## State
 
+- **Add a student by hand, college-wide** (owner, 2026-11-08; `feat/students-add-college-wide`):
+  «سجل الطلاب» (/students) has «+ طالب» → `/students/new` for `students.manage` holders with
+  college scope (system admin, system supervisor, head registrar; they already held it in the
+  matrix, only the page was missing). The form is shared with /department/students
+  (`components/StudentForm.tsx`); the college-wide list groups programmes under departments and
+  needs an explicit pick. Programme labels add the degree unless the name already says it.
+- **Programmes, not departments** (owner, 2026-11-08): a department/specialisation is only a
+  container; a student belongs to one programme, sees that programme, and staff address a
+  programme's or a department's students (both exist in notifications/audience). Registration
+  matches number + the programme picked by name (the code is only the internal key) + name.
+  New students never self-verify until their record exists (admission → `register_applicant`,
+  or added by hand/import). **Open (owner's words):** a graduate who continues to a master's
+  keeps the old university number and their account is reactivated, and the master's is a new
+  stage with nothing carried over from the old record. That conflicts with
+  `StudentRecord.university_number unique` + `user` OneToOne (240 uses of `student_record`):
+  ask before building — same number on a new record needs a model change (records per user,
+  number unique per programme or per active record).
 - **Own name** (owner, 2026-11-08): staff change their name in /settings («تعديل الاسم»,
   `PATCH /api/v1/me/name`, audit `account.rename_self`, site rebuilt if they appear on it);
   students get 403. The system admin renames any account from /system/users/:id, a student's

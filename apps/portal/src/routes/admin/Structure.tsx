@@ -19,18 +19,11 @@ import {
 } from "../../components/ui";
 import { api, ok } from "../../lib/api";
 import { num } from "../../lib/reports";
-import { count, N, SEMESTERS, fmtDate, termName } from "../../lib/format";
+import { count, DEGREE, N, SEMESTERS, fmtDate, termName } from "../../lib/format";
 import { ALL } from "../../components/Pager";
 import { useConfirm } from "../../components/Confirm";
 import { useUnsavedChanges } from "../../lib/useUnsavedChanges";
 import { Select } from "../../components/Select";
-
-const DEGREE: Record<string, string> = {
-  diploma: "دبلوم",
-  bachelor: "بكالوريوس",
-  honours: "بكالوريوس مرتبة الشرف",
-  master: "ماجستير",
-};
 
 /** Back to the button that opened a form, once it closes (review 2026-11: the focus fell to
  * the page, and a keyboard user started again from the top). */

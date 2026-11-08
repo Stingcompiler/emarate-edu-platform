@@ -139,6 +139,7 @@ const Promotion = page(() => import("./routes/registrar/Promotion"), "Promotion"
 const Registrars = page(() => import("./routes/registrar/Registrars"), "Registrars");
 const StudentRecord = page(() => import("./routes/registrar/StudentRecord"), "StudentRecord");
 const StudentRecords = page(() => import("./routes/registrar/StudentRecords"), "StudentRecords");
+const NewStudent = page(() => import("./routes/registrar/StudentRecords"), "NewStudent");
 const Approvals = page(() => import("./routes/department/Approvals"), "Approvals");
 const Audit = page(() => import("./routes/department/Audit"), "Audit");
 const DepartmentDashboard = page(
@@ -283,6 +284,7 @@ const router = createBrowserRouter([
   { path: "/admissions/forms", element: signedIn(<FormBuilder />, "/admissions/forms") },
   { path: "/registrar", element: signedIn(<RegistrarHome />, "/registrar") },
   { path: "/students", element: signedIn(<StudentRecords />, "/students") },
+  { path: "/students/new", element: signedIn(<NewStudent />, "/students/new") },
   { path: "/students/:id", element: signedIn(<StudentRecord />, "/students/:id") },
   { path: "/student-imports", element: signedIn(<StudentImports />, "/student-imports") },
   { path: "/student-promotion", element: signedIn(<Promotion />, "/student-promotion") },

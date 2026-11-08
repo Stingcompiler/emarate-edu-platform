@@ -129,6 +129,7 @@ export const ROUTE_ACCESS: Record<string, Allow> = {
   "/admissions/forms": cap("admissions.review", "admissions.manage"),
   "/registrar": cap("admissions.review"),
   "/students": cap("students.view"),
+  "/students/new": cap("students.manage"),
   "/students/:id": cap("students.view"),
   "/student-imports": cap("students.import"),
   "/student-promotion": cap("students.promote"),
