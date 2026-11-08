@@ -298,3 +298,80 @@ def test_a_stale_rejection_cannot_delete_an_approved_account(make_user, make_stu
     record_.refresh_from_db()
     assert pending.is_active and record_.user_id == pending.pk
     assert RegistrationRequest.objects.get(pk=request.pk).status == "approved"
+
+
+# ─── Review 2026-11-08 ────────────────────────────────────────────────────
+
+
+def test_a_paused_programmes_students_still_register(
+    api, django_capture_on_commit_callbacks, student, it_program, make_user, it_dept
+):
+    from organization.models import Program
+
+    it_program.is_active = False
+    it_program.save()
+    empty = Program.objects.create(
+        department=it_dept,
+        code="OLD",
+        name_ar="برنامج متوقف بلا طلاب",
+        degree=Program.Degree.DIPLOMA,
+        levels_count=2,
+        duration_terms=4,
+        is_active=False,
+    )
+    codes = [p["code"] for p in api().get("/api/public/registration/programs").data]
+    assert "BIT" in codes and empty.code not in codes
+    _, status = _register(api, django_capture_on_commit_callbacks, "ahmed@college.test")
+    assert status == "active"
+
+
+def test_an_own_pending_account_is_named_as_waiting(
+    api, django_capture_on_commit_callbacks, student
+):
+    _register(api, django_capture_on_commit_callbacks, "me@gmail.test")
+    response = api().post(START, {**DETAILS, "email": "me@gmail.test"})
+    assert response.status_code == 409 and response.data["code"] == "pending_approval"
+
+
+def test_upholding_closes_the_impostors_pending_registration(
+    api, django_capture_on_commit_callbacks, student, make_user, it_dept
+):
+    impostor_request, status = _register(
+        api, django_capture_on_commit_callbacks, "classmate@gmail.test"
+    )
+    assert status == "pending_approval"
+    manager = make_user(Role.DEPARTMENT_MANAGER, department=it_dept)
+    api().post(REPORT, {**DETAILS, "email": "real@me.test"})
+    report = api(manager).get(REPORTS).data["results"][0]["public_id"]
+    assert api(manager).post(f"{REPORTS}/{report}/decide", {"uphold": True}).status_code == 200
+
+    stale = RegistrationRequest.objects.get(public_id=impostor_request)
+    assert stale.status == "rejected"
+    pending = api(manager).get("/api/v1/registration-requests", {"status": "pending_approval"})
+    assert pending.data["count"] == 0
+
+    # The real student registers; an old card approved now would not activate their account.
+    real_request, _ = _register(api, django_capture_on_commit_callbacks, "real@me.test")
+    stale.status = "pending_approval"
+    stale.save()
+    url = f"/api/v1/registration-requests/{impostor_request}/decide"
+    assert api(manager).post(url, {"approve": True}).status_code == 409
+    assert not User.objects.get(email="real@me.test").is_active
+
+
+def test_every_reporter_hears_the_decision(
+    api, django_capture_on_commit_callbacks, student, make_user
+):
+    from audit.models import AuditLog
+
+    _register(api, django_capture_on_commit_callbacks, "classmate@gmail.test")
+    head = make_user(Role.HEAD_REGISTRAR)
+    api().post(REPORT, {**DETAILS, "email": "one@x.test"})
+    api().post(REPORT, {**DETAILS, "email": "two@x.test"})
+    first = api(head).get(REPORTS, {"status": "open"}).data["results"][0]["public_id"]
+    mail.outbox.clear()
+    with django_capture_on_commit_callbacks(execute=True):
+        api(head).post(f"{REPORTS}/{first}/decide", {"uphold": True})
+    assert sorted(m.to[0] for m in mail.outbox) == ["one@x.test", "two@x.test"]
+    assert api(head).get(REPORTS, {"status": "open"}).data["count"] == 0
+    assert AuditLog.objects.filter(action="registration.identity_upheld").count() == 2

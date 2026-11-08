@@ -71,6 +71,24 @@ def _identity(university_number: str, full_name: str, program: str) -> StudentRe
     return record_
 
 
+def registration_programs():
+    """The programmes a student picks from when registering: every one that is open, and every
+    one that still has students on file, even if it is paused or its department is (review
+    2026-11-08: a paused programme's students must still be able to register)."""
+    from django.db.models import Q
+
+    from organization.models import Program
+
+    return (
+        Program.objects.filter(
+            Q(is_active=True, department__is_active=True) | Q(students__isnull=False)
+        )
+        .distinct()
+        .select_related("department")
+        .order_by("department__name_ar", "name_ar")
+    )
+
+
 def start_registration(
     university_number: str, full_name: str, program: str, email: str
 ) -> RegistrationRequest:
@@ -83,6 +101,21 @@ def start_registration(
     email = _email(email)
     record_ = _identity(university_number, full_name, program)
     if record_ is not None and record_.user_id is not None:
+        if (
+            not record_.user.is_active
+            and record_.registration_requests.filter(
+                status=RegistrationRequest.Status.PENDING_APPROVAL
+            ).exists()
+        ):
+            # Most often the student's own account, waiting for the department: say so, so they
+            # wait for the approval email instead of reporting themselves (review 2026-11-08).
+            raise Conflict(
+                gettext(
+                    "An account on this university number is waiting for the department's "
+                    "approval. If it is not yours, report it."
+                ),
+                code="pending_approval",
+            )
         raise Conflict(
             gettext(
                 "This university number already has an account. If it is not yours, report it."
@@ -203,8 +236,10 @@ def decide_registration(
         if request.status != RegistrationRequest.Status.PENDING_APPROVAL:
             raise already
         user = student.user
-        if user is None or user.is_active:
-            raise already  # the account was approved or removed meanwhile
+        if user is None or user.is_active or user.email != request.email:
+            # Approved or removed meanwhile, or the record now holds another account (an
+            # impersonation report freed it): this card is stale.
+            raise already
         request.decided_by = meta.actor
         request.decided_at = timezone.now()
         request.reason = reason
@@ -299,32 +334,55 @@ def decide_identity_report(
             account.save(update_fields=["is_active"])
             account.role_assignments.filter(role=Role.STUDENT).delete()
             _revoke_refresh_tokens(account)
-            # Every other open report on this account is settled by the same decision.
-            others = IdentityReport.objects.filter(
-                account=account, status=IdentityReport.Status.OPEN
-            ).exclude(pk=report.pk)
-            others.update(
-                status=IdentityReport.Status.UPHELD,
+            # Its registration, if still waiting, is closed: approving that stale card later
+            # would activate whichever account the record holds then (review 2026-11-08).
+            RegistrationRequest.objects.filter(
+                student_record=student,
+                status__in=[
+                    RegistrationRequest.Status.OTP_PENDING,
+                    RegistrationRequest.Status.VERIFIED,
+                    RegistrationRequest.Status.PENDING_APPROVAL,
+                ],
+            ).update(
+                status=RegistrationRequest.Status.REJECTED,
                 decided_by=meta.actor,
                 decided_at=timezone.now(),
-                reason=reason,
+                reason=gettext("The account was stopped after an impersonation report."),
                 updated_at=timezone.now(),
             )
-        report.status = IdentityReport.Status.UPHELD if uphold else IdentityReport.Status.DISMISSED
-        report.decided_by = meta.actor
-        report.decided_at = timezone.now()
-        report.reason = reason
-        report.save(update_fields=["status", "decided_by", "decided_at", "reason", "updated_at"])
-        record(
-            meta,
-            "registration.identity_upheld" if uphold else "registration.identity_dismissed",
-            student,
-            old={"account": account.email if account else None},
-            new={"status": report.status, "reason": reason},
-            department_id=student.department_id,
+        # Every other open report on this account is settled by the same decision, and each of
+        # its senders is told and logged (review 2026-11-08).
+        others = list(
+            IdentityReport.objects.select_for_update()
+            .filter(account=account, status=IdentityReport.Status.OPEN)
+            .exclude(pk=report.pk)
+            if uphold and account is not None
+            else []
         )
-        to = report.contact_email
-        transaction.on_commit(lambda: emails.identity_report_decided(to, uphold, reason))
+        for settled in [report, *others]:
+            settled.status = (
+                IdentityReport.Status.UPHELD if uphold else IdentityReport.Status.DISMISSED
+            )
+            settled.decided_by = meta.actor
+            settled.decided_at = timezone.now()
+            settled.reason = reason
+            settled.save(
+                update_fields=["status", "decided_by", "decided_at", "reason", "updated_at"]
+            )
+            record(
+                meta,
+                "registration.identity_upheld" if uphold else "registration.identity_dismissed",
+                student,
+                old={"account": account.email if account else None},
+                new={
+                    "status": settled.status,
+                    "reason": reason,
+                    "contact_email": settled.contact_email,
+                },
+                department_id=student.department_id,
+            )
+            to = settled.contact_email
+            transaction.on_commit(lambda to=to: emails.identity_report_decided(to, uphold, reason))
     return report
 
 

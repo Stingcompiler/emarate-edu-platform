@@ -1198,3 +1198,9 @@ msgstr "اكتب سبب رفض البلاغ."
 
 msgid "A student's name is corrected by the registrar in the student record."
 msgstr "اسم الطالب يصحّحه المسجّل في سجل الطالب."
+
+msgid "An account on this university number is waiting for the department's approval. If it is not yours, report it."
+msgstr "على هذا الرقم الجامعي حساب ينتظر اعتماد القسم. إن لم يكن حسابك فأبلغ عن انتحال."
+
+msgid "The account was stopped after an impersonation report."
+msgstr "أُوقف الحساب بعد بلاغ انتحال."

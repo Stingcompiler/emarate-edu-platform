@@ -565,6 +565,32 @@ class RegistrationCompleteView(APIView):
         )
 
 
+class RegistrationProgramSerializer(serializers.Serializer):
+    code = serializers.CharField()
+    name_ar = serializers.CharField()
+    name_en = serializers.CharField()
+    degree_label = serializers.CharField(source="get_degree_display")
+    department_name = serializers.CharField(source="department.name_ar")
+
+
+class RegistrationProgramsView(APIView):
+    """The programmes listed on the registration page: open ones and any that still has
+    students on file, paused or not (review 2026-11-08)."""
+
+    permission_classes = [AllowAny]
+    authentication_classes = []
+
+    @extend_schema(
+        operation_id="registration_programs",
+        responses=RegistrationProgramSerializer(many=True),
+        tags=["registration"],
+    )
+    def get(self, request):
+        return Response(
+            RegistrationProgramSerializer(services.registration_programs(), many=True).data
+        )
+
+
 class RegistrationReportView(APIView):
     """The student says the account on their record is not theirs (owner, 2026-11-07)."""
 

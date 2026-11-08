@@ -31,6 +31,8 @@ export function Register() {
   const [name, setName] = useState("");
   const [program, setProgram] = useState("");
   const [note, setNote] = useState("");
+  // The account on the record is still waiting for the department (often the student's own).
+  const [waiting, setWaiting] = useState(false);
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
   const [password, setPassword] = useState("");
@@ -39,8 +41,9 @@ export function Register() {
   const [busy, setBusy] = useState(false);
 
   const programs = useQuery({
-    queryKey: ["public", "programs"],
-    queryFn: async () => (await api.GET("/api/public/programs")).data ?? [],
+    queryKey: ["public", "registration-programs"],
+    // Open programmes and any that still has students on file, paused or not.
+    queryFn: async () => (await api.GET("/api/public/registration/programs")).data ?? [],
     staleTime: 5 * 60_000,
   });
   const choices: Choice[] = (programs.data ?? []).map((p) => ({
@@ -77,7 +80,9 @@ export function Register() {
       const { data, error } = await api.POST("/api/public/registration/start", {
         body: details(),
       });
-      if ((error as { code?: string } | undefined)?.code === "already_registered") {
+      const code = (error as { code?: string } | undefined)?.code;
+      if (code === "already_registered" || code === "pending_approval") {
+        setWaiting(code === "pending_approval");
         setStep("taken");
         return null;
       }
@@ -145,15 +150,22 @@ export function Register() {
   if (step === "taken") {
     return (
       <AuthLayout
-        title="هذا الرقم مسجَّل بحساب"
+        title={waiting ? "حساب بانتظار الاعتماد" : "هذا الرقم مسجَّل بحساب"}
         subtitle={`الرقم الجامعي \u2066${number.trim()}\u2069`}
       >
         <form onSubmit={report} className="space-y-4">
-          <Notice tone="warning">
-            أُنشئ حساب على هذا الرقم من قبل. إن كنت أنشأته فادخل إليه أو استعد كلمة المرور. وإن لم
-            تنشئه فأبلغ قسمك ليتحقق ويوقفه.
-          </Notice>
-          <div className="grid grid-cols-2 gap-2">
+          {waiting ? (
+            <Notice tone="info">
+              على هذا الرقم حساب ينتظر اعتماد قسمك. إن كنت أنشأته فلا تفعل شيئًا: يصلك بريد عند
+              الاعتماد. وإن لم تنشئه فأبلغ قسمك ليتحقق ويوقفه.
+            </Notice>
+          ) : (
+            <Notice tone="warning">
+              أُنشئ حساب على هذا الرقم من قبل. إن كنت أنشأته فادخل إليه أو استعد كلمة المرور. وإن لم
+              تنشئه فأبلغ قسمك ليتحقق ويوقفه.
+            </Notice>
+          )}
+          <div className={waiting ? "hidden" : "grid grid-cols-2 gap-2"}>
             <Link to="/login">
               <Button variant="secondary" className="w-full">
                 الدخول
