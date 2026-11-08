@@ -351,7 +351,7 @@ def test_upholding_closes_the_impostors_pending_registration(
     assert pending.data["count"] == 0
 
     # The real student registers; an old card approved now would not activate their account.
-    real_request, _ = _register(api, django_capture_on_commit_callbacks, "real@me.test")
+    _register(api, django_capture_on_commit_callbacks, "real@me.test")
     stale.status = "pending_approval"
     stale.save()
     url = f"/api/v1/registration-requests/{impostor_request}/decide"
