@@ -111,7 +111,7 @@ export function SiteHome() {
                 items={[
                   { to: "/site/media", icon: Image, label: "الوسائط والقوائم" },
                   { to: "/site/redirects", icon: Link2, label: "التحويلات" },
-                  { to: "/site/staff", icon: UsersRound, label: "تصنيف الكوادر" },
+                  { to: "/site-staff", icon: UsersRound, label: "تصنيف الكوادر" },
                   { to: "/announcements/new", icon: Newspaper, label: "إعلان عام" },
                 ]}
               />

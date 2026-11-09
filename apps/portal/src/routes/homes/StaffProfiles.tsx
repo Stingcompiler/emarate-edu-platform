@@ -1,9 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { UsersRound } from "lucide-react";
+import { UserPlus, UsersRound } from "lucide-react";
+import { Link } from "react-router";
 
 import { PortalShell } from "../../components/PortalShell";
 import { Avatar, Card, EmptyState, ListStatus, Switch } from "../../components/ui";
 import { api, ok } from "../../lib/api";
+import { useMe } from "../../lib/auth";
+import { can } from "../../lib/nav";
 import { initials } from "../../lib/reports";
 
 const DEGREE: Record<string, string> = {
@@ -21,6 +24,7 @@ const DEGREE: Record<string, string> = {
  * from the site here (the member still sees it, marked as hidden).
  */
 export function StaffProfiles() {
+  const me = useMe();
   const client = useQueryClient();
   const list = useQuery({
     queryKey: ["staff-profiles"],
@@ -50,6 +54,22 @@ export function StaffProfiles() {
   const rows = list.data ?? [];
   return (
     <PortalShell title="الكوادر على موقع الكلية" subtitle="ما يظهر للزوار — بموافقة كل عضو">
+      {/* Adding people and sorting them into groups is its own page (owner, 2026-11-09): this
+          page only reviews photos and degrees, so it points there for those who may. */}
+      {can(me.data, "site_staff.manage") && (
+        <Link
+          to="/site-staff"
+          className="mb-4 flex min-h-11 items-center gap-3 rounded-xl border border-border-soft bg-surface p-3 text-sm shadow-xs hover:bg-surface-alt"
+        >
+          <UserPlus size={20} className="shrink-0 text-primary" aria-hidden />
+          <span className="min-w-0 flex-1">
+            <b className="block text-text">إضافة كادر وتصنيفه</b>
+            <span className="block text-xs text-text-muted">
+              أضف موظفًا أو شخصًا بلا حساب، وضعه في «هيئة الإدارة» أو «هيئة التدريس» أو غيرهما.
+            </span>
+          </span>
+        </Link>
+      )}
       {!rows.length && list.isSuccess ? (
         <Card>
           <EmptyState
