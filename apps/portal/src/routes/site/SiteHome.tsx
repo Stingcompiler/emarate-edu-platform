@@ -1,5 +1,15 @@
 import { useQuery } from "@tanstack/react-query";
-import { FileCheck, FileText, Image, Link2, ListTodo, Newspaper, Plus, Zap } from "lucide-react";
+import {
+  FileCheck,
+  FileText,
+  Image,
+  Link2,
+  ListTodo,
+  Newspaper,
+  Plus,
+  UsersRound,
+  Zap,
+} from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router";
 
@@ -101,6 +111,7 @@ export function SiteHome() {
                 items={[
                   { to: "/site/media", icon: Image, label: "الوسائط والقوائم" },
                   { to: "/site/redirects", icon: Link2, label: "التحويلات" },
+                  { to: "/site/staff", icon: UsersRound, label: "تصنيف الكوادر" },
                   { to: "/announcements/new", icon: Newspaper, label: "إعلان عام" },
                 ]}
               />

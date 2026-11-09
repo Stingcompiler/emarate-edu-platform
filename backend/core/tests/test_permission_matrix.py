@@ -322,6 +322,18 @@ READS: dict[str, tuple[str, frozenset, frozenset]] = {
         frozenset({R.SYSTEM_ADMIN, R.SITE_MANAGER}),
         frozenset(),
     ),
+    # «الكوادر» in groups (owner, 2026-11-09): the system and the site team.
+    "site-staff": ("/api/v1/site-staff", frozenset({R.SYSTEM_ADMIN, R.SITE_MANAGER}), frozenset()),
+    "site-staff-people": (
+        "/api/v1/site-staff/people",
+        frozenset({R.SYSTEM_ADMIN, R.SITE_MANAGER}),
+        frozenset(),
+    ),
+    "site-staff-group-list": (
+        "/api/v1/site-staff/groups",
+        frozenset({R.SYSTEM_ADMIN, R.SITE_MANAGER}),
+        frozenset(),
+    ),
     "event-list": (
         "/api/v1/content/events",
         frozenset({R.SYSTEM_ADMIN, R.SITE_MANAGER, R.EVENTS_MANAGER}),
@@ -441,6 +453,7 @@ _STAFF = "accounts.tests.test_staff_profile::"
 _LV = "live.tests.test_live::"
 _IQ = "inquiries.tests.test_inquiries::"
 _CT = "content.tests.test_content::"
+_SS = "content.tests.test_site_staff::"
 _RS = "results.tests.test_results::"
 _SA = "student_affairs.tests.test_student_affairs::"
 _DELETIONS = "content.tests.test_deletion_requests::"
@@ -504,6 +517,11 @@ COVERED_ELSEWHERE = {
     "event-detail": _CT + "test_events_media_menus_redirects_settings",
     "media-detail": _CT + "test_events_media_menus_redirects_settings",
     "redirect-detail": _CT + "test_events_media_menus_redirects_settings",
+    # Writes only (owner, 2026-11-09).
+    "site-staff-group-detail": _SS + "test_groups_are_flexible_but_the_faculty_always_has_one",
+    "site-staff-entry-list": _SS + "test_the_site_manager_adds_people_and_sorts_them_on_the_matrix",
+    "site-staff-entry-detail": _SS
+    + "test_the_site_manager_adds_people_and_sorts_them_on_the_matrix",
     "exam-publish": _EX + "test_builder_permissions_and_publishing",
     "exam-close": _EX + "test_close_submits_running_attempts",
     "exam-release": _EX + "test_visibility_modes",

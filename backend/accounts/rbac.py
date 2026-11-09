@@ -208,6 +208,9 @@ CAPABILITIES: dict[str, frozenset[Role]] = {
     "news.manage": frozenset({R.SYSTEM_ADMIN, R.SITE_MANAGER, R.EVENTS_MANAGER}),
     # Hides a staff photo or qualification from the site's «الكوادر» (owner, 2026-10-30).
     "staff_profiles.moderate": frozenset({R.SYSTEM_ADMIN, R.ACADEMIC_AFFAIRS}),
+    # Adds people to the site's «الكوادر» (never an account) and sorts them into groups on a
+    # matrix (owner, 2026-11-09: «اجعل إدارة النظام والموقع قادرين على إضافة كوادر»).
+    "site_staff.manage": frozenset({R.SYSTEM_ADMIN, R.SITE_MANAGER}),
     # Users and roles
     "users.view": frozenset({R.SYSTEM_ADMIN, R.ACADEMIC_AFFAIRS, R.HEAD_REGISTRAR}),
     # Sets a temporary password for another account (the owner's request, 2026-10-13).

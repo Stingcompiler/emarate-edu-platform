@@ -308,3 +308,82 @@ class DeletionRequest(models.Model):
 
     def __str__(self) -> str:
         return f"{self.get_kind_display()}: {self.title}"
+
+
+class StaffGroup(TimestampedModel):
+    """A heading on the site's «الكوادر» (owner, 2026-11-09): «هيئة الإدارة», «هيئة التدريس» and
+    any the site team adds, in their order. One group holds the teaching staff: those who chose
+    to appear and whom nobody placed by hand show there by themselves."""
+
+    name_ar = models.CharField(max_length=120)
+    name_en = models.CharField(max_length=120, blank=True)
+    order = models.PositiveSmallIntegerField(default=0)
+    is_visible = models.BooleanField(default=True)
+    holds_faculty = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ["order", "id"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["holds_faculty"],
+                condition=models.Q(holds_faculty=True),
+                name="one_staff_group_holds_faculty",
+            )
+        ]
+
+    def __str__(self) -> str:
+        return self.name_ar
+
+
+class StaffEntry(PublicIdModel, TimestampedModel):
+    """Someone the site team put on «الكوادر»: a staff account (name, title and photo come from
+    it, and it shows only with its own consent) or a person with no account. Never an account."""
+
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="site_staff",
+    )
+    name_ar = models.CharField(max_length=200, blank=True)
+    name_en = models.CharField(max_length=200, blank=True)
+    title_ar = models.CharField(max_length=100, blank=True)
+    title_en = models.CharField(max_length=100, blank=True)
+    photo = models.ForeignKey(
+        MediaAsset, on_delete=models.SET_NULL, null=True, blank=True, related_name="+"
+    )
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="+"
+    )
+
+    class Meta:
+        constraints = [
+            models.CheckConstraint(
+                condition=models.Q(user__isnull=False) | ~models.Q(name_ar=""),
+                name="staff_entry_has_a_name",
+            )
+        ]
+
+    def __str__(self) -> str:
+        return self.user.full_name_ar if self.user_id else self.name_ar
+
+
+class StaffPlacement(models.Model):
+    """A tick on the matrix: this person in this group, with an optional position
+    («عميد الكلية») and order (smaller first)."""
+
+    entry = models.ForeignKey(StaffEntry, on_delete=models.CASCADE, related_name="placements")
+    group = models.ForeignKey(StaffGroup, on_delete=models.CASCADE, related_name="placements")
+    position_ar = models.CharField(max_length=120, blank=True)
+    position_en = models.CharField(max_length=120, blank=True)
+    order = models.PositiveSmallIntegerField(default=0)
+
+    class Meta:
+        ordering = ["order", "id"]
+        constraints = [
+            models.UniqueConstraint(fields=["entry", "group"], name="one_placement_per_group")
+        ]
+
+    def __str__(self) -> str:
+        return f"{self.entry} · {self.group}"

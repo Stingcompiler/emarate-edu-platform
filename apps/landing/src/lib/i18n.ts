@@ -38,10 +38,11 @@ const T = {
   darkMode: { ar: "الوضع الداكن", en: "Dark mode" },
   lightMode: { ar: "الوضع الفاتح", en: "Light mode" },
   warmMode: { ar: "الوضع الدافئ", en: "Warm mode" },
-  staff: { ar: "الكوادر", en: "Faculty" },
+  staff: { ar: "الكوادر", en: "Faculty and staff" },
+  // Administration as well as faculty since 2026-11-09 (owner).
   staffLead: {
-    ar: "أعضاء هيئة التدريس الذين اختاروا الظهور، بمؤهلاتهم واهتماماتهم.",
-    en: "Faculty members who chose to appear, with their degrees and interests.",
+    ar: "هيئة الإدارة وهيئة التدريس في الكلية، ومؤهلات أعضائها واهتماماتهم.",
+    en: "The college's administration and faculty, with their degrees and interests.",
   },
   qualifications: { ar: "المؤهلات العلمية", en: "Qualifications" },
   staffLinks: { ar: "على الشبكات", en: "Online" },

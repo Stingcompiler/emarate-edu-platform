@@ -4,6 +4,17 @@ Older rounds (2026-10-24 → 11-02): `.claude/handoff/archive/2026-10-24_to_2026
 
 ## State
 
+- **«الكوادر» in groups** (owner, 2026-11-09; `feat/site-staff-groups`): the system admin and
+  the site manager (and the supervisor, who deletes nothing) add people to the site's «الكوادر» on
+  `/site/staff` («تصنيف الكوادر», linked from /site): a staff account, or a person with no account
+  (adding never makes an account). Groups are flexible (`content.StaffGroup`; «هيئة الإدارة» and
+  «هيئة التدريس» to start); a matrix places each person in one or more groups with a position and
+  an order (`StaffEntry`/`StaffPlacement`, rules in `content/staff.py`). An account shows only with
+  its own consent (`public_profile`); consenting teaching staff nobody placed show by themselves in
+  the group that `holds_faculty`. Public: `GET /api/public/staff` → the site's /staff/ page in
+  sections. Capability `site_staff.manage` (matrix row `site.staff`).
+- **Medicine has five levels** (owner, 2026-11-09; #261): MBBS was entered with four; data
+  migration `organization/0007` raises it to 5 (semesters 9–10). Forms follow `levels_count`.
 - **Add a student by hand, college-wide** (owner, 2026-11-08; `feat/students-add-college-wide`):
   «سجل الطلاب» (/students) has «+ طالب» → `/students/new` for `students.manage` holders with
   college scope (system admin, system supervisor, head registrar; they already held it in the

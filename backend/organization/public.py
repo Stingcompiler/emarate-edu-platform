@@ -539,11 +539,26 @@ class PublicStaffPhotoView(_PublicRead):
         from django.db.models import Exists, OuterRef
         from django.http import FileResponse, Http404
 
+        from content.models import StaffPlacement
+
         # Only someone «الكوادر» lists: a department head or a member of a department. A
         # member who left teaching drops off the site, and so does their photo (review 2026-11).
-        on_staff = Q(
-            Exists(RoleAssignment.objects.filter(user=OuterRef("pk"), role=Role.DEPARTMENT_MANAGER))
-        ) | Q(Exists(DepartmentMembership.objects.filter(user=OuterRef("pk"))))
+        # Since 2026-11-09 also an account the site team placed in a visible group (owner).
+        on_staff = (
+            Q(
+                Exists(
+                    RoleAssignment.objects.filter(user=OuterRef("pk"), role=Role.DEPARTMENT_MANAGER)
+                )
+            )
+            | Q(Exists(DepartmentMembership.objects.filter(user=OuterRef("pk"))))
+            | Q(
+                Exists(
+                    StaffPlacement.objects.filter(
+                        entry__user=OuterRef("pk"), group__is_visible=True
+                    )
+                )
+            )
+        )
         user = (
             User.objects.filter(
                 on_staff,

@@ -1209,3 +1209,24 @@ msgid ""
 "Your earlier account is disabled. Ask the registrar to enable it, then "
 "register again."
 msgstr "حسابك السابق معطّل. اطلب من المسجّل تفعيله، ثم أعد التسجيل."
+
+msgid "Choose another group to hold the teaching staff first."
+msgstr "اختر تصنيفًا آخر يضم هيئة التدريس أولًا."
+
+msgid "This group holds the teaching staff. Choose another group for them first."
+msgstr "هذا التصنيف يضم هيئة التدريس. اختر لهم تصنيفًا آخر أولًا."
+
+msgid "Pick a picture from the media library."
+msgstr "اختر صورة من مكتبة الوسائط."
+
+msgid "Unknown group."
+msgstr "تصنيف غير موجود."
+
+msgid "Only staff accounts can be added."
+msgstr "تُضاف حسابات الموظفين فقط."
+
+msgid "This person is already on the page."
+msgstr "هذا الشخص في الصفحة من قبل."
+
+msgid "Enter the name."
+msgstr "اكتب الاسم."

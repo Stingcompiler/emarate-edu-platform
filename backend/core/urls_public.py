@@ -2,6 +2,7 @@ from django.urls import path
 
 from accounts import views as accounts
 from admissions import views as admissions
+from content import staff_views as site_staff
 from content import views as content
 from files import views as files
 from inquiries import views as inquiries
@@ -64,6 +65,7 @@ urlpatterns = [
         name="public-department",
     ),
     path("programs", catalogue.PublicProgramsView.as_view(), name="public-programs"),
+    path("staff", site_staff.PublicStaffView.as_view(), name="public-staff"),
     path("programs/<str:code>", catalogue.PublicProgramView.as_view(), name="public-program"),
     path("stats", catalogue.PublicStatsView.as_view(), name="public-stats"),
     path("news", content.PublicNewsList.as_view(), name="public-news"),

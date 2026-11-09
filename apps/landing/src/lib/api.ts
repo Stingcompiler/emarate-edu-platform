@@ -290,6 +290,25 @@ export async function staff(): Promise<StaffMember[]> {
     (a, b) => ROLE_ORDER[a.role] - ROLE_ORDER[b.role] || a.name_ar.localeCompare(b.name_ar, "ar"),
   );
 }
+/** «الكوادر» in groups (owner, 2026-11-09): «هيئة الإدارة», «هيئة التدريس» and any the site team
+ * adds, in their order. A member with an ``id`` has an account; it has a page when it teaches. */
+export type StaffGroupMember = {
+  id: string | null;
+  name_ar: string;
+  name_en: string;
+  title_ar: string;
+  title_en: string;
+  position_ar: string;
+  position_en: string;
+  photo: string | null;
+};
+export type StaffGroup = {
+  id: number;
+  name_ar: string;
+  name_en: string;
+  members: StaffGroupMember[];
+};
+export const staffGroups = () => get<StaffGroup[]>("staff", []);
 export const news = () => get<News[]>("news", []);
 export const events = () => get<Event[]>("events", []);
 /** Ended events, newest first: their pages stay online (docs/07 §1). */
