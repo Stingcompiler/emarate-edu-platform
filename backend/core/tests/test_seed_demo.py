@@ -39,7 +39,7 @@ def test_seed_is_complete_and_idempotent(db, settings, monkeypatch):
     _seed()
     again = (Program.objects.count(), StudentRecord.objects.count(), Enrollment.objects.count())
     assert again == counts
-    assert Department.objects.count() == 4
+    assert Department.objects.count() == 5  # IT, CS, ENG, MED, BA
     # Sample site content: each piece says it is an example, and a rerun adds nothing.
     from content.models import MediaAsset, News, Page, SiteSettings
 
@@ -56,7 +56,7 @@ def test_seed_is_complete_and_idempotent(db, settings, monkeypatch):
     pictures = MediaAsset.objects.count()
     _seed()
     assert MediaAsset.objects.count() == pictures
-    assert counts[:2] == (11, 40)
+    assert counts[:2] == (12, 40)
     assert set(RoleAssignment.objects.values_list("role", flat=True)) == set(Role)
 
     client = APIClient()
