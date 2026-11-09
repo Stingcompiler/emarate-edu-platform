@@ -321,7 +321,7 @@ function AddPerson({ onAdded }: { onAdded: () => void }) {
     <>
       <SectionLabel>إضافة إلى الصفحة</SectionLabel>
       <Card className="p-3">
-        <div className="mb-3 flex gap-1" role="tablist" aria-label="نوع الإضافة">
+        <div className="mb-3 flex flex-wrap gap-1" role="tablist" aria-label="نوع الإضافة">
           <QuietTab
             role="tab"
             aria-selected={mode === "account"}
