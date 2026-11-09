@@ -104,6 +104,7 @@ const PageEditor = page(() => import("./routes/site/PageEditor"), "PageEditor");
 const Redirects = page(() => import("./routes/site/Redirects"), "Redirects");
 const SiteHome = page(() => import("./routes/site/SiteHome"), "SiteHome");
 const SiteMedia = page(() => import("./routes/site/SiteMedia"), "SiteMedia");
+const SiteStaff = page(() => import("./routes/site/SiteStaff"), "SiteStaff");
 const ExamEditor = page(() => import("./routes/exams/ExamEditor"), "ExamEditor");
 const ExamMonitor = page(() => import("./routes/exams/ExamMonitor"), "ExamMonitor");
 const ExamResult = page(() => import("./routes/exams/ExamResult"), "ExamResult");
@@ -272,6 +273,7 @@ const router = createBrowserRouter([
   { path: "/site/news/:id", element: signedIn(<NewsEditor />, "/site/news/:id") },
   { path: "/site/media", element: signedIn(<SiteMedia />, "/site/media") },
   { path: "/site/redirects", element: signedIn(<Redirects />, "/site/redirects") },
+  { path: "/site/staff", element: signedIn(<SiteStaff />, "/site/staff") },
   { path: "/events", element: signedIn(<Events />, "/events") },
   { path: "/events/:id", element: signedIn(<EventEditor />, "/events/:id") },
   { path: "/applications", element: signedIn(<Applications />, "/applications") },

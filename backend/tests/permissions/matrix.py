@@ -70,6 +70,7 @@ ALIASES = {
     "hr.notify_faculty": "hr.notify",
     "site.content": "content.manage",
     "site.events": "events.manage",
+    "site.staff": "site_staff.manage",
 }
 
 
@@ -137,4 +138,5 @@ READ_BINDINGS = {
     "reports.student_affairs": ["report-affairs"],
     "site.content": ["page-list", "redirect-list", "site-settings", "menu"],
     "site.events": ["event-list"],
+    "site.staff": ["site-staff", "site-staff-people", "site-staff-group-list"],
 }

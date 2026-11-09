@@ -7,6 +7,7 @@ from academic import views as academic
 from accounts import views as accounts
 from admissions import views as admissions
 from audit import views as audit
+from content import staff_views as site_staff
 from content import views as content
 from exams import views as exams
 from files import views as files
@@ -170,5 +171,20 @@ urlpatterns = [
     ),
     path("content/site-settings", content.SiteSettingsView.as_view(), name="site-settings"),
     path("content/menus/<slug:key>", content.MenuView.as_view(), name="menu"),
+    # «الكوادر» in groups (owner, 2026-11-09).
+    path("site-staff", site_staff.StaffBoardView.as_view(), name="site-staff"),
+    path("site-staff/people", site_staff.StaffPeopleView.as_view(), name="site-staff-people"),
+    path("site-staff/groups", site_staff.StaffGroupsView.as_view(), name="site-staff-group-list"),
+    path(
+        "site-staff/groups/<int:pk>",
+        site_staff.StaffGroupView.as_view(),
+        name="site-staff-group-detail",
+    ),
+    path("site-staff/entries", site_staff.StaffEntriesView.as_view(), name="site-staff-entry-list"),
+    path(
+        "site-staff/entries/<uuid:public_id>",
+        site_staff.StaffEntryView.as_view(),
+        name="site-staff-entry-detail",
+    ),
     path("", include(router.urls)),
 ]

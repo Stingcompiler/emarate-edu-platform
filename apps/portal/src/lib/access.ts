@@ -119,6 +119,8 @@ export const ROUTE_ACCESS: Record<string, Allow> = {
   "/site/news/:id": cap("news.manage"),
   "/site/media": cap("content.manage"),
   "/site/redirects": cap("content.manage"),
+  // «الكوادر» in groups (owner, 2026-11-09): the system and the site team.
+  "/site/staff": cap("site_staff.manage"),
   "/events": cap("events.manage"),
   "/staff-profiles": cap("staff_profiles.moderate"),
   "/events/:id": cap("events.manage"),
