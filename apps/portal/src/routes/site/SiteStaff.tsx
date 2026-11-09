@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowDown, ArrowUp, Search, Trash2, UserPlus } from "lucide-react";
-import { useState } from "react";
+import { createContext, useContext, useState } from "react";
 
 import { useConfirm } from "../../components/Confirm";
 import { PortalShell } from "../../components/PortalShell";
@@ -22,6 +22,7 @@ import {
 import type { Schemas } from "@ecst/api";
 
 import { api, ok } from "../../lib/api";
+import { hasRole, useMe } from "../../lib/auth";
 import { ALL } from "../../components/Pager";
 import { num } from "../../lib/reports";
 
@@ -31,11 +32,16 @@ type Placement = Schemas["Placement"];
 
 const BOARD = ["site", "staff"];
 
+/** Deleting (a group, a person off the page) is the system admin's and the site manager's:
+ * the system supervisor deletes nothing (docs/roles-matrix.md), so the buttons are hidden. */
+const MayDelete = createContext(false);
+
 /** «تصنيف الكوادر» (owner, 2026-11-09): the site team adds people to the site's «الكوادر» —
  * staff accounts or people with no account — and sorts them into groups on a matrix. Adding
  * someone never makes an account; an account appears only with its own consent. No board:
  * derived from docs/06 §9 (the matrix is a table on ≥1024, one card a person on phones). */
 export function SiteStaff() {
+  const me = useMe();
   const client = useQueryClient();
   const board = useQuery({
     queryKey: BOARD,
@@ -45,36 +51,38 @@ export function SiteStaff() {
   const groups = board.data?.groups ?? [];
   const rows = board.data?.rows ?? [];
   return (
-    <PortalShell
-      title="تصنيف الكوادر"
-      subtitle={`${num(rows.length)} في الصفحة · ${num(groups.length)} تصنيفات`}
-      back={{ label: "محتوى الموقع", to: "/site" }}
-    >
-      <WithSide
-        side={
-          <SideNote title="كيف تعمل الصفحة؟">
-            أضف من يظهر في «الكوادر» على الموقع: موظفًا له حساب، أو شخصًا بلا حساب كالعميد. ثم ضع كل
-            شخص في تصنيف أو أكثر من المصفوفة. صاحب الحساب لا يظهر إلا إن وافق على ملفه العام من
-            إعداداته، وأعضاء هيئة التدريس الموافقون يظهرون تلقائيًا في التصنيف الذي يضمّهم حتى تغيّر
-            مكانهم. الإضافة هنا لا تُنشئ حسابًا.
-          </SideNote>
-        }
+    <MayDelete.Provider value={hasRole(me.data, "system_admin", "site_manager")}>
+      <PortalShell
+        title="تصنيف الكوادر"
+        subtitle={`${num(rows.length)} في الصفحة · ${num(groups.length)} تصنيفات`}
+        back={{ label: "محتوى الموقع", to: "/site" }}
       >
-        {board.isError && <Notice>{problemMessage(board.error)}</Notice>}
-        <Groups groups={groups} onChange={refresh} />
-        <AddPerson onAdded={refresh} />
-        <SectionLabel>المصفوفة</SectionLabel>
-        {board.isPending ? (
-          <Card className="p-4 text-sm text-text-muted">جارٍ التحميل…</Card>
-        ) : rows.length === 0 ? (
-          <EmptyState icon={<UserPlus size={24} aria-hidden />} title="لا أحد في الصفحة بعد">
-            أضف موظفًا أو شخصًا من الأعلى.
-          </EmptyState>
-        ) : (
-          <Matrix groups={groups} rows={rows} onChange={refresh} />
-        )}
-      </WithSide>
-    </PortalShell>
+        <WithSide
+          side={
+            <SideNote title="كيف تعمل الصفحة؟">
+              أضف من يظهر في «الكوادر» على الموقع: موظفًا له حساب، أو شخصًا بلا حساب كالعميد. ثم ضع
+              كل شخص في تصنيف أو أكثر من المصفوفة. صاحب الحساب لا يظهر إلا إن وافق على ملفه العام من
+              إعداداته، وأعضاء هيئة التدريس الموافقون يظهرون تلقائيًا في التصنيف الذي يضمّهم حتى
+              تغيّر مكانهم. الإضافة هنا لا تُنشئ حسابًا.
+            </SideNote>
+          }
+        >
+          {board.isError && <Notice>{problemMessage(board.error)}</Notice>}
+          <Groups groups={groups} onChange={refresh} />
+          <AddPerson onAdded={refresh} />
+          <SectionLabel>المصفوفة</SectionLabel>
+          {board.isPending ? (
+            <Card className="p-4 text-sm text-text-muted">جارٍ التحميل…</Card>
+          ) : rows.length === 0 ? (
+            <EmptyState icon={<UserPlus size={24} aria-hidden />} title="لا أحد في الصفحة بعد">
+              أضف موظفًا أو شخصًا من الأعلى.
+            </EmptyState>
+          ) : (
+            <Matrix groups={groups} rows={rows} onChange={refresh} />
+          )}
+        </WithSide>
+      </PortalShell>
+    </MayDelete.Provider>
   );
 }
 
@@ -117,15 +125,28 @@ function Groups({ groups, onChange }: { groups: Group[]; onChange: () => void })
     },
     onSuccess: onChange,
   });
-  // Moving swaps the order with the neighbour (orders may repeat: number them first).
-  const move = (index: number, by: -1 | 1) => {
-    const other = groups[index + by];
-    const group = groups[index];
-    if (!other || !group) return;
-    save.mutate({ id: group.id, body: { order: index + by + 1 } });
-    save.mutate({ id: other.id, body: { order: index + 1 } });
-  };
-  const error = add.error ?? save.error ?? remove.error;
+  // Moving swaps two neighbours in the list as shown, then numbers every group 1, 2, 3… in
+  // that order, one request after another: stored orders may have gaps or repeat (review
+  // 2026-11-09), and two requests at once raced.
+  const reorder = useMutation({
+    mutationFn: async ({ index, by }: { index: number; by: -1 | 1 }) => {
+      const list = [...groups];
+      const [moved] = list.splice(index, 1);
+      if (!moved) return;
+      list.splice(index + by, 0, moved);
+      for (const [i, g] of list.entries()) {
+        if (g.order === i + 1) continue;
+        const { data, error } = await api.PATCH("/api/v1/site-staff/groups/{id}", {
+          params: { path: { id: g.id } },
+          body: { order: i + 1 } as Group,
+        });
+        if (!data) throw error;
+      }
+    },
+    onSettled: onChange,
+  });
+  const move = (index: number, by: -1 | 1) => reorder.mutate({ index, by });
+  const error = add.error ?? save.error ?? remove.error ?? reorder.error;
   return (
     <>
       <SectionLabel>التصنيفات</SectionLabel>
@@ -136,7 +157,7 @@ function Groups({ groups, onChange }: { groups: Group[]; onChange: () => void })
             group={g}
             first={i === 0}
             last={i === groups.length - 1}
-            busy={save.isPending || remove.isPending}
+            busy={save.isPending || remove.isPending || reorder.isPending}
             onSave={(body) => save.mutate({ id: g.id, body })}
             onMove={(by) => move(i, by)}
             onRemove={async () => {
@@ -199,6 +220,7 @@ function GroupRow({
   onMove: (by: -1 | 1) => void;
   onRemove: () => void;
 }) {
+  const mayDelete = useContext(MayDelete);
   const [name, setName] = useState(g.name_ar);
   const [nameEn, setNameEn] = useState(g.name_en ?? "");
   const changed = name.trim() !== g.name_ar || nameEn.trim() !== (g.name_en ?? "");
@@ -267,7 +289,7 @@ function GroupRow({
           >
             <ArrowDown size={18} />
           </button>
-          {!g.holds_faculty && (
+          {!g.holds_faculty && mayDelete && (
             <button
               type="button"
               className="grid size-11 place-items-center rounded-lg text-danger-strong hover:bg-danger-soft disabled:opacity-40"
@@ -581,10 +603,16 @@ function Person({ row: r }: { row: Row }) {
             تلقائي
           </span>
         )}
-        {!r.consent && (
+        {!r.staff ? (
           <span className="rounded-full bg-warning-soft px-2 py-0.5 text-[11px] text-warning-strong">
-            لم يوافق على الظهور — لن يظهر
+            لم يعد موظفًا — لن يظهر
           </span>
+        ) : (
+          !r.consent && (
+            <span className="rounded-full bg-warning-soft px-2 py-0.5 text-[11px] text-warning-strong">
+              لم يوافق على الظهور — لن يظهر
+            </span>
+          )
         )}
       </span>
     </div>
@@ -657,7 +685,11 @@ function Edit({
   onChange: () => void;
 }) {
   const confirm = useConfirm();
-  const [placements, setPlacements] = useState<Placement[]>(r.placements);
+  const mayDelete = useContext(MayDelete);
+  // Only what was typed here, by group: saving lays it over the row's current placements, so
+  // a tick made in the matrix while this is open is kept (review 2026-11-09).
+  const [edits, setEdits] = useState<Record<number, Partial<Placement>>>({});
+  const placements = r.placements.map((p) => ({ ...p, ...edits[p.group] }));
   const [person, setPerson] = useState({
     name_ar: r.name_ar,
     name_en: r.name_en,
@@ -690,19 +722,19 @@ function Edit({
     onSuccess: onChange,
   });
   const name = (id: number) => groups.find((g) => g.id === id)?.name_ar ?? "";
-  const set = (i: number, patch: Partial<Placement>) =>
-    setPlacements(placements.map((p, j) => (i === j ? { ...p, ...patch } : p)));
+  const set = (group: number, patch: Partial<Placement>) =>
+    setEdits({ ...edits, [group]: { ...edits[group], ...patch } });
   return (
     <div className="mt-2 space-y-3">
       {placements.length === 0 && (
         <p className="text-sm text-text-muted">لا يظهر في أي تصنيف. ضع علامة في المصفوفة أولًا.</p>
       )}
-      {placements.map((p, i) => (
+      {placements.map((p) => (
         <div key={p.group} className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_7rem]">
           <input
             className={input}
             value={p.position_ar ?? ""}
-            onChange={(e) => set(i, { position_ar: e.target.value })}
+            onChange={(e) => set(p.group, { position_ar: e.target.value })}
             placeholder={`المسمّى في «${name(p.group)}»، مثل: عميد الكلية`}
             aria-label={`المسمّى في «${name(p.group)}»`}
           />
@@ -710,7 +742,7 @@ function Edit({
             className={input}
             dir="ltr"
             value={p.position_en ?? ""}
-            onChange={(e) => set(i, { position_en: e.target.value })}
+            onChange={(e) => set(p.group, { position_en: e.target.value })}
             placeholder="Position in English"
             aria-label={`المسمّى بالإنجليزية في «${name(p.group)}»`}
           />
@@ -720,7 +752,7 @@ function Edit({
             min={0}
             max={999}
             value={p.order ?? 0}
-            onChange={(e) => set(i, { order: Number(e.target.value) || 0 })}
+            onChange={(e) => set(p.group, { order: Number(e.target.value) || 0 })}
             aria-label={`الترتيب في «${name(p.group)}» (الأصغر أولًا)`}
             title="الترتيب: الأصغر يظهر أولًا"
           />
@@ -767,7 +799,7 @@ function Edit({
         >
           حفظ
         </Button>
-        {r.entry && (
+        {r.entry && mayDelete && (
           <Button
             variant="secondary"
             disabled={remove.isPending}

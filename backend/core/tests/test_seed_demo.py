@@ -95,3 +95,16 @@ def test_seed_fills_only_an_empty_site_settings(db, settings, monkeypatch):
     _seed()
     filled = SiteSettings.load()
     assert filled.email == "info@demo.ecst.test" and filled.whatsapp_e164 == "+249000000000"
+
+
+def test_seed_reuses_a_department_the_college_entered_under_its_own_code(db, settings, monkeypatch):
+    """Review 2026-11-09: production has «الطب» as M, the demo calls it MED."""
+    from organization.models import College
+
+    settings.DEBUG = True
+    monkeypatch.setenv("DEMO_PASSWORD", PASSWORD)
+    college = College.objects.create(code="ECST", name_ar="كلية الإمارات للعلوم والتكنولوجيا")
+    Department.objects.create(college=college, code="M", name_ar="الطب")
+    _seed()
+    assert Department.objects.filter(name_ar="الطب").count() == 1
+    assert not Department.objects.filter(code="MED").exists()

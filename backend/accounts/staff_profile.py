@@ -14,8 +14,6 @@ from . import rbac
 from .models import Qualification, StaffLink, User
 from .rbac import Role
 
-# Who appears on a department's public page (same as MyPublicProfileView).
-MEMBERS = frozenset({Role.TEACHER, Role.TA, Role.DEPARTMENT_MANAGER})
 FIELDS = ["degree", "field", "institution", "year"]
 
 
@@ -26,9 +24,17 @@ def site_changed() -> None:
     transaction.on_commit(request_site_rebuild)
 
 
+def on_staff(user: User) -> bool:
+    """A staff account, not a student's: it may choose to appear on the site. Teaching staff
+    show on their department's page; anyone the site team placed shows on «الكوادر» (owner,
+    2026-11-09: the administration too)."""
+    roles = rbac.roles_of(user)
+    return bool(roles) and Role.STUDENT not in roles
+
+
 def _member(user: User) -> None:
-    if not rbac.roles_of(user) & MEMBERS:
-        raise PermissionDenied(gettext("Only teaching staff appear on the public pages."))
+    if not on_staff(user):
+        raise PermissionDenied(gettext("Only staff appear on the public pages."))
 
 
 def _snapshot(q: Qualification) -> dict:

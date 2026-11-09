@@ -13,6 +13,14 @@ Older rounds (2026-10-24 → 11-02): `.claude/handoff/archive/2026-10-24_to_2026
   its own consent (`public_profile`); consenting teaching staff nobody placed show by themselves in
   the group that `holds_faculty`. Public: `GET /api/public/staff` → the site's /staff/ page in
   sections. Capability `site_staff.manage` (matrix row `site.staff`).
+- **Staff review fixes** (2026-11-09; `fix/site-staff-review`): any staff account (not only
+  teachers) may now choose to appear (`accounts.staff_profile.on_staff`, Settings card for all
+  staff); a placed account that is no longer staff drops off (`content.staff.shown`); the people
+  search needs 2 letters and matches names only; the edit panel lays its edits over the current
+  placements; groups reorder by renumbering 1..n; the supervisor sees no delete buttons; the demo
+  seed reuses a department of the same name (production «الطب» is M); a new engineering/medicine
+  programme defaults to 5 levels in /system/structure. The page lives at `/site-staff` with its
+  own sidebar link (#263).
 - **Medicine has five levels** (owner, 2026-11-09; #261): MBBS was entered with four; data
   migration `organization/0007` raises it to 5 (semesters 9–10). Forms follow `levels_count`.
 - **Add a student by hand, college-wide** (owner, 2026-11-08; `feat/students-add-college-wide`):

@@ -170,9 +170,6 @@ msgstr "تم"
 msgid "No session."
 msgstr "لا توجد جلسة."
 
-msgid "Only teaching staff appear on the public pages."
-msgstr "الظهور في صفحات الأقسام العامة لأعضاء هيئة التدريس فقط."
-
 msgid "If the details match the college records, a code was sent to the email."
 msgstr "إذا طابقت البيانات سجلات الكلية فقد أُرسل رمز إلى البريد."
 
@@ -1230,3 +1227,6 @@ msgstr "هذا الشخص في الصفحة من قبل."
 
 msgid "Enter the name."
 msgstr "اكتب الاسم."
+
+msgid "Only staff appear on the public pages."
+msgstr "يظهر الموظفون فقط في صفحات الموقع."
