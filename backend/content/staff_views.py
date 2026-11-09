@@ -59,6 +59,8 @@ class StaffRowSerializer(S.Serializer):
     # Has an account; the account agreed to appear (always true for a person with no account).
     account = S.BooleanField()
     consent = S.BooleanField()
+    # Still a staff account (false once its staff roles are gone: it no longer shows).
+    staff = S.BooleanField()
     teaching = S.BooleanField()
     automatic = S.BooleanField()
     placements = PlacementSerializer(many=True)
@@ -152,22 +154,46 @@ def _entries():
     )
 
 
+def _row(entry: StaffEntry, request, *, teaching: bool, on_staff: bool) -> dict:
+    user = entry.user
+    return {
+        "entry": str(entry.public_id),
+        **_person(entry, user, request),
+        "account": user is not None,
+        # Shows on the site: an account while it is active, staff, and agrees to appear.
+        "consent": user is None or (user.is_active and user.public_profile),
+        "staff": user is None or on_staff,
+        "teaching": teaching,
+        "automatic": False,
+        "placements": [_placement(p) for p in entry.placements.all()],
+    }
+
+
+def entry_row(entry: StaffEntry, request) -> dict:
+    """One person's row, for the answer to a write (not the whole board)."""
+    entry = _entries().get(pk=entry.pk)
+    account = User.objects.filter(pk=entry.user_id)
+    return _row(
+        entry,
+        request,
+        teaching=account.filter(staff.teaching_q()).exists(),
+        on_staff=staff.staff_accounts().filter(pk=entry.user_id).exists(),
+    )
+
+
 def board(request) -> dict:
     teaching = set(User.objects.filter(staff.teaching_q()).values_list("pk", flat=True))
+    on_staff = set(staff.staff_accounts().values_list("pk", flat=True))
     faculty = StaffGroup.objects.filter(holds_faculty=True).first()
     rows = []
     for entry in _entries():
-        user = entry.user
         rows.append(
-            {
-                "entry": str(entry.public_id),
-                **_person(entry, user, request),
-                "account": user is not None,
-                "consent": user is None or (user.is_active and user.public_profile),
-                "teaching": user is not None and user.pk in teaching,
-                "automatic": False,
-                "placements": [_placement(p) for p in entry.placements.all()],
-            }
+            _row(
+                entry,
+                request,
+                teaching=entry.user_id in teaching,
+                on_staff=entry.user_id in on_staff,
+            )
         )
     for user in staff.automatic_faculty():
         rows.append(
@@ -176,6 +202,7 @@ def board(request) -> dict:
                 **_person(None, user, request),
                 "account": True,
                 "consent": True,
+                "staff": True,
                 "teaching": True,
                 "automatic": True,
                 "placements": (
@@ -192,30 +219,27 @@ def board(request) -> dict:
 def public_groups(request) -> list[dict]:
     """Visible groups in order, each with its members: placed by hand first (by the order the
     site team gave, then name), then — in the faculty group — teaching staff placed by
-    themselves. An account appears only while active and with its own consent."""
-    shown = Q(entry__user__isnull=True) | Q(
-        entry__user__is_active=True, entry__user__public_profile=True
-    )
+    themselves. An account appears only while active, staff, and with its own consent."""
     placements = (
-        StaffPlacement.objects.filter(shown, group__is_visible=True)
+        StaffPlacement.objects.filter(
+            Q(entry__user__isnull=True) | staff.shown("entry__user"), group__is_visible=True
+        )
         .select_related("entry__user", "entry__photo")
         .order_by("order", "id")
     )
-    by_group: dict[int, list[dict]] = {}
+    by_group: dict[int, list[tuple]] = {}
     for p in placements:
         person = _person(p.entry, p.entry.user, request)
-        by_group.setdefault(p.group_id, []).append(
-            {
-                "id": person.pop("user"),
-                **person,
-                "position_ar": p.position_ar,
-                "position_en": p.position_en,
-                "_order": (p.order, person["name_ar"]),
-            }
-        )
+        member = {
+            "id": person.pop("user"),
+            **person,
+            "position_ar": p.position_ar,
+            "position_en": p.position_en,
+        }
+        by_group.setdefault(p.group_id, []).append((p.order, member["name_ar"], member))
     groups = []
     for group in StaffGroup.objects.filter(is_visible=True):
-        members = sorted(by_group.get(group.pk, []), key=lambda m: m.pop("_order"))
+        members = [m for *_, m in sorted(by_group.get(group.pk, []), key=lambda t: t[:2])]
         if group.holds_faculty:
             for user in staff.automatic_faculty().order_by("full_name_ar"):
                 person = _person(None, user, request)
@@ -261,14 +285,16 @@ class StaffPeopleView(_Manage):
         responses=StaffPersonSerializer(many=True),
     )
     def get(self, request):
+        # By name, from two letters: the site team adds staff, it does not browse or look up
+        # accounts by email (users.view is not theirs; review 2026-11-09).
         search = (request.query_params.get("search") or "").strip()
-        people = staff.staff_accounts().order_by("full_name_ar")
-        if search:
-            people = people.filter(
-                Q(full_name_ar__icontains=search)
-                | Q(full_name_en__icontains=search)
-                | Q(email__icontains=search)
-            )
+        if len(search) < 2:
+            return Response([])
+        people = (
+            staff.staff_accounts()
+            .filter(Q(full_name_ar__icontains=search) | Q(full_name_en__icontains=search))
+            .order_by("full_name_ar")
+        )
         on_page = set(StaffEntry.objects.values_list("user_id", flat=True))
         rows = [
             {
@@ -344,8 +370,9 @@ class StaffEntriesView(_Manage):
         user_id = fields.pop("user", None)
         user = get_object_or_404(User, public_id=user_id) if user_id else None
         entry = staff.create_entry(_meta(request), user=user, **fields)
-        row = next(r for r in board(request)["rows"] if r["entry"] == str(entry.public_id))
-        return Response(StaffRowSerializer(row).data, status=status.HTTP_201_CREATED)
+        return Response(
+            StaffRowSerializer(entry_row(entry, request)).data, status=status.HTTP_201_CREATED
+        )
 
 
 @extend_schema(tags=["content"])
@@ -362,8 +389,7 @@ class StaffEntryView(_Manage):
         fields = _entry_fields(data.validated_data)
         fields.pop("user", None)  # an entry's account never changes
         staff.update_entry(_meta(request), entry, **fields)
-        row = next(r for r in board(request)["rows"] if r["entry"] == str(entry.public_id))
-        return Response(StaffRowSerializer(row).data)
+        return Response(StaffRowSerializer(entry_row(entry, request)).data)
 
     @extend_schema(operation_id="site_staff_entries_delete", responses={204: None})
     def delete(self, request, public_id):

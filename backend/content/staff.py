@@ -42,12 +42,24 @@ def automatic_faculty():
     return consenting().filter(teaching_q(), site_staff__isnull=True)
 
 
+def staff_q(prefix: str = "") -> Q:
+    """A staff account (some role, and not a student's), as accounts.staff_profile.on_staff."""
+    return Q(**{f"{prefix}role_assignments__isnull": False}) & ~Q(
+        **{f"{prefix}role_assignments__role": Role.STUDENT}
+    )
+
+
 def staff_accounts():
     """Accounts that may be added to the page: staff, not students."""
-    return (
-        User.objects.filter(is_active=True, role_assignments__isnull=False)
-        .exclude(role_assignments__role=Role.STUDENT)
-        .distinct()
+    return User.objects.filter(staff_q(), is_active=True).distinct()
+
+
+def shown(user_ref: str) -> Exists:
+    """An account on the page shows while it is active, a staff account, and agrees to appear:
+    one that left the staff drops off by itself, like a teacher whose membership ends.
+    ``user_ref`` names the account's id in the outer query (``"entry__user"``, ``"pk"``)."""
+    return Exists(
+        User.objects.filter(staff_q(), pk=OuterRef(user_ref), is_active=True, public_profile=True)
     )
 
 

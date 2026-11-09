@@ -551,12 +551,17 @@ class PublicStaffPhotoView(_PublicRead):
                 )
             )
             | Q(Exists(DepartmentMembership.objects.filter(user=OuterRef("pk"))))
-            | Q(
-                Exists(
-                    StaffPlacement.objects.filter(
-                        entry__user=OuterRef("pk"), group__is_visible=True
+            # Placed by the site team, while still a staff account (review 2026-11-09).
+            | (
+                Q(
+                    Exists(
+                        StaffPlacement.objects.filter(
+                            entry__user=OuterRef("pk"), group__is_visible=True
+                        )
                     )
                 )
+                & Q(Exists(RoleAssignment.objects.filter(user=OuterRef("pk"))))
+                & ~Q(Exists(RoleAssignment.objects.filter(user=OuterRef("pk"), role=Role.STUDENT)))
             )
         )
         user = (

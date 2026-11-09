@@ -919,13 +919,16 @@ function ProgramForm({
   const opened = useOpenFocus<HTMLFormElement>(!!program);
   const confirm = useConfirm();
   const unsaved = useUnsavedChanges();
+  // Engineering and medicine are five years, the rest four (owner, 2026-11-09: a medicine
+  // programme entered with the default four stopped at semester 8).
+  const fiveYears = /^(الهندسة|الطب)(\s|$)/.test(department.name_ar.trim());
   const blank = {
     code: "",
     name_ar: "",
     name_en: "",
     degree: "bachelor",
-    levels_count: "4",
-    duration_terms: "8",
+    levels_count: fiveYears ? "5" : "4",
+    duration_terms: fiveYears ? "10" : "8",
     total_credit_hours: "",
     is_active: true,
     department: department.id,
@@ -1039,6 +1042,9 @@ function ProgramForm({
             ))}
           </span>
         </div>
+        <p className="text-xs text-text-muted">
+          البكالوريوس في الهندسة والطب خمسة مستويات (الفصول 1–10)، وفي غيرهما أربعة.
+        </p>
         <div className="grid grid-cols-3 gap-3 @lg:max-w-md">
           <label className={LABEL}>
             مستويات

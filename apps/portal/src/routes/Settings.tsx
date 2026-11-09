@@ -125,7 +125,12 @@ export function Settings() {
         }
       >
         <PushCard />
-        {hasRole(me.data, "teacher", "ta", "department_manager") && <PublicProfileCard />}
+        {/* Any staff member may choose to appear on the site (owner, 2026-11-09: the
+            administration too); a teacher on their department's page, anyone the site team
+            placed on «الكوادر». A student never. */}
+        {!me.data?.student && !hasRole(me.data, "student") && (me.data?.roles?.length ?? 0) > 0 && (
+          <PublicProfileCard teaches={hasRole(me.data, "teacher", "ta", "department_manager")} />
+        )}
 
         <SectionLabel>الإشعارات — لكل فئة قنواتها</SectionLabel>
         {/* Phones: one row per category with its channels as labelled switches (no table). */}
@@ -259,7 +264,7 @@ const PUSH_TEXT: Record<PushState, string> = {
  * The member's own choice to appear on their department's page of the college site (owner
  * decision 2026-09-30): off until they turn it on, with the title shown beside the name.
  */
-function PublicProfileCard() {
+function PublicProfileCard({ teaches }: { teaches: boolean }) {
   const client = useQueryClient();
   const profile = useQuery({
     queryKey: ["me", "public-profile"],
@@ -291,6 +296,7 @@ function PublicProfileCard() {
   });
   const p = profile.data;
   if (!p) return null;
+  const consentLabel = teaches ? "أظهر اسمي ولقبي في صفحة قسمي" : "أظهر اسمي ولقبي على موقع الكلية";
   const changed =
     draft.full_name_en !== (p.full_name_en ?? "") ||
     draft.academic_title_ar !== (p.academic_title_ar ?? "") ||
@@ -298,18 +304,22 @@ function PublicProfileCard() {
     draft.research_interests !== (p.research_interests ?? "");
   return (
     <>
-      <SectionLabel>الظهور في صفحة القسم على موقع الكلية</SectionLabel>
+      <SectionLabel>
+        {teaches ? "الظهور في صفحة القسم على موقع الكلية" : "الظهور في «الكوادر» على موقع الكلية"}
+      </SectionLabel>
       <Card className="overflow-hidden">
         <div className="flex items-center justify-between gap-3 px-4 py-3">
           <div>
-            <p className="text-sm font-semibold text-text">أظهر اسمي ولقبي في صفحة قسمي</p>
+            <p className="text-sm font-semibold text-text">{consentLabel}</p>
             <p className="mt-0.5 text-xs text-text-muted">
-              باختيارك وحدك، وتستطيع إيقافه متى شئت. لا يظهر بريدك ولا هاتفك.
+              {teaches
+                ? "باختيارك وحدك، وتستطيع إيقافه متى شئت. لا يظهر بريدك ولا هاتفك."
+                : "يظهر إن وضعك فريق الموقع في «الكوادر»، وباختيارك وحدك؛ توقفه متى شئت. لا يظهر بريدك ولا هاتفك."}
             </p>
           </div>
           <Switch
             checked={p.public_profile ?? false}
-            label="أظهر اسمي ولقبي في صفحة قسمي"
+            label={consentLabel}
             disabled={save.isPending}
             onChange={(value) => save.mutate({ public_profile: value })}
           />

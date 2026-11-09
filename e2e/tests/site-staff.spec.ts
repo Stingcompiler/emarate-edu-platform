@@ -34,4 +34,20 @@ test("the site manager adds a group and a person and sorts them on the matrix", 
     else await expect(cell).toBeChecked();
   }
   expect(await offscreen(page)).toEqual([]);
+  if (phone) return;
+
+  // A tick made while «تعديل» is open survives its «حفظ» (review 2026-11-09).
+  await page
+    .getByRole("row", { name: new RegExp(person) })
+    .getByRole("button", { name: "تعديل" })
+    .click();
+  const tick = (name: string) => page.getByLabel(`${person} في «${name}»`).locator("visible=true");
+  await tick("هيئة التدريس").click();
+  await expect(tick("هيئة التدريس")).toBeChecked();
+  const position = page.getByLabel("المسمّى في «هيئة الإدارة»").locator("visible=true");
+  await position.fill("عميد الكلية");
+  await page.getByRole("button", { name: "حفظ", exact: true }).click();
+  await expect(position).toHaveCount(0); // saved and closed
+  await expect(tick("هيئة التدريس")).toBeChecked();
+  await expect(tick(group)).toBeChecked();
 });

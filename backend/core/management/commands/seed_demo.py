@@ -215,8 +215,14 @@ class Command(BaseCommand):
         departments: dict[str, Department] = {}
         programs: dict[str, Program] = {}
         for code, name_ar, name_en, program_rows in DEPARTMENTS:
-            department, _ = Department.objects.get_or_create(
-                college=college, code=code, defaults={"name_ar": name_ar, "name_en": name_en}
+            # By code, or by name: a college that entered «الطب» under its own code (M) must
+            # not get a second, empty one from a demo run (review 2026-11-09).
+            department = (
+                Department.objects.filter(code=code).first()
+                or Department.objects.filter(college=college, name_ar=name_ar).first()
+                or Department.objects.create(
+                    college=college, code=code, name_ar=name_ar, name_en=name_en
+                )
             )
             departments[code] = department
             for p_code, p_ar, p_en, degree, levels, terms in program_rows:

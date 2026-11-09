@@ -118,8 +118,23 @@ def test_an_account_appears_only_with_its_consent_and_never_a_student(api, make_
     student = make_user(Role.STUDENT, full_name_ar="طالب")
     refused = site.post(ENTRIES, {"user": str(student.public_id)}, format="json")
     assert refused.status_code == 400
-    names = [p["full_name_ar"] for p in site.get(f"{BOARD}/people?search=").data]
-    assert "أ. رشا المكي" in names and "طالب" not in names
+    names = [p["full_name_ar"] for p in site.get(f"{BOARD}/people?search=رشا").data]
+    assert names == ["أ. رشا المكي"]
+    assert site.get(f"{BOARD}/people?search=طالب").data == []
+    # No browsing and no look-up by email (review 2026-11-09).
+    assert site.get(f"{BOARD}/people").data == []
+    assert site.get(f"{BOARD}/people?search={shy.email}").data == []
+    # The account itself chooses to appear (any staff, not only teachers); a student cannot.
+    assert api(shy).patch("/api/v1/me/public-profile", {"public_profile": True}).status_code == 200
+    assert [m["name_ar"] for m in _public(api)["هيئة الإدارة"]] == ["أ. رشا المكي"]
+    assert (
+        api(student).patch("/api/v1/me/public-profile", {"public_profile": True}).status_code == 403
+    )
+    # Once no longer staff (roles taken away, the account kept), it drops off by itself.
+    shy.role_assignments.all().delete()
+    assert _public(api) == {}
+    row = site.get(BOARD).data["rows"][0]
+    assert row["consent"] and not row["staff"]
 
 
 def test_groups_are_flexible_but_the_faculty_always_has_one(api, teacher, make_user):
