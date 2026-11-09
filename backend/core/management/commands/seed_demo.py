@@ -74,6 +74,13 @@ DEPARTMENTS = [
         ],
     ),
     (
+        # Medicine is five years, like engineering (owner, 2026-11-09).
+        "MED",
+        "الطب",
+        "Medicine",
+        [("MBBS", "بكالوريوس الطب والجراحة", "MBBS Medicine and Surgery", "bachelor", 5, 10)],
+    ),
+    (
         "BA",
         "إدارة الأعمال",
         "Business Administration",
