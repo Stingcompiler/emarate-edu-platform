@@ -35,6 +35,7 @@ import {
   UserCheck,
   UserRound,
   Users,
+  UserPlus,
   UsersRound,
   Trash2,
 } from "lucide-react";
@@ -213,6 +214,10 @@ export function navFor(me: Me | null | undefined, unread: number): NavItem[] {
   // The site's «الكوادر», reviewed by academic affairs (owner, 2026-10-30).
   if (can(me, "staff_profiles.moderate"))
     items.push({ label: "الكوادر على الموقع", to: "/staff-profiles", icon: UsersRound });
+  // Adding people to «الكوادر» and sorting them into groups (owner, 2026-11-09): a link of its
+  // own, so it is not only a quick link inside «محتوى الموقع».
+  if (can(me, "site_staff.manage"))
+    items.push({ label: "تصنيف الكوادر", to: "/site-staff", icon: UserPlus });
   if (me?.student) {
     items.push({ label: "النتائج", to: "/results", icon: Award });
     items.push({ label: "اللوائح", to: "/regulations", icon: ScrollText });
@@ -295,7 +300,7 @@ const GROUPS: [string, RegExp][] = [
     /^\/(courses|exams|live|department|reports|hr|transcripts|cases|regulations|grading)/,
   ],
   ["النتائج", /^\/(result-imports|result-corrections|results)/],
-  ["المحتوى والتواصل", /^\/(site|events|announcements|notifications\/new)/],
+  ["المحتوى والتواصل", /^\/(site|events|announcements|notifications\/new|staff-profiles)/],
 ];
 
 function grouped(items: NavItem[]): NavItem[] {

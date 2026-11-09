@@ -6,7 +6,7 @@ Older rounds (2026-10-24 → 11-02): `.claude/handoff/archive/2026-10-24_to_2026
 
 - **«الكوادر» in groups** (owner, 2026-11-09; `feat/site-staff-groups`): the system admin and
   the site manager (and the supervisor, who deletes nothing) add people to the site's «الكوادر» on
-  `/site/staff` («تصنيف الكوادر», linked from /site): a staff account, or a person with no account
+  `/site-staff` («تصنيف الكوادر», linked from /site): a staff account, or a person with no account
   (adding never makes an account). Groups are flexible (`content.StaffGroup`; «هيئة الإدارة» and
   «هيئة التدريس» to start); a matrix places each person in one or more groups with a position and
   an order (`StaffEntry`/`StaffPlacement`, rules in `content/staff.py`). An account shows only with

@@ -273,7 +273,7 @@ const router = createBrowserRouter([
   { path: "/site/news/:id", element: signedIn(<NewsEditor />, "/site/news/:id") },
   { path: "/site/media", element: signedIn(<SiteMedia />, "/site/media") },
   { path: "/site/redirects", element: signedIn(<Redirects />, "/site/redirects") },
-  { path: "/site/staff", element: signedIn(<SiteStaff />, "/site/staff") },
+  { path: "/site-staff", element: signedIn(<SiteStaff />, "/site-staff") },
   { path: "/events", element: signedIn(<Events />, "/events") },
   { path: "/events/:id", element: signedIn(<EventEditor />, "/events/:id") },
   { path: "/applications", element: signedIn(<Applications />, "/applications") },

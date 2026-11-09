@@ -10,7 +10,10 @@ test("the site manager adds a group and a person and sorts them on the matrix", 
 }, info) => {
   const phone = (page.viewportSize()?.width ?? 1280) < 1024;
   await signIn(page, "site@demo.ecst.test");
-  await page.goto("/site/staff");
+  // Found from the sidebar, not only from a quick link (owner, 2026-11-09: «أين زر إضافة كادر؟»).
+  if (!phone) await page.getByRole("link", { name: "تصنيف الكوادر" }).first().click();
+  else await page.goto("/site-staff");
+  await expect(page).toHaveURL(/\/site-staff$/);
   await expect(page.getByRole("heading", { name: "تصنيف الكوادر" })).toBeVisible();
 
   const group = `مجلس الأمناء ${info.project.name}`;
