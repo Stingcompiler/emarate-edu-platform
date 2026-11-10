@@ -47,13 +47,13 @@
 | R71 | 🟠 | 1.2 | ترفيع قسم بلا طلاب يمنع ترفيع الكلية للفصل كله؛ رقم قسم غير موجود = 500 على PostgreSQL | #269 |
 | R72 | 🟠 | 1.2 | خفض مستويات برنامج تحت طلابه ومواده | #269 |
 | R73 | 🟠 | 2 | مشرف النظام يرى أزرار حذف يرفضها الخادم (الهيكل، التحويلات، الوسائط، دفعة النتائج)؛ ورفض حذف تحويل أو صورة — ومنه «الصورة مستعملة» — يُبتلع بصمت | #270 |
-| R74 | 🟠 | 1.3 | برنامج مفتوح فيه طلبات يُغيَّر برنامجه، فتصير طلباته لبرنامج آخر | PR_A |
-| R75 | 🟠 | 1.3 | ويُنقل إلى دورة أخرى بطلباته | PR_A |
-| R76 | 🟢 | 1.3 | نافذة البرنامج المفتوح تُحفظ وهي تُغلق قبل أن تُفتح | PR_A |
-| R77 | 🟢 | 1.3 | برنامج موقوف يُفتح للتقديم | PR_A |
-| R78 | 🟠 | 1.1 | الاستيراد يضيف الرقم الجامعي نفسه بأحرف صغيرة سجلًا ثانيًا | PR_A |
-| R79 | 🟠 | 1.1 | طالب يكتب رقمه بأحرف صغيرة لا يجد سجله في التسجيل | PR_A |
-| R80 | 🟢 | 1.1 | كل بلاغ انتحال بعنوان آخر يرسل إشعارًا جديدًا لكل معتمدي القسم | PR_A |
+| R74 | 🟠 | 1.3 | برنامج مفتوح فيه طلبات يُغيَّر برنامجه، فتصير طلباته لبرنامج آخر | #272 |
+| R75 | 🟠 | 1.3 | ويُنقل إلى دورة أخرى بطلباته | #272 |
+| R76 | 🟢 | 1.3 | نافذة البرنامج المفتوح تُحفظ وهي تُغلق قبل أن تُفتح | #272 |
+| R77 | 🟢 | 1.3 | برنامج موقوف يُفتح للتقديم | #272 |
+| R78 | 🟠 | 1.1 | الاستيراد يضيف الرقم الجامعي نفسه بأحرف صغيرة سجلًا ثانيًا | #272 |
+| R79 | 🟠 | 1.1 | طالب يكتب رقمه بأحرف صغيرة لا يجد سجله في التسجيل | #272 |
+| R80 | 🟢 | 1.1 | كل بلاغ انتحال بعنوان آخر يرسل إشعارًا جديدًا لكل معتمدي القسم | #272 |
 
 ## 3. التفاصيل
 
@@ -61,7 +61,7 @@
 - **R57–R63:** [`identity/README.md`](evidence/review-2026-11-10/identity/README.md) (المجسات على SQLite وPostgreSQL قبل الإصلاح) ووصف [#267](https://github.com/Stingcompiler/emarate-edu-platform/pull/267).
 - **R67–R72:** [`structure/README.md`](evidence/review-2026-11-10/structure/README.md) (ستة مجسات على SQLite وPostgreSQL قبل الإصلاح) ووصف [#269](https://github.com/Stingcompiler/emarate-edu-platform/pull/269).
 - **المحور 2 وR73:** [`permissions/README.md`](evidence/review-2026-11-10/permissions/README.md) ووصف [#270](https://github.com/Stingcompiler/emarate-edu-platform/pull/270). السطح الجديد: 19 عملية كتابة × 15 دورًا = **289 خلية بلا فرق عن المصفوفة** (اختبار دائم `tests/permissions/test_new_surface_writes.py`).
-- **R74–R80 والمحور 3:** [`admissions/README.md`](evidence/review-2026-11-10/admissions/README.md)، [`identity/README.md`](evidence/review-2026-11-10/identity/README.md) (الجولة الرابعة)، [`integrity/README.md`](evidence/review-2026-11-10/integrity/README.md): الترحيلات تُعكس وتُعاد على المحركين، ولا كتابة جديدة بلا تدقيق. ووصف PR_A.
+- **R74–R80 والمحور 3:** [`admissions/README.md`](evidence/review-2026-11-10/admissions/README.md)، [`identity/README.md`](evidence/review-2026-11-10/identity/README.md) (الجولة الرابعة)، [`integrity/README.md`](evidence/review-2026-11-10/integrity/README.md): الترحيلات تُعكس وتُعاد على المحركين، ولا كتابة جديدة بلا تدقيق. ووصف [#272](https://github.com/Stingcompiler/emarate-edu-platform/pull/272).
 - **الجرد:** [`inventory/README.md`](evidence/review-2026-11-10/inventory/README.md)، يُولَّد بـ `bash scripts/qa/inventory.sh <مجلد>` (جديد، بلا ذكاء اصطناعي وبلا خادم):
 
 | السجل | وحدة العد | العدد |
