@@ -1,0 +1,182 @@
+{"surface":"site","page":"/404","who":"-","width":1280,"address":"/404","result":"ok"}
+{"surface":"site","page":"/","who":"-","width":1280,"address":"/","result":"ok (opened /ar/)"}
+{"surface":"site","page":"/ar/[...path]","who":"ar","width":1280,"address":"/ar/no-such-page","result":"ok"}
+{"surface":"site","page":"/ar/about","who":"ar","width":1280,"address":"/ar/about","result":"ok"}
+{"surface":"site","page":"/ar/admissions","who":"ar","width":1280,"address":"/ar/admissions","result":"ok"}
+{"surface":"site","page":"/ar/announcements/[id]","who":"ar","width":1280,"address":"/ar/announcements/a661f9a4-4b77-450c-8aa6-d02c1864c812","result":"ok"}
+{"surface":"site","page":"/ar/announcements","who":"ar","width":1280,"address":"/ar/announcements","result":"ok"}
+{"surface":"site","page":"/ar/calendar","who":"ar","width":1280,"address":"/ar/calendar","result":"ok"}
+{"surface":"site","page":"/ar/contact","who":"ar","width":1280,"address":"/ar/contact","result":"ok"}
+{"surface":"site","page":"/ar/departments/[code]","who":"ar","width":1280,"address":"/ar/departments/BA","result":"ok"}
+{"surface":"site","page":"/ar/departments","who":"ar","width":1280,"address":"/ar/departments","result":"ok"}
+{"surface":"site","page":"/ar/events/[slug]","who":"ar","width":1280,"address":"/ar/events/open-day","result":"ok"}
+{"surface":"site","page":"/ar/events","who":"ar","width":1280,"address":"/ar/events","result":"ok"}
+{"surface":"site","page":"/ar","who":"ar","width":1280,"address":"/ar","result":"ok"}
+{"surface":"site","page":"/ar/news/[slug]","who":"ar","width":1280,"address":"/ar/news/sample-graduation","result":"ok"}
+{"surface":"site","page":"/ar/news","who":"ar","width":1280,"address":"/ar/news","result":"ok"}
+{"surface":"site","page":"/ar/p/[slug]","who":"ar","width":1280,"address":null,"result":"n/a: nothing to open in the demo data"}
+{"surface":"site","page":"/ar/parents","who":"ar","width":1280,"address":"/ar/parents","result":"ok"}
+{"surface":"site","page":"/ar/programs/[code]","who":"ar","width":1280,"address":"/ar/programs/BBA","result":"ok"}
+{"surface":"site","page":"/ar/programs","who":"ar","width":1280,"address":"/ar/programs","result":"ok"}
+{"surface":"site","page":"/ar/regulations","who":"ar","width":1280,"address":"/ar/regulations","result":"ok"}
+{"surface":"site","page":"/ar/staff/[id]","who":"ar","width":1280,"address":"/ar/staff/dd9f3d21-e442-41fe-88ca-f2e626b0e6e0","result":"ok"}
+{"surface":"site","page":"/ar/staff","who":"ar","width":1280,"address":"/ar/staff","result":"ok"}
+{"surface":"site","page":"/en/[...path]","who":"en","width":1280,"address":"/en/no-such-page","result":"ok"}
+{"surface":"site","page":"/en/about","who":"en","width":1280,"address":"/en/about","result":"ok"}
+{"surface":"site","page":"/en/admissions","who":"en","width":1280,"address":"/en/admissions","result":"ok"}
+{"surface":"site","page":"/en/announcements/[id]","who":"en","width":1280,"address":"/en/announcements/a661f9a4-4b77-450c-8aa6-d02c1864c812","result":"ok"}
+{"surface":"site","page":"/en/announcements","who":"en","width":1280,"address":"/en/announcements","result":"ok"}
+{"surface":"site","page":"/en/calendar","who":"en","width":1280,"address":"/en/calendar","result":"ok"}
+{"surface":"site","page":"/en/contact","who":"en","width":1280,"address":"/en/contact","result":"ok"}
+{"surface":"site","page":"/en/departments/[code]","who":"en","width":1280,"address":"/en/departments/BA","result":"ok"}
+{"surface":"site","page":"/en/departments","who":"en","width":1280,"address":"/en/departments","result":"ok"}
+{"surface":"site","page":"/en/events/[slug]","who":"en","width":1280,"address":"/en/events/open-day","result":"ok"}
+{"surface":"site","page":"/en/events","who":"en","width":1280,"address":"/en/events","result":"ok"}
+{"surface":"site","page":"/en","who":"en","width":1280,"address":"/en","result":"ok"}
+{"surface":"site","page":"/en/news/[slug]","who":"en","width":1280,"address":"/en/news/sample-graduation","result":"ok"}
+{"surface":"site","page":"/en/news","who":"en","width":1280,"address":"/en/news","result":"ok"}
+{"surface":"site","page":"/en/p/[slug]","who":"en","width":1280,"address":null,"result":"n/a: nothing to open in the demo data"}
+{"surface":"site","page":"/en/parents","who":"en","width":1280,"address":"/en/parents","result":"ok"}
+{"surface":"site","page":"/en/programs/[code]","who":"en","width":1280,"address":"/en/programs/BBA","result":"ok"}
+{"surface":"site","page":"/en/programs","who":"en","width":1280,"address":"/en/programs","result":"ok"}
+{"surface":"site","page":"/en/regulations","who":"en","width":1280,"address":"/en/regulations","result":"ok"}
+{"surface":"site","page":"/en/staff/[id]","who":"en","width":1280,"address":"/en/staff/dd9f3d21-e442-41fe-88ca-f2e626b0e6e0","result":"ok"}
+{"surface":"site","page":"/en/staff","who":"en","width":1280,"address":"/en/staff","result":"ok"}
+{"surface":"portal","page":"/login","who":"(بلا دخول)","width":1280,"address":"/login","result":"ok"}
+{"surface":"portal","page":"/register","who":"(بلا دخول)","width":1280,"address":"/register","result":"ok"}
+{"surface":"portal","page":"/forgot-password","who":"(بلا دخول)","width":1280,"address":"/forgot-password","result":"ok"}
+{"surface":"portal","page":"/activate/:token","who":"(بلا دخول)","width":1280,"address":null,"result":"n/a: nothing to open in the demo data"}
+{"surface":"portal","page":"/change-password","who":"(بلا دخول)","width":1280,"address":"/change-password","result":"ok (opened /login)"}
+{"surface":"portal","page":"/apply","who":"(بلا دخول)","width":1280,"address":"/apply","result":"ok"}
+{"surface":"portal","page":"/apply/guide","who":"(بلا دخول)","width":1280,"address":"/apply/guide","result":"ok"}
+{"surface":"portal","page":"/track","who":"(بلا دخول)","width":1280,"address":"/track","result":"ok"}
+{"surface":"portal","page":"/site/staff","who":"(بلا دخول)","width":1280,"address":"/site/staff","result":"ok (opened /login)"}
+{"surface":"portal","page":"*","who":"(بلا دخول)","width":1280,"address":"/no-such-page","result":"ok"}
+{"surface":"portal","page":"/tasks","who":"student","width":1280,"address":"/tasks","result":"ok"}
+{"surface":"portal","page":"/me","who":"student","width":1280,"address":"/me","result":"ok"}
+{"surface":"portal","page":"/me/status","who":"student","width":1280,"address":"/me/status","result":"ok"}
+{"surface":"portal","page":"/results","who":"student","width":1280,"address":"/results","result":"ok"}
+{"surface":"portal","page":"/print/my-results","who":"student","width":1280,"address":"/print/my-results","result":"ok"}
+{"surface":"portal","page":"/me/teaching","who":"teacher","width":1280,"address":"/me/teaching","result":"ok"}
+{"surface":"portal","page":"/","who":"system_admin","width":1280,"address":"/","result":"ok (opened /system)"}
+{"surface":"portal","page":"/courses","who":"system_admin","width":1280,"address":"/courses","result":"ok"}
+{"surface":"portal","page":"/courses/:id","who":"system_admin","width":1280,"address":null,"result":"n/a: nothing to open in the demo data"}
+{"surface":"portal","page":"/courses/:id/students","who":"system_admin","width":1280,"address":null,"result":"n/a: nothing to open in the demo data"}
+{"surface":"portal","page":"/lectures/new","who":"system_admin","width":1280,"address":"/lectures/new","result":"ok"}
+{"surface":"portal","page":"/lectures/:id","who":"system_admin","width":1280,"address":null,"result":"n/a: nothing to open in the demo data"}
+{"surface":"portal","page":"/lectures/:id/edit","who":"system_admin","width":1280,"address":null,"result":"n/a: nothing to open in the demo data"}
+{"surface":"portal","page":"/assignments/new","who":"system_admin","width":1280,"address":"/assignments/new","result":"ok"}
+{"surface":"portal","page":"/assignments/:id","who":"system_admin","width":1280,"address":null,"result":"n/a: nothing to open in the demo data"}
+{"surface":"portal","page":"/assignments/:id/edit","who":"system_admin","width":1280,"address":null,"result":"n/a: nothing to open in the demo data"}
+{"surface":"portal","page":"/submissions/:id","who":"system_admin","width":1280,"address":null,"result":"n/a: nothing to open in the demo data"}
+{"surface":"portal","page":"/grading","who":"system_admin","width":1280,"address":"/grading","result":"ok"}
+{"surface":"portal","page":"/results-office","who":"system_admin","width":1280,"address":"/results-office","result":"ok"}
+{"surface":"portal","page":"/academic","who":"system_admin","width":1280,"address":"/academic","result":"ok"}
+{"surface":"portal","page":"/staff-profiles","who":"system_admin","width":1280,"address":"/staff-profiles","result":"ok"}
+{"surface":"portal","page":"/affairs","who":"system_admin","width":1280,"address":"/affairs","result":"ok"}
+{"surface":"portal","page":"/notifications","who":"system_admin","width":1280,"address":"/notifications","result":"ok"}
+{"surface":"portal","page":"/notifications/new","who":"system_admin","width":1280,"address":"/notifications/new","result":"ok"}
+{"surface":"portal","page":"/settings","who":"system_admin","width":1280,"address":"/settings","result":"ok"}
+{"surface":"portal","page":"/install","who":"system_admin","width":1280,"address":"/install","result":"ok"}
+{"surface":"portal","page":"/results/search","who":"system_admin","width":1280,"address":"/results/search","result":"ok"}
+{"surface":"portal","page":"/results/settings","who":"system_admin","width":1280,"address":"/results/settings","result":"ok"}
+{"surface":"portal","page":"/result-imports","who":"system_admin","width":1280,"address":"/result-imports","result":"ok"}
+{"surface":"portal","page":"/result-imports/:id","who":"system_admin","width":1280,"address":"/result-imports/f557681d-e78e-435e-a62e-ac2b4bffe215","result":"ok"}
+{"surface":"portal","page":"/result-corrections","who":"system_admin","width":1280,"address":"/result-corrections","result":"ok"}
+{"surface":"portal","page":"/regulations","who":"system_admin","width":1280,"address":"/regulations","result":"ok"}
+{"surface":"portal","page":"/regulations/new","who":"system_admin","width":1280,"address":"/regulations/new","result":"ok"}
+{"surface":"portal","page":"/regulations/:id","who":"system_admin","width":1280,"address":"/regulations/new","result":"ok"}
+{"surface":"portal","page":"/exams","who":"system_admin","width":1280,"address":"/exams","result":"ok"}
+{"surface":"portal","page":"/exams/new","who":"system_admin","width":1280,"address":"/exams/new","result":"ok"}
+{"surface":"portal","page":"/exams/:id","who":"system_admin","width":1280,"address":"/exams/new","result":"ok"}
+{"surface":"portal","page":"/exams/:id/edit","who":"system_admin","width":1280,"address":"/exams/new/edit","result":"ok"}
+{"surface":"portal","page":"/exams/:id/monitor","who":"system_admin","width":1280,"address":"/exams/new/monitor","result":"ok"}
+{"surface":"portal","page":"/exams/:id/stats","who":"system_admin","width":1280,"address":"/exams/new/stats","result":"ok"}
+{"surface":"portal","page":"/exam-attempts/:id","who":"system_admin","width":1280,"address":null,"result":"n/a: nothing to open in the demo data"}
+{"surface":"portal","page":"/exam-attempts/:id/result","who":"system_admin","width":1280,"address":null,"result":"n/a: nothing to open in the demo data"}
+{"surface":"portal","page":"/live","who":"system_admin","width":1280,"address":"/live","result":"ok"}
+{"surface":"portal","page":"/live/new","who":"system_admin","width":1280,"address":"/live/new","result":"ok"}
+{"surface":"portal","page":"/announcements","who":"system_admin","width":1280,"address":"/announcements","result":"ok"}
+{"surface":"portal","page":"/announcements/new","who":"system_admin","width":1280,"address":"/announcements/new","result":"ok"}
+{"surface":"portal","page":"/inquiries","who":"system_admin","width":1280,"address":"/inquiries","result":"ok"}
+{"surface":"portal","page":"/inquiries/:id","who":"system_admin","width":1280,"address":null,"result":"n/a: nothing to open in the demo data"}
+{"surface":"portal","page":"/site","who":"system_admin","width":1280,"address":"/site","result":"ok"}
+{"surface":"portal","page":"/site/pages/:id","who":"system_admin","width":1280,"address":"/site/pages/89f07e71-22ed-4a33-84e8-8d09a0f4825b","result":"ok"}
+{"surface":"portal","page":"/site/news/:id","who":"system_admin","width":1280,"address":null,"result":"n/a: nothing to open in the demo data"}
+{"surface":"portal","page":"/site/media","who":"system_admin","width":1280,"address":"/site/media","result":"ok"}
+{"surface":"portal","page":"/site/redirects","who":"system_admin","width":1280,"address":"/site/redirects","result":"ok"}
+{"surface":"portal","page":"/site-staff","who":"system_admin","width":1280,"address":"/site-staff","result":"ok"}
+{"surface":"portal","page":"/events","who":"system_admin","width":1280,"address":"/events","result":"ok"}
+{"surface":"portal","page":"/events/:id","who":"system_admin","width":1280,"address":"/events/new","result":"ok"}
+{"surface":"portal","page":"/applications","who":"system_admin","width":1280,"address":"/applications","result":"ok"}
+{"surface":"portal","page":"/applications/:id","who":"system_admin","width":1280,"address":"/applications/26663ca8-3301-4ce5-9028-cdf80c9ab5a2","result":"ok"}
+{"surface":"portal","page":"/applications/:id/print","who":"system_admin","width":1280,"address":"/applications/26663ca8-3301-4ce5-9028-cdf80c9ab5a2/print","result":"ok"}
+{"surface":"portal","page":"/admissions/cycles","who":"system_admin","width":1280,"address":"/admissions/cycles","result":"ok"}
+{"surface":"portal","page":"/admissions/forms","who":"system_admin","width":1280,"address":"/admissions/forms","result":"ok"}
+{"surface":"portal","page":"/registrar","who":"system_admin","width":1280,"address":"/registrar","result":"ok"}
+{"surface":"portal","page":"/students","who":"system_admin","width":1280,"address":"/students","result":"ok"}
+{"surface":"portal","page":"/students/new","who":"system_admin","width":1280,"address":"/students/new","result":"ok"}
+{"surface":"portal","page":"/students/:id","who":"system_admin","width":1280,"address":"/students/new","result":"ok"}
+{"surface":"portal","page":"/student-imports","who":"system_admin","width":1280,"address":"/student-imports","result":"ok"}
+{"surface":"portal","page":"/student-promotion","who":"system_admin","width":1280,"address":"/student-promotion","result":"ok"}
+{"surface":"portal","page":"/student-imports/:id","who":"system_admin","width":1280,"address":null,"result":"n/a: nothing to open in the demo data"}
+{"surface":"portal","page":"/registrars","who":"system_admin","width":1280,"address":"/registrars","result":"ok"}
+{"surface":"portal","page":"/department","who":"system_admin","width":1280,"address":"/department","result":"ok"}
+{"surface":"portal","page":"/department/courses","who":"system_admin","width":1280,"address":"/department/courses","result":"ok"}
+{"surface":"portal","page":"/department/lectures","who":"system_admin","width":1280,"address":"/department/lectures","result":"ok"}
+{"surface":"portal","page":"/department/teachers","who":"system_admin","width":1280,"address":"/department/teachers","result":"ok"}
+{"surface":"portal","page":"/department/students","who":"system_admin","width":1280,"address":"/department/students","result":"ok"}
+{"surface":"portal","page":"/department/approvals","who":"system_admin","width":1280,"address":"/department/approvals","result":"ok"}
+{"surface":"portal","page":"/department/audit","who":"system_admin","width":1280,"address":"/department/audit","result":"ok"}
+{"surface":"portal","page":"/reports","who":"system_admin","width":1280,"address":"/reports","result":"ok"}
+{"surface":"portal","page":"/reports/admissions","who":"system_admin","width":1280,"address":"/reports/admissions","result":"ok"}
+{"surface":"portal","page":"/reports/affairs","who":"system_admin","width":1280,"address":"/reports/affairs","result":"ok"}
+{"surface":"portal","page":"/hr","who":"system_admin","width":1280,"address":"/hr","result":"ok"}
+{"surface":"portal","page":"/hr/teachers","who":"system_admin","width":1280,"address":"/hr/teachers","result":"ok"}
+{"surface":"portal","page":"/hr/teachers/:id","who":"system_admin","width":1280,"address":"/hr/teachers/dd9f3d21-e442-41fe-88ca-f2e626b0e6e0","result":"ok"}
+{"surface":"portal","page":"/hr/notices/new","who":"system_admin","width":1280,"address":"/hr/notices/new","result":"ok"}
+{"surface":"portal","page":"/hr/report","who":"system_admin","width":1280,"address":"/hr/report","result":"ok"}
+{"surface":"portal","page":"/hr-notices/:id","who":"system_admin","width":1280,"address":null,"result":"n/a: nothing to open in the demo data"}
+{"surface":"portal","page":"/transcripts","who":"system_admin","width":1280,"address":"/transcripts","result":"ok"}
+{"surface":"portal","page":"/print/report/:id","who":"system_admin","width":1280,"address":null,"result":"n/a: nothing to open in the demo data"}
+{"surface":"portal","page":"/print/transcript/:number","who":"system_admin","width":1280,"address":null,"result":"n/a: nothing to open in the demo data"}
+{"surface":"portal","page":"/cases","who":"system_admin","width":1280,"address":"/cases","result":"ok"}
+{"surface":"portal","page":"/cases/new","who":"system_admin","width":1280,"address":"/cases/new","result":"ok"}
+{"surface":"portal","page":"/cases/:id","who":"system_admin","width":1280,"address":"/cases/new","result":"ok"}
+{"surface":"portal","page":"/system","who":"system_admin","width":1280,"address":"/system","result":"ok"}
+{"surface":"portal","page":"/system/users","who":"system_admin","width":1280,"address":"/system/users","result":"ok"}
+{"surface":"portal","page":"/system/users/:id","who":"system_admin","width":1280,"address":"/system/users/77b24aa6-f4c6-4f05-9697-a939f4f58961","result":"ok"}
+{"surface":"portal","page":"/system/roles","who":"system_admin","width":1280,"address":"/system/roles","result":"ok"}
+{"surface":"portal","page":"/system/structure","who":"system_admin","width":1280,"address":"/system/structure","result":"ok"}
+{"surface":"portal","page":"/system/settings","who":"system_admin","width":1280,"address":"/system/settings","result":"ok"}
+{"surface":"portal","page":"/system/deletions","who":"system_admin","width":1280,"address":"/system/deletions","result":"ok"}
+{"surface":"portal","page":"/audit","who":"system_admin","width":1280,"address":"/audit","result":"ok"}
+{"surface":"portal","page":"/activate/:token","who":"(بلا دخول)","width":1280,"address":null,"result":"n/a: nothing to open in the demo data (nor as teacher)"}
+{"surface":"portal","page":"/courses/:id","who":"system_admin","width":1280,"address":"/courses/1","result":"ok [as teacher]"}
+{"surface":"portal","page":"/courses/:id/students","who":"system_admin","width":1280,"address":"/courses/1/students","result":"ok [as teacher]"}
+{"surface":"portal","page":"/lectures/:id","who":"system_admin","width":1280,"address":null,"result":"n/a: nothing to open in the demo data (nor as teacher)"}
+{"surface":"portal","page":"/lectures/:id/edit","who":"system_admin","width":1280,"address":null,"result":"n/a: nothing to open in the demo data (nor as teacher)"}
+{"surface":"portal","page":"/assignments/:id","who":"system_admin","width":1280,"address":null,"result":"n/a: nothing to open in the demo data (nor as teacher)"}
+{"surface":"portal","page":"/assignments/:id/edit","who":"system_admin","width":1280,"address":null,"result":"n/a: nothing to open in the demo data (nor as teacher)"}
+{"surface":"portal","page":"/submissions/:id","who":"system_admin","width":1280,"address":"/submissions/2e4ee92f-a58e-489f-870e-9e4b1b23570e","result":"ok [as teacher]"}
+{"surface":"portal","page":"/exam-attempts/:id","who":"system_admin","width":1280,"address":null,"result":"n/a: nothing to open in the demo data (nor as teacher)"}
+{"surface":"portal","page":"/exam-attempts/:id/result","who":"system_admin","width":1280,"address":null,"result":"n/a: nothing to open in the demo data (nor as teacher)"}
+{"surface":"portal","page":"/inquiries/:id","who":"system_admin","width":1280,"address":null,"result":"n/a: nothing to open in the demo data (nor as teacher)"}
+{"surface":"portal","page":"/site/news/:id","who":"system_admin","width":1280,"address":null,"result":"n/a: nothing to open in the demo data (nor as teacher)"}
+{"surface":"portal","page":"/student-imports/:id","who":"system_admin","width":1280,"address":null,"result":"n/a: nothing to open in the demo data (nor as teacher)"}
+{"surface":"portal","page":"/hr-notices/:id","who":"system_admin","width":1280,"address":null,"result":"n/a: nothing to open in the demo data (nor as teacher)"}
+{"surface":"portal","page":"/print/report/:id","who":"system_admin","width":1280,"address":null,"result":"n/a: nothing to open in the demo data (nor as teacher)"}
+{"surface":"portal","page":"/print/transcript/:number","who":"system_admin","width":1280,"address":null,"result":"n/a: nothing to open in the demo data (nor as teacher)"}
+{"surface":"portal","page":"/activate/:token","who":"(بلا دخول)","width":1280,"address":null,"result":"n/a: nothing to open in the demo data (nor as student)"}
+{"surface":"portal","page":"/lectures/:id","who":"system_admin","width":1280,"address":null,"result":"n/a: nothing to open in the demo data (nor as student)"}
+{"surface":"portal","page":"/lectures/:id/edit","who":"system_admin","width":1280,"address":null,"result":"n/a: nothing to open in the demo data (nor as student)"}
+{"surface":"portal","page":"/assignments/:id","who":"system_admin","width":1280,"address":null,"result":"n/a: nothing to open in the demo data (nor as student)"}
+{"surface":"portal","page":"/assignments/:id/edit","who":"system_admin","width":1280,"address":null,"result":"n/a: nothing to open in the demo data (nor as student)"}
+{"surface":"portal","page":"/exam-attempts/:id","who":"system_admin","width":1280,"address":null,"result":"n/a: nothing to open in the demo data (nor as student)"}
+{"surface":"portal","page":"/exam-attempts/:id/result","who":"system_admin","width":1280,"address":null,"result":"n/a: nothing to open in the demo data (nor as student)"}
+{"surface":"portal","page":"/inquiries/:id","who":"system_admin","width":1280,"address":null,"result":"n/a: nothing to open in the demo data (nor as student)"}
+{"surface":"portal","page":"/site/news/:id","who":"system_admin","width":1280,"address":null,"result":"n/a: nothing to open in the demo data (nor as student)"}
+{"surface":"portal","page":"/student-imports/:id","who":"system_admin","width":1280,"address":null,"result":"n/a: nothing to open in the demo data (nor as student)"}
+{"surface":"portal","page":"/hr-notices/:id","who":"system_admin","width":1280,"address":null,"result":"n/a: nothing to open in the demo data (nor as student)"}
+{"surface":"portal","page":"/print/report/:id","who":"system_admin","width":1280,"address":null,"result":"n/a: nothing to open in the demo data (nor as student)"}
+{"surface":"portal","page":"/print/transcript/:number","who":"system_admin","width":1280,"address":null,"result":"n/a: nothing to open in the demo data (nor as student)"}

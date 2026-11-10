@@ -1,307 +1,307 @@
 surface,page,language_or_role,width,result
-site,/404,-,390,
-site,/404,-,1280,
-site,/ar/[...path],ar,390,
-site,/ar/[...path],ar,1280,
-site,/en/[...path],en,390,
-site,/en/[...path],en,1280,
-site,/ar/about,ar,390,
-site,/ar/about,ar,1280,
-site,/en/about,en,390,
-site,/en/about,en,1280,
-site,/ar/admissions,ar,390,
-site,/ar/admissions,ar,1280,
-site,/en/admissions,en,390,
-site,/en/admissions,en,1280,
-site,/ar/announcements/[id],ar,390,
-site,/ar/announcements/[id],ar,1280,
-site,/en/announcements/[id],en,390,
-site,/en/announcements/[id],en,1280,
-site,/ar/announcements,ar,390,
-site,/ar/announcements,ar,1280,
-site,/en/announcements,en,390,
-site,/en/announcements,en,1280,
-site,/ar/calendar,ar,390,
-site,/ar/calendar,ar,1280,
-site,/en/calendar,en,390,
-site,/en/calendar,en,1280,
-site,/ar/contact,ar,390,
-site,/ar/contact,ar,1280,
-site,/en/contact,en,390,
-site,/en/contact,en,1280,
-site,/ar/departments/[code],ar,390,
-site,/ar/departments/[code],ar,1280,
-site,/en/departments/[code],en,390,
-site,/en/departments/[code],en,1280,
-site,/ar/departments,ar,390,
-site,/ar/departments,ar,1280,
-site,/en/departments,en,390,
-site,/en/departments,en,1280,
-site,/ar/events/[slug],ar,390,
-site,/ar/events/[slug],ar,1280,
-site,/en/events/[slug],en,390,
-site,/en/events/[slug],en,1280,
-site,/ar/events,ar,390,
-site,/ar/events,ar,1280,
-site,/en/events,en,390,
-site,/en/events,en,1280,
-site,/ar,ar,390,
-site,/ar,ar,1280,
-site,/en,en,390,
-site,/en,en,1280,
-site,/ar/news/[slug],ar,390,
-site,/ar/news/[slug],ar,1280,
-site,/en/news/[slug],en,390,
-site,/en/news/[slug],en,1280,
-site,/ar/news,ar,390,
-site,/ar/news,ar,1280,
-site,/en/news,en,390,
-site,/en/news,en,1280,
-site,/ar/p/[slug],ar,390,
-site,/ar/p/[slug],ar,1280,
-site,/en/p/[slug],en,390,
-site,/en/p/[slug],en,1280,
-site,/ar/parents,ar,390,
-site,/ar/parents,ar,1280,
-site,/en/parents,en,390,
-site,/en/parents,en,1280,
-site,/ar/programs/[code],ar,390,
-site,/ar/programs/[code],ar,1280,
-site,/en/programs/[code],en,390,
-site,/en/programs/[code],en,1280,
-site,/ar/programs,ar,390,
-site,/ar/programs,ar,1280,
-site,/en/programs,en,390,
-site,/en/programs,en,1280,
-site,/ar/regulations,ar,390,
-site,/ar/regulations,ar,1280,
-site,/en/regulations,en,390,
-site,/en/regulations,en,1280,
-site,/ar/staff/[id],ar,390,
-site,/ar/staff/[id],ar,1280,
-site,/en/staff/[id],en,390,
-site,/en/staff/[id],en,1280,
-site,/ar/staff,ar,390,
-site,/ar/staff,ar,1280,
-site,/en/staff,en,390,
-site,/en/staff,en,1280,
-site,/,-,390,
-site,/,-,1280,
-portal,/login,(بلا دخول),390,
-portal,/login,(بلا دخول),1280,
-portal,/register,(بلا دخول),390,
-portal,/register,(بلا دخول),1280,
-portal,/forgot-password,(بلا دخول),390,
-portal,/forgot-password,(بلا دخول),1280,
-portal,/activate/:token,(بلا دخول),390,
-portal,/activate/:token,(بلا دخول),1280,
-portal,/change-password,(بلا دخول),390,
-portal,/change-password,(بلا دخول),1280,
-portal,/apply,(بلا دخول),390,
-portal,/apply,(بلا دخول),1280,
-portal,/apply/guide,(بلا دخول),390,
-portal,/apply/guide,(بلا دخول),1280,
-portal,/track,(بلا دخول),390,
-portal,/track,(بلا دخول),1280,
-portal,/,system_admin,390,
-portal,/,system_admin,1280,
-portal,/courses,system_admin,390,
-portal,/courses,system_admin,1280,
-portal,/courses/:id,system_admin,390,
-portal,/courses/:id,system_admin,1280,
-portal,/courses/:id/students,system_admin,390,
-portal,/courses/:id/students,system_admin,1280,
-portal,/lectures/new,system_admin,390,
-portal,/lectures/new,system_admin,1280,
-portal,/lectures/:id,system_admin,390,
-portal,/lectures/:id,system_admin,1280,
-portal,/lectures/:id/edit,system_admin,390,
-portal,/lectures/:id/edit,system_admin,1280,
-portal,/assignments/new,system_admin,390,
-portal,/assignments/new,system_admin,1280,
-portal,/assignments/:id,system_admin,390,
-portal,/assignments/:id,system_admin,1280,
-portal,/assignments/:id/edit,system_admin,390,
-portal,/assignments/:id/edit,system_admin,1280,
-portal,/submissions/:id,system_admin,390,
-portal,/submissions/:id,system_admin,1280,
-portal,/grading,system_admin,390,
-portal,/grading,system_admin,1280,
-portal,/tasks,student,390,
-portal,/tasks,student,1280,
-portal,/me,student,390,
-portal,/me,student,1280,
-portal,/me/status,student,390,
-portal,/me/status,student,1280,
-portal,/results-office,system_admin,390,
-portal,/results-office,system_admin,1280,
-portal,/academic,system_admin,390,
-portal,/academic,system_admin,1280,
-portal,/staff-profiles,system_admin,390,
-portal,/staff-profiles,system_admin,1280,
-portal,/affairs,system_admin,390,
-portal,/affairs,system_admin,1280,
-portal,/notifications,system_admin,390,
-portal,/notifications,system_admin,1280,
-portal,/notifications/new,system_admin,390,
-portal,/notifications/new,system_admin,1280,
-portal,/settings,system_admin,390,
-portal,/settings,system_admin,1280,
-portal,/install,system_admin,390,
-portal,/install,system_admin,1280,
-portal,/results,student,390,
-portal,/results,student,1280,
-portal,/results/search,system_admin,390,
-portal,/results/search,system_admin,1280,
-portal,/results/settings,system_admin,390,
-portal,/results/settings,system_admin,1280,
-portal,/result-imports,system_admin,390,
-portal,/result-imports,system_admin,1280,
-portal,/result-imports/:id,system_admin,390,
-portal,/result-imports/:id,system_admin,1280,
-portal,/result-corrections,system_admin,390,
-portal,/result-corrections,system_admin,1280,
-portal,/regulations,system_admin,390,
-portal,/regulations,system_admin,1280,
-portal,/regulations/new,system_admin,390,
-portal,/regulations/new,system_admin,1280,
-portal,/regulations/:id,system_admin,390,
-portal,/regulations/:id,system_admin,1280,
-portal,/exams,system_admin,390,
-portal,/exams,system_admin,1280,
-portal,/exams/new,system_admin,390,
-portal,/exams/new,system_admin,1280,
-portal,/exams/:id,system_admin,390,
-portal,/exams/:id,system_admin,1280,
-portal,/exams/:id/edit,system_admin,390,
-portal,/exams/:id/edit,system_admin,1280,
-portal,/exams/:id/monitor,system_admin,390,
-portal,/exams/:id/monitor,system_admin,1280,
-portal,/exams/:id/stats,system_admin,390,
-portal,/exams/:id/stats,system_admin,1280,
-portal,/exam-attempts/:id,system_admin,390,
-portal,/exam-attempts/:id,system_admin,1280,
-portal,/exam-attempts/:id/result,system_admin,390,
-portal,/exam-attempts/:id/result,system_admin,1280,
-portal,/live,system_admin,390,
-portal,/live,system_admin,1280,
-portal,/live/new,system_admin,390,
-portal,/live/new,system_admin,1280,
-portal,/announcements,system_admin,390,
-portal,/announcements,system_admin,1280,
-portal,/announcements/new,system_admin,390,
-portal,/announcements/new,system_admin,1280,
-portal,/inquiries,system_admin,390,
-portal,/inquiries,system_admin,1280,
-portal,/inquiries/:id,system_admin,390,
-portal,/inquiries/:id,system_admin,1280,
-portal,/site,system_admin,390,
-portal,/site,system_admin,1280,
-portal,/site/pages/:id,system_admin,390,
-portal,/site/pages/:id,system_admin,1280,
-portal,/site/news/:id,system_admin,390,
-portal,/site/news/:id,system_admin,1280,
-portal,/site/media,system_admin,390,
-portal,/site/media,system_admin,1280,
-portal,/site/redirects,system_admin,390,
-portal,/site/redirects,system_admin,1280,
-portal,/site-staff,system_admin,390,
-portal,/site-staff,system_admin,1280,
-portal,/site/staff,(بلا دخول),390,
-portal,/site/staff,(بلا دخول),1280,
-portal,/events,system_admin,390,
-portal,/events,system_admin,1280,
-portal,/events/:id,system_admin,390,
-portal,/events/:id,system_admin,1280,
-portal,/applications,system_admin,390,
-portal,/applications,system_admin,1280,
-portal,/applications/:id,system_admin,390,
-portal,/applications/:id,system_admin,1280,
-portal,/applications/:id/print,system_admin,390,
-portal,/applications/:id/print,system_admin,1280,
-portal,/admissions/cycles,system_admin,390,
-portal,/admissions/cycles,system_admin,1280,
-portal,/admissions/forms,system_admin,390,
-portal,/admissions/forms,system_admin,1280,
-portal,/registrar,system_admin,390,
-portal,/registrar,system_admin,1280,
-portal,/students,system_admin,390,
-portal,/students,system_admin,1280,
-portal,/students/new,system_admin,390,
-portal,/students/new,system_admin,1280,
-portal,/students/:id,system_admin,390,
-portal,/students/:id,system_admin,1280,
-portal,/student-imports,system_admin,390,
-portal,/student-imports,system_admin,1280,
-portal,/student-promotion,system_admin,390,
-portal,/student-promotion,system_admin,1280,
-portal,/student-imports/:id,system_admin,390,
-portal,/student-imports/:id,system_admin,1280,
-portal,/registrars,system_admin,390,
-portal,/registrars,system_admin,1280,
-portal,/department,system_admin,390,
-portal,/department,system_admin,1280,
-portal,/department/courses,system_admin,390,
-portal,/department/courses,system_admin,1280,
-portal,/department/lectures,system_admin,390,
-portal,/department/lectures,system_admin,1280,
-portal,/department/teachers,system_admin,390,
-portal,/department/teachers,system_admin,1280,
-portal,/department/students,system_admin,390,
-portal,/department/students,system_admin,1280,
-portal,/department/approvals,system_admin,390,
-portal,/department/approvals,system_admin,1280,
-portal,/department/audit,system_admin,390,
-portal,/department/audit,system_admin,1280,
-portal,/reports,system_admin,390,
-portal,/reports,system_admin,1280,
-portal,/reports/admissions,system_admin,390,
-portal,/reports/admissions,system_admin,1280,
-portal,/reports/affairs,system_admin,390,
-portal,/reports/affairs,system_admin,1280,
-portal,/hr,system_admin,390,
-portal,/hr,system_admin,1280,
-portal,/hr/teachers,system_admin,390,
-portal,/hr/teachers,system_admin,1280,
-portal,/hr/teachers/:id,system_admin,390,
-portal,/hr/teachers/:id,system_admin,1280,
-portal,/me/teaching,teacher,390,
-portal,/me/teaching,teacher,1280,
-portal,/hr/notices/new,system_admin,390,
-portal,/hr/notices/new,system_admin,1280,
-portal,/hr/report,system_admin,390,
-portal,/hr/report,system_admin,1280,
-portal,/hr-notices/:id,system_admin,390,
-portal,/hr-notices/:id,system_admin,1280,
-portal,/transcripts,system_admin,390,
-portal,/transcripts,system_admin,1280,
-portal,/print/report/:id,system_admin,390,
-portal,/print/report/:id,system_admin,1280,
-portal,/print/transcript/:number,system_admin,390,
-portal,/print/transcript/:number,system_admin,1280,
-portal,/print/my-results,student,390,
-portal,/print/my-results,student,1280,
-portal,/cases,system_admin,390,
-portal,/cases,system_admin,1280,
-portal,/cases/new,system_admin,390,
-portal,/cases/new,system_admin,1280,
-portal,/cases/:id,system_admin,390,
-portal,/cases/:id,system_admin,1280,
-portal,/system,system_admin,390,
-portal,/system,system_admin,1280,
-portal,/system/users,system_admin,390,
-portal,/system/users,system_admin,1280,
-portal,/system/users/:id,system_admin,390,
-portal,/system/users/:id,system_admin,1280,
-portal,/system/roles,system_admin,390,
-portal,/system/roles,system_admin,1280,
-portal,/system/structure,system_admin,390,
-portal,/system/structure,system_admin,1280,
-portal,/system/settings,system_admin,390,
-portal,/system/settings,system_admin,1280,
-portal,/system/deletions,system_admin,390,
-portal,/system/deletions,system_admin,1280,
-portal,/audit,system_admin,390,
-portal,/audit,system_admin,1280,
-portal,*,(بلا دخول),390,
-portal,*,(بلا دخول),1280,
+site,/404,-,390,ok
+site,/404,-,1280,ok
+site,/ar/[...path],ar,390,ok
+site,/ar/[...path],ar,1280,ok
+site,/en/[...path],en,390,ok
+site,/en/[...path],en,1280,ok
+site,/ar/about,ar,390,ok
+site,/ar/about,ar,1280,ok
+site,/en/about,en,390,ok
+site,/en/about,en,1280,ok
+site,/ar/admissions,ar,390,ok
+site,/ar/admissions,ar,1280,ok
+site,/en/admissions,en,390,ok
+site,/en/admissions,en,1280,ok
+site,/ar/announcements/[id],ar,390,ok
+site,/ar/announcements/[id],ar,1280,ok
+site,/en/announcements/[id],en,390,ok
+site,/en/announcements/[id],en,1280,ok
+site,/ar/announcements,ar,390,ok
+site,/ar/announcements,ar,1280,ok
+site,/en/announcements,en,390,ok
+site,/en/announcements,en,1280,ok
+site,/ar/calendar,ar,390,ok
+site,/ar/calendar,ar,1280,ok
+site,/en/calendar,en,390,ok
+site,/en/calendar,en,1280,ok
+site,/ar/contact,ar,390,ok
+site,/ar/contact,ar,1280,ok
+site,/en/contact,en,390,ok
+site,/en/contact,en,1280,ok
+site,/ar/departments/[code],ar,390,ok
+site,/ar/departments/[code],ar,1280,ok
+site,/en/departments/[code],en,390,ok
+site,/en/departments/[code],en,1280,ok
+site,/ar/departments,ar,390,ok
+site,/ar/departments,ar,1280,ok
+site,/en/departments,en,390,ok
+site,/en/departments,en,1280,ok
+site,/ar/events/[slug],ar,390,ok
+site,/ar/events/[slug],ar,1280,ok
+site,/en/events/[slug],en,390,ok
+site,/en/events/[slug],en,1280,ok
+site,/ar/events,ar,390,ok
+site,/ar/events,ar,1280,ok
+site,/en/events,en,390,ok
+site,/en/events,en,1280,ok
+site,/ar,ar,390,ok
+site,/ar,ar,1280,ok
+site,/en,en,390,ok
+site,/en,en,1280,ok
+site,/ar/news/[slug],ar,390,ok
+site,/ar/news/[slug],ar,1280,ok
+site,/en/news/[slug],en,390,ok
+site,/en/news/[slug],en,1280,ok
+site,/ar/news,ar,390,ok
+site,/ar/news,ar,1280,ok
+site,/en/news,en,390,ok
+site,/en/news,en,1280,ok
+site,/ar/p/[slug],ar,390,n/a: nothing to open in the demo data
+site,/ar/p/[slug],ar,1280,n/a: nothing to open in the demo data
+site,/en/p/[slug],en,390,n/a: nothing to open in the demo data
+site,/en/p/[slug],en,1280,n/a: nothing to open in the demo data
+site,/ar/parents,ar,390,ok
+site,/ar/parents,ar,1280,ok
+site,/en/parents,en,390,ok
+site,/en/parents,en,1280,ok
+site,/ar/programs/[code],ar,390,ok
+site,/ar/programs/[code],ar,1280,ok
+site,/en/programs/[code],en,390,ok
+site,/en/programs/[code],en,1280,ok
+site,/ar/programs,ar,390,ok
+site,/ar/programs,ar,1280,ok
+site,/en/programs,en,390,ok
+site,/en/programs,en,1280,ok
+site,/ar/regulations,ar,390,ok
+site,/ar/regulations,ar,1280,ok
+site,/en/regulations,en,390,ok
+site,/en/regulations,en,1280,ok
+site,/ar/staff/[id],ar,390,ok
+site,/ar/staff/[id],ar,1280,ok
+site,/en/staff/[id],en,390,ok
+site,/en/staff/[id],en,1280,ok
+site,/ar/staff,ar,390,ok
+site,/ar/staff,ar,1280,ok
+site,/en/staff,en,390,ok
+site,/en/staff,en,1280,ok
+site,/,-,390,ok (opened /ar/)
+site,/,-,1280,ok (opened /ar/)
+portal,/login,(بلا دخول),390,ok
+portal,/login,(بلا دخول),1280,ok
+portal,/register,(بلا دخول),390,ok
+portal,/register,(بلا دخول),1280,ok
+portal,/forgot-password,(بلا دخول),390,ok
+portal,/forgot-password,(بلا دخول),1280,ok
+portal,/activate/:token,(بلا دخول),390,n/a: nothing to open in the demo data (nor as student)
+portal,/activate/:token,(بلا دخول),1280,n/a: nothing to open in the demo data (nor as student)
+portal,/change-password,(بلا دخول),390,ok (opened /login)
+portal,/change-password,(بلا دخول),1280,ok (opened /login)
+portal,/apply,(بلا دخول),390,ok
+portal,/apply,(بلا دخول),1280,ok
+portal,/apply/guide,(بلا دخول),390,ok
+portal,/apply/guide,(بلا دخول),1280,ok
+portal,/track,(بلا دخول),390,ok
+portal,/track,(بلا دخول),1280,ok
+portal,/,system_admin,390,ok (opened /system)
+portal,/,system_admin,1280,ok (opened /system)
+portal,/courses,system_admin,390,ok
+portal,/courses,system_admin,1280,ok
+portal,/courses/:id,system_admin,390,ok [as teacher]
+portal,/courses/:id,system_admin,1280,ok [as teacher]
+portal,/courses/:id/students,system_admin,390,ok [as teacher]
+portal,/courses/:id/students,system_admin,1280,ok [as teacher]
+portal,/lectures/new,system_admin,390,ok
+portal,/lectures/new,system_admin,1280,ok
+portal,/lectures/:id,system_admin,390,n/a: nothing to open in the demo data (nor as student)
+portal,/lectures/:id,system_admin,1280,n/a: nothing to open in the demo data (nor as student)
+portal,/lectures/:id/edit,system_admin,390,n/a: nothing to open in the demo data (nor as student)
+portal,/lectures/:id/edit,system_admin,1280,n/a: nothing to open in the demo data (nor as student)
+portal,/assignments/new,system_admin,390,ok
+portal,/assignments/new,system_admin,1280,ok
+portal,/assignments/:id,system_admin,390,n/a: nothing to open in the demo data (nor as student)
+portal,/assignments/:id,system_admin,1280,n/a: nothing to open in the demo data (nor as student)
+portal,/assignments/:id/edit,system_admin,390,n/a: nothing to open in the demo data (nor as student)
+portal,/assignments/:id/edit,system_admin,1280,n/a: nothing to open in the demo data (nor as student)
+portal,/submissions/:id,system_admin,390,ok [as teacher]
+portal,/submissions/:id,system_admin,1280,ok [as teacher]
+portal,/grading,system_admin,390,ok
+portal,/grading,system_admin,1280,ok
+portal,/tasks,student,390,ok
+portal,/tasks,student,1280,ok
+portal,/me,student,390,ok
+portal,/me,student,1280,ok
+portal,/me/status,student,390,ok
+portal,/me/status,student,1280,ok
+portal,/results-office,system_admin,390,ok
+portal,/results-office,system_admin,1280,ok
+portal,/academic,system_admin,390,ok
+portal,/academic,system_admin,1280,ok
+portal,/staff-profiles,system_admin,390,ok
+portal,/staff-profiles,system_admin,1280,ok
+portal,/affairs,system_admin,390,ok
+portal,/affairs,system_admin,1280,ok
+portal,/notifications,system_admin,390,ok
+portal,/notifications,system_admin,1280,ok
+portal,/notifications/new,system_admin,390,ok
+portal,/notifications/new,system_admin,1280,ok
+portal,/settings,system_admin,390,ok
+portal,/settings,system_admin,1280,ok
+portal,/install,system_admin,390,ok
+portal,/install,system_admin,1280,ok
+portal,/results,student,390,ok
+portal,/results,student,1280,ok
+portal,/results/search,system_admin,390,ok
+portal,/results/search,system_admin,1280,ok
+portal,/results/settings,system_admin,390,ok
+portal,/results/settings,system_admin,1280,ok
+portal,/result-imports,system_admin,390,ok
+portal,/result-imports,system_admin,1280,ok
+portal,/result-imports/:id,system_admin,390,ok
+portal,/result-imports/:id,system_admin,1280,ok
+portal,/result-corrections,system_admin,390,ok
+portal,/result-corrections,system_admin,1280,ok
+portal,/regulations,system_admin,390,ok
+portal,/regulations,system_admin,1280,ok
+portal,/regulations/new,system_admin,390,ok
+portal,/regulations/new,system_admin,1280,ok
+portal,/regulations/:id,system_admin,390,ok
+portal,/regulations/:id,system_admin,1280,ok
+portal,/exams,system_admin,390,ok
+portal,/exams,system_admin,1280,ok
+portal,/exams/new,system_admin,390,ok
+portal,/exams/new,system_admin,1280,ok
+portal,/exams/:id,system_admin,390,ok
+portal,/exams/:id,system_admin,1280,ok
+portal,/exams/:id/edit,system_admin,390,ok
+portal,/exams/:id/edit,system_admin,1280,ok
+portal,/exams/:id/monitor,system_admin,390,ok
+portal,/exams/:id/monitor,system_admin,1280,ok
+portal,/exams/:id/stats,system_admin,390,ok
+portal,/exams/:id/stats,system_admin,1280,ok
+portal,/exam-attempts/:id,system_admin,390,n/a: nothing to open in the demo data (nor as student)
+portal,/exam-attempts/:id,system_admin,1280,n/a: nothing to open in the demo data (nor as student)
+portal,/exam-attempts/:id/result,system_admin,390,n/a: nothing to open in the demo data (nor as student)
+portal,/exam-attempts/:id/result,system_admin,1280,n/a: nothing to open in the demo data (nor as student)
+portal,/live,system_admin,390,ok
+portal,/live,system_admin,1280,ok
+portal,/live/new,system_admin,390,ok
+portal,/live/new,system_admin,1280,ok
+portal,/announcements,system_admin,390,ok
+portal,/announcements,system_admin,1280,ok
+portal,/announcements/new,system_admin,390,ok
+portal,/announcements/new,system_admin,1280,ok
+portal,/inquiries,system_admin,390,ok
+portal,/inquiries,system_admin,1280,ok
+portal,/inquiries/:id,system_admin,390,n/a: nothing to open in the demo data (nor as student)
+portal,/inquiries/:id,system_admin,1280,n/a: nothing to open in the demo data (nor as student)
+portal,/site,system_admin,390,ok
+portal,/site,system_admin,1280,ok
+portal,/site/pages/:id,system_admin,390,ok
+portal,/site/pages/:id,system_admin,1280,ok
+portal,/site/news/:id,system_admin,390,n/a: nothing to open in the demo data (nor as student)
+portal,/site/news/:id,system_admin,1280,n/a: nothing to open in the demo data (nor as student)
+portal,/site/media,system_admin,390,ok
+portal,/site/media,system_admin,1280,ok
+portal,/site/redirects,system_admin,390,ok
+portal,/site/redirects,system_admin,1280,ok
+portal,/site-staff,system_admin,390,ok
+portal,/site-staff,system_admin,1280,ok
+portal,/site/staff,(بلا دخول),390,ok (opened /login)
+portal,/site/staff,(بلا دخول),1280,ok (opened /login)
+portal,/events,system_admin,390,ok
+portal,/events,system_admin,1280,ok
+portal,/events/:id,system_admin,390,ok
+portal,/events/:id,system_admin,1280,ok
+portal,/applications,system_admin,390,ok
+portal,/applications,system_admin,1280,ok
+portal,/applications/:id,system_admin,390,ok
+portal,/applications/:id,system_admin,1280,ok
+portal,/applications/:id/print,system_admin,390,ok
+portal,/applications/:id/print,system_admin,1280,ok
+portal,/admissions/cycles,system_admin,390,ok
+portal,/admissions/cycles,system_admin,1280,ok
+portal,/admissions/forms,system_admin,390,ok
+portal,/admissions/forms,system_admin,1280,ok
+portal,/registrar,system_admin,390,ok
+portal,/registrar,system_admin,1280,ok
+portal,/students,system_admin,390,ok
+portal,/students,system_admin,1280,ok
+portal,/students/new,system_admin,390,ok
+portal,/students/new,system_admin,1280,ok
+portal,/students/:id,system_admin,390,ok
+portal,/students/:id,system_admin,1280,ok
+portal,/student-imports,system_admin,390,ok
+portal,/student-imports,system_admin,1280,ok
+portal,/student-promotion,system_admin,390,ok
+portal,/student-promotion,system_admin,1280,ok
+portal,/student-imports/:id,system_admin,390,n/a: nothing to open in the demo data (nor as student)
+portal,/student-imports/:id,system_admin,1280,n/a: nothing to open in the demo data (nor as student)
+portal,/registrars,system_admin,390,ok
+portal,/registrars,system_admin,1280,ok
+portal,/department,system_admin,390,ok
+portal,/department,system_admin,1280,ok
+portal,/department/courses,system_admin,390,ok
+portal,/department/courses,system_admin,1280,ok
+portal,/department/lectures,system_admin,390,ok
+portal,/department/lectures,system_admin,1280,ok
+portal,/department/teachers,system_admin,390,ok
+portal,/department/teachers,system_admin,1280,ok
+portal,/department/students,system_admin,390,ok
+portal,/department/students,system_admin,1280,ok
+portal,/department/approvals,system_admin,390,ok
+portal,/department/approvals,system_admin,1280,ok
+portal,/department/audit,system_admin,390,ok
+portal,/department/audit,system_admin,1280,ok
+portal,/reports,system_admin,390,ok
+portal,/reports,system_admin,1280,ok
+portal,/reports/admissions,system_admin,390,ok
+portal,/reports/admissions,system_admin,1280,ok
+portal,/reports/affairs,system_admin,390,ok
+portal,/reports/affairs,system_admin,1280,ok
+portal,/hr,system_admin,390,ok
+portal,/hr,system_admin,1280,ok
+portal,/hr/teachers,system_admin,390,ok
+portal,/hr/teachers,system_admin,1280,ok
+portal,/hr/teachers/:id,system_admin,390,ok
+portal,/hr/teachers/:id,system_admin,1280,ok
+portal,/me/teaching,teacher,390,ok
+portal,/me/teaching,teacher,1280,ok
+portal,/hr/notices/new,system_admin,390,ok
+portal,/hr/notices/new,system_admin,1280,ok
+portal,/hr/report,system_admin,390,ok
+portal,/hr/report,system_admin,1280,ok
+portal,/hr-notices/:id,system_admin,390,n/a: nothing to open in the demo data (nor as student)
+portal,/hr-notices/:id,system_admin,1280,n/a: nothing to open in the demo data (nor as student)
+portal,/transcripts,system_admin,390,ok
+portal,/transcripts,system_admin,1280,ok
+portal,/print/report/:id,system_admin,390,n/a: nothing to open in the demo data (nor as student)
+portal,/print/report/:id,system_admin,1280,n/a: nothing to open in the demo data (nor as student)
+portal,/print/transcript/:number,system_admin,390,n/a: nothing to open in the demo data (nor as student)
+portal,/print/transcript/:number,system_admin,1280,n/a: nothing to open in the demo data (nor as student)
+portal,/print/my-results,student,390,ok
+portal,/print/my-results,student,1280,ok
+portal,/cases,system_admin,390,ok
+portal,/cases,system_admin,1280,ok
+portal,/cases/new,system_admin,390,ok
+portal,/cases/new,system_admin,1280,ok
+portal,/cases/:id,system_admin,390,ok
+portal,/cases/:id,system_admin,1280,ok
+portal,/system,system_admin,390,ok
+portal,/system,system_admin,1280,ok
+portal,/system/users,system_admin,390,ok
+portal,/system/users,system_admin,1280,ok
+portal,/system/users/:id,system_admin,390,ok
+portal,/system/users/:id,system_admin,1280,ok
+portal,/system/roles,system_admin,390,ok
+portal,/system/roles,system_admin,1280,ok
+portal,/system/structure,system_admin,390,ok
+portal,/system/structure,system_admin,1280,ok
+portal,/system/settings,system_admin,390,ok
+portal,/system/settings,system_admin,1280,ok
+portal,/system/deletions,system_admin,390,ok
+portal,/system/deletions,system_admin,1280,ok
+portal,/audit,system_admin,390,ok
+portal,/audit,system_admin,1280,ok
+portal,*,(بلا دخول),390,ok
+portal,*,(بلا دخول),1280,ok
