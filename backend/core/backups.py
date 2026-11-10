@@ -149,10 +149,24 @@ def create(keep: int) -> list[str]:
             _encrypt_file(plain, sealed, box)
             plain.unlink()
             with sealed.open("rb") as handle:
-                stored.append(default_storage.save(name, File(handle)))
+                saved = default_storage.save(name, File(handle))
+            stored.append(saved)
+            _owner_only(saved)
             sealed.unlink()
     prune(keep)
     return stored
+
+
+def _owner_only(name: str) -> None:
+    """A backup on the server's own disk is readable by its owner alone (review 2026-11-10,
+    R83: they were -rw-r--r-- on a shared server; encrypted, but no other account needs them).
+    Storage without a local path (Bunny) has nothing to change."""
+    try:
+        path = default_storage.path(name)
+    except NotImplementedError:
+        return
+    if os.path.exists(path):  # a storage kept in memory (the tests) has no file there
+        os.chmod(path, 0o600)
 
 
 def existing(suffix: str = DB_SUFFIX) -> list[str]:
