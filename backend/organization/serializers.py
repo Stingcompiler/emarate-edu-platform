@@ -63,6 +63,23 @@ class ProgramSerializer(serializers.ModelSerializer):
         levels = attrs.get("levels_count", getattr(self.instance, "levels_count", None))
         if levels is not None:
             attrs["duration_terms"] = 2 * levels
+        program = self.instance
+        if program is not None and levels is not None and levels < program.levels_count:
+            # Nobody is left above the last level (review 2026-11-10, R72): move them first.
+            students = program.students.filter(level__gt=levels).count()
+            courses = program.courses.filter(default_level__gt=levels).count()
+            if students or courses:
+                raise serializers.ValidationError(
+                    {
+                        "levels_count": [
+                            _(
+                                "%(students)s students and %(courses)s courses are in a level "
+                                "above %(levels)s. Move them first."
+                            )
+                            % {"students": students, "courses": courses, "levels": levels}
+                        ]
+                    }
+                )
         return attrs
 
     def validate_department(self, value):

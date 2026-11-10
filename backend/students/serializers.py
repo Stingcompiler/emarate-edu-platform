@@ -151,6 +151,7 @@ class PromotionPreviewSerializer(serializers.Serializer):
     term = serializers.IntegerField()
     term_name = serializers.CharField()
     done_at = serializers.DateTimeField(allow_null=True)
+    departments_done = serializers.IntegerField()
     students = PromotionStudentSerializer(many=True)
 
 

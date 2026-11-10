@@ -42,13 +42,32 @@ def _current_term() -> Term:
 
 
 def _done_for(term: Term, department_id: int | None) -> PromotionRun | None:
-    """A run this term covering the department (or any run, for the whole college)."""
+    """The run that covers this scope: for a department, its own run or the college's; for
+    the whole college, only a college-wide run (departments promoted on their own are left
+    out of a later college run instead of blocking it — review 2026-11-10, R71)."""
     runs = PromotionRun.objects.filter(term=term)
-    if department_id is not None:
-        runs = runs.filter(department_id__in=[department_id]) | runs.filter(
-            department_id__isnull=True
+    if department_id is None:
+        return runs.filter(department_id__isnull=True).order_by("-created_at").first()
+    covering = runs.filter(department_id=department_id) | runs.filter(department_id__isnull=True)
+    return covering.order_by("-created_at").first()
+
+
+def _promoted_departments(term: Term) -> set[int]:
+    """Departments already promoted this term on their own."""
+    return set(
+        PromotionRun.objects.filter(term=term, department_id__isnull=False).values_list(
+            "department_id", flat=True
         )
-    return runs.order_by("-created_at").first()
+    )
+
+
+def _scope(term: Term, department_id: int | None):
+    """The active students a run would move: the department's, or — for the whole college —
+    everyone but the departments promoted on their own this term."""
+    students = _students(department_id)
+    if department_id is None:
+        students = students.exclude(department_id__in=_promoted_departments(term))
+    return students
 
 
 def _students(department_id: int | None):
@@ -69,7 +88,8 @@ def preview(user, department_id: int | None = None) -> dict:
     _require(user)
     term = _current_term()
     rows = []
-    for student in _students(department_id):
+    done = _done_for(term, department_id)
+    for student in _students(department_id) if done else _scope(term, department_id):
         to = next_place(student)
         rows.append(
             {
@@ -84,11 +104,16 @@ def preview(user, department_id: int | None = None) -> dict:
                 "to_semester": to[1] if to else None,
             }
         )
-    done = _done_for(term, department_id)
+    already = _promoted_departments(term) if department_id is None and not done else set()
+    if already and not rows:
+        # Every department with students was promoted on its own: the college is done.
+        done = PromotionRun.objects.filter(term=term).order_by("-created_at").first()
     return {
         "term": term.pk,
         "term_name": term.name_ar,
         "done_at": done.created_at if done else None,
+        # Departments promoted on their own this term: the list above leaves them out.
+        "departments_done": len(already),
         "students": rows,
     }
 
@@ -108,7 +133,18 @@ def promote(
             )
         moves: Counter = Counter()
         kept = last = 0
-        students = list(_students(department_id).select_for_update(of=("self",)))
+        students = list(_scope(term, department_id).select_for_update(of=("self",)))
+        if not students:
+            # No run is recorded for nobody: an empty department (a wrong pick in the filter)
+            # used to spend the term's promotion for the whole college (R71).
+            if department_id is None and _promoted_departments(term):
+                raise Conflict(
+                    gettext("The students were already promoted at the end of this term."),
+                    code="already_promoted",
+                )
+            raise ValidationError(
+                {"department": [gettext("There are no active students to promote here.")]}
+            )
         for student in students:
             if str(student.public_id) in excluded:
                 kept += 1

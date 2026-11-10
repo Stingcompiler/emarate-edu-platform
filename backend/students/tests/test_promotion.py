@@ -76,7 +76,7 @@ def test_a_department_at_a_time(api, head, cohort, term, it_dept, ba_dept):
     assert api(head).post(URL, {"department": it_dept.pk}, format="json").status_code == 409
     assert api(head).post(URL, {"department": ba_dept.pk}, format="json").status_code == 200
     assert _place(cohort["ba"]) == (4, 1)
-    # The whole college after a department: refused, the department would move twice.
+    # The whole college after every department: refused, nobody is left to move.
     assert api(head).post(URL, {}, format="json").status_code == 409
     assert PromotionRun.objects.count() == 2
 
@@ -91,3 +91,37 @@ def test_who_promotes(api, make_user, it_dept, cohort, term, role):
 
 def test_needs_a_current_term(api, head, cohort):
     assert api(head).post(URL, {}, format="json").status_code == 400
+
+
+def test_the_college_after_a_department_moves_only_the_rest(
+    api, head, cohort, term, it_dept, ba_dept
+):
+    """Review 2026-11-10, R71: a department promoted on its own is left out of a later
+    college-wide run, which no longer answers «already promoted» for everyone."""
+    assert api(head).post(URL, {"department": ba_dept.pk}, format="json").status_code == 200
+    assert _place(cohort["ba"]) == (4, 1)
+    before = api(head).get(URL).data
+    assert before["done_at"] is None and before["departments_done"] == 1
+    assert {s["department_name"] for s in before["students"]} == {it_dept.name_ar}
+    rest = api(head).post(URL, {}, format="json")
+    assert rest.status_code == 200 and rest.data["promoted"] == 3
+    assert _place(cohort["ba"]) == (4, 1)  # not twice
+    assert _place(cohort["first"]) == (1, 2)
+    # Now the college is done: any department, and the college again, are refused.
+    assert api(head).post(URL, {"department": it_dept.pk}, format="json").status_code == 409
+    assert api(head).post(URL, {}, format="json").status_code == 409
+    assert api(head).get(URL).data["done_at"] is not None
+
+
+def test_a_run_with_nobody_to_promote_is_not_recorded(api, head, cohort, term, college, make_user):
+    """R71: an empty department (a wrong pick in the filter), or an id that does not exist,
+    used to record a run that blocked the college for the term."""
+    from organization.models import Department
+
+    empty = Department.objects.create(college=college, code="NUR", name_ar="التمريض")
+    for department in (empty.pk, 987654):
+        refused = api(head).post(URL, {"department": department}, format="json")
+        assert refused.status_code == 400 and "department" in refused.data["errors"]
+    assert PromotionRun.objects.count() == 0
+    assert api(head).post(URL, {}, format="json").status_code == 200
+    assert _place(cohort["first"]) == (1, 2)
