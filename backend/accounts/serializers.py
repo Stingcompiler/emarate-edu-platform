@@ -54,6 +54,7 @@ class MeStudentSerializer(serializers.Serializer):
 class MeSerializer(serializers.ModelSerializer):
     roles = serializers.SerializerMethodField()
     capabilities = serializers.SerializerMethodField()
+    deletes = serializers.SerializerMethodField()
     creatable_roles = serializers.SerializerMethodField()
     grantable_roles = serializers.SerializerMethodField()
     student = serializers.SerializerMethodField()
@@ -71,6 +72,7 @@ class MeSerializer(serializers.ModelSerializer):
             "must_change_password",
             "roles",
             "capabilities",
+            "deletes",
             "creatable_roles",
             "grantable_roles",
             "student",
@@ -87,6 +89,14 @@ class MeSerializer(serializers.ModelSerializer):
             name: {"everything": scope.everything, "departments": sorted(scope.departments)}
             for name, scope in rbac.capabilities_of(obj).items()
         }
+
+    def get_deletes(self, obj) -> list[str]:
+        """Capabilities whose DELETE this user may send. The system supervisor holds what the
+        admin holds but deletes nothing: pages hide their delete buttons by this, instead of
+        showing a button the server refuses (review 2026-11-10, R73)."""
+        return sorted(
+            name for name in rbac.CAPABILITIES if not rbac.scope_for(obj, name, deleting=True).none
+        )
 
     def get_creatable_roles(self, obj) -> list[str]:
         """Staff roles this user may create accounts for (rbac.CREATABLE_ACCOUNTS)."""

@@ -16,6 +16,8 @@ import {
   EmptyState,
 } from "../../components/ui";
 import { api, ok } from "../../lib/api";
+import { useMe } from "../../lib/auth";
+import { canDelete } from "../../lib/nav";
 import { altNeedsWork } from "../../lib/media";
 import { asForm, formData } from "../../lib/upload";
 import { Pager, useServerPages } from "../../components/Pager";
@@ -83,12 +85,18 @@ function Media() {
   });
   const remove = useMutation({
     mutationFn: async (id: string) => {
-      await api.DELETE("/api/v1/content/media/{public_id}", {
+      const { error, response } = await api.DELETE("/api/v1/content/media/{public_id}", {
         params: { path: { public_id: id } },
       });
+      // A refusal is shown (review 2026-11-10, R73): the picture is in use (409), or someone
+      // else's (403) — it used to look as if nothing was pressed.
+      if (!response.ok) throw error;
     },
     onSuccess: () => client.invalidateQueries({ queryKey: ["site", "media"] }),
   });
+  // The system supervisor uploads and describes pictures and deletes none.
+  const me = useMe();
+  const deletes = canDelete(me.data, "events.manage");
   return (
     <>
       <label className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-lg bg-primary px-4 text-sm font-semibold text-on-primary">
@@ -102,7 +110,14 @@ function Media() {
       </label>
       {upload.isError && (
         <div className="mt-3">
-          <Notice>{problemMessage(upload.error)}</Notice>
+          <Notice>
+            {problemMessage(upload.error)}
+            {remove.isError && (
+              <div className="mt-3">
+                <Notice>{problemMessage(remove.error)}</Notice>
+              </div>
+            )}
+          </Notice>
         </div>
       )}
       {media.query.isSuccess && !media.count && (
@@ -176,20 +191,22 @@ function Media() {
               <span className="text-text-muted" dir="ltr">
                 {m.width}×{m.height}
               </span>
-              <button
-                type="button"
-                aria-label="حذف"
-                onClick={async () =>
-                  (await confirm({
-                    title: "حذف الصورة؟",
-                    body: "تختفي من كل صفحة أو خبر يستخدمها.",
-                    confirm: "حذف",
-                  })) && remove.mutate(m.public_id)
-                }
-                className="grid size-11 place-items-center rounded-lg text-danger-strong hover:bg-danger-soft"
-              >
-                <Trash2 size={14} />
-              </button>
+              {deletes && (
+                <button
+                  type="button"
+                  aria-label="حذف"
+                  onClick={async () =>
+                    (await confirm({
+                      title: "حذف الصورة؟",
+                      body: "تختفي من كل صفحة أو خبر يستخدمها.",
+                      confirm: "حذف",
+                    })) && remove.mutate(m.public_id)
+                  }
+                  className="grid size-11 place-items-center rounded-lg text-danger-strong hover:bg-danger-soft"
+                >
+                  <Trash2 size={14} />
+                </button>
+              )}
             </div>
           </Card>
         ))}

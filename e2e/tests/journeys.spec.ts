@@ -104,3 +104,14 @@ test("a new programme's levels follow its department and degree", async ({ page 
   await form.getByRole("button", { name: "دبلوم", exact: true }).click();
   await expect(levels).toHaveValue("3");
 });
+
+// Review 2026-11-10, R73: the system supervisor edits the structure and deletes nothing, so the
+// page offers no delete or merge (the server refuses both).
+test("the system supervisor sees no delete or merge in the structure", async ({ page }) => {
+  await signIn(page, "supervisor@demo.ecst.test");
+  await page.goto("/system/structure");
+  await page.getByRole("button", { name: "تعديل القسم" }).click();
+  const form = page.locator("form").filter({ hasText: "تعديل قسم «" });
+  await expect(form.getByText("دمج القسم وحذفه لمدير النظام")).toBeVisible();
+  await expect(form.getByRole("button", { name: /حذف القسم|^دمج$/ })).toHaveCount(0);
+});
