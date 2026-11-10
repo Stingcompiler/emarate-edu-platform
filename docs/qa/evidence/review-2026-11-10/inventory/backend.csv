@@ -1,0 +1,397 @@
+tag,method,path,operation,url_name,permission_test
+auth,POST,/api/public/activate,activate_create,activate,
+public,GET,/api/public/announcements,public_announcements_list,public-announcements,
+public,GET,/api/public/applications/{reference_no},public_application_status,public-application-status,
+public,GET,/api/public/calendar,public_calendar,public-calendar,
+auth,GET,/api/public/csrf,csrf_retrieve,csrf,
+public,GET,/api/public/departments,public_departments_list,public-departments,
+public,GET,/api/public/departments/{code},public_department_get,public-department,
+public,GET,/api/public/events,events_list,public-events,
+public,GET,/api/public/events/{slug},events_retrieve,public-event-detail,
+system,GET,/api/public/health,health,health,
+public,POST,/api/public/inquiries,inquiries_create,public-inquiry,
+public,GET,/api/public/inquiries/{reference_no},public_inquiry_status,public-inquiry-status,
+public,GET,/api/public/intakes,public_intakes_get,public-intakes,
+public,GET,/api/public/intakes/{id},public_intake_get,public-intake,
+public,GET,/api/public/menus/{key},menus_retrieve,public-menu,
+public,GET,/api/public/news,news_list,public-news,
+public,GET,/api/public/news/{slug},news_retrieve,public-news-detail,
+public,GET,/api/public/pages,public_pages_list,public-pages,
+public,GET,/api/public/pages/{slug},pages_retrieve,public-page,
+auth,POST,/api/public/password/forgot,password_forgot_create,password-forgot,
+auth,POST,/api/public/password/reset,password_reset_create,password-reset,
+public,GET,/api/public/portal-icon/{kind}.png,portal_icon_.png_retrieve,public-portal-icon,
+public,GET,/api/public/programs,public_programs_list,public-programs,
+public,GET,/api/public/programs/{code},public_program_get,public-program,
+public,GET,/api/public/redirects,redirects_retrieve,public-redirect,
+registration,POST,/api/public/registration/complete,registration_complete_create,registration-complete,
+registration,GET,/api/public/registration/programs,registration_programs,registration-programs,
+registration,POST,/api/public/registration/report,registration_report_create,registration-report,
+registration,POST,/api/public/registration/start,registration_start_create,registration-start,
+registration,POST,/api/public/registration/verify,registration_verify_create,registration-verify,
+public,GET,/api/public/regulations,public_regulations_list,public-regulations,
+public,GET,/api/public/regulations/{public_id}/file,public_regulation_file,public-regulation-file,
+public,GET,/api/public/site,site_retrieve,public-site,
+public,GET,/api/public/staff,public_staff_groups,public-staff,
+public,GET,/api/public/stats,public_stats_get,public-stats,
+public,POST,/api/public/visitor/otp,public_visitor_otp_post,visitor-otp,
+public,POST,/api/public/visitor/verify,public_visitor_verify_post,visitor-verify,
+academic-years,GET,/api/v1/academic-years,academic_years_list,academic-year-list,READS: academic_affairs department_manager department_supervisor head_registrar hr registrar results_officer student_affairs system_admin
+academic-years,POST,/api/v1/academic-years,academic_years_create,academic-year-list,READS: academic_affairs department_manager department_supervisor head_registrar hr registrar results_officer student_affairs system_admin
+academic-years,GET,/api/v1/academic-years/{id},academic_years_retrieve,academic-year-detail,READS: academic_affairs department_manager department_supervisor head_registrar hr registrar results_officer student_affairs system_admin
+academic-years,PUT,/api/v1/academic-years/{id},academic_years_update,academic-year-detail,READS: academic_affairs department_manager department_supervisor head_registrar hr registrar results_officer student_affairs system_admin
+academic-years,PATCH,/api/v1/academic-years/{id},academic_years_partial_update,academic-year-detail,READS: academic_affairs department_manager department_supervisor head_registrar hr registrar results_officer student_affairs system_admin
+academic-years,DELETE,/api/v1/academic-years/{id},academic_years_destroy,academic-year-detail,READS: academic_affairs department_manager department_supervisor head_registrar hr registrar results_officer student_affairs system_admin
+admissions,GET,/api/v1/admission-cycles,admission_cycles_list,admission-cycle-list,READS: department_manager department_supervisor head_registrar registrar system_admin
+admissions,POST,/api/v1/admission-cycles,admission_cycles_create,admission-cycle-list,READS: department_manager department_supervisor head_registrar registrar system_admin
+admissions,GET,/api/v1/admission-cycles/{id},admission_cycles_retrieve,admission-cycle-detail,admissions.tests.test_admissions::test_limits_duplicates_and_windows
+admissions,PUT,/api/v1/admission-cycles/{id},admission_cycles_update,admission-cycle-detail,admissions.tests.test_admissions::test_limits_duplicates_and_windows
+admissions,PATCH,/api/v1/admission-cycles/{id},admission_cycles_partial_update,admission-cycle-detail,admissions.tests.test_admissions::test_limits_duplicates_and_windows
+admissions,DELETE,/api/v1/admission-cycles/{id},admission_cycles_destroy,admission-cycle-detail,admissions.tests.test_admissions::test_limits_duplicates_and_windows
+announcements,GET,/api/v1/announcements,announcements_list,announcement-list,READS: academic_affairs department_manager department_supervisor events_manager head_registrar hr registrar results_officer site_manager student student_affairs system_admin system_supervisor ta teacher
+announcements,POST,/api/v1/announcements,announcements_create,announcement-list,READS: academic_affairs department_manager department_supervisor events_manager head_registrar hr registrar results_officer site_manager student student_affairs system_admin system_supervisor ta teacher
+announcements,GET,/api/v1/announcements/{public_id},announcements_retrieve,announcement-detail,content.tests.test_content::test_announcement_scopes_and_feed
+announcements,PATCH,/api/v1/announcements/{public_id},announcements_partial_update,announcement-detail,content.tests.test_content::test_announcement_scopes_and_feed
+announcements,DELETE,/api/v1/announcements/{public_id},announcements_destroy,announcement-detail,content.tests.test_content::test_announcement_scopes_and_feed
+announcements,POST,/api/v1/announcements/{public_id}/archive,announcements_archive_create,announcement-archive,content.tests.test_content::test_archive_announcement
+announcements,POST,/api/v1/announcements/{public_id}/publish,announcements_publish_create,announcement-publish,content.tests.test_content::test_announcement_scopes_and_feed
+admissions,GET,/api/v1/applications,applications_list,application-list,READS: department_manager department_supervisor head_registrar registrar system_admin
+admissions,GET,/api/v1/applications/summary,applications_summary_retrieve,application-summary,READS: department_manager department_supervisor head_registrar registrar system_admin
+admissions,GET,/api/v1/applications/{public_id},applications_retrieve,application-detail,READS: department_manager department_supervisor head_registrar registrar system_admin
+admissions,POST,/api/v1/applications/{public_id}/assign,applications_assign_create,application-assign,admissions.tests.test_admissions::test_claim_and_assign
+admissions,POST,/api/v1/applications/{public_id}/claim,applications_claim_create,application-claim,admissions.tests.test_admissions::test_claim_and_assign
+admissions,GET,/api/v1/applications/{public_id}/documents/{document_id}/link,applications_documents_link_retrieve,application-document-link,admissions.tests.test_admissions::test_full_journey
+admissions,POST,/api/v1/applications/{public_id}/documents/{document_id}/review,applications_documents_review_create,application-document-review,admissions.tests.test_admissions::test_full_journey
+admissions,POST,/api/v1/applications/{public_id}/messages,applications_messages_create,application-messages,admissions.tests.test_admissions::test_claim_and_assign
+admissions,POST,/api/v1/applications/{public_id}/register,applications_register_create,application-register,admissions.tests.test_admissions::test_full_journey
+admissions,PATCH,/api/v1/applications/{public_id}/staff-answers,applications_staff_answers_partial_update,application-staff-answers,admissions.tests.test_form_rules::test_staff_fill_the_college_fields_and_release_some
+admissions,POST,/api/v1/applications/{public_id}/transition,applications_transition_create,application-transition,admissions.tests.test_admissions::test_full_journey
+learning,GET,/api/v1/assignments,assignments_list,assignment-list,READS: academic_affairs department_manager department_supervisor student system_admin ta teacher
+learning,POST,/api/v1/assignments,assignments_create,assignment-list,READS: academic_affairs department_manager department_supervisor student system_admin ta teacher
+learning,GET,/api/v1/assignments/{public_id},assignments_retrieve,assignment-detail,READS: academic_affairs department_manager department_supervisor student system_admin ta teacher
+learning,PUT,/api/v1/assignments/{public_id},assignments_update,assignment-detail,READS: academic_affairs department_manager department_supervisor student system_admin ta teacher
+learning,PATCH,/api/v1/assignments/{public_id},assignments_partial_update,assignment-detail,READS: academic_affairs department_manager department_supervisor student system_admin ta teacher
+learning,DELETE,/api/v1/assignments/{public_id},assignments_destroy,assignment-detail,READS: academic_affairs department_manager department_supervisor student system_admin ta teacher
+learning,POST,/api/v1/assignments/{public_id}/close,assignments_close_create,assignment-close,learning.tests.test_learning::test_assignment_with_submissions_cannot_be_deleted
+learning,GET,/api/v1/assignments/{public_id}/my-submission,assignments_my_submission_retrieve,assignment-my-submission,READS: student
+learning,POST,/api/v1/assignments/{public_id}/publish,assignments_publish_create,assignment-publish,learning.tests.test_learning::test_drafts_are_hidden_and_publish_needs_submission_types
+learning,GET,/api/v1/assignments/{public_id}/submissions,assignments_submissions_list,assignment-submissions,READS: academic_affairs department_manager department_supervisor system_admin ta teacher
+learning,POST,/api/v1/assignments/{public_id}/submit,assignments_submit_create,assignment-submit,learning.tests.test_learning::test_submit_resubmit_and_grade
+audit-logs,GET,/api/v1/audit-logs,audit_logs_list,audit-log-list,READS: academic_affairs department_manager department_supervisor head_registrar registrar results_officer site_manager system_admin
+audit-logs,GET,/api/v1/audit-logs/{id},audit_logs_retrieve,audit-log-detail,READS: department_manager department_supervisor system_admin
+auth,POST,/api/v1/auth/change-password,auth_change_password_create,auth-change-password,accounts.tests.test_auth::test_a_user_changes_their_own_password
+auth,POST,/api/v1/auth/login,auth_login_create,auth-login,accounts.tests.test_auth::test_login_sets_httponly_cookies
+auth,POST,/api/v1/auth/logout,auth_logout_create,auth-logout,accounts.tests.test_auth::test_logout_revokes_refresh
+auth,POST,/api/v1/auth/refresh,auth_refresh_create,auth-refresh,accounts.tests.test_auth::test_refresh_rotates_and_old_token_dies
+system,GET,/api/v1/backups,backups_retrieve,backups,READS: system_admin
+system,POST,/api/v1/backups,backups_create,backups,READS: system_admin
+student-affairs,GET,/api/v1/cases,cases_list,case-list,READS: academic_affairs department_manager department_supervisor head_registrar student_affairs system_admin
+student-affairs,POST,/api/v1/cases,cases_create,case-list,READS: academic_affairs department_manager department_supervisor head_registrar student_affairs system_admin
+student-affairs,GET,/api/v1/cases/{public_id},cases_retrieve,case-detail,READS: academic_affairs department_manager department_supervisor head_registrar student_affairs system_admin
+student-affairs,POST,/api/v1/cases/{public_id}/close,cases_close_create,case-close,student_affairs.tests.test_student_affairs::test_cases
+student-affairs,POST,/api/v1/cases/{public_id}/decide,cases_decide_create,case-decide,student_affairs.tests.test_student_affairs::test_cases
+student-affairs,POST,/api/v1/cases/{public_id}/notes,cases_notes_create,case-notes,student_affairs.tests.test_student_affairs::test_cases
+student-affairs,POST,/api/v1/cases/{public_id}/publish,cases_publish_create,case-publish,student_affairs.tests.test_student_affairs::test_cases
+student-affairs,POST,/api/v1/cases/{public_id}/reopen,cases_reopen_create,case-reopen,student_affairs.tests.test_student_affairs::test_cases
+colleges,GET,/api/v1/colleges,colleges_list,college-list,READS: academic_affairs department_manager department_supervisor head_registrar hr registrar results_officer student_affairs system_admin
+colleges,POST,/api/v1/colleges,colleges_create,college-list,READS: academic_affairs department_manager department_supervisor head_registrar hr registrar results_officer student_affairs system_admin
+colleges,GET,/api/v1/colleges/{id},colleges_retrieve,college-detail,READS: academic_affairs department_manager department_supervisor head_registrar hr registrar results_officer student_affairs system_admin
+colleges,PUT,/api/v1/colleges/{id},colleges_update,college-detail,READS: academic_affairs department_manager department_supervisor head_registrar hr registrar results_officer student_affairs system_admin
+colleges,PATCH,/api/v1/colleges/{id},colleges_partial_update,college-detail,READS: academic_affairs department_manager department_supervisor head_registrar hr registrar results_officer student_affairs system_admin
+colleges,DELETE,/api/v1/colleges/{id},colleges_destroy,college-detail,READS: academic_affairs department_manager department_supervisor head_registrar hr registrar results_officer student_affairs system_admin
+content,GET,/api/v1/content/events,content_events_list,event-list,READS: events_manager site_manager system_admin
+content,POST,/api/v1/content/events,content_events_create,event-list,READS: events_manager site_manager system_admin
+content,GET,/api/v1/content/events/{public_id},content_events_retrieve,event-detail,content.tests.test_content::test_events_media_menus_redirects_settings
+content,PUT,/api/v1/content/events/{public_id},content_events_update,event-detail,content.tests.test_content::test_events_media_menus_redirects_settings
+content,PATCH,/api/v1/content/events/{public_id},content_events_partial_update,event-detail,content.tests.test_content::test_events_media_menus_redirects_settings
+content,DELETE,/api/v1/content/events/{public_id},content_events_destroy,event-detail,content.tests.test_content::test_events_media_menus_redirects_settings
+content,GET,/api/v1/content/media,content_media_list,media-list,READS: events_manager site_manager system_admin
+content,POST,/api/v1/content/media,content_media_create,media-list,READS: events_manager site_manager system_admin
+content,PATCH,/api/v1/content/media/{public_id},content_media_partial_update,media-detail,content.tests.test_content::test_events_media_menus_redirects_settings
+content,DELETE,/api/v1/content/media/{public_id},content_media_destroy,media-detail,content.tests.test_content::test_events_media_menus_redirects_settings
+content,GET,/api/v1/content/menus/{key},content_menus_retrieve,menu,READS: site_manager system_admin
+content,PUT,/api/v1/content/menus/{key},content_menus_update,menu,READS: site_manager system_admin
+content,GET,/api/v1/content/news,content_news_list,news-list,READS: events_manager site_manager system_admin
+content,POST,/api/v1/content/news,content_news_create,news-list,READS: events_manager site_manager system_admin
+content,GET,/api/v1/content/news/{public_id},content_news_retrieve,news-detail,content.tests.test_content::test_publishing_asks_for_one_debounced_rebuild
+content,PUT,/api/v1/content/news/{public_id},content_news_update,news-detail,content.tests.test_content::test_publishing_asks_for_one_debounced_rebuild
+content,PATCH,/api/v1/content/news/{public_id},content_news_partial_update,news-detail,content.tests.test_content::test_publishing_asks_for_one_debounced_rebuild
+content,DELETE,/api/v1/content/news/{public_id},content_news_destroy,news-detail,content.tests.test_content::test_publishing_asks_for_one_debounced_rebuild
+content,GET,/api/v1/content/pages,content_pages_list,page-list,READS: site_manager system_admin
+content,POST,/api/v1/content/pages,content_pages_create,page-list,READS: site_manager system_admin
+content,GET,/api/v1/content/pages/{public_id},content_pages_retrieve,page-detail,content.tests.test_content::test_pages_are_sanitized_and_public_when_published
+content,PUT,/api/v1/content/pages/{public_id},content_pages_update,page-detail,content.tests.test_content::test_pages_are_sanitized_and_public_when_published
+content,PATCH,/api/v1/content/pages/{public_id},content_pages_partial_update,page-detail,content.tests.test_content::test_pages_are_sanitized_and_public_when_published
+content,DELETE,/api/v1/content/pages/{public_id},content_pages_destroy,page-detail,content.tests.test_content::test_pages_are_sanitized_and_public_when_published
+content,GET,/api/v1/content/redirects,content_redirects_list,redirect-list,READS: site_manager system_admin
+content,POST,/api/v1/content/redirects,content_redirects_create,redirect-list,READS: site_manager system_admin
+content,GET,/api/v1/content/redirects/{id},content_redirects_retrieve,redirect-detail,content.tests.test_content::test_events_media_menus_redirects_settings
+content,PUT,/api/v1/content/redirects/{id},content_redirects_update,redirect-detail,content.tests.test_content::test_events_media_menus_redirects_settings
+content,PATCH,/api/v1/content/redirects/{id},content_redirects_partial_update,redirect-detail,content.tests.test_content::test_events_media_menus_redirects_settings
+content,DELETE,/api/v1/content/redirects/{id},content_redirects_destroy,redirect-detail,content.tests.test_content::test_events_media_menus_redirects_settings
+content,GET,/api/v1/content/site-settings,content_site_settings_retrieve,site-settings,READS: site_manager system_admin
+content,PATCH,/api/v1/content/site-settings,content_site_settings_partial_update,site-settings,READS: site_manager system_admin
+courses,GET,/api/v1/courses,courses_list,course-list,READS: academic_affairs department_manager department_supervisor head_registrar system_admin
+courses,POST,/api/v1/courses,courses_create,course-list,READS: academic_affairs department_manager department_supervisor head_registrar system_admin
+courses,GET,/api/v1/courses/{id},courses_retrieve,course-detail,READS: academic_affairs department_manager department_supervisor head_registrar system_admin
+courses,PUT,/api/v1/courses/{id},courses_update,course-detail,READS: academic_affairs department_manager department_supervisor head_registrar system_admin
+courses,PATCH,/api/v1/courses/{id},courses_partial_update,course-detail,READS: academic_affairs department_manager department_supervisor head_registrar system_admin
+courses,DELETE,/api/v1/courses/{id},courses_destroy,course-detail,READS: academic_affairs department_manager department_supervisor head_registrar system_admin
+content,GET,/api/v1/deletion-requests,deletion_requests_list,deletion-request-list,READS: system_admin
+content,POST,/api/v1/deletion-requests/{id}/approve,deletion_requests_approve_create,deletion-request-approve,content.tests.test_deletion_requests::test_an_author_asks_and_the_supervisor_approves
+content,POST,/api/v1/deletion-requests/{id}/reject,deletion_requests_reject_create,deletion-request-reject,content.tests.test_deletion_requests::test_a_rejected_request_keeps_the_announcement
+departments,GET,/api/v1/departments,departments_list,department-list,READS: academic_affairs department_manager department_supervisor head_registrar hr registrar results_officer student_affairs system_admin
+departments,POST,/api/v1/departments,departments_create,department-list,READS: academic_affairs department_manager department_supervisor head_registrar hr registrar results_officer student_affairs system_admin
+departments,GET,/api/v1/departments/{department_id}/members,departments_members_list,department-members,READS: academic_affairs department_manager department_supervisor head_registrar system_admin
+departments,POST,/api/v1/departments/{department_id}/members,departments_members_create,department-members,READS: academic_affairs department_manager department_supervisor head_registrar system_admin
+departments,DELETE,/api/v1/departments/{department_id}/members/{membership_id},departments_members_destroy,department-member-detail,academic.tests.test_enrollment::test_members_and_instructors
+departments,GET,/api/v1/departments/{id},departments_retrieve,department-detail,READS: academic_affairs department_manager department_supervisor head_registrar hr registrar results_officer student_affairs system_admin
+departments,PUT,/api/v1/departments/{id},departments_update,department-detail,READS: academic_affairs department_manager department_supervisor head_registrar hr registrar results_officer student_affairs system_admin
+departments,PATCH,/api/v1/departments/{id},departments_partial_update,department-detail,READS: academic_affairs department_manager department_supervisor head_registrar hr registrar results_officer student_affairs system_admin
+departments,DELETE,/api/v1/departments/{id},departments_destroy,department-detail,READS: academic_affairs department_manager department_supervisor head_registrar hr registrar results_officer student_affairs system_admin
+departments,POST,/api/v1/departments/{id}/merge,departments_merge_create,department-merge,organization.tests.test_structure_edit::test_a_department_is_merged_into_another
+departments,GET,/api/v1/departments/{id}/usage,departments_usage_retrieve,department-usage,READS: system_admin
+enrollments,GET,/api/v1/enrollments,enrollments_list,enrollment-list,READS: department_manager department_supervisor head_registrar system_admin
+enrollments,POST,/api/v1/enrollments,enrollments_create,enrollment-list,READS: department_manager department_supervisor head_registrar system_admin
+enrollments,POST,/api/v1/enrollments/bulk,enrollments_bulk_create,enrollment-bulk,academic.tests.test_enrollment::test_bulk_enroll_is_idempotent
+enrollments,GET,/api/v1/enrollments/{id},enrollments_retrieve,enrollment-detail,READS: department_manager department_supervisor head_registrar system_admin
+enrollments,POST,/api/v1/enrollments/{id}/drop,enrollments_drop_create,enrollment-drop,academic.tests.test_enrollment::test_enroll_and_drop
+exams,GET,/api/v1/exam-attempts/{public_id},exam_attempts_retrieve,exam-attempt-detail,READS: academic_affairs department_manager department_supervisor student system_admin ta teacher
+exams,PUT,/api/v1/exam-attempts/{public_id}/answers/{question_id},exam_attempts_answers_update,exam-attempt-answer,exams.tests.test_exams::test_student_takes_the_exam
+exams,POST,/api/v1/exam-attempts/{public_id}/answers/{question_id}/grade,exam_attempts_answers_grade_create,exam-attempt-grade,exams.tests.test_exams::test_student_takes_the_exam
+exams,GET,/api/v1/exam-attempts/{public_id}/clock,exam_attempts_clock_retrieve,exam-attempt-clock,READS: student
+exams,POST,/api/v1/exam-attempts/{public_id}/extend,exam_attempts_extend_create,exam-attempt-extend,exams.tests.test_exams::test_monitor_extend_reopen_invalidate_and_stats
+exams,POST,/api/v1/exam-attempts/{public_id}/invalidate,exam_attempts_invalidate_create,exam-attempt-invalidate,exams.tests.test_exams::test_monitor_extend_reopen_invalidate_and_stats
+exams,POST,/api/v1/exam-attempts/{public_id}/reopen,exam_attempts_reopen_create,exam-attempt-reopen,exams.tests.test_exams::test_monitor_extend_reopen_invalidate_and_stats
+exams,GET,/api/v1/exam-attempts/{public_id}/result,exam_attempts_result_retrieve,exam-attempt-result,READS: student
+exams,POST,/api/v1/exam-attempts/{public_id}/signals,exam_attempts_signals_create,exam-attempt-signals,exams.tests.test_exams::test_monitor_extend_reopen_invalidate_and_stats
+exams,POST,/api/v1/exam-attempts/{public_id}/submit,exam_attempts_submit_create,exam-attempt-submit,exams.tests.test_exams::test_student_takes_the_exam
+exams,GET,/api/v1/exams,exams_list,exam-list,READS: academic_affairs department_manager department_supervisor student system_admin ta teacher
+exams,POST,/api/v1/exams,exams_create,exam-list,READS: academic_affairs department_manager department_supervisor student system_admin ta teacher
+exams,GET,/api/v1/exams/{public_id},exams_retrieve,exam-detail,READS: academic_affairs department_manager department_supervisor student system_admin ta teacher
+exams,PATCH,/api/v1/exams/{public_id},exams_partial_update,exam-detail,READS: academic_affairs department_manager department_supervisor student system_admin ta teacher
+exams,DELETE,/api/v1/exams/{public_id},exams_destroy,exam-detail,READS: academic_affairs department_manager department_supervisor student system_admin ta teacher
+exams,GET,/api/v1/exams/{public_id}/attempts,exams_attempts_list,exam-attempts,READS: academic_affairs department_manager department_supervisor system_admin ta teacher
+exams,POST,/api/v1/exams/{public_id}/close,exams_close_create,exam-close,exams.tests.test_exams::test_close_submits_running_attempts
+exams,GET,/api/v1/exams/{public_id}/problems,exams_problems_retrieve,exam-problems,READS: academic_affairs department_manager department_supervisor system_admin ta teacher
+exams,POST,/api/v1/exams/{public_id}/publish,exams_publish_create,exam-publish,exams.tests.test_exams::test_builder_permissions_and_publishing
+exams,GET,/api/v1/exams/{public_id}/questions,exams_questions_list,exam-questions,READS: academic_affairs department_manager department_supervisor system_admin ta teacher
+exams,POST,/api/v1/exams/{public_id}/questions,exams_questions_create,exam-questions,READS: academic_affairs department_manager department_supervisor system_admin ta teacher
+exams,POST,/api/v1/exams/{public_id}/questions-order,exams_questions_order_create,exam-reorder,exams.tests.test_exams::test_reorder_questions
+exams,PATCH,/api/v1/exams/{public_id}/questions/{question_id},exams_questions_partial_update,exam-question,exams.tests.test_exams::test_builder_permissions_and_publishing
+exams,DELETE,/api/v1/exams/{public_id}/questions/{question_id},exams_questions_destroy,exam-question,exams.tests.test_exams::test_builder_permissions_and_publishing
+exams,POST,/api/v1/exams/{public_id}/release,exams_release_create,exam-release,exams.tests.test_exams::test_visibility_modes
+exams,POST,/api/v1/exams/{public_id}/start,exams_start_create,exam-start,exams.tests.test_exams::test_student_takes_the_exam
+exams,GET,/api/v1/exams/{public_id}/stats,exams_stats_retrieve,exam-stats,READS: academic_affairs department_manager department_supervisor system_admin ta teacher
+files,POST,/api/v1/files,files_create,file-upload,learning.tests.test_learning::test_upload_permissions
+files,GET,/api/v1/files/{public_id}/url,files_url_retrieve,file-url,READS: academic_affairs department_manager department_supervisor student system_admin ta teacher
+admissions,GET,/api/v1/form-templates,form_templates_list,form-template-list,READS: head_registrar registrar system_admin
+admissions,POST,/api/v1/form-templates,form_templates_create,form-template-list,READS: head_registrar registrar system_admin
+admissions,GET,/api/v1/form-templates/{id},form_templates_retrieve,form-template-detail,admissions.tests.test_admissions::test_templates_freeze_on_publish
+admissions,PATCH,/api/v1/form-templates/{id},form_templates_partial_update,form-template-detail,admissions.tests.test_admissions::test_templates_freeze_on_publish
+admissions,DELETE,/api/v1/form-templates/{id},form_templates_destroy,form-template-detail,admissions.tests.test_admissions::test_templates_freeze_on_publish
+admissions,POST,/api/v1/form-templates/{id}/new-version,form_templates_new_version_create,form-template-new-version,admissions.tests.test_admissions::test_templates_freeze_on_publish
+admissions,POST,/api/v1/form-templates/{id}/publish,form_templates_publish_create,form-template-publish,admissions.tests.test_admissions::test_templates_freeze_on_publish
+learning,GET,/api/v1/gradebooks/{offering_id},gradebooks_retrieve,gradebook,READS: academic_affairs department_manager department_supervisor system_admin ta teacher
+learning,GET,/api/v1/grading-queue,grading_queue_retrieve,grading-queue,READS: academic_affairs department_manager department_supervisor events_manager head_registrar hr registrar results_officer site_manager student student_affairs system_admin system_supervisor ta teacher
+notifications,GET,/api/v1/hr-notices,hr_notices_list,hr-notice-list,READS: academic_affairs hr system_admin ta teacher
+notifications,POST,/api/v1/hr-notices,hr_notices_create,hr-notice-list,READS: academic_affairs hr system_admin ta teacher
+notifications,GET,/api/v1/hr-notices/{public_id},hr_notices_retrieve,hr-notice-detail,READS: academic_affairs hr system_admin teacher
+notifications,POST,/api/v1/hr-notices/{public_id}/acknowledge,hr_notices_acknowledge_create,hr-notice-acknowledge,notifications.tests.test_notifications::test_hr_notice
+identity-reports,GET,/api/v1/identity-reports,identity_reports_list,identity-report-list,READS: department_manager department_supervisor head_registrar system_admin
+identity-reports,GET,/api/v1/identity-reports/{public_id},identity_reports_retrieve,identity-report-detail,READS: department_manager department_supervisor head_registrar system_admin
+identity-reports,POST,/api/v1/identity-reports/{public_id}/decide,identity_reports_decide_create,identity-report-decide,accounts.tests.test_registration::test_a_stolen_record_is_reported_and_freed
+inquiries,GET,/api/v1/inquiries,inquiries_list,inquiry-list,READS: academic_affairs department_manager department_supervisor events_manager head_registrar hr registrar results_officer site_manager student student_affairs system_admin system_supervisor ta teacher
+inquiries,GET,/api/v1/inquiries/{public_id},inquiries_retrieve,inquiry-detail,READS: site_manager system_admin
+inquiries,POST,/api/v1/inquiries/{public_id}/assign,inquiries_assign_create,inquiry-assign,inquiries.tests.test_inquiries::test_assign_only_to_handlers
+inquiries,POST,/api/v1/inquiries/{public_id}/reply,inquiries_reply_create,inquiry-reply,inquiries.tests.test_inquiries::test_general_inquiry_goes_to_the_site_manager
+inquiries,POST,/api/v1/inquiries/{public_id}/reroute,inquiries_reroute_create,inquiry-reroute,inquiries.tests.test_inquiries::test_admission_inquiries_route_to_department_registrars
+inquiries,POST,/api/v1/inquiries/{public_id}/transition,inquiries_transition_create,inquiry-transition,inquiries.tests.test_inquiries::test_general_inquiry_goes_to_the_site_manager
+inquiries,POST,/api/v1/inquiries/{public_id}/whatsapp,inquiries_whatsapp_create,inquiry-whatsapp,inquiries.tests.test_inquiries::test_general_inquiry_goes_to_the_site_manager
+admissions,GET,/api/v1/intakes,intakes_list,intake-list,READS: department_manager department_supervisor head_registrar registrar system_admin
+admissions,POST,/api/v1/intakes,intakes_create,intake-list,READS: department_manager department_supervisor head_registrar registrar system_admin
+admissions,GET,/api/v1/intakes/{id},intakes_retrieve,intake-detail,admissions.tests.test_admissions::test_limits_duplicates_and_windows
+admissions,PUT,/api/v1/intakes/{id},intakes_update,intake-detail,admissions.tests.test_admissions::test_limits_duplicates_and_windows
+admissions,PATCH,/api/v1/intakes/{id},intakes_partial_update,intake-detail,admissions.tests.test_admissions::test_limits_duplicates_and_windows
+admissions,DELETE,/api/v1/intakes/{id},intakes_destroy,intake-detail,admissions.tests.test_admissions::test_limits_duplicates_and_windows
+learning,GET,/api/v1/lectures,lectures_list,lecture-list,READS: academic_affairs department_manager department_supervisor student system_admin ta teacher
+learning,POST,/api/v1/lectures,lectures_create,lecture-list,READS: academic_affairs department_manager department_supervisor student system_admin ta teacher
+learning,POST,/api/v1/lectures/reorder,lectures_reorder_create,lecture-reorder,learning.tests.test_learning::test_lecture_reorder_is_whole_audited_and_for_editors
+learning,GET,/api/v1/lectures/{public_id},lectures_retrieve,lecture-detail,READS: academic_affairs department_manager department_supervisor student system_admin ta teacher
+learning,PUT,/api/v1/lectures/{public_id},lectures_update,lecture-detail,READS: academic_affairs department_manager department_supervisor student system_admin ta teacher
+learning,PATCH,/api/v1/lectures/{public_id},lectures_partial_update,lecture-detail,READS: academic_affairs department_manager department_supervisor student system_admin ta teacher
+learning,DELETE,/api/v1/lectures/{public_id},lectures_destroy,lecture-detail,READS: academic_affairs department_manager department_supervisor student system_admin ta teacher
+learning,POST,/api/v1/lectures/{public_id}/publish,lectures_publish_create,lecture-publish,learning.tests.test_learning::test_students_see_published_lectures_only
+learning,POST,/api/v1/lectures/{public_id}/resources,lectures_resources_create,lecture-add-resource,learning.tests.test_learning::test_lecture_file_link_is_signed_and_scoped
+learning,DELETE,/api/v1/lectures/{public_id}/resources/{resource_id},lectures_resources_destroy,lecture-remove-resource,learning.tests.test_learning::test_resource_removal_and_unpublish
+learning,POST,/api/v1/lectures/{public_id}/unpublish,lectures_unpublish_create,lecture-unpublish,learning.tests.test_learning::test_resource_removal_and_unpublish
+learning,POST,/api/v1/lectures/{public_id}/view,lectures_view_create,lecture-mark-viewed,learning.tests.test_learning::test_lecture_views_are_counted_for_staff_only
+live,GET,/api/v1/live-sessions,live_sessions_list,live-session-list,READS: academic_affairs department_manager department_supervisor events_manager head_registrar hr registrar results_officer site_manager student student_affairs system_admin system_supervisor ta teacher
+live,POST,/api/v1/live-sessions,live_sessions_create,live-session-list,READS: academic_affairs department_manager department_supervisor events_manager head_registrar hr registrar results_officer site_manager student student_affairs system_admin system_supervisor ta teacher
+live,GET,/api/v1/live-sessions/{public_id},live_sessions_retrieve,live-session-detail,READS: academic_affairs department_manager department_supervisor student system_admin ta teacher
+live,PATCH,/api/v1/live-sessions/{public_id},live_sessions_partial_update,live-session-detail,READS: academic_affairs department_manager department_supervisor student system_admin ta teacher
+live,POST,/api/v1/live-sessions/{public_id}/cancel,live_sessions_cancel_create,live-session-cancel,live.tests.test_live::test_bad_links_cancel_and_reminder
+live,GET,/api/v1/live-sessions/{public_id}/join,live_sessions_join_retrieve,live-session-join,live.tests.test_live::test_link_is_encrypted_hidden_and_timed
+me,GET,/api/v1/me,me_retrieve,me,READS: academic_affairs department_manager department_supervisor events_manager head_registrar hr registrar results_officer site_manager student student_affairs system_admin system_supervisor ta teacher
+me,PATCH,/api/v1/me,me_partial_update,me,READS: academic_affairs department_manager department_supervisor events_manager head_registrar hr registrar results_officer site_manager student student_affairs system_admin system_supervisor ta teacher
+me,GET,/api/v1/me/cases,me_cases_list,my-case-list,READS: academic_affairs department_manager department_supervisor events_manager head_registrar hr registrar results_officer site_manager student student_affairs system_admin system_supervisor ta teacher
+me,GET,/api/v1/me/cases/{public_id},me_cases_retrieve,my-case-detail,READS: student
+me,GET,/api/v1/me/courses,me_courses_list,me-courses,READS: academic_affairs department_manager department_supervisor events_manager head_registrar hr registrar results_officer site_manager student student_affairs system_admin system_supervisor ta teacher
+me,POST,/api/v1/me/email,me_email_create,me-email,accounts.tests.test_profile::test_a_student_changes_their_email_with_a_code
+me,POST,/api/v1/me/email/confirm,me_email_confirm_create,me-email-confirm,accounts.tests.test_profile::test_a_taken_address_gets_no_code_and_a_code_is_for_one_account
+me,GET,/api/v1/me/links,me_links_list,me-links,accounts.tests.test_staff_profile::test_staff_links_show_on_the_site_only_when_switched_on
+me,POST,/api/v1/me/links,me_links_create,me-links,accounts.tests.test_staff_profile::test_staff_links_show_on_the_site_only_when_switched_on
+me,PATCH,/api/v1/me/links/{id},me_links_partial_update,me-link,accounts.tests.test_staff_profile::test_staff_links_show_on_the_site_only_when_switched_on
+me,DELETE,/api/v1/me/links/{id},me_links_destroy,me-link,accounts.tests.test_staff_profile::test_staff_links_show_on_the_site_only_when_switched_on
+me,PATCH,/api/v1/me/name,me_name_partial_update,me-name,accounts.tests.test_profile::test_staff_correct_their_own_name
+me,GET,/api/v1/me/public-profile,me_public_profile_retrieve,me-public-profile,READS: academic_affairs department_manager department_supervisor events_manager head_registrar hr registrar results_officer site_manager student student_affairs system_admin system_supervisor ta teacher
+me,PATCH,/api/v1/me/public-profile,me_public_profile_partial_update,me-public-profile,READS: academic_affairs department_manager department_supervisor events_manager head_registrar hr registrar results_officer site_manager student student_affairs system_admin system_supervisor ta teacher
+me,GET,/api/v1/me/qualifications,me_qualifications_list,me-qualifications,accounts.tests.test_staff_profile::test_staff_degrees_and_photo_on_the_site_with_consent
+me,POST,/api/v1/me/qualifications,me_qualifications_create,me-qualifications,accounts.tests.test_staff_profile::test_staff_degrees_and_photo_on_the_site_with_consent
+me,PATCH,/api/v1/me/qualifications/{id},me_qualifications_partial_update,me-qualification,accounts.tests.test_staff_profile::test_staff_degrees_and_photo_on_the_site_with_consent
+me,DELETE,/api/v1/me/qualifications/{id},me_qualifications_destroy,me-qualification,accounts.tests.test_staff_profile::test_staff_degrees_and_photo_on_the_site_with_consent
+me,GET,/api/v1/me/results,me_results_retrieve,me-results,READS: student
+student-affairs,GET,/api/v1/misconduct-reports,misconduct_reports_list,misconduct-report-list,READS: academic_affairs department_manager department_supervisor events_manager head_registrar hr registrar results_officer site_manager student student_affairs system_admin system_supervisor ta teacher
+student-affairs,POST,/api/v1/misconduct-reports,misconduct_reports_create,misconduct-report-list,READS: academic_affairs department_manager department_supervisor events_manager head_registrar hr registrar results_officer site_manager student student_affairs system_admin system_supervisor ta teacher
+student-affairs,GET,/api/v1/misconduct-reports/{public_id},misconduct_reports_retrieve,misconduct-report-detail,READS: academic_affairs department_manager department_supervisor head_registrar student_affairs system_admin teacher
+student-affairs,POST,/api/v1/misconduct-reports/{public_id}/resolve,misconduct_reports_resolve_create,misconduct-report-resolve,student_affairs.tests.test_student_affairs::test_misconduct_reports
+notifications,GET,/api/v1/notifications,notifications_list,notification-list,READS: academic_affairs department_manager department_supervisor events_manager head_registrar hr registrar results_officer site_manager student student_affairs system_admin system_supervisor ta teacher
+notifications,GET,/api/v1/notifications/preferences,notifications_preferences_list,notification-preferences,READS: academic_affairs department_manager department_supervisor events_manager head_registrar hr registrar results_officer site_manager student student_affairs system_admin system_supervisor ta teacher
+notifications,PUT,/api/v1/notifications/preferences,notifications_preferences_update,notification-preferences,READS: academic_affairs department_manager department_supervisor events_manager head_registrar hr registrar results_officer site_manager student student_affairs system_admin system_supervisor ta teacher
+notifications,POST,/api/v1/notifications/read-all,notifications_read_all_create,notification-read-all,notifications.tests.test_notifications::test_inbox_read_and_counts
+notifications,GET,/api/v1/notifications/sent,notifications_sent_list,notification-sent-list,READS: academic_affairs department_manager department_supervisor events_manager head_registrar hr registrar results_officer site_manager student student_affairs system_admin system_supervisor ta teacher
+notifications,POST,/api/v1/notifications/sent,notifications_sent_create,notification-sent-list,READS: academic_affairs department_manager department_supervisor events_manager head_registrar hr registrar results_officer site_manager student student_affairs system_admin system_supervisor ta teacher
+notifications,GET,/api/v1/notifications/sent/audiences,notifications_sent_audiences_list,notification-sent-audiences,READS: academic_affairs department_manager department_supervisor events_manager head_registrar hr registrar results_officer site_manager student student_affairs system_admin system_supervisor ta teacher
+notifications,POST,/api/v1/notifications/sent/preview,notifications_sent_preview_create,notification-sent-preview,notifications.tests.test_notifications::test_audience_options_and_preview
+notifications,DELETE,/api/v1/notifications/sent/{public_id},notifications_sent_destroy,notification-sent-detail,content.tests.test_deletion_requests::test_a_sent_notification_is_kept_and_deleted_by_request
+notifications,POST,/api/v1/notifications/sent/{public_id}/hide,notifications_sent_hide_create,notification-sent-hide,content.tests.test_deletion_requests::test_a_sender_hides_a_notification_at_once_and_restores_it
+notifications,POST,/api/v1/notifications/sent/{public_id}/restore,notifications_sent_restore_create,notification-sent-restore,content.tests.test_deletion_requests::test_a_sender_hides_a_notification_at_once_and_restores_it
+notifications,GET,/api/v1/notifications/unread-count,notifications_unread_count_retrieve,notification-unread-count,READS: academic_affairs department_manager department_supervisor events_manager head_registrar hr registrar results_officer site_manager student student_affairs system_admin system_supervisor ta teacher
+notifications,POST,/api/v1/notifications/{id}/read,notifications_read_create,notification-read,notifications.tests.test_notifications::test_inbox_read_and_counts
+offerings,GET,/api/v1/offerings,offerings_list,offering-list,READS: academic_affairs department_manager department_supervisor head_registrar system_admin
+offerings,POST,/api/v1/offerings,offerings_create,offering-list,READS: academic_affairs department_manager department_supervisor head_registrar system_admin
+offerings,GET,/api/v1/offerings/{id},offerings_retrieve,offering-detail,READS: academic_affairs department_manager department_supervisor head_registrar system_admin
+offerings,PUT,/api/v1/offerings/{id},offerings_update,offering-detail,READS: academic_affairs department_manager department_supervisor head_registrar system_admin
+offerings,PATCH,/api/v1/offerings/{id},offerings_partial_update,offering-detail,READS: academic_affairs department_manager department_supervisor head_registrar system_admin
+offerings,DELETE,/api/v1/offerings/{id},offerings_destroy,offering-detail,READS: academic_affairs department_manager department_supervisor head_registrar system_admin
+offerings,POST,/api/v1/offerings/{id}/instructors,offerings_instructors_create,offering-add-instructor,academic.tests.test_enrollment::test_members_and_instructors
+offerings,DELETE,/api/v1/offerings/{id}/instructors/{instructor_id},offerings_instructors_destroy,offering-remove-instructor,academic.tests.test_enrollment::test_members_and_instructors
+files,GET,/api/v1/photos/{public_id},photos_retrieve,photo,accounts.tests.test_profile::test_everyone_has_a_photo_cropped_small_and_seen_by_colleagues
+programs,GET,/api/v1/programs,programs_list,program-list,READS: academic_affairs department_manager department_supervisor head_registrar hr registrar results_officer student_affairs system_admin
+programs,POST,/api/v1/programs,programs_create,program-list,READS: academic_affairs department_manager department_supervisor head_registrar hr registrar results_officer student_affairs system_admin
+programs,GET,/api/v1/programs/{id},programs_retrieve,program-detail,READS: academic_affairs department_manager department_supervisor head_registrar hr registrar results_officer student_affairs system_admin
+programs,PUT,/api/v1/programs/{id},programs_update,program-detail,READS: academic_affairs department_manager department_supervisor head_registrar hr registrar results_officer student_affairs system_admin
+programs,PATCH,/api/v1/programs/{id},programs_partial_update,program-detail,READS: academic_affairs department_manager department_supervisor head_registrar hr registrar results_officer student_affairs system_admin
+programs,DELETE,/api/v1/programs/{id},programs_destroy,program-detail,READS: academic_affairs department_manager department_supervisor head_registrar hr registrar results_officer student_affairs system_admin
+push,GET,/api/v1/push/config,push_config_retrieve,push-config,READS: academic_affairs department_manager department_supervisor events_manager head_registrar hr registrar results_officer site_manager student student_affairs system_admin system_supervisor ta teacher
+push,POST,/api/v1/push/subscriptions,push_subscriptions_create,push-subscribe,notifications.tests.test_notifications::test_teacher_notifies_their_course_and_push_arrives
+push,POST,/api/v1/push/subscriptions/remove,push_subscriptions_remove_create,push-unsubscribe,notifications.tests.test_notifications::test_push_unsubscribe_and_config
+staff-profiles,PATCH,/api/v1/qualifications/{id}/visibility,qualifications_visibility_partial_update,qualification-visibility,accounts.tests.test_staff_profile::test_staff_degrees_and_photo_on_the_site_with_consent
+registration-requests,GET,/api/v1/registration-requests,registration_requests_list,registration-request-list,READS: department_manager department_supervisor head_registrar system_admin
+registration-requests,GET,/api/v1/registration-requests/{public_id},registration_requests_retrieve,registration-request-detail,READS: department_manager department_supervisor head_registrar system_admin
+registration-requests,POST,/api/v1/registration-requests/{public_id}/decide,registration_requests_decide_create,registration-request-decide,accounts.tests.test_registration::test_other_email_waits_for_the_department
+student-affairs,GET,/api/v1/regulations,regulations_list,regulation-list,READS: academic_affairs department_manager department_supervisor events_manager head_registrar hr registrar results_officer site_manager student student_affairs system_admin system_supervisor ta teacher
+student-affairs,POST,/api/v1/regulations,regulations_create,regulation-list,READS: academic_affairs department_manager department_supervisor events_manager head_registrar hr registrar results_officer site_manager student student_affairs system_admin system_supervisor ta teacher
+student-affairs,GET,/api/v1/regulations/{public_id},regulations_retrieve,regulation-detail,READS: academic_affairs department_manager department_supervisor events_manager head_registrar hr registrar results_officer site_manager student student_affairs system_admin system_supervisor ta teacher
+student-affairs,PATCH,/api/v1/regulations/{public_id},regulations_partial_update,regulation-detail,READS: academic_affairs department_manager department_supervisor events_manager head_registrar hr registrar results_officer site_manager student student_affairs system_admin system_supervisor ta teacher
+student-affairs,DELETE,/api/v1/regulations/{public_id},regulations_destroy,regulation-detail,READS: academic_affairs department_manager department_supervisor events_manager head_registrar hr registrar results_officer site_manager student student_affairs system_admin system_supervisor ta teacher
+student-affairs,POST,/api/v1/regulations/{public_id}/acknowledge,regulations_acknowledge_create,regulation-acknowledge,student_affairs.tests.test_student_affairs::test_regulation_lifecycle
+student-affairs,POST,/api/v1/regulations/{public_id}/new-version,regulations_new_version_create,regulation-new-version,student_affairs.tests.test_student_affairs::test_regulation_lifecycle
+student-affairs,POST,/api/v1/regulations/{public_id}/publish,regulations_publish_create,regulation-publish,student_affairs.tests.test_student_affairs::test_regulation_lifecycle
+report-snapshots,GET,/api/v1/report-snapshots,report_snapshots_list,report-snapshot-list,READS: academic_affairs department_manager department_supervisor head_registrar hr registrar student_affairs system_admin
+report-snapshots,POST,/api/v1/report-snapshots,report_snapshots_create,report-snapshot-list,READS: academic_affairs department_manager department_supervisor head_registrar hr registrar student_affairs system_admin
+report-snapshots,GET,/api/v1/report-snapshots/{public_id},report_snapshots_retrieve,report-snapshot-detail,reports.tests.test_reports::test_snapshots_are_frozen_and_scoped
+reports,GET,/api/v1/reports/admissions,reports_admissions_retrieve,report-admissions,READS: department_manager department_supervisor head_registrar registrar system_admin
+reports,GET,/api/v1/reports/affairs,reports_affairs_retrieve,report-affairs,READS: student_affairs system_admin
+reports,GET,/api/v1/reports/department,reports_department_retrieve,report-department,READS: academic_affairs department_manager department_supervisor system_admin
+reports,GET,/api/v1/reports/me/teaching,reports_my_teaching,report-my-teaching,READS: ta teacher
+reports,GET,/api/v1/reports/teachers,reports_teachers_list,report-teachers,READS: academic_affairs department_manager department_supervisor hr system_admin
+reports,GET,/api/v1/reports/teachers/{public_id},reports_teacher_profile,report-teacher,READS: academic_affairs department_manager department_supervisor hr system_admin
+results,GET,/api/v1/result-corrections,result_corrections_list,result-correction-list,READS: academic_affairs results_officer system_admin
+results,GET,/api/v1/result-corrections/{public_id},result_corrections_retrieve,result-correction-detail,READS: academic_affairs results_officer system_admin
+results,POST,/api/v1/result-corrections/{public_id}/decide,result_corrections_decide_create,result-correction-decide,results.tests.test_results::test_corrections_need_academic_affairs
+results,GET,/api/v1/result-imports,result_imports_list,result-import-list,READS: department_manager department_supervisor head_registrar results_officer system_admin
+results,POST,/api/v1/result-imports,result_imports_create,result-import-list,READS: department_manager department_supervisor head_registrar results_officer system_admin
+results,GET,/api/v1/result-imports/{public_id},result_imports_retrieve,result-import-detail,READS: department_manager department_supervisor head_registrar results_officer system_admin
+results,DELETE,/api/v1/result-imports/{public_id},result_imports_destroy,result-import-detail,READS: department_manager department_supervisor head_registrar results_officer system_admin
+results,POST,/api/v1/result-imports/{public_id}/commit,result_imports_commit_create,result-import-commit,results.tests.test_results::test_import_preview_commit_publish
+results,POST,/api/v1/result-imports/{public_id}/publish,result_imports_publish_create,result-import-publish,results.tests.test_results::test_import_preview_commit_publish
+results,GET,/api/v1/result-imports/{public_id}/rows,result_imports_rows_list,result-import-rows,READS: department_manager department_supervisor head_registrar results_officer system_admin
+results,POST,/api/v1/result-imports/{public_id}/unpublish,result_imports_unpublish_create,result-import-unpublish,results.tests.test_results::test_import_preview_commit_publish
+results,GET,/api/v1/results,results_list,result-list,READS: department_manager department_supervisor head_registrar results_officer student system_admin ta teacher
+results,GET,/api/v1/results/export,results_export_retrieve,result-export,READS: department_manager department_supervisor head_registrar results_officer system_admin teacher
+results,GET,/api/v1/results/grading-scales,results_grading_scales_list,grading-scale-list,READS: head_registrar results_officer system_admin
+results,POST,/api/v1/results/grading-scales,results_grading_scales_create,grading-scale-list,READS: head_registrar results_officer system_admin
+results,PUT,/api/v1/results/grading-scales/{id},results_grading_scales_update,grading-scale-detail,results.tests.test_results::test_gpa_uses_credit_hours_and_program_scale
+results,GET,/api/v1/results/settings,results_settings_retrieve,result-settings,READS: head_registrar results_officer system_admin
+results,PATCH,/api/v1/results/settings,results_settings_partial_update,result-settings,READS: head_registrar results_officer system_admin
+results,GET,/api/v1/results/term-releases,results_term_releases_list,term-release-list,READS: head_registrar results_officer system_admin
+results,POST,/api/v1/results/term-releases,results_term_releases_create,term-release-list,READS: head_registrar results_officer system_admin
+results,PUT,/api/v1/results/term-releases/{id},results_term_releases_update,term-release-detail,results.tests.test_results::test_display_rules
+results,GET,/api/v1/results/{id},results_retrieve,result-detail,READS: department_manager department_supervisor head_registrar results_officer system_admin teacher
+results,POST,/api/v1/results/{id}/corrections,results_corrections_create,result-corrections,results.tests.test_results::test_corrections_need_academic_affairs
+role-assignments,GET,/api/v1/role-assignments,role_assignments_list,role-assignment-list,READS: academic_affairs head_registrar site_manager system_admin
+role-assignments,POST,/api/v1/role-assignments,role_assignments_create,role-assignment-list,READS: academic_affairs head_registrar site_manager system_admin
+role-assignments,GET,/api/v1/role-assignments/counts,role_assignments_counts_retrieve,role-assignment-counts,READS: academic_affairs head_registrar site_manager system_admin
+role-assignments,DELETE,/api/v1/role-assignments/{id},role_assignments_destroy,role-assignment-detail,core.tests.test_permission_matrix::test_revoking_follows_the_same_rules
+users,GET,/api/v1/roles,roles_retrieve,roles,READS: academic_affairs head_registrar system_admin
+content,GET,/api/v1/site-staff,site_staff_board,site-staff,READS: site_manager system_admin
+content,POST,/api/v1/site-staff/entries,site_staff_entries_create,site-staff-entry-list,content.tests.test_site_staff::test_the_site_manager_adds_people_and_sorts_them_on_the_matrix
+content,PATCH,/api/v1/site-staff/entries/{public_id},site_staff_entries_update,site-staff-entry-detail,content.tests.test_site_staff::test_the_site_manager_adds_people_and_sorts_them_on_the_matrix
+content,DELETE,/api/v1/site-staff/entries/{public_id},site_staff_entries_delete,site-staff-entry-detail,content.tests.test_site_staff::test_the_site_manager_adds_people_and_sorts_them_on_the_matrix
+content,GET,/api/v1/site-staff/groups,site_staff_groups_list,site-staff-group-list,READS: site_manager system_admin
+content,POST,/api/v1/site-staff/groups,site_staff_groups_create,site-staff-group-list,READS: site_manager system_admin
+content,PUT,/api/v1/site-staff/groups/order,site_staff_groups_order,site-staff-group-order,content.tests.test_site_staff::test_groups_reorder_in_one_write
+content,PATCH,/api/v1/site-staff/groups/{id},site_staff_groups_update,site-staff-group-detail,content.tests.test_site_staff::test_groups_are_flexible_but_the_faculty_always_has_one
+content,DELETE,/api/v1/site-staff/groups/{id},site_staff_groups_delete,site-staff-group-detail,content.tests.test_site_staff::test_groups_are_flexible_but_the_faculty_always_has_one
+content,GET,/api/v1/site-staff/people,site_staff_people,site-staff-people,READS: site_manager system_admin
+staff-profiles,GET,/api/v1/staff-profiles,staff_profiles_list,staff-profiles,accounts.tests.test_staff_profile::test_staff_degrees_and_photo_on_the_site_with_consent
+staff-profiles,PATCH,/api/v1/staff-profiles/{public_id}/photo,staff_profiles_photo_partial_update,staff-photo-visibility,accounts.tests.test_staff_profile::test_staff_degrees_and_photo_on_the_site_with_consent
+student-imports,GET,/api/v1/student-imports,student_imports_list,student-import-list,READS: head_registrar system_admin
+student-imports,POST,/api/v1/student-imports,student_imports_create,student-import-list,READS: head_registrar system_admin
+student-imports,GET,/api/v1/student-imports/{public_id},student_imports_retrieve,student-import-detail,READS: head_registrar system_admin
+student-imports,POST,/api/v1/student-imports/{public_id}/commit,student_imports_commit_create,student-import-commit,students.tests.test_importer::test_preview_then_commit
+student-imports,POST,/api/v1/student-imports/{public_id}/reject,student_imports_reject_create,student-import-reject,students.tests.test_importer::test_reject_closes_the_batch
+student-imports,GET,/api/v1/student-imports/{public_id}/rows,student_imports_rows_list,student-import-rows,READS: head_registrar system_admin
+student-promotion,GET,/api/v1/student-promotion,student_promotion_preview,student-promotion,READS: head_registrar system_admin
+student-promotion,POST,/api/v1/student-promotion,student_promotion_apply,student-promotion,READS: head_registrar system_admin
+students,GET,/api/v1/students,students_list,student-list,READS: department_manager department_supervisor head_registrar student_affairs system_admin
+students,POST,/api/v1/students,students_create,student-list,READS: department_manager department_supervisor head_registrar student_affairs system_admin
+students,GET,/api/v1/students/{public_id},students_retrieve,student-detail,READS: department_manager department_supervisor head_registrar student_affairs system_admin
+students,PATCH,/api/v1/students/{public_id},students_partial_update,student-detail,READS: department_manager department_supervisor head_registrar student_affairs system_admin
+students,DELETE,/api/v1/students/{public_id},students_destroy,student-detail,READS: department_manager department_supervisor head_registrar student_affairs system_admin
+student-affairs,POST,/api/v1/students/{public_id}/status,students_status_create,student-status,student_affairs.tests.test_student_affairs::test_student_status
+learning,GET,/api/v1/submissions/{public_id},submissions_retrieve,submission-detail,READS: academic_affairs department_manager department_supervisor student system_admin ta teacher
+learning,PUT,/api/v1/submissions/{public_id}/grade,submissions_grade_update,submission-grade,learning.tests.test_learning::test_submit_resubmit_and_grade
+learning,POST,/api/v1/submissions/{public_id}/grade/approve,submissions_grade_approve_create,submission-approve,learning.tests.test_learning::test_rule_grading_is_a_suggestion_until_approved
+system,GET,/api/v1/system-settings,system_settings_retrieve,system-settings,READS: system_admin
+system,PATCH,/api/v1/system-settings,system_settings_partial_update,system-settings,READS: system_admin
+system,GET,/api/v1/system-status,system_status_retrieve,system-status,READS: system_admin
+academic,GET,/api/v1/teachers-directory,teachers_directory,teacher-directory,READS: academic_affairs department_manager department_supervisor system_admin
+terms,GET,/api/v1/terms,terms_list,term-list,READS: academic_affairs department_manager department_supervisor head_registrar hr registrar results_officer student_affairs system_admin
+terms,POST,/api/v1/terms,terms_create,term-list,READS: academic_affairs department_manager department_supervisor head_registrar hr registrar results_officer student_affairs system_admin
+terms,GET,/api/v1/terms/{id},terms_retrieve,term-detail,READS: academic_affairs department_manager department_supervisor head_registrar hr registrar results_officer student_affairs system_admin
+terms,PUT,/api/v1/terms/{id},terms_update,term-detail,READS: academic_affairs department_manager department_supervisor head_registrar hr registrar results_officer student_affairs system_admin
+terms,PATCH,/api/v1/terms/{id},terms_partial_update,term-detail,READS: academic_affairs department_manager department_supervisor head_registrar hr registrar results_officer student_affairs system_admin
+terms,DELETE,/api/v1/terms/{id},terms_destroy,term-detail,READS: academic_affairs department_manager department_supervisor head_registrar hr registrar results_officer student_affairs system_admin
+terms,POST,/api/v1/terms/{id}/set-current,terms_set_current_create,term-set-current,academic.tests.test_academic::test_set_current_term
+transcripts,GET,/api/v1/transcripts/{university_number},transcripts_retrieve,transcript,READS: department_manager department_supervisor head_registrar results_officer system_admin
+users,GET,/api/v1/users,users_list,user-list,READS: academic_affairs head_registrar system_admin
+users,POST,/api/v1/users,users_create,user-list,READS: academic_affairs head_registrar system_admin
+users,GET,/api/v1/users/{public_id},users_retrieve,user-detail,READS: academic_affairs head_registrar system_admin
+users,PATCH,/api/v1/users/{public_id},users_partial_update,user-detail,READS: academic_affairs head_registrar system_admin
+users,DELETE,/api/v1/users/{public_id},users_destroy,user-detail,READS: academic_affairs head_registrar system_admin
+users,POST,/api/v1/users/{public_id}/reset-password,users_reset_password_create,user-reset-password,accounts.tests.test_auth::test_the_admin_resets_a_users_password
+users,POST,/api/v1/users/{public_id}/set-active,users_set_active_create,user-set-active,accounts.tests.test_accounts::test_set_active
+videos,POST,/api/v1/videos/upload-ticket,videos_upload_ticket_create,video-ticket,files.tests.test_files::test_student_cannot_request_upload_tickets
+videos,GET,/api/v1/videos/{public_id}/playback,videos_playback_retrieve,video-playback,READS: academic_affairs department_manager department_supervisor student system_admin ta teacher
+videos,POST,/api/v1/videos/{public_id}/upload,videos_upload_create,video-local-upload,files.tests.test_files::test_local_video_flow
+visitor,POST,/api/visitor/applications,visitor_applications_post,visitor-applications,
+visitor,GET,/api/visitor/applications/{public_id},visitor_application_get,visitor-application,
+visitor,PATCH,/api/visitor/applications/{public_id},visitor_application_patch,visitor-application,
+visitor,POST,/api/visitor/applications/{public_id}/documents,visitor_documents_post,visitor-documents,
+visitor,POST,/api/visitor/applications/{public_id}/messages,visitor_message_post,visitor-message,
+visitor,POST,/api/visitor/applications/{public_id}/submit,visitor_submit_post,visitor-submit,
+visitor,POST,/api/visitor/applications/{public_id}/withdraw,visitor_withdraw_post,visitor-withdraw,
+visitor,POST,/api/visitor/inquiries/{public_id}/messages,visitor_inquiry_reply_post,visitor-inquiry-reply,
+visitor,GET,/api/visitor/me,visitor_me_get,visitor-me,

@@ -7,21 +7,15 @@ Older rounds (2026-10-24 → 11-02): `.claude/handoff/archive/2026-10-24_to_2026
 - **Next review** (owner, 2026-11-10: «اكتب خطة مراجعة بعد قراءة الوثائق»): work order
   `docs/qa/comprehensive-review-plan-2026-11-10.md` — scope #234–#264 since report `c8479a8`;
   the owner added a full-round scope section (coverage registers, journeys, sizes) and sent it
-  back to run. **Step 0 done** (`fix/review-k1-k8`): K1–K8 fixed with tests — «staff» = holds a
-  role other than student (the plan's recommendation; a TA who also studies appears again),
-  `/site/staff` redirects, levels default follows the degree, one staff rule for list and photo,
-  `PUT /site-staff/groups/order`, one edit panel per layout. **Next:** axis 0 baseline
-  (`scripts/qa/run.sh docs/qa/evidence/review-2026-11-10/baseline …`, plan §5.1), then the
-  inventory registers, then axes 1.1 and 1.3. Findings start at R57.
-- **«الكوادر» in groups** (owner, 2026-11-09; `feat/site-staff-groups`): the system admin and
-  the site manager (and the supervisor, who deletes nothing) add people to the site's «الكوادر» on
-  `/site-staff` («تصنيف الكوادر», linked from /site): a staff account, or a person with no account
-  (adding never makes an account). Groups are flexible (`content.StaffGroup`; «هيئة الإدارة» and
-  «هيئة التدريس» to start); a matrix places each person in one or more groups with a position and
-  an order (`StaffEntry`/`StaffPlacement`, rules in `content/staff.py`). An account shows only with
-  its own consent (`public_profile`); consenting teaching staff nobody placed show by themselves in
-  the group that `holds_faculty`. Public: `GET /api/public/staff` → the site's /staff/ page in
-  sections. Capability `site_staff.manage` (matrix row `site.staff`).
+  back to run. **Round 1 done** — report `docs/qa/comprehensive-review-2026-11-10.md`:
+  step 0 K1–K8 (#266; «staff» = holds a role other than student), baseline (all green; local
+  full E2E is unreliable on this Mac — the browser closes mid-test, CI is the authority),
+  inventory registers (`bash scripts/qa/inventory.sh <dir>` → site/portal/backend/fit CSVs),
+  axis 1.1 known hypotheses proven by probes and fixed (#267: R57–R60, R62, R63; statuses
+  `move_pending`, `stale`; `StudentRecord.account_moved_at`). **Open for the owner:** K1's
+  definition, R61 (new student in a stopped programme), R65 (download manager D25 not built),
+  docs differences. **Next:** axis 1.3 (merge probes), 1.2 (promotion), rest of 1.1, axes 2–3;
+  fill `fit.csv`. Never run probes or other work while E2E runs. Findings continue from R67.
 - **Staff review fixes** (2026-11-09; `fix/site-staff-review`): any staff account (not only
   teachers) may now choose to appear (`accounts.staff_profile.on_staff`, Settings card for all
   staff); a placed account that is no longer staff drops off (`content.staff.shown`); the people

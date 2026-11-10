@@ -1,0 +1,46 @@
+All checks passed!
+296 files already formatted
+$ prettier --check .
+Checking formatting...
+[warn] .claude/worktrees/agent-a33690dcce1ab7a08/packages/api/src/generated/openapi.json
+[warn] .claude/worktrees/agent-a33690dcce1ab7a08/packages/api/src/generated/schema.d.ts
+[warn] .claude/worktrees/agent-a4d8748c03d6fe4b3/packages/api/src/generated/openapi.json
+[warn] .claude/worktrees/agent-a4d8748c03d6fe4b3/packages/api/src/generated/schema.d.ts
+[warn] .claude/worktrees/agent-a7aa9c5324fb32b77/e2e/test-results/.last-run.json
+[warn] .claude/worktrees/agent-a7aa9c5324fb32b77/packages/api/src/generated/openapi.json
+[warn] .claude/worktrees/agent-a7aa9c5324fb32b77/packages/api/src/generated/schema.d.ts
+[warn] .scratch/contract/contract.html
+[warn] .scratch/contract/make.js
+[warn] .scratch/cost/cost-bw.html
+[warn] .scratch/cost/cost.html
+[warn] .scratch/cost/data.js
+[warn] .scratch/cost/make-bw.js
+[warn] .scratch/cost/make.js
+[warn] .scratch/directions/A-quiet-ledger.html
+[warn] .scratch/directions/B-tinted-surfaces.html
+[warn] .scratch/directions/C-priority-first.html
+[warn] .scratch/feas/doc.js
+[warn] .scratch/feas/feas-bw.html
+[warn] .scratch/feas/feas.html
+[warn] .scratch/feas/make-bw.js
+[warn] .scratch/feas/make.js
+[warn] .scratch/prop/doc.js
+[warn] .scratch/prop/make.js
+[warn] .scratch/prop/prop.html
+[warn] .scratch/tmp-header.spec.ts
+[warn] .scratch/tmp-plan.spec.ts
+[warn] Claude outputs/font-comparison/index.html
+[error] Claude outputs/Sting-Design-Reference-3.0.html: SyntaxError: Void elements do not have end tags "input" (821:35)
+[error]   819 | للفحص)</h2>
+[error]   820 | <ul class="task-list">
+[error] > 821 | <li><label><input type="checkbox"></input><code>scripts/check_contrast.py</code> يمر بلا فشل
+[error]       |                                   ^^^^^^^^
+[error]   822 | للثيمين (نص ≥ 4.5:1، شارات ≥ 4.5:1، حدود/أيقونات ≥ 3:1).</label></li>
+[error]   823 | <li><label><input type="checkbox"></input>المهمة الأساسية وأهم إجراء ظاهران
+[error]   824 | دون مؤشرات زائدة؛ إجراء رئيسي واحد في السياق.</label></li>
+[warn] Claude outputs/student-redesign/index.html
+[warn] Claude outputs/welcome-email/email-preview.html
+[warn] Claude outputs/welcome-email/email-template.html
+Error occurred when checking code style in the above file.
+[ELIFECYCLE] Command failed with exit code 2.
+# exit 2, 22s, 2026-11-10T06:32:09Z

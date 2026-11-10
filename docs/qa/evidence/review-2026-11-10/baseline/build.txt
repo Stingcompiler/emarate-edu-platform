@@ -1,0 +1,517 @@
+$ pnpm -r --if-present build
+apps/landing build$ astro build
+apps/portal build$ pnpm typecheck && vite build
+apps/portal build: $ tsc -p tsconfig.json && tsc -p tsconfig.node.json
+apps/landing build: 08:38:26 [types] Generated 72ms
+apps/landing build: 08:38:26 [build] output: "static"
+apps/landing build: 08:38:26 [build] mode: "static"
+apps/landing build: 08:38:26 [build] directory: /Users/macbookairm1/Desktop/emarate-edu-platform/apps/landing/dist/
+apps/landing build: 08:38:26 [build] Collecting build info...
+apps/landing build: 08:38:26 [build] ✓ Completed in 121ms.
+apps/landing build: 08:38:26 [build] Building static entrypoints...
+apps/landing build: 08:38:27 [vite] ✓ built in 640ms
+apps/landing build: 08:38:27 [vite] ✓ built in 26ms
+apps/landing build: 08:38:27 [build] Rearranging server assets...
+apps/landing build: 
+apps/landing build:  generating static routes 
+apps/landing build: [landing] /api/public/events unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/events?past=1 unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/site unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/site unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/announcements unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/departments unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/events unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/events?past=1 unavailable (TypeError: fetch failed); building without it
+apps/portal build: vite v8.3.5 building client environment for production...
+apps/portal build: transforming...
+apps/portal build: ✓ 2317 modules transformed.
+apps/portal build: rendering chunks...
+apps/portal build: computing gzip size...
+apps/portal build: dist/index.html                                                         1.58 kB │ gzip:  0.75 kB
+apps/portal build: dist/assets/ibm-plex-sans-arabic-latin-ext-700-normal-C7GcWn11.woff     5.08 kB
+apps/portal build: dist/assets/ibm-plex-sans-arabic-latin-ext-400-normal-BeVLg08x.woff     5.10 kB
+apps/portal build: dist/assets/ibm-plex-sans-arabic-latin-ext-500-normal-eJxPnL1P.woff     5.11 kB
+apps/portal build: dist/assets/ibm-plex-sans-arabic-latin-ext-600-normal-DT29Q8HW.woff     5.12 kB
+apps/portal build: dist/assets/ibm-plex-sans-arabic-latin-ext-500-normal-Ck_W4G78.woff2    6.54 kB
+apps/portal build: dist/assets/ibm-plex-sans-arabic-latin-ext-700-normal-BSbyEp0V.woff2    6.56 kB
+apps/portal build: dist/assets/ibm-plex-sans-arabic-latin-ext-400-normal-BpLfq-63.woff2    6.65 kB
+apps/portal build: dist/assets/ibm-plex-sans-arabic-latin-ext-600-normal-DjDAeNQD.woff2    6.68 kB
+apps/portal build: dist/assets/ibm-plex-sans-arabic-latin-400-normal-CFZh1unN.woff        17.51 kB
+apps/portal build: dist/assets/ibm-plex-sans-arabic-latin-700-normal-Cl4F7CZR.woff        17.78 kB
+apps/portal build: dist/assets/ibm-plex-sans-arabic-latin-500-normal-BletK1Hp.woff        18.64 kB
+apps/portal build: dist/assets/ibm-plex-sans-arabic-latin-600-normal-Dk5eISD_.woff        18.88 kB
+apps/portal build: dist/assets/ibm-plex-sans-arabic-latin-400-normal-Bo5KPYvw.woff2       19.16 kB
+apps/portal build: dist/assets/ibm-plex-sans-arabic-latin-700-normal-BzSf6GNr.woff2       19.50 kB
+apps/portal build: dist/assets/ibm-plex-sans-arabic-latin-500-normal-Cd6jVIg7.woff2       20.08 kB
+apps/portal build: dist/assets/ibm-plex-sans-arabic-latin-600-normal-KrqB56Mw.woff2       20.50 kB
+apps/portal build: dist/assets/ibm-plex-sans-arabic-arabic-400-normal-CyU-ddYS.woff2      42.84 kB
+apps/portal build: dist/assets/ibm-plex-sans-arabic-arabic-400-normal-EA1o-u_Q.woff       44.13 kB
+apps/portal build: dist/assets/ibm-plex-sans-arabic-arabic-700-normal-DrtBj6UE.woff2      44.28 kB
+apps/portal build: dist/assets/ibm-plex-sans-arabic-arabic-700-normal-9rXc6cUL.woff       44.36 kB
+apps/portal build: dist/assets/ibm-plex-sans-arabic-arabic-500-normal-C4MQITzh.woff2      45.29 kB
+apps/portal build: dist/assets/ibm-plex-sans-arabic-arabic-600-normal-0pRdybE_.woff2      45.68 kB
+apps/portal build: dist/assets/ibm-plex-sans-arabic-arabic-600-normal-MJZ0liF5.woff       46.78 kB
+apps/portal build: dist/assets/ibm-plex-sans-arabic-arabic-500-normal-DPXcppbm.woff       46.92 kB
+apps/portal build: dist/assets/index-By3TmDvj.css                                        105.32 kB │ gzip: 26.37 kB
+apps/portal build: dist/assets/plus-DQkpd9hX.js                                            0.18 kB │ gzip:  0.16 kB
+apps/portal build: dist/assets/rotate-ccw-D7F6bFII.js                                      0.22 kB │ gzip:  0.19 kB
+apps/portal build: dist/assets/circle-check-ktk-1IJh.js                                    0.23 kB │ gzip:  0.20 kB
+apps/portal build: dist/assets/upload-DiT8V1LL.js                                          0.25 kB │ gzip:  0.20 kB
+apps/portal build: dist/assets/paperclip-BYPkooNz.js                                       0.26 kB │ gzip:  0.21 kB
+apps/portal build: dist/assets/copy-BSUUirI9.js                                            0.26 kB │ gzip:  0.22 kB
+apps/portal build: dist/assets/link-2-CdR03PQ0.js                                          0.26 kB │ gzip:  0.22 kB
+apps/portal build: dist/assets/image-B_fQXru_.js                                           0.29 kB │ gzip:  0.23 kB
+apps/portal build: dist/assets/zap-esRxnjgA.js                                             0.30 kB │ gzip:  0.23 kB
+apps/portal build: dist/assets/pencil-BOhtD4R6.js                                          0.30 kB │ gzip:  0.23 kB
+apps/portal build: dist/assets/arrow-up-D1W5wh9w.js                                        0.32 kB │ gzip:  0.22 kB
+apps/portal build: dist/assets/media-BD7iNyf3.js                                           0.33 kB │ gzip:  0.25 kB
+apps/portal build: dist/assets/NotFound-C7-8IQX1.js                                        0.34 kB │ gzip:  0.28 kB
+apps/portal build: dist/assets/file-check-DKFBLZ0y.js                                      0.34 kB │ gzip:  0.24 kB
+apps/portal build: dist/assets/printer-BsHE4Ev8.js                                         0.34 kB │ gzip:  0.25 kB
+apps/portal build: dist/assets/shield-check-DQa9bb7g.js                                    0.34 kB │ gzip:  0.26 kB
+apps/portal build: dist/assets/newspaper-BKqpd0Cq.js                                       0.37 kB │ gzip:  0.26 kB
+apps/portal build: dist/assets/grip-vertical-b_KYO-l5.js                                   0.39 kB │ gzip:  0.20 kB
+apps/portal build: dist/assets/DepartmentSwitch-2IHDtQJP.js                                0.45 kB │ gzip:  0.34 kB
+apps/portal build: dist/assets/richText-DOpqGDA-.js                                        0.60 kB │ gzip:  0.40 kB
+apps/portal build: dist/assets/roles-DcfOl_lf.js                                           0.86 kB │ gzip:  0.39 kB
+apps/portal build: dist/assets/upload-Bj9Bmawy.js                                          0.86 kB │ gzip:  0.60 kB
+apps/portal build: dist/assets/offlineQueue-DSAz4tTB.js                                    0.97 kB │ gzip:  0.56 kB
+apps/portal build: dist/assets/department-BUiQMtVH.js                                      0.98 kB │ gzip:  0.53 kB
+apps/portal build: dist/assets/LiveBanner-CfO48l0r.js                                      0.99 kB │ gzip:  0.49 kB
+apps/portal build: dist/assets/useUnsavedChanges-C-wKmhvR.js                               1.02 kB │ gzip:  0.63 kB
+apps/portal build: dist/assets/TranscriptLookup-z28cU1am.js                                1.13 kB │ gzip:  0.71 kB
+apps/portal build: dist/assets/OtpInput-Bpd7j1ZQ.js                                        1.68 kB │ gzip:  0.86 kB
+apps/portal build: dist/assets/visitor-CNcT39ZR.js                                         1.73 kB │ gzip:  0.96 kB
+apps/portal build: dist/assets/ForgotPassword-B00fuCHr.js                                  2.20 kB │ gzip:  1.14 kB
+apps/portal build: dist/assets/exam-BedtoExM.js                                            2.30 kB │ gzip:  1.09 kB
+apps/portal build: dist/assets/useMutation-DqHWPA2W.js                                     2.34 kB │ gzip:  0.97 kB
+apps/portal build: dist/assets/learning-Dq1LVRQA.js                                        2.37 kB │ gzip:  1.14 kB
+apps/portal build: dist/assets/MyNotice-QsoNM4Ap.js                                        2.46 kB │ gzip:  1.13 kB
+apps/portal build: dist/assets/DataTable-DyUlQBe-.js                                       2.48 kB │ gzip:  1.16 kB
+apps/portal build: dist/assets/Activate-DKHaYd3a.js                                        2.60 kB │ gzip:  1.30 kB
+apps/portal build: dist/assets/UploadStatus-CMz1yiyA.js                                    2.70 kB │ gzip:  1.16 kB
+apps/portal build: dist/assets/dashboard-B-0aiSeK.js                                       2.70 kB │ gzip:  0.99 kB
+apps/portal build: dist/assets/ChangePassword-B2FxMUc8.js                                  2.79 kB │ gzip:  1.37 kB
+apps/portal build: dist/assets/Inbox-CudjboB-.js                                           2.88 kB │ gzip:  1.31 kB
+apps/portal build: dist/assets/LiveNew-D_Yu-IQp.js                                         2.94 kB │ gzip:  1.42 kB
+apps/portal build: dist/assets/PrintLayout-F9bu60P6.js                                     2.95 kB │ gzip:  1.26 kB
+apps/portal build: dist/assets/Pager-D7ixcQBP.js                                           3.05 kB │ gzip:  1.32 kB
+apps/portal build: dist/assets/RegulationDetail-DX9J15YC.js                                3.36 kB │ gzip:  1.66 kB
+apps/portal build: dist/assets/NewsEditor--pKzGAv6.js                                      3.57 kB │ gzip:  1.68 kB
+apps/portal build: dist/assets/Courses-DvvkQoh1.js                                         3.59 kB │ gzip:  1.65 kB
+apps/portal build: dist/assets/Exams-BkmqgGfO.js                                           3.62 kB │ gzip:  1.51 kB
+apps/portal build: dist/assets/Tasks-B8fL3w0U.js                                           3.64 kB │ gzip:  1.52 kB
+apps/portal build: dist/assets/Deletions-B-iN6rfP.js                                       3.72 kB │ gzip:  1.68 kB
+apps/portal build: dist/assets/StaffProfiles-HfMW7Gy_.js                                   3.73 kB │ gzip:  1.65 kB
+apps/portal build: dist/assets/Regulations-o4RWiKvU.js                                     3.78 kB │ gzip:  1.57 kB
+apps/portal build: dist/assets/RegulationNew-DiJbB_8S.js                                   3.82 kB │ gzip:  1.71 kB
+apps/portal build: dist/assets/Grading-MsfUgotb.js                                         3.86 kB │ gzip:  1.76 kB
+apps/portal build: dist/assets/AcademicHome-f695nekj.js                                    3.95 kB │ gzip:  1.71 kB
+apps/portal build: dist/assets/ResultsHome-BmbuGmWW.js                                     3.98 kB │ gzip:  1.68 kB
+apps/portal build: dist/assets/ApplicationPrint-BUsKW9k_.js                                3.99 kB │ gzip:  1.68 kB
+apps/portal build: dist/assets/LiveList-CqqFz39k.js                                        4.01 kB │ gzip:  1.78 kB
+apps/portal build: dist/assets/AffairsHome-CEqHG0ei.js                                     4.12 kB │ gzip:  1.89 kB
+apps/portal build: dist/assets/PrintTranscript-CvtnHkGL.js                                 4.26 kB │ gzip:  1.46 kB
+apps/portal build: dist/assets/Registrars-DhZ6HGht.js                                      4.26 kB │ gzip:  1.87 kB
+apps/portal build: dist/assets/CaseDetail-bMsYvvJf.js                                      4.27 kB │ gzip:  1.73 kB
+apps/portal build: dist/assets/ResultSettings-CjinH_qZ.js                                  4.39 kB │ gzip:  1.85 kB
+apps/portal build: dist/assets/Redirects-B_YBLeJE.js                                       4.41 kB │ gzip:  1.95 kB
+apps/portal build: dist/assets/StudentRecord-mqjkcnhl.js                                   4.44 kB │ gzip:  1.79 kB
+apps/portal build: dist/assets/ExamStats-iOoteD7f.js                                       4.47 kB │ gzip:  1.84 kB
+apps/portal build: dist/assets/ExamDetail-Dr9Qw5BO.js                                      4.52 kB │ gzip:  1.97 kB
+apps/portal build: dist/assets/Report-BIqSwZV-.js                                          4.56 kB │ gzip:  1.71 kB
+apps/portal build: dist/assets/Install-9X9iRDzh.js                                         4.58 kB │ gzip:  1.97 kB
+apps/portal build: dist/assets/Imports-C9U117wc.js                                         4.58 kB │ gzip:  1.99 kB
+apps/portal build: dist/assets/AnnouncementNew-gSHdmMip.js                                 4.64 kB │ gzip:  2.05 kB
+apps/portal build: dist/assets/StudentForm-DcjSWkhk.js                                     4.71 kB │ gzip:  1.96 kB
+apps/portal build: dist/assets/Corrections-B7oOjy22.js                                     4.73 kB │ gzip:  2.04 kB
+apps/portal build: dist/assets/Announcements-D_YO_oBY.js                                   4.81 kB │ gzip:  2.31 kB
+apps/portal build: dist/assets/Search-B-IocHvV.js                                          5.06 kB │ gzip:  2.15 kB
+apps/portal build: dist/assets/StudentRecords-BU4OGjNN.js                                  5.13 kB │ gzip:  1.95 kB
+apps/portal build: dist/assets/format-DayeWoEr.js                                          5.14 kB │ gzip:  2.14 kB
+apps/portal build: dist/assets/Home-ipKZn_5M.js                                            5.16 kB │ gzip:  1.87 kB
+apps/portal build: dist/assets/CaseNew-Cg2OXWJ6.js                                         5.19 kB │ gzip:  2.15 kB
+apps/portal build: dist/assets/TeacherProfile-CZ_3ounK.js                                  5.36 kB │ gzip:  2.13 kB
+apps/portal build: dist/assets/PrintReport-DeCgNYAg.js                                     5.37 kB │ gzip:  2.21 kB
+apps/portal build: dist/assets/VisitorLayout-CLa4cg56.js                                   5.76 kB │ gzip:  2.53 kB
+apps/portal build: dist/assets/ExamResult-D0P5OF57.js                                      5.77 kB │ gzip:  2.41 kB
+apps/portal build: dist/assets/Promotion-DXaoN2OK.js                                       5.80 kB │ gzip:  2.46 kB
+apps/portal build: dist/assets/SiteHome-CSBxQkvv.js                                        5.92 kB │ gzip:  2.25 kB
+apps/portal build: dist/assets/reports-Bf3mVAk4.js                                         5.94 kB │ gzip:  2.69 kB
+apps/portal build: dist/assets/Students-C756m9fx.js                                        6.11 kB │ gzip:  2.68 kB
+apps/portal build: dist/assets/AffairsReport-BmjIUMJX.js                                   6.15 kB │ gzip:  2.24 kB
+apps/portal build: dist/assets/Compose-Ajj6etNd.js                                         6.23 kB │ gzip:  2.72 kB
+apps/portal build: dist/assets/Dashboard-CSecy3ep.js                                       6.56 kB │ gzip:  2.45 kB
+apps/portal build: dist/assets/Me-BdupkM_J.js                                              6.60 kB │ gzip:  2.33 kB
+apps/portal build: dist/assets/AdmissionsReport-C5QKVHkP.js                                6.71 kB │ gzip:  2.60 kB
+apps/portal build: dist/assets/NoticeNew-BS7EnymY.js                                       6.89 kB │ gzip:  2.71 kB
+apps/portal build: dist/assets/Applications-BBre-4hE.js                                    7.08 kB │ gzip:  2.78 kB
+apps/portal build: dist/assets/Teachers-DU09CNZp.js                                        7.20 kB │ gzip:  2.60 kB
+apps/portal build: dist/assets/ExamMonitor-DFayLgNY.js                                     7.22 kB │ gzip:  3.00 kB
+apps/portal build: dist/assets/DepartmentReport-DvJ7UcsY.js                                7.56 kB │ gzip:  2.53 kB
+apps/portal build: dist/assets/Register-CHx3pz4i.js                                        7.64 kB │ gzip:  2.84 kB
+apps/portal build: dist/assets/Members-D89JnW3N.js                                         7.67 kB │ gzip:  2.76 kB
+apps/portal build: dist/assets/ImportDetail-C5nPDxC1.js                                    7.67 kB │ gzip:  2.90 kB
+apps/portal build: dist/assets/RolesMatrix-CaN8BO1R.js                                     7.91 kB │ gzip:  2.93 kB
+apps/portal build: dist/assets/Lectures-lrmYeBsC.js                                        7.94 kB │ gzip:  2.92 kB
+apps/portal build: dist/assets/Track-jCJ_aEMK.js                                           7.96 kB │ gzip:  3.08 kB
+apps/portal build: dist/assets/Cases-DAVvubBv.js                                           8.41 kB │ gzip:  2.84 kB
+apps/portal build: dist/assets/Guide-BW68Zodp.js                                           8.46 kB │ gzip:  2.92 kB
+apps/portal build: dist/assets/Inquiries-CBA6Q6i2.js                                       8.48 kB │ gzip:  3.34 kB
+apps/portal build: dist/assets/Home-BoFYnk-2.js                                            8.77 kB │ gzip:  3.16 kB
+apps/portal build: dist/assets/Users-duXqf47A.js                                           8.82 kB │ gzip:  3.34 kB
+apps/portal build: dist/assets/Home-CzgwB3A4.js                                            8.86 kB │ gzip:  3.56 kB
+apps/portal build: dist/assets/Approvals-CnwfHNS9.js                                       8.95 kB │ gzip:  2.75 kB
+apps/portal build: dist/assets/MyResults-CzR-wj3w.js                                       9.01 kB │ gzip:  2.99 kB
+apps/portal build: dist/assets/Settings-CIDB1TIl.js                                        9.17 kB │ gzip:  3.55 kB
+apps/portal build: dist/assets/Grade-CXi2uiRR.js                                           9.20 kB │ gzip:  3.41 kB
+apps/portal build: dist/assets/Imports-Bw7Mtii5.js                                         9.31 kB │ gzip:  3.38 kB
+apps/portal build: dist/assets/Students-BNJtXsp0.js                                        9.41 kB │ gzip:  2.78 kB
+apps/portal build: dist/assets/AssignmentEditor-Bhzw23p3.js                                9.80 kB │ gzip:  3.28 kB
+apps/portal build: dist/assets/LectureEditor-B80IlzDl.js                                   9.87 kB │ gzip:  3.81 kB
+apps/portal build: dist/assets/Events-CcJ2BTSQ.js                                         10.90 kB │ gzip:  3.85 kB
+apps/portal build: dist/assets/Notifications-BKdK-RuZ.js                                  11.52 kB │ gzip:  4.55 kB
+apps/portal build: dist/assets/Assignment-BEZZHhPy.js                                     11.71 kB │ gzip:  4.19 kB
+apps/portal build: dist/assets/Lecture-CXqRW9eT.js                                        11.73 kB │ gzip:  4.27 kB
+apps/portal build: dist/assets/Cycles-BrVgJOqV.js                                         11.90 kB │ gzip:  3.76 kB
+apps/portal build: dist/assets/ApplicationDetail-BDe_1sY4.js                              12.75 kB │ gzip:  4.37 kB
+apps/portal build: dist/assets/User-DngGybFl.js                                           12.81 kB │ gzip:  4.50 kB
+apps/portal build: dist/assets/PageEditor-DiQLZj6R.js                                     13.00 kB │ gzip:  4.57 kB
+apps/portal build: dist/assets/ExamEditor-CFAw9PlI.js                                     13.11 kB │ gzip:  4.45 kB
+apps/portal build: dist/assets/Course-Cxjq7wrA.js                                         13.74 kB │ gzip:  4.41 kB
+apps/portal build: dist/assets/Audit-BXE7pCh5.js                                          14.04 kB │ gzip:  4.69 kB
+apps/portal build: dist/assets/Offerings-B3xQPmz3.js                                      14.38 kB │ gzip:  4.42 kB
+apps/portal build: dist/assets/Home-DgdOc3hI.js                                           17.74 kB │ gzip:  5.43 kB
+apps/portal build: dist/assets/SiteMedia-CgDx1dzV.js                                      18.25 kB │ gzip:  5.55 kB
+apps/portal build: dist/assets/SiteStaff-K13C3ciu.js                                      18.47 kB │ gzip:  5.49 kB
+apps/portal build: dist/assets/TakeExam-Bd5yU6CZ.js                                       19.83 kB │ gzip:  6.82 kB
+apps/portal build: dist/assets/FormBuilder-DEDmFXHF.js                                    25.37 kB │ gzip:  7.89 kB
+apps/portal build: dist/assets/Settings-C6NOSQbI.js                                       25.73 kB │ gzip:  7.11 kB
+apps/portal build: dist/assets/Apply-DcV04sUy.js                                          28.91 kB │ gzip:  9.92 kB
+apps/portal build: dist/assets/Structure-BpnE-0gj.js                                      34.25 kB │ gzip:  8.98 kB
+apps/portal build: dist/assets/ui-Cc1gzy1q.js                                            181.17 kB │ gzip: 57.98 kB
+apps/portal build: dist/assets/index-CNXJ2VEw.js                                         299.92 kB │ gzip: 92.67 kB
+apps/portal build: 
+apps/portal build: ✓ built in 479ms
+apps/portal build: Done
+apps/landing build: [landing] /api/public/news unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/pages unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/programs unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/departments unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/pages unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/site unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/pages unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/programs unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/menus/header unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/pages unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/menus/footer unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/pages unavailable (TypeError: fetch failed); building without it
+apps/landing build: 08:38:39   ├─ /404.html (+6.37s) 
+apps/landing build: 08:38:45   ├─ /robots.txt (+4ms) 
+apps/landing build: [landing] /api/public/site unavailable (TypeError: fetch failed); building without it
+apps/landing build: 08:38:45   ├─ /site-icon.png (+935ms) 
+apps/landing build: [landing] /api/public/site unavailable (TypeError: fetch failed); building without it
+apps/landing build: 08:38:46   ├─ /site-logo.webp (+906ms) (file not created, response body was empty)
+apps/landing build: [landing] /api/public/departments unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/programs unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/news unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/pages unavailable (TypeError: fetch failed); building without it
+apps/landing build: 08:38:47   ├─ /sitemap.xml (+911ms) 
+apps/landing build: [landing] /api/public/site unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/pages/about unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/departments unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/pages unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/site unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/pages unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/programs unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/menus/header unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/pages unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/menus/footer unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/pages unavailable (TypeError: fetch failed); building without it
+apps/landing build: 08:38:48   ├─ /ar/about/index.html (+7.25s) 
+apps/landing build: [landing] /api/public/site unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/pages/about unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/departments unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/pages unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/site unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/pages unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/programs unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/menus/header unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/pages unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/menus/footer unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/pages unavailable (TypeError: fetch failed); building without it
+apps/landing build: 08:38:55   ├─ /en/about/index.html (+7.25s) 
+apps/landing build: [landing] /api/public/programs unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/intakes unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/site unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/pages unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/programs unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/menus/header unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/pages unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/menus/footer unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/pages unavailable (TypeError: fetch failed); building without it
+apps/landing build: 08:39:02   ├─ /ar/admissions/index.html (+7.29s) 
+apps/landing build: [landing] /api/public/programs unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/intakes unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/site unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/pages unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/programs unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/menus/header unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/pages unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/menus/footer unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/pages unavailable (TypeError: fetch failed); building without it
+apps/landing build: 08:39:09   ├─ /en/admissions/index.html (+7.27s) 
+apps/landing build: [landing] /api/public/announcements unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/pages unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/site unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/pages unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/programs unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/menus/header unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/pages unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/menus/footer unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/pages unavailable (TypeError: fetch failed); building without it
+apps/landing build: 08:39:17   ├─ /ar/announcements/index.html (+8.20s) 
+apps/landing build: [landing] /api/public/announcements unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/pages unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/site unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/pages unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/programs unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/menus/header unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/pages unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/menus/footer unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/pages unavailable (TypeError: fetch failed); building without it
+apps/landing build: 08:39:25   ├─ /en/announcements/index.html (+8.18s) 
+apps/landing build: [landing] /api/public/calendar unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/events unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/site unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/pages unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/programs unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/menus/header unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/pages unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/menus/footer unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/pages unavailable (TypeError: fetch failed); building without it
+apps/landing build: 08:39:33   ├─ /ar/calendar/index.html (+7.27s) 
+apps/landing build: [landing] /api/public/calendar unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/events unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/site unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/pages unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/programs unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/menus/header unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/pages unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/menus/footer unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/pages unavailable (TypeError: fetch failed); building without it
+apps/landing build: 08:39:40   ├─ /en/calendar/index.html (+7.26s) 
+apps/landing build: [landing] /api/public/site unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/departments unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/pages unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/site unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/pages unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/programs unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/menus/header unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/pages unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/menus/footer unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/pages unavailable (TypeError: fetch failed); building without it
+apps/landing build: 08:39:48   ├─ /ar/contact/index.html (+8.18s) 
+apps/landing build: [landing] /api/public/site unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/departments unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/pages unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/site unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/pages unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/programs unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/menus/header unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/pages unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/menus/footer unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/pages unavailable (TypeError: fetch failed); building without it
+apps/landing build: 08:39:56   ├─ /en/contact/index.html (+8.17s) 
+apps/landing build: [landing] /api/public/departments unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/site unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/pages unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/programs unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/menus/header unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/pages unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/menus/footer unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/pages unavailable (TypeError: fetch failed); building without it
+apps/landing build: 08:40:04   ├─ /ar/departments/index.html (+7.27s) 
+apps/landing build: [landing] /api/public/departments unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/site unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/pages unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/programs unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/menus/header unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/pages unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/menus/footer unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/pages unavailable (TypeError: fetch failed); building without it
+apps/landing build: 08:40:11   ├─ /en/departments/index.html (+7.26s) 
+apps/landing build: [landing] /api/public/events unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/events?past=1 unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/pages unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/site unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/pages unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/programs unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/menus/header unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/pages unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/menus/footer unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/pages unavailable (TypeError: fetch failed); building without it
+apps/landing build: 08:40:18   ├─ /ar/events/index.html (+8.17s) 
+apps/landing build: [landing] /api/public/events unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/events?past=1 unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/pages unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/site unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/pages unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/programs unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/menus/header unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/pages unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/menus/footer unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/pages unavailable (TypeError: fetch failed); building without it
+apps/landing build: 08:40:27   ├─ /en/events/index.html (+8.17s) 
+apps/landing build: [landing] /api/public/news unavailable (TypeError: fetch failed); building without it
+apps/landing build: 08:40:35   ├─ /ar/news/rss.xml (+913ms) 
+apps/landing build: [landing] /api/public/news unavailable (TypeError: fetch failed); building without it
+apps/landing build: 08:40:36   ├─ /en/news/rss.xml (+913ms) 
+apps/landing build: [landing] /api/public/news unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/events unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/announcements unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/site unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/pages unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/programs unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/menus/header unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/pages unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/menus/footer unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/pages unavailable (TypeError: fetch failed); building without it
+apps/landing build: 08:40:37   ├─ /ar/news/index.html (+7.27s) 
+apps/landing build: [landing] /api/public/news unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/events unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/announcements unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/site unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/pages unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/programs unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/menus/header unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/pages unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/menus/footer unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/pages unavailable (TypeError: fetch failed); building without it
+apps/landing build: 08:40:44   ├─ /en/news/index.html (+7.26s) 
+apps/landing build: [landing] /api/public/site unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/programs unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/departments unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/pages unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/site unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/pages unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/programs unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/menus/header unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/pages unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/menus/footer unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/pages unavailable (TypeError: fetch failed); building without it
+apps/landing build: 08:40:51   ├─ /ar/parents/index.html (+7.26s) 
+apps/landing build: [landing] /api/public/site unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/programs unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/departments unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/pages unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/site unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/pages unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/programs unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/menus/header unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/pages unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/menus/footer unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/pages unavailable (TypeError: fetch failed); building without it
+apps/landing build: 08:40:58   ├─ /en/parents/index.html (+7.27s) 
+apps/landing build: [landing] /api/public/programs unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/site unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/pages unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/programs unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/menus/header unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/pages unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/menus/footer unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/pages unavailable (TypeError: fetch failed); building without it
+apps/landing build: 08:41:06   ├─ /ar/programs/index.html (+7.27s) 
+apps/landing build: [landing] /api/public/programs unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/site unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/pages unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/programs unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/menus/header unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/pages unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/menus/footer unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/pages unavailable (TypeError: fetch failed); building without it
+apps/landing build: 08:41:13   ├─ /en/programs/index.html (+7.27s) 
+apps/landing build: [landing] /api/public/regulations unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/pages unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/site unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/pages unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/programs unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/menus/header unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/pages unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/menus/footer unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/pages unavailable (TypeError: fetch failed); building without it
+apps/landing build: 08:41:20   ├─ /ar/regulations/index.html (+8.17s) 
+apps/landing build: [landing] /api/public/regulations unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/pages unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/site unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/pages unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/programs unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/menus/header unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/pages unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/menus/footer unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/pages unavailable (TypeError: fetch failed); building without it
+apps/landing build: 08:41:28   ├─ /en/regulations/index.html (+8.17s) 
+apps/landing build: [landing] /api/public/site unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/departments unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/staff unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/site unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/pages unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/programs unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/menus/header unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/pages unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/menus/footer unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/pages unavailable (TypeError: fetch failed); building without it
+apps/landing build: 08:41:37   ├─ /ar/staff/index.html (+7.27s) 
+apps/landing build: [landing] /api/public/site unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/departments unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/staff unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/site unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/pages unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/programs unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/menus/header unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/pages unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/menus/footer unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/pages unavailable (TypeError: fetch failed); building without it
+apps/landing build: 08:41:44   ├─ /en/staff/index.html (+7.28s) 
+apps/landing build: [landing] /api/public/site unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/programs unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/stats unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/events unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/news unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/departments unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/announcements unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/pages/about/dean unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/pages unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/site unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/pages unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/programs unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/menus/header unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/pages unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/menus/footer unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/pages unavailable (TypeError: fetch failed); building without it
+apps/landing build: 08:41:51   ├─ /ar/index.html (+8.16s) 
+apps/landing build: [landing] /api/public/site unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/programs unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/stats unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/events unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/news unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/departments unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/announcements unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/pages/about/dean unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/pages unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/site unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/pages unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/programs unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/menus/header unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/pages unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/menus/footer unavailable (TypeError: fetch failed); building without it
+apps/landing build: [landing] /api/public/pages unavailable (TypeError: fetch failed); building without it
+apps/landing build: 08:41:59   ├─ /en/index.html (+8.16s) 
+apps/landing build: 08:42:07   ├─ /index.html (+10ms) 
+apps/landing build: 08:42:07 ✓ Completed in 3m 41s.
+apps/landing build: 
+apps/landing build: 08:42:07 [build] ✓ Completed in 3m 42s.
+apps/landing build: 08:42:07 [build] 28 page(s) built in 3m 42s
+apps/landing build: 08:42:07 [build] Complete!
+apps/landing build: Done
+# exit 0, 224s, 2026-11-10T06:42:08Z

@@ -1,0 +1,54 @@
+template,route,language,kind,dynamic,data,e2e
+404.astro,/404,-,page,no,"API, PORTAL",
+[lang]/[...path].astro,/ar/[...path],ar,page,yes,", departments, describe, page as loadPage, pages, programs as loadPrograms",a11y access apply exam fit-signed-in fit hidden-sample journeys keyboard landing layout password-reset pwa shots sign-in site-staff states sweep
+[lang]/[...path].astro,/en/[...path],en,page,yes,", departments, describe, page as loadPage, pages, programs as loadPrograms",a11y access apply exam fit-signed-in fit hidden-sample journeys keyboard landing layout password-reset pwa shots sign-in site-staff states sweep
+[lang]/about.astro,/ar/about,ar,page,no,"departments, get, pages, site",fit hidden-sample landing
+[lang]/about.astro,/en/about,en,page,no,"departments, get, pages, site",landing
+[lang]/admissions/index.astro,/ar/admissions,ar,page,no,"PORTAL, intakes, programs",hidden-sample landing
+[lang]/admissions/index.astro,/en/admissions,en,page,no,"PORTAL, intakes, programs",
+[lang]/announcements/[id].astro,/ar/announcements/[id],ar,page,yes,announcements,
+[lang]/announcements/[id].astro,/en/announcements/[id],en,page,yes,announcements,
+[lang]/announcements/index.astro,/ar/announcements,ar,page,no,"PORTAL, announcements",
+[lang]/announcements/index.astro,/en/announcements,en,page,no,"PORTAL, announcements",
+[lang]/calendar/index.astro,/ar/calendar,ar,page,no,"calendar, events",hidden-sample
+[lang]/calendar/index.astro,/en/calendar,en,page,no,"calendar, events",
+[lang]/contact.astro,/ar/contact,ar,page,no,"API, PORTAL, departments, site",fit hidden-sample landing
+[lang]/contact.astro,/en/contact,en,page,no,"API, PORTAL, departments, site",
+[lang]/departments/[code].astro,/ar/departments/[code],ar,page,yes,"PORTAL, departments, site",hidden-sample landing
+[lang]/departments/[code].astro,/en/departments/[code],en,page,yes,"PORTAL, departments, site",
+[lang]/departments/index.astro,/ar/departments,ar,page,no,departments,hidden-sample landing
+[lang]/departments/index.astro,/en/departments,en,page,no,departments,
+[lang]/events/[slug].astro,/ar/events/[slug],ar,page,yes,"events, get, pastEvents, site",fit hidden-sample landing
+[lang]/events/[slug].astro,/en/events/[slug],en,page,yes,"events, get, pastEvents, site",
+[lang]/events/index.astro,/ar/events,ar,page,no,"events, pastEvents",fit hidden-sample landing
+[lang]/events/index.astro,/en/events,en,page,no,"events, pastEvents",
+[lang]/index.astro,/ar,ar,page,no,", PORTAL, announcements, departments, events, news, page, pages, programs, site, staff, stats",a11y access apply exam fit-signed-in fit hidden-sample journeys keyboard landing layout password-reset pwa shots sign-in site-staff states sweep
+[lang]/index.astro,/en,en,page,no,", PORTAL, announcements, departments, events, news, page, pages, programs, site, staff, stats",a11y access apply exam fit-signed-in fit hidden-sample journeys keyboard landing layout password-reset pwa shots sign-in site-staff states sweep
+[lang]/news/[slug].astro,/ar/news/[slug],ar,page,yes,"get, news",fit hidden-sample landing
+[lang]/news/[slug].astro,/en/news/[slug],en,page,yes,"get, news",
+[lang]/news/index.astro,/ar/news,ar,page,no,"announcements, events, news",fit hidden-sample landing
+[lang]/news/index.astro,/en/news,en,page,no,"announcements, events, news",
+[lang]/news/rss.xml.ts,/ar/news/rss.xml,ar,file,no,news,
+[lang]/news/rss.xml.ts,/en/news/rss.xml,en,file,no,news,
+[lang]/p/[slug].astro,/ar/p/[slug],ar,page,yes,"describe, get, pages",fit hidden-sample journeys landing
+[lang]/p/[slug].astro,/en/p/[slug],en,page,yes,"describe, get, pages",hidden-sample
+[lang]/parents.astro,/ar/parents,ar,page,no,"PORTAL, departments, pages, programs, site",
+[lang]/parents.astro,/en/parents,en,page,no,"PORTAL, departments, pages, programs, site",
+[lang]/programs/[code].astro,/ar/programs/[code],ar,page,yes,"PORTAL, get, pages, programs, site",fit hidden-sample journeys landing
+[lang]/programs/[code].astro,/en/programs/[code],en,page,yes,"PORTAL, get, pages, programs, site",hidden-sample
+[lang]/programs/index.astro,/ar/programs,ar,page,no,programs,fit hidden-sample journeys landing
+[lang]/programs/index.astro,/en/programs,en,page,no,programs,hidden-sample
+[lang]/regulations/index.astro,/ar/regulations,ar,page,no,"API, regulations",
+[lang]/regulations/index.astro,/en/regulations,en,page,no,"API, regulations",
+[lang]/staff/[id].astro,/ar/staff/[id],ar,page,yes,staff,
+[lang]/staff/[id].astro,/en/staff/[id],en,page,yes,staff,
+[lang]/staff/index.astro,/ar/staff,ar,page,no,"site, staff, staffGroups",
+[lang]/staff/index.astro,/en/staff,en,page,no,"site, staff, staffGroups",
+events/[slug].ics.ts,/events/[slug].ics,-,file,yes,"events, get, pastEvents, site",fit hidden-sample landing
+img/hero-[width].avif.ts,/img/hero-[width].avif,-,file,yes,site,landing
+img/hero-[width].webp.ts,/img/hero-[width].webp,-,file,yes,site,landing
+index.astro,/,-,page,no,,a11y access apply exam fit-signed-in fit hidden-sample journeys keyboard landing layout password-reset pwa shots sign-in site-staff states sweep
+robots.txt.ts,/robots.txt,-,file,no,,
+site-icon.png.ts,/site-icon.png,-,file,no,"PORTAL, site",landing
+site-logo.webp.ts,/site-logo.webp,-,file,no,site,landing
+sitemap.xml.ts,/sitemap.xml,-,file,no,"departments, news, pages, programs, staff",hidden-sample landing

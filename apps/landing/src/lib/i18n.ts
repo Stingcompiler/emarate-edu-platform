@@ -41,7 +41,8 @@ const T = {
   staff: { ar: "الكوادر", en: "Faculty and staff" },
   // Administration as well as faculty since 2026-11-09 (owner).
   staffLead: {
-    ar: "هيئة الإدارة وهيئة التدريس في الكلية، ومؤهلات أعضائها واهتماماتهم.",
+    // Also the page's description: 70 characters or more (seo:check; review 2026-11-10, R64).
+    ar: "هيئة الإدارة وهيئة التدريس في كلية الإمارات للعلوم والتكنولوجيا، ومؤهلات أعضائها واهتماماتهم.",
     en: "The college's administration and faculty, with their degrees and interests.",
   },
   qualifications: { ar: "المؤهلات العلمية", en: "Qualifications" },

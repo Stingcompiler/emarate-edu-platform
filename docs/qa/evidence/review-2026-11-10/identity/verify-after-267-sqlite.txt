@@ -1,0 +1,159 @@
+FFF.F                                                                    [100%]
+=================================== FAILURES ===================================
+_______ test_probe_r57_a_verified_request_completes_over_a_pending_move ________
+
+api = <function api.<locals>.client at 0x1108562a0>
+django_capture_on_commit_callbacks = <bound method TestCase.captureOnCommitCallbacks of <class 'django.test.testcases.TestCase'>>
+student = <StudentRecord: 26-IT-0001 أحمد محمد علي>
+masters = <StudentRecord: 27-IT-M-0001 أحمد محمد علي>
+make_user = <function make_user.<locals>.make at 0x110857420>
+it_dept = <Department: تقانة المعلومات>
+
+    def test_probe_r57_a_verified_request_completes_over_a_pending_move(
+        api, django_capture_on_commit_callbacks, student, masters, make_user, it_dept
+    ):
+        """start_registration refuses a record with a pending move, but a request that was started
+        and verified BEFORE the move went pending still completes: complete_registration only looks
+        at record.user, which a pending move leaves empty. The record gets a second account, and
+        the move card can then be neither approved nor rejected (R58)."""
+        capture = django_capture_on_commit_callbacks
+        StudentRecord.objects.filter(pk=masters.pk).update(email="")
+        # A classmate who knows the number, the programme and the name starts first.
+        early = _start(api, capture, "27-IT-M-0001", "أحمد محمد علي", "other@gmail.test", "MIT")
+        assert api().post(VERIFY, {"request_id": early, "code": last_code()}).status_code == 200
+        # The graduate's move goes pending.
+        _register(api, capture, "ahmed@college.test")
+        graduate = User.objects.get(email="ahmed@college.test")
+        StudentRecord.objects.filter(pk=student.pk).update(status=StudentRecord.Status.GRADUATED)
+>       assert _on_masters(api, capture, "ahmed@college.test").data["status"] == "pending_approval"
+E       AssertionError: assert 'move_pending' == 'pending_approval'
+E         
+E         - pending_approval
+E         + move_pending
+
+core/tests/test_qa_probes_identity.py:64: AssertionError
+_________ test_probe_r59_an_upheld_report_leaves_the_pending_move_open _________
+
+api = <function api.<locals>.client at 0x110856a20>
+django_capture_on_commit_callbacks = <bound method TestCase.captureOnCommitCallbacks of <class 'django.test.testcases.TestCase'>>
+student = <StudentRecord: 26-IT-0001 أحمد محمد علي>
+masters = <StudentRecord: 27-IT-M-0001 أحمد محمد علي>
+make_user = <function make_user.<locals>.make at 0x11192b880>
+it_dept = <Department: تقانة المعلومات>
+
+    def test_probe_r59_an_upheld_report_leaves_the_pending_move_open(
+        api, django_capture_on_commit_callbacks, student, masters, make_user, it_dept
+    ):
+        """Upholding a report closes the pending requests of the REPORTED record only. The
+        account's move request sits on the master's record, so its card stays: approving it
+        answers 409 (the account no longer holds a finished record), and the master's record keeps
+        answering «pending approval» to its real student until someone rejects the card by hand."""
+        capture = django_capture_on_commit_callbacks
+>       account = _graduate_with_a_pending_move(api, capture, student, masters)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+core/tests/test_qa_probes_identity.py:94: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+api = <function api.<locals>.client at 0x110856a20>
+capture = <bound method TestCase.captureOnCommitCallbacks of <class 'django.test.testcases.TestCase'>>
+student = <StudentRecord: 26-IT-0001 أحمد محمد علي>
+masters = <StudentRecord: 27-IT-M-0001 أحمد محمد علي>
+
+    def _graduate_with_a_pending_move(api, capture, student, masters):
+        """The bachelor's account, graduated, asks to move to a master's record whose file has no
+        official email: the move waits for the department."""
+        StudentRecord.objects.filter(pk=masters.pk).update(email="")
+        _register(api, capture, "ahmed@college.test")
+        StudentRecord.objects.filter(pk=student.pk).update(status=StudentRecord.Status.GRADUATED)
+        pending = _on_masters(api, capture, "ahmed@college.test")
+>       assert pending.data["status"] == "pending_approval"
+E       AssertionError: assert 'move_pending' == 'pending_approval'
+E         
+E         - pending_approval
+E         + move_pending
+
+core/tests/test_qa_probes_identity.py:36: AssertionError
+___________ test_probe_r60_one_account_waits_to_move_to_two_records ____________
+
+api = <function api.<locals>.client at 0x110857060>
+django_capture_on_commit_callbacks = <bound method TestCase.captureOnCommitCallbacks of <class 'django.test.testcases.TestCase'>>
+student = <StudentRecord: 26-IT-0001 أحمد محمد علي>
+masters = <StudentRecord: 27-IT-M-0001 أحمد محمد علي>
+make_student = <function make_student.<locals>.make at 0x11192b600>
+make_user = <function make_user.<locals>.make at 0x111170860>
+it_dept = <Department: تقانة المعلومات>
+
+    def test_probe_r60_one_account_waits_to_move_to_two_records(
+        api, django_capture_on_commit_callbacks, student, masters, make_student, make_user, it_dept
+    ):
+        """The pending-move guard is per record. The same graduate account opens a second pending
+        move to another new record; once the first is approved the second card answers 409
+        «this email is already used by another account» — about the student's own account."""
+        capture = django_capture_on_commit_callbacks
+>       _graduate_with_a_pending_move(api, capture, student, masters)
+
+core/tests/test_qa_probes_identity.py:133: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+api = <function api.<locals>.client at 0x110857060>
+capture = <bound method TestCase.captureOnCommitCallbacks of <class 'django.test.testcases.TestCase'>>
+student = <StudentRecord: 26-IT-0001 أحمد محمد علي>
+masters = <StudentRecord: 27-IT-M-0001 أحمد محمد علي>
+
+    def _graduate_with_a_pending_move(api, capture, student, masters):
+        """The bachelor's account, graduated, asks to move to a master's record whose file has no
+        official email: the move waits for the department."""
+        StudentRecord.objects.filter(pk=masters.pk).update(email="")
+        _register(api, capture, "ahmed@college.test")
+        StudentRecord.objects.filter(pk=student.pk).update(status=StudentRecord.Status.GRADUATED)
+        pending = _on_masters(api, capture, "ahmed@college.test")
+>       assert pending.data["status"] == "pending_approval"
+E       AssertionError: assert 'move_pending' == 'pending_approval'
+E         
+E         - pending_approval
+E         + move_pending
+
+core/tests/test_qa_probes_identity.py:36: AssertionError
+________ test_probe_r62_deleting_the_new_record_unarchives_the_old_one _________
+
+api = <function api.<locals>.client at 0x11192b560>
+django_capture_on_commit_callbacks = <bound method TestCase.captureOnCommitCallbacks of <class 'django.test.testcases.TestCase'>>
+student = <StudentRecord: 26-IT-0001 أحمد محمد علي>
+masters = <StudentRecord: 27-IT-M-0001 أحمد محمد علي>
+
+    def test_probe_r62_deleting_the_new_record_unarchives_the_old_one(
+        api, django_capture_on_commit_callbacks, student, masters
+    ):
+        """The archive mark is «account_moved_to is not null», and the key is SET_NULL: once the
+        master's record is gone (added by mistake, account detached), the bachelor's record is no
+        longer archived, and if its status is corrected to active it is offered an account again —
+        the case the 2026-11-08 fix meant to close."""
+        from django.core import mail
+    
+        capture = django_capture_on_commit_callbacks
+        _register(api, capture, "ahmed@college.test")
+        StudentRecord.objects.filter(pk=student.pk).update(status=StudentRecord.Status.GRADUATED)
+        assert _on_masters(api, capture, "ahmed@college.test").data["status"] == "moved"
+        StudentRecord.objects.filter(pk=masters.pk).update(user=None)  # e.g. an upheld report
+        StudentRecord.objects.filter(pk=masters.pk).delete()
+        student.refresh_from_db()
+        assert student.account_moved_to_id is None  # the archive mark is gone
+        StudentRecord.objects.filter(pk=student.pk).update(status=StudentRecord.Status.ACTIVE)
+        mail.outbox.clear()
+        _start(api, capture, "26-IT-0001", "أحمد محمد علي", "thief@gmail.test")
+>       assert len(mail.outbox) == 1  # a code is sent: the record can be claimed
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: assert 0 == 1
+E        +  where 0 = len([])
+E        +    where [] = <module 'django.core.mail' from '/Users/macbookairm1/Desktop/emarate-edu-platform/backend/.venv/lib/python3.13/site-packages/django/core/mail/__init__.py'>.outbox
+
+core/tests/test_qa_probes_identity.py:197: AssertionError
+==================================== PASSES ====================================
+=========================== short test summary info ============================
+PASSED core/tests/test_qa_probes_identity.py::test_probe_r61_a_new_student_is_added_to_a_stopped_programme
+FAILED core/tests/test_qa_probes_identity.py::test_probe_r57_a_verified_request_completes_over_a_pending_move
+FAILED core/tests/test_qa_probes_identity.py::test_probe_r59_an_upheld_report_leaves_the_pending_move_open
+FAILED core/tests/test_qa_probes_identity.py::test_probe_r60_one_account_waits_to_move_to_two_records
+FAILED core/tests/test_qa_probes_identity.py::test_probe_r62_deleting_the_new_record_unarchives_the_old_one
+4 failed, 1 passed in 7.00s

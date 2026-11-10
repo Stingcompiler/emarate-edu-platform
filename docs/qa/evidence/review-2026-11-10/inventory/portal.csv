@@ -1,0 +1,569 @@
+route,role,in_navigation,needs_a_record,e2e
+/login,(بلا دخول),,no,a11y fit password-reset pwa sign-in
+/register,(بلا دخول),,no,a11y fit
+/forgot-password,(بلا دخول),,no,fit
+/activate/:token,(بلا دخول),,yes,
+/change-password,(بلا دخول),,no,
+/apply,(بلا دخول),,no,a11y fit
+/apply/guide,(بلا دخول),,no,
+/track,(بلا دخول),,no,fit
+/,system_admin,no,no,a11y layout password-reset shots sign-in site-staff states
+/,system_supervisor,no,no,a11y layout password-reset shots sign-in site-staff states
+/,head_registrar,no,no,a11y layout password-reset shots sign-in site-staff states
+/,registrar,no,no,a11y layout password-reset shots sign-in site-staff states
+/,results_officer,no,no,a11y layout password-reset shots sign-in site-staff states
+/,academic_affairs,no,no,a11y layout password-reset shots sign-in site-staff states
+/,student_affairs,no,no,a11y layout password-reset shots sign-in site-staff states
+/,department_manager,no,no,a11y layout password-reset shots sign-in site-staff states
+/,department_supervisor,no,no,a11y layout password-reset shots sign-in site-staff states
+/,teacher,yes,no,a11y layout password-reset shots sign-in site-staff states
+/,ta,yes,no,a11y layout password-reset shots sign-in site-staff states
+/,student,yes,no,a11y layout password-reset shots sign-in site-staff states
+/,hr,no,no,a11y layout password-reset shots sign-in site-staff states
+/,site_manager,no,no,a11y layout password-reset shots sign-in site-staff states
+/,events_manager,no,no,a11y layout password-reset shots sign-in site-staff states
+/courses,system_admin,no,no,a11y layout shots
+/courses,system_supervisor,no,no,a11y layout shots
+/courses,academic_affairs,no,no,a11y layout shots
+/courses,department_manager,no,no,a11y layout shots
+/courses,department_supervisor,no,no,a11y layout shots
+/courses,teacher,yes,no,a11y layout shots
+/courses,ta,yes,no,a11y layout shots
+/courses,student,yes,no,a11y layout shots
+/courses/:id,system_admin,no,yes,
+/courses/:id,system_supervisor,no,yes,
+/courses/:id,academic_affairs,no,yes,
+/courses/:id,department_manager,no,yes,
+/courses/:id,department_supervisor,no,yes,
+/courses/:id,teacher,no,yes,
+/courses/:id,ta,no,yes,
+/courses/:id,student,no,yes,
+/courses/:id/students,system_admin,no,yes,
+/courses/:id/students,system_supervisor,no,yes,
+/courses/:id/students,academic_affairs,no,yes,
+/courses/:id/students,department_manager,no,yes,
+/courses/:id/students,department_supervisor,no,yes,
+/courses/:id/students,teacher,no,yes,
+/courses/:id/students,ta,no,yes,
+/lectures/new,system_admin,no,no,
+/lectures/new,system_supervisor,no,no,
+/lectures/new,department_manager,no,no,
+/lectures/new,department_supervisor,no,no,
+/lectures/new,teacher,no,no,
+/lectures/new,ta,no,no,
+/lectures/:id,system_admin,no,yes,
+/lectures/:id,system_supervisor,no,yes,
+/lectures/:id,academic_affairs,no,yes,
+/lectures/:id,department_manager,no,yes,
+/lectures/:id,department_supervisor,no,yes,
+/lectures/:id,teacher,no,yes,
+/lectures/:id,ta,no,yes,
+/lectures/:id,student,no,yes,
+/lectures/:id/edit,system_admin,no,yes,
+/lectures/:id/edit,system_supervisor,no,yes,
+/lectures/:id/edit,department_manager,no,yes,
+/lectures/:id/edit,department_supervisor,no,yes,
+/lectures/:id/edit,teacher,no,yes,
+/lectures/:id/edit,ta,no,yes,
+/assignments/new,system_admin,no,no,
+/assignments/new,system_supervisor,no,no,
+/assignments/new,department_manager,no,no,
+/assignments/new,department_supervisor,no,no,
+/assignments/new,teacher,no,no,
+/assignments/new,ta,no,no,
+/assignments/:id,system_admin,no,yes,
+/assignments/:id,system_supervisor,no,yes,
+/assignments/:id,academic_affairs,no,yes,
+/assignments/:id,department_manager,no,yes,
+/assignments/:id,department_supervisor,no,yes,
+/assignments/:id,teacher,no,yes,
+/assignments/:id,ta,no,yes,
+/assignments/:id,student,no,yes,
+/assignments/:id/edit,system_admin,no,yes,
+/assignments/:id/edit,system_supervisor,no,yes,
+/assignments/:id/edit,department_manager,no,yes,
+/assignments/:id/edit,department_supervisor,no,yes,
+/assignments/:id/edit,teacher,no,yes,
+/assignments/:id/edit,ta,no,yes,
+/submissions/:id,system_admin,no,yes,
+/submissions/:id,system_supervisor,no,yes,
+/submissions/:id,academic_affairs,no,yes,
+/submissions/:id,department_manager,no,yes,
+/submissions/:id,department_supervisor,no,yes,
+/submissions/:id,teacher,no,yes,
+/submissions/:id,ta,no,yes,
+/grading,system_admin,no,no,a11y journeys layout
+/grading,system_supervisor,no,no,a11y journeys layout
+/grading,department_manager,no,no,a11y journeys layout
+/grading,department_supervisor,no,no,a11y journeys layout
+/grading,teacher,yes,no,a11y journeys layout
+/grading,ta,yes,no,a11y journeys layout
+/tasks,student,yes,no,a11y layout
+/me,student,yes,no,a11y layout
+/me/status,student,no,no,
+/results-office,system_admin,no,no,access
+/results-office,system_supervisor,no,no,access
+/results-office,results_officer,yes,no,access
+/academic,system_admin,no,no,
+/academic,system_supervisor,no,no,
+/academic,academic_affairs,yes,no,
+/staff-profiles,system_admin,yes,no,
+/staff-profiles,system_supervisor,yes,no,
+/staff-profiles,academic_affairs,yes,no,
+/affairs,system_admin,no,no,
+/affairs,system_supervisor,no,no,
+/affairs,student_affairs,yes,no,
+/notifications,system_admin,yes,no,a11y layout
+/notifications,system_supervisor,yes,no,a11y layout
+/notifications,head_registrar,yes,no,a11y layout
+/notifications,registrar,yes,no,a11y layout
+/notifications,results_officer,yes,no,a11y layout
+/notifications,academic_affairs,yes,no,a11y layout
+/notifications,student_affairs,yes,no,a11y layout
+/notifications,department_manager,yes,no,a11y layout
+/notifications,department_supervisor,yes,no,a11y layout
+/notifications,teacher,yes,no,a11y layout
+/notifications,ta,yes,no,a11y layout
+/notifications,student,yes,no,a11y layout
+/notifications,hr,yes,no,a11y layout
+/notifications,site_manager,yes,no,a11y layout
+/notifications,events_manager,yes,no,a11y layout
+/notifications/new,system_admin,yes,no,
+/notifications/new,system_supervisor,yes,no,
+/notifications/new,head_registrar,yes,no,
+/notifications/new,academic_affairs,yes,no,
+/notifications/new,student_affairs,yes,no,
+/notifications/new,department_manager,yes,no,
+/notifications/new,department_supervisor,yes,no,
+/notifications/new,teacher,yes,no,
+/notifications/new,ta,yes,no,
+/notifications/new,site_manager,yes,no,
+/notifications/new,events_manager,yes,no,
+/settings,system_admin,yes,no,
+/settings,system_supervisor,yes,no,
+/settings,head_registrar,yes,no,
+/settings,registrar,yes,no,
+/settings,results_officer,yes,no,
+/settings,academic_affairs,yes,no,
+/settings,student_affairs,yes,no,
+/settings,department_manager,yes,no,
+/settings,department_supervisor,yes,no,
+/settings,teacher,yes,no,
+/settings,ta,yes,no,
+/settings,student,yes,no,
+/settings,hr,yes,no,
+/settings,site_manager,yes,no,
+/settings,events_manager,yes,no,
+/install,system_admin,yes,no,
+/install,system_supervisor,yes,no,
+/install,head_registrar,yes,no,
+/install,registrar,yes,no,
+/install,results_officer,yes,no,
+/install,academic_affairs,yes,no,
+/install,student_affairs,yes,no,
+/install,department_manager,yes,no,
+/install,department_supervisor,yes,no,
+/install,teacher,yes,no,
+/install,ta,yes,no,
+/install,student,no,no,
+/install,hr,yes,no,
+/install,site_manager,yes,no,
+/install,events_manager,yes,no,
+/results,student,yes,no,access
+/results/search,system_admin,yes,no,
+/results/search,system_supervisor,yes,no,
+/results/search,results_officer,yes,no,
+/results/settings,system_admin,yes,no,
+/results/settings,system_supervisor,yes,no,
+/results/settings,results_officer,yes,no,
+/result-imports,system_admin,yes,no,
+/result-imports,system_supervisor,yes,no,
+/result-imports,results_officer,yes,no,
+/result-imports,department_manager,yes,no,
+/result-imports,department_supervisor,yes,no,
+/result-imports/:id,system_admin,no,yes,
+/result-imports/:id,system_supervisor,no,yes,
+/result-imports/:id,results_officer,no,yes,
+/result-imports/:id,department_manager,no,yes,
+/result-imports/:id,department_supervisor,no,yes,
+/result-corrections,system_admin,yes,no,
+/result-corrections,system_supervisor,yes,no,
+/result-corrections,results_officer,yes,no,
+/result-corrections,academic_affairs,yes,no,
+/regulations,system_admin,yes,no,
+/regulations,system_supervisor,yes,no,
+/regulations,head_registrar,no,no,
+/regulations,registrar,no,no,
+/regulations,results_officer,no,no,
+/regulations,academic_affairs,no,no,
+/regulations,student_affairs,yes,no,
+/regulations,department_manager,no,no,
+/regulations,department_supervisor,no,no,
+/regulations,teacher,no,no,
+/regulations,ta,no,no,
+/regulations,student,yes,no,
+/regulations,hr,no,no,
+/regulations,site_manager,no,no,
+/regulations,events_manager,no,no,
+/regulations/new,system_admin,no,no,access
+/regulations/new,system_supervisor,no,no,access
+/regulations/new,student_affairs,no,no,access
+/regulations/:id,system_admin,no,yes,
+/regulations/:id,system_supervisor,no,yes,
+/regulations/:id,head_registrar,no,yes,
+/regulations/:id,registrar,no,yes,
+/regulations/:id,results_officer,no,yes,
+/regulations/:id,academic_affairs,no,yes,
+/regulations/:id,student_affairs,no,yes,
+/regulations/:id,department_manager,no,yes,
+/regulations/:id,department_supervisor,no,yes,
+/regulations/:id,teacher,no,yes,
+/regulations/:id,ta,no,yes,
+/regulations/:id,student,no,yes,
+/regulations/:id,hr,no,yes,
+/regulations/:id,site_manager,no,yes,
+/regulations/:id,events_manager,no,yes,
+/exams,system_admin,yes,no,a11y layout shots
+/exams,system_supervisor,yes,no,a11y layout shots
+/exams,academic_affairs,yes,no,a11y layout shots
+/exams,department_manager,yes,no,a11y layout shots
+/exams,department_supervisor,yes,no,a11y layout shots
+/exams,teacher,yes,no,a11y layout shots
+/exams,ta,yes,no,a11y layout shots
+/exams,student,yes,no,a11y layout shots
+/exams/new,system_admin,no,no,
+/exams/new,system_supervisor,no,no,
+/exams/new,department_manager,no,no,
+/exams/new,department_supervisor,no,no,
+/exams/new,teacher,no,no,
+/exams/new,ta,no,no,
+/exams/:id,system_admin,no,yes,
+/exams/:id,system_supervisor,no,yes,
+/exams/:id,academic_affairs,no,yes,
+/exams/:id,department_manager,no,yes,
+/exams/:id,department_supervisor,no,yes,
+/exams/:id,teacher,no,yes,
+/exams/:id,ta,no,yes,
+/exams/:id,student,no,yes,
+/exams/:id/edit,system_admin,no,yes,
+/exams/:id/edit,system_supervisor,no,yes,
+/exams/:id/edit,department_manager,no,yes,
+/exams/:id/edit,department_supervisor,no,yes,
+/exams/:id/edit,teacher,no,yes,
+/exams/:id/edit,ta,no,yes,
+/exams/:id/monitor,system_admin,no,yes,
+/exams/:id/monitor,system_supervisor,no,yes,
+/exams/:id/monitor,academic_affairs,no,yes,
+/exams/:id/monitor,department_manager,no,yes,
+/exams/:id/monitor,department_supervisor,no,yes,
+/exams/:id/monitor,teacher,no,yes,
+/exams/:id/monitor,ta,no,yes,
+/exams/:id/stats,system_admin,no,yes,
+/exams/:id/stats,system_supervisor,no,yes,
+/exams/:id/stats,academic_affairs,no,yes,
+/exams/:id/stats,department_manager,no,yes,
+/exams/:id/stats,department_supervisor,no,yes,
+/exams/:id/stats,teacher,no,yes,
+/exams/:id/stats,ta,no,yes,
+/exam-attempts/:id,system_admin,no,yes,
+/exam-attempts/:id,system_supervisor,no,yes,
+/exam-attempts/:id,academic_affairs,no,yes,
+/exam-attempts/:id,department_manager,no,yes,
+/exam-attempts/:id,department_supervisor,no,yes,
+/exam-attempts/:id,teacher,no,yes,
+/exam-attempts/:id,ta,no,yes,
+/exam-attempts/:id,student,no,yes,
+/exam-attempts/:id/result,system_admin,no,yes,
+/exam-attempts/:id/result,system_supervisor,no,yes,
+/exam-attempts/:id/result,academic_affairs,no,yes,
+/exam-attempts/:id/result,department_manager,no,yes,
+/exam-attempts/:id/result,department_supervisor,no,yes,
+/exam-attempts/:id/result,teacher,no,yes,
+/exam-attempts/:id/result,ta,no,yes,
+/exam-attempts/:id/result,student,no,yes,
+/live,system_admin,yes,no,
+/live,system_supervisor,yes,no,
+/live,academic_affairs,yes,no,
+/live,department_manager,yes,no,
+/live,department_supervisor,yes,no,
+/live,teacher,yes,no,
+/live,ta,yes,no,
+/live,student,yes,no,
+/live/new,system_admin,no,no,
+/live/new,system_supervisor,no,no,
+/live/new,department_manager,no,no,
+/live/new,department_supervisor,no,no,
+/live/new,teacher,no,no,
+/live/new,ta,no,no,
+/announcements,system_admin,yes,no,layout
+/announcements,system_supervisor,yes,no,layout
+/announcements,head_registrar,yes,no,layout
+/announcements,registrar,yes,no,layout
+/announcements,results_officer,yes,no,layout
+/announcements,academic_affairs,yes,no,layout
+/announcements,student_affairs,yes,no,layout
+/announcements,department_manager,yes,no,layout
+/announcements,department_supervisor,yes,no,layout
+/announcements,teacher,yes,no,layout
+/announcements,ta,yes,no,layout
+/announcements,student,yes,no,layout
+/announcements,hr,yes,no,layout
+/announcements,site_manager,yes,no,layout
+/announcements,events_manager,yes,no,layout
+/announcements/new,system_admin,no,no,a11y
+/announcements/new,system_supervisor,no,no,a11y
+/announcements/new,head_registrar,no,no,a11y
+/announcements/new,registrar,no,no,a11y
+/announcements/new,academic_affairs,no,no,a11y
+/announcements/new,department_manager,no,no,a11y
+/announcements/new,department_supervisor,no,no,a11y
+/announcements/new,teacher,no,no,a11y
+/announcements/new,ta,no,no,a11y
+/announcements/new,site_manager,no,no,a11y
+/announcements/new,events_manager,no,no,a11y
+/inquiries,system_admin,yes,no,journeys
+/inquiries,system_supervisor,yes,no,journeys
+/inquiries,head_registrar,yes,no,journeys
+/inquiries,registrar,yes,no,journeys
+/inquiries,site_manager,yes,no,journeys
+/inquiries/:id,system_admin,no,yes,
+/inquiries/:id,system_supervisor,no,yes,
+/inquiries/:id,head_registrar,no,yes,
+/inquiries/:id,registrar,no,yes,
+/inquiries/:id,site_manager,no,yes,
+/site,system_admin,yes,no,
+/site,system_supervisor,yes,no,
+/site,site_manager,yes,no,
+/site/pages/:id,system_admin,no,yes,
+/site/pages/:id,system_supervisor,no,yes,
+/site/pages/:id,site_manager,no,yes,
+/site/news/:id,system_admin,no,yes,
+/site/news/:id,system_supervisor,no,yes,
+/site/news/:id,site_manager,no,yes,
+/site/news/:id,events_manager,no,yes,
+/site/media,system_admin,no,no,
+/site/media,system_supervisor,no,no,
+/site/media,site_manager,no,no,
+/site/redirects,system_admin,no,no,
+/site/redirects,system_supervisor,no,no,
+/site/redirects,site_manager,no,no,
+/site-staff,system_admin,yes,no,site-staff
+/site-staff,system_supervisor,yes,no,site-staff
+/site-staff,site_manager,yes,no,site-staff
+/site/staff,(بلا دخول),,no,site-staff
+/events,system_admin,yes,no,
+/events,system_supervisor,yes,no,
+/events,site_manager,yes,no,
+/events,events_manager,yes,no,
+/events/:id,system_admin,no,yes,
+/events/:id,system_supervisor,no,yes,
+/events/:id,site_manager,no,yes,
+/events/:id,events_manager,no,yes,
+/applications,system_admin,yes,no,journeys
+/applications,system_supervisor,yes,no,journeys
+/applications,head_registrar,yes,no,journeys
+/applications,registrar,yes,no,journeys
+/applications,department_manager,no,no,journeys
+/applications,department_supervisor,no,no,journeys
+/applications/:id,system_admin,no,yes,
+/applications/:id,system_supervisor,no,yes,
+/applications/:id,head_registrar,no,yes,
+/applications/:id,registrar,no,yes,
+/applications/:id,department_manager,no,yes,
+/applications/:id,department_supervisor,no,yes,
+/applications/:id/print,system_admin,no,yes,
+/applications/:id/print,system_supervisor,no,yes,
+/applications/:id/print,head_registrar,no,yes,
+/applications/:id/print,registrar,no,yes,
+/applications/:id/print,department_manager,no,yes,
+/applications/:id/print,department_supervisor,no,yes,
+/admissions/cycles,system_admin,yes,no,
+/admissions/cycles,system_supervisor,yes,no,
+/admissions/cycles,head_registrar,yes,no,
+/admissions/forms,system_admin,yes,no,keyboard
+/admissions/forms,system_supervisor,yes,no,keyboard
+/admissions/forms,head_registrar,yes,no,keyboard
+/admissions/forms,registrar,no,no,keyboard
+/registrar,system_admin,yes,no,
+/registrar,system_supervisor,yes,no,
+/registrar,head_registrar,yes,no,
+/registrar,registrar,yes,no,
+/students,system_admin,yes,no,journeys
+/students,system_supervisor,yes,no,journeys
+/students,head_registrar,yes,no,journeys
+/students,student_affairs,no,no,journeys
+/students,department_manager,no,no,journeys
+/students,department_supervisor,no,no,journeys
+/students/new,system_admin,no,no,
+/students/new,system_supervisor,no,no,
+/students/new,head_registrar,no,no,
+/students/:id,system_admin,no,yes,
+/students/:id,system_supervisor,no,yes,
+/students/:id,head_registrar,no,yes,
+/students/:id,student_affairs,no,yes,
+/students/:id,department_manager,no,yes,
+/students/:id,department_supervisor,no,yes,
+/student-imports,system_admin,yes,no,
+/student-imports,system_supervisor,yes,no,
+/student-imports,head_registrar,yes,no,
+/student-promotion,system_admin,yes,no,
+/student-promotion,system_supervisor,yes,no,
+/student-promotion,head_registrar,yes,no,
+/student-imports/:id,system_admin,no,yes,
+/student-imports/:id,system_supervisor,no,yes,
+/student-imports/:id,head_registrar,no,yes,
+/registrars,system_admin,yes,no,
+/registrars,system_supervisor,yes,no,
+/registrars,head_registrar,yes,no,
+/department,system_admin,no,no,a11y access layout sign-in
+/department,system_supervisor,no,no,a11y access layout sign-in
+/department,academic_affairs,no,no,a11y access layout sign-in
+/department,department_manager,yes,no,a11y access layout sign-in
+/department,department_supervisor,yes,no,a11y access layout sign-in
+/department/courses,system_admin,no,no,a11y layout
+/department/courses,system_supervisor,no,no,a11y layout
+/department/courses,academic_affairs,no,no,a11y layout
+/department/courses,department_manager,yes,no,a11y layout
+/department/courses,department_supervisor,yes,no,a11y layout
+/department/lectures,system_admin,no,no,
+/department/lectures,system_supervisor,no,no,
+/department/lectures,academic_affairs,no,no,
+/department/lectures,department_manager,yes,no,
+/department/lectures,department_supervisor,yes,no,
+/department/teachers,system_admin,no,no,
+/department/teachers,system_supervisor,no,no,
+/department/teachers,academic_affairs,no,no,
+/department/teachers,department_manager,yes,no,
+/department/teachers,department_supervisor,yes,no,
+/department/students,system_admin,no,no,a11y layout
+/department/students,system_supervisor,no,no,a11y layout
+/department/students,academic_affairs,no,no,a11y layout
+/department/students,department_manager,yes,no,a11y layout
+/department/students,department_supervisor,yes,no,a11y layout
+/department/approvals,system_admin,no,no,journeys
+/department/approvals,system_supervisor,no,no,journeys
+/department/approvals,head_registrar,no,no,journeys
+/department/approvals,department_manager,yes,no,journeys
+/department/approvals,department_supervisor,yes,no,journeys
+/department/audit,system_admin,no,no,layout
+/department/audit,system_supervisor,no,no,layout
+/department/audit,department_manager,yes,no,layout
+/department/audit,department_supervisor,yes,no,layout
+/reports,system_admin,yes,no,layout
+/reports,system_supervisor,yes,no,layout
+/reports,academic_affairs,yes,no,layout
+/reports,department_manager,yes,no,layout
+/reports,department_supervisor,yes,no,layout
+/reports/admissions,system_admin,yes,no,
+/reports/admissions,system_supervisor,yes,no,
+/reports/admissions,head_registrar,yes,no,
+/reports/admissions,registrar,yes,no,
+/reports/admissions,department_manager,yes,no,
+/reports/admissions,department_supervisor,yes,no,
+/reports/affairs,system_admin,yes,no,
+/reports/affairs,system_supervisor,yes,no,
+/reports/affairs,student_affairs,yes,no,
+/hr,system_admin,yes,no,
+/hr,system_supervisor,yes,no,
+/hr,academic_affairs,yes,no,
+/hr,hr,yes,no,
+/hr/teachers,system_admin,yes,no,
+/hr/teachers,system_supervisor,yes,no,
+/hr/teachers,academic_affairs,yes,no,
+/hr/teachers,department_manager,no,no,
+/hr/teachers,department_supervisor,no,no,
+/hr/teachers,hr,yes,no,
+/hr/teachers/:id,system_admin,no,yes,
+/hr/teachers/:id,system_supervisor,no,yes,
+/hr/teachers/:id,academic_affairs,no,yes,
+/hr/teachers/:id,department_manager,no,yes,
+/hr/teachers/:id,department_supervisor,no,yes,
+/hr/teachers/:id,hr,no,yes,
+/me/teaching,teacher,yes,no,
+/me/teaching,ta,yes,no,
+/hr/notices/new,system_admin,no,no,
+/hr/notices/new,system_supervisor,no,no,
+/hr/notices/new,academic_affairs,no,no,
+/hr/notices/new,hr,no,no,
+/hr/report,system_admin,yes,no,
+/hr/report,system_supervisor,yes,no,
+/hr/report,academic_affairs,yes,no,
+/hr/report,department_manager,no,no,
+/hr/report,department_supervisor,no,no,
+/hr/report,hr,yes,no,
+/hr-notices/:id,system_admin,no,yes,
+/hr-notices/:id,system_supervisor,no,yes,
+/hr-notices/:id,academic_affairs,no,yes,
+/hr-notices/:id,teacher,no,yes,
+/hr-notices/:id,ta,no,yes,
+/hr-notices/:id,hr,no,yes,
+/transcripts,system_admin,yes,no,
+/transcripts,system_supervisor,yes,no,
+/transcripts,head_registrar,yes,no,
+/transcripts,results_officer,yes,no,
+/transcripts,department_manager,no,no,
+/transcripts,department_supervisor,no,no,
+/print/report/:id,system_admin,no,yes,
+/print/report/:id,system_supervisor,no,yes,
+/print/report/:id,head_registrar,no,yes,
+/print/report/:id,registrar,no,yes,
+/print/report/:id,academic_affairs,no,yes,
+/print/report/:id,student_affairs,no,yes,
+/print/report/:id,department_manager,no,yes,
+/print/report/:id,department_supervisor,no,yes,
+/print/report/:id,hr,no,yes,
+/print/transcript/:number,system_admin,no,yes,
+/print/transcript/:number,system_supervisor,no,yes,
+/print/transcript/:number,head_registrar,no,yes,
+/print/transcript/:number,results_officer,no,yes,
+/print/transcript/:number,department_manager,no,yes,
+/print/transcript/:number,department_supervisor,no,yes,
+/print/transcript/:number,student,no,yes,
+/print/my-results,student,no,no,
+/cases,system_admin,yes,no,
+/cases,system_supervisor,yes,no,
+/cases,head_registrar,yes,no,
+/cases,academic_affairs,yes,no,
+/cases,student_affairs,yes,no,
+/cases,department_manager,no,no,
+/cases,department_supervisor,no,no,
+/cases/new,system_admin,no,no,
+/cases/new,system_supervisor,no,no,
+/cases/new,student_affairs,no,no,
+/cases/:id,system_admin,no,yes,
+/cases/:id,system_supervisor,no,yes,
+/cases/:id,head_registrar,no,yes,
+/cases/:id,academic_affairs,no,yes,
+/cases/:id,student_affairs,no,yes,
+/cases/:id,department_manager,no,yes,
+/cases/:id,department_supervisor,no,yes,
+/system,system_admin,yes,no,a11y layout
+/system,system_supervisor,yes,no,a11y layout
+/system/users,system_admin,yes,no,a11y access layout shots
+/system/users,system_supervisor,yes,no,a11y access layout shots
+/system/users,head_registrar,no,no,a11y access layout shots
+/system/users,academic_affairs,no,no,a11y access layout shots
+/system/users/:id,system_admin,no,yes,
+/system/users/:id,system_supervisor,no,yes,
+/system/users/:id,head_registrar,no,yes,
+/system/users/:id,academic_affairs,no,yes,
+/system/roles,system_admin,yes,no,
+/system/roles,system_supervisor,yes,no,
+/system/roles,head_registrar,no,no,
+/system/roles,academic_affairs,no,no,
+/system/structure,system_admin,yes,no,a11y journeys keyboard layout
+/system/structure,system_supervisor,yes,no,a11y journeys keyboard layout
+/system/settings,system_admin,yes,no,a11y layout
+/system/settings,system_supervisor,yes,no,a11y layout
+/system/deletions,system_admin,yes,no,
+/system/deletions,system_supervisor,yes,no,
+/audit,system_admin,yes,no,layout
+/audit,system_supervisor,yes,no,layout
+/audit,head_registrar,yes,no,layout
+/audit,registrar,yes,no,layout
+/audit,results_officer,yes,no,layout
+/audit,academic_affairs,yes,no,layout
+/audit,department_manager,no,no,layout
+/audit,department_supervisor,no,no,layout
+/audit,site_manager,yes,no,layout
+*,(بلا دخول),,yes,
