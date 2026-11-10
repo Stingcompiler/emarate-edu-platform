@@ -141,6 +141,7 @@ def start_registration(
     matched = (
         record_ is not None
         and record_.status == StudentRecord.Status.ACTIVE
+        and record_.account_moved_at is None
         and record_.account_moved_to_id is None
     )
     with transaction.atomic():
@@ -189,6 +190,22 @@ def complete_registration(request: RegistrationRequest, password: str) -> str:
         if locked.user_id is not None:
             raise Conflict(
                 gettext("This student already has an account."), code="already_registered"
+            )
+        if (
+            locked.registration_requests.filter(
+                status=RegistrationRequest.Status.PENDING_APPROVAL, moves_account=True
+            )
+            .exclude(pk=request.pk)
+            .exists()
+        ):
+            # A graduate's move went pending after this request was verified: the start refuses
+            # such a record, and so does the finish (review 2026-11-10, R57).
+            raise Conflict(
+                gettext(
+                    "An account on this university number is waiting for the department's "
+                    "approval. If it is not yours, report it."
+                ),
+                code="pending_approval",
             )
         existing = User.objects.select_for_update().filter(email=request.email).first()
         if existing is not None:
@@ -275,7 +292,8 @@ def _move(meta: RequestMeta, record_: StudentRecord, account: User, earlier: Stu
     """The account leaves ``earlier`` (archived: nothing comes over) for ``record_``."""
     earlier.user = None
     earlier.account_moved_to = record_
-    earlier.save(update_fields=["user", "account_moved_to", "updated_at"])
+    earlier.account_moved_at = timezone.now()
+    earlier.save(update_fields=["user", "account_moved_to", "account_moved_at", "updated_at"])
     record_.user = account
     record_.save(update_fields=["user", "updated_at"])
     account.full_name_ar = record_.full_name_ar
@@ -315,6 +333,21 @@ def _request_move(
     share a name). Runs inside complete_registration's transaction, with ``record_`` locked.
     """
     earlier = _check_move(record_, account)
+    if (
+        RegistrationRequest.objects.filter(
+            email=account.email,
+            moves_account=True,
+            status=RegistrationRequest.Status.PENDING_APPROVAL,
+        )
+        .exclude(pk=request.pk)
+        .exists()
+    ):
+        # One move at a time: a second card could only fail once the first is approved
+        # (review 2026-11-10, R60).
+        raise Conflict(
+            gettext("A move of this account already waits for the department's approval."),
+            code="move_pending",
+        )
     account.set_password(password)
     account.save(update_fields=["password"])
     _revoke_refresh_tokens(account)  # a new password: other sessions sign in again
@@ -336,7 +369,8 @@ def _request_move(
         to, program = account.email, record_.program.name_ar
         transaction.on_commit(lambda: emails.account_move_pending(to, program))
         events.registration_pending(request)
-        return "pending_approval"
+        # Not «pending_approval»: the account works meanwhile, on its earlier record.
+        return "move_pending"
     _move(SYSTEM, record_, account, earlier)
     request.status = RegistrationRequest.Status.APPROVED
     request.decided_at = timezone.now()
@@ -349,18 +383,26 @@ def _decide_move(
     meta: RequestMeta, request: RegistrationRequest, student: StudentRecord, approve: bool
 ) -> None:
     """A pending move (``moves_account``): approving moves the account, rejecting leaves it on
-    its earlier record. Inside decide_registration's transaction, request locked."""
-    already = Conflict(gettext("This request was already decided."), code="already_decided")
+    its earlier record. Inside decide_registration's transaction, request locked.
+
+    A card whose account is gone, or whose record got an account meanwhile, can only be
+    closed: approving answers 409 ``stale``, rejecting closes it without a word to anyone
+    (review 2026-11-10, R58: both used to answer 409, so the card stayed for good)."""
     account = User.objects.select_for_update().filter(email=request.email).first()
     record_ = StudentRecord.objects.select_for_update().get(pk=student.pk)
-    if account is None or record_.user_id is not None:
-        raise already  # the account is gone, or the record got an account meanwhile
+    stale = account is None or record_.user_id is not None
+    program = record_.program.name_ar
     if approve:
+        if stale:
+            raise Conflict(
+                gettext("This record now holds another account. Reject this request."),
+                code="stale",
+            )
         _move(meta, record_, account, _check_move(record_, account))
-        events.registration_approved(account)
-    else:
+        events.account_move_approved(account, record_)
+    elif not stale:
         to, reason = request.email, request.reason
-        transaction.on_commit(lambda: emails.registration_decided(to, False, reason))
+        transaction.on_commit(lambda: emails.account_move_rejected(to, program, reason))
 
 
 def decide_registration(
@@ -513,6 +555,19 @@ def decide_identity_report(
                     RegistrationRequest.Status.VERIFIED,
                     RegistrationRequest.Status.PENDING_APPROVAL,
                 ],
+            ).update(
+                status=RegistrationRequest.Status.REJECTED,
+                decided_by=meta.actor,
+                decided_at=timezone.now(),
+                reason=gettext("The account was stopped after an impersonation report."),
+                updated_at=timezone.now(),
+            )
+            # A move this account asked for waits on ANOTHER record: closed too, or its card
+            # could never be approved and kept that record shut (review 2026-11-10, R59).
+            RegistrationRequest.objects.filter(
+                email=account.email,
+                moves_account=True,
+                status=RegistrationRequest.Status.PENDING_APPROVAL,
             ).update(
                 status=RegistrationRequest.Status.REJECTED,
                 decided_by=meta.actor,

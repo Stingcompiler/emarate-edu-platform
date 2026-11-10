@@ -514,7 +514,7 @@ def test_a_move_on_another_email_waits_for_the_department(
     StudentRecord.objects.filter(pk=student.pk).update(status=StudentRecord.Status.GRADUATED)
 
     pending = _on_masters(api, capture, "ahmed@college.test")
-    assert pending.status_code == 201 and pending.data["status"] == "pending_approval"
+    assert pending.status_code == 201 and pending.data["status"] == "move_pending"
     masters.refresh_from_db()
     student.refresh_from_db()
     assert masters.user_id is None and student.user_id == account.pk
@@ -557,7 +557,7 @@ def test_a_rejected_move_leaves_the_account_where_it_was(
     _register(api, capture, "ahmed@college.test")
     account = User.objects.get(email="ahmed@college.test")
     StudentRecord.objects.filter(pk=student.pk).update(status=StudentRecord.Status.GRADUATED)
-    assert _on_masters(api, capture, "ahmed@college.test").data["status"] == "pending_approval"
+    assert _on_masters(api, capture, "ahmed@college.test").data["status"] == "move_pending"
 
     manager = make_user(Role.DEPARTMENT_MANAGER, department=it_dept)
     card = next(
@@ -573,7 +573,11 @@ def test_a_rejected_move_leaves_the_account_where_it_was(
     student.refresh_from_db()
     masters.refresh_from_db()
     assert account.is_active and student.user_id == account.pk and masters.user_id is None
-    assert "لم يُعتمد" in mail.outbox[-1].body
+    # The student is told the move was refused and that the account is fine — not to register
+    # again (review 2026-11-10).
+    body = mail.outbox[-1].body
+    assert "لم يُعتمد نقل حسابك" in body and "حسابك باقٍ كما هو" in body
+    assert "أعد التسجيل" not in body
 
 
 def test_an_archived_record_is_never_offered_an_account_again(
@@ -594,3 +598,156 @@ def test_an_archived_record_is_never_offered_an_account_again(
     assert mail.outbox == []  # the same quiet answer as unknown details
     refused = api().post(VERIFY, {"request_id": request_id, "code": "000000"})
     assert refused.status_code == 400
+
+
+# --- Review 2026-11-10, axis 1.1 (probes R57–R60, R62 turned into tests) -------------------
+
+REQUESTS = "/api/v1/registration-requests"
+
+
+def _pending_move(api, capture, student, masters):
+    """The bachelor's account, graduated, asks to move to a master's record whose file has no
+    official email: the move waits for the department."""
+    from students.models import StudentRecord
+
+    StudentRecord.objects.filter(pk=masters.pk).update(email="")
+    _register(api, capture, "ahmed@college.test")
+    StudentRecord.objects.filter(pk=student.pk).update(status=StudentRecord.Status.GRADUATED)
+    assert _on_masters(api, capture, "ahmed@college.test").data["status"] == "move_pending"
+    return User.objects.get(email="ahmed@college.test")
+
+
+def _move_card(api, manager, number="27-IT-M-0001"):
+    cards = api(manager).get(REQUESTS).data["results"]
+    return next(c for c in cards if c["university_number"] == number and c["moves_account"])
+
+
+def test_a_request_verified_before_the_move_cannot_finish_over_it(
+    api, django_capture_on_commit_callbacks, student, masters
+):
+    """R57: the start refuses a record with a pending move; a request that was verified before
+    the move went pending is refused at the finish, and no second account is made."""
+    from students.models import StudentRecord
+
+    capture = django_capture_on_commit_callbacks
+    StudentRecord.objects.filter(pk=masters.pk).update(email="")
+    early = _start(api, capture, "27-IT-M-0001", "أحمد محمد علي", "other@gmail.test", "MIT")
+    assert api().post(VERIFY, {"request_id": early, "code": last_code()}).status_code == 200
+    _register(api, capture, "ahmed@college.test")
+    StudentRecord.objects.filter(pk=student.pk).update(status=StudentRecord.Status.GRADUATED)
+    assert _on_masters(api, capture, "ahmed@college.test").data["status"] == "move_pending"
+
+    late = api().post(COMPLETE, {"request_id": early, "password": NEW_PASSWORD})
+    assert late.status_code == 409 and late.data["code"] == "pending_approval"
+    masters.refresh_from_db()
+    assert masters.user_id is None
+    assert not User.objects.filter(email="other@gmail.test").exists()
+
+
+def test_a_stale_move_card_is_closed_by_rejecting_it(
+    api, django_capture_on_commit_callbacks, student, masters, make_user, it_dept
+):
+    """R58: a card whose record got an account meanwhile cannot be approved, and rejecting it
+    closes it — with no email telling a student with a working account that it was refused."""
+    capture = django_capture_on_commit_callbacks
+    _pending_move(api, capture, student, masters)
+    other = make_user(Role.STUDENT, email="other@gmail.test")
+    masters.user = other  # e.g. the registrar's correction, or an older request's account
+    masters.save(update_fields=["user"])
+    manager = make_user(Role.DEPARTMENT_MANAGER, department=it_dept)
+    url = f"{REQUESTS}/{_move_card(api, manager)['public_id']}/decide"
+    refused = api(manager).post(url, {"approve": True})
+    assert refused.status_code == 409 and refused.data["code"] == "stale"
+    mail.outbox.clear()
+    with capture(execute=True):
+        closed = api(manager).post(url, {"approve": False, "reason": "للسجل حساب آخر"})
+    assert closed.status_code == 200 and closed.data["status"] == "rejected"
+    assert mail.outbox == []
+    masters.refresh_from_db()
+    student.refresh_from_db()
+    assert masters.user == other and student.user.email == "ahmed@college.test"
+
+
+def test_an_upheld_report_closes_the_accounts_pending_move(
+    api, django_capture_on_commit_callbacks, student, masters, make_user, it_dept
+):
+    """R59: stopping an account after a report closes the move it asked for on another record,
+    so that record's real student can register."""
+    capture = django_capture_on_commit_callbacks
+    _pending_move(api, capture, student, masters)
+    manager = make_user(Role.DEPARTMENT_MANAGER, department=it_dept)
+    with capture(execute=True):
+        assert api().post(REPORT, {**DETAILS, "email": "real@me.test"}).status_code == 201
+    report = api(manager).get(REPORTS, {"status": "open"}).data["results"][0]
+    with capture(execute=True):
+        upheld = api(manager).post(f"{REPORTS}/{report['public_id']}/decide", {"uphold": True})
+    assert upheld.status_code == 200
+    cards = api(manager).get(REQUESTS, {"status": "pending_approval"}).data["results"]
+    assert [c for c in cards if c["moves_account"]] == []
+    # The master's record is open again to its student.
+    again = _start(api, capture, "27-IT-M-0001", "أحمد محمد علي", "real@me.test", "MIT")
+    assert api().post(VERIFY, {"request_id": again, "code": last_code()}).status_code == 200
+
+
+def test_an_account_asks_for_one_move_at_a_time(
+    api, django_capture_on_commit_callbacks, student, masters, make_student, it_dept
+):
+    """R60: a second pending move of the same account is refused when it is asked for, not
+    when its card is approved."""
+    from organization.models import Program
+
+    capture = django_capture_on_commit_callbacks
+    _pending_move(api, capture, student, masters)
+    second = Program.objects.create(
+        department=it_dept,
+        code="MIS",
+        name_ar="ماجستير نظم المعلومات",
+        degree=Program.Degree.MASTER,
+        levels_count=2,
+        duration_terms=4,
+    )
+    other = make_student(second, "27-IS-M-0001", name="أحمد محمد علي")
+    again = _start(api, capture, "27-IS-M-0001", "أحمد محمد علي", "ahmed@college.test", "MIS")
+    assert api().post(VERIFY, {"request_id": again, "code": last_code()}).status_code == 200
+    refused = api().post(COMPLETE, {"request_id": again, "password": NEW_PASSWORD})
+    assert refused.status_code == 409 and refused.data["code"] == "move_pending"
+    assert not other.registration_requests.filter(moves_account=True).exists()
+
+
+def test_an_archived_record_stays_archived_when_the_new_record_is_deleted(
+    api, django_capture_on_commit_callbacks, student, masters
+):
+    """R62: the archive mark is the time of the move, not the pointer to the new record: the
+    pointer is cleared when that record is deleted, and the old record still gets no account."""
+    from students.models import StudentRecord
+
+    capture = django_capture_on_commit_callbacks
+    _register(api, capture, "ahmed@college.test")
+    StudentRecord.objects.filter(pk=student.pk).update(status=StudentRecord.Status.GRADUATED)
+    assert _on_masters(api, capture, "ahmed@college.test").data["status"] == "moved"
+    StudentRecord.objects.filter(pk=masters.pk).update(user=None)
+    StudentRecord.objects.filter(pk=masters.pk).delete()
+    student.refresh_from_db()
+    assert student.account_moved_to_id is None and student.account_moved_at is not None
+    StudentRecord.objects.filter(pk=student.pk).update(status=StudentRecord.Status.ACTIVE)
+    mail.outbox.clear()
+    _start(api, capture, "26-IT-0001", "أحمد محمد علي", "thief@gmail.test")
+    assert mail.outbox == []
+
+
+def test_an_approved_move_tells_the_student_about_the_move(
+    api, django_capture_on_commit_callbacks, student, masters, make_user, it_dept
+):
+    """The notice says the move was approved, not «your account was approved»."""
+    from notifications.models import Notification
+
+    capture = django_capture_on_commit_callbacks
+    account = _pending_move(api, capture, student, masters)
+    manager = make_user(Role.DEPARTMENT_MANAGER, department=it_dept)
+    url = f"{REQUESTS}/{_move_card(api, manager)['public_id']}/decide"
+    with capture(execute=True):
+        assert api(manager).post(url, {"approve": True}).status_code == 200
+    titles = list(
+        Notification.objects.filter(recipients__user=account).values_list("title", flat=True)
+    )
+    assert "اعتُمد نقل حسابك إلى برنامجك الجديد" in titles and "اعتُمد حسابك" not in titles
