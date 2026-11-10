@@ -1,0 +1,260 @@
+......                                                                   [100%]
+==================================== PASSES ====================================
+_________ test_probe_r67_a_member_of_both_departments_breaks_the_merge _________
+----------------------------- Captured stderr call -----------------------------
+2026-11-10 11:25:32,523 ERROR django.request Internal Server Error: /api/v1/departments/1/merge
+Traceback (most recent call last):
+  File "/Users/macbookairm1/Desktop/emarate-edu-platform/backend/.venv/lib/python3.13/site-packages/django/db/models/query.py", line 1070, in get_or_create
+    return self.get(**kwargs), False
+           ~~~~~~~~^^^^^^^^^^
+  File "/Users/macbookairm1/Desktop/emarate-edu-platform/backend/.venv/lib/python3.13/site-packages/django/db/models/query.py", line 722, in get
+    raise self.model.DoesNotExist(
+        "%s matching query does not exist." % self.model._meta.object_name
+    )
+academic.models.DepartmentMembership.DoesNotExist: DepartmentMembership matching query does not exist.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/macbookairm1/Desktop/emarate-edu-platform/backend/.venv/lib/python3.13/site-packages/django/db/backends/utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/Users/macbookairm1/Desktop/emarate-edu-platform/backend/.venv/lib/python3.13/site-packages/psycopg/cursor.py", line 117, in execute
+    raise ex.with_traceback(None)
+psycopg.errors.UniqueViolation: duplicate key value violates unique constraint "uniq_department_member"
+DETAIL:  Key (department_id, user_id)=(2, 1) already exists.
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/macbookairm1/Desktop/emarate-edu-platform/backend/.venv/lib/python3.13/site-packages/django/core/handlers/exception.py", line 56, in inner
+    response = get_response(request)
+  File "/Users/macbookairm1/Desktop/emarate-edu-platform/backend/.venv/lib/python3.13/site-packages/django/core/handlers/base.py", line 199, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/macbookairm1/Desktop/emarate-edu-platform/backend/.venv/lib/python3.13/site-packages/django/views/decorators/csrf.py", line 64, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "/Users/macbookairm1/Desktop/emarate-edu-platform/backend/.venv/lib/python3.13/site-packages/rest_framework/viewsets.py", line 124, in view
+    return self.dispatch(request, *args, **kwargs)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/macbookairm1/Desktop/emarate-edu-platform/backend/.venv/lib/python3.13/site-packages/rest_framework/views.py", line 526, in dispatch
+    response = self.handle_exception(exc)
+  File "/Users/macbookairm1/Desktop/emarate-edu-platform/backend/.venv/lib/python3.13/site-packages/rest_framework/views.py", line 474, in handle_exception
+    self.raise_uncaught_exception(exc)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^
+  File "/Users/macbookairm1/Desktop/emarate-edu-platform/backend/.venv/lib/python3.13/site-packages/rest_framework/views.py", line 485, in raise_uncaught_exception
+    raise exc
+  File "/Users/macbookairm1/Desktop/emarate-edu-platform/backend/.venv/lib/python3.13/site-packages/rest_framework/views.py", line 523, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/Users/macbookairm1/Desktop/emarate-edu-platform/backend/organization/views.py", line 139, in merge
+    result = services.merge(self.meta, self.get_object(), body.validated_data["into"])
+  File "/Users/macbookairm1/Desktop/emarate-edu-platform/backend/organization/services.py", line 181, in merge
+    DepartmentMembership.objects.get_or_create(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        department=into, user_id=membership.user_id, kind=membership.kind
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/macbookairm1/Desktop/emarate-edu-platform/backend/.venv/lib/python3.13/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/Users/macbookairm1/Desktop/emarate-edu-platform/backend/.venv/lib/python3.13/site-packages/django/db/models/query.py", line 1077, in get_or_create
+    return self.create(**params), True
+           ~~~~~~~~~~~^^^^^^^^^^
+  File "/Users/macbookairm1/Desktop/emarate-edu-platform/backend/.venv/lib/python3.13/site-packages/django/db/models/query.py", line 752, in create
+    obj.save(force_insert=True, using=self.db)
+    ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/macbookairm1/Desktop/emarate-edu-platform/backend/.venv/lib/python3.13/site-packages/django/db/models/base.py", line 904, in save
+    self.save_base(
+    ~~~~~~~~~~~~~~^
+        using=using,
+        ^^^^^^^^^^^^
+    ...<2 lines>...
+        update_fields=update_fields,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/macbookairm1/Desktop/emarate-edu-platform/backend/.venv/lib/python3.13/site-packages/django/db/models/base.py", line 996, in save_base
+    updated = self._save_table(
+        raw,
+    ...<4 lines>...
+        update_fields,
+    )
+  File "/Users/macbookairm1/Desktop/emarate-edu-platform/backend/.venv/lib/python3.13/site-packages/django/db/models/base.py", line 1201, in _save_table
+    results = self._do_insert(
+        cls._base_manager, using, insert_fields, returning_fields, raw
+    )
+  File "/Users/macbookairm1/Desktop/emarate-edu-platform/backend/.venv/lib/python3.13/site-packages/django/db/models/base.py", line 1253, in _do_insert
+    return manager._insert(
+           ~~~~~~~~~~~~~~~^
+        [self],
+        ^^^^^^^
+    ...<3 lines>...
+        raw=raw,
+        ^^^^^^^^
+    )
+    ^
+  File "/Users/macbookairm1/Desktop/emarate-edu-platform/backend/.venv/lib/python3.13/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/Users/macbookairm1/Desktop/emarate-edu-platform/backend/.venv/lib/python3.13/site-packages/django/db/models/query.py", line 2166, in _insert
+    return query.get_compiler(using=using).execute_sql(returning_fields)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "/Users/macbookairm1/Desktop/emarate-edu-platform/backend/.venv/lib/python3.13/site-packages/django/db/models/sql/compiler.py", line 1954, in execute_sql
+    cursor.execute(sql, params)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/Users/macbookairm1/Desktop/emarate-edu-platform/backend/.venv/lib/python3.13/site-packages/django/db/backends/utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        sql, params, many=False, executor=self._execute
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/macbookairm1/Desktop/emarate-edu-platform/backend/.venv/lib/python3.13/site-packages/django/db/backends/utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+  File "/Users/macbookairm1/Desktop/emarate-edu-platform/backend/.venv/lib/python3.13/site-packages/django/db/backends/utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/macbookairm1/Desktop/emarate-edu-platform/backend/.venv/lib/python3.13/site-packages/django/db/utils.py", line 94, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "/Users/macbookairm1/Desktop/emarate-edu-platform/backend/.venv/lib/python3.13/site-packages/django/db/backends/utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/Users/macbookairm1/Desktop/emarate-edu-platform/backend/.venv/lib/python3.13/site-packages/psycopg/cursor.py", line 117, in execute
+    raise ex.with_traceback(None)
+django.db.utils.IntegrityError: duplicate key value violates unique constraint "uniq_department_member"
+DETAIL:  Key (department_id, user_id)=(2, 1) already exists.
+------------------------------ Captured log call -------------------------------
+ERROR    django.request:log.py:283 Internal Server Error: /api/v1/departments/1/merge
+Traceback (most recent call last):
+  File "/Users/macbookairm1/Desktop/emarate-edu-platform/backend/.venv/lib/python3.13/site-packages/django/db/models/query.py", line 1070, in get_or_create
+    return self.get(**kwargs), False
+           ~~~~~~~~^^^^^^^^^^
+  File "/Users/macbookairm1/Desktop/emarate-edu-platform/backend/.venv/lib/python3.13/site-packages/django/db/models/query.py", line 722, in get
+    raise self.model.DoesNotExist(
+        "%s matching query does not exist." % self.model._meta.object_name
+    )
+academic.models.DepartmentMembership.DoesNotExist: DepartmentMembership matching query does not exist.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/macbookairm1/Desktop/emarate-edu-platform/backend/.venv/lib/python3.13/site-packages/django/db/backends/utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/Users/macbookairm1/Desktop/emarate-edu-platform/backend/.venv/lib/python3.13/site-packages/psycopg/cursor.py", line 117, in execute
+    raise ex.with_traceback(None)
+psycopg.errors.UniqueViolation: duplicate key value violates unique constraint "uniq_department_member"
+DETAIL:  Key (department_id, user_id)=(2, 1) already exists.
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/macbookairm1/Desktop/emarate-edu-platform/backend/.venv/lib/python3.13/site-packages/django/core/handlers/exception.py", line 56, in inner
+    response = get_response(request)
+  File "/Users/macbookairm1/Desktop/emarate-edu-platform/backend/.venv/lib/python3.13/site-packages/django/core/handlers/base.py", line 199, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/macbookairm1/Desktop/emarate-edu-platform/backend/.venv/lib/python3.13/site-packages/django/views/decorators/csrf.py", line 64, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "/Users/macbookairm1/Desktop/emarate-edu-platform/backend/.venv/lib/python3.13/site-packages/rest_framework/viewsets.py", line 124, in view
+    return self.dispatch(request, *args, **kwargs)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/macbookairm1/Desktop/emarate-edu-platform/backend/.venv/lib/python3.13/site-packages/rest_framework/views.py", line 526, in dispatch
+    response = self.handle_exception(exc)
+  File "/Users/macbookairm1/Desktop/emarate-edu-platform/backend/.venv/lib/python3.13/site-packages/rest_framework/views.py", line 474, in handle_exception
+    self.raise_uncaught_exception(exc)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^
+  File "/Users/macbookairm1/Desktop/emarate-edu-platform/backend/.venv/lib/python3.13/site-packages/rest_framework/views.py", line 485, in raise_uncaught_exception
+    raise exc
+  File "/Users/macbookairm1/Desktop/emarate-edu-platform/backend/.venv/lib/python3.13/site-packages/rest_framework/views.py", line 523, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/Users/macbookairm1/Desktop/emarate-edu-platform/backend/organization/views.py", line 139, in merge
+    result = services.merge(self.meta, self.get_object(), body.validated_data["into"])
+  File "/Users/macbookairm1/Desktop/emarate-edu-platform/backend/organization/services.py", line 181, in merge
+    DepartmentMembership.objects.get_or_create(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        department=into, user_id=membership.user_id, kind=membership.kind
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/macbookairm1/Desktop/emarate-edu-platform/backend/.venv/lib/python3.13/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/Users/macbookairm1/Desktop/emarate-edu-platform/backend/.venv/lib/python3.13/site-packages/django/db/models/query.py", line 1077, in get_or_create
+    return self.create(**params), True
+           ~~~~~~~~~~~^^^^^^^^^^
+  File "/Users/macbookairm1/Desktop/emarate-edu-platform/backend/.venv/lib/python3.13/site-packages/django/db/models/query.py", line 752, in create
+    obj.save(force_insert=True, using=self.db)
+    ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/macbookairm1/Desktop/emarate-edu-platform/backend/.venv/lib/python3.13/site-packages/django/db/models/base.py", line 904, in save
+    self.save_base(
+    ~~~~~~~~~~~~~~^
+        using=using,
+        ^^^^^^^^^^^^
+    ...<2 lines>...
+        update_fields=update_fields,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/macbookairm1/Desktop/emarate-edu-platform/backend/.venv/lib/python3.13/site-packages/django/db/models/base.py", line 996, in save_base
+    updated = self._save_table(
+        raw,
+    ...<4 lines>...
+        update_fields,
+    )
+  File "/Users/macbookairm1/Desktop/emarate-edu-platform/backend/.venv/lib/python3.13/site-packages/django/db/models/base.py", line 1201, in _save_table
+    results = self._do_insert(
+        cls._base_manager, using, insert_fields, returning_fields, raw
+    )
+  File "/Users/macbookairm1/Desktop/emarate-edu-platform/backend/.venv/lib/python3.13/site-packages/django/db/models/base.py", line 1253, in _do_insert
+    return manager._insert(
+           ~~~~~~~~~~~~~~~^
+        [self],
+        ^^^^^^^
+    ...<3 lines>...
+        raw=raw,
+        ^^^^^^^^
+    )
+    ^
+  File "/Users/macbookairm1/Desktop/emarate-edu-platform/backend/.venv/lib/python3.13/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/Users/macbookairm1/Desktop/emarate-edu-platform/backend/.venv/lib/python3.13/site-packages/django/db/models/query.py", line 2166, in _insert
+    return query.get_compiler(using=using).execute_sql(returning_fields)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "/Users/macbookairm1/Desktop/emarate-edu-platform/backend/.venv/lib/python3.13/site-packages/django/db/models/sql/compiler.py", line 1954, in execute_sql
+    cursor.execute(sql, params)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/Users/macbookairm1/Desktop/emarate-edu-platform/backend/.venv/lib/python3.13/site-packages/django/db/backends/utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        sql, params, many=False, executor=self._execute
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/macbookairm1/Desktop/emarate-edu-platform/backend/.venv/lib/python3.13/site-packages/django/db/backends/utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+  File "/Users/macbookairm1/Desktop/emarate-edu-platform/backend/.venv/lib/python3.13/site-packages/django/db/backends/utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/macbookairm1/Desktop/emarate-edu-platform/backend/.venv/lib/python3.13/site-packages/django/db/utils.py", line 94, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "/Users/macbookairm1/Desktop/emarate-edu-platform/backend/.venv/lib/python3.13/site-packages/django/db/backends/utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/Users/macbookairm1/Desktop/emarate-edu-platform/backend/.venv/lib/python3.13/site-packages/psycopg/cursor.py", line 117, in execute
+    raise ex.with_traceback(None)
+django.db.utils.IntegrityError: duplicate key value violates unique constraint "uniq_department_member"
+DETAIL:  Key (department_id, user_id)=(2, 1) already exists.
+_________ test_probe_r71_an_empty_run_blocks_the_college_for_the_term __________
+----------------------------- Captured stderr call -----------------------------
+2026-11-10 11:25:32,621 WARNING django.request Conflict: /api/v1/student-promotion
+------------------------------ Captured log call -------------------------------
+WARNING  django.request:log.py:283 Conflict: /api/v1/student-promotion
+=========================== short test summary info ============================
+PASSED core/tests/test_qa_probes_structure.py::test_probe_r67_a_member_of_both_departments_breaks_the_merge
+PASSED core/tests/test_qa_probes_structure.py::test_probe_r68_inquiries_and_news_stay_behind_the_merge
+PASSED core/tests/test_qa_probes_structure.py::test_probe_r69_merging_into_a_stopped_department_is_accepted
+PASSED core/tests/test_qa_probes_structure.py::test_probe_r70_a_stopped_department_keeps_the_roles_the_audit_says_removed
+PASSED core/tests/test_qa_probes_structure.py::test_probe_r71_an_empty_run_blocks_the_college_for_the_term
+PASSED core/tests/test_qa_probes_structure.py::test_probe_r72_levels_are_lowered_under_students_and_courses
+6 passed in 7.04s

@@ -14,8 +14,12 @@ Older rounds (2026-10-24 → 11-02): `.claude/handoff/archive/2026-10-24_to_2026
   axis 1.1 known hypotheses proven by probes and fixed (#267: R57–R60, R62, R63; statuses
   `move_pending`, `stale`; `StudentRecord.account_moved_at`). **Open for the owner:** K1's
   definition, R61 (new student in a stopped programme), R65 (download manager D25 not built),
-  docs differences. **Next:** axis 1.3 (merge probes), 1.2 (promotion), rest of 1.1, axes 2–3;
-  fill `fit.csv`. Never run probes or other work while E2E runs. Findings continue from R67.
+  docs differences. **Round 2 done** (#269): axes 1.3 and 1.2 — R67–R72 proven and fixed (merge:
+  member of both departments, inquiries and news follow, no merge into a stopped department,
+  roles end; promotion: no run for nobody, the college after departments moves the rest; levels
+  not lowered under students). **Next:** axis 2 (seven operations outside the matrix, role
+  combinations), rest of 1.1/1.3 (admission cycles), axis 3; fill `fit.csv`. Never run probes or
+  other work while E2E runs. Findings continue from R73.
 - **Staff review fixes** (2026-11-09; `fix/site-staff-review`): any staff account (not only
   teachers) may now choose to appear (`accounts.staff_profile.on_staff`, Settings card for all
   staff); a placed account that is no longer staff drops off (`content.staff.shown`); the people
