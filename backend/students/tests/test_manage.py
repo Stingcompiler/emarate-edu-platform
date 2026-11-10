@@ -172,3 +172,16 @@ def test_the_college_wide_roles_add_a_student_in_any_department(
         assert made.department_id == program.department_id
         entry = AuditLog.objects.filter(target_id=str(made.pk)).first()
         assert entry is not None and entry.actor_id == who.pk
+
+
+def test_a_stopped_programme_still_takes_a_student_added_by_hand(api, make_user, it_program):
+    """Owner, 2026-11-10 (review R61): a stopped programme takes no applicants, but a student
+    already studying in it (a programme taught out) is still added by hand; the form warns."""
+    it_program.is_active = False
+    it_program.save(update_fields=["is_active"])
+    added = api(make_user(Role.HEAD_REGISTRAR)).post(
+        "/api/v1/students",
+        {"full_name_ar": "طالب قائم", "program": it_program.pk, "level": 3},
+        format="json",
+    )
+    assert added.status_code == 201, added.data

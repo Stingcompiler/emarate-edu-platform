@@ -155,22 +155,6 @@ def test_probe_r60_one_account_waits_to_move_to_two_records(
     assert refused.status_code == 409 and refused.data["code"] == "email_taken"
 
 
-# ─── R61: a stopped programme takes a new student ─────────────────────────────────────────
-
-
-def test_probe_r61_a_new_student_is_added_to_a_stopped_programme(api, make_user, it_program):
-    """The add form lists stopped programmes («موقوف») because existing students stay in
-    them; nothing refuses a NEW student there."""
-    it_program.is_active = False
-    it_program.save(update_fields=["is_active"])
-    added = api(make_user(Role.HEAD_REGISTRAR)).post(
-        "/api/v1/students",
-        {"full_name_ar": "طالب جديد", "program": it_program.pk, "level": 1},
-        format="json",
-    )
-    assert added.status_code == 201, added.data
-
-
 # ─── R62: deleting the new record un-archives the old one ─────────────────────────────────
 
 

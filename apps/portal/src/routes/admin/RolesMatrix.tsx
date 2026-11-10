@@ -57,16 +57,22 @@ const CAPABILITY: Record<string, string> = {
   "content.manage": "محتوى الموقع",
   "news.manage": "الأخبار",
   "events.manage": "الفعاليات",
+  // Rows the owner added to the matrix after the review of 2026-11-10.
+  "users.create": "إنشاء حساب موظف",
+  "roles.grant": "منح الأدوار وسحبها",
+  "deletions.approve": "الموافقة على طلبات الحذف",
+  "staff_profiles.moderate": "حجب صورة أو مؤهل من «الكوادر»",
+  "site_staff.manage": "كوادر الموقع: الإضافة والتصنيف",
 };
 const GROUPS: [string, string[]][] = [
-  ["النظام", ["settings", "structure", "users", "audit"]],
+  ["النظام", ["settings", "structure", "users", "roles", "deletions", "audit"]],
   ["القسم والتدريس", ["courses", "membership", "learning"]],
   ["الطلاب والتسجيل", ["students", "registration", "enrollment"]],
   ["النتائج", ["results"]],
   ["شؤون الطلاب", ["regulations", "cases"]],
   ["القبول", ["admissions"]],
   ["التقارير والموارد البشرية", ["reports", "hr"]],
-  ["الموقع", ["content", "events"]],
+  ["الموقع", ["content", "news", "events", "site_staff", "staff_profiles"]],
 ];
 
 /**

@@ -127,11 +127,13 @@ backend/
 - **User** (AbstractUser): email[u], full_name_ar/en, phone_e164, avatar, is_active, must_change_password, last_seen. لا حقل `role`.
 - **RoleAssignment**: user→, role (Group)→, college→(null), department→(null), created_by→; [u (user, role, department)].
 - **OTP**: purpose {register|login_reset|contact}, target (email/phone), code_hash, expires_at, attempts, used_at (idx target).
-- **RegistrationRequest**: student_record⇄, email, status {otp_pending|pending_approval|approved|rejected}, decided_by→, decided_at, reason.
+- **RegistrationRequest**: student_record→, email, status {otp_pending|verified|pending_approval|approved|rejected}, moves_account (نقل حساب خريج ينتظر الاعتماد)، decided_by→, decided_at, reason.
+- **IdentityReport**: student_record→, account→(null), contact_email, note, status {open|upheld|dismissed}, decided_by→, decided_at, reason — بلاغ انتحال على حساب طالب (§8.1 بند 6).
 - **ActivationToken**: student_record→, token_hash[u], expires_at, used_at.
 
 ### students
 - **StudentRecord**: university_number[u], full_name_ar/en, program→, department→ (denormalized), level, semester (1|2، الفصل الدراسي داخل المستوى: يُحدَّد عند الإضافة والاستيراد — فارغًا = فصل Term الحالي — وعند التحويل من القبول يختاره المسجّل؛ والهجرة أعطت السجلات القائمة فصل Term الحالي)، status {active|suspended|graduated|withdrawn}, user⇄(null), application→(null), email, phone_e164, birth_date, gender, nationality, national_id_hash, admitted_term→, notes. (idx program, level, status)
+  ومعها `account_moved_to→(self, null)` و`account_moved_at`: سجل انتقل حسابه إلى سجل لاحق (الماجستير) مؤرشف، وعلامة الأرشفة هي وقت النقل.
 - **PromotionRun**: term→ (CASCADE), department_id (null = الكلية؛ رقم لا مفتاح لأن الدمج ينقل الأقسام)، run_by→(SET_NULL)، summary {promoted, kept, last_semester, moves}. ترفيع واحد لكل فصل لكل نطاق (`students/promotion.py`).
 - **StudentImportBatch**: file, uploaded_by→, status {uploaded|validated|has_errors|committed|rejected}, summary JSON. **StudentImportRow**: batch→, row_no, raw JSON, normalized JSON, action {create|update|skip|error}, errors JSON.
 - **UniversityNumberSequence**: college→, year, prefix, last_value; [u (college, year, prefix)].
@@ -183,7 +185,7 @@ backend/
 - **Inquiry**: public_id, reference_no[u], contact→, type {admission|registration|fees|programs|study|technical|general}, department→(null), subject, message, status {new|in_progress|waiting_for_user|resolved|closed}, assigned_to→, source, first_response_at, resolved_at. **InquiryMessage**: inquiry→, author→(null), channel, body, sent_at. **InquiryStatusHistory**.
 
 ### content
-- **Page**: slug[u], title_ar/en, blocks JSON, seo JSON, status {draft|scheduled|published|archived}, publish_at, author→. **Announcement**: scope {university|college|department|program|offering}, scope_id, audience {public|students|staff|all_internal}, title, body, status, publish_at, expires_at, is_featured, is_pinned, cover→, attachments JSON. **News**: slug, title, body, cover, status, publish_at. **Event**: slug, title, description, starts_at, ends_at, location, cover, registration_url, status. **MediaAsset**: file (عام), alt_ar/en, width, height. **Menu/MenuItem**. **Redirect**: from_path[u], to_path.
+- **Page**: slug[u], title_ar/en, blocks JSON, seo JSON, status {draft|scheduled|published|archived}, publish_at, author→. **Announcement**: scope {university|college|department|program|offering}, scope_id, audience {public|students|staff|all_internal}, title, body, status, publish_at, expires_at, is_featured, is_pinned, cover→, attachments JSON. **News**: slug, title, body, cover, status, publish_at. **Event**: slug, title, description, starts_at, ends_at, location, cover, registration_url, status. **MediaAsset**: file (عام), alt_ar/en, width, height. **Menu/MenuItem**. **Redirect**: from_path[u], to_path. **DeletionRequest**: kind {announcement|notification}, object_id, title, reason, state {pending|approved|rejected}, requested_by→, decided_by→ — طلب حذف يقرره مدير النظام أو مشرفه، ولا يقرره صاحبه. **StaffGroup**: name_ar/en, order, is_visible, holds_faculty (تصنيف واحد يضم هيئة التدريس تلقائيًا). **StaffEntry**: user⇄(null) أو name/title/photo→MediaAsset لشخص بلا حساب. **StaffPlacement**: entry→, group→, position_ar/en, order؛ [u (entry, group)].
 
 ### notifications
 - **Notification**: sender→(null=النظام), kind {manual|system|hr_notice}, category, title, body, action_url, audience JSON, channels JSON. **NotificationRecipient**: notification→, user→, delivered_at, read_at; [u]. **PushSubscription**: user→, endpoint[u], p256dh, auth, user_agent, last_success_at. **NotificationPreference**: user→, category, inapp, push, email. **HRNotice**: teacher→, sent_by→, subject, body, requires_ack, acknowledged_at, notification→. **Outbox**: channel, payload JSON, status, attempts, next_try_at.
@@ -240,7 +242,7 @@ Visitor → `POST /api/public/contacts/otp` → جلسة زائر → `POST /api
 Service يطلق `Event(kind, payload)` → Task `fan_out`: حساب المستلمين من `audience` (وفق نطاق المرسل المسموح) → `NotificationRecipient` لكل مستخدم → لكل قناة مفعّلة في التفضيلات: In-app فوري، Push عبر `pywebpush` (حذف الاشتراك عند 404/410)، Email عبر Outbox بإعادة محاولة. الواجهة: Polling 60 ثانية + Service Worker يعرض Push ويُبطل الاستعلام.
 
 ### 8.7 نشر المحتوى → الموقع العام
-`publish` في `content` → Task `trigger_site_rebuild` (Debounce دقيقتين) → Deploy hook للمنصة الثابتة → البناء يقرأ `/api/public/*` (Cache-Control قصير) → نشر. زر يدوي "إعادة بناء" لمدير الموقع.
+`publish` في `content` → Task `trigger_site_rebuild` (Debounce 30 ثانية — قرار 2026-11-02) → Deploy hook للمنصة الثابتة → البناء يقرأ `/api/public/*` (Cache-Control قصير) → نشر. زر يدوي "إعادة بناء" لمدير الموقع.
 
 ### 8.8 الوصول للملفات
 `MediaService.sign(file, user)`: تحقق الصلاحية (`scope_of(file.owner)`) → في التطوير رابط موقّع محلي (`itsdangerous`, 10 دقائق) تخدمه View؛ في الإنتاج Bunny Token Auth. لا يُعاد أي مسار خام.
@@ -290,7 +292,9 @@ Service يطلق `Event(kind, payload)` → Task `fan_out`: حساب المست�
 
 ---
 
-## 12. المراقبة والنسخ والنشر (إنتاج — لاحقًا)
+## 12. المراقبة والنسخ والنشر (إنتاج)
+
+> **الواقع منذ أكتوبر 2026:** الإنتاج على خادم خاص (VPS) خلف Caddy، بخدمات systemd، ونشر تلقائي لكل commit على `main` نجح CI له، ونسخ احتياطي يومي مشفّر — التفاصيل والأوامر في [runbook.md](runbook.md). الفقرة التالية هي الخطة الأصلية (Render وCloudflare) وتبقى مرجعًا إن تغيّر المضيف.
 
 Sentry (API + الواجهة)، Logging JSON، Uptime، نسخ Postgres يومية + `pg_dump` أسبوعي مشفّر إلى Bunny + اختبار استعادة ربع سنوي، Runbook. النشر: Render (Web + Worker + Beat + Redis + Postgres) أو مكافئ، Cloudflare Pages للواجهتين، Cloudflare أمام الـ API (WAF/Rate). كل ذلك خارج نطاق التطوير الحالي.
 
