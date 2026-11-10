@@ -28,9 +28,13 @@ Older rounds: `.claude/handoff/archive/2026-10-24_to_2026-11-02.md`, `.claude/ha
   student record; a stopped programme takes a hand-added student and the form warns (R61); the
   download manager D25 is written as deferred (02, 07, 09); the docs differences are fixed (03
   v2.5, 05 §6/§8.7/§12, 07 v1.1 with §2.18 «actual routes» generated from the inventory,
-  ui-profile, runbook §1). Not decided: an «undo the last promotion» button. **Next:**
-  rest of 1.1/1.3 (admission cycles), axis 3 (migrations, writes without audit), 1.4–1.7, 4, 5,
-  8; fill `fit.csv`. Never run probes or other work while E2E runs. Findings continue from R74.
+  ui-profile, runbook §1). Not decided: an «undo the last promotion» button. **Round 4**
+  (`fix/admissions-identity-review`): admission intakes R74–R77 (an intake with applications
+  keeps its programme and cycle; its window is checked; a stopped programme is not opened),
+  identity R78–R80 (import upper-cases the number; registration matches it in any case; one
+  notification per account's first report), axis 3 (the migrations go down and up on both
+  engines; no new write without an audit entry). **Next:**
+  1.4–1.7, 4, 5, 8; fill `fit.csv`. Never run probes or other work while E2E runs. Findings continue from R81.
 - **Staff review fixes** (2026-11-09; `fix/site-staff-review`): any staff account (not only
   teachers) may now choose to appear (`accounts.staff_profile.on_staff`, Settings card for all
   staff); a placed account that is no longer staff drops off (`content.staff.shown`); the people

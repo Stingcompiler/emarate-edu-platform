@@ -751,3 +751,31 @@ def test_an_approved_move_tells_the_student_about_the_move(
         Notification.objects.filter(recipients__user=account).values_list("title", flat=True)
     )
     assert "اعتُمد نقل حسابك إلى برنامجك الجديد" in titles and "اعتُمد حسابك" not in titles
+
+
+def test_a_number_typed_in_lower_case_is_found(api, django_capture_on_commit_callbacks, student):
+    """Review 2026-11-10, R79: the student's own details with the number in lower case."""
+    mail.outbox.clear()
+    request_id = _start(
+        api, django_capture_on_commit_callbacks, "26-it-0001", "أحمد محمد علي", "ahmed@me.test"
+    )
+    assert len(mail.outbox) == 1
+    assert api().post(VERIFY, {"request_id": request_id, "code": last_code()}).status_code == 200
+
+
+def test_the_approvers_hear_of_the_first_report_on_an_account(
+    api, django_capture_on_commit_callbacks, student, make_user, it_dept
+):
+    """R80: later reports on the same account join the list without a notification each."""
+    from notifications.models import Notification
+
+    _register(api, django_capture_on_commit_callbacks, "classmate@gmail.test")
+    manager = make_user(Role.DEPARTMENT_MANAGER, department=it_dept)
+    with django_capture_on_commit_callbacks(execute=True):
+        for n in range(5):
+            assert api().post(REPORT, {**DETAILS, "email": f"r{n}@x.test"}).status_code == 201
+    notified = Notification.objects.filter(
+        recipients__user=manager, title="بلاغ انتحال على حساب طالب"
+    )
+    assert notified.count() == 1
+    assert api(manager).get(REPORTS, {"status": "open"}).data["count"] == 5

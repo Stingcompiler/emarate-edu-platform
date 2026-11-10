@@ -1248,3 +1248,12 @@ msgstr "%(students)s طالبًا و%(courses)s مادة في مستوى أعل�
 
 msgid "There are no active students to promote here."
 msgstr "لا طلاب منتظمون للترفيع في هذا النطاق."
+
+msgid "Applications were made to this intake: it keeps its programme and cycle. Open a new one instead."
+msgstr "قُدِّمت طلبات إلى هذا البرنامج في هذه الدورة: يبقى على برنامجه ودورته. افتح برنامجًا جديدًا بدلًا من ذلك."
+
+msgid "The intake must close after it opens."
+msgstr "يجب أن يُغلق التقديم بعد أن يُفتح."
+
+msgid "This programme or its department is stopped. Reactivate it in the academic structure first."
+msgstr "هذا البرنامج أو قسمه موقوف. أعد تفعيله من «الهيكل الأكاديمي» أولًا."
