@@ -54,8 +54,8 @@
 | R78 | 🟠 | 1.1 | الاستيراد يضيف الرقم الجامعي نفسه بأحرف صغيرة سجلًا ثانيًا | #272 |
 | R79 | 🟠 | 1.1 | طالب يكتب رقمه بأحرف صغيرة لا يجد سجله في التسجيل | #272 |
 | R80 | 🟢 | 1.1 | كل بلاغ انتحال بعنوان آخر يرسل إشعارًا جديدًا لكل معتمدي القسم | #272 |
-| R81 | 🟠 | 1.4 | إشعار يخفيه مرسله يصل مع ذلك بالإشعار الفوري المنتظر وبالبريد المنتظر | PR_S |
-| R82 | 🟢 | 1.5 | صورة شخص في «الكوادر» تُحذف من مكتبة الوسائط بلا تنبيه | PR_S |
+| R81 | 🟠 | 1.4 | إشعار يخفيه مرسله يصل مع ذلك بالإشعار الفوري المنتظر وبالبريد المنتظر | #273 |
+| R82 | 🟢 | 1.5 | صورة شخص في «الكوادر» تُحذف من مكتبة الوسائط بلا تنبيه | #273 |
 
 ## 3. التفاصيل
 
@@ -64,7 +64,7 @@
 - **R67–R72:** [`structure/README.md`](evidence/review-2026-11-10/structure/README.md) (ستة مجسات على SQLite وPostgreSQL قبل الإصلاح) ووصف [#269](https://github.com/Stingcompiler/emarate-edu-platform/pull/269).
 - **المحور 2 وR73:** [`permissions/README.md`](evidence/review-2026-11-10/permissions/README.md) ووصف [#270](https://github.com/Stingcompiler/emarate-edu-platform/pull/270). السطح الجديد: 19 عملية كتابة × 15 دورًا = **289 خلية بلا فرق عن المصفوفة** (اختبار دائم `tests/permissions/test_new_surface_writes.py`).
 - **R74–R80 والمحور 3:** [`admissions/README.md`](evidence/review-2026-11-10/admissions/README.md)، [`identity/README.md`](evidence/review-2026-11-10/identity/README.md) (الجولة الرابعة)، [`integrity/README.md`](evidence/review-2026-11-10/integrity/README.md): الترحيلات تُعكس وتُعاد على المحركين، ولا كتابة جديدة بلا تدقيق. ووصف [#272](https://github.com/Stingcompiler/emarate-edu-platform/pull/272).
-- **R81–R82 والمحاور 1.4–1.7 و4 و5:** [`surface/README.md`](evidence/review-2026-11-10/surface/README.md) ووصف PR_S. عدد الاستعلامات ثابت في ست صفحات جديدة، وعنصر الاختيار يعمل بلوحة المفاتيح وحدها (اختباران دائمان).
+- **R81–R82 والمحاور 1.4–1.7 و4 و5:** [`surface/README.md`](evidence/review-2026-11-10/surface/README.md) ووصف [#273](https://github.com/Stingcompiler/emarate-edu-platform/pull/273). عدد الاستعلامات ثابت في ست صفحات جديدة، وعنصر الاختيار يعمل بلوحة المفاتيح وحدها (اختباران دائمان).
 - **الجرد:** [`inventory/README.md`](evidence/review-2026-11-10/inventory/README.md)، يُولَّد بـ `bash scripts/qa/inventory.sh <مجلد>` (جديد، بلا ذكاء اصطناعي وبلا خادم):
 
 | السجل | وحدة العد | العدد |
