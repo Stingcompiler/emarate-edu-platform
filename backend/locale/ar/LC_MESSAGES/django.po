@@ -1233,3 +1233,9 @@ msgstr "يظهر الموظفون فقط في صفحات الموقع."
 
 msgid "Send every group once, in the new order."
 msgstr "أرسل كل التصنيفات مرة واحدة بالترتيب الجديد."
+
+msgid "A move of this account already waits for the department's approval."
+msgstr "طلب نقل لهذا الحساب ينتظر اعتماد القسم من قبل."
+
+msgid "This record now holds another account. Reject this request."
+msgstr "صار لهذا السجل حساب آخر. ارفض هذا الطلب لإغلاقه."

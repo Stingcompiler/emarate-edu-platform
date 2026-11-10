@@ -49,6 +49,9 @@ class StudentRecord(PublicIdModel, TimestampedModel):
     account_moved_to = models.ForeignKey(
         "self", on_delete=models.SET_NULL, null=True, blank=True, related_name="+"
     )
+    # When it moved: the archive mark itself. The pointer above is cleared if the new record is
+    # deleted, and the old one must stay archived all the same (review 2026-11-10, R62).
+    account_moved_at = models.DateTimeField(null=True, blank=True)
     email = models.EmailField(blank=True, help_text="Official email from the college file.")
     phone_e164 = models.CharField(max_length=20, blank=True)
     birth_date = models.DateField(null=True, blank=True)

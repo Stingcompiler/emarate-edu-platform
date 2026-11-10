@@ -36,7 +36,9 @@ export function Register() {
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
   const [password, setPassword] = useState("");
-  const [status, setStatus] = useState<"active" | "pending_approval" | "moved">("active");
+  const [status, setStatus] = useState<"active" | "pending_approval" | "moved" | "move_pending">(
+    "active",
+  );
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
 
@@ -221,18 +223,26 @@ export function Register() {
         title={
           status === "moved"
             ? "انتقل حسابك إلى برنامجك الجديد"
-            : status === "active"
-              ? "تم إنشاء حسابك"
-              : "حسابك بانتظار الاعتماد"
+            : status === "move_pending"
+              ? "طلب نقل حسابك بانتظار الاعتماد"
+              : status === "active"
+                ? "تم إنشاء حسابك"
+                : "حسابك بانتظار الاعتماد"
         }
       >
-        <Notice tone={status === "pending_approval" ? "info" : "success"}>
+        <Notice
+          tone={status === "pending_approval" || status === "move_pending" ? "info" : "success"}
+        >
           {status === "moved"
             ? // A graduate's own account now holds the new record (owner, 2026-11-08).
               "ادخل برقمك الجامعي الجديد أو ببريدك، وبكلمة المرور التي اخترتها الآن. سجل مرحلتك السابقة محفوظ لدى الكلية."
-            : status === "active"
-              ? "يمكنك الدخول الآن برقمك الجامعي أو بريدك."
-              : "سيعتمد مدير قسمك الحساب قريبًا، وسنرسل لك بريدًا عند الاعتماد."}
+            : status === "move_pending"
+              ? // The account itself works meanwhile (review 2026-11-10: the page used to say
+                // «حسابك بانتظار الاعتماد», as for a new account).
+                "سيراجع قسمك نقل حسابك إلى برنامجك الجديد، وسنرسل لك بريدًا عند الاعتماد. حتى ذلك يعمل حسابك كما هو: ادخل ببريدك أو برقمك الجامعي السابق، وبكلمة المرور التي اخترتها الآن."
+              : status === "active"
+                ? "يمكنك الدخول الآن برقمك الجامعي أو بريدك."
+                : "سيعتمد مدير قسمك الحساب قريبًا، وسنرسل لك بريدًا عند الاعتماد."}
         </Notice>
         <Link to="/login" className="mt-4 block">
           <Button className="w-full">الذهاب إلى الدخول</Button>

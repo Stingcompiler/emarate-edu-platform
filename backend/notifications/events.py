@@ -111,6 +111,19 @@ def account_moved(record) -> None:
     )
 
 
+def account_move_approved(user, record) -> None:
+    """To the student: the department approved the move (not «your account was approved»: the
+    account was never waiting; review 2026-11-10)."""
+    notify(
+        [user],
+        category=Category.ACCOUNT,
+        title="اعتُمد نقل حسابك إلى برنامجك الجديد",
+        body=f"{record.program.name_ar} · رقمك الجامعي {record.university_number}",
+        action_url="/",
+        channels=["inapp"],
+    )
+
+
 def identity_reported(report) -> None:
     """Same approvers as a pending registration: they decide the report."""
     student = report.student_record

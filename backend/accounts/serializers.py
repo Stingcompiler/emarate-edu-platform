@@ -147,8 +147,11 @@ class RegistrationCompleteSerializer(serializers.Serializer):
 
 
 class RegistrationCompleteResponseSerializer(serializers.Serializer):
-    # moved: the student's earlier account now holds this record (owner, 2026-11-08).
-    status = serializers.ChoiceField(choices=["active", "pending_approval", "moved"])
+    # moved: the student's earlier account now holds this record (owner, 2026-11-08);
+    # move_pending: that move waits for the department, the account works meanwhile.
+    status = serializers.ChoiceField(
+        choices=["active", "pending_approval", "moved", "move_pending"]
+    )
 
 
 class PasswordForgotSerializer(serializers.Serializer):

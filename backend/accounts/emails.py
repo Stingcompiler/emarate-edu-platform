@@ -87,6 +87,17 @@ def account_move_pending(to: str, program: str) -> None:
     )
 
 
+def account_move_rejected(to: str, program: str, reason: str = "") -> None:
+    """The department did not approve the move: the account stays as it is (review 2026-11-10:
+    the new-account wording told a student with a working account to register again)."""
+    body = f"لم يُعتمد نقل حسابك إلى برنامج «{program}»." + (f"\nالسبب: {reason}" if reason else "")
+    body += (
+        "\nحسابك باقٍ كما هو على سجلك السابق، وتدخل بكلمة المرور التي اخترتها عند طلب النقل."
+        "\nإن كان في بيانات سجلك الجديد خطأ فراجع مسجل قسمك لتصحيحه ثم اطلب النقل من جديد."
+    )
+    _send(to, "طلب نقل حسابك — بوابة كلية الإمارات", body)
+
+
 def identity_report_decided(to: str, upheld: bool, reason: str = "") -> None:
     if upheld:
         body = (
