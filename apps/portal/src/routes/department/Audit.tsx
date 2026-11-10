@@ -259,7 +259,12 @@ function AuditDetail({ r }: { r: Entry }) {
             <tbody className="divide-y divide-border-soft">
               {fields.map((k) => (
                 <tr key={k}>
-                  <th scope="row" className="px-2 py-1.5 text-start font-normal text-text-muted">
+                  {/* A field's name is one long word («university_number»): it breaks like the
+                      values beside it, not past its column (review 2026-11-10, R91). */}
+                  <th
+                    scope="row"
+                    className="break-words px-2 py-1.5 text-start font-normal text-text-muted"
+                  >
                     <bdi>{k}</bdi>
                   </th>
                   <td className="break-words bg-danger-soft/50 px-2 py-1.5">
