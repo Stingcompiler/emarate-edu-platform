@@ -174,3 +174,25 @@ def test_streamed_backups_from_before_the_seal_still_read(fake_dump, db, tmp_pat
         data += len(token).to_bytes(4, "big") + token
     name = default_storage.save(f"backups/ecst-v1{DB_SUFFIX}", ContentFile(data))
     assert backups.decrypt(name) == b"PGDMP-v1"
+
+
+def test_backups_on_the_server_disk_are_readable_by_their_owner_alone(
+    fake_dump, db, tmp_path, monkeypatch
+):
+    """Review 2026-11-10, R83: the files were -rw-r--r-- on a shared server (encrypted, but no
+    other account needs them)."""
+    import os
+    import stat
+
+    from django.core.files.storage import FileSystemStorage
+
+    disk = FileSystemStorage(location=tmp_path / "private")
+    monkeypatch.setattr(backups, "default_storage", disk)
+    old = os.umask(0o022)  # the server's default: new files are -rw-r--r--
+    try:
+        stored = backups.create(keep=2)
+    finally:
+        os.umask(old)
+    assert stored
+    for name in stored:
+        assert stat.S_IMODE(os.stat(disk.path(name)).st_mode) == 0o600
