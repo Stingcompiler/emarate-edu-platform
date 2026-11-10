@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ecst-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-13 16:50+0200\n"
+"POT-Creation-Date: 2026-11-10 23:38+0200\n"
 "Language: ar\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -14,905 +14,1740 @@ msgstr ""
 "Plural-Forms: nplurals=6; plural=n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 "
 "&& n%100<=10 ? 3 : n%100>=11 && n%100<=99 ? 4 : 5;\n"
 
+#: academic/serializers.py:27
+msgid "The end must be after the start."
+msgstr "يجب أن يكون تاريخ النهاية بعد تاريخ البداية."
+
+#: academic/serializers.py:62 academic/serializers.py:89
+#: admissions/services.py:1048 students/services.py:66
+msgid "The semester is 1 or 2."
+msgstr "الفصل الدراسي إما الأول (1) أو الثاني (2)."
+
+#: academic/serializers.py:99
 msgid "The program belongs to another department."
 msgstr "البرنامج يتبع قسمًا آخر."
 
+#: academic/serializers.py:105
 #, python-format
 msgid "This program has %(levels_count)s levels."
 msgstr "عدد مستويات هذا البرنامج %(levels_count)s."
 
+#: academic/services.py:25 core/viewsets.py:76 students/services.py:43
 msgid "Outside your department scope."
 msgstr "خارج نطاق قسمك."
 
+#: academic/services.py:38
 #, python-format
 msgid ""
 "This person does not have the %(kind)s role. Academic affairs creates it."
 msgstr "هذا الشخص لا يحمل دور %(kind)s؛ ينشئه أمين الشؤون العلمية."
 
+#: academic/services.py:58
 msgid "Already a member of this department."
 msgstr "عضو في هذا القسم بالفعل."
 
+#: academic/services.py:92
 #, python-format
 msgid "This person does not have the %(role)s role."
 msgstr "هذا الشخص لا يحمل دور %(role)s."
 
+#: academic/services.py:100
 msgid "Add this person to the department first."
 msgstr "أضف هذا الشخص إلى القسم أولًا."
 
+#: academic/services.py:114
 msgid "Already assigned to this course."
 msgstr "مُعيَّن على هذه المادة بالفعل."
 
+#: academic/services.py:143
 msgid "This student belongs to another department."
 msgstr "هذا الطالب من قسم آخر؛ يسجّله مسؤول المسجلين."
 
+#: academic/services.py:146
 msgid "Only active students can be enrolled."
 msgstr "لا يُسجَّل في المواد إلا الطلاب المنتظمون."
 
+#: academic/services.py:149
 msgid "This offering is closed."
 msgstr "هذه الشعبة مغلقة."
 
+#: academic/services.py:156
 msgid "Already enrolled."
 msgstr "مسجَّل بالفعل."
 
+#: academic/services.py:173
 msgid "This enrollment is not active."
 msgstr "هذا التسجيل غير نشط."
 
+#: accounts/authentication.py:29
 msgid "User is inactive."
 msgstr "الحساب معطَّل."
 
+#: accounts/authentication.py:33 accounts/views.py:153
 msgid "Session expired."
 msgstr "انتهت الجلسة."
 
+#: accounts/authentication.py:49
 #, python-format
 msgid "CSRF failed: %(reason)s"
 msgstr "فشل التحقق من CSRF: %(reason)s"
 
-msgid "Give a reason when rejecting."
-msgstr "اذكر سبب الرفض."
+# Strings added since 2026-10-25 without Arabic (review 2026-11 axis 8).
+#: accounts/profile.py:29
+msgid "Only a student edits these details here."
+msgstr "هذه البيانات يعدّلها الطالب وحده هنا."
 
-msgid "The Arabic name cannot be empty."
-msgstr "الاسم بالعربية مطلوب."
+#: accounts/profile.py:45 accounts/services.py:1060
+msgid "Enter a valid email address."
+msgstr "أدخل بريدًا إلكترونيًا صحيحًا."
 
-msgid "Invalid or expired code."
-msgstr "الرمز غير صحيح أو منتهي الصلاحية."
-
-msgid "Too many attempts. Start the registration again."
-msgstr "محاولات كثيرة. ابدأ التسجيل من جديد."
-
-msgid "Verify your email first."
-msgstr "أكّد بريدك الإلكتروني أولًا."
-
-msgid "This student already has an account."
-msgstr "لهذا الطالب حساب بالفعل."
-
-msgid "This email is already used by another account."
-msgstr "هذا البريد مستخدم في حساب آخر."
-
-msgid "This request was already decided."
-msgstr "بُتّ في هذا الطلب من قبل."
-
-msgid "Your account is waiting for approval."
-msgstr "حسابك بانتظار الموافقة."
-
-msgid "Incorrect email/university number or password."
-msgstr "البريد أو الرقم الجامعي أو كلمة المرور غير صحيحة."
-
+#: accounts/profile.py:65 accounts/services.py:698 contacts/visitor.py:60
 msgid "Too many attempts. Request a new code."
 msgstr "محاولات كثيرة. اطلب رمزًا جديدًا."
 
+#: accounts/profile.py:67 accounts/services.py:165 accounts/services.py:170
+#: accounts/services.py:700 contacts/visitor.py:62
+msgid "Invalid or expired code."
+msgstr "الرمز غير صحيح أو منتهي الصلاحية."
+
+#: accounts/profile.py:76 accounts/services.py:227 accounts/services.py:279
+#: accounts/services.py:1063
+msgid "This email is already used by another account."
+msgstr "هذا البريد مستخدم في حساب آخر."
+
+#: accounts/profile.py:107
+msgid "Upload your photo first."
+msgstr "ارفع صورتك أولًا."
+
+#: accounts/profile.py:133
+msgid "A student's name is corrected by the registrar in the student record."
+msgstr "اسم الطالب يصحّحه المسجّل في سجل الطالب."
+
+#: accounts/serializers.py:320
+msgid "Give a reason when dismissing."
+msgstr "اكتب سبب رفض البلاغ."
+
+#: accounts/serializers.py:332
+msgid "Give a reason when rejecting."
+msgstr "اذكر سبب الرفض."
+
+#: accounts/serializers.py:366 accounts/services.py:1073
+msgid "The Arabic name cannot be empty."
+msgstr "الاسم بالعربية مطلوب."
+
+#: accounts/serializers.py:415
+msgid "Use a link that starts with https://"
+msgstr "استخدم رابطًا يبدأ بـ https://"
+
+#: accounts/services.py:115 accounts/services.py:135 accounts/services.py:206
+msgid ""
+"An account on this university number is waiting for the department's "
+"approval. If it is not yours, report it."
+msgstr ""
+"على هذا الرقم الجامعي حساب ينتظر اعتماد القسم. إن لم يكن حسابك فأبلغ عن "
+"انتحال."
+
+#: accounts/services.py:122
+msgid ""
+"This university number already has an account. If it is not yours, report it."
+msgstr "هذا الرقم الجامعي مرتبط بحساب. إن لم يكن حسابك فأبلغ عن انتحال."
+
+#: accounts/services.py:168
+msgid "Too many attempts. Start the registration again."
+msgstr "محاولات كثيرة. ابدأ التسجيل من جديد."
+
+#: accounts/services.py:180
+msgid "Verify your email first."
+msgstr "أكّد بريدك الإلكتروني أولًا."
+
+#: accounts/services.py:193
+msgid "This student already has an account."
+msgstr "لهذا الطالب حساب بالفعل."
+
+#: accounts/services.py:284
+msgid ""
+"Your earlier account is disabled. Ask the registrar to enable it, then "
+"register again."
+msgstr "حسابك السابق معطّل. اطلب من المسجّل تفعيله، ثم أعد التسجيل."
+
+#: accounts/services.py:349
+msgid "A move of this account already waits for the department's approval."
+msgstr "طلب نقل لهذا الحساب ينتظر اعتماد القسم من قبل."
+
+#: accounts/services.py:399
+msgid "This record now holds another account. Reject this request."
+msgstr "صار لهذا السجل حساب آخر. ارفض هذا الطلب لإغلاقه."
+
+#: accounts/services.py:416 content/deletions.py:109
+msgid "This request was already decided."
+msgstr "بُتّ في هذا الطلب من قبل."
+
+#: accounts/services.py:497
+msgid "These details do not match an existing account."
+msgstr "هذه البيانات لا تطابق حسابًا قائمًا."
+
+#: accounts/services.py:536
+msgid "This report was already decided."
+msgstr "سبق البتّ في هذا البلاغ."
+
+#: accounts/services.py:567 accounts/services.py:580
+msgid "The account was stopped after an impersonation report."
+msgstr "أُوقف الحساب بعد بلاغ انتحال."
+
+#: accounts/services.py:659
+msgid "Your account is waiting for approval."
+msgstr "حسابك بانتظار الموافقة."
+
+#: accounts/services.py:667
+msgid "Incorrect email/university number or password."
+msgstr "البريد أو الرقم الجامعي أو كلمة المرور غير صحيحة."
+
+#: accounts/services.py:738
 msgid "Change your own password from your settings."
 msgstr "غيّر كلمة مرورك أنت من «الإعدادات»."
 
+#: accounts/services.py:742
 msgid ""
 "Enable the account first: a disabled or not yet activated account has no "
 "password."
 msgstr "فعّل الحساب أولًا: الحساب المعطّل أو غير المفعّل ليس له كلمة مرور."
 
+#: accounts/services.py:764
 msgid "The current password is wrong."
 msgstr "كلمة المرور الحالية غير صحيحة."
 
+#: accounts/services.py:768
 msgid "Choose a different password."
 msgstr "اختر كلمة مرور مختلفة عن الحالية."
 
+#: accounts/services.py:841
 msgid "You cannot create accounts with this role."
 msgstr "لا يمكنك إنشاء حسابات بهذا الدور."
 
+#: accounts/services.py:846
 msgid "An account with this email already exists."
 msgstr "يوجد حساب بهذا البريد بالفعل."
 
+#: accounts/services.py:890
 msgid "This link is invalid or expired."
 msgstr "هذا الرابط غير صالح أو منتهي الصلاحية."
 
+#: accounts/services.py:909
 msgid "This role requires a department."
 msgstr "هذا الدور يتطلب تحديد القسم."
 
+#: accounts/services.py:911
 msgid "This role is college-wide."
 msgstr "هذا الدور على مستوى الكلية ولا يُحدَّد له قسم."
 
+#: accounts/services.py:918
 msgid "You cannot grant this role."
 msgstr "لا يمكنك منح هذا الدور."
 
+#: accounts/services.py:920
 msgid "Students get their role by registering."
 msgstr "يحصل الطلاب على دورهم عند التسجيل."
 
+#: accounts/services.py:922
 msgid "You cannot grant a role to yourself."
 msgstr "لا يمكنك منح نفسك دورًا."
 
+#: accounts/services.py:924
 msgid "A student account cannot hold a staff role."
 msgstr "حساب الطالب لا يحمل دورًا إداريًا."
 
+#: accounts/services.py:932
 msgid "The user already has this role."
 msgstr "المستخدم يحمل هذا الدور بالفعل."
 
+#: accounts/services.py:947
 msgid "You cannot revoke this role."
 msgstr "لا يمكنك سحب هذا الدور."
 
+#: accounts/services.py:949
 msgid "You cannot remove your own system admin role."
 msgstr "لا يمكنك سحب دور مدير النظام من نفسك."
 
+#: accounts/services.py:971
 msgid "You cannot delete your own account."
 msgstr "لا يمكنك حذف حسابك."
 
+#: accounts/services.py:986
 msgid ""
 "This account has a history (records, grades or log entries): disable it "
 "instead of deleting it."
 msgstr "لهذا الحساب سجل (عمليات أو درجات أو محتوى): عطّله بدل حذفه."
 
-msgid "A student's name is edited from the student record."
-msgstr "اسم الطالب يُعدَّل من سجل الطالب."
+#: accounts/services.py:1084
+msgid "Upload the photo first."
+msgstr "ارفع الصورة أولًا."
 
+#: accounts/services.py:1119
+msgid "Only the system admin changes this account."
+msgstr "لا يعدّل هذا الحساب إلا مدير النظام."
+
+#: accounts/services.py:1130
 msgid "You cannot disable your own account."
 msgstr "لا يمكنك تعطيل حسابك."
 
+#: accounts/staff_profile.py:37 accounts/views.py:350
+msgid "Only staff appear on the public pages."
+msgstr "يظهر الموظفون فقط في صفحات الموقع."
+
+#: accounts/staff_profile.py:96
+msgid "At most ten links."
+msgstr "عشرة روابط على الأكثر."
+
+#: accounts/views.py:112 accounts/views.py:157 accounts/views.py:208
+#: files/views.py:158
 msgid "ok"
 msgstr "تم"
 
+#: accounts/views.py:141
 msgid "No session."
 msgstr "لا توجد جلسة."
 
+#: accounts/views.py:520
 msgid "If the details match the college records, a code was sent to the email."
 msgstr "إذا طابقت البيانات سجلات الكلية فقد أُرسل رمز إلى البريد."
 
+#: accounts/views.py:541
 msgid "Email verified."
 msgstr "تم تأكيد البريد."
 
+#: accounts/views.py:605
+msgid "Your report reached the department. They will reply by email."
+msgstr "وصل بلاغك إلى القسم، وسيردّ عليك بالبريد."
+
+#: accounts/views.py:623
 msgid "If an account uses this email, a code was sent to it."
 msgstr "إذا كان هذا البريد مسجلًا فقد أُرسل إليه رمز."
 
+#: accounts/views.py:639
 msgid "Password changed. Sign in with the new password."
 msgstr "تغيّرت كلمة المرور. سجّل الدخول بكلمة المرور الجديدة."
 
+#: accounts/views.py:660
 msgid "Password changed."
 msgstr "تغيّرت كلمة المرور."
 
+#: accounts/views.py:675
 msgid "Account activated. You can sign in now."
 msgstr "فُعِّل الحساب. يمكنك تسجيل الدخول الآن."
 
+#: admissions/serializers.py:33
+msgid "The cycle must close after it opens."
+msgstr "يجب أن تُغلق الدورة بعد أن تُفتح."
+
+#: admissions/serializers.py:77
+msgid ""
+"Applications were made to this intake: it keeps its programme and cycle. "
+"Open a new one instead."
+msgstr ""
+"قُدِّمت طلبات إلى هذا البرنامج في هذه الدورة: يبقى على برنامجه ودورته. افتح "
+"برنامجًا جديدًا بدلًا من ذلك."
+
+#: admissions/serializers.py:88
+msgid "The intake must close after it opens."
+msgstr "يجب أن يُغلق التقديم بعد أن يُفتح."
+
+#: admissions/serializers.py:103
+msgid ""
+"This programme or its department is stopped. Reactivate it in the academic "
+"structure first."
+msgstr "هذا البرنامج أو قسمه موقوف. أعد تفعيله من «الهيكل الأكاديمي» أولًا."
+
+#: admissions/services.py:213
+msgid "Each step must be an object with a list of sections."
+msgstr "كل خطوة يجب أن تحوي قائمة أقسام."
+
+#: admissions/services.py:217
+msgid "Each section must be an object with a list of fields."
+msgstr "كل قسم يجب أن يحوي قائمة حقول."
+
+#: admissions/services.py:220
+msgid "Each field must be an object."
+msgstr "كل حقل يجب أن يكون عنصرًا مستقلًا."
+
+# Form builder checks (review 2026-11 axis 8): the head registrar reads them as they are.
+#: admissions/services.py:227
+msgid "The schema needs a list of steps."
+msgstr "الاستمارة تحتاج قائمة خطوات."
+
+#: admissions/services.py:235
+#, python-format
+msgid "Field key %(key)s must be lowercase letters, digits or _."
+msgstr "مفتاح الحقل %(key)s يُكتب بحروف لاتينية صغيرة وأرقام و_ فقط."
+
+#: admissions/services.py:239
+#, python-format
+msgid "Field key %(key)s is used twice."
+msgstr "مفتاح الحقل %(key)s مستعمل مرتين."
+
+#: admissions/services.py:244
+#, python-format
+msgid "%(field)s: unknown type %(type)s."
+msgstr "%(field)s: نوع غير معروف (%(type)s)."
+
+#: admissions/services.py:247
+#, python-format
+msgid "%(field)s: add the options."
+msgstr "%(field)s: أضف الخيارات."
+
+#: admissions/services.py:253
+#, python-format
+msgid "%(field)s: the pattern is not a valid regular expression."
+msgstr "%(field)s: نمط التحقق غير صحيح."
+
+#: admissions/services.py:257
+#, python-format
+msgid "%(field)s: choose who fills this field."
+msgstr "%(field)s: اختر من يعبئ هذا الحقل."
+
+#: admissions/services.py:261
+#, python-format
+msgid "%(field)s: the university number is filled by the college."
+msgstr ""
+"%(field)s: الرقم الجامعي يعبئه موظف التسجيل؛ اجعله «للموظفين» أو «يُتاح "
+"للمتقدم»."
+
+#: admissions/services.py:265
+#, python-format
+msgid "%(field)s: width must be full or half."
+msgstr "%(field)s: العرض كامل أو نصف."
+
+#: admissions/services.py:268
+#, python-format
+msgid "%(field)s: the condition is not valid."
+msgstr "%(field)s: شرط الظهور غير صالح."
+
+#: admissions/services.py:275
+#, python-format
+msgid "%(field)s: the condition must name a field above it."
+msgstr "%(field)s: شرط الظهور يجب أن يشير إلى حقل قبله."
+
+#: admissions/services.py:282
+#, python-format
+msgid "%(field)s: choose the answers that show this field."
+msgstr "%(field)s: اختر الإجابات التي تُظهر هذا الحقل."
+
+#: admissions/services.py:286
+#, python-format
+msgid "%(field)s: the condition must name a field the applicant fills."
+msgstr "%(field)s: شرط الظهور يجب أن يشير إلى حقل يعبئه المتقدم."
+
+#: admissions/services.py:298
+#, python-format
+msgid "%(field)s: accepted files must be some of %(types)s."
+msgstr "%(field)s: الملفات المقبولة يجب أن تكون من %(types)s."
+
+#: admissions/services.py:321
+msgid "Must be text."
+msgstr "يجب أن يكون نصًا."
+
+#: admissions/services.py:323
+msgid "Must be true or false."
+msgstr "يجب أن يكون نعم أو لا."
+
+#: admissions/services.py:326 admissions/services.py:330
+msgid "Must be a date (YYYY-MM-DD)."
+msgstr "يجب أن يكون تاريخًا (سنة-شهر-يوم)."
+
+#: admissions/services.py:336 admissions/services.py:338
+#: inquiries/services.py:47 inquiries/services.py:49
+msgid "Invalid phone number."
+msgstr "رقم الهاتف غير صحيح — اكتبه مثل 0912345678 أو +249912345678."
+
+#: admissions/services.py:340
+msgid "Must be a year."
+msgstr "يجب أن يكون سنة."
+
+#: admissions/services.py:344 admissions/services.py:416
+msgid "Choose from the options."
+msgstr "اختر من الخيارات."
+
+#: admissions/services.py:364 admissions/services.py:664
+msgid "Upload this document."
+msgstr "ارفع هذا المستند."
+
+#: admissions/services.py:367 admissions/services.py:371
+#: admissions/services.py:655
+msgid "Required."
+msgstr "مطلوب."
+
+#: admissions/services.py:388
+msgid "Must be an amount."
+msgstr "يجب أن يكون مبلغًا."
+
+#: admissions/services.py:392 admissions/services.py:397
+#: admissions/services.py:400
+msgid "Must be a number."
+msgstr "يجب أن يكون رقمًا."
+
+#: admissions/services.py:405
+msgid "Out of range."
+msgstr "خارج النطاق المسموح."
+
+#: admissions/services.py:410
+msgid "Invalid email."
+msgstr "بريد إلكتروني غير صحيح."
+
+#: admissions/services.py:412
+msgid "Choose one of the options."
+msgstr "اختر أحد الخيارات."
+
+#: admissions/services.py:422
+msgid "Invalid format."
+msgstr "الصيغة غير صحيحة."
+
+#: admissions/services.py:442 exams/services.py:149
 msgid "Only a draft can be published."
 msgstr "لا تُنشر إلا المسودة."
 
+#: admissions/services.py:480
 msgid "This program is not accepting applications now."
 msgstr "هذا البرنامج لا يستقبل طلبات الآن."
 
+#: admissions/services.py:487
 msgid "You already have an application for this program."
 msgstr "لديك طلب لهذا البرنامج بالفعل."
 
+#: admissions/services.py:492
 #, python-format
 msgid "At most %(limit)s applications per admission cycle."
 msgstr "الحد الأقصى %(limit)s طلبات في دورة القبول."
 
+#: admissions/services.py:515
 msgid "Please try again."
 msgstr "أعد المحاولة."
 
+#: admissions/services.py:544 admissions/services.py:904
 msgid "Send an object of answers."
 msgstr "أرسل الإجابات في كائن."
 
+#: admissions/services.py:550
 msgid ""
 "The application can only change while it is a draft or missing documents."
 msgstr "لا يتغير الطلب إلا وهو مسودة أو بمستندات ناقصة."
 
+#: admissions/services.py:571
+msgid "These fields are filled by the college."
+msgstr "هذه الحقول تعبئها الكلية."
+
+#: admissions/services.py:606 admissions/services.py:618
 msgid "Documents can be added while the application is open."
 msgstr "تُضاف المستندات ما دام الطلب مفتوحًا."
 
+#: admissions/services.py:657 inquiries/services.py:104
+msgid "Give an email or a phone number."
+msgstr "أدخل بريدًا إلكترونيًا أو رقم هاتف."
+
+#: admissions/services.py:668
 msgid "The admission window has closed."
 msgstr "انتهت فترة القبول."
 
+#: admissions/services.py:716
 msgid "This application can no longer be withdrawn."
 msgstr "لم يعد ممكنًا سحب هذا الطلب."
 
+#: admissions/services.py:727
 msgid "This application is closed."
 msgstr "هذا الطلب مغلق."
 
+#: admissions/services.py:746
 msgid "This application belongs to another department."
 msgstr "هذا الطلب يتبع قسمًا آخر."
 
+#: admissions/services.py:761
 msgid "This person does not register for this department."
 msgstr "هذا الشخص ليس مسجلًا لهذا القسم."
 
+#: admissions/services.py:797
 #, python-format
 msgid "You cannot move this application from %(status)s to %(to)s."
 msgstr "لا يمكن نقل الطلب من %(status)s إلى %(to)s."
 
+#: admissions/services.py:802
 msgid "Tell the applicant what is missing."
 msgstr "أخبر المتقدم بما ينقصه."
 
+#: admissions/services.py:811
 msgid "This application changed meanwhile; reload it and decide again."
 msgstr "تغيّر هذا الطلب في الأثناء؛ أعد تحميله ثم اتخذ القرار."
 
+#: admissions/services.py:858
 msgid "Email the applicant or add an internal note."
 msgstr "راسل المتقدم بالبريد أو أضف ملاحظة داخلية."
 
+#: admissions/services.py:911
+#, python-format
+msgid "Not a staff field of this form: %(keys)s"
+msgstr "ليست من حقول الموظفين في هذه الاستمارة: %(keys)s"
+
+#: admissions/services.py:932
+msgid "The student is registered: change the number on the student record."
+msgstr "الطالب مسجَّل: عدّل رقمه الجامعي من سجل الطالب."
+
+#: admissions/services.py:943
+#, python-format
+msgid "At most %(n)s characters."
+msgstr "لا يزيد على %(n)s حرفًا."
+
+#: admissions/services.py:955 admissions/services.py:1013
+msgid "This university number is already in use."
+msgstr "هذا الرقم الجامعي مستخدم."
+
+#: admissions/services.py:960
+msgid "Only fields marked for release can be released."
+msgstr "لا يُتاح للمتقدم إلا ما عُلِّم «يُتاح للمتقدم»."
+
+#: admissions/services.py:1009
+msgid "Enter the university number first."
+msgstr "أدخل الرقم الجامعي أولًا."
+
+#: admissions/services.py:1050
 msgid "Only the head registrar registers applicants."
 msgstr "لا يسجّل المتقدمين طلابًا إلا مسؤول المسجلين."
 
+#: admissions/services.py:1055
 msgid "Only an accepted, not yet registered applicant can be registered."
 msgstr "لا يُسجَّل إلا متقدم مقبول لم يُسجَّل بعد."
 
+#: admissions/views.py:101
 msgid "Applications exist; close the intake instead."
 msgstr "توجد طلبات؛ أغلق البرنامج في الدورة بدلًا من حذفه."
 
-msgid "A published template is frozen; create a new version."
-msgstr "القالب المنشور مجمَّد؛ أنشئ إصدارًا جديدًا."
-
-msgid "A code was sent to the email."
-msgstr "أُرسل رمز إلى البريد."
-
-msgid "This inquiry is closed."
-msgstr "هذا الاستفسار مغلق."
-
-msgid "Your session expired. Verify your email again."
-msgstr "انتهت جلستك. أكّد بريدك من جديد."
-
-msgid "Letters, digits, - or a single /."
-msgstr "حروف وأرقام و- أو / واحدة فقط."
-
-#, python-format
-msgid "Images are limited to %(MAX_IMAGE_MB)s MB."
-msgstr "حجم الصورة لا يتجاوز %(MAX_IMAGE_MB)s ميغابايت."
-
-msgid "Upload a PNG, JPEG, WebP or GIF image."
-msgstr "ارفع صورة بصيغة PNG أو JPEG أو WebP أو GIF."
-
-msgid "An official page keeps its address."
-msgstr "الصفحة الرسمية تحتفظ بعنوانها."
-
-msgid "Blocks are a list."
-msgstr "الكتل يجب أن تكون قائمة."
-
-msgid "College announcements have no scope id."
-msgstr "إعلانات الكلية بلا معرّف نطاق."
-
-msgid "Choose the department, program or course."
-msgstr "اختر القسم أو البرنامج أو المادة."
-
-msgid "Public announcements are for the college or a department."
-msgstr "الإعلانات العامة للكلية أو لقسم (في صفحته على الموقع)."
-
-msgid "Must be after the start."
-msgstr "يجب أن يكون بعد البداية."
-
-msgid "Use a site path (/...) or an https:// link."
-msgstr "استخدم مسارًا في الموقع (/...) أو رابط https://."
-
-msgid "A link needs a URL; a group needs links."
-msgstr "الرابط يحتاج عنوانًا، والمجموعة تحتاج روابط."
-
-msgid "Start with /."
-msgstr "ابدأ بـ /."
-
-msgid "Enter a year between 1800 and 2100."
-msgstr "أدخل سنة بين 1800 و2100."
-
-msgid "Use a portal path (/...) or an https:// link."
-msgstr "استخدم مسارًا في البوابة (/...) أو رابط https://."
-
-msgid "A list of figures."
-msgstr "قائمة أرقام."
-
-msgid "At most six figures."
-msgstr "ستة أرقام على الأكثر."
-
-msgid "This scope or audience is outside what you may announce to."
-msgstr "هذا النطاق أو الجمهور خارج ما يحق لك الإعلان له."
-
-msgid "You may not delete this announcement."
-msgstr "لا يمكنك حذف هذا الإعلان."
-
-msgid "The request conflicts with the current state."
-msgstr "الطلب يتعارض مع الحالة الحالية."
-
-msgid "Too many failed attempts. Try again later."
-msgstr "محاولات فاشلة كثيرة. أعد المحاولة لاحقًا."
-
-msgid "Invalid request"
-msgstr "طلب غير صالح"
-
-msgid "Authentication required"
-msgstr "يلزم تسجيل الدخول"
-
-msgid "Not allowed"
-msgstr "غير مسموح"
-
-msgid "Not found"
-msgstr "غير موجود"
-
-msgid "Method not allowed"
-msgstr "الطريقة غير مسموحة"
-
-msgid "Too many requests"
-msgstr "طلبات كثيرة"
-
-msgid "Server error"
-msgstr "خطأ في الخادم"
-
-msgid "Error"
-msgstr "خطأ"
-
-msgid "One or more fields are invalid."
-msgstr "بعض الحقول غير صحيحة."
-
-msgid "The address contains an invalid character."
-msgstr "العنوان يحتوي على حرف غير صالح."
-
-msgid "No endpoint matches this path."
-msgstr "لا يوجد مسار مطابق."
-
-msgid "An unexpected error occurred."
-msgstr "حدث خطأ غير متوقع."
-
+#: admissions/views.py:120 core/viewsets.py:130
 msgid ""
 "This item is in use and cannot be deleted. Deactivate or archive it instead."
 msgstr "هذا العنصر مستخدم ولا يمكن حذفه. عطّله أو أرشفه بدلًا من ذلك."
 
+#: admissions/views.py:139
+msgid "Applications exist in this cycle; stop it instead."
+msgstr "في هذه الدورة طلبات؛ أوقفها بدل حذفها."
+
+#: admissions/views.py:203
+msgid "A published template is frozen; create a new version."
+msgstr "القالب المنشور مجمَّد؛ أنشئ إصدارًا جديدًا."
+
+#: admissions/views.py:422
+msgid "A code was sent to the email."
+msgstr "أُرسل رمز إلى البريد."
+
+#: admissions/views.py:638
+msgid "This inquiry is closed."
+msgstr "هذا الاستفسار مغلق."
+
+#: contacts/visitor.py:98
+msgid "Your session expired. Verify your email again."
+msgstr "انتهت جلستك. أكّد بريدك من جديد."
+
+#: content/deletions.py:48
+msgid "A deletion request is already waiting."
+msgstr "طلب الحذف بانتظار الموافقة بالفعل."
+
+#: content/deletions.py:113 results/services.py:212
+msgid "Someone else decides on your own request."
+msgstr "لا تعتمد طلبًا قدّمته؛ يقرّر فيه غيرك."
+
+#: content/models.py:92
+msgid "Letters, digits, - or a single /."
+msgstr "حروف وأرقام و- أو / واحدة فقط."
+
+#: content/serializers.py:57
+#, python-format
+msgid "Images are limited to %(MAX_IMAGE_MB)s MB."
+msgstr "حجم الصورة لا يتجاوز %(MAX_IMAGE_MB)s ميغابايت."
+
+#: content/serializers.py:61
+msgid "Upload a PNG, JPEG, WebP or GIF image."
+msgstr "ارفع صورة بصيغة PNG أو JPEG أو WebP أو GIF."
+
+#: content/serializers.py:125
+#, python-format
+msgid ""
+"Replace the writing guidance with the college's text before publishing: "
+"%(sections)s"
+msgstr "استبدل إرشادات الكتابة بنص الكلية المعتمد قبل النشر: %(sections)s"
+
+#: content/serializers.py:136
+msgid "An official page keeps its address."
+msgstr "الصفحة الرسمية تحتفظ بعنوانها."
+
+#: content/serializers.py:141
+msgid "Blocks are a list."
+msgstr "الكتل يجب أن تكون قائمة."
+
+#: content/serializers.py:237
+msgid "College announcements have no scope id."
+msgstr "إعلانات الكلية بلا معرّف نطاق."
+
+#: content/serializers.py:241
+msgid "Choose the department, program or course."
+msgstr "اختر القسم أو البرنامج أو المادة."
+
+#: content/serializers.py:246
+msgid "Public announcements are for the college or a department."
+msgstr "الإعلانات العامة للكلية أو لقسم (في صفحته على الموقع)."
+
+#: content/serializers.py:319 live/serializers.py:92
+msgid "Must be after the start."
+msgstr "يجب أن يكون بعد البداية."
+
+#: content/serializers.py:326
+msgid "Use a site path (/...) or an https:// link."
+msgstr "استخدم مسارًا في الموقع (/...) أو رابط https://."
+
+#: content/serializers.py:355
+msgid "A link needs a URL; a group needs links."
+msgstr "الرابط يحتاج عنوانًا، والمجموعة تحتاج روابط."
+
+#: content/serializers.py:392
+msgid "Start with /."
+msgstr "ابدأ بـ /."
+
+#: content/serializers.py:467
+msgid "Enter a year between 1800 and 2100."
+msgstr "أدخل سنة بين 1800 و2100."
+
+#: content/serializers.py:476 notifications/serializers.py:69
+msgid "Use a portal path (/...) or an https:// link."
+msgstr "استخدم مسارًا في البوابة (/...) أو رابط https://."
+
+#: content/serializers.py:483 content/serializers.py:487
+msgid "A list of figures."
+msgstr "قائمة أرقام."
+
+#: content/serializers.py:493
+msgid "At most six figures."
+msgstr "ستة أرقام على الأكثر."
+
+#: content/services.py:163
+msgid "This scope or audience is outside what you may announce to."
+msgstr "هذا النطاق أو الجمهور خارج ما يحق لك الإعلان له."
+
+#: content/staff.py:101
+msgid "Choose another group to hold the teaching staff first."
+msgstr "اختر تصنيفًا آخر يضم هيئة التدريس أولًا."
+
+#: content/staff.py:120
+msgid "Send every group once, in the new order."
+msgstr "أرسل كل التصنيفات مرة واحدة بالترتيب الجديد."
+
+#: content/staff.py:138
+msgid ""
+"This group holds the teaching staff. Choose another group for them first."
+msgstr "هذا التصنيف يضم هيئة التدريس. اختر لهم تصنيفًا آخر أولًا."
+
+#: content/staff.py:164
+msgid "Pick a picture from the media library."
+msgstr "اختر صورة من مكتبة الوسائط."
+
+#: content/staff.py:175
+msgid "Unknown group."
+msgstr "تصنيف غير موجود."
+
+#: content/staff.py:201
+msgid "Only staff accounts can be added."
+msgstr "تُضاف حسابات الموظفين فقط."
+
+#: content/staff.py:203
+msgid "This person is already on the page."
+msgstr "هذا الشخص في الصفحة من قبل."
+
+#: content/staff.py:211 content/staff.py:233
+msgid "Enter the name."
+msgstr "اكتب الاسم."
+
+#: content/views.py:140
+msgid "Choose the event this news is about."
+msgstr "اختر الفعالية التي يتناولها هذا الخبر."
+
+#: content/views.py:193
+msgid "Only the site team changes this picture."
+msgstr "لا يعدّل هذه الصورة إلا فريق الموقع."
+
+#: content/views.py:214
+msgid ""
+"This picture is a photo on the site's staff page. Change it there first."
+msgstr "هذه الصورة صورة شخص في «الكوادر» على الموقع. غيّرها هناك أولًا."
+
+#: content/views.py:219
+msgid "The site uses this picture. Choose another in the site settings first."
+msgstr "الموقع يستعمل هذه الصورة. اختر غيرها من إعدادات الموقع أولًا."
+
+#: content/views.py:406
+msgid "You may not delete this announcement."
+msgstr "لا يمكنك حذف هذا الإعلان."
+
+#: core/errors.py:10
+msgid "The request conflicts with the current state."
+msgstr "الطلب يتعارض مع الحالة الحالية."
+
+#: core/errors.py:16
+msgid "Too many failed attempts. Try again later."
+msgstr "محاولات فاشلة كثيرة. أعد المحاولة لاحقًا."
+
+#: core/exceptions.py:18
+msgid "Invalid request"
+msgstr "طلب غير صالح"
+
+#: core/exceptions.py:19
+msgid "Authentication required"
+msgstr "يلزم تسجيل الدخول"
+
+#: core/exceptions.py:20
+msgid "Not allowed"
+msgstr "غير مسموح"
+
+#: core/exceptions.py:21
+msgid "Not found"
+msgstr "غير موجود"
+
+#: core/exceptions.py:22
+msgid "Method not allowed"
+msgstr "الطريقة غير مسموحة"
+
+#: core/exceptions.py:23
+msgid "Too many requests"
+msgstr "طلبات كثيرة"
+
+#: core/exceptions.py:24
+msgid "Server error"
+msgstr "خطأ في الخادم"
+
+#: core/exceptions.py:33
+msgid "Error"
+msgstr "خطأ"
+
+#: core/exceptions.py:66
+msgid "One or more fields are invalid."
+msgstr "بعض الحقول غير صحيحة."
+
+#: core/idempotency.py:58
+msgid "This Idempotency-Key was used for another request."
+msgstr "استُعمل هذا الطلب من قبل لعملية أخرى؛ أعد المحاولة."
+
+#: core/idempotency.py:60
+msgid "The first request with this key is still running."
+msgstr "الطلب الأول ما زال قيد التنفيذ؛ انتظر قليلًا."
+
+#: core/idempotency.py:63
+msgid "This changed since the first request; send it again with a new key."
+msgstr "تغيّر هذا منذ الطلب الأول؛ أعد المحاولة."
+
+#: core/middleware.py:75
+msgid "The address contains an invalid character."
+msgstr "العنوان يحتوي على حرف غير صالح."
+
+#: core/views.py:80
+msgid "No endpoint matches this path."
+msgstr "لا يوجد مسار مطابق."
+
+#: core/views.py:88
+msgid "An unexpected error occurred."
+msgstr "حدث خطأ غير متوقع."
+
+#: exams/question_types.py:52 exams/question_types.py:78
 msgid "Add at least two choices."
 msgstr "أضف خيارين على الأقل."
 
+#: exams/question_types.py:54
 msgid "Mark exactly one correct choice."
 msgstr "حدّد خيارًا صحيحًا واحدًا بالضبط."
 
+#: exams/question_types.py:60
+msgid "Pick one of the choices."
+msgstr "اختر أحد الخيارات."
+
+#: exams/question_types.py:80
 msgid "Mark at least one correct choice."
 msgstr "حدّد خيارًا صحيحًا واحدًا على الأقل."
 
+#: exams/question_types.py:86
+msgid "Pick from the choices."
+msgstr "اختر من الخيارات."
+
+#: exams/question_types.py:113
+msgid "Set the correct answer."
+msgstr "حدّد الإجابة الصحيحة."
+
+#: exams/question_types.py:118
+msgid "Answer true or false."
+msgstr "أجب بصح أو خطأ."
+
+#: exams/question_types.py:140
+msgid "List the accepted answers."
+msgstr "اكتب الإجابات المقبولة."
+
+#: exams/question_types.py:145
+msgid "Type the missing word."
+msgstr "اكتب الكلمة الناقصة."
+
+#: exams/question_types.py:167
+#, python-format
+msgid "Write up to %(limit)s characters."
+msgstr "اكتب %(limit)s حرفًا على الأكثر."
+
+#: exams/serializers.py:58
 msgid "Must be after the opening time."
 msgstr "يجب أن يكون بعد وقت الفتح."
 
+#: exams/serializers.py:132
 msgid "Add the choices."
 msgstr "أضف الخيارات."
 
-msgid "Students have started this exam; questions are locked."
-msgstr "بدأ طلاب هذا الاختبار؛ الأسئلة مقفلة."
+#: exams/services.py:44
+msgid "The exam is published; its questions are locked."
+msgstr "نُشر الاختبار؛ لا تُعدَّل أسئلته بعد النشر."
 
+#: exams/services.py:59
 msgid "A closed exam cannot change."
 msgstr "لا يتغير الاختبار بعد إغلاقه."
 
+#: exams/services.py:102
+msgid "You cannot delete questions of this exam."
+msgstr "لا يمكنك حذف أسئلة هذا الاختبار."
+
+#: exams/services.py:120
 msgid "List every question exactly once."
 msgstr "اذكر كل سؤال مرة واحدة بالضبط."
 
+#: exams/services.py:132
+msgid "Add at least one question."
+msgstr "أضف سؤالًا واحدًا على الأقل."
+
+#: exams/services.py:136
+#, python-format
+msgid "Question %(number)s: %(problem)s"
+msgstr "السؤال %(number)s: %(problem)s"
+
+#: exams/services.py:140
+msgid "The pass mark is above the total marks."
+msgstr "درجة النجاح أعلى من مجموع الدرجات."
+
+#: exams/services.py:142
+msgid "The attempt is longer than the window."
+msgstr "مدة المحاولة أطول من فترة الامتحان."
+
+#: exams/services.py:171
 msgid "Only a published exam can be closed."
 msgstr "لا يُغلق إلا اختبار منشور."
 
+#: exams/services.py:196
 msgid "You cannot delete this exam."
 msgstr "لا يمكنك حذف هذا الاختبار."
 
+#: exams/services.py:198
 msgid "Students attempted this exam; archive it instead."
 msgstr "حاول طلاب هذا الاختبار؛ أرشفه بدلًا من حذفه."
 
+#: exams/services.py:224
 msgid "This exam is not open."
 msgstr "هذا الاختبار غير مفتوح."
 
+#: exams/services.py:226
 msgid "The exam has not opened yet."
 msgstr "لم يُفتح الاختبار بعد."
 
+#: exams/services.py:228
 msgid "The exam window has closed."
 msgstr "انتهت نافذة الاختبار."
 
+#: exams/services.py:231
 msgid "No attempts left."
 msgstr "لا محاولات متبقية."
 
+#: exams/services.py:274
 msgid "This attempt was already submitted."
 msgstr "أُرسلت هذه المحاولة من قبل."
 
+#: exams/services.py:276
 msgid "Time is up."
 msgstr "انتهى الوقت."
 
+#: exams/services.py:299
 msgid "Your student record is suspended."
 msgstr "قيدك موقوف حاليًا؛ لا يمكن متابعة الاختبار."
 
+#: exams/services.py:306
 msgid "You are no longer enrolled in this course."
 msgstr "لم تعد مسجلًا في هذه المادة."
 
+#: exams/services.py:318
 msgid "Going back is not allowed in this exam."
 msgstr "الرجوع إلى الأسئلة السابقة غير مسموح في هذا الاختبار."
 
+#: exams/services.py:334
 msgid "Unknown signal."
 msgstr "إشارة غير معروفة."
 
+#: exams/services.py:386
 msgid "This attempt is closed."
 msgstr "هذه المحاولة مغلقة."
 
+#: exams/services.py:455
 msgid "Only a running attempt can be extended."
 msgstr "لا يُمدَّد إلا وقت محاولة جارية."
 
+#: exams/services.py:471 exams/services.py:499 results/services.py:156
+#: student_affairs/services.py:352
 msgid "A reason is required."
 msgstr "السبب مطلوب."
 
+#: exams/services.py:476
 msgid "Only a submitted attempt can be reopened."
 msgstr "لا يُعاد فتح إلا محاولة مُرسلة."
 
+#: exams/services.py:481
 msgid "The student has another attempt running."
 msgstr "لدى الطالب محاولة أخرى جارية."
 
-msgid "Grade after the attempt is submitted."
-msgstr "صحّح بعد إرسال المحاولة."
-
+#: exams/services.py:521
 #, python-format
 msgid "Between 0 and %(marks)s."
 msgstr "بين 0 و%(marks)s."
 
+#: exams/services.py:528
+msgid "This attempt was invalidated."
+msgstr "أُبطلت هذه المحاولة."
+
+#: exams/services.py:530
+msgid "Grade after the attempt is submitted."
+msgstr "صحّح بعد إرسال المحاولة."
+
+#: exams/views.py:310
 msgid "The result is not visible yet."
 msgstr "النتيجة لم تُعلن بعد."
 
+#: files/services.py:40
 msgid "Unknown purpose."
 msgstr "غرض غير معروف."
 
+#: files/services.py:42 live/serializers.py:84
 msgid "Choose the course."
 msgstr "اختر المادة."
 
+#: files/services.py:44
 msgid "You cannot upload files to this course."
 msgstr "لا يمكنك رفع ملفات لهذه المادة."
 
+#: files/services.py:57
+msgid "The image has too many pixels. Use a smaller photo."
+msgstr "أبعاد الصورة كبيرة جدًا. اختر صورة أصغر."
+
+#: files/services.py:60
+msgid "The image could not be read."
+msgstr "تعذّرت قراءة الصورة."
+
+#: files/services.py:145
 msgid "You cannot upload videos to this course."
 msgstr "لا يمكنك رفع فيديوهات لهذه المادة."
 
+#: files/services.py:150
 #, python-format
 msgid "Videos are limited to %(VIDEO_MAX_MB)s MB."
 msgstr "حجم الفيديو لا يتجاوز %(VIDEO_MAX_MB)s ميغابايت."
 
+#: files/services.py:185
 msgid "This video uploads directly to the video service."
 msgstr "هذا الفيديو يُرفع مباشرة إلى خدمة الفيديو."
 
+#: files/services.py:190
 msgid "This video was already uploaded."
 msgstr "رُفع هذا الفيديو من قبل."
 
+#: files/services.py:192
 msgid "Upload an MP4, MOV, MKV or WebM video."
 msgstr "ارفع فيديو بصيغة MP4 أو MOV أو MKV أو WebM."
 
+#: files/services.py:214
 msgid "The video is not ready yet."
 msgstr "الفيديو غير جاهز بعد."
 
-msgid "Invalid phone number."
-msgstr "رقم الهاتف غير صحيح — اكتبه مثل 0912345678 أو +249912345678."
+#: files/validation.py:78
+#, python-format
+msgid "File type .%(ext)s is not allowed here."
+msgstr "نوع الملف .%(ext)s غير مسموح هنا."
 
-msgid "Give an email or a phone number."
-msgstr "أدخل بريدًا إلكترونيًا أو رقم هاتف."
+#: files/validation.py:80
+#, python-format
+msgid "The file is larger than %(max_mb)s MB."
+msgstr "حجم الملف أكبر من %(max_mb)s ميغابايت."
 
+#: files/validation.py:88
+msgid "The file content does not match its extension."
+msgstr "محتوى الملف لا يطابق امتداده — تأكد أنه ملف صحيح بهذا النوع."
+
+#: files/validation.py:90
+msgid "Text files must not contain binary data."
+msgstr "الملف النصي يحتوي بيانات غير نصية."
+
+#: files/validation.py:101
+msgid "The archive is damaged."
+msgstr "الملف المضغوط تالف."
+
+#: files/validation.py:105
+msgid "The archive has too many files."
+msgstr "الملف المضغوط يحتوي ملفات كثيرة جدًا."
+
+#: files/validation.py:107
+msgid "The archive expands to an unsafe size."
+msgstr "الملف المضغوط يتمدد إلى حجم غير آمن."
+
+#: inquiries/services.py:149
 msgid "This inquiry is routed to someone else."
 msgstr "هذا الاستفسار محوَّل إلى شخص آخر."
 
+#: inquiries/services.py:157
 #, python-format
 msgid "Cannot move from %(status)s to %(to)s."
 msgstr "لا يمكن النقل من %(status)s إلى %(to)s."
 
+#: inquiries/services.py:175
 msgid "Reply by email or add an internal note."
 msgstr "ردّ بالبريد أو أضف ملاحظة داخلية."
 
+#: inquiries/services.py:177
 msgid "This visitor has no email; use WhatsApp."
 msgstr "لا بريد لهذا الزائر؛ استخدم واتساب."
 
+#: inquiries/services.py:205
 msgid "This visitor has no phone number."
 msgstr "لا رقم هاتف لهذا الزائر."
 
+#: inquiries/services.py:238
 msgid "This person does not handle this kind of inquiry."
 msgstr "هذا الشخص لا يتولى هذا النوع من الاستفسارات."
 
+#: learning/serializers.py:171
 msgid "Use {\"rules\": [...]}."
 msgstr "استخدم {\"rules\": [...]}."
 
+#: learning/serializers.py:184
+msgid "Set the last date for late work."
+msgstr "حدّد آخر موعد لتسليم المتأخر."
+
+#: learning/serializers.py:188
 msgid "Must be after the due date."
 msgstr "يجب أن يكون بعد موعد التسليم."
 
+#: learning/serializers.py:193
 msgid "Must be before the due date."
 msgstr "يجب أن يكون قبل موعد التسليم."
 
+#: learning/serializers.py:198
 msgid "Pick a lecture of the same course."
 msgstr "اختر محاضرة من المادة نفسها."
 
+#: learning/services.py:114
 msgid "The list must name every lecture of the course once."
 msgstr "يجب أن تضم القائمة كل محاضرات المادة، كل محاضرة مرة واحدة."
 
+#: learning/services.py:152
 msgid "You cannot delete this lecture."
 msgstr "لا يمكنك حذف هذه المحاضرة."
 
+#: learning/services.py:179
 msgid "A file resource needs exactly one uploaded file."
 msgstr "مورد الملف يحتاج ملفًا مرفوعًا واحدًا بالضبط."
 
+#: learning/services.py:182
 msgid "Upload the file to this course first."
 msgstr "ارفع الملف إلى هذه المادة أولًا."
 
+#: learning/services.py:185
 msgid "A video resource needs exactly one video."
 msgstr "مورد الفيديو يحتاج فيديو واحدًا بالضبط."
 
+#: learning/services.py:187
 msgid "Upload the video to this course first."
 msgstr "ارفع الفيديو إلى هذه المادة أولًا."
 
+#: learning/services.py:190
 msgid "A link resource needs a URL."
 msgstr "مورد الرابط يحتاج عنوان URL."
 
+#: learning/services.py:210
+msgid "You cannot remove files from this lecture."
+msgstr "لا يمكنك حذف ملفات هذه المحاضرة."
+
+#: learning/services.py:237
 #, python-format
 msgid "Invalid pattern: %(pattern)s"
 msgstr "نمط غير صالح: %(pattern)s"
 
+#: learning/services.py:286
 msgid "Choose how students submit first."
 msgstr "اختر طريقة تسليم الطلاب أولًا."
 
+#: learning/services.py:307
 msgid "You cannot delete this assignment."
 msgstr "لا يمكنك حذف هذا الواجب."
 
+#: learning/services.py:310
 msgid "Students have submitted; close the assignment instead."
 msgstr "سلّم الطلاب؛ أغلق الواجب بدلًا من حذفه."
 
+#: learning/services.py:328
 msgid "Submissions have not opened yet."
 msgstr "لم يُفتح التسليم بعد."
 
+#: learning/services.py:332
 msgid "The deadline has passed."
 msgstr "انتهى موعد التسليم."
 
+#: learning/services.py:334
 msgid "The late window has closed."
 msgstr "انتهت مهلة التسليم المتأخر."
 
+#: learning/services.py:343
 #, python-format
 msgid "At most %(max_files)s files."
 msgstr "الحد الأقصى %(max_files)s ملفات."
 
+#: learning/services.py:356
 msgid "Upload each file to this course first."
 msgstr "ارفع كل ملف إلى هذه المادة أولًا."
 
+#: learning/services.py:361
 #, python-format
 msgid "%(name)s: type not accepted here."
 msgstr "%(name)s: نوع غير مقبول هنا."
 
+#: learning/services.py:367
 #, python-format
 msgid "%(name)s: larger than %(max_file_size_mb)s MB."
 msgstr "%(name)s: أكبر من %(max_file_size_mb)s ميغابايت."
 
+#: learning/services.py:383
 #, python-format
 msgid "%(label)s: required."
 msgstr "%(label)s: مطلوب."
 
+#: learning/services.py:390
 #, python-format
 msgid "%(label)s: must start with http:// or https://."
 msgstr "%(label)s: يجب أن يبدأ بـ http:// أو https://."
 
+#: learning/services.py:399
 #, python-format
 msgid "%(label)s: does not match the expected format."
 msgstr "%(label)s: لا يطابق الصيغة المطلوبة."
 
+#: learning/services.py:407
 #, python-format
 msgid "Unknown link: %(value)s"
 msgstr "رابط غير معروف: %(value)s"
 
+#: learning/services.py:419
 msgid "This assignment is not accepting submissions."
 msgstr "هذا الواجب لا يستقبل تسليمات."
 
-msgid "Text answers are not accepted here."
-msgstr "الإجابات النصية غير مقبولة هنا."
-
+#: learning/services.py:430
 msgid "Files are not accepted here."
 msgstr "الملفات غير مقبولة هنا."
 
+#: learning/services.py:432
 msgid "Links are not accepted here."
 msgstr "الروابط غير مقبولة هنا."
 
+#: learning/services.py:436
 msgid "The submission is empty."
 msgstr "التسليم فارغ."
 
+#: learning/services.py:453
 msgid "Submitted twice at once; try again."
 msgstr "أُرسل التسليم مرتين في اللحظة نفسها؛ أعد المحاولة."
 
+#: learning/services.py:458
 msgid "Resubmission is not allowed."
 msgstr "إعادة التسليم غير مسموحة."
 
+#: learning/services.py:461
 msgid "This submission is already graded."
 msgstr "صُحّح هذا التسليم بالفعل."
 
+#: learning/services.py:534
 #, python-format
 msgid "Between 0 and %(max_grade)s."
 msgstr "بين 0 و%(max_grade)s."
 
+#: learning/services.py:571
 msgid "There is no suggested grade to approve."
 msgstr "لا توجد درجة مقترحة لاعتمادها."
 
+#: learning/services.py:577
 msgid "Only the teacher approves AI-suggested grades."
 msgstr "لا يعتمد الدرجات المقترحة آليًا إلا الأستاذ."
 
+#: live/serializers.py:87
 msgid "Choose the program and level."
 msgstr "اختر البرنامج والمستوى."
 
+#: live/services.py:62
 msgid "You cannot schedule sessions for this course or cohort."
 msgstr "لا يمكنك جدولة جلسات لهذه المادة أو الدفعة."
 
+#: live/services.py:64
 msgid "Use the https:// meeting link."
 msgstr "استخدم رابط الاجتماع https://."
 
+#: live/services.py:68
 msgid "Add the meeting link."
 msgstr "أضف رابط الاجتماع."
 
+#: live/services.py:138
 msgid "This session was cancelled."
 msgstr "أُلغيت هذه الجلسة."
 
+#: live/services.py:144
+msgid "You can see this session but not join it."
+msgstr "يمكنك رؤية هذه الجلسة دون الانضمام إليها."
+
+#: live/services.py:147
 msgid "The link opens 15 minutes before the start."
 msgstr "يُفتح الرابط قبل البداية بـ 15 دقيقة."
 
+#: notifications/audience.py:33
 #, python-format
 msgid "type must be one of %(sorted)s."
 msgstr "النوع يجب أن يكون أحد: %(sorted)s."
 
+#: notifications/audience.py:40
 msgid "ids: a non-empty list of numbers."
 msgstr "ids: قائمة أرقام غير فارغة."
 
+#: notifications/audience.py:45
 msgid "ids: a non-empty list of user ids."
 msgstr "ids: قائمة غير فارغة بمعرّفات المستخدمين."
 
+#: notifications/audience.py:53
 #, python-format
 msgid "members must be one of %(sorted)s."
 msgstr "الأعضاء يجب أن يكونوا أحد: %(sorted)s."
 
+#: notifications/audience.py:61
 msgid "level must be between 1 and 10."
 msgstr "المستوى يجب أن يكون بين 1 و10."
 
+#: notifications/audience.py:66
 msgid "roles: a non-empty list of roles."
 msgstr "roles: قائمة أدوار غير فارغة."
 
+#: notifications/audience.py:167
 msgid "This audience is outside what you may notify."
 msgstr "هذا الجمهور خارج ما يحق لك إشعاره."
 
+#: notifications/serializers.py:157
 msgid "Push endpoints are https URLs."
 msgstr "عناوين Push يجب أن تكون https."
 
+#: notifications/serializers.py:162
 msgid "Not a browser push service."
 msgstr "هذا ليس عنوان خدمة إشعارات لمتصفح."
 
+#: notifications/services.py:33
 #, python-format
 msgid "Choose from %(values)s."
 msgstr "اختر من: %(values)s."
 
+#: notifications/services.py:220
 msgid "Choose a teacher or TA."
 msgstr "اختر أستاذًا أو معيدًا."
 
+#: notifications/services.py:256 student_affairs/services.py:143
 msgid "Already acknowledged."
 msgstr "أقررت بالفعل."
 
+#: organization/serializers.py:76
+#, python-format
+msgid ""
+"%(students)s students and %(courses)s courses are in a level above "
+"%(levels)s. Move them first."
+msgstr ""
+"%(students)s طالبًا و%(courses)s مادة في مستوى أعلى من %(levels)s. انقلهم "
+"أولًا."
+
+#: organization/serializers.py:99
+msgid ""
+"A programme with students, courses or applications cannot move department."
+msgstr "لا يُنقل إلى قسم آخر برنامجٌ عليه طلاب أو مواد أو طلبات تقديم."
+
+#: organization/services.py:94
+msgid ""
+"The department has entries in the audit log, which keeps them for good: stop "
+"it instead, or merge it into another department."
+msgstr ""
+"للقسم سجل في التدقيق، والسجل لا يُحذف أبدًا: أوقفه مؤقتًا بدلًا من ذلك، أو ادمجه "
+"في قسم آخر."
+
+#: organization/services.py:101
+msgid ""
+"The department still has courses, students, or programmes with students, "
+"courses or applications. Stop it instead, or move those first."
+msgstr ""
+"ما زال في القسم مواد أو طلاب، أو برامج عليها طلاب أو مواد أو طلبات تقديم. "
+"أوقفه مؤقتًا بدلًا من ذلك، أو انقل هذه أولًا."
+
+#: organization/services.py:161
+msgid "Choose another department."
+msgstr "اختر قسمًا آخر."
+
+#: organization/services.py:165
+msgid "That department is stopped. Choose an active one."
+msgstr "ذلك القسم موقوف. اختر قسمًا نشطًا."
+
+#: organization/views.py:320
+msgid "A backup is being made; wait for it to finish."
+msgstr "تُنشأ نسخة احتياطية الآن؛ انتظر حتى تكتمل."
+
+#: reports/views.py:48
 msgid "Expected a number."
 msgstr "المتوقع رقم."
 
+#: reports/views.py:55
 msgid "No term."
 msgstr "لا يوجد فصل دراسي."
 
+#: reports/views.py:106
 msgid "teacher or ta."
 msgstr "أستاذ أو معيد."
 
+#: reports/views.py:222
+msgid "No courses this term."
+msgstr "لا مواد في هذا الفصل."
+
+#: reports/views.py:246
 msgid "No admission cycle."
 msgstr "لا توجد دورة قبول."
 
+#: reports/views.py:273
 msgid "No academic year."
 msgstr "لا يوجد عام دراسي."
 
+#: reports/views.py:352 reports/views.py:357
 msgid "Choose a department."
 msgstr "اختر قسمًا."
 
+#: results/importer.py:67 students/importer.py:223
 #, python-format
 msgid "%(field)s: required"
 msgstr "%(field)s: مطلوب"
 
+#: results/importer.py:71
 msgid "university_number: no such student"
 msgstr "الرقم الجامعي: لا يوجد طالب بهذا الرقم"
 
+#: results/importer.py:75
 #, python-format
 msgid "course_code: no offering %(code)s-%(section)s in this term"
 msgstr "رمز المقرر: لا توجد شعبة %(code)s-%(section)s في هذا الفصل"
 
+#: results/importer.py:83
 msgid "course_code: outside your department"
 msgstr "رمز المقرر: خارج قسمك"
 
+#: results/importer.py:85
 msgid "university_number: not enrolled in this course"
 msgstr "الرقم الجامعي: الطالب غير مسجل في هذه المادة"
 
+#: results/importer.py:89
 msgid "status: use pass/fail/absent/withdrawn/incomplete"
 msgstr ""
 "الحالة: استخدم pass/fail/absent/withdrawn/incomplete (ناجح/راسب/غائب/منسحب/"
 "غير مكتمل)"
 
+#: results/importer.py:96
 msgid "score: must be a number"
 msgstr "الدرجة: يجب أن تكون رقمًا"
 
+#: results/importer.py:99
 msgid "score: must be between 0 and 100"
 msgstr "الدرجة: يجب أن تكون بين 0 و100"
 
+#: results/importer.py:101
 msgid "score: required"
 msgstr "الدرجة: مطلوبة"
 
+#: results/importer.py:113
 #, python-format
 msgid "letter: %(given)s does not match the scale (%(letter)s for %(score)s)"
 msgstr ""
 "التقدير: %(given)s لا يطابق سلّم التقديرات (%(letter)s للدرجة %(score)s)"
 
+#: results/importer.py:160
 msgid "duplicated in this file"
 msgstr "مكرر في هذا الملف"
 
+#: results/importer.py:162
 msgid "already has a result; request a correction instead"
 msgstr "له نتيجة بالفعل؛ اطلب تعديلًا بدلًا من ذلك"
 
+#: results/serializers.py:103
 msgid "Give a new score or status."
 msgstr "أدخل درجة أو حالة جديدة."
 
+#: results/serializers.py:185
 msgid "This programme already has a scale; edit it instead."
 msgstr "لهذا البرنامج سلّم تقديرات بالفعل؛ عدّله بدل إضافة سلّم جديد."
 
+#: results/serializers.py:187
 msgid "A default scale exists already; edit it instead."
 msgstr "يوجد سلّم تقديرات افتراضي بالفعل؛ عدّله بدل إضافة سلّم جديد."
 
+#: results/serializers.py:195
 msgid "Include a band starting at 0."
 msgstr "أضف فئة تبدأ من 0."
 
+#: results/services.py:40
 msgid "Outside your results scope."
 msgstr "خارج نطاق نتائجك."
 
+#: results/services.py:47 students/importer.py:455
 msgid "This batch was already committed or rejected."
 msgstr "اعتُمدت هذه الدفعة أو رُفضت من قبل."
 
+#: results/services.py:74
 msgid ""
 "Some students got a result from another batch meanwhile. Upload the file "
 "again."
 msgstr "حصل بعض الطلاب على نتيجة من دفعة أخرى في الأثناء. ارفع الملف من جديد."
 
+#: results/services.py:88
+msgid "Commit the batch first."
+msgstr "اعتمد الدفعة أولًا."
+
+#: results/services.py:88
+msgid "Not published."
+msgstr "غير منشورة."
+
+#: results/services.py:131
 msgid "A committed batch cannot be deleted; unpublish it instead."
 msgstr "لا تُحذف دفعة معتمدة؛ ألغِ نشرها بدلًا من ذلك."
 
+#: results/services.py:168
 msgid "Nothing would change."
 msgstr "لن يتغير شيء."
 
+#: results/services.py:184
 msgid "This result already has a pending correction."
 msgstr "لهذه النتيجة طلب تعديل معلّق بالفعل."
 
+#: results/services.py:195 results/services.py:209
 msgid "Already decided."
 msgstr "بُتّ فيه من قبل."
 
+#: results/services.py:198
 msgid "Give the reason for rejecting."
 msgstr "اكتب سبب الرفض."
 
+#: results/views.py:85
 msgid "Choose your department."
 msgstr "اختر قسمك."
 
+#: results/views.py:87
 msgid "Outside your department."
 msgstr "خارج قسمك."
 
+#: results/views.py:102 students/views.py:107
 msgid "Save the CSV as UTF-8."
 msgstr "احفظ ملف CSV بترميز UTF-8."
 
+#: results/views.py:194
 msgid "Choose a term."
 msgstr "اختر الفصل الدراسي."
 
+#: student_affairs/services.py:37
 msgid "Upload the file for this purpose first."
 msgstr "ارفع الملف لهذا الغرض أولًا."
 
+#: student_affairs/services.py:53
 msgid "Published regulations change through a new version."
 msgstr "اللوائح المنشورة تتغير بإصدار جديد."
 
+#: student_affairs/services.py:67
 msgid "Only a published regulation gets a new version."
 msgstr "لا يُصدر إصدار جديد إلا للائحة منشورة."
 
+#: student_affairs/services.py:96
+msgid "Only an unpublished draft can be deleted."
+msgstr "لا يُحذف إلا مسودة لم تُنشر."
+
+#: student_affairs/services.py:104
 msgid "Already published."
 msgstr "منشورة بالفعل."
 
+#: student_affairs/services.py:106
 msgid "Write the text or attach the PDF."
 msgstr "اكتب النص أو أرفق ملف PDF."
 
+#: student_affairs/services.py:135
 msgid "This regulation needs no acknowledgement."
 msgstr "هذه اللائحة لا تتطلب إقرارًا."
 
+#: student_affairs/services.py:158
 msgid "Upload each attachment first."
 msgstr "ارفع كل مرفق أولًا."
 
+#: student_affairs/services.py:185
 msgid "Write the note."
 msgstr "اكتب الملاحظة."
 
+#: student_affairs/services.py:204
 msgid "Reopen the case first."
 msgstr "أعد فتح الحالة أولًا."
 
+#: student_affairs/services.py:206
 msgid "Must be after the start date."
 msgstr "يجب أن يكون بعد تاريخ البداية."
 
+#: student_affairs/services.py:228
 msgid "Already visible to the student."
 msgstr "ظاهرة للطالب بالفعل."
 
+#: student_affairs/services.py:254
 msgid "Nothing to change."
 msgstr "لا شيء لتغييره."
 
+#: student_affairs/services.py:281
 msgid "You can report only in courses you teach or manage."
 msgstr "لا يمكنك الإبلاغ إلا في مواد تدرّسها أو تديرها."
 
+#: student_affairs/services.py:283
 msgid "This student is not in the course."
 msgstr "هذا الطالب ليس في المادة."
 
+#: student_affairs/services.py:288
 msgid "The attempt belongs to another student or course."
 msgstr "المحاولة تخص طالبًا أو مادة أخرى."
 
+#: student_affairs/services.py:317
 msgid "Already handled."
 msgstr "عولج من قبل."
 
+#: student_affairs/services.py:350
 msgid "Student affairs suspends or reinstates only."
 msgstr "شؤون الطلاب توقف الطالب أو ترفع إيقافه فقط."
 
+#: student_affairs/services.py:354
 msgid "The student already has this status."
 msgstr "الطالب في هذه الحالة بالفعل."
 
+#: students/importer.py:40
 msgid "University number"
 msgstr "الرقم الجامعي"
 
+#: students/importer.py:41
 msgid "Name in Arabic"
 msgstr "الاسم بالعربية"
 
+#: students/importer.py:42
 msgid "Program code"
 msgstr "رمز البرنامج"
 
+#: students/importer.py:43
 msgid "Level"
 msgstr "المستوى"
 
+#: students/importer.py:44
+msgid "Semester"
+msgstr "الفصل الدراسي"
+
+#: students/importer.py:45
 msgid "Course code"
 msgstr "رمز المقرر"
 
+#: students/importer.py:169
 msgid "The file is larger than 5 MB."
 msgstr "حجم الملف أكبر من 5 ميغابايت."
 
+#: students/importer.py:179
 msgid "Upload an Excel (.xlsx) or CSV file."
 msgstr "ارفع ملف Excel (.xlsx) أو CSV."
 
+#: students/importer.py:181
 msgid "The file is empty."
 msgstr "الملف فارغ."
 
+#: students/importer.py:186
 #, python-format
 msgid "Missing required columns: %(join)s."
 msgstr "أعمدة مطلوبة ناقصة: %(join)s."
 
+#: students/importer.py:200
 #, python-format
 msgid "The file has more than %(MAX_ROWS)s rows."
 msgstr "الملف يتجاوز %(MAX_ROWS)s صفًا."
 
+#: students/importer.py:234
 #, python-format
 msgid "program_code: unknown program %(get)s"
 msgstr "رمز البرنامج: برنامج غير معروف %(get)s"
 
+#: students/importer.py:244
 msgid "level: must be a number"
 msgstr "المستوى: يجب أن يكون رقمًا"
 
+#: students/importer.py:247 students/services.py:50
 #, python-format
 msgid "level: must be between 1 and %(levels_count)s"
 msgstr "المستوى: يجب أن يكون بين 1 و%(levels_count)s"
 
+#: students/importer.py:259
+msgid "semester: a number from 1 to 10 (الأول … العاشر)"
+msgstr "الفصل الدراسي: رقم من 1 إلى 10 (الأول … العاشر)"
+
+#: students/importer.py:264
+#, python-format
+msgid "semester: level %(level)s holds semesters %(first)s and %(second)s"
+msgstr "الفصل الدراسي: المستوى %(level)s فصلاه %(first)s و%(second)s"
+
+#: students/importer.py:273
 msgid "email: invalid"
 msgstr "البريد: غير صالح"
 
+#: students/importer.py:287 students/serializers.py:106
 msgid "phone: invalid"
 msgstr "الهاتف: غير صالح"
 
+#: students/importer.py:292
 msgid "gender: use male/female (ذكر/أنثى)"
 msgstr "الجنس: استخدم male/female (ذكر/أنثى)"
 
+#: students/importer.py:300
 msgid "birth_date: use YYYY-MM-DD or DD/MM/YYYY"
 msgstr "تاريخ الميلاد: استخدم YYYY-MM-DD أو DD/MM/YYYY"
 
+#: students/importer.py:343
 msgid "university_number: duplicated in this file"
 msgstr "الرقم الجامعي: مكرر في هذا الملف"
 
+#: students/promotion.py:40
+msgid "There is no current term."
+msgstr "لا يوجد فصل حالي."
+
+#: students/promotion.py:131 students/promotion.py:142
+msgid "The students were already promoted at the end of this term."
+msgstr "رُفِّع الطلاب في نهاية هذا الفصل من قبل."
+
+#: students/promotion.py:146
+msgid "There are no active students to promote here."
+msgstr "لا طلاب منتظمون للترفيع في هذا النطاق."
+
+#: students/serializers.py:88
 msgid "This field is required."
 msgstr "هذا الحقل مطلوب."
 
+#: students/services.py:78 students/services.py:83 students/services.py:105
 msgid "This number is already in use."
 msgstr "هذا الرقم الجامعي مستخدم لطالب آخر."
 
+#: students/services.py:102
 msgid "The student has activated an account with it."
 msgstr "فعّل الطالب حسابه بهذا الرقم؛ لا يتغير بعد التفعيل."
 
+#: students/services.py:139 students/services.py:153
 msgid ""
 "This student has an account or academic history; it cannot be deleted. Ask "
 "student affairs to change the status instead."
@@ -920,342 +1755,6 @@ msgstr ""
 "لهذا الطالب حساب أو سجل أكاديمي فلا يُحذف. اطلب من شؤون الطلاب تغيير حالته "
 "بدلًا من ذلك."
 
-#: files/validation.py
-#, python-format
-msgid "File type .%(ext)s is not allowed here."
-msgstr "نوع الملف .%(ext)s غير مسموح هنا."
-
-#: files/validation.py
-#, python-format
-msgid "The file is larger than %(max_mb)s MB."
-msgstr "حجم الملف أكبر من %(max_mb)s ميغابايت."
-
-#: files/validation.py
-msgid "The file content does not match its extension."
-msgstr "محتوى الملف لا يطابق امتداده — تأكد أنه ملف صحيح بهذا النوع."
-
-#: files/validation.py
-msgid "Text files must not contain binary data."
-msgstr "الملف النصي يحتوي بيانات غير نصية."
-
-#: files/validation.py
-msgid "The archive is damaged."
-msgstr "الملف المضغوط تالف."
-
-#: files/validation.py
-msgid "The archive has too many files."
-msgstr "الملف المضغوط يحتوي ملفات كثيرة جدًا."
-
-#: files/validation.py
-msgid "The archive expands to an unsafe size."
-msgstr "الملف المضغوط يتمدد إلى حجم غير آمن."
-
-msgid "Use a link that starts with https://"
-msgstr "استخدم رابطًا يبدأ بـ https://"
-
-msgid "At most ten links."
-msgstr "عشرة روابط على الأكثر."
-
-msgid "Not a staff field of this form: %(keys)s"
-msgstr "ليست من حقول الموظفين في هذه الاستمارة: %(keys)s"
-
-msgid "This university number is already in use."
-msgstr "هذا الرقم الجامعي مستخدم."
-
-msgid "Only fields marked for release can be released."
-msgstr "لا يُتاح للمتقدم إلا ما عُلِّم «يُتاح للمتقدم»."
-
-msgid "Enter the university number first."
-msgstr "أدخل الرقم الجامعي أولًا."
-
-msgid "These fields are filled by the college."
-msgstr "هذه الحقول تعبئها الكلية."
-
-msgid "Replace the writing guidance with the college's text before publishing: %(sections)s"
-msgstr "استبدل إرشادات الكتابة بنص الكلية المعتمد قبل النشر: %(sections)s"
-
-# The stock Arabic of these (DRF / Django) reads «تأكد ان القيمة…» (exam test 2026-11-01).
-msgid "Ensure this value is greater than or equal to {min_value}."
-msgstr "يجب ألا تقل القيمة عن {min_value}."
-
-msgid "Ensure this value is less than or equal to {max_value}."
-msgstr "يجب ألا تزيد القيمة على {max_value}."
-
-#, python-format
-msgid "Ensure this value is greater than or equal to %(limit_value)s."
-msgstr "يجب ألا تقل القيمة عن %(limit_value)s."
-
-#, python-format
-msgid "Ensure this value is less than or equal to %(limit_value)s."
-msgstr "يجب ألا تزيد القيمة على %(limit_value)s."
-
-msgid "A programme with students, courses or applications cannot move department."
-msgstr "لا يُنقل إلى قسم آخر برنامجٌ عليه طلاب أو مواد أو طلبات تقديم."
-
-msgid "The student is registered: change the number on the student record."
-msgstr "الطالب مسجَّل: عدّل رقمه الجامعي من سجل الطالب."
-
-#, python-format
-msgid "At most %(n)s characters."
-msgstr "لا يزيد على %(n)s حرفًا."
-
-msgid "The image has too many pixels. Use a smaller photo."
-msgstr "أبعاد الصورة كبيرة جدًا. اختر صورة أصغر."
-
-msgid "The end must be after the start."
-msgstr "يجب أن يكون تاريخ النهاية بعد تاريخ البداية."
-
-msgid "The semester is 1 or 2."
-msgstr "الفصل الدراسي إما الأول (1) أو الثاني (2)."
-
-msgid "Only the site team changes this picture."
-msgstr "لا يعدّل هذه الصورة إلا فريق الموقع."
-
-msgid "The site uses this picture. Choose another in the site settings first."
-msgstr "الموقع يستعمل هذه الصورة. اختر غيرها من إعدادات الموقع أولًا."
-
-msgid "The department still has courses, students, or programmes with students, courses or applications. Stop it instead, or move those first."
-msgstr "ما زال في القسم مواد أو طلاب، أو برامج عليها طلاب أو مواد أو طلبات تقديم. أوقفه مؤقتًا بدلًا من ذلك، أو انقل هذه أولًا."
-
-msgid "Choose another department."
-msgstr "اختر قسمًا آخر."
-
-msgid "The department has entries in the audit log, which keeps them for good: stop it instead, or merge it into another department."
-msgstr "للقسم سجل في التدقيق، والسجل لا يُحذف أبدًا: أوقفه مؤقتًا بدلًا من ذلك، أو ادمجه في قسم آخر."
-
-msgid "A backup is being made; wait for it to finish."
-msgstr "تُنشأ نسخة احتياطية الآن؛ انتظر حتى تكتمل."
-
-# Form builder checks (review 2026-11 axis 8): the head registrar reads them as they are.
-msgid "The schema needs a list of steps."
-msgstr "الاستمارة تحتاج قائمة خطوات."
-
-msgid "Each step must be an object with a list of sections."
-msgstr "كل خطوة يجب أن تحوي قائمة أقسام."
-
-msgid "Each section must be an object with a list of fields."
-msgstr "كل قسم يجب أن يحوي قائمة حقول."
-
-msgid "Each field must be an object."
-msgstr "كل حقل يجب أن يكون عنصرًا مستقلًا."
-
-#, python-format
-msgid "Field key %(key)s must be lowercase letters, digits or _."
-msgstr "مفتاح الحقل %(key)s يُكتب بحروف لاتينية صغيرة وأرقام و_ فقط."
-
-#, python-format
-msgid "Field key %(key)s is used twice."
-msgstr "مفتاح الحقل %(key)s مستعمل مرتين."
-
-#, python-format
-msgid "%(field)s: unknown type %(type)s."
-msgstr "%(field)s: نوع غير معروف (%(type)s)."
-
-#, python-format
-msgid "%(field)s: add the options."
-msgstr "%(field)s: أضف الخيارات."
-
-#, python-format
-msgid "%(field)s: the pattern is not a valid regular expression."
-msgstr "%(field)s: نمط التحقق غير صحيح."
-
-#, python-format
-msgid "%(field)s: choose who fills this field."
-msgstr "%(field)s: اختر من يعبئ هذا الحقل."
-
-#, python-format
-msgid "%(field)s: the university number is filled by the college."
-msgstr "%(field)s: الرقم الجامعي يعبئه موظف التسجيل؛ اجعله «للموظفين» أو «يُتاح للمتقدم»."
-
-#, python-format
-msgid "%(field)s: width must be full or half."
-msgstr "%(field)s: العرض كامل أو نصف."
-
-#, python-format
-msgid "%(field)s: the condition is not valid."
-msgstr "%(field)s: شرط الظهور غير صالح."
-
-#, python-format
-msgid "%(field)s: the condition must name a field above it."
-msgstr "%(field)s: شرط الظهور يجب أن يشير إلى حقل قبله."
-
-#, python-format
-msgid "%(field)s: choose the answers that show this field."
-msgstr "%(field)s: اختر الإجابات التي تُظهر هذا الحقل."
-
-#, python-format
-msgid "%(field)s: the condition must name a field the applicant fills."
-msgstr "%(field)s: شرط الظهور يجب أن يشير إلى حقل يعبئه المتقدم."
-
-#, python-format
-msgid "%(field)s: accepted files must be some of %(types)s."
-msgstr "%(field)s: الملفات المقبولة يجب أن تكون من %(types)s."
-
-# Strings added since 2026-10-25 without Arabic (review 2026-11 axis 8).
-msgid "Only a student edits these details here."
-msgstr "هذه البيانات يعدّلها الطالب وحده هنا."
-
-msgid "Upload your photo first."
-msgstr "ارفع صورتك أولًا."
-
-msgid "Upload the photo first."
-msgstr "ارفع الصورة أولًا."
-
-msgid "Choose the event this news is about."
-msgstr "اختر الفعالية التي يتناولها هذا الخبر."
-
-msgid "This Idempotency-Key was used for another request."
-msgstr "استُعمل هذا الطلب من قبل لعملية أخرى؛ أعد المحاولة."
-
-msgid "The first request with this key is still running."
-msgstr "الطلب الأول ما زال قيد التنفيذ؛ انتظر قليلًا."
-
-msgid "This changed since the first request; send it again with a new key."
-msgstr "تغيّر هذا منذ الطلب الأول؛ أعد المحاولة."
-
-msgid "You cannot delete questions of this exam."
-msgstr "لا يمكنك حذف أسئلة هذا الاختبار."
-
-msgid "This attempt was invalidated."
-msgstr "أُبطلت هذه المحاولة."
-
-msgid "The image could not be read."
-msgstr "تعذّرت قراءة الصورة."
-
-msgid "You cannot remove files from this lecture."
-msgstr "لا يمكنك حذف ملفات هذه المحاضرة."
-
-msgid "You can see this session but not join it."
-msgstr "يمكنك رؤية هذه الجلسة دون الانضمام إليها."
-
-msgid "No courses this term."
-msgstr "لا مواد في هذا الفصل."
-
-msgid "Only an unpublished draft can be deleted."
-msgstr "لا يُحذف إلا مسودة لم تُنشر."
-
-msgid "Set the last date for late work."
-msgstr "حدّد آخر موعد لتسليم المتأخر."
-
-msgid "The exam is published; its questions are locked."
-msgstr "نُشر الاختبار؛ لا تُعدَّل أسئلته بعد النشر."
-
-msgid "Only the system admin changes this account."
-msgstr "لا يعدّل هذا الحساب إلا مدير النظام."
-
-msgid "A deletion request is already waiting."
-msgstr "طلب الحذف بانتظار الموافقة بالفعل."
-
-msgid "Semester"
-msgstr "الفصل الدراسي"
-
-
-msgid "There is no current term."
-msgstr "لا يوجد فصل حالي."
-
-msgid "The students were already promoted at the end of this term."
-msgstr "رُفِّع الطلاب في نهاية هذا الفصل من قبل."
-
+#: students/views.py:162
 msgid "Invalid department."
 msgstr "قسم غير صالح."
-
-msgid "The cycle must close after it opens."
-msgstr "يجب أن تُغلق الدورة بعد أن تُفتح."
-
-msgid "Applications exist in this cycle; stop it instead."
-msgstr "في هذه الدورة طلبات؛ أوقفها بدل حذفها."
-
-msgid "Someone else decides on your own request."
-msgstr "لا تعتمد طلبًا قدّمته؛ يقرّر فيه غيرك."
-
-msgid "semester: a number from 1 to 10 (الأول … العاشر)"
-msgstr "الفصل الدراسي: رقم من 1 إلى 10 (الأول … العاشر)"
-
-#, python-format
-msgid "semester: level %(level)s holds semesters %(first)s and %(second)s"
-msgstr "الفصل الدراسي: المستوى %(level)s فصلاه %(first)s و%(second)s"
-
-msgid "A programme has 1 to 5 levels."
-msgstr "للبرنامج من مستوى واحد إلى خمسة مستويات."
-
-msgid "This university number already has an account. If it is not yours, report it."
-msgstr "هذا الرقم الجامعي مرتبط بحساب. إن لم يكن حسابك فأبلغ عن انتحال."
-
-msgid "These details do not match an existing account."
-msgstr "هذه البيانات لا تطابق حسابًا قائمًا."
-
-msgid "This report was already decided."
-msgstr "سبق البتّ في هذا البلاغ."
-
-msgid "Your report reached the department. They will reply by email."
-msgstr "وصل بلاغك إلى القسم، وسيردّ عليك بالبريد."
-
-msgid "Give a reason when dismissing."
-msgstr "اكتب سبب رفض البلاغ."
-
-msgid "A student's name is corrected by the registrar in the student record."
-msgstr "اسم الطالب يصحّحه المسجّل في سجل الطالب."
-
-msgid "An account on this university number is waiting for the department's approval. If it is not yours, report it."
-msgstr "على هذا الرقم الجامعي حساب ينتظر اعتماد القسم. إن لم يكن حسابك فأبلغ عن انتحال."
-
-msgid "The account was stopped after an impersonation report."
-msgstr "أُوقف الحساب بعد بلاغ انتحال."
-
-msgid ""
-"Your earlier account is disabled. Ask the registrar to enable it, then "
-"register again."
-msgstr "حسابك السابق معطّل. اطلب من المسجّل تفعيله، ثم أعد التسجيل."
-
-msgid "Choose another group to hold the teaching staff first."
-msgstr "اختر تصنيفًا آخر يضم هيئة التدريس أولًا."
-
-msgid "This group holds the teaching staff. Choose another group for them first."
-msgstr "هذا التصنيف يضم هيئة التدريس. اختر لهم تصنيفًا آخر أولًا."
-
-msgid "Pick a picture from the media library."
-msgstr "اختر صورة من مكتبة الوسائط."
-
-msgid "Unknown group."
-msgstr "تصنيف غير موجود."
-
-msgid "Only staff accounts can be added."
-msgstr "تُضاف حسابات الموظفين فقط."
-
-msgid "This person is already on the page."
-msgstr "هذا الشخص في الصفحة من قبل."
-
-msgid "Enter the name."
-msgstr "اكتب الاسم."
-
-msgid "Only staff appear on the public pages."
-msgstr "يظهر الموظفون فقط في صفحات الموقع."
-
-msgid "Send every group once, in the new order."
-msgstr "أرسل كل التصنيفات مرة واحدة بالترتيب الجديد."
-
-msgid "A move of this account already waits for the department's approval."
-msgstr "طلب نقل لهذا الحساب ينتظر اعتماد القسم من قبل."
-
-msgid "This record now holds another account. Reject this request."
-msgstr "صار لهذا السجل حساب آخر. ارفض هذا الطلب لإغلاقه."
-
-msgid "That department is stopped. Choose an active one."
-msgstr "ذلك القسم موقوف. اختر قسمًا نشطًا."
-
-msgid "%(students)s students and %(courses)s courses are in a level above %(levels)s. Move them first."
-msgstr "%(students)s طالبًا و%(courses)s مادة في مستوى أعلى من %(levels)s. انقلهم أولًا."
-
-msgid "There are no active students to promote here."
-msgstr "لا طلاب منتظمون للترفيع في هذا النطاق."
-
-msgid "This picture is a photo on the site's staff page. Change it there first."
-msgstr "هذه الصورة صورة شخص في «الكوادر» على الموقع. غيّرها هناك أولًا."
-msgid "Applications were made to this intake: it keeps its programme and cycle. Open a new one instead."
-msgstr "قُدِّمت طلبات إلى هذا البرنامج في هذه الدورة: يبقى على برنامجه ودورته. افتح برنامجًا جديدًا بدلًا من ذلك."
-
-msgid "The intake must close after it opens."
-msgstr "يجب أن يُغلق التقديم بعد أن يُفتح."
-
-msgid "This programme or its department is stopped. Reactivate it in the academic structure first."
-msgstr "هذا البرنامج أو قسمه موقوف. أعد تفعيله من «الهيكل الأكاديمي» أولًا."

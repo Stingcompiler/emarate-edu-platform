@@ -17,6 +17,7 @@ import { api, ok } from "../../lib/api";
 import { TOPIC_LABEL, days, initials, num, pct } from "../../lib/reports";
 import { ROLE_LINE, useTeachersReport } from "./Teachers";
 import { count, N } from "../../lib/format";
+import { matches } from "../../lib/search";
 import { useToast } from "../../components/Toast";
 
 const TEMPLATES: Record<string, (d: string) => string> = {
@@ -112,7 +113,7 @@ export function NoticeNew() {
               />
               <div className="max-h-64 divide-y divide-border-soft overflow-y-auto">
                 {(report.data?.rows ?? [])
-                  .filter((r) => r.name.includes(search))
+                  .filter((r) => matches(search, r.name))
                   .map((r) => (
                     <button
                       key={r.public_id}

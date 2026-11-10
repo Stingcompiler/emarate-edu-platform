@@ -318,30 +318,30 @@ def _type_problem(kind: str, value) -> str | None:
     """The value's type, checked before any rule (review 2026-10-25 R20: a regex was skipped for
     a value that was not text, and dates, booleans and phones were not checked at all)."""
     if kind in TEXT_KINDS and not isinstance(value, str):
-        return "Must be text."
+        return gettext("Must be text.")
     if kind in ("boolean", "consent") and type(value) is not bool:
-        return "Must be true or false."
+        return gettext("Must be true or false.")
     if kind == "date":
         if not isinstance(value, str) or not re.fullmatch(r"\d{4}-\d{2}-\d{2}", value):
-            return "Must be a date (YYYY-MM-DD)."
+            return gettext("Must be a date (YYYY-MM-DD).")
         try:
             date.fromisoformat(value)
         except ValueError:
-            return "Must be a date (YYYY-MM-DD)."
+            return gettext("Must be a date (YYYY-MM-DD).")
     if kind == "phone":
         from inquiries.services import normalize_phone
 
         try:
             if normalize_phone(value) is None:
-                return "Invalid phone number."
+                return gettext("Invalid phone number.")
         except ValidationError:
-            return "Invalid phone number."
+            return gettext("Invalid phone number.")
     if kind == "year" and not (type(value) is int and 1900 <= value <= timezone.now().year + 10):
-        return "Must be a year."
+        return gettext("Must be a year.")
     if kind == "multiselect" and not (
         isinstance(value, list) and all(isinstance(v, str) for v in value)
     ):
-        return "Choose from the options."
+        return gettext("Choose from the options.")
     return None
 
 
@@ -361,14 +361,14 @@ def validate_answers(
         empty = value in (None, "", [])
         if kind == "file":
             if field.get("required") and key not in documents:
-                errors[key] = "Upload this document."
+                errors[key] = gettext("Upload this document.")
             continue
         if kind == "consent" and field.get("required") and value is not True:
-            errors[key] = "Required."
+            errors[key] = gettext("Required.")
             continue
         if empty:
             if field.get("required"):
-                errors[key] = "Required."
+                errors[key] = gettext("Required.")
             continue
         problem = _type_problem(kind, value)
         if problem:
@@ -385,41 +385,41 @@ def validate_answers(
                 or amount < 0
                 or amount.as_tuple().exponent < -2
             ):
-                errors[key] = "Must be an amount."
+                errors[key] = gettext("Must be an amount.")
             continue
         if kind == "number":
             if isinstance(value, bool):
-                errors[key] = "Must be a number."
+                errors[key] = gettext("Must be a number.")
                 continue
             try:
                 number = Decimal(str(value))
             except InvalidOperation:
-                errors[key] = "Must be a number."
+                errors[key] = gettext("Must be a number.")
                 continue
             if not number.is_finite():
-                errors[key] = "Must be a number."
+                errors[key] = gettext("Must be a number.")
                 continue
             if ("min" in field and number < Decimal(str(field["min"]))) or (
                 "max" in field and number > Decimal(str(field["max"]))
             ):
-                errors[key] = "Out of range."
+                errors[key] = gettext("Out of range.")
         elif kind == "email":
             try:
                 validate_email(str(value))
             except DjangoValidationError:
-                errors[key] = "Invalid email."
+                errors[key] = gettext("Invalid email.")
         elif kind == "select" and value not in field.get("options", []):
-            errors[key] = "Choose one of the options."
+            errors[key] = gettext("Choose one of the options.")
         elif kind == "multiselect" and not (
             isinstance(value, list) and set(value) <= set(field.get("options", []))
         ):
-            errors[key] = "Choose from the options."
+            errors[key] = gettext("Choose from the options.")
         if (
             field.get("pattern")
             and isinstance(value, str)
             and not re.fullmatch(field["pattern"], value)
         ):
-            errors[key] = "Invalid format."
+            errors[key] = gettext("Invalid format.")
     return errors
 
 
@@ -652,7 +652,7 @@ def _submit(application: Application) -> Application:
         return application
     errors = {}
     if not application.full_name:
-        errors["full_name"] = "Required."
+        errors["full_name"] = gettext("Required.")
     if not application.email and not application.phone_e164:
         errors["email"] = gettext("Give an email or a phone number.")
     documents = set(application.documents.values_list("doc_type", flat=True))
@@ -661,7 +661,7 @@ def _submit(application: Application) -> Application:
         errors.update(validate_answers(template.schema, application.answers, documents))
     for required in application.intake.required_documents:
         if required.get("required") and required.get("key") not in documents:
-            errors[required.get("key", "document")] = "Upload this document."
+            errors[required.get("key", "document")] = gettext("Upload this document.")
     if errors:
         raise Invalid({k: [v] for k, v in errors.items()}, code="incomplete")
     if application.status == S.DRAFT and not application.intake.accepting():

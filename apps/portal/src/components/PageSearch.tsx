@@ -2,16 +2,8 @@ import { Search } from "lucide-react";
 import { useId, useState } from "react";
 import { useNavigate } from "react-router";
 
+import { fold } from "../lib/search";
 import type { NavItem } from "./AppShell";
-
-/** Letters an Arabic search should not tell apart: hamza forms, tāʾ marbūṭa, alif maqṣūra, harakāt. */
-export const fold = (text: string) =>
-  text
-    .replace(/[ً-ْـ]/g, "")
-    .replace(/[أإآ]/g, "ا")
-    .replace(/ة/g, "ه")
-    .replace(/ى/g, "ي")
-    .toLowerCase();
 
 /**
  * «ابحث عن صفحة»: the top bar's search over the pages the person can open (their navigation,

@@ -31,8 +31,26 @@ const PAGES: Record<string, string[]> = {
     "/lectures/new?offering=4",
     "/assignments/new?offering=4",
   ],
-  "dept.manager@demo.ecst.test": ["/department", "/department/courses", "/department/students"],
-  "admin@demo.ecst.test": ["/system", "/system/users", "/system/settings", "/system/structure"],
+  "dept.manager@demo.ecst.test": [
+    "/department",
+    "/department/courses",
+    "/department/students",
+    "/department/approvals",
+  ],
+  "admin@demo.ecst.test": [
+    "/system",
+    "/system/users",
+    "/system/settings",
+    "/system/structure",
+    "/system/deletions",
+    "/system/roles",
+    "/admissions/cycles",
+  ],
+  // Pages added since review 2026-11-10 began (axis 8): with the admin's last three, the staff
+  // matrix, promotion and the staff profiles.
+  "site@demo.ecst.test": ["/site-staff"],
+  "head.registrar@demo.ecst.test": ["/student-promotion"],
+  "academic@demo.ecst.test": ["/staff-profiles"],
 };
 
 for (const [account, paths] of Object.entries(PAGES)) {
@@ -44,6 +62,39 @@ for (const [account, paths] of Object.entries(PAGES)) {
     for (const path of paths) await audit(page, path);
   });
 }
+
+// «ليس حسابي — أبلّغ عن انتحال» (review 2026-11-10, axis 8): the form a student reaches when their
+// number already has an account. Reached by the answer the server gives, so no demo account changes.
+test("the impersonation report on /register", async ({ page }) => {
+  await page.route("**/api/public/registration/start", (route) =>
+    route.fulfill({
+      status: 409,
+      contentType: "application/json",
+      body: JSON.stringify({ detail: "مسجَّل", code: "already_registered" }),
+    }),
+  );
+  await page.goto("/register");
+  await page.getByLabel("التخصص").click();
+  await page.getByRole("option").first().click();
+  await page.getByLabel("الرقم الجامعي").fill("26-IT-0001");
+  await page.getByLabel("الاسم الرباعي").fill("محمد أحمد علي حسن");
+  await page.getByLabel("البريد الإلكتروني").fill("someone@example.test");
+  await page.getByRole("button", { name: "متابعة", exact: true }).click();
+  await expect(page.getByRole("button", { name: "ليس حسابي — أبلّغ عن انتحال" })).toBeVisible();
+  // By keyboard: from the email field, Tab reaches the note and then the report button.
+  await page.getByLabel("بريدك للتواصل").focus();
+  await page.keyboard.press("Tab");
+  await expect(page.getByLabel("ملاحظة للقسم (اختياري)")).toBeFocused();
+  await page.keyboard.press("Tab");
+  await expect(page.getByRole("button", { name: "ليس حسابي — أبلّغ عن انتحال" })).toBeFocused();
+  const { violations } = await new AxeBuilder({ page })
+    .withTags(["wcag2a", "wcag2aa", "wcag21aa"])
+    .analyze();
+  const blocking = violations
+    .filter((v) => v.impact === "serious" || v.impact === "critical")
+    .map((v) => `${v.id} (${v.impact}): ${v.nodes.map((n) => n.target.join(" ")).join(" | ")}`);
+  expect(blocking, blocking.join("\n")).toEqual([]);
+});
 
 test("dark mode keeps AA contrast", async ({ page }) => {
   // Five axe audits, like the signed-in ones above: 30s fails on a loaded machine, not a finding.

@@ -3,7 +3,8 @@ import { Users } from "lucide-react";
 import { MemoryRouter, Route, Routes } from "react-router";
 import { afterEach, expect, it } from "vitest";
 
-import { PageSearch, fold } from "./PageSearch";
+import { fold } from "../lib/search";
+import { PageSearch } from "./PageSearch";
 
 afterEach(cleanup);
 

@@ -129,15 +129,17 @@ def problems(exam: Exam) -> list[str]:
     found = []
     questions = list(exam.questions.prefetch_related("choices"))
     if not questions:
-        found.append("Add at least one question.")
+        found.append(gettext("Add at least one question."))
     for index, q in enumerate(questions, start=1):
         for message in REGISTRY[q.type].validate(q, list(q.choices.all())):
-            found.append(f"Question {index}: {message}")
+            found.append(
+                gettext("Question %(number)s: %(problem)s") % {"number": index, "problem": message}
+            )
     total = sum((q.marks for q in questions), Decimal(0))
     if exam.pass_marks > total:
-        found.append("The pass mark is above the total marks.")
+        found.append(gettext("The pass mark is above the total marks."))
     if exam.duration_minutes > (exam.closes_at - exam.opens_at).total_seconds() / 60:
-        found.append("The attempt is longer than the window.")
+        found.append(gettext("The attempt is longer than the window."))
     return found
 
 

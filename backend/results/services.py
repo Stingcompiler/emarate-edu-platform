@@ -85,7 +85,8 @@ def set_published(
     allowed = (B.COMMITTED, B.UNPUBLISHED) if published else (B.PUBLISHED,)
     if batch.status not in allowed:
         raise Conflict(
-            "Commit the batch first." if published else "Not published.", code="bad_state"
+            gettext("Commit the batch first.") if published else gettext("Not published."),
+            code="bad_state",
         )
     now = timezone.now()
     with transaction.atomic():

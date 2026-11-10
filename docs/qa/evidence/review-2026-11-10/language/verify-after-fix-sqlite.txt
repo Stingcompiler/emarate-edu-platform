@@ -1,0 +1,122 @@
+FFFF                                                                     [100%]
+=================================== FAILURES ===================================
+__________________ test_probe_r85_a_new_exam_warns_in_english __________________
+
+classroom = <class 'conftest.Classroom'>
+
+    def test_probe_r85_a_new_exam_warns_in_english(classroom):
+        """Every new exam opens with «Add at least one question.» above «نشر» (ExamEditor shows
+        /problems as is); a true/false or fill-in question without its answer adds «Question 1: Set
+        the correct answer.»."""
+        now = timezone.now()
+        exam = Exam.objects.create(
+            offering=classroom.offering,
+            title="اختبار",
+            opens_at=now,
+            closes_at=now + timedelta(hours=1),
+            duration_minutes=90,
+            pass_marks=5,
+            created_by=classroom.teacher,
+        )
+>       assert "Add at least one question." in exams.problems(exam)
+E       AssertionError: assert 'Add at least one question.' in ['أضف سؤالًا واحدًا على الأقل.', 'درجة النجاح أعلى من مجموع الدرجات.', 'مدة المحاولة أطول من فترة الامتحان.']
+E        +  where ['أضف سؤالًا واحدًا على الأقل.', 'درجة النجاح أعلى من مجموع الدرجات.', 'مدة المحاولة أطول من فترة الامتحان.'] = <function problems at 0x10b4a32e0>(<Exam: اختبار>)
+E        +    where <function problems at 0x10b4a32e0> = exams.problems
+
+core/tests/test_qa_probes_language.py:31: AssertionError
+_______________ test_probe_r87_a_closed_batch_answers_in_english _______________
+
+api = <function api.<locals>.client at 0x10d372fc0>
+make_user = <function make_user.<locals>.make at 0x10d0014e0>
+it_dept = <Department: تقانة المعلومات>
+it_program = <Program: بكالوريوس تقانة المعلومات>
+
+    def test_probe_r87_a_closed_batch_answers_in_english(api, make_user, it_dept, it_program):
+        """Two people (or two tabs) press «اعتماد» on the same import: the second sees «This batch
+        was already committed or rejected.»; unpublishing a result batch that is not published
+        answers «Not published.»."""
+        from students.tests.test_importer import URL, _csv, _upload
+    
+        head = make_user(Role.HEAD_REGISTRAR)
+        batch = _upload(
+            api(head),
+            _csv("university_number,full_name_ar,program_code,level", "26-IT-0001,أحمد,BIT,1"),
+        ).data
+        assert api(head).post(f"{URL}/{batch['public_id']}/reject").status_code == 200
+        again = api(head).post(f"{URL}/{batch['public_id']}/commit")
+        assert again.status_code == 409
+>       assert again.data["detail"] == "This batch was already committed or rejected."
+E       AssertionError: assert 'اعتُمدت هذه ...رُفضت من قبل.' == 'This batch w... or rejected.'
+E         
+E         - This batch was already committed or rejected.
+E         + اعتُمدت هذه الدفعة أو رُفضت من قبل.
+
+core/tests/test_qa_probes_language.py:98: AssertionError
+----------------------------- Captured stderr call -----------------------------
+2026-11-10 23:39:05,618 WARNING django.request Conflict: /api/v1/student-imports/ed9183d7-cad1-4f8c-a70c-e0d886930edb/commit
+------------------------------ Captured log call -------------------------------
+WARNING  django.request:log.py:283 Conflict: /api/v1/student-imports/ed9183d7-cad1-4f8c-a70c-e0d886930edb/commit
+______________ test_probe_r85_a_bad_answer_is_refused_in_english _______________
+
+    def test_probe_r85_a_bad_answer_is_refused_in_english():
+        """An answer of the wrong shape (an old tab, a changed question) comes back as «Pick one of
+        the choices.» under the question."""
+        q = Question(type="true_false", config={"answer": True})
+        try:
+>           REGISTRY["true_false"].clean_answer(q, "yes")
+
+core/tests/test_qa_probes_language.py:44: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <exams.question_types.TrueFalse object at 0x10b48e3c0>
+question = <Question: >, answer = 'yes'
+
+    def clean_answer(self, question, answer):
+        if not isinstance(answer, bool):
+>           raise ValueError(gettext("Answer true or false."))
+E           ValueError: أجب بصح أو خطأ.
+
+exams/question_types.py:118: ValueError
+
+During handling of the above exception, another exception occurred:
+
+    def test_probe_r85_a_bad_answer_is_refused_in_english():
+        """An answer of the wrong shape (an old tab, a changed question) comes back as «Pick one of
+        the choices.» under the question."""
+        q = Question(type="true_false", config={"answer": True})
+        try:
+            REGISTRY["true_false"].clean_answer(q, "yes")
+        except ValueError as error:
+>           assert str(error) == "Answer true or false."
+E           AssertionError: assert 'أجب بصح أو خطأ.' == 'Answer true or false.'
+E             
+E             - Answer true or false.
+E             + أجب بصح أو خطأ.
+
+core/tests/test_qa_probes_language.py:46: AssertionError
+_________ test_probe_r86_the_applicant_reads_english_beside_the_fields _________
+
+    def test_probe_r86_the_applicant_reads_english_beside_the_fields():
+        """«تقديم» on /apply puts the server's message beside each field (Apply.tsx, spec §6): the
+        visitor reads «Upload this document.», «Out of range.», «Invalid phone number.»."""
+        errors = admissions.validate_answers(SCHEMA, {"score": "120", "mobile": "x"}, set())
+>       assert errors == {
+            "score": "Out of range.",
+            "cert": "Upload this document.",
+            "mobile": "Invalid phone number.",
+        }
+E       AssertionError: assert {'score': 'خا...49912345678.'} == {'score': 'Ou...hone number.'}
+E         
+E         Differing items:
+E         {'score': 'خارج النطاق المسموح.'} != {'score': 'Out of range.'}
+E         {'cert': 'ارفع هذا المستند.'} != {'cert': 'Upload this document.'}
+E         {'mobile': 'رقم الهاتف غير صحيح — اكتبه مثل 0912345678 أو +249912345678.'} != {'mobile': 'Invalid phone number.'}
+E         Use -v to get more diff
+
+core/tests/test_qa_probes_language.py:74: AssertionError
+=========================== short test summary info ============================
+FAILED core/tests/test_qa_probes_language.py::test_probe_r85_a_new_exam_warns_in_english
+FAILED core/tests/test_qa_probes_language.py::test_probe_r87_a_closed_batch_answers_in_english
+FAILED core/tests/test_qa_probes_language.py::test_probe_r85_a_bad_answer_is_refused_in_english
+FAILED core/tests/test_qa_probes_language.py::test_probe_r86_the_applicant_reads_english_beside_the_fields
+4 failed in 6.86s

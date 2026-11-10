@@ -12,8 +12,10 @@ const ACCOUNTS = [
   "registrar@demo.ecst.test",
   "academic@demo.ecst.test",
   "admin@demo.ecst.test",
+  "site@demo.ecst.test",
 ];
-const LARGE_TEXT = new Set(["26-IT-0001", "teacher@demo.ecst.test", "admin@demo.ecst.test"]);
+// Larger text on every role's pages, the new ones too (review 2026-11-10, axis 8).
+const LARGE_TEXT = new Set(ACCOUNTS);
 
 for (const account of ACCOUNTS) {
   for (const rem of LARGE_TEXT.has(account) ? [16, 20] : [16]) {

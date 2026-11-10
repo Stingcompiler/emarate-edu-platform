@@ -17,7 +17,7 @@ import {
 } from "react";
 import { createPortal } from "react-dom";
 
-import { fold } from "./PageSearch";
+import { fold } from "../lib/search";
 import { useDialogFocus } from "./useDialogFocus";
 
 /**

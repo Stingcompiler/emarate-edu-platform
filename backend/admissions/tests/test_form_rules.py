@@ -46,7 +46,7 @@ def test_answers_are_checked_by_type_before_any_rule():
     errors = services.validate_answers(FIELDS, bad, set())
     assert set(errors) == set(bad), errors
     assert services.validate_answers(FIELDS, {"score": True}, set()) == {
-        "score": "Must be a number."
+        "score": "يجب أن يكون رقمًا."
     }
     good = {
         "code": "ABC",
@@ -238,15 +238,15 @@ def test_the_college_form_checks_audiences_conditions_and_new_types():
         COLLEGE, {"application_path": "تجسير", "certificate_year": "2024"}, set()
     )
     assert errors == {
-        "previous_university": "Required.",
-        "certificate_year": "Must be a year.",
-        "declaration": "Required.",
+        "previous_university": "مطلوب.",
+        "certificate_year": "يجب أن يكون سنة.",
+        "declaration": "مطلوب.",
     }
     assert services.validate_answers(COLLEGE, {**ok, "declaration": False}, set()) == {
-        "declaration": "Required."
+        "declaration": "مطلوب."
     }
     staff = services.validate_answers(COLLEGE, {"tuition_fees": "12.345"}, set(), who="staff")
-    assert staff == {"tuition_fees": "Must be an amount.", "university_number": "Required."}
+    assert staff == {"tuition_fees": "يجب أن يكون مبلغًا.", "university_number": "مطلوب."}
     assert (
         services.validate_answers(
             COLLEGE, {"tuition_fees": "1500.50", "university_number": "26-IT-1"}, set(), who="staff"

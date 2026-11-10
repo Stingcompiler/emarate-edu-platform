@@ -452,5 +452,5 @@ def _locked_open(batch: StudentImportBatch) -> StudentImportBatch:
         StudentImportBatch.Status.VALIDATED,
         StudentImportBatch.Status.HAS_ERRORS,
     ):
-        raise ValueError("This batch was already committed or rejected.")
+        raise ValueError(gettext("This batch was already committed or rejected."))
     return batch
