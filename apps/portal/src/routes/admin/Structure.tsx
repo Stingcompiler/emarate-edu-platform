@@ -17,6 +17,8 @@ import {
   Switch,
   TextArea,
 } from "../../components/ui";
+import { useMe } from "../../lib/auth";
+import { canDelete } from "../../lib/nav";
 import { api, ok } from "../../lib/api";
 import { num } from "../../lib/reports";
 import { count, DEGREE, N, SEMESTERS, fmtDate, termName } from "../../lib/format";
@@ -917,6 +919,8 @@ function ProgramForm({
   onDone: () => void;
 }) {
   const opened = useOpenFocus<HTMLFormElement>(!!program);
+  // The system supervisor edits the structure and deletes nothing (review 2026-11-10, R73).
+  const deletes = canDelete(useMe().data, "structure.manage");
   const confirm = useConfirm();
   const unsaved = useUnsavedChanges();
   // Engineering and medicine are five years, the rest four (owner, 2026-11-09: a medicine
@@ -1149,7 +1153,7 @@ function ProgramForm({
             <>
               <Button
                 variant="ghost"
-                className="me-auto text-danger-strong"
+                className={`me-auto text-danger-strong ${deletes ? "" : "hidden"}`}
                 disabled={remove.isPending}
                 onClick={async () => {
                   if (
@@ -1403,6 +1407,7 @@ function DepartmentEnd({
   departments: Schemas["Department"][];
   onGone: (deleted?: boolean) => void;
 }) {
+  const deletes = canDelete(useMe().data, "structure.manage");
   const confirm = useConfirm();
   const usage = useQuery({
     queryKey: ["department-usage", department.id],
@@ -1462,7 +1467,12 @@ function DepartmentEnd({
         {roles && <li>الأدوار: {roles}</li>}
       </ul>
       {error(merge.error ?? removeAll.error)}
-      {u.can_merge ? (
+      {!deletes ? (
+        // Merging and deleting delete: the system admin's alone (docs/roles-matrix.md).
+        <p className="text-text-muted">
+          دمج القسم وحذفه لمدير النظام. تستطيع إيقافه مؤقتًا من «إيقاف مؤقت» أعلاه.
+        </p>
+      ) : u.can_merge ? (
         <div className="flex flex-wrap items-end gap-2">
           <label className={`${LABEL} min-w-48 flex-1`}>
             دمج في قسم آخر
@@ -1512,7 +1522,7 @@ function DepartmentEnd({
           أولًا.
         </p>
       )}
-      {u.can_delete && (
+      {deletes && u.can_delete && (
         <Button
           variant="ghost"
           className="text-danger-strong"
@@ -1541,7 +1551,7 @@ function DepartmentEnd({
           {u.programs.length ? "حذف القسم مع برامجه" : "حذف القسم"}
         </Button>
       )}
-      {u.can_merge && !u.can_delete && (
+      {deletes && u.can_merge && !u.can_delete && (
         <p className="text-xs text-text-muted">
           للقسم سجل في التدقيق، والسجل لا يُحذف: يُدمج أو يُوقف، ولا يُحذف.
         </p>

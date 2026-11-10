@@ -15,6 +15,8 @@ import {
   problemMessage,
 } from "../../components/ui";
 import { api, ok } from "../../lib/api";
+import { useMe } from "../../lib/auth";
+import { can } from "../../lib/nav";
 import { num } from "../../lib/reports";
 import { Pager, useServerPages } from "../../components/Pager";
 import { useConfirm } from "../../components/Confirm";
@@ -59,6 +61,7 @@ export function ResultImportDetail() {
   );
 
   const toast = useToast();
+  const mayDelete = can(useMe().data, "results.delete");
   const act = useMutation({
     mutationFn: async (kind: "commit" | "publish" | "unpublish" | "delete") => {
       const call =
@@ -150,6 +153,8 @@ export function ResultImportDetail() {
                     </Button>
                     <Button
                       variant="secondary"
+                      // Deleting a batch is not the supervisors' (results.delete; R73).
+                      className={mayDelete ? "" : "hidden"}
                       onClick={async () =>
                         (await confirm({
                           title: "إلغاء الدفعة؟",

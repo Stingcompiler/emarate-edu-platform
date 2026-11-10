@@ -66,6 +66,12 @@ export function can(me: Me | null | undefined, capability: string): boolean {
   return !!me?.capabilities?.[capability];
 }
 
+/** May send the capability's DELETE: the system supervisor holds what the admin holds but
+ * deletes nothing, so a page hides its delete buttons by this (review 2026-11-10, R73). */
+export function canDelete(me: Me | null | undefined, capability: string): boolean {
+  return !!me?.deletes?.includes(capability);
+}
+
 /** The capability across the whole college, not only in some departments. */
 export function canEverywhere(me: Me | null | undefined, capability: string): boolean {
   return !!me?.capabilities?.[capability]?.everything;

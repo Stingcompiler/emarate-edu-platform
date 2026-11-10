@@ -17,9 +17,12 @@ Older rounds (2026-10-24 → 11-02): `.claude/handoff/archive/2026-10-24_to_2026
   docs differences. **Round 2 done** (#269): axes 1.3 and 1.2 — R67–R72 proven and fixed (merge:
   member of both departments, inquiries and news follow, no merge into a stopped department,
   roles end; promotion: no run for nobody, the college after departments moves the rest; levels
-  not lowered under students). **Next:** axis 2 (seven operations outside the matrix, role
-  combinations), rest of 1.1/1.3 (admission cycles), axis 3; fill `fit.csv`. Never run probes or
-  other work while E2E runs. Findings continue from R73.
+  not lowered under students). **Round 3 done** (#270): axis 2 — the 19 writes added since the
+  roles audit × 15 roles match the matrix (`tests/permissions/test_new_surface_writes.py`); R73:
+  `/me` → `deletes` + `canDelete()` hide deletes the server refuses (structure, redirects, media,
+  result batch). Five matrix rows proposed to the owner in the report §4 (not added). **Next:**
+  rest of 1.1/1.3 (admission cycles), axis 3 (migrations, writes without audit), 1.4–1.7, 4, 5,
+  8; fill `fit.csv`. Never run probes or other work while E2E runs. Findings continue from R74.
 - **Staff review fixes** (2026-11-09; `fix/site-staff-review`): any staff account (not only
   teachers) may now choose to appear (`accounts.staff_profile.on_staff`, Settings card for all
   staff); a placed account that is no longer staff drops off (`content.staff.shown`); the people

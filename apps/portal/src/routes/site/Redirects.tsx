@@ -13,12 +13,17 @@ import {
   problemMessage,
 } from "../../components/ui";
 import { api, ok } from "../../lib/api";
+import { useMe } from "../../lib/auth";
+import { canDelete } from "../../lib/nav";
 import { ALL, Pager, useLocalPages } from "../../components/Pager";
 import { useConfirm } from "../../components/Confirm";
 import { count, N } from "../../lib/format";
 
 /** Board: DesktopSiteRedirects (desktop). Phone derived as a card list. 404 suggestions arrive with the public site (Phase 9). */
 export function Redirects() {
+  const me = useMe();
+  // The system supervisor adds redirects and deletes none.
+  const deletes = canDelete(me.data, "content.manage");
   const confirm = useConfirm();
   const client = useQueryClient();
   const list = useQuery({
@@ -44,7 +49,11 @@ export function Redirects() {
   });
   const remove = useMutation({
     mutationFn: async (id: number) => {
-      await api.DELETE("/api/v1/content/redirects/{id}", { params: { path: { id } } });
+      const { error, response } = await api.DELETE("/api/v1/content/redirects/{id}", {
+        params: { path: { id } },
+      });
+      // A refusal is shown, not swallowed (review 2026-11-10, R73: nothing happened).
+      if (!response.ok) throw error;
     },
     onSuccess: refresh,
   });
@@ -105,6 +114,11 @@ export function Redirects() {
             </Button>
           </form>
         </Card>
+        {remove.isError && (
+          <div className="mt-3">
+            <Notice>{problemMessage(remove.error)}</Notice>
+          </div>
+        )}
         {add.isError && (
           <div className="mt-3">
             <Notice>{problemMessage(add.error)}</Notice>
@@ -131,20 +145,22 @@ export function Redirects() {
               <span className="shrink-0 pt-3 text-xs text-text-muted lg:pt-0">
                 {count(r.hits, N.time)}
               </span>
-              <button
-                type="button"
-                aria-label="حذف"
-                onClick={async () =>
-                  (await confirm({
-                    title: "حذف التحويل؟",
-                    body: `${r.from_path} ← ${r.to_path}`,
-                    confirm: "حذف",
-                  })) && remove.mutate(r.id)
-                }
-                className="grid size-11 place-items-center rounded-lg text-danger-strong hover:bg-danger-soft"
-              >
-                <Trash2 size={16} />
-              </button>
+              {deletes && (
+                <button
+                  type="button"
+                  aria-label="حذف"
+                  onClick={async () =>
+                    (await confirm({
+                      title: "حذف التحويل؟",
+                      body: `${r.from_path} ← ${r.to_path}`,
+                      confirm: "حذف",
+                    })) && remove.mutate(r.id)
+                  }
+                  className="grid size-11 place-items-center rounded-lg text-danger-strong hover:bg-danger-soft"
+                >
+                  <Trash2 size={16} />
+                </button>
+              )}
             </div>
           ))}
           {list.data && !list.data.length && (
