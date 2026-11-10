@@ -1,0 +1,34 @@
+.....                                                                    [100%]
+==================================== PASSES ====================================
+_______ test_probe_r57_a_verified_request_completes_over_a_pending_move ________
+----------------------------- Captured stderr call -----------------------------
+2026-11-10 08:40:01,554 WARNING django.request Conflict: /api/v1/registration-requests/a3531ea1-441e-4f19-b512-bda90ff5be66/decide
+2026-11-10 08:40:01,557 WARNING django.request Conflict: /api/v1/registration-requests/a3531ea1-441e-4f19-b512-bda90ff5be66/decide
+------------------------------ Captured log call -------------------------------
+WARNING  django.request:log.py:283 Conflict: /api/v1/registration-requests/a3531ea1-441e-4f19-b512-bda90ff5be66/decide
+WARNING  django.request:log.py:283 Conflict: /api/v1/registration-requests/a3531ea1-441e-4f19-b512-bda90ff5be66/decide
+_________ test_probe_r59_an_upheld_report_leaves_the_pending_move_open _________
+----------------------------- Captured stderr call -----------------------------
+2026-11-10 08:40:01,603 WARNING kombu.connection No hostname was supplied. Reverting to default 'localhost'
+2026-11-10 08:40:01,612 INFO celery.app.trace Task notifications.tasks.fan_out[595c9104-69c4-43b3-b6aa-20a04d7466ef] succeeded in 0.00848733299972082s: 1
+2026-11-10 08:40:01,631 WARNING django.request Conflict: /api/v1/registration-requests/04ae48cf-6ed5-4730-aa93-a5786ebe8ad6/decide
+2026-11-10 08:40:01,633 WARNING django.request Conflict: /api/public/registration/start
+------------------------------ Captured log call -------------------------------
+WARNING  kombu.connection:connection.py:671 No hostname was supplied. Reverting to default 'localhost'
+INFO     celery.app.trace:trace.py:128 Task notifications.tasks.fan_out[595c9104-69c4-43b3-b6aa-20a04d7466ef] succeeded in 0.00848733299972082s: 1
+WARNING  django.request:log.py:283 Conflict: /api/v1/registration-requests/04ae48cf-6ed5-4730-aa93-a5786ebe8ad6/decide
+WARNING  django.request:log.py:283 Conflict: /api/public/registration/start
+___________ test_probe_r60_one_account_waits_to_move_to_two_records ____________
+----------------------------- Captured stderr call -----------------------------
+2026-11-10 08:40:01,688 INFO celery.app.trace Task notifications.tasks.fan_out[6771ee97-9608-42ab-953e-3dc8825a99b8] succeeded in 0.0013213750003160385s: 1
+2026-11-10 08:40:01,693 WARNING django.request Conflict: /api/v1/registration-requests/fcfc6446-2589-4a3f-a244-a666bb8ba7ed/decide
+------------------------------ Captured log call -------------------------------
+INFO     celery.app.trace:trace.py:128 Task notifications.tasks.fan_out[6771ee97-9608-42ab-953e-3dc8825a99b8] succeeded in 0.0013213750003160385s: 1
+WARNING  django.request:log.py:283 Conflict: /api/v1/registration-requests/fcfc6446-2589-4a3f-a244-a666bb8ba7ed/decide
+=========================== short test summary info ============================
+PASSED core/tests/test_qa_probes_identity.py::test_probe_r57_a_verified_request_completes_over_a_pending_move
+PASSED core/tests/test_qa_probes_identity.py::test_probe_r59_an_upheld_report_leaves_the_pending_move_open
+PASSED core/tests/test_qa_probes_identity.py::test_probe_r60_one_account_waits_to_move_to_two_records
+PASSED core/tests/test_qa_probes_identity.py::test_probe_r61_a_new_student_is_added_to_a_stopped_programme
+PASSED core/tests/test_qa_probes_identity.py::test_probe_r62_deleting_the_new_record_unarchives_the_old_one
+5 passed in 5.10s

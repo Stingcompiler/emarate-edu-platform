@@ -96,7 +96,7 @@ const lead = L(
   lang={lang}
   title={title}
   path="admissions/"
-  description={cycle ? `${cycleName(lang, cycle.cycle)} — ${lead}` : lead}
+  description={`${cycle ? cycleName(lang, cycle.cycle) : title} — ${lead}`}
   jsonLd={jsonLd}
 >
   <PageHead

@@ -1,0 +1,33 @@
+$ node scripts/seo-check.mjs apps/landing/dist
+ar/about/index.html: no og:image
+ar/admissions/index.html: description is 68 characters (want 70–170)
+ar/admissions/index.html: no og:image
+ar/announcements/index.html: no og:image
+ar/calendar/index.html: no og:image
+ar/contact/index.html: no og:image
+ar/departments/index.html: no og:image
+ar/events/index.html: no og:image
+ar/index.html: no og:image
+ar/news/index.html: no og:image
+ar/parents/index.html: no og:image
+ar/programs/index.html: no og:image
+ar/regulations/index.html: no og:image
+ar/staff/index.html: description is 66 characters (want 70–170)
+ar/staff/index.html: no og:image
+en/about/index.html: no og:image
+en/admissions/index.html: no og:image
+en/announcements/index.html: no og:image
+en/calendar/index.html: no og:image
+en/contact/index.html: no og:image
+en/departments/index.html: no og:image
+en/events/index.html: no og:image
+en/index.html: no og:image
+en/news/index.html: no og:image
+en/parents/index.html: no og:image
+en/programs/index.html: no og:image
+en/regulations/index.html: no og:image
+en/staff/index.html: no og:image
+
+28 search-readiness problem(s) in apps/landing/dist
+[ELIFECYCLE] Command failed with exit code 1.
+# exit 1, 0s, 2026-11-10T06:42:08Z

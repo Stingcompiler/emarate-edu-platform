@@ -1,0 +1,1468 @@
+$ playwright test -c e2e/playwright.config.ts
+
+Running 232 tests using 1 worker
+
+  ✓    1 [phone] › e2e/tests/a11y.spec.ts:21:5 › public pages: sign-in and application (5.4s)
+  ✓    2 [phone] › e2e/tests/a11y.spec.ts:39:7 › signed-in pages — 26-IT-0001 (11.6s)
+  ✓    3 [phone] › e2e/tests/a11y.spec.ts:39:7 › signed-in pages — teacher@demo.ecst.test (10.3s)
+  ✘    4 [phone] › e2e/tests/a11y.spec.ts:39:7 › signed-in pages — dept.manager@demo.ecst.test (3.0s)
+  ✓    5 [phone] › e2e/tests/a11y.spec.ts:39:7 › signed-in pages — admin@demo.ecst.test (9.0s)
+  ✓    6 [phone] › e2e/tests/a11y.spec.ts:48:5 › dark mode keeps AA contrast (9.3s)
+  ✓    7 [phone] › e2e/tests/a11y.spec.ts:58:5 › warm mode keeps AA contrast (9.2s)
+  ✓    8 [phone] › e2e/tests/access.spec.ts:7:5 › a student opening staff pages sees «غير مسموح», not empty dashboards (3.1s)
+  ✘    9 [phone] › e2e/tests/apply.spec.ts:7:5 › a visitor verifies the email, fills the application, uploads documents and submits (1.0s)
+  ✓   10 [phone] › e2e/tests/apply.spec.ts:73:5 › the filling guide lists the form's fields with their explanations and prints (owner, 2026-11-01) (1.2s)
+  ✓   11 [phone] › e2e/tests/exam.spec.ts:9:5 › a student takes the open quiz, submits it and sees the auto-graded result (2.3s)
+  ✘   12 [phone] › e2e/tests/fit-signed-in.spec.ts:20:9 › pages fit the screen — 26-IT-0001 (27.9s)
+  ✓   13 [phone] › e2e/tests/fit-signed-in.spec.ts:20:9 › pages fit the screen — 26-IT-0001 (larger text) (30.4s)
+  ✘   14 [phone] › e2e/tests/fit-signed-in.spec.ts:20:9 › pages fit the screen — teacher@demo.ecst.test (1.1s)
+  ✓   15 [phone] › e2e/tests/fit-signed-in.spec.ts:20:9 › pages fit the screen — teacher@demo.ecst.test (larger text) (29.3s)
+  ✘   16 [phone] › e2e/tests/fit-signed-in.spec.ts:20:9 › pages fit the screen — dept.manager@demo.ecst.test (2.2s)
+  ✓   17 [phone] › e2e/tests/fit-signed-in.spec.ts:20:9 › pages fit the screen — registrar@demo.ecst.test (19.4s)
+  ✘   18 [phone] › e2e/tests/fit-signed-in.spec.ts:20:9 › pages fit the screen — academic@demo.ecst.test (12.1s)
+  ✘   19 [phone] › e2e/tests/fit-signed-in.spec.ts:20:9 › pages fit the screen — admin@demo.ecst.test (31.5s)
+  ✘   20 [phone] › e2e/tests/fit-signed-in.spec.ts:20:9 › pages fit the screen — admin@demo.ecst.test (larger text) (31.6s)
+  ✓   21 [phone] › e2e/tests/fit.spec.ts:10:7 › fits the screen — portal /login (1.6s)
+  ✓   22 [phone] › e2e/tests/fit.spec.ts:10:7 › fits the screen — portal /register (1.4s)
+  ✓   23 [phone] › e2e/tests/fit.spec.ts:10:7 › fits the screen — portal /forgot-password (1.5s)
+  ✓   24 [phone] › e2e/tests/fit.spec.ts:10:7 › fits the screen — portal /apply (1.4s)
+  ✓   25 [phone] › e2e/tests/fit.spec.ts:10:7 › fits the screen — portal /track (1.4s)
+  ✓   26 [phone] › e2e/tests/fit.spec.ts:18:7 › fits the screen — site /ar/ (1.6s)
+  ✓   27 [phone] › e2e/tests/fit.spec.ts:18:7 › fits the screen — site /ar/contact (854ms)
+  ✓   28 [phone] › e2e/tests/fit.spec.ts:18:7 › fits the screen — site /ar/news (837ms)
+  ✓   29 [phone] › e2e/tests/fit.spec.ts:18:7 › fits the screen — site /ar/events (972ms)
+  ✓   30 [phone] › e2e/tests/fit.spec.ts:18:7 › fits the screen — site /ar/programs (944ms)
+  ✓   31 [phone] › e2e/tests/fit.spec.ts:18:7 › fits the screen — site /ar/about (853ms)
+  ✓   32 [phone] › e2e/tests/fit.spec.ts:34:7 › fits the screen — portal /track with applications, a reply box and an inquiry at 320px, text 100% (1.4s)
+  ✓   33 [phone] › e2e/tests/fit.spec.ts:34:7 › fits the screen — portal /track with applications, a reply box and an inquiry at 360px, text 100% (1.5s)
+  ✓   34 [phone] › e2e/tests/fit.spec.ts:34:7 › fits the screen — portal /track with applications, a reply box and an inquiry at 390px, text 100% (1.5s)
+  ✓   35 [phone] › e2e/tests/fit.spec.ts:34:7 › fits the screen — portal /track with applications, a reply box and an inquiry at 360px, text 138% (1.8s)
+  ✓   36 [phone] › e2e/tests/fit.spec.ts:34:7 › fits the screen — portal /track with applications, a reply box and an inquiry at 360px, text 175% (1.6s)
+  ✓   37 [phone] › e2e/tests/fit.spec.ts:34:7 › fits the screen — portal /track with applications, a reply box and an inquiry at 320px, text 150% (1.4s)
+  -   38 [phone] › e2e/tests/hidden-sample.spec.ts:11:5 › the site shows no sample text, and still shows the real content
+  ✓   39 [phone] › e2e/tests/journeys.spec.ts:11:7 › journeys › a visitor finds a programme's conditions and reaches the application (990ms)
+  ✓   40 [phone] › e2e/tests/journeys.spec.ts:23:7 › journeys › a student returns to the portal and sees what is due, with a way to all tasks (1.6s)
+  ✓   41 [phone] › e2e/tests/journeys.spec.ts:37:7 › journeys › a teacher reaches the grading queue from today (1.6s)
+  ✓   42 [phone] › e2e/tests/journeys.spec.ts:47:7 › journeys › a registrar finds what needs a decision and opens it (1.6s)
+  ✘   43 [phone] › e2e/tests/journeys.spec.ts:63:7 › journeys › the system admin adds a student by hand beside the import (2.8s)
+  ✓   44 [phone] › e2e/tests/journeys.spec.ts:92:5 › a new programme's levels follow its department and degree (3.3s)
+  ✓   45 [phone] › e2e/tests/keyboard.spec.ts:87:7 › form builder by keyboard › an arrow keeps the focus on the moved field, and crosses into the next section (2.4s)
+  ✓   46 [phone] › e2e/tests/keyboard.spec.ts:106:7 › form builder by keyboard › a refused publish speaks Arabic and names the field (2.9s)
+  ✓   47 [phone] › e2e/tests/keyboard.spec.ts:116:5 › structure forms give the focus back to the button that opened them (2.9s)
+  ✓   48 [phone] › e2e/tests/keyboard.spec.ts:132:5 › the phone theme menu answers arrows and gives the focus back (1.6s)
+  ✘   49 [phone] › e2e/tests/landing.spec.ts:8:5 › every public page loads, fits, is accessible and has its SEO basics (18.3s)
+  ✓   50 [phone] › e2e/tests/landing.spec.ts:79:5 › the programme page keeps «apply to this programme» in reach (625ms)
+  ✓   51 [phone] › e2e/tests/landing.spec.ts:96:5 › a plan that does not add up to the credit hours says it is partial (533ms)
+  ✓   52 [phone] › e2e/tests/landing.spec.ts:103:5 › the home picture and the logo are served resized, in modern formats (design review B6) (379ms)
+  ✓   53 [phone] › e2e/tests/landing.spec.ts:131:5 › the public site has one filled action, in the accent colour, and no filled blue button (design review B4) (1.4s)
+  ✓   54 [phone] › e2e/tests/landing.spec.ts:178:5 › search engines get a dated sitemap and a site-hosted icon (72ms)
+  ✓   55 [phone] › e2e/tests/landing.spec.ts:193:5 › the programme page states its fees, and the fees page lists every programme (451ms)
+  ✓   56 [phone] › e2e/tests/landing.spec.ts:207:5 › the programme finder narrows by name, spelling-tolerant, and by department (729ms)
+  ✓   57 [phone] › e2e/tests/landing.spec.ts:240:5 › WhatsApp is one tap away, and parents have their own page (899ms)
+  ✓   58 [phone] › e2e/tests/landing.spec.ts:258:5 › an event can be added to a calendar, with directions to the college (353ms)
+  ✓   59 [phone] › e2e/tests/landing.spec.ts:275:5 › English pages mark Arabic-only content, and every trail is structured data (955ms)
+  ✓   60 [phone] › e2e/tests/landing.spec.ts:297:5 › a department page shows the members who chose to appear, and its own news (567ms)
+  ✓   61 [phone] › e2e/tests/landing.spec.ts:312:5 › the home page shows «الكوادر», and a card opens the member's page (790ms)
+  ✓   62 [phone] › e2e/tests/landing.spec.ts:345:5 › the site menus come from the CMS and behave like menus (898ms)
+  ✓   63 [phone] › e2e/tests/landing.spec.ts:389:5 › motion never leaves content hidden, and «reduce motion» turns it off (11.8s)
+  ✓   64 [phone] › e2e/tests/landing.spec.ts:427:5 › on a phone every control in the site header and menu is at least 44 px (design review B9) (1.7s)
+  ✓   65 [phone] › e2e/tests/layout.spec.ts:27:7 › no sideways overflow — 26-IT-0001 (8.7s)
+  ✘   66 [phone] › e2e/tests/layout.spec.ts:27:7 › no sideways overflow — teacher@demo.ecst.test (401ms)
+  ✓   67 [phone] › e2e/tests/layout.spec.ts:27:7 › no sideways overflow — dept.manager@demo.ecst.test (7.9s)
+  ✓   68 [phone] › e2e/tests/layout.spec.ts:27:7 › no sideways overflow — admin@demo.ecst.test (7.8s)
+  ✓   69 [phone] › e2e/tests/password-reset.spec.ts:7:5 › an admin resets a password and the account must choose its own (8.2s)
+  ✓   70 [phone] › e2e/tests/password-reset.spec.ts:47:5 › an admin deletes an account created by mistake (3.2s)
+  ✓   71 [phone] › e2e/tests/password-reset.spec.ts:67:5 › an admin changes a staff member's name (3.0s)
+  ✓   72 [phone] › e2e/tests/pwa.spec.ts:6:5 › the web app manifest, tab icon and home-screen icon are served from the logo endpoint (669ms)
+  -   73 [phone] › e2e/tests/shots.spec.ts:38:9 › student-today (light)
+  -   74 [phone] › e2e/tests/shots.spec.ts:38:9 › student-today (dark)
+  -   75 [phone] › e2e/tests/shots.spec.ts:38:9 › student-courses (light)
+  -   76 [phone] › e2e/tests/shots.spec.ts:38:9 › student-courses (dark)
+  -   77 [phone] › e2e/tests/shots.spec.ts:38:9 › student-exams (light)
+  -   78 [phone] › e2e/tests/shots.spec.ts:38:9 › student-exams (dark)
+  -   79 [phone] › e2e/tests/shots.spec.ts:38:9 › teacher-today (light)
+  -   80 [phone] › e2e/tests/shots.spec.ts:38:9 › teacher-today (dark)
+  -   81 [phone] › e2e/tests/shots.spec.ts:38:9 › department-home (light)
+  -   82 [phone] › e2e/tests/shots.spec.ts:38:9 › department-home (dark)
+  -   83 [phone] › e2e/tests/shots.spec.ts:38:9 › registrar-home (light)
+  -   84 [phone] › e2e/tests/shots.spec.ts:38:9 › registrar-home (dark)
+  -   85 [phone] › e2e/tests/shots.spec.ts:38:9 › admin-home (light)
+  -   86 [phone] › e2e/tests/shots.spec.ts:38:9 › admin-home (dark)
+  -   87 [phone] › e2e/tests/shots.spec.ts:38:9 › admin-users (light)
+  -   88 [phone] › e2e/tests/shots.spec.ts:38:9 › admin-users (dark)
+  -   89 [phone] › e2e/tests/shots.spec.ts:38:9 › results-home (light)
+  -   90 [phone] › e2e/tests/shots.spec.ts:38:9 › results-home (dark)
+  -   91 [phone] › e2e/tests/shots.spec.ts:38:9 › affairs-home (light)
+  -   92 [phone] › e2e/tests/shots.spec.ts:38:9 › affairs-home (dark)
+  -   93 [phone] › e2e/tests/shots.spec.ts:38:9 › academic-home (light)
+  -   94 [phone] › e2e/tests/shots.spec.ts:38:9 › academic-home (dark)
+  -   95 [phone] › e2e/tests/shots.spec.ts:38:9 › site-home (light)
+  -   96 [phone] › e2e/tests/shots.spec.ts:38:9 › site-home (dark)
+  ✘   97 [phone] › e2e/tests/sign-in.spec.ts:5:5 › a student signs in with the university number and lands on Today (577ms)
+  ✓   98 [phone] › e2e/tests/sign-in.spec.ts:12:5 › a wrong password shows an Arabic error and stays on login (1.8s)
+  ✓   99 [phone] › e2e/tests/sign-in.spec.ts:21:5 › staff land on their role's home (1.6s)
+  ✓  100 [phone] › e2e/tests/site-staff.spec.ts:8:5 › the site manager adds a group and a person and sorts them on the matrix (3.7s)
+  -  101 [phone] › e2e/tests/states.spec.ts:11:7 › student today: loading and failed sources › a slow source shows a placeholder, not the empty message
+  -  102 [phone] › e2e/tests/states.spec.ts:22:7 › student today: loading and failed sources › a failed source says so and offers a retry
+  ✓  103 [phone] › e2e/tests/sweep.spec.ts:26:7 › every navigation page works — 26-IT-0001 (18.8s)
+  ✘  104 [phone] › e2e/tests/sweep.spec.ts:26:7 › every navigation page works — teacher@demo.ecst.test (5.6s)
+  ✓  105 [phone] › e2e/tests/sweep.spec.ts:26:7 › every navigation page works — ta@demo.ecst.test (19.1s)
+  ✘  106 [phone] › e2e/tests/sweep.spec.ts:26:7 › every navigation page works — dept.manager@demo.ecst.test (12.4s)
+  ✓  107 [phone] › e2e/tests/sweep.spec.ts:26:7 › every navigation page works — dept.supervisor@demo.ecst.test (30.6s)
+  ✘  108 [phone] › e2e/tests/sweep.spec.ts:26:7 › every navigation page works — head.registrar@demo.ecst.test (869ms)
+  ✓  109 [phone] › e2e/tests/sweep.spec.ts:26:7 › every navigation page works — registrar@demo.ecst.test (16.1s)
+  ✘  110 [phone] › e2e/tests/sweep.spec.ts:26:7 › every navigation page works — results@demo.ecst.test (15.3s)
+  ✓  111 [phone] › e2e/tests/sweep.spec.ts:26:7 › every navigation page works — academic@demo.ecst.test (26.0s)
+  ✘  112 [phone] › e2e/tests/sweep.spec.ts:26:7 › every navigation page works — student.affairs@demo.ecst.test (5.4s)
+  ✓  113 [phone] › e2e/tests/sweep.spec.ts:26:7 › every navigation page works — hr@demo.ecst.test (12.4s)
+  ✓  114 [phone] › e2e/tests/sweep.spec.ts:26:7 › every navigation page works — site@demo.ecst.test (17.1s)
+  ✘  115 [phone] › e2e/tests/sweep.spec.ts:26:7 › every navigation page works — events@demo.ecst.test (2.2s)
+  ✘  116 [phone] › e2e/tests/sweep.spec.ts:26:7 › every navigation page works — admin@demo.ecst.test (31.8s)
+  ✓  117 [desktop] › e2e/tests/a11y.spec.ts:21:5 › public pages: sign-in and application (4.5s)
+  ✓  118 [desktop] › e2e/tests/a11y.spec.ts:39:7 › signed-in pages — 26-IT-0001 (10.6s)
+  ✓  119 [desktop] › e2e/tests/a11y.spec.ts:39:7 › signed-in pages — teacher@demo.ecst.test (9.2s)
+  ✓  120 [desktop] › e2e/tests/a11y.spec.ts:39:7 › signed-in pages — dept.manager@demo.ecst.test (6.9s)
+  ✘  121 [desktop] › e2e/tests/a11y.spec.ts:39:7 › signed-in pages — admin@demo.ecst.test (227ms)
+  ✓  122 [desktop] › e2e/tests/a11y.spec.ts:48:5 › dark mode keeps AA contrast (8.9s)
+  ✓  123 [desktop] › e2e/tests/a11y.spec.ts:58:5 › warm mode keeps AA contrast (8.7s)
+  ✓  124 [desktop] › e2e/tests/access.spec.ts:7:5 › a student opening staff pages sees «غير مسموح», not empty dashboards (3.1s)
+  ✓  125 [desktop] › e2e/tests/apply.spec.ts:7:5 › a visitor verifies the email, fills the application, uploads documents and submits (4.7s)
+  ✓  126 [desktop] › e2e/tests/apply.spec.ts:73:5 › the filling guide lists the form's fields with their explanations and prints (owner, 2026-11-01) (936ms)
+  -  127 [desktop] › e2e/tests/exam.spec.ts:9:5 › a student takes the open quiz, submits it and sees the auto-graded result
+  ✘  128 [desktop] › e2e/tests/fit-signed-in.spec.ts:20:9 › pages fit the screen — 26-IT-0001 (5.1s)
+  -  129 [desktop] › e2e/tests/fit-signed-in.spec.ts:20:9 › pages fit the screen — 26-IT-0001 (larger text)
+  ✓  130 [desktop] › e2e/tests/fit-signed-in.spec.ts:20:9 › pages fit the screen — teacher@demo.ecst.test (27.7s)
+  -  131 [desktop] › e2e/tests/fit-signed-in.spec.ts:20:9 › pages fit the screen — teacher@demo.ecst.test (larger text)
+  ✘  132 [desktop] › e2e/tests/fit-signed-in.spec.ts:20:9 › pages fit the screen — dept.manager@demo.ecst.test (3.6s)
+  ✓  133 [desktop] › e2e/tests/fit-signed-in.spec.ts:20:9 › pages fit the screen — registrar@demo.ecst.test (19.3s)
+  ✘  134 [desktop] › e2e/tests/fit-signed-in.spec.ts:20:9 › pages fit the screen — academic@demo.ecst.test (12.5s)
+  ✘  135 [desktop] › e2e/tests/fit-signed-in.spec.ts:20:9 › pages fit the screen — admin@demo.ecst.test (31.8s)
+  -  136 [desktop] › e2e/tests/fit-signed-in.spec.ts:20:9 › pages fit the screen — admin@demo.ecst.test (larger text)
+  ✓  137 [desktop] › e2e/tests/fit.spec.ts:10:7 › fits the screen — portal /login (1.4s)
+  ✓  138 [desktop] › e2e/tests/fit.spec.ts:10:7 › fits the screen — portal /register (1.4s)
+  ✓  139 [desktop] › e2e/tests/fit.spec.ts:10:7 › fits the screen — portal /forgot-password (1.6s)
+  ✓  140 [desktop] › e2e/tests/fit.spec.ts:10:7 › fits the screen — portal /apply (1.4s)
+  ✓  141 [desktop] › e2e/tests/fit.spec.ts:10:7 › fits the screen — portal /track (1.4s)
+  ✓  142 [desktop] › e2e/tests/fit.spec.ts:18:7 › fits the screen — site /ar/ (1.1s)
+  ✓  143 [desktop] › e2e/tests/fit.spec.ts:18:7 › fits the screen — site /ar/contact (951ms)
+  ✓  144 [desktop] › e2e/tests/fit.spec.ts:18:7 › fits the screen — site /ar/news (910ms)
+  ✓  145 [desktop] › e2e/tests/fit.spec.ts:18:7 › fits the screen — site /ar/events (809ms)
+  ✓  146 [desktop] › e2e/tests/fit.spec.ts:18:7 › fits the screen — site /ar/programs (923ms)
+  ✓  147 [desktop] › e2e/tests/fit.spec.ts:18:7 › fits the screen — site /ar/about (823ms)
+  ✓  148 [desktop] › e2e/tests/fit.spec.ts:34:7 › fits the screen — portal /track with applications, a reply box and an inquiry at 320px, text 100% (1.5s)
+  ✓  149 [desktop] › e2e/tests/fit.spec.ts:34:7 › fits the screen — portal /track with applications, a reply box and an inquiry at 360px, text 100% (1.5s)
+  ✓  150 [desktop] › e2e/tests/fit.spec.ts:34:7 › fits the screen — portal /track with applications, a reply box and an inquiry at 390px, text 100% (1.4s)
+  ✓  151 [desktop] › e2e/tests/fit.spec.ts:34:7 › fits the screen — portal /track with applications, a reply box and an inquiry at 360px, text 138% (1.5s)
+  ✓  152 [desktop] › e2e/tests/fit.spec.ts:34:7 › fits the screen — portal /track with applications, a reply box and an inquiry at 360px, text 175% (1.5s)
+  ✓  153 [desktop] › e2e/tests/fit.spec.ts:34:7 › fits the screen — portal /track with applications, a reply box and an inquiry at 320px, text 150% (1.5s)
+  -  154 [desktop] › e2e/tests/hidden-sample.spec.ts:11:5 › the site shows no sample text, and still shows the real content
+  ✓  155 [desktop] › e2e/tests/journeys.spec.ts:11:7 › journeys › a visitor finds a programme's conditions and reaches the application (882ms)
+  ✓  156 [desktop] › e2e/tests/journeys.spec.ts:23:7 › journeys › a student returns to the portal and sees what is due, with a way to all tasks (1.6s)
+  ✓  157 [desktop] › e2e/tests/journeys.spec.ts:37:7 › journeys › a teacher reaches the grading queue from today (1.7s)
+  ✓  158 [desktop] › e2e/tests/journeys.spec.ts:47:7 › journeys › a registrar finds what needs a decision and opens it (2.0s)
+  ✘  159 [desktop] › e2e/tests/journeys.spec.ts:63:7 › journeys › the system admin adds a student by hand beside the import (3.0s)
+  ✓  160 [desktop] › e2e/tests/journeys.spec.ts:92:5 › a new programme's levels follow its department and degree (3.5s)
+  ✓  161 [desktop] › e2e/tests/keyboard.spec.ts:87:7 › form builder by keyboard › an arrow keeps the focus on the moved field, and crosses into the next section (2.5s)
+  ✓  162 [desktop] › e2e/tests/keyboard.spec.ts:106:7 › form builder by keyboard › a refused publish speaks Arabic and names the field (3.5s)
+  ✓  163 [desktop] › e2e/tests/keyboard.spec.ts:116:5 › structure forms give the focus back to the button that opened them (3.5s)
+  -  164 [desktop] › e2e/tests/keyboard.spec.ts:132:5 › the phone theme menu answers arrows and gives the focus back
+  ✘  165 [desktop] › e2e/tests/landing.spec.ts:8:5 › every public page loads, fits, is accessible and has its SEO basics (18.1s)
+  ✓  166 [desktop] › e2e/tests/landing.spec.ts:79:5 › the programme page keeps «apply to this programme» in reach (760ms)
+  ✓  167 [desktop] › e2e/tests/landing.spec.ts:96:5 › a plan that does not add up to the credit hours says it is partial (317ms)
+  ✓  168 [desktop] › e2e/tests/landing.spec.ts:103:5 › the home picture and the logo are served resized, in modern formats (design review B6) (334ms)
+  ✓  169 [desktop] › e2e/tests/landing.spec.ts:131:5 › the public site has one filled action, in the accent colour, and no filled blue button (design review B4) (1.1s)
+  ✓  170 [desktop] › e2e/tests/landing.spec.ts:178:5 › search engines get a dated sitemap and a site-hosted icon (49ms)
+  ✓  171 [desktop] › e2e/tests/landing.spec.ts:193:5 › the programme page states its fees, and the fees page lists every programme (421ms)
+  ✓  172 [desktop] › e2e/tests/landing.spec.ts:207:5 › the programme finder narrows by name, spelling-tolerant, and by department (654ms)
+  ✓  173 [desktop] › e2e/tests/landing.spec.ts:240:5 › WhatsApp is one tap away, and parents have their own page (738ms)
+  ✓  174 [desktop] › e2e/tests/landing.spec.ts:258:5 › an event can be added to a calendar, with directions to the college (302ms)
+  ✓  175 [desktop] › e2e/tests/landing.spec.ts:275:5 › English pages mark Arabic-only content, and every trail is structured data (431ms)
+  ✓  176 [desktop] › e2e/tests/landing.spec.ts:297:5 › a department page shows the members who chose to appear, and its own news (362ms)
+  ✓  177 [desktop] › e2e/tests/landing.spec.ts:312:5 › the home page shows «الكوادر», and a card opens the member's page (630ms)
+  ✓  178 [desktop] › e2e/tests/landing.spec.ts:345:5 › the site menus come from the CMS and behave like menus (508ms)
+  ✓  179 [desktop] › e2e/tests/landing.spec.ts:389:5 › motion never leaves content hidden, and «reduce motion» turns it off (11.1s)
+  -  180 [desktop] › e2e/tests/landing.spec.ts:427:5 › on a phone every control in the site header and menu is at least 44 px (design review B9)
+  ✓  181 [desktop] › e2e/tests/layout.spec.ts:27:7 › no sideways overflow — 26-IT-0001 (8.9s)
+  ✘  182 [desktop] › e2e/tests/layout.spec.ts:27:7 › no sideways overflow — teacher@demo.ecst.test (4.6s)
+  ✓  183 [desktop] › e2e/tests/layout.spec.ts:27:7 › no sideways overflow — dept.manager@demo.ecst.test (8.0s)
+  ✓  184 [desktop] › e2e/tests/layout.spec.ts:27:7 › no sideways overflow — admin@demo.ecst.test (7.6s)
+  ✓  185 [desktop] › e2e/tests/password-reset.spec.ts:7:5 › an admin resets a password and the account must choose its own (7.7s)
+  ✓  186 [desktop] › e2e/tests/password-reset.spec.ts:47:5 › an admin deletes an account created by mistake (3.1s)
+  ✓  187 [desktop] › e2e/tests/password-reset.spec.ts:67:5 › an admin changes a staff member's name (3.2s)
+  ✓  188 [desktop] › e2e/tests/pwa.spec.ts:6:5 › the web app manifest, tab icon and home-screen icon are served from the logo endpoint (622ms)
+  -  189 [desktop] › e2e/tests/shots.spec.ts:38:9 › student-today (light)
+  -  190 [desktop] › e2e/tests/shots.spec.ts:38:9 › student-today (dark)
+  -  191 [desktop] › e2e/tests/shots.spec.ts:38:9 › student-courses (light)
+  -  192 [desktop] › e2e/tests/shots.spec.ts:38:9 › student-courses (dark)
+  -  193 [desktop] › e2e/tests/shots.spec.ts:38:9 › student-exams (light)
+  -  194 [desktop] › e2e/tests/shots.spec.ts:38:9 › student-exams (dark)
+  -  195 [desktop] › e2e/tests/shots.spec.ts:38:9 › teacher-today (light)
+  -  196 [desktop] › e2e/tests/shots.spec.ts:38:9 › teacher-today (dark)
+  -  197 [desktop] › e2e/tests/shots.spec.ts:38:9 › department-home (light)
+  -  198 [desktop] › e2e/tests/shots.spec.ts:38:9 › department-home (dark)
+  -  199 [desktop] › e2e/tests/shots.spec.ts:38:9 › registrar-home (light)
+  -  200 [desktop] › e2e/tests/shots.spec.ts:38:9 › registrar-home (dark)
+  -  201 [desktop] › e2e/tests/shots.spec.ts:38:9 › admin-home (light)
+  -  202 [desktop] › e2e/tests/shots.spec.ts:38:9 › admin-home (dark)
+  -  203 [desktop] › e2e/tests/shots.spec.ts:38:9 › admin-users (light)
+  -  204 [desktop] › e2e/tests/shots.spec.ts:38:9 › admin-users (dark)
+  -  205 [desktop] › e2e/tests/shots.spec.ts:38:9 › results-home (light)
+  -  206 [desktop] › e2e/tests/shots.spec.ts:38:9 › results-home (dark)
+  -  207 [desktop] › e2e/tests/shots.spec.ts:38:9 › affairs-home (light)
+  -  208 [desktop] › e2e/tests/shots.spec.ts:38:9 › affairs-home (dark)
+  -  209 [desktop] › e2e/tests/shots.spec.ts:38:9 › academic-home (light)
+  -  210 [desktop] › e2e/tests/shots.spec.ts:38:9 › academic-home (dark)
+  -  211 [desktop] › e2e/tests/shots.spec.ts:38:9 › site-home (light)
+  -  212 [desktop] › e2e/tests/shots.spec.ts:38:9 › site-home (dark)
+  ✘  213 [desktop] › e2e/tests/sign-in.spec.ts:5:5 › a student signs in with the university number and lands on Today (1.3s)
+  ✓  214 [desktop] › e2e/tests/sign-in.spec.ts:12:5 › a wrong password shows an Arabic error and stays on login (1.8s)
+  ✓  215 [desktop] › e2e/tests/sign-in.spec.ts:21:5 › staff land on their role's home (1.5s)
+  ✓  216 [desktop] › e2e/tests/site-staff.spec.ts:8:5 › the site manager adds a group and a person and sorts them on the matrix (3.8s)
+  ✓  217 [desktop] › e2e/tests/states.spec.ts:11:7 › student today: loading and failed sources › a slow source shows a placeholder, not the empty message (2.7s)
+  ✓  218 [desktop] › e2e/tests/states.spec.ts:22:7 › student today: loading and failed sources › a failed source says so and offers a retry (3.6s)
+  ✘  219 [desktop] › e2e/tests/sweep.spec.ts:26:7 › every navigation page works — 26-IT-0001 (18.1s)
+  ✓  220 [desktop] › e2e/tests/sweep.spec.ts:26:7 › every navigation page works — teacher@demo.ecst.test (18.8s)
+  ✘  221 [desktop] › e2e/tests/sweep.spec.ts:26:7 › every navigation page works — ta@demo.ecst.test (12.8s)
+  ✓  222 [desktop] › e2e/tests/sweep.spec.ts:26:7 › every navigation page works — dept.manager@demo.ecst.test (29.5s)
+  ✘  223 [desktop] › e2e/tests/sweep.spec.ts:26:7 › every navigation page works — dept.supervisor@demo.ecst.test (2.0s)
+  ✘  224 [desktop] › e2e/tests/sweep.spec.ts:26:7 › every navigation page works — head.registrar@demo.ecst.test (31.5s)
+  ✓  225 [desktop] › e2e/tests/sweep.spec.ts:26:7 › every navigation page works — registrar@demo.ecst.test (15.9s)
+  ✘  226 [desktop] › e2e/tests/sweep.spec.ts:26:7 › every navigation page works — results@demo.ecst.test (15.6s)
+  ✓  227 [desktop] › e2e/tests/sweep.spec.ts:26:7 › every navigation page works — academic@demo.ecst.test (27.6s)
+  ✘  228 [desktop] › e2e/tests/sweep.spec.ts:26:7 › every navigation page works — student.affairs@demo.ecst.test (4.0s)
+  ✓  229 [desktop] › e2e/tests/sweep.spec.ts:26:7 › every navigation page works — hr@demo.ecst.test (12.7s)
+  ✓  230 [desktop] › e2e/tests/sweep.spec.ts:26:7 › every navigation page works — site@demo.ecst.test (18.2s)
+  ✘  231 [desktop] › e2e/tests/sweep.spec.ts:26:7 › every navigation page works — events@demo.ecst.test (502ms)
+  ✘  232 [desktop] › e2e/tests/sweep.spec.ts:26:7 › every navigation page works — admin@demo.ecst.test (31.5s)
+
+
+  1) [phone] › e2e/tests/a11y.spec.ts:39:7 › signed-in pages — dept.manager@demo.ecst.test ─────────
+
+    Error: page.waitForLoadState: Target page, context or browser has been closed
+
+       9 |   await page.goto(path);
+      10 |   await expect(page.locator("main")).toBeVisible();
+    > 11 |   await page.waitForLoadState("networkidle");
+         |              ^
+      12 |   const { violations } = await new AxeBuilder({ page })
+      13 |     .withTags(["wcag2a", "wcag2aa", "wcag21aa"])
+      14 |     .analyze();
+        at audit (/Users/macbookairm1/Desktop/emarate-edu-platform/e2e/tests/a11y.spec.ts:11:14)
+        at /Users/macbookairm1/Desktop/emarate-edu-platform/e2e/tests/a11y.spec.ts:44:31
+
+    Error: apiRequestContext._wrapApiCall: Target page, context or browser has been closed
+
+    Error Context: e2e/test-results/a11y-signed-in-pages-—-dept-manager-demo-ecst-test-phone/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    e2e/test-results/a11y-signed-in-pages-—-dept-manager-demo-ecst-test-phone/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace e2e/test-results/a11y-signed-in-pages-—-dept-manager-demo-ecst-test-phone/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) [phone] › e2e/tests/apply.spec.ts:7:5 › a visitor verifies the email, fills the application, uploads documents and submits 
+
+    Error: locator.click: Target page, context or browser has been closed
+
+      19 |   await expect(page.getByText("صيغة البريد غير صحيحة")).toBeVisible();
+      20 |   await page.getByLabel("البريد الإلكتروني").fill(email);
+    > 21 |   await page.getByRole("button", { name: "إرسال رمز التحقق" }).click();
+         |                                                                ^
+      22 |   // The name is asked beside the code, once it has arrived.
+      23 |   await page.getByLabel("رمز التحقق").fill(await lastCode(email));
+      24 |   await page.getByLabel(/الاسم الكامل/).fill("سلمى عثمان الأمين");
+        at /Users/macbookairm1/Desktop/emarate-edu-platform/e2e/tests/apply.spec.ts:21:64
+
+    Error Context: e2e/test-results/apply-a-visitor-verifies-t-1dcfe-loads-documents-and-submits-phone/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    e2e/test-results/apply-a-visitor-verifies-t-1dcfe-loads-documents-and-submits-phone/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace e2e/test-results/apply-a-visitor-verifies-t-1dcfe-loads-documents-and-submits-phone/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3) [phone] › e2e/tests/fit-signed-in.spec.ts:20:9 › pages fit the screen — 26-IT-0001 ────────────
+
+    Error: page.waitForLoadState: Target page, context or browser has been closed
+
+      37 |       const check = async (href: string) => {
+      38 |         await page.goto(href);
+    > 39 |         await page.waitForLoadState("networkidle");
+         |                    ^
+      40 |         // What sits in a closed «details» (a new-record form) counts too: open them all.
+      41 |         await page.evaluate(() =>
+      42 |           document.querySelectorAll("details").forEach((d) => (d.open = true)),
+        at check (/Users/macbookairm1/Desktop/emarate-edu-platform/e2e/tests/fit-signed-in.spec.ts:39:20)
+        at /Users/macbookairm1/Desktop/emarate-edu-platform/e2e/tests/fit-signed-in.spec.ts:61:36
+
+    Error: apiRequestContext._wrapApiCall: Target page, context or browser has been closed
+
+    Error Context: e2e/test-results/fit-signed-in-pages-fit-the-screen-—-26-IT-0001-phone/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    e2e/test-results/fit-signed-in-pages-fit-the-screen-—-26-IT-0001-phone/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace e2e/test-results/fit-signed-in-pages-fit-the-screen-—-26-IT-0001-phone/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  4) [phone] › e2e/tests/fit-signed-in.spec.ts:20:9 › pages fit the screen — teacher@demo.ecst.test 
+
+    Error: locator.fill: Target page, context or browser has been closed
+    Browser logs:
+
+    <launching> /Applications/Google Chrome.app/Contents/MacOS/Google Chrome --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-edgeupdater --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,BlockOriginHeaderModificationOnRedirect,Translate,AutoDeElevate,OptimizationHints,msForceBrowserSignIn,msEdgeUpdateLaunchServicesPreferredVersion --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --disable-updater-scheduler --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --user-data-dir=/var/folders/4c/p6lz5m5s0lz9v53bpz76j6140000gn/T/playwright_chromiumdev_profile-iuVoxO --remote-debugging-pipe --no-startup-window
+    <launched> pid=17704
+    [pid=17704][err] Trying to load the allocator multiple times. This is *not* supported.
+    [pid=17704][err] [17715:101928:1110/084405.838476:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=17704][err] [17715:102001:1110/084405.838850:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=17704][err] [17715:101928:1110/084405.842294:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=17704][err] [17715:102001:1110/084405.842345:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=17704][err] [17715:101928:1110/084405.843362:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=17704][err] [17715:102001:1110/084405.843412:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=17704][err] [17715:101928:1110/084405.844371:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=17704][err] [17715:102001:1110/084405.844412:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=17704][err] [17715:101928:1110/084405.844524:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=17704][err] [17715:102001:1110/084405.844589:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=17704][err] [17715:101928:1110/084406.312130:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=17704][err] [17715:102001:1110/084406.312181:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=17704][err] [17715:101928:1110/084407.236263:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=17704][err] [17715:102001:1110/084407.236319:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=17704][err] [17715:101928:1110/084436.166516:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=17704][err] [17715:102001:1110/084436.166628:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=17704][err] [17715:101928:1110/084436.167341:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=17704][err] [17715:102001:1110/084436.167438:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=17704][err] [17715:101928:1110/084436.168235:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=17704][err] [17715:102001:1110/084436.168295:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=17704][err] [17715:101928:1110/084436.168409:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=17704][err] [17715:102001:1110/084436.168478:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=17704][err] [17715:101928:1110/084436.168597:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=17704][err] [17715:102001:1110/084436.168654:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=17704][err] [17715:101928:1110/084436.847878:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=17704][err] [17715:102001:1110/084436.847989:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    Call log:
+      - waiting for getByLabel('الرقم الجامعي أو البريد')
+
+
+       at helpers.ts:10
+
+       8 | export async function signIn(page: Page, identifier: string) {
+       9 |   await page.goto("/login");
+    > 10 |   await page.getByLabel("الرقم الجامعي أو البريد").fill(identifier);
+         |                                                    ^
+      11 |   await page.getByLabel("كلمة المرور", { exact: true }).fill(PASSWORD);
+      12 |   await page.getByRole("button", { name: "تسجيل الدخول" }).click();
+      13 |   await expect(page).not.toHaveURL(/\/login/, { timeout: 30_000 }); // a busy machine signs in slowly
+        at signIn (/Users/macbookairm1/Desktop/emarate-edu-platform/e2e/tests/helpers.ts:10:52)
+        at /Users/macbookairm1/Desktop/emarate-edu-platform/e2e/tests/fit-signed-in.spec.ts:27:7
+
+    Error Context: e2e/test-results/fit-signed-in-pages-fit-the-screen-—-teacher-demo-ecst-test-phone/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    e2e/test-results/fit-signed-in-pages-fit-the-screen-—-teacher-demo-ecst-test-phone/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace e2e/test-results/fit-signed-in-pages-fit-the-screen-—-teacher-demo-ecst-test-phone/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  5) [phone] › e2e/tests/fit-signed-in.spec.ts:20:9 › pages fit the screen — dept.manager@demo.ecst.test 
+
+    Error: page.goto: Target page, context or browser has been closed
+    Call log:
+      - navigating to "http://localhost:5184/department", waiting until "load"
+
+
+      36 |       const problems: string[] = [];
+      37 |       const check = async (href: string) => {
+    > 38 |         await page.goto(href);
+         |                    ^
+      39 |         await page.waitForLoadState("networkidle");
+      40 |         // What sits in a closed «details» (a new-record form) counts too: open them all.
+      41 |         await page.evaluate(() =>
+        at check (/Users/macbookairm1/Desktop/emarate-edu-platform/e2e/tests/fit-signed-in.spec.ts:38:20)
+        at /Users/macbookairm1/Desktop/emarate-edu-platform/e2e/tests/fit-signed-in.spec.ts:48:15
+
+    Error: browserContext._wrapApiCall: Target page, context or browser has been closed
+
+    Error Context: e2e/test-results/fit-signed-in-pages-fit-th-dae2e-dept-manager-demo-ecst-test-phone/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    e2e/test-results/fit-signed-in-pages-fit-th-dae2e-dept-manager-demo-ecst-test-phone/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace e2e/test-results/fit-signed-in-pages-fit-th-dae2e-dept-manager-demo-ecst-test-phone/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  6) [phone] › e2e/tests/fit-signed-in.spec.ts:20:9 › pages fit the screen — academic@demo.ecst.test 
+
+    Error: page.waitForLoadState: Target page, context or browser has been closed
+
+      37 |       const check = async (href: string) => {
+      38 |         await page.goto(href);
+    > 39 |         await page.waitForLoadState("networkidle");
+         |                    ^
+      40 |         // What sits in a closed «details» (a new-record form) counts too: open them all.
+      41 |         await page.evaluate(() =>
+      42 |           document.querySelectorAll("details").forEach((d) => (d.open = true)),
+        at check (/Users/macbookairm1/Desktop/emarate-edu-platform/e2e/tests/fit-signed-in.spec.ts:39:20)
+        at /Users/macbookairm1/Desktop/emarate-edu-platform/e2e/tests/fit-signed-in.spec.ts:48:9
+
+    Error: apiRequestContext._wrapApiCall: Target page, context or browser has been closed
+
+    Error Context: e2e/test-results/fit-signed-in-pages-fit-the-screen-—-academic-demo-ecst-test-phone/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    e2e/test-results/fit-signed-in-pages-fit-the-screen-—-academic-demo-ecst-test-phone/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace e2e/test-results/fit-signed-in-pages-fit-the-screen-—-academic-demo-ecst-test-phone/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  7) [phone] › e2e/tests/fit-signed-in.spec.ts:20:9 › pages fit the screen — admin@demo.ecst.test ──
+
+    Error: page.goto: Target page, context or browser has been closed
+    Call log:
+      - navigating to "http://localhost:5184/registrars", waiting until "load"
+
+
+      36 |       const problems: string[] = [];
+      37 |       const check = async (href: string) => {
+    > 38 |         await page.goto(href);
+         |                    ^
+      39 |         await page.waitForLoadState("networkidle");
+      40 |         // What sits in a closed «details» (a new-record form) counts too: open them all.
+      41 |         await page.evaluate(() =>
+        at check (/Users/macbookairm1/Desktop/emarate-edu-platform/e2e/tests/fit-signed-in.spec.ts:38:20)
+        at /Users/macbookairm1/Desktop/emarate-edu-platform/e2e/tests/fit-signed-in.spec.ts:48:15
+
+    Error Context: e2e/test-results/fit-signed-in-pages-fit-the-screen-—-admin-demo-ecst-test-phone/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    e2e/test-results/fit-signed-in-pages-fit-the-screen-—-admin-demo-ecst-test-phone/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace e2e/test-results/fit-signed-in-pages-fit-the-screen-—-admin-demo-ecst-test-phone/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  8) [phone] › e2e/tests/fit-signed-in.spec.ts:20:9 › pages fit the screen — admin@demo.ecst.test (larger text) 
+
+    Error: page.addStyleTag: Target page, context or browser has been closed
+
+      42 |           document.querySelectorAll("details").forEach((d) => (d.open = true)),
+      43 |         );
+    > 44 |         if (rem > 16) await page.addStyleTag({ content: `html { font-size: ${rem}px }` });
+         |                                  ^
+      45 |         for (const line of await offscreen(page)) problems.push(`${href}: ${line}`);
+      46 |       };
+      47 |       for (const href of navHrefs) {
+        at check (/Users/macbookairm1/Desktop/emarate-edu-platform/e2e/tests/fit-signed-in.spec.ts:44:34)
+        at /Users/macbookairm1/Desktop/emarate-edu-platform/e2e/tests/fit-signed-in.spec.ts:48:9
+
+    Error Context: e2e/test-results/fit-signed-in-pages-fit-th-f8686-demo-ecst-test-larger-text--phone/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    e2e/test-results/fit-signed-in-pages-fit-th-f8686-demo-ecst-test-larger-text--phone/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace e2e/test-results/fit-signed-in-pages-fit-th-f8686-demo-ecst-test-larger-text--phone/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  9) [phone] › e2e/tests/journeys.spec.ts:63:7 › journeys › the system admin adds a student by hand beside the import 
+
+    Error: locator.click: Target page, context or browser has been closed
+    Browser logs:
+
+    [pid=19290][err] [19298:111973:1110/084701.829212:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:112036:1110/084701.829259:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:111973:1110/084701.829369:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:112036:1110/084701.829406:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:111973:1110/084701.829515:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:112036:1110/084701.829551:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:111973:1110/084702.059596:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:112036:1110/084702.059647:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:111973:1110/084702.665220:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:112036:1110/084702.665273:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:111973:1110/084702.666026:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:112036:1110/084702.666065:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:111973:1110/084702.666690:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:112036:1110/084702.666728:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:111973:1110/084702.666853:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:112036:1110/084702.666893:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:111973:1110/084702.667016:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:112036:1110/084702.667055:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:111973:1110/084703.159696:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:112036:1110/084703.159745:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:111973:1110/084704.134017:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:112036:1110/084704.134072:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:111973:1110/084704.137197:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:112036:1110/084704.137265:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:111973:1110/084704.137419:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:112036:1110/084704.137450:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:111973:1110/084704.137834:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:112036:1110/084704.137869:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:111973:1110/084704.138041:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:112036:1110/084704.138068:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:111973:1110/084704.643817:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:112036:1110/084704.643869:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:111973:1110/084705.605267:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:112036:1110/084705.605326:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:111973:1110/084705.606323:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:112036:1110/084705.606377:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:111973:1110/084705.606925:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:112036:1110/084705.606969:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:111973:1110/084705.607076:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:112036:1110/084705.607106:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:111973:1110/084705.607269:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:112036:1110/084705.607362:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:111973:1110/084706.129206:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:112036:1110/084706.129254:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:111973:1110/084707.099841:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:112036:1110/084707.099898:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:111973:1110/084707.103852:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:112036:1110/084707.103963:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:111973:1110/084707.104114:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:112036:1110/084707.104150:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:111973:1110/084707.104256:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:112036:1110/084707.104310:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:111973:1110/084707.104585:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:112036:1110/084707.104619:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:111973:1110/084707.943374:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:112036:1110/084707.943456:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:111973:1110/084708.941576:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:112036:1110/084708.941674:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:111973:1110/084708.943897:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:112036:1110/084708.944034:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:111973:1110/084708.945967:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:112036:1110/084708.946070:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:111973:1110/084708.946248:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:112036:1110/084708.946297:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:111973:1110/084708.946565:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:112036:1110/084708.946614:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:111973:1110/084709.530495:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:112036:1110/084709.530597:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:111973:1110/084710.458991:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:112036:1110/084710.459047:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:111973:1110/084710.460383:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:112036:1110/084710.460436:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:111973:1110/084710.461275:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:112036:1110/084710.461317:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:111973:1110/084710.461428:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:112036:1110/084710.461461:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:111973:1110/084710.461563:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:112036:1110/084710.461607:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:111973:1110/084710.946920:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:112036:1110/084710.946969:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:111973:1110/084711.930884:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:112036:1110/084711.930946:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:111973:1110/084711.931942:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:112036:1110/084711.931981:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:111973:1110/084711.933026:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:112036:1110/084711.933070:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:111973:1110/084711.933290:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:112036:1110/084711.933325:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:111973:1110/084711.933424:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:112036:1110/084711.933451:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:111973:1110/084712.304597:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:112036:1110/084712.304691:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:111973:1110/084712.420172:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:112036:1110/084712.420250:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:111973:1110/084712.953834:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:112036:1110/084712.953936:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:111973:1110/084712.954106:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:112036:1110/084712.954146:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:111973:1110/084712.954248:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:112036:1110/084712.954285:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:111973:1110/084712.954378:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:112036:1110/084712.954408:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:111973:1110/084712.954504:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:112036:1110/084712.954534:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:111973:1110/084713.326650:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:112036:1110/084713.326704:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:111973:1110/084714.429711:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:112036:1110/084714.429779:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:111973:1110/084714.640588:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:112036:1110/084714.640672:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:111973:1110/084714.642450:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:112036:1110/084714.642595:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:111973:1110/084714.643721:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:112036:1110/084714.643809:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:111973:1110/084714.644158:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:112036:1110/084714.644252:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:111973:1110/084714.644508:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:112036:1110/084714.644605:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:111973:1110/084714.999556:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:112036:1110/084714.999629:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:111973:1110/084715.666600:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:112036:1110/084715.666676:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:111973:1110/084716.215142:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:112036:1110/084716.215197:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:111973:1110/084716.216344:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:112036:1110/084716.216389:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:111973:1110/084716.220278:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:112036:1110/084716.220354:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:111973:1110/084716.220520:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:112036:1110/084716.220561:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:111973:1110/084716.220667:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:112036:1110/084716.220705:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:111973:1110/084716.579614:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:112036:1110/084716.579657:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:111973:1110/084717.353669:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:112036:1110/084717.353788:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:111973:1110/084717.803995:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:112036:1110/084717.804052:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:111973:1110/084717.806116:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:112036:1110/084717.806175:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:111973:1110/084717.808618:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:112036:1110/084717.808661:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:111973:1110/084717.808766:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:112036:1110/084717.808793:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:111973:1110/084717.808873:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:112036:1110/084717.808942:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:111973:1110/084718.175217:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:112036:1110/084718.175307:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:111973:1110/084719.130927:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=19290][err] [19298:112036:1110/084719.131037:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    Call log:
+      - waiting for getByRole('option', { name: 'بكالوريوس علوم الحاسوب', exact: true })
+        - locator resolved to <div role="option" id="_r_7_-o12" data-index="12" aria-selected="false" class="flex items-center gap-3 rounded-lg px-2.5 py-1.5 min-h-11 lg:min-h-9 cursor-pointer  text-text">…</div>
+      - attempting click action
+        - waiting for element to be visible, enabled and stable
+        - element is not stable
+      - retrying click action
+        - waiting for element to be visible, enabled and stable
+
+
+       at helpers.ts:104
+
+      102 |   await trigger.click();
+      103 |   const page = trigger.page();
+    > 104 |   await page.getByRole("option", { name: option, exact: typeof option === "string" }).click();
+          |                                                                                       ^
+      105 |   await expect(page.getByRole("listbox")).toBeHidden();
+      106 | }
+      107 |
+        at choose (/Users/macbookairm1/Desktop/emarate-edu-platform/e2e/tests/helpers.ts:104:87)
+        at /Users/macbookairm1/Desktop/emarate-edu-platform/e2e/tests/journeys.spec.ts:73:5
+
+    Error Context: e2e/test-results/journeys-journeys-the-syst-132e3-t-by-hand-beside-the-import-phone/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    e2e/test-results/journeys-journeys-the-syst-132e3-t-by-hand-beside-the-import-phone/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace e2e/test-results/journeys-journeys-the-syst-132e3-t-by-hand-beside-the-import-phone/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  10) [phone] › e2e/tests/landing.spec.ts:8:5 › every public page loads, fits, is accessible and has its SEO basics 
+
+    Error: page.goto: Target page, context or browser has been closed
+    Call log:
+      - navigating to "http://localhost:4332/ar/admissions/equivalence/", waiting until "networkidle"
+
+
+      22 |     seen.add(path);
+      23 |     current = path;
+    > 24 |     const response = await page.goto(SITE + path, { waitUntil: "networkidle" });
+         |                                 ^
+      25 |     if (!response || response.status() >= 400) {
+      26 |       problems.push(`${path}: HTTP ${response?.status()}`);
+      27 |       continue;
+        at /Users/macbookairm1/Desktop/emarate-edu-platform/e2e/tests/landing.spec.ts:24:33
+
+    Error Context: e2e/test-results/landing-every-public-page--c3561-ible-and-has-its-SEO-basics-phone/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    e2e/test-results/landing-every-public-page--c3561-ible-and-has-its-SEO-basics-phone/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace e2e/test-results/landing-every-public-page--c3561-ible-and-has-its-SEO-basics-phone/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  11) [phone] › e2e/tests/layout.spec.ts:27:7 › no sideways overflow — teacher@demo.ecst.test ──────
+
+    Error: page.goto: Target page, context or browser has been closed
+    Call log:
+      - navigating to "http://localhost:5184/login", waiting until "load"
+
+
+       at helpers.ts:9
+
+       7 | /** Sign in through the real login form (cookies + CSRF exactly as in production). */
+       8 | export async function signIn(page: Page, identifier: string) {
+    >  9 |   await page.goto("/login");
+         |              ^
+      10 |   await page.getByLabel("الرقم الجامعي أو البريد").fill(identifier);
+      11 |   await page.getByLabel("كلمة المرور", { exact: true }).fill(PASSWORD);
+      12 |   await page.getByRole("button", { name: "تسجيل الدخول" }).click();
+        at signIn (/Users/macbookairm1/Desktop/emarate-edu-platform/e2e/tests/helpers.ts:9:14)
+        at /Users/macbookairm1/Desktop/emarate-edu-platform/e2e/tests/layout.spec.ts:28:17
+
+    Error Context: e2e/test-results/layout-no-sideways-overflow-—-teacher-demo-ecst-test-phone/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    e2e/test-results/layout-no-sideways-overflow-—-teacher-demo-ecst-test-phone/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace e2e/test-results/layout-no-sideways-overflow-—-teacher-demo-ecst-test-phone/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  12) [phone] › e2e/tests/sign-in.spec.ts:5:5 › a student signs in with the university number and lands on Today 
+
+    Error: Object with guid response@5ef83fefa4a8947d117ffe440ffe76ab was not bound in the connection
+
+    Error Context: e2e/test-results/sign-in-a-student-signs-in-08d43-y-number-and-lands-on-Today-phone/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    e2e/test-results/sign-in-a-student-signs-in-08d43-y-number-and-lands-on-Today-phone/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace e2e/test-results/sign-in-a-student-signs-in-08d43-y-number-and-lands-on-Today-phone/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  13) [phone] › e2e/tests/sweep.spec.ts:26:7 › every navigation page works — teacher@demo.ecst.test 
+
+    Error: page.waitForLoadState: Target page, context or browser has been closed
+
+      51 |       current = href;
+      52 |       await page.goto(href);
+    > 53 |       await page.waitForLoadState("networkidle");
+         |                  ^
+      54 |       // Arabic counting (review 2026-09-29): 3–10 take the plural («3 طلاب», never «3 طالبًا»);
+      55 |       // and no RTL-flipped dividers.
+      56 |       const grammar = await page.evaluate(() => {
+        at /Users/macbookairm1/Desktop/emarate-edu-platform/e2e/tests/sweep.spec.ts:53:18
+
+    Error: apiRequestContext._wrapApiCall: Target page, context or browser has been closed
+
+    Error Context: e2e/test-results/sweep-every-navigation-page-works-—-teacher-demo-ecst-test-phone/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    e2e/test-results/sweep-every-navigation-page-works-—-teacher-demo-ecst-test-phone/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace e2e/test-results/sweep-every-navigation-page-works-—-teacher-demo-ecst-test-phone/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  14) [phone] › e2e/tests/sweep.spec.ts:26:7 › every navigation page works — dept.manager@demo.ecst.test 
+
+    Error: browserContext.newPage: Target page, context or browser has been closed
+     Please check out https://github.com/dequelabs/axe-core-npm/blob/develop/packages/playwright/error-handling.md
+
+      72 |       if (overflow > 0) problems.push(`${href}: overflows sideways by ${overflow}px`);
+      73 |       for (const line of await offscreen(page)) problems.push(`${href}: sticks out — ${line}`);
+    > 74 |       const { violations } = await new AxeBuilder({ page })
+         |                              ^
+      75 |         .withTags(["wcag2a", "wcag2aa", "wcag21aa"])
+      76 |         .analyze();
+      77 |       for (const v of violations)
+        at AxeBuilder.analyze (/Users/macbookairm1/Desktop/emarate-edu-platform/node_modules/.pnpm/@axe-core+playwright@4.13.0_playwright-core@1.63.0/node_modules/@axe-core/playwright/dist/index.js:253:13)
+        at /Users/macbookairm1/Desktop/emarate-edu-platform/e2e/tests/sweep.spec.ts:74:30
+
+    Error Context: e2e/test-results/sweep-every-navigation-pag-3756b-dept-manager-demo-ecst-test-phone/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    e2e/test-results/sweep-every-navigation-pag-3756b-dept-manager-demo-ecst-test-phone/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace e2e/test-results/sweep-every-navigation-pag-3756b-dept-manager-demo-ecst-test-phone/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  15) [phone] › e2e/tests/sweep.spec.ts:26:7 › every navigation page works — head.registrar@demo.ecst.test 
+
+    Error: locator.fill: Target page, context or browser has been closed
+
+       at helpers.ts:10
+
+       8 | export async function signIn(page: Page, identifier: string) {
+       9 |   await page.goto("/login");
+    > 10 |   await page.getByLabel("الرقم الجامعي أو البريد").fill(identifier);
+         |                                                    ^
+      11 |   await page.getByLabel("كلمة المرور", { exact: true }).fill(PASSWORD);
+      12 |   await page.getByRole("button", { name: "تسجيل الدخول" }).click();
+      13 |   await expect(page).not.toHaveURL(/\/login/, { timeout: 30_000 }); // a busy machine signs in slowly
+        at signIn (/Users/macbookairm1/Desktop/emarate-edu-platform/e2e/tests/helpers.ts:10:52)
+        at /Users/macbookairm1/Desktop/emarate-edu-platform/e2e/tests/sweep.spec.ts:38:5
+
+    Error Context: e2e/test-results/sweep-every-navigation-pag-6c154-ad-registrar-demo-ecst-test-phone/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    e2e/test-results/sweep-every-navigation-pag-6c154-ad-registrar-demo-ecst-test-phone/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace e2e/test-results/sweep-every-navigation-pag-6c154-ad-registrar-demo-ecst-test-phone/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  16) [phone] › e2e/tests/sweep.spec.ts:26:7 › every navigation page works — results@demo.ecst.test 
+
+    Error: page.goto: Target page, context or browser has been closed
+    Call log:
+      - navigating to "http://localhost:5184/results/settings", waiting until "load"
+
+
+      50 |     for (const href of hrefs) {
+      51 |       current = href;
+    > 52 |       await page.goto(href);
+         |                  ^
+      53 |       await page.waitForLoadState("networkidle");
+      54 |       // Arabic counting (review 2026-09-29): 3–10 take the plural («3 طلاب», never «3 طالبًا»);
+      55 |       // and no RTL-flipped dividers.
+        at /Users/macbookairm1/Desktop/emarate-edu-platform/e2e/tests/sweep.spec.ts:52:18
+
+    Error Context: e2e/test-results/sweep-every-navigation-page-works-—-results-demo-ecst-test-phone/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    e2e/test-results/sweep-every-navigation-page-works-—-results-demo-ecst-test-phone/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace e2e/test-results/sweep-every-navigation-page-works-—-results-demo-ecst-test-phone/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  17) [phone] › e2e/tests/sweep.spec.ts:26:7 › every navigation page works — student.affairs@demo.ecst.test 
+
+    Error: page.waitForLoadState: Target page, context or browser has been closed
+
+      51 |       current = href;
+      52 |       await page.goto(href);
+    > 53 |       await page.waitForLoadState("networkidle");
+         |                  ^
+      54 |       // Arabic counting (review 2026-09-29): 3–10 take the plural («3 طلاب», never «3 طالبًا»);
+      55 |       // and no RTL-flipped dividers.
+      56 |       const grammar = await page.evaluate(() => {
+        at /Users/macbookairm1/Desktop/emarate-edu-platform/e2e/tests/sweep.spec.ts:53:18
+
+    Error: apiRequestContext._wrapApiCall: Target page, context or browser has been closed
+
+    Error Context: e2e/test-results/sweep-every-navigation-pag-42712-dent-affairs-demo-ecst-test-phone/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    e2e/test-results/sweep-every-navigation-pag-42712-dent-affairs-demo-ecst-test-phone/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace e2e/test-results/sweep-every-navigation-pag-42712-dent-affairs-demo-ecst-test-phone/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  18) [phone] › e2e/tests/sweep.spec.ts:26:7 › every navigation page works — events@demo.ecst.test ─
+
+    Error: page.waitForLoadState: Target page, context or browser has been closed
+
+      51 |       current = href;
+      52 |       await page.goto(href);
+    > 53 |       await page.waitForLoadState("networkidle");
+         |                  ^
+      54 |       // Arabic counting (review 2026-09-29): 3–10 take the plural («3 طلاب», never «3 طالبًا»);
+      55 |       // and no RTL-flipped dividers.
+      56 |       const grammar = await page.evaluate(() => {
+        at /Users/macbookairm1/Desktop/emarate-edu-platform/e2e/tests/sweep.spec.ts:53:18
+
+    Error: apiRequestContext._wrapApiCall: Target page, context or browser has been closed
+
+    Error Context: e2e/test-results/sweep-every-navigation-page-works-—-events-demo-ecst-test-phone/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    e2e/test-results/sweep-every-navigation-page-works-—-events-demo-ecst-test-phone/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace e2e/test-results/sweep-every-navigation-page-works-—-events-demo-ecst-test-phone/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  19) [phone] › e2e/tests/sweep.spec.ts:26:7 › every navigation page works — admin@demo.ecst.test ──
+
+    Error: page.waitForLoadState: Target page, context or browser has been closed
+
+      51 |       current = href;
+      52 |       await page.goto(href);
+    > 53 |       await page.waitForLoadState("networkidle");
+         |                  ^
+      54 |       // Arabic counting (review 2026-09-29): 3–10 take the plural («3 طلاب», never «3 طالبًا»);
+      55 |       // and no RTL-flipped dividers.
+      56 |       const grammar = await page.evaluate(() => {
+        at /Users/macbookairm1/Desktop/emarate-edu-platform/e2e/tests/sweep.spec.ts:53:18
+
+    Error: apiRequestContext._wrapApiCall: Target page, context or browser has been closed
+
+    Error Context: e2e/test-results/sweep-every-navigation-page-works-—-admin-demo-ecst-test-phone/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    e2e/test-results/sweep-every-navigation-page-works-—-admin-demo-ecst-test-phone/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace e2e/test-results/sweep-every-navigation-page-works-—-admin-demo-ecst-test-phone/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  20) [desktop] › e2e/tests/a11y.spec.ts:39:7 › signed-in pages — admin@demo.ecst.test ─────────────
+
+    Error: page.goto: Target page, context or browser has been closed
+    Call log:
+      - navigating to "http://localhost:5184/login", waiting until "load"
+
+
+       at helpers.ts:9
+
+       7 | /** Sign in through the real login form (cookies + CSRF exactly as in production). */
+       8 | export async function signIn(page: Page, identifier: string) {
+    >  9 |   await page.goto("/login");
+         |              ^
+      10 |   await page.getByLabel("الرقم الجامعي أو البريد").fill(identifier);
+      11 |   await page.getByLabel("كلمة المرور", { exact: true }).fill(PASSWORD);
+      12 |   await page.getByRole("button", { name: "تسجيل الدخول" }).click();
+        at signIn (/Users/macbookairm1/Desktop/emarate-edu-platform/e2e/tests/helpers.ts:9:14)
+        at /Users/macbookairm1/Desktop/emarate-edu-platform/e2e/tests/a11y.spec.ts:43:17
+
+    Error Context: e2e/test-results/a11y-signed-in-pages-—-admin-demo-ecst-test-desktop/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    e2e/test-results/a11y-signed-in-pages-—-admin-demo-ecst-test-desktop/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace e2e/test-results/a11y-signed-in-pages-—-admin-demo-ecst-test-desktop/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  21) [desktop] › e2e/tests/fit-signed-in.spec.ts:20:9 › pages fit the screen — 26-IT-0001 ─────────
+
+    Error: page.evaluate: Target page, context or browser has been closed
+
+      39 |         await page.waitForLoadState("networkidle");
+      40 |         // What sits in a closed «details» (a new-record form) counts too: open them all.
+    > 41 |         await page.evaluate(() =>
+         |                    ^
+      42 |           document.querySelectorAll("details").forEach((d) => (d.open = true)),
+      43 |         );
+      44 |         if (rem > 16) await page.addStyleTag({ content: `html { font-size: ${rem}px }` });
+        at check (/Users/macbookairm1/Desktop/emarate-edu-platform/e2e/tests/fit-signed-in.spec.ts:41:20)
+        at /Users/macbookairm1/Desktop/emarate-edu-platform/e2e/tests/fit-signed-in.spec.ts:61:36
+
+    Error Context: e2e/test-results/fit-signed-in-pages-fit-the-screen-—-26-IT-0001-desktop/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    e2e/test-results/fit-signed-in-pages-fit-the-screen-—-26-IT-0001-desktop/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace e2e/test-results/fit-signed-in-pages-fit-the-screen-—-26-IT-0001-desktop/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  22) [desktop] › e2e/tests/fit-signed-in.spec.ts:20:9 › pages fit the screen — dept.manager@demo.ecst.test 
+
+    Error: page.waitForLoadState: Target page, context or browser has been closed
+
+      37 |       const check = async (href: string) => {
+      38 |         await page.goto(href);
+    > 39 |         await page.waitForLoadState("networkidle");
+         |                    ^
+      40 |         // What sits in a closed «details» (a new-record form) counts too: open them all.
+      41 |         await page.evaluate(() =>
+      42 |           document.querySelectorAll("details").forEach((d) => (d.open = true)),
+        at check (/Users/macbookairm1/Desktop/emarate-edu-platform/e2e/tests/fit-signed-in.spec.ts:39:20)
+        at /Users/macbookairm1/Desktop/emarate-edu-platform/e2e/tests/fit-signed-in.spec.ts:61:36
+
+    Error: apiRequestContext._wrapApiCall: Target page, context or browser has been closed
+
+    Error Context: e2e/test-results/fit-signed-in-pages-fit-th-dae2e-dept-manager-demo-ecst-test-desktop/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    e2e/test-results/fit-signed-in-pages-fit-th-dae2e-dept-manager-demo-ecst-test-desktop/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace e2e/test-results/fit-signed-in-pages-fit-th-dae2e-dept-manager-demo-ecst-test-desktop/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  23) [desktop] › e2e/tests/fit-signed-in.spec.ts:20:9 › pages fit the screen — academic@demo.ecst.test 
+
+    Error: page.waitForLoadState: Target page, context or browser has been closed
+
+      37 |       const check = async (href: string) => {
+      38 |         await page.goto(href);
+    > 39 |         await page.waitForLoadState("networkidle");
+         |                    ^
+      40 |         // What sits in a closed «details» (a new-record form) counts too: open them all.
+      41 |         await page.evaluate(() =>
+      42 |           document.querySelectorAll("details").forEach((d) => (d.open = true)),
+        at check (/Users/macbookairm1/Desktop/emarate-edu-platform/e2e/tests/fit-signed-in.spec.ts:39:20)
+        at /Users/macbookairm1/Desktop/emarate-edu-platform/e2e/tests/fit-signed-in.spec.ts:48:9
+
+    Error: apiRequestContext._wrapApiCall: Target page, context or browser has been closed
+
+    Error Context: e2e/test-results/fit-signed-in-pages-fit-the-screen-—-academic-demo-ecst-test-desktop/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    e2e/test-results/fit-signed-in-pages-fit-the-screen-—-academic-demo-ecst-test-desktop/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace e2e/test-results/fit-signed-in-pages-fit-the-screen-—-academic-demo-ecst-test-desktop/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  24) [desktop] › e2e/tests/fit-signed-in.spec.ts:20:9 › pages fit the screen — admin@demo.ecst.test 
+
+    Error: page.waitForLoadState: Target page, context or browser has been closed
+
+      37 |       const check = async (href: string) => {
+      38 |         await page.goto(href);
+    > 39 |         await page.waitForLoadState("networkidle");
+         |                    ^
+      40 |         // What sits in a closed «details» (a new-record form) counts too: open them all.
+      41 |         await page.evaluate(() =>
+      42 |           document.querySelectorAll("details").forEach((d) => (d.open = true)),
+        at check (/Users/macbookairm1/Desktop/emarate-edu-platform/e2e/tests/fit-signed-in.spec.ts:39:20)
+        at /Users/macbookairm1/Desktop/emarate-edu-platform/e2e/tests/fit-signed-in.spec.ts:48:9
+
+    Error: apiRequestContext._wrapApiCall: Target page, context or browser has been closed
+
+    Error Context: e2e/test-results/fit-signed-in-pages-fit-the-screen-—-admin-demo-ecst-test-desktop/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    e2e/test-results/fit-signed-in-pages-fit-the-screen-—-admin-demo-ecst-test-desktop/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace e2e/test-results/fit-signed-in-pages-fit-the-screen-—-admin-demo-ecst-test-desktop/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  25) [desktop] › e2e/tests/journeys.spec.ts:63:7 › journeys › the system admin adds a student by hand beside the import 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator:  getByText(/-CS-\d{4}/).visible().first()
+    Expected: visible
+    Received: undefined
+
+
+      84 |         .locator("visible=true")
+      85 |         .first(),
+    > 86 |     ).toBeVisible();
+         |       ^
+      87 |   });
+      88 | });
+      89 |
+        at /Users/macbookairm1/Desktop/emarate-edu-platform/e2e/tests/journeys.spec.ts:86:7
+
+    Error Context: e2e/test-results/journeys-journeys-the-syst-132e3-t-by-hand-beside-the-import-desktop/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    e2e/test-results/journeys-journeys-the-syst-132e3-t-by-hand-beside-the-import-desktop/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace e2e/test-results/journeys-journeys-the-syst-132e3-t-by-hand-beside-the-import-desktop/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  26) [desktop] › e2e/tests/landing.spec.ts:8:5 › every public page loads, fits, is accessible and has its SEO basics 
+
+    Error: page.goto: Target page, context or browser has been closed
+    Call log:
+      - navigating to "http://localhost:4332/ar/student-life/affairs/", waiting until "networkidle"
+
+
+      22 |     seen.add(path);
+      23 |     current = path;
+    > 24 |     const response = await page.goto(SITE + path, { waitUntil: "networkidle" });
+         |                                 ^
+      25 |     if (!response || response.status() >= 400) {
+      26 |       problems.push(`${path}: HTTP ${response?.status()}`);
+      27 |       continue;
+        at /Users/macbookairm1/Desktop/emarate-edu-platform/e2e/tests/landing.spec.ts:24:33
+
+    Error Context: e2e/test-results/landing-every-public-page--c3561-ible-and-has-its-SEO-basics-desktop/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    e2e/test-results/landing-every-public-page--c3561-ible-and-has-its-SEO-basics-desktop/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace e2e/test-results/landing-every-public-page--c3561-ible-and-has-its-SEO-basics-desktop/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  27) [desktop] › e2e/tests/layout.spec.ts:27:7 › no sideways overflow — teacher@demo.ecst.test ────
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: locator('main')
+    Expected: visible
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" locator('main') with timeout 5000ms
+      - waiting for locator('main')
+      - Target page, context or browser has been closed
+
+
+      29 |     for (const path of paths) {
+      30 |       await page.goto(path);
+    > 31 |       await expect(page.locator("main")).toBeVisible();
+         |                                          ^
+      32 |       await page.waitForLoadState("networkidle");
+      33 |       const overflow = await page.evaluate(
+      34 |         () => document.documentElement.scrollWidth - window.innerWidth,
+        at /Users/macbookairm1/Desktop/emarate-edu-platform/e2e/tests/layout.spec.ts:31:42
+
+    Error Context: e2e/test-results/layout-no-sideways-overflow-—-teacher-demo-ecst-test-desktop/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    e2e/test-results/layout-no-sideways-overflow-—-teacher-demo-ecst-test-desktop/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace e2e/test-results/layout-no-sideways-overflow-—-teacher-demo-ecst-test-desktop/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  28) [desktop] › e2e/tests/sign-in.spec.ts:5:5 › a student signs in with the university number and lands on Today 
+
+    Error: expect(page).not.toHaveURL(expected) failed
+
+    Expected pattern: not /\/login/
+    Received string: "http://localhost:5184/login"
+
+    Call log:
+      - Expect "not toHaveURL" with timeout 30000ms
+        5 × locator resolved to <html lang="ar" dir="rtl">…</html>
+          - unexpected value "http://localhost:5184/login"
+      - Target page, context or browser has been closed
+
+
+       at helpers.ts:13
+
+      11 |   await page.getByLabel("كلمة المرور", { exact: true }).fill(PASSWORD);
+      12 |   await page.getByRole("button", { name: "تسجيل الدخول" }).click();
+    > 13 |   await expect(page).not.toHaveURL(/\/login/, { timeout: 30_000 }); // a busy machine signs in slowly
+         |                          ^
+      14 | }
+      15 |
+      16 | const MAIL_DIR = path.resolve(__dirname, "../../backend/sent-emails-e2e");
+        at signIn (/Users/macbookairm1/Desktop/emarate-edu-platform/e2e/tests/helpers.ts:13:26)
+        at /Users/macbookairm1/Desktop/emarate-edu-platform/e2e/tests/sign-in.spec.ts:6:3
+
+    Error Context: e2e/test-results/sign-in-a-student-signs-in-08d43-y-number-and-lands-on-Today-desktop/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    e2e/test-results/sign-in-a-student-signs-in-08d43-y-number-and-lands-on-Today-desktop/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace e2e/test-results/sign-in-a-student-signs-in-08d43-y-number-and-lands-on-Today-desktop/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  29) [desktop] › e2e/tests/sweep.spec.ts:26:7 › every navigation page works — 26-IT-0001 ──────────
+
+    Error: page.waitForLoadState: Target page, context or browser has been closed
+
+      51 |       current = href;
+      52 |       await page.goto(href);
+    > 53 |       await page.waitForLoadState("networkidle");
+         |                  ^
+      54 |       // Arabic counting (review 2026-09-29): 3–10 take the plural («3 طلاب», never «3 طالبًا»);
+      55 |       // and no RTL-flipped dividers.
+      56 |       const grammar = await page.evaluate(() => {
+        at /Users/macbookairm1/Desktop/emarate-edu-platform/e2e/tests/sweep.spec.ts:53:18
+
+    Error: apiRequestContext._wrapApiCall: Target page, context or browser has been closed
+
+    Error Context: e2e/test-results/sweep-every-navigation-page-works-—-26-IT-0001-desktop/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    e2e/test-results/sweep-every-navigation-page-works-—-26-IT-0001-desktop/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace e2e/test-results/sweep-every-navigation-page-works-—-26-IT-0001-desktop/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  30) [desktop] › e2e/tests/sweep.spec.ts:26:7 › every navigation page works — ta@demo.ecst.test ───
+
+    Error: page.waitForLoadState: Target page, context or browser has been closed
+
+      51 |       current = href;
+      52 |       await page.goto(href);
+    > 53 |       await page.waitForLoadState("networkidle");
+         |                  ^
+      54 |       // Arabic counting (review 2026-09-29): 3–10 take the plural («3 طلاب», never «3 طالبًا»);
+      55 |       // and no RTL-flipped dividers.
+      56 |       const grammar = await page.evaluate(() => {
+        at /Users/macbookairm1/Desktop/emarate-edu-platform/e2e/tests/sweep.spec.ts:53:18
+
+    Error: apiRequestContext._wrapApiCall: Target page, context or browser has been closed
+
+    Error Context: e2e/test-results/sweep-every-navigation-page-works-—-ta-demo-ecst-test-desktop/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    e2e/test-results/sweep-every-navigation-page-works-—-ta-demo-ecst-test-desktop/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace e2e/test-results/sweep-every-navigation-page-works-—-ta-demo-ecst-test-desktop/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  31) [desktop] › e2e/tests/sweep.spec.ts:26:7 › every navigation page works — dept.supervisor@demo.ecst.test 
+
+    Error: page.waitForLoadState: Target page, context or browser has been closed
+
+      51 |       current = href;
+      52 |       await page.goto(href);
+    > 53 |       await page.waitForLoadState("networkidle");
+         |                  ^
+      54 |       // Arabic counting (review 2026-09-29): 3–10 take the plural («3 طلاب», never «3 طالبًا»);
+      55 |       // and no RTL-flipped dividers.
+      56 |       const grammar = await page.evaluate(() => {
+        at /Users/macbookairm1/Desktop/emarate-edu-platform/e2e/tests/sweep.spec.ts:53:18
+
+    Error: apiRequestContext._wrapApiCall: Target page, context or browser has been closed
+
+    Error Context: e2e/test-results/sweep-every-navigation-pag-477d0-t-supervisor-demo-ecst-test-desktop/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    e2e/test-results/sweep-every-navigation-pag-477d0-t-supervisor-demo-ecst-test-desktop/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace e2e/test-results/sweep-every-navigation-pag-477d0-t-supervisor-demo-ecst-test-desktop/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  32) [desktop] › e2e/tests/sweep.spec.ts:26:7 › every navigation page works — head.registrar@demo.ecst.test 
+
+    Error: /audit: sticks out — <bdi class=""> «university_number» x 226…326 of 1280
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 3
+
+    - Array []
+    + Array [
+    +   "/audit: sticks out — <bdi class=\"\"> «university_number» x 226…326 of 1280",
+    + ]
+
+      79 |           problems.push(`${href}: ${v.id} — ${v.nodes.map((n) => n.target.join(" ")).join(" | ")}`);
+      80 |     }
+    > 81 |     expect(problems, problems.join("\n")).toEqual([]);
+         |                                           ^
+      82 |   });
+      83 | }
+      84 |
+        at /Users/macbookairm1/Desktop/emarate-edu-platform/e2e/tests/sweep.spec.ts:81:43
+
+    Error: browserContext.close: Target page, context or browser has been closed
+
+    Error Context: e2e/test-results/sweep-every-navigation-pag-6c154-ad-registrar-demo-ecst-test-desktop/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    e2e/test-results/sweep-every-navigation-pag-6c154-ad-registrar-demo-ecst-test-desktop/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace e2e/test-results/sweep-every-navigation-pag-6c154-ad-registrar-demo-ecst-test-desktop/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  33) [desktop] › e2e/tests/sweep.spec.ts:26:7 › every navigation page works — results@demo.ecst.test 
+
+    Error: page.goto: Target page, context or browser has been closed
+
+      50 |     for (const href of hrefs) {
+      51 |       current = href;
+    > 52 |       await page.goto(href);
+         |                  ^
+      53 |       await page.waitForLoadState("networkidle");
+      54 |       // Arabic counting (review 2026-09-29): 3–10 take the plural («3 طلاب», never «3 طالبًا»);
+      55 |       // and no RTL-flipped dividers.
+        at /Users/macbookairm1/Desktop/emarate-edu-platform/e2e/tests/sweep.spec.ts:52:18
+
+    Error Context: e2e/test-results/sweep-every-navigation-page-works-—-results-demo-ecst-test-desktop/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    e2e/test-results/sweep-every-navigation-page-works-—-results-demo-ecst-test-desktop/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace e2e/test-results/sweep-every-navigation-page-works-—-results-demo-ecst-test-desktop/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  34) [desktop] › e2e/tests/sweep.spec.ts:26:7 › every navigation page works — student.affairs@demo.ecst.test 
+
+    Error: page.goto: Target page, context or browser has been closed
+    Call log:
+      - navigating to "http://localhost:5184/notifications", waiting until "load"
+
+
+      50 |     for (const href of hrefs) {
+      51 |       current = href;
+    > 52 |       await page.goto(href);
+         |                  ^
+      53 |       await page.waitForLoadState("networkidle");
+      54 |       // Arabic counting (review 2026-09-29): 3–10 take the plural («3 طلاب», never «3 طالبًا»);
+      55 |       // and no RTL-flipped dividers.
+        at /Users/macbookairm1/Desktop/emarate-edu-platform/e2e/tests/sweep.spec.ts:52:18
+
+    Error Context: e2e/test-results/sweep-every-navigation-pag-42712-dent-affairs-demo-ecst-test-desktop/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    e2e/test-results/sweep-every-navigation-pag-42712-dent-affairs-demo-ecst-test-desktop/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace e2e/test-results/sweep-every-navigation-pag-42712-dent-affairs-demo-ecst-test-desktop/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  35) [desktop] › e2e/tests/sweep.spec.ts:26:7 › every navigation page works — events@demo.ecst.test 
+
+    Error: page.goto: Target page, context or browser has been closed
+    Call log:
+      - navigating to "http://localhost:5184/login", waiting until "load"
+
+
+       at helpers.ts:9
+
+       7 | /** Sign in through the real login form (cookies + CSRF exactly as in production). */
+       8 | export async function signIn(page: Page, identifier: string) {
+    >  9 |   await page.goto("/login");
+         |              ^
+      10 |   await page.getByLabel("الرقم الجامعي أو البريد").fill(identifier);
+      11 |   await page.getByLabel("كلمة المرور", { exact: true }).fill(PASSWORD);
+      12 |   await page.getByRole("button", { name: "تسجيل الدخول" }).click();
+        at signIn (/Users/macbookairm1/Desktop/emarate-edu-platform/e2e/tests/helpers.ts:9:14)
+        at /Users/macbookairm1/Desktop/emarate-edu-platform/e2e/tests/sweep.spec.ts:38:17
+
+    Error Context: e2e/test-results/sweep-every-navigation-page-works-—-events-demo-ecst-test-desktop/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    e2e/test-results/sweep-every-navigation-page-works-—-events-demo-ecst-test-desktop/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace e2e/test-results/sweep-every-navigation-page-works-—-events-demo-ecst-test-desktop/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  36) [desktop] › e2e/tests/sweep.spec.ts:26:7 › every navigation page works — admin@demo.ecst.test 
+
+    Error: page.evaluate: Target page, context or browser has been closed
+    Browser logs:
+
+    <launching> /Applications/Google Chrome.app/Contents/MacOS/Google Chrome --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-edgeupdater --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,BlockOriginHeaderModificationOnRedirect,Translate,AutoDeElevate,OptimizationHints,msForceBrowserSignIn,msEdgeUpdateLaunchServicesPreferredVersion --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --disable-updater-scheduler --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --user-data-dir=/var/folders/4c/p6lz5m5s0lz9v53bpz76j6140000gn/T/playwright_chromiumdev_profile-2WCPJU --remote-debugging-pipe --no-startup-window
+    <launched> pid=27190
+    [pid=27190][err] Trying to load the allocator multiple times. This is *not* supported.
+    [pid=27190][err] [27199:174949:1110/090132.077360:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=27190][err] [27199:175022:1110/090132.077666:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=27190][err] [27199:174949:1110/090132.084342:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=27190][err] [27199:175022:1110/090132.084414:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=27190][err] [27199:174949:1110/090132.085558:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=27190][err] [27199:175022:1110/090132.085627:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=27190][err] [27199:174949:1110/090132.089236:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=27190][err] [27199:175022:1110/090132.089311:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=27190][err] [27199:174949:1110/090132.089504:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=27190][err] [27199:175022:1110/090132.089539:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=27190][err] [27199:174949:1110/090132.590909:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=27190][err] [27199:175022:1110/090132.591038:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=27190][err] [27199:174949:1110/090135.244159:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=27190][err] [27199:175022:1110/090135.244345:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=27190][err] [27199:174949:1110/090137.017607:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=27190][err] [27199:175022:1110/090137.017694:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=27190][err] [27199:174949:1110/090138.767600:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=27190][err] [27199:175022:1110/090138.767686:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=27190][err] [27199:174949:1110/090140.381292:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=27190][err] [27199:175022:1110/090140.381371:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=27190][err] [27199:174949:1110/090143.073596:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=27190][err] [27199:175022:1110/090143.073777:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=27190][err] [27199:174949:1110/090145.416310:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=27190][err] [27199:175022:1110/090145.416411:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=27190][err] [27199:174949:1110/090146.997581:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=27190][err] [27199:175022:1110/090146.997682:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=27190][err] [27199:174949:1110/090148.583223:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=27190][err] [27199:175022:1110/090148.583312:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=27190][err] [27199:174949:1110/090150.149291:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=27190][err] [27199:175022:1110/090150.149379:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=27190][err] [27199:174949:1110/090151.757524:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=27190][err] [27199:175022:1110/090151.757624:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=27190][err] [27199:174949:1110/090153.497087:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=27190][err] [27199:175022:1110/090153.497174:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=27190][err] [27199:174949:1110/090155.032912:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=27190][err] [27199:175022:1110/090155.032999:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=27190][err] [27199:174949:1110/090156.805510:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=27190][err] [27199:175022:1110/090156.805580:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=27190][err] [27199:174949:1110/090158.649666:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=27190][err] [27199:175022:1110/090158.649751:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=27190][err] [27199:174949:1110/090200.267408:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=27190][err] [27199:175022:1110/090200.267491:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=27190][err] [27199:174949:1110/090201.823222:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+    [pid=27190][err] [27199:175022:1110/090201.823370:ERROR:ui/display/mac/cv_display_link_mac.mm:188] CVDisplayLinkCreateWithCGDisplay failed. CVReturn: -6670
+
+      74 |       const { violations } = await new AxeBuilder({ page })
+      75 |         .withTags(["wcag2a", "wcag2aa", "wcag21aa"])
+    > 76 |         .analyze();
+         |          ^
+      77 |       for (const v of violations)
+      78 |         if (v.impact === "serious" || v.impact === "critical")
+      79 |           problems.push(`${href}: ${v.id} — ${v.nodes.map((n) => n.target.join(" ")).join(" | ")}`);
+        at AxeBuilder.analyze (/Users/macbookairm1/Desktop/emarate-edu-platform/node_modules/.pnpm/@axe-core+playwright@4.13.0_playwright-core@1.63.0/node_modules/@axe-core/playwright/dist/index.js:236:16)
+        at /Users/macbookairm1/Desktop/emarate-edu-platform/e2e/tests/sweep.spec.ts:76:10
+
+    Error Context: e2e/test-results/sweep-every-navigation-page-works-—-admin-demo-ecst-test-desktop/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    e2e/test-results/sweep-every-navigation-page-works-—-admin-demo-ecst-test-desktop/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace e2e/test-results/sweep-every-navigation-page-works-—-admin-demo-ecst-test-desktop/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  36 failed
+    [phone] › e2e/tests/a11y.spec.ts:39:7 › signed-in pages — dept.manager@demo.ecst.test ──────────
+    [phone] › e2e/tests/apply.spec.ts:7:5 › a visitor verifies the email, fills the application, uploads documents and submits 
+    [phone] › e2e/tests/fit-signed-in.spec.ts:20:9 › pages fit the screen — 26-IT-0001 ─────────────
+    [phone] › e2e/tests/fit-signed-in.spec.ts:20:9 › pages fit the screen — teacher@demo.ecst.test ─
+    [phone] › e2e/tests/fit-signed-in.spec.ts:20:9 › pages fit the screen — dept.manager@demo.ecst.test 
+    [phone] › e2e/tests/fit-signed-in.spec.ts:20:9 › pages fit the screen — academic@demo.ecst.test 
+    [phone] › e2e/tests/fit-signed-in.spec.ts:20:9 › pages fit the screen — admin@demo.ecst.test ───
+    [phone] › e2e/tests/fit-signed-in.spec.ts:20:9 › pages fit the screen — admin@demo.ecst.test (larger text) 
+    [phone] › e2e/tests/journeys.spec.ts:63:7 › journeys › the system admin adds a student by hand beside the import 
+    [phone] › e2e/tests/landing.spec.ts:8:5 › every public page loads, fits, is accessible and has its SEO basics 
+    [phone] › e2e/tests/layout.spec.ts:27:7 › no sideways overflow — teacher@demo.ecst.test ────────
+    [phone] › e2e/tests/sign-in.spec.ts:5:5 › a student signs in with the university number and lands on Today 
+    [phone] › e2e/tests/sweep.spec.ts:26:7 › every navigation page works — teacher@demo.ecst.test ──
+    [phone] › e2e/tests/sweep.spec.ts:26:7 › every navigation page works — dept.manager@demo.ecst.test 
+    [phone] › e2e/tests/sweep.spec.ts:26:7 › every navigation page works — head.registrar@demo.ecst.test 
+    [phone] › e2e/tests/sweep.spec.ts:26:7 › every navigation page works — results@demo.ecst.test ──
+    [phone] › e2e/tests/sweep.spec.ts:26:7 › every navigation page works — student.affairs@demo.ecst.test 
+    [phone] › e2e/tests/sweep.spec.ts:26:7 › every navigation page works — events@demo.ecst.test ───
+    [phone] › e2e/tests/sweep.spec.ts:26:7 › every navigation page works — admin@demo.ecst.test ────
+    [desktop] › e2e/tests/a11y.spec.ts:39:7 › signed-in pages — admin@demo.ecst.test ───────────────
+    [desktop] › e2e/tests/fit-signed-in.spec.ts:20:9 › pages fit the screen — 26-IT-0001 ───────────
+    [desktop] › e2e/tests/fit-signed-in.spec.ts:20:9 › pages fit the screen — dept.manager@demo.ecst.test 
+    [desktop] › e2e/tests/fit-signed-in.spec.ts:20:9 › pages fit the screen — academic@demo.ecst.test 
+    [desktop] › e2e/tests/fit-signed-in.spec.ts:20:9 › pages fit the screen — admin@demo.ecst.test ─
+    [desktop] › e2e/tests/journeys.spec.ts:63:7 › journeys › the system admin adds a student by hand beside the import 
+    [desktop] › e2e/tests/landing.spec.ts:8:5 › every public page loads, fits, is accessible and has its SEO basics 
+    [desktop] › e2e/tests/layout.spec.ts:27:7 › no sideways overflow — teacher@demo.ecst.test ──────
+    [desktop] › e2e/tests/sign-in.spec.ts:5:5 › a student signs in with the university number and lands on Today 
+    [desktop] › e2e/tests/sweep.spec.ts:26:7 › every navigation page works — 26-IT-0001 ────────────
+    [desktop] › e2e/tests/sweep.spec.ts:26:7 › every navigation page works — ta@demo.ecst.test ─────
+    [desktop] › e2e/tests/sweep.spec.ts:26:7 › every navigation page works — dept.supervisor@demo.ecst.test 
+    [desktop] › e2e/tests/sweep.spec.ts:26:7 › every navigation page works — head.registrar@demo.ecst.test 
+    [desktop] › e2e/tests/sweep.spec.ts:26:7 › every navigation page works — results@demo.ecst.test 
+    [desktop] › e2e/tests/sweep.spec.ts:26:7 › every navigation page works — student.affairs@demo.ecst.test 
+    [desktop] › e2e/tests/sweep.spec.ts:26:7 › every navigation page works — events@demo.ecst.test ─
+    [desktop] › e2e/tests/sweep.spec.ts:26:7 › every navigation page works — admin@demo.ecst.test ──
+  58 skipped
+  138 passed (19.9m)
+[ELIFECYCLE] Command failed with exit code 1.
+# exit 1, 1195s, 2026-11-10T07:02:03Z
