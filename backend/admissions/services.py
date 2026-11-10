@@ -927,12 +927,13 @@ def set_staff_answers(
         # Registered: the record holds the number; a new one here would show the applicant a
         # number that is not theirs (review 2026-11). Correct it on the student's record.
         current = application.student_record.university_number
-        if str(answers["university_number"] or "").strip() != current:
+        if str(answers["university_number"] or "").strip().upper() != current.upper():
             raise Conflict(
                 gettext("The student is registered: change the number on the student record."),
                 code="registered",
             )
-    number = str(given.get("university_number", "")).strip()
+    # One number in one case: «26-it-5000» is «26-IT-5000» (R78; R90 at admission).
+    number = str(given.get("university_number", "")).strip().upper()
     if number:
         given["university_number"] = number
         limit = StudentRecord._meta.get_field("university_number").max_length
@@ -944,7 +945,7 @@ def set_staff_answers(
                     ]
                 }
             )
-        taken = StudentRecord.objects.filter(university_number=number)
+        taken = StudentRecord.objects.filter(university_number__iexact=number)
         if application.student_record_id:
             taken = taken.exclude(pk=application.student_record_id)
         held = Application.objects.filter(staff_answers__university_number=number).exclude(
@@ -1003,12 +1004,12 @@ def _registration_details(locked: Application, program) -> dict:
     keys = {f["key"]: f for f in staff_fields(locked)}
     details: dict = {}
     if "university_number" in keys:
-        number = str(locked.staff_answers.get("university_number", "")).strip()
+        number = str(locked.staff_answers.get("university_number", "")).strip().upper()
         if not number:
             raise ValidationError(
                 {"university_number": [gettext("Enter the university number first.")]}
             )
-        if StudentRecord.objects.filter(university_number=number).exists():
+        if StudentRecord.objects.filter(university_number__iexact=number).exists():
             raise ValidationError(
                 {"university_number": [gettext("This university number is already in use.")]}
             )
