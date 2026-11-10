@@ -1438,7 +1438,9 @@ function DepartmentEnd({
   if (!u) return null;
   const busy = u.programs.filter((p) => !p.free);
   const roles = u.roles.map((r) => `${r.role}: ${r.user}`).join("، ");
-  const others = departments.filter((d) => d.id !== department.id);
+  // Only into an active department: its programmes would leave the site and applying with a
+  // stopped one (review 2026-11-10, R69; the server refuses it too).
+  const others = departments.filter((d) => d.id !== department.id && d.is_active !== false);
   const target = others.find((d) => String(d.id) === into);
   const blocked = [
     u.courses ? count(u.courses, N.course) : "",
@@ -1485,8 +1487,8 @@ function DepartmentEnd({
                   title: `دمج «${department.name_ar}» في «${target.name_ar}»؟`,
                   body: [
                     u.programs.length
-                      ? `تنتقل البرامج (${u.programs.map((p) => p.name_ar).join("، ")}) وأعضاء هيئة التدريس إلى «${target.name_ar}».`
-                      : `ينتقل أعضاء هيئة التدريس إلى «${target.name_ar}».`,
+                      ? `تنتقل البرامج (${u.programs.map((p) => p.name_ar).join("، ")}) وأعضاء هيئة التدريس واستفسارات القبول وأخبار القسم إلى «${target.name_ar}».`
+                      : `ينتقل أعضاء هيئة التدريس واستفسارات القبول وأخبار القسم إلى «${target.name_ar}».`,
                     roles ? `تُلغى أدوار هذا القسم: ${roles}.` : "",
                     u.history
                       ? "للقسم سجل في التدقيق، فيبقى موقوفًا مخفيًا بدل حذفه."

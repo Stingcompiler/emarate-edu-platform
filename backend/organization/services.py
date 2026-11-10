@@ -159,6 +159,15 @@ def merge(meta, department, into) -> str:
 
     if into.pk == department.pk:
         raise ValidationError({"into": [gettext("Choose another department.")]})
+    if not into.is_active:
+        # Its programmes would leave the site and applying with it (review 2026-11-10, R69).
+        raise ValidationError(
+            {"into": [gettext("That department is stopped. Choose an active one.")]}
+        )
+    from accounts.models import RoleAssignment
+    from content.models import Announcement
+    from inquiries.models import Inquiry
+
     with transaction.atomic():
         found = usage(department)
         if not found["can_merge"]:
@@ -177,16 +186,30 @@ def merge(meta, department, into) -> str:
                 department_id=into.pk,
             )
             moved.append(program.code)
+        # A member of both keeps their place in `into` (one membership a department; looking
+        # them up with their kind broke the merge for a teacher who assists there — R67).
+        there = set(
+            DepartmentMembership.objects.filter(department=into).values_list("user_id", flat=True)
+        )
         for membership in DepartmentMembership.objects.filter(department=department):
-            DepartmentMembership.objects.get_or_create(
-                department=into, user_id=membership.user_id, kind=membership.kind
-            )
+            if membership.user_id not in there:
+                DepartmentMembership.objects.create(
+                    department=into, user_id=membership.user_id, kind=membership.kind
+                )
+        # What was addressed to it follows its programmes (R68): admission inquiries reach
+        # the registrars of `into`, and its news shows on that department's page.
+        inquiries = Inquiry.objects.filter(department=department).update(department=into)
+        news = Announcement.objects.filter(
+            scope=Announcement.Scope.DEPARTMENT, scope_id=department.pk
+        ).update(scope_id=into.pk)
+        # Its own roles end with it, deleted or stopped: the entry below says so (R70).
+        RoleAssignment.objects.filter(department=department).delete()
         record(
             meta,
             "department.merge",
             department,
             old={**snapshot(department), "roles_removed": found["roles"]},
-            new={"into": into.code, "programs": moved},
+            new={"into": into.code, "programs": moved, "inquiries": inquiries, "news": news},
             department_id=into.pk,
         )
         source, target = department.code, into.code

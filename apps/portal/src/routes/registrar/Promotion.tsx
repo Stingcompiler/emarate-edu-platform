@@ -125,6 +125,16 @@ export function Promotion() {
           </Notice>
         </div>
       )}
+      {!done && (preview.data?.departments_done ?? 0) > 0 && (
+        // Departments promoted on their own are left out of the college's run (review
+        // 2026-11-10, R71): say so, the list below is the rest.
+        <div className="mt-4">
+          <Notice tone="info">
+            رُفِّع {count(preview.data!.departments_done, N.department)} على حدة في نهاية هذا الفصل؛
+            القائمة أدناه بقية الكلية، والترفيع يشملها وحدها.
+          </Notice>
+        </div>
+      )}
       {apply.isError && (
         <div className="mt-4">
           <Notice>{problemMessage(apply.error)}</Notice>

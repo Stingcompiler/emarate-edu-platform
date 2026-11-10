@@ -1239,3 +1239,12 @@ msgstr "طلب نقل لهذا الحساب ينتظر اعتماد القسم �
 
 msgid "This record now holds another account. Reject this request."
 msgstr "صار لهذا السجل حساب آخر. ارفض هذا الطلب لإغلاقه."
+
+msgid "That department is stopped. Choose an active one."
+msgstr "ذلك القسم موقوف. اختر قسمًا نشطًا."
+
+msgid "%(students)s students and %(courses)s courses are in a level above %(levels)s. Move them first."
+msgstr "%(students)s طالبًا و%(courses)s مادة في مستوى أعلى من %(levels)s. انقلهم أولًا."
+
+msgid "There are no active students to promote here."
+msgstr "لا طلاب منتظمون للترفيع في هذا النطاق."

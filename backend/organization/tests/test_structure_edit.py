@@ -268,3 +268,112 @@ def test_a_department_with_history_is_stopped_not_deleted(api, make_user, colleg
     assert merged.data["result"] == "stopped"
     wrong.refresh_from_db()
     assert wrong.is_active is False and not wrong.programs.exists()
+
+
+# --- Review 2026-11-10, axis 1.3 (probes R67–R70, R72 turned into tests) -------------------
+
+
+def _wrong_department(college):
+    """A programme entered as a department (the production case): one free programme."""
+    from organization.models import Program
+
+    department = Department.objects.create(college=college, code="NUR", name_ar="التمريض")
+    Program.objects.create(
+        department=department,
+        code="BNUR",
+        name_ar="بكالوريوس التمريض",
+        degree="bachelor",
+        levels_count=4,
+        duration_terms=8,
+    )
+    return department
+
+
+def test_a_member_of_both_departments_keeps_their_place_in_the_target(
+    api, make_user, college, it_dept
+):
+    """R67: a teacher in the merged department who assists in the target broke the merge."""
+    from academic.models import DepartmentMembership
+
+    wrong = _wrong_department(college)
+    member = make_user(Role.TEACHER)
+    DepartmentMembership.objects.create(department=wrong, user=member, kind="teacher")
+    DepartmentMembership.objects.create(department=it_dept, user=member, kind="ta")
+    admin = api(make_user(Role.SYSTEM_ADMIN))
+    merged = admin.post(f"/api/v1/departments/{wrong.pk}/merge", {"into": it_dept.pk})
+    assert merged.status_code == 200, merged.data
+    assert list(
+        DepartmentMembership.objects.filter(user=member).values_list("department", "kind")
+    ) == [(it_dept.pk, "ta")]
+
+
+def test_what_was_addressed_to_a_merged_department_follows_it(api, make_user, college, it_dept):
+    """R68: its admission inquiries and its news go to the target; R70: its own roles end
+    with it even when it is stopped rather than deleted, as the audit entry says."""
+    from accounts.models import RoleAssignment
+    from contacts.models import Contact
+    from content.models import Announcement
+    from inquiries.models import Inquiry
+
+    wrong = _wrong_department(college)
+    manager = make_user(Role.DEPARTMENT_MANAGER, department=wrong)
+    inquiry = Inquiry.objects.create(
+        reference_no="INQ-1",
+        contact=Contact.objects.create(email="visitor@x.test", name="زائر"),
+        type="admission",
+        department=wrong,
+        subject="القبول",
+        message="متى يفتح التقديم؟",
+    )
+    news = Announcement.objects.create(
+        scope="department",
+        scope_id=wrong.pk,
+        audience="public",
+        title="خبر القسم",
+        body="<p>نص</p>",
+        status="published",
+        created_by=manager,
+    )
+    AuditLog.objects.create(
+        action="department.update",
+        target_type="department",
+        target_id=str(wrong.pk),
+        target_repr="x",
+        department=wrong,
+    )
+    admin = api(make_user(Role.SYSTEM_ADMIN))
+    merged = admin.post(f"/api/v1/departments/{wrong.pk}/merge", {"into": it_dept.pk})
+    assert merged.status_code == 200 and merged.data["result"] == "stopped"  # it has history
+    inquiry.refresh_from_db()
+    news.refresh_from_db()
+    assert inquiry.department_id == it_dept.pk and news.scope_id == it_dept.pk
+    assert not RoleAssignment.objects.filter(user=manager, department=wrong).exists()
+    entry = AuditLog.objects.get(action="department.merge")
+    assert entry.new["inquiries"] == 1 and entry.new["news"] == 1 and entry.old["roles_removed"]
+
+
+def test_a_department_is_not_merged_into_a_stopped_one(api, make_user, college, it_dept):
+    """R69: its programmes would leave the site and applying with the stopped department."""
+    wrong = _wrong_department(college)
+    it_dept.is_active = False
+    it_dept.save(update_fields=["is_active"])
+    admin = api(make_user(Role.SYSTEM_ADMIN))
+    refused = admin.post(f"/api/v1/departments/{wrong.pk}/merge", {"into": it_dept.pk})
+    assert refused.status_code == 400 and "into" in refused.data["errors"]
+    assert Department.objects.filter(pk=wrong.pk, is_active=True).exists()
+
+
+def test_levels_are_not_lowered_under_students_or_courses(
+    api, make_user, make_student, it_program, it_course
+):
+    """R72: nobody is left above a programme's last level."""
+    make_student(it_program, "26-IT-0001", level=4)
+    admin = api(make_user(Role.SYSTEM_ADMIN))
+    url = f"/api/v1/programs/{it_program.pk}"
+    refused = admin.patch(url, {"levels_count": 3}, format="json")
+    assert refused.status_code == 400 and "levels_count" in refused.data["errors"]
+    it_program.refresh_from_db()
+    assert it_program.levels_count == 4
+    # Raising it, or lowering it to where everyone still fits, is fine.
+    assert admin.patch(url, {"levels_count": 5}, format="json").status_code == 200
+    assert admin.patch(url, {"levels_count": 4}, format="json").status_code == 200
