@@ -163,3 +163,19 @@ def test_answers_outside_the_form_are_not_kept_nor_reach_the_record(
     with django_capture_on_commit_callbacks(execute=True):
         record = services.register_applicant(RequestMeta(actor=head), application)
     assert record.full_name_en != "Injected Name" and record.nationality != "X"
+
+
+def test_a_number_typed_in_lower_case_is_the_same_number(
+    api, intake, make_user, it_dept, make_student, it_program
+):
+    """R90: «26-it-5000» is «26-IT-5000» — held by another application, or by a student."""
+    head, registrar = make_user(Role.HEAD_REGISTRAR), make_user(Role.REGISTRAR, department=it_dept)
+    _default(head, _form(PATH, NUMBER))
+    one = _application(intake, email="one@example.test")
+    two = _application(intake, email="two@example.test")
+    assert _staff(api, registrar, one, {"university_number": "26-it-5000"}).status_code == 200
+    one.refresh_from_db()
+    assert one.staff_answers["university_number"] == "26-IT-5000"
+    assert _staff(api, registrar, two, {"university_number": "26-IT-5000"}).status_code == 400
+    make_student(it_program, "26-IT-6000")
+    assert _staff(api, registrar, two, {"university_number": "26-it-6000"}).status_code == 400

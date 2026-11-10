@@ -59,7 +59,7 @@ def _norm(value) -> str:
 
 def _normalize(raw: dict, term, allowed_departments, cache) -> tuple[dict, list[str], tuple]:
     errors: list[str] = []
-    number = _norm(raw.get("university_number"))
+    number = _norm(raw.get("university_number")).upper()  # as the students import (R78, R90)
     code = _norm(raw.get("course_code")).upper()
     section = _norm(raw.get("section")) or "A"
     for field in REQUIRED:
@@ -131,7 +131,7 @@ def _normalize(raw: dict, term, allowed_departments, cache) -> tuple[dict, list[
 def validate_file(meta: RequestMeta, *, term, department, allowed_departments, name, uploaded):
     table_rows, columns = read_table(name, uploaded.read(), HEADERS, REQUIRED)
     uploaded.seek(0)
-    numbers = {_norm(r.get("university_number")) for r in table_rows}
+    numbers = {_norm(r.get("university_number")).upper() for r in table_rows}
     offerings = CourseOffering.objects.filter(term=term).select_related("course")
     if department is not None:
         offerings = offerings.filter(course__department=department)

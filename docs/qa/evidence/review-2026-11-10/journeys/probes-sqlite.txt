@@ -1,0 +1,12 @@
+...                                                                      [100%]
+==================================== PASSES ====================================
+_______ test_probe_r90_the_transcript_address_in_lower_case_is_not_found _______
+----------------------------- Captured stderr call -----------------------------
+2026-11-11 00:55:34,170 WARNING django.request Not Found: /api/v1/transcripts/26-it-0100
+------------------------------ Captured log call -------------------------------
+WARNING  django.request:log.py:283 Not Found: /api/v1/transcripts/26-it-0100
+=========================== short test summary info ============================
+PASSED core/tests/test_qa_probes_journeys.py::test_probe_r90_a_results_file_in_lower_case_finds_no_student
+PASSED core/tests/test_qa_probes_journeys.py::test_probe_r90_a_number_typed_in_lower_case_at_admission_is_a_second_number
+PASSED core/tests/test_qa_probes_journeys.py::test_probe_r90_the_transcript_address_in_lower_case_is_not_found
+3 passed in 6.44s

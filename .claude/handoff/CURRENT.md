@@ -54,7 +54,9 @@ Older rounds: `.claude/handoff/archive/2026-10-24_to_2026-11-02.md`, `.claude/ha
   #278 merged. Journeys (§3) as permanent E2E: journey-admission / journey-coursework /
   journey-site-event; the dev site now re-reads the API per request (astro dev cache hid new
   content). Left: results→student and deletion-request journeys in the browser; Lighthouse.
-  Findings continue from R90.
+  #279 merged (journeys + R91 audit column). Then R90 (university number case in results
+  import, transcript address, admission staff number) + journey-results.spec.ts.
+  Findings continue from R92.
 - **Staff review fixes** (2026-11-09; `fix/site-staff-review`): any staff account (not only
   teachers) may now choose to appear (`accounts.staff_profile.on_staff`, Settings card for all
   staff); a placed account that is no longer staff drops off (`content.staff.shown`); the people

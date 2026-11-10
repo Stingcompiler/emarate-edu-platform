@@ -1,0 +1,77 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+_________ test_probe_r90_a_results_file_in_lower_case_finds_no_student _________
+
+api = <function api.<locals>.client at 0x10db25260>
+make_user = <function make_user.<locals>.make at 0x10db25a80>
+classroom = <class 'conftest.Classroom'>, term = <Term: الفصل الأول>
+
+    def test_probe_r90_a_results_file_in_lower_case_finds_no_student(api, make_user, classroom, term):
+        """The students import reads «26-it-0100» as «26-IT-0100» since R78; the results import
+        does not: the row is refused «لا يوجد طالب» though the student is enrolled."""
+        officer = make_user(Role.RESULTS_OFFICER)
+        body = {"file": csv_upload("r.csv", HEADER, "26-it-0100,IT101,91,,"), "term": term.pk}
+        batch = api(officer).post(URL, body, format="multipart").data
+>       assert batch["summary"]["error"] == 1
+E       assert 0 == 1
+
+core/tests/test_qa_probes_journeys.py:18: AssertionError
+_ test_probe_r90_a_number_typed_in_lower_case_at_admission_is_a_second_number __
+
+api = <function api.<locals>.client at 0x10db267a0>
+intake = <ProgramIntake: 1:1>
+make_user = <function make_user.<locals>.make at 0x10d48cfe0>
+it_dept = <Department: تقانة المعلومات>
+
+    def test_probe_r90_a_number_typed_in_lower_case_at_admission_is_a_second_number(
+        api, intake, make_user, it_dept
+    ):
+        """The registration staff type «26-it-5000» on an application while another holds
+        «26-IT-5000»: accepted, and registering it makes a record beside the other's."""
+        from admissions.tests.test_form_review_2026_11 import (
+            NUMBER,
+            PATH,
+            _application,
+            _default,
+            _form,
+            _staff,
+        )
+    
+        head, registrar = make_user(Role.HEAD_REGISTRAR), make_user(Role.REGISTRAR, department=it_dept)
+        _default(head, _form(PATH, NUMBER))
+        one = _application(intake, email="one@example.test")
+        two = _application(intake, email="two@example.test")
+        assert _staff(api, registrar, one, {"university_number": "26-IT-5000"}).status_code == 200
+>       assert _staff(api, registrar, two, {"university_number": "26-it-5000"}).status_code == 200
+E       assert 400 == 200
+E        +  where 400 = <Response status_code=400, "application/problem+json">.status_code
+E        +    where <Response status_code=400, "application/problem+json"> = <function _staff at 0x10d48d8a0>(<function api.<locals>.client at 0x10db267a0>, <User: مستخدم 7 <user7@ecst.test>>, <Application: APP-2026-349415>, {'university_number': '26-it-5000'})
+
+core/tests/test_qa_probes_journeys.py:42: AssertionError
+----------------------------- Captured stderr call -----------------------------
+2026-11-11 00:55:13,182 WARNING django.request Bad Request: /api/v1/applications/5554d26d-c41b-41a6-8b26-8399becddbb1/staff-answers
+------------------------------ Captured log call -------------------------------
+WARNING  django.request:log.py:283 Bad Request: /api/v1/applications/5554d26d-c41b-41a6-8b26-8399becddbb1/staff-answers
+_______ test_probe_r90_the_transcript_address_in_lower_case_is_not_found _______
+
+api = <function api.<locals>.client at 0x10db27240>
+make_user = <function make_user.<locals>.make at 0x10d48cf40>
+classroom = <class 'conftest.Classroom'>
+
+    def test_probe_r90_the_transcript_address_in_lower_case_is_not_found(api, make_user, classroom):
+        """«/print/transcript/26-it-0100» (a typed address) answers 404 for an existing student."""
+        officer = make_user(Role.RESULTS_OFFICER)
+        assert api(officer).get("/api/v1/transcripts/26-IT-0100").status_code == 200
+>       assert api(officer).get("/api/v1/transcripts/26-it-0100").status_code == 404
+E       assert 200 == 404
+E        +  where 200 = <Response status_code=200, "application/json">.status_code
+E        +    where <Response status_code=200, "application/json"> = get('/api/v1/transcripts/26-it-0100')
+E        +      where get = <rest_framework.test.APIClient object at 0x10d41ed70>.get
+E        +        where <rest_framework.test.APIClient object at 0x10d41ed70> = <function api.<locals>.client at 0x10db27240>(<User: مستخدم 11 <user11@ecst.test>>)
+
+core/tests/test_qa_probes_journeys.py:49: AssertionError
+=========================== short test summary info ============================
+FAILED core/tests/test_qa_probes_journeys.py::test_probe_r90_a_results_file_in_lower_case_finds_no_student
+FAILED core/tests/test_qa_probes_journeys.py::test_probe_r90_a_number_typed_in_lower_case_at_admission_is_a_second_number
+FAILED core/tests/test_qa_probes_journeys.py::test_probe_r90_the_transcript_address_in_lower_case_is_not_found
+3 failed in 6.46s
