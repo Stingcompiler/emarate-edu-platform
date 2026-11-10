@@ -10,7 +10,7 @@ Older rounds: `.claude/handoff/archive/2026-10-24_to_2026-11-02.md`, `.claude/ha
   the owner added a full-round scope section (coverage registers, journeys, sizes) and sent it
   back to run. **Round 1 done** — report `docs/qa/comprehensive-review-2026-11-10.md`:
   step 0 K1–K8 (#266; «staff» = holds a role other than student), baseline (all green; local
-  full E2E is unreliable on this Mac — the browser closes mid-test, CI is the authority),
+  local E2E: the installed Google Chrome closes mid-test; run with `CI=1 pnpm e2e …` (Playwright's own Chromium) and it is reliable),
   inventory registers (`bash scripts/qa/inventory.sh <dir>` → site/portal/backend/fit CSVs),
   axis 1.1 known hypotheses proven by probes and fixed (#267: R57–R60, R62, R63; statuses
   `move_pending`, `stale`; `StudentRecord.account_moved_at`). **Open for the owner:** K1's
@@ -44,7 +44,12 @@ Older rounds: `.claude/handoff/archive/2026-10-24_to_2026-11-02.md`, `.claude/ha
   college's logo/share/hero (uploaded with a demo account): fixed, pictures in use stay unless
   samples. **Gotcha:** dev settings ignore `DATABASE_URL` (always `backend/db.sqlite3`); for any
   other database use `DJANGO_SETTINGS_MODULE=config.settings.test` and print the engine first.
-  Findings continue from R85.
+  Axis 8 (PR «qa/review-axis8-a11y»): R85–R87 English reaching pages (exam builder, applicant
+  form, import) fixed with gettext + Arabic; permanent guards `core/tests/test_messages_in_arabic.py`
+  (AST scan for un-gettext'd English sentences + no untranslated/fuzzy .po entries). R88 in-page
+  search uses `matches()` (`apps/portal/src/lib/search.ts`). axe now covers 7 new pages + the
+  /register report form; larger text for every role. Bundle 148.5 kB JS first load (budget 200).
+  Findings continue from R89.
 - **Staff review fixes** (2026-11-09; `fix/site-staff-review`): any staff account (not only
   teachers) may now choose to appear (`accounts.staff_profile.on_staff`, Settings card for all
   staff); a placed account that is no longer staff drops off (`content.staff.shown`); the people

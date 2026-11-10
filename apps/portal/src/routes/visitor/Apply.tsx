@@ -36,6 +36,7 @@ import { markSynced, readDraft, writeDraft } from "../../lib/localDraft";
 import { VisitorLayout } from "./VisitorLayout";
 import { fmtDate } from "../../lib/format";
 import { exampleText, explain } from "../../lib/guide";
+import { matches } from "../../lib/search";
 import { Select } from "../../components/Select";
 
 type Application = {
@@ -191,7 +192,7 @@ function ChooseProgram({
     onSuccess: onStarted,
   });
   const rows = (intakes.data ?? [])
-    .filter((i) => !query || `${i.program_name} ${i.department_name}`.includes(query))
+    .filter((i) => matches(query, i.program_name, i.department_name))
     .sort((a, b) => Number(b.program_code === preferred) - Number(a.program_code === preferred));
   return (
     <div className="space-y-3">

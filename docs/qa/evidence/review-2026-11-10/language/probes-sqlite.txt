@@ -1,0 +1,13 @@
+....                                                                     [100%]
+==================================== PASSES ====================================
+_______________ test_probe_r87_a_closed_batch_answers_in_english _______________
+----------------------------- Captured stderr call -----------------------------
+2026-11-10 23:39:14,391 WARNING django.request Conflict: /api/v1/student-imports/5ceb415d-93ca-45c4-bcf9-5a55f23e2e01/commit
+------------------------------ Captured log call -------------------------------
+WARNING  django.request:log.py:283 Conflict: /api/v1/student-imports/5ceb415d-93ca-45c4-bcf9-5a55f23e2e01/commit
+=========================== short test summary info ============================
+PASSED core/tests/test_qa_probes_language.py::test_probe_r85_a_new_exam_warns_in_english
+PASSED core/tests/test_qa_probes_language.py::test_probe_r87_a_closed_batch_answers_in_english
+PASSED core/tests/test_qa_probes_language.py::test_probe_r85_a_bad_answer_is_refused_in_english
+PASSED core/tests/test_qa_probes_language.py::test_probe_r86_the_applicant_reads_english_beside_the_fields
+4 passed in 7.15s

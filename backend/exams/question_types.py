@@ -57,7 +57,7 @@ class Single(QuestionType):
     def clean_answer(self, question, answer):
         ids = {c.pk for c in question.choices.all()}
         if not isinstance(answer, int) or answer not in ids:
-            raise ValueError("Pick one of the choices.")
+            raise ValueError(gettext("Pick one of the choices."))
         return answer
 
     def grade(self, question, answer):
@@ -83,7 +83,7 @@ class Multiple(QuestionType):
     def clean_answer(self, question, answer):
         ids = {c.pk for c in question.choices.all()}
         if not isinstance(answer, list) or not all(isinstance(a, int) and a in ids for a in answer):
-            raise ValueError("Pick from the choices.")
+            raise ValueError(gettext("Pick from the choices."))
         return sorted(set(answer))
 
     def grade(self, question, answer):
@@ -108,12 +108,14 @@ class Multiple(QuestionType):
 class TrueFalse(QuestionType):
     def validate(self, question, choices):
         return (
-            [] if isinstance(question.config.get("answer"), bool) else ["Set the correct answer."]
+            []
+            if isinstance(question.config.get("answer"), bool)
+            else [gettext("Set the correct answer.")]
         )
 
     def clean_answer(self, question, answer):
         if not isinstance(answer, bool):
-            raise ValueError("Answer true or false.")
+            raise ValueError(gettext("Answer true or false."))
         return answer
 
     def grade(self, question, answer):
@@ -135,12 +137,12 @@ class FillBlank(QuestionType):
     def validate(self, question, choices):
         accepted = question.config.get("accepted")
         if not accepted or not all(isinstance(a, str) and a.strip() for a in accepted):
-            return ["List the accepted answers."]
+            return [gettext("List the accepted answers.")]
         return []
 
     def clean_answer(self, question, answer):
         if not isinstance(answer, str) or len(answer) > 500:
-            raise ValueError("Type the missing word.")
+            raise ValueError(gettext("Type the missing word."))
         return answer.strip()
 
     def grade(self, question, answer):
@@ -162,7 +164,7 @@ class Written(QuestionType):
 
     def clean_answer(self, question, answer):
         if not isinstance(answer, str) or len(answer) > self.limit:
-            raise ValueError(f"Write up to {self.limit} characters.")
+            raise ValueError(gettext("Write up to %(limit)s characters.") % {"limit": self.limit})
         return answer
 
     def grade(self, question, answer):

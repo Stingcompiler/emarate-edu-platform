@@ -9,6 +9,7 @@ import { Button, Card, EmptyState, FilterBar, Notice, problemMessage } from "../
 import { api, ok } from "../../lib/api";
 import { N, count, levelSemester, when } from "../../lib/format";
 import { Picker, num, useDepartments } from "../../lib/reports";
+import { matches } from "../../lib/search";
 
 type Row = {
   public_id: string;
@@ -79,9 +80,7 @@ export function Promotion() {
     });
   const needle = search.trim();
   const shown = (list: Row[]) =>
-    needle
-      ? list.filter((r) => r.full_name_ar.includes(needle) || r.university_number.includes(needle))
-      : list;
+    list.filter((r) => matches(needle, r.full_name_ar, r.university_number));
 
   return (
     <PortalShell

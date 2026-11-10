@@ -8,6 +8,7 @@ import { Avatar, Button, Card, Chip, FilterBar, ScrollRegion } from "../../compo
 import { api, ok } from "../../lib/api";
 import { useCourse } from "../../lib/learning";
 import { downloadCsv, initials } from "../../lib/reports";
+import { matches } from "../../lib/search";
 
 /** Boards: TeacherStudents + TeacherGradebook (phone), DesktopTeacherGradebook — the students as a
  *  table on large screens; the gradebook with the same filters, pending cells and averages. */
@@ -34,7 +35,7 @@ export function Students() {
   const last = b?.assignments.at(-1);
   const rows = (b?.students ?? [])
     .filter((s) => {
-      if (q && !s.full_name_ar.includes(q) && !s.university_number.includes(q)) return false;
+      if (!matches(q, s.full_name_ar, s.university_number)) return false;
       if (filter === "missing") return !!last && !s.cells[last.public_id];
       if (filter === "low") return max > 0 && pct(s.total) < 50;
       if (filter === "idle") return s.submitted === 0;
