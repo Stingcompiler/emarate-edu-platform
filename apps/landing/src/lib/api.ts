@@ -59,6 +59,10 @@ async function fetchJson(path: string, attempts = 3): Promise<unknown> {
 }
 
 export function get<T>(path: string, fallback: T): Promise<T> {
+  // A build reads each path once. `astro dev` keeps running, so it reads again: what the portal
+  // just published shows on the next load, as production shows it after its rebuild (review
+  // 2026-11-10 §3: an event published in the portal never reached the dev site).
+  if (import.meta.env.DEV) cache.delete(path);
   if (!cache.has(path)) {
     cache.set(
       path,
