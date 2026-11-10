@@ -38,7 +38,13 @@ Older rounds: `.claude/handoff/archive/2026-10-24_to_2026-11-02.md`, `.claude/ha
   `cancelled`), R82 (a staff photo is in use in the media library); axes 1.4–1.7, 4, 5 sound
   (Select keyboard test, six constant query counts). **Next:** axis 8, bundle size/Lighthouse;
   fill `fit.csv`. Never run probes or other work while E2E runs. Axis 6 read-only done (owner ran `scripts/qa/vps-readonly.sh`; all healthy; R83: backup files
-  are world-readable — owner's). Findings continue from R84.
+  are world-readable — fixed #275, owner ran chmod 600). **Rehearsal on a restored production copy**
+  (owner's approval; `scripts/qa/vps-export-backup.sh`; local copy deleted after): the 11 merges all
+  succeed (20 → 9 departments); the 2 pending migrations take 2 s; R84 — `purge_demo` deleted the
+  college's logo/share/hero (uploaded with a demo account): fixed, pictures in use stay unless
+  samples. **Gotcha:** dev settings ignore `DATABASE_URL` (always `backend/db.sqlite3`); for any
+  other database use `DJANGO_SETTINGS_MODULE=config.settings.test` and print the engine first.
+  Findings continue from R85.
 - **Staff review fixes** (2026-11-09; `fix/site-staff-review`): any staff account (not only
   teachers) may now choose to appear (`accounts.staff_profile.on_staff`, Settings card for all
   staff); a placed account that is no longer staff drops off (`content.staff.shown`); the people
