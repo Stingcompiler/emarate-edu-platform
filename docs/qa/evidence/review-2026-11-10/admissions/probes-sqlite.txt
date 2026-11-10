@@ -1,0 +1,8 @@
+....                                                                     [100%]
+==================================== PASSES ====================================
+=========================== short test summary info ============================
+PASSED core/tests/test_qa_probes_admissions.py::test_probe_r74_an_intake_with_applications_changes_programme
+PASSED core/tests/test_qa_probes_admissions.py::test_probe_r75_an_intake_with_applications_moves_to_another_cycle
+PASSED core/tests/test_qa_probes_admissions.py::test_probe_r76_an_intake_closes_before_it_opens
+PASSED core/tests/test_qa_probes_admissions.py::test_probe_r77_a_stopped_programme_gets_an_open_intake
+4 passed in 13.06s

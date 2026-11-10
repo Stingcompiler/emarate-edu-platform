@@ -381,16 +381,19 @@ export function Cycles() {
           </Card>
           <SectionLabel>إضافة برنامج</SectionLabel>
           <div className="flex flex-wrap gap-2">
+            {/* A stopped programme is not opened for applying (review 2026-11-10, R77): reactivate
+                it in the academic structure first. */}
             {(programs.data ?? [])
-              .filter((p) => !used.has(p.id))
+              .filter((p) => !used.has(p.id) && p.is_active !== false)
               .map((p) => (
                 <Chip key={p.id} disabled={add.isPending} onClick={() => add.mutate(p.id)}>
                   + {p.name_ar}
                 </Chip>
               ))}
-            {programs.data && programs.data.every((p) => used.has(p.id)) && (
-              <p className="text-sm text-text-muted">كل البرامج مضافة إلى هذه الدورة.</p>
-            )}
+            {programs.data &&
+              programs.data.every((p) => used.has(p.id) || p.is_active === false) && (
+                <p className="text-sm text-text-muted">كل البرامج مضافة إلى هذه الدورة.</p>
+              )}
           </div>
           {(toggle.isError || add.isError || linkForm.isError || removeIntake.isError) && (
             <div className="mt-3">
