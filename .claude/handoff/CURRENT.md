@@ -4,6 +4,11 @@ Older rounds (2026-10-24 → 11-02): `.claude/handoff/archive/2026-10-24_to_2026
 
 ## State
 
+- **Next review** (owner, 2026-11-10: «اكتب خطة مراجعة بعد قراءة الوثائق»): work order
+  `docs/qa/comprehensive-review-plan-2026-11-10.md` — scope #234–#264 since report `c8479a8`;
+  first step is fixing the known K1–K8 from the 09/10-11 review of #263/#264 (K1: a TA who also
+  studies lost «الظهور» — needs the owner's definition of «staff» or the plan's recommendation).
+  Findings start at R57; evidence in `docs/qa/evidence/review-2026-11-10/`.
 - **«الكوادر» in groups** (owner, 2026-11-09; `feat/site-staff-groups`): the system admin and
   the site manager (and the supervisor, who deletes nothing) add people to the site's «الكوادر» on
   `/site-staff` («تصنيف الكوادر», linked from /site): a staff account, or a person with no account
