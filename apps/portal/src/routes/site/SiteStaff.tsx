@@ -22,6 +22,7 @@ import {
 import type { Schemas } from "@ecst/api";
 
 import { api, ok } from "../../lib/api";
+import { isWide } from "../../lib/media";
 import { hasRole, useMe } from "../../lib/auth";
 import { ALL } from "../../components/Pager";
 import { num } from "../../lib/reports";
@@ -125,23 +126,16 @@ function Groups({ groups, onChange }: { groups: Group[]; onChange: () => void })
     },
     onSuccess: onChange,
   });
-  // Moving swaps two neighbours in the list as shown, then numbers every group 1, 2, 3… in
-  // that order, one request after another: stored orders may have gaps or repeat (review
-  // 2026-11-09), and two requests at once raced.
+  // Moving swaps two neighbours in the list as shown and sends the whole order once: the
+  // server numbers the groups 1, 2, 3… in one write (K7; stored orders may have gaps or repeat).
   const reorder = useMutation({
     mutationFn: async ({ index, by }: { index: number; by: -1 | 1 }) => {
-      const list = [...groups];
-      const [moved] = list.splice(index, 1);
-      if (!moved) return;
-      list.splice(index + by, 0, moved);
-      for (const [i, g] of list.entries()) {
-        if (g.order === i + 1) continue;
-        const { data, error } = await api.PATCH("/api/v1/site-staff/groups/{id}", {
-          params: { path: { id: g.id } },
-          body: { order: i + 1 } as Group,
-        });
-        if (!data) throw error;
-      }
+      const ids = groups.map((g) => g.id);
+      const [moved] = ids.splice(index, 1);
+      if (moved === undefined) return;
+      ids.splice(index + by, 0, moved);
+      const { data, error } = await api.PUT("/api/v1/site-staff/groups/order", { body: { ids } });
+      if (!data) throw error;
     },
     onSettled: onChange,
   });
@@ -497,6 +491,9 @@ function Matrix({
   onChange: () => void;
 }) {
   const [open, setOpen] = useState<string>();
+  // The edit panel is mounted in the layout that shows (the table from 1024, the cards below):
+  // two copies kept two drafts of the same form (K8).
+  const wide = isWide();
   const place = useMutation({
     mutationFn: async ({ row, placements }: { row: Row; placements: Placement[] }) => {
       const result = row.entry
@@ -544,7 +541,7 @@ function Matrix({
                 key={rowKey(r)}
                 row={r}
                 groups={groups}
-                open={open === rowKey(r)}
+                open={wide && open === rowKey(r)}
                 busy={place.isPending}
                 onToggle={(g) => toggle(r, g)}
                 onOpen={() => setOpen(open === rowKey(r) ? undefined : rowKey(r))}
@@ -580,7 +577,7 @@ function Matrix({
             >
               {open === rowKey(r) ? "إغلاق" : "المسمّى والترتيب والبيانات"}
             </Button>
-            {open === rowKey(r) && (
+            {!wide && open === rowKey(r) && (
               <Edit row={r} groups={groups} onDone={() => setOpen(undefined)} onChange={onChange} />
             )}
           </Card>

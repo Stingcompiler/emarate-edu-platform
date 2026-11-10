@@ -10,6 +10,10 @@ test("the site manager adds a group and a person and sorts them on the matrix", 
 }, info) => {
   const phone = (page.viewportSize()?.width ?? 1280) < 1024;
   await signIn(page, "site@demo.ecst.test");
+  // The page's first address still opens it (plan 2026-11-10, K3).
+  await page.goto("/site/staff");
+  await expect(page).toHaveURL(/\/site-staff$/);
+  await page.goto("/");
   // Found from the sidebar, not only from a quick link (owner, 2026-11-09: «أين زر إضافة كادر؟»).
   if (!phone) await page.getByRole("link", { name: "تصنيف الكوادر" }).first().click();
   else await page.goto("/site-staff");
@@ -20,6 +24,20 @@ test("the site manager adds a group and a person and sorts them on the matrix", 
   await page.getByLabel("اسم التصنيف بالعربية").fill(group);
   await page.getByRole("button", { name: "إضافة", exact: true }).click();
   await expect(page.getByLabel(`اسم التصنيف «${group}»`)).toBeVisible();
+
+  // The new group is last; one press moves it above its neighbour, in one request (K7).
+  const names = () =>
+    page
+      .getByLabel(/^اسم التصنيف «/)
+      .evaluateAll((all) => all.map((el) => (el as HTMLInputElement).value));
+  const before = await names();
+  expect(before.at(-1)).toBe(group);
+  const order = page.waitForResponse(
+    (r) => r.url().endsWith("/site-staff/groups/order") && r.request().method() === "PUT",
+  );
+  await page.getByRole("button", { name: `نقل «${group}» للأعلى` }).click();
+  expect((await order).status()).toBe(200);
+  await expect.poll(names).toEqual([...before.slice(0, -2), group, before.at(-2)]);
 
   const person = `أ.د. عمر الأمين ${info.project.name}`;
   await page.getByRole("tab", { name: "شخص بلا حساب" }).click();

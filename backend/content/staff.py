@@ -42,16 +42,16 @@ def automatic_faculty():
     return consenting().filter(teaching_q(), site_staff__isnull=True)
 
 
-def staff_q(prefix: str = "") -> Q:
-    """A staff account (some role, and not a student's), as accounts.staff_profile.on_staff."""
-    return Q(**{f"{prefix}role_assignments__isnull": False}) & ~Q(
-        **{f"{prefix}role_assignments__role": Role.STUDENT}
-    )
+def staff_q() -> Q:
+    """A staff account: it holds a role other than student, as accounts.staff_profile.on_staff.
+    A teaching assistant who also studies (a master's student who assists) is staff (owner's
+    plan 2026-11-10, K1); their name still comes from the student record."""
+    return Q(Exists(RoleAssignment.objects.filter(user=OuterRef("pk")).exclude(role=Role.STUDENT)))
 
 
 def staff_accounts():
     """Accounts that may be added to the page: staff, not students."""
-    return User.objects.filter(staff_q(), is_active=True).distinct()
+    return User.objects.filter(staff_q(), is_active=True)
 
 
 def shown(user_ref: str) -> Exists:
@@ -109,6 +109,24 @@ def update_group(meta: RequestMeta, group: StaffGroup, **data) -> StaffGroup:
         record(meta, "site.staff_group_update", group, old=old, new=_group_snapshot(group))
         _changed()
     return group
+
+
+def reorder_groups(meta: RequestMeta, ids: list[int]) -> list[StaffGroup]:
+    """The groups in the order given, numbered 1..n: one write and one audit entry for a move
+    (review 2026-11-10, K7). ``ids`` must name every group exactly once."""
+    with transaction.atomic():
+        groups = {g.pk: g for g in StaffGroup.objects.select_for_update()}
+        if len(ids) != len(groups) or set(ids) != set(groups):
+            raise ValidationError({"ids": [gettext("Send every group once, in the new order.")]})
+        old = [g.pk for g in sorted(groups.values(), key=lambda g: (g.order, g.pk))]
+        for position, pk in enumerate(ids, start=1):
+            if groups[pk].order != position:
+                groups[pk].order = position
+                groups[pk].save(update_fields=["order", "updated_at"])
+        first = groups[ids[0]]
+        record(meta, "site.staff_group_reorder", first, old={"order": old}, new={"order": ids})
+        _changed()
+    return [groups[pk] for pk in ids]
 
 
 def delete_group(meta: RequestMeta, group: StaffGroup) -> None:

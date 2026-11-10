@@ -125,10 +125,11 @@ export function Settings() {
         }
       >
         <PushCard />
-        {/* Any staff member may choose to appear on the site (owner, 2026-11-09: the
-            administration too); a teacher on their department's page, anyone the site team
-            placed on «الكوادر». A student never. */}
-        {!me.data?.student && !hasRole(me.data, "student") && (me.data?.roles?.length ?? 0) > 0 && (
+        {/* Any staff member — whoever holds a role other than student — may choose to appear on
+            the site (owner, 2026-11-09: the administration too): a teacher on their department's
+            page, anyone the site team placed on «الكوادر». A teaching assistant who also studies
+            is staff (plan 2026-11-10, K2); a student alone never. */}
+        {me.data?.roles.some((r) => r.role !== "student") && (
           <PublicProfileCard teaches={hasRole(me.data, "teacher", "ta", "department_manager")} />
         )}
 

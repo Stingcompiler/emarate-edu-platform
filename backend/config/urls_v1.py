@@ -176,6 +176,11 @@ urlpatterns = [
     path("site-staff/people", site_staff.StaffPeopleView.as_view(), name="site-staff-people"),
     path("site-staff/groups", site_staff.StaffGroupsView.as_view(), name="site-staff-group-list"),
     path(
+        "site-staff/groups/order",
+        site_staff.StaffGroupOrderView.as_view(),
+        name="site-staff-group-order",
+    ),
+    path(
         "site-staff/groups/<int:pk>",
         site_staff.StaffGroupView.as_view(),
         name="site-staff-group-detail",

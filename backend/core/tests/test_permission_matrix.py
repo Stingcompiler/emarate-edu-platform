@@ -519,6 +519,7 @@ COVERED_ELSEWHERE = {
     "redirect-detail": _CT + "test_events_media_menus_redirects_settings",
     # Writes only (owner, 2026-11-09).
     "site-staff-group-detail": _SS + "test_groups_are_flexible_but_the_faculty_always_has_one",
+    "site-staff-group-order": _SS + "test_groups_reorder_in_one_write",
     "site-staff-entry-list": _SS + "test_the_site_manager_adds_people_and_sorts_them_on_the_matrix",
     "site-staff-entry-detail": _SS
     + "test_the_site_manager_adds_people_and_sorts_them_on_the_matrix",

@@ -7,7 +7,7 @@ import "./app.css";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { type ComponentType, lazy, StrictMode, Suspense } from "react";
 import { createRoot } from "react-dom/client";
-import { createBrowserRouter, RouterProvider } from "react-router";
+import { createBrowserRouter, Navigate, RouterProvider } from "react-router";
 
 import { RequireAuth } from "./lib/auth";
 import { Login } from "./routes/Login";
@@ -274,6 +274,8 @@ const router = createBrowserRouter([
   { path: "/site/media", element: signedIn(<SiteMedia />, "/site/media") },
   { path: "/site/redirects", element: signedIn(<Redirects />, "/site/redirects") },
   { path: "/site-staff", element: signedIn(<SiteStaff />, "/site-staff") },
+  // The page's first address, given out for a day (plan 2026-11-10, K3).
+  { path: "/site/staff", element: <Navigate to="/site-staff" replace /> },
   { path: "/events", element: signedIn(<Events />, "/events") },
   { path: "/events/:id", element: signedIn(<EventEditor />, "/events/:id") },
   { path: "/applications", element: signedIn(<Applications />, "/applications") },

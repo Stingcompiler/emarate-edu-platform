@@ -921,14 +921,18 @@ function ProgramForm({
   const unsaved = useUnsavedChanges();
   // Engineering and medicine are five years, the rest four (owner, 2026-11-09: a medicine
   // programme entered with the default four stopped at semester 8).
+  // Only their bachelor's (and honours): a diploma or a master's there starts at four, and
+  // the number follows the degree picked until someone types another (plan 2026-11-10, K4).
   const fiveYears = /^(الهندسة|الطب)(\s|$)/.test(department.name_ar.trim());
+  const startLevels = (degree: string) =>
+    fiveYears && (degree === "bachelor" || degree === "honours") ? "5" : "4";
   const blank = {
     code: "",
     name_ar: "",
     name_en: "",
     degree: "bachelor",
-    levels_count: fiveYears ? "5" : "4",
-    duration_terms: fiveYears ? "10" : "8",
+    levels_count: startLevels("bachelor"),
+    duration_terms: String(2 * Number(startLevels("bachelor"))),
     total_credit_hours: "",
     is_active: true,
     department: department.id,
@@ -1036,7 +1040,19 @@ function ProgramForm({
           الدرجة
           <span className="flex flex-wrap gap-2">
             {Object.entries(DEGREE).map(([k, l]) => (
-              <Chip key={k} active={form.degree === k} onClick={() => set({ degree: k })}>
+              <Chip
+                key={k}
+                active={form.degree === k}
+                onClick={() =>
+                  set({
+                    degree: k,
+                    // A new programme whose levels nobody changed follows the degree.
+                    ...(!program && form.levels_count === startLevels(form.degree)
+                      ? { levels_count: startLevels(k) }
+                      : {}),
+                  })
+                }
+              >
                 {l}
               </Chip>
             ))}

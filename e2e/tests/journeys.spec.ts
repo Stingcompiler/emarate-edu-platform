@@ -86,3 +86,21 @@ test.describe("journeys", () => {
     ).toBeVisible();
   });
 });
+
+// Plan 2026-11-10, K4: five levels is the start for a bachelor's in engineering or medicine
+// only; a diploma there starts at four, and a number someone typed is kept.
+test("a new programme's levels follow its department and degree", async ({ page }) => {
+  await signIn(page, "admin@demo.ecst.test");
+  await page.goto("/system/structure");
+  await page.getByRole("button", { name: /^الهندسة/ }).click();
+  const form = page.locator("form").filter({ hasText: "برنامج جديد في الهندسة" });
+  const levels = form.getByLabel("مستويات");
+  await expect(levels).toHaveValue("5");
+  await form.getByRole("button", { name: "دبلوم", exact: true }).click();
+  await expect(levels).toHaveValue("4");
+  await form.getByRole("button", { name: "بكالوريوس", exact: true }).click();
+  await expect(levels).toHaveValue("5");
+  await levels.fill("3");
+  await form.getByRole("button", { name: "دبلوم", exact: true }).click();
+  await expect(levels).toHaveValue("3");
+});

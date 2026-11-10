@@ -25,11 +25,11 @@ def site_changed() -> None:
 
 
 def on_staff(user: User) -> bool:
-    """A staff account, not a student's: it may choose to appear on the site. Teaching staff
-    show on their department's page; anyone the site team placed shows on «الكوادر» (owner,
-    2026-11-09: the administration too)."""
-    roles = rbac.roles_of(user)
-    return bool(roles) and Role.STUDENT not in roles
+    """A staff account — it holds a role other than student — may choose to appear on the site.
+    Teaching staff show on their department's page; anyone the site team placed shows on
+    «الكوادر» (owner, 2026-11-09: the administration too). A teaching assistant who also
+    studies is staff (plan 2026-11-10, K1: the first version of this shut them out)."""
+    return bool(rbac.roles_of(user) - {Role.STUDENT})
 
 
 def _member(user: User) -> None:

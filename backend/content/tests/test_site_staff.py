@@ -187,3 +187,65 @@ def test_a_placed_administrator_shows_their_photo_with_consent(api, make_user):
     )
     assert api().get(url).status_code == 200
     assert _public(api)["هيئة الإدارة"][0]["photo"].endswith(url)
+
+
+def test_a_teaching_assistant_who_also_studies_is_staff(api, make_user, it_dept):
+    """Plan 2026-11-10, K1: a master's student who assists holds the student role too; the
+    first version of the staff rule shut them out of their own consent and off the page."""
+    assistant = make_user(Role.TA, Role.STUDENT, full_name_ar="م. ياسر عبد الباقي")
+    DepartmentMembership.objects.create(department=it_dept, user=assistant, kind="ta")
+    mine = api(assistant)
+    assert mine.patch("/api/v1/me/public-profile", {"public_profile": True}).status_code == 200
+    degree = {"degree": "bachelor", "field": "تقنية المعلومات", "institution": "ECST"}
+    assert mine.post("/api/v1/me/qualifications", degree, format="json").status_code == 201
+    # Placed by themselves in the faculty group, and the site team finds and places them.
+    assert [m["name_ar"] for m in _public(api)["هيئة التدريس"]] == ["م. ياسر عبد الباقي"]
+    site = api(make_user(Role.SITE_MANAGER))
+    assert [p["full_name_ar"] for p in site.get(f"{BOARD}/people?search=ياسر").data] == [
+        "م. ياسر عبد الباقي"
+    ]
+    group = _groups()["هيئة الإدارة"]
+    placed = site.post(
+        ENTRIES,
+        {"user": str(assistant.public_id), "placements": [{"group": group.pk}]},
+        format="json",
+    )
+    assert placed.status_code == 201 and placed.data["staff"]
+    assert [m["name_ar"] for m in _public(api)["هيئة الإدارة"]] == ["م. ياسر عبد الباقي"]
+
+
+def test_groups_reorder_in_one_write(api, make_user):
+    """K7: one request and one audit entry for a move, whatever the stored orders were."""
+    site = api(make_user(Role.SITE_MANAGER))
+    StaffGroup.objects.filter(name_ar="هيئة الإدارة").update(order=5)
+    StaffGroup.objects.filter(name_ar="هيئة التدريس").update(order=9)
+    third = site.post(GROUPS, {"name_ar": "مجلس الأمناء"}, format="json").data["id"]
+    groups = _groups()
+    ids = [third, groups["هيئة الإدارة"].pk, groups["هيئة التدريس"].pk]
+    moved = site.put(f"{GROUPS}/order", {"ids": ids}, format="json")
+    assert moved.status_code == 200, moved.data
+    assert [g["name_ar"] for g in site.get(GROUPS).data] == [
+        "مجلس الأمناء",
+        "هيئة الإدارة",
+        "هيئة التدريس",
+    ]
+    assert list(StaffGroup.objects.values_list("order", flat=True)) == [1, 2, 3]
+    assert AuditLog.objects.filter(action="site.staff_group_reorder").count() == 1
+    # Every group once: a missing or repeated id is refused.
+    assert site.put(f"{GROUPS}/order", {"ids": ids[:2]}, format="json").status_code == 400
+    assert (
+        site.put(f"{GROUPS}/order", {"ids": [*ids[:2], ids[0]]}, format="json").status_code == 400
+    )
+    # Not a delete: the system supervisor reorders too; other roles do not.
+    assert (
+        api(make_user(Role.SYSTEM_SUPERVISOR))
+        .put(f"{GROUPS}/order", {"ids": ids}, format="json")
+        .status_code
+        == 200
+    )
+    assert (
+        api(make_user(Role.HEAD_REGISTRAR))
+        .put(f"{GROUPS}/order", {"ids": ids}, format="json")
+        .status_code
+        == 403
+    )
