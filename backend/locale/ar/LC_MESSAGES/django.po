@@ -1249,6 +1249,8 @@ msgstr "%(students)s طالبًا و%(courses)s مادة في مستوى أعل�
 msgid "There are no active students to promote here."
 msgstr "لا طلاب منتظمون للترفيع في هذا النطاق."
 
+msgid "This picture is a photo on the site's staff page. Change it there first."
+msgstr "هذه الصورة صورة شخص في «الكوادر» على الموقع. غيّرها هناك أولًا."
 msgid "Applications were made to this intake: it keeps its programme and cycle. Open a new one instead."
 msgstr "قُدِّمت طلبات إلى هذا البرنامج في هذه الدورة: يبقى على برنامجه ودورته. افتح برنامجًا جديدًا بدلًا من ذلك."
 

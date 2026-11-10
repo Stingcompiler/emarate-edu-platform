@@ -23,7 +23,8 @@ def fan_out(notification_id: int) -> int:
 def send_push(subscription_id: int, notification_id: int) -> bool:
     subscription = PushSubscription.objects.filter(pk=subscription_id).first()
     notification = Notification.objects.filter(pk=notification_id).first()
-    if subscription is None or notification is None:
+    # Hidden by its sender meanwhile (a busy worker, a retry): nothing is sent (R81).
+    if subscription is None or notification is None or notification.hidden_at is not None:
         return False
     return push.send(subscription, services.push_payload(notification))
 

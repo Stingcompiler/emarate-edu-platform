@@ -22,6 +22,7 @@ from .models import (
     Notification,
     NotificationPreference,
     NotificationRecipient,
+    Outbox,
     PushSubscription,
 )
 from .serializers import (
@@ -140,6 +141,12 @@ class SentViewSet(mixins.ListModelMixin, mixins.DestroyModelMixin, viewsets.Gene
             notification.hidden_at = timezone.now() if hidden else None
             notification.hidden_by = request.user if hidden else None
             notification.save(update_fields=["hidden_at", "hidden_by"])
+            if hidden:
+                # What is not sent yet is not sent (review 2026-11-10, R81); a restore does not
+                # send again what was cancelled.
+                Outbox.objects.filter(
+                    notification=notification, status=Outbox.Status.PENDING
+                ).update(status=Outbox.Status.CANCELLED, updated_at=timezone.now())
             record(
                 RequestMeta.from_request(request),
                 "notification.hide" if hidden else "notification.restore",

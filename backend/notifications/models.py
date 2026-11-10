@@ -169,7 +169,17 @@ class Outbox(TimestampedModel):
         PENDING = "pending", "بانتظار الإرسال"
         SENT = "sent", "أُرسل"
         FAILED = "failed", "فشل"
+        # Its notification was hidden by the sender before it went (review 2026-11-10, R81).
+        CANCELLED = "cancelled", "أُلغي"
 
+    # The notification this email carries: hiding it stops what is not sent yet.
+    notification = models.ForeignKey(
+        "notifications.Notification",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="+",
+    )
     channel = models.CharField(max_length=10, choices=Channel.choices, default=Channel.EMAIL)
     to = models.EmailField()
     subject = models.CharField(max_length=200)

@@ -1,0 +1,6 @@
+..                                                                       [100%]
+==================================== PASSES ====================================
+=========================== short test summary info ============================
+PASSED core/tests/test_qa_probes_surface.py::test_probe_r81_a_hidden_notification_is_still_pushed
+PASSED core/tests/test_qa_probes_surface.py::test_probe_r82_a_staff_photo_is_deleted_from_the_library
+2 passed in 6.62s

@@ -33,8 +33,11 @@ Older rounds: `.claude/handoff/archive/2026-10-24_to_2026-11-02.md`, `.claude/ha
   keeps its programme and cycle; its window is checked; a stopped programme is not opened),
   identity R78–R80 (import upper-cases the number; registration matches it in any case; one
   notification per account's first report), axis 3 (the migrations go down and up on both
-  engines; no new write without an audit entry). **Next:**
-  1.4–1.7, 4, 5, 8; fill `fit.csv`. Never run probes or other work while E2E runs. Findings continue from R81.
+  engines; no new write without an audit entry). **Round 5** (`fix/review-round5`): R81 (a hidden
+  notification's queued push and pending emails are stopped: `Outbox.notification`, status
+  `cancelled`), R82 (a staff photo is in use in the media library); axes 1.4–1.7, 4, 5 sound
+  (Select keyboard test, six constant query counts). **Next:** axis 8, bundle size/Lighthouse;
+  fill `fit.csv`. Never run probes or other work while E2E runs. Findings continue from R83.
 - **Staff review fixes** (2026-11-09; `fix/site-staff-review`): any staff account (not only
   teachers) may now choose to appear (`accounts.staff_profile.on_staff`, Settings card for all
   staff); a placed account that is no longer staff drops off (`content.staff.shown`); the people

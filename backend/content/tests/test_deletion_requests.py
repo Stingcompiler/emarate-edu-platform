@@ -129,3 +129,35 @@ def test_a_sender_hides_a_notification_at_once_and_restores_it(api, make_user):
     assert api(sender).get("/api/v1/notifications/sent").data["results"][0]["hidden_at"]
     assert api(sender).post(f"{url}/restore").data["hidden_at"] is None
     assert api(reader).get("/api/v1/notifications/unread-count").data["count"] == 1
+
+
+def test_hiding_a_notification_stops_what_is_not_sent_yet(api, make_user, monkeypatch):
+    """Review 2026-11-10, R81: a push queued before the sender hid it, and an email waiting in
+    the outbox, used to go out all the same."""
+    from notifications import push, tasks
+    from notifications.models import Outbox, PushSubscription
+
+    sender, teacher = make_user(Role.ACADEMIC_AFFAIRS), make_user(Role.TEACHER)
+    note = Notification.objects.create(category="college", title="تنبيه", sender=sender)
+    waiting = Outbox.objects.create(notification=note, to="t@x.test", subject="تنبيه", body="نص")
+    sent_already = Outbox.objects.create(
+        notification=note, to="u@x.test", subject="تنبيه", body="نص", status="sent"
+    )
+    subscription = PushSubscription.objects.create(
+        user=teacher, endpoint="https://push.example/1", p256dh="k", auth="a"
+    )
+    url = f"/api/v1/notifications/sent/{note.public_id}"
+    assert api(sender).post(f"{url}/hide").status_code == 200
+    pushed = []
+    monkeypatch.setattr(push, "send", lambda sub, payload: pushed.append(payload) or True)
+    assert tasks.send_push(subscription.pk, note.pk) is False and pushed == []
+    waiting.refresh_from_db()
+    sent_already.refresh_from_db()
+    assert waiting.status == "cancelled" and sent_already.status == "sent"
+    tasks.deliver_outbox()
+    waiting.refresh_from_db()
+    assert waiting.status == "cancelled"
+    # A restore shows it again in the inboxes, and sends nothing that was cancelled.
+    assert api(sender).post(f"{url}/restore").status_code == 200
+    waiting.refresh_from_db()
+    assert waiting.status == "cancelled"
