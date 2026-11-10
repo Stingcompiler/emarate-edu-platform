@@ -17,6 +17,8 @@ follow the college's pattern), so the rule is explicit and chosen by the owner:
   (docs/03).
 * **«(مثال)» texts** in the site settings, programme and department descriptions are
   cleared, and sample images are removed from pages.
+* **Pictures the site uses stay** (logo, share and hero images, staff photos), whoever
+  uploaded them (review 2026-11-10, R84).
 * **The structure stays**: college, departments, programmes, courses, terms, offerings,
   cycles, templates and pages. They are edited from the portal.
 
@@ -80,6 +82,25 @@ CONTENT = [
 AUTHOR_FIELDS = ("created_by", "author", "uploaded_by", "host")
 
 
+def in_use_pictures() -> set[int]:
+    """Pictures the site shows, but the demo's samples: the site settings' logo, share and hero
+    images, and the photos of people on «الكوادر»."""
+    site = apps.get_model("content", "SiteSettings").objects.first()
+    used = {site.logo_id, site.share_image_id, site.hero_image_id} if site is not None else set()
+    used |= set(
+        apps.get_model("content", "StaffEntry")
+        .objects.exclude(photo=None)
+        .values_list("photo_id", flat=True)
+    )
+    # The demo's own sample pictures (alt «(مثال) …») go even when the settings show them.
+    return set(
+        apps.get_model("content", "MediaAsset")
+        .objects.filter(pk__in=[pk for pk in used if pk is not None])
+        .exclude(alt_ar__startswith=EXAMPLE)
+        .values_list("pk", flat=True)
+    )
+
+
 class Command(BaseCommand):
     help = "Preview or remove the demo data made before a date (see the module docstring)."
 
@@ -106,6 +127,9 @@ class Command(BaseCommand):
         self.stdout.write(
             f"  demo accounts to switch off: {demo_users.filter(is_active=True).count()}"
         )
+        kept = len(in_use_pictures())
+        if kept:
+            self.stdout.write(f"  pictures kept because the site uses them: {kept}")
         if not apply:
             self.stdout.write("Nothing changed. Add --apply to remove the above.")
             return
@@ -135,9 +159,15 @@ class Command(BaseCommand):
         by_demo = Q()
         for name in fields:
             by_demo |= Q(**{f"{name}__in": demo_users})
-        return (
-            model.objects.filter(by_demo, created_at__lt=cutoff) if fields else model.objects.none()
-        )
+        if not fields:
+            return model.objects.none()
+        rows = model.objects.filter(by_demo, created_at__lt=cutoff)
+        if label == "content.MediaAsset":
+            # A picture the site uses stays, whoever uploaded it: on the production copy the
+            # college's logo, share image and hero image were uploaded with a demo account,
+            # and the purge left the site without them (review 2026-11-10, R84).
+            rows = rows.exclude(pk__in=in_use_pictures())
+        return rows
 
     # ── changes ─────────────────────────────────────────────────────────────
     def _delete_in_passes(self, targets) -> dict[str, int]:

@@ -91,3 +91,51 @@ def test_a_bad_date_is_refused(db):
 
     with pytest.raises(CommandError, match="YYYY-MM-DD"):
         call_command("purge_demo", "--before", "tomorrow", stdout=io.StringIO())
+
+
+def test_purge_keeps_the_pictures_the_site_uses(seeded):
+    """Review 2026-11-10, R84: on a copy of production the college's logo, share image and
+    hero image had been uploaded with a demo account, and the purge deleted them. A picture the
+    site uses stays, whoever uploaded it; the samples still go."""
+    from django.core.files.uploadedfile import SimpleUploadedFile
+
+    from accounts.models import User
+    from content.models import MediaAsset, SiteSettings, StaffEntry
+
+    demo = User.objects.get(email="site@demo.ecst.test")
+
+    def picture(alt):
+        return MediaAsset.objects.create(
+            file=SimpleUploadedFile(f"{alt}.png", b"x", "image/png"), alt_ar=alt, uploaded_by=demo
+        )
+
+    sample_hero = SiteSettings.load().hero_image  # seed_demo's «(مثال) …» picture
+    assert sample_hero is not None and sample_hero.alt_ar.startswith("(مثال)")
+    logo, hero, dean = picture("الشعار"), picture("صورة الواجهة"), picture("العميد")
+    unused = picture("صورة لم تُستعمل")
+    site = SiteSettings.load()
+    site.logo, site.share_image, site.hero_image = logo, logo, hero
+    site.save()
+    StaffEntry.objects.create(name_ar="أ.د. عمر", photo=dean)
+    preview = _purge()
+    assert "pictures kept because the site uses them: 3" in preview
+    _purge("--apply")
+    site.refresh_from_db()
+    assert (site.logo_id, site.share_image_id, site.hero_image_id) == (logo.pk, logo.pk, hero.pk)
+    assert StaffEntry.objects.get().photo_id == dean.pk
+    assert not MediaAsset.objects.filter(pk=unused.pk).exists()
+    assert set(MediaAsset.objects.values_list("pk", flat=True)) == {logo.pk, hero.pk, dean.pk}
+    assert not MediaAsset.objects.filter(pk=sample_hero.pk).exists()
+
+
+def test_a_sample_picture_in_the_settings_still_goes(seeded):
+    """The demo's own hero and share pictures («(مثال) …») are not kept for being in use."""
+    from content.models import MediaAsset
+
+    site = SiteSettings.load()
+    assert site.hero_image_id and site.share_image_id
+    assert "pictures kept" not in _purge()
+    _purge("--apply")
+    site.refresh_from_db()
+    assert site.hero_image_id is None and site.share_image_id is None
+    assert not MediaAsset.objects.exists()
