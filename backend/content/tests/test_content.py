@@ -673,3 +673,29 @@ def test_the_notification_badge_is_the_logos_drawing_in_white(api, site, make_us
     assert badge.size == (96, 96) and badge.mode == "RGBA"
     assert badge.getpixel((48, 48)) == (255, 255, 255, 255)  # the line: white ink
     assert badge.getpixel((48, 15))[3] == 0  # the logo's white ground: transparent
+
+
+def test_a_staff_photo_is_not_deleted_from_the_library(api, make_user):
+    """Review 2026-11-10, R82: a picture that is a person's photo on «الكوادر» is in use, like
+    the site's logo; the card used to lose it silently."""
+    import io
+
+    from django.core.files.uploadedfile import SimpleUploadedFile
+    from PIL import Image
+
+    from content.models import MediaAsset, StaffEntry
+
+    manager = make_user(Role.SITE_MANAGER)
+    out = io.BytesIO()
+    Image.new("RGB", (300, 300), (10, 20, 30)).save(out, "PNG")
+    asset = MediaAsset.objects.create(
+        file=SimpleUploadedFile("dean.png", out.getvalue(), "image/png"),
+        alt_ar="العميد",
+        uploaded_by=manager,
+    )
+    entry = StaffEntry.objects.create(name_ar="أ.د. عمر", photo=asset)
+    refused = api(manager).delete(f"/api/v1/content/media/{asset.public_id}")
+    assert refused.status_code == 409 and refused.data["code"] == "in_use"
+    entry.photo = None
+    entry.save(update_fields=["photo"])
+    assert api(manager).delete(f"/api/v1/content/media/{asset.public_id}").status_code == 204

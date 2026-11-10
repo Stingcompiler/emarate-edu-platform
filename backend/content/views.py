@@ -206,6 +206,14 @@ class MediaAssetViewSet(
     def perform_destroy(self, instance):
         self._owned(instance)
         site = SiteSettings.load()
+        from .models import StaffEntry
+
+        if StaffEntry.objects.filter(photo=instance).exists():
+            # A photo on «الكوادر» (review 2026-11-10, R82): the card would lose it silently.
+            raise Conflict(
+                gettext("This picture is a photo on the site's staff page. Change it there first."),
+                code="in_use",
+            )
         if instance.pk in {site.logo_id, site.share_image_id}:
             raise Conflict(
                 gettext("The site uses this picture. Choose another in the site settings first."),

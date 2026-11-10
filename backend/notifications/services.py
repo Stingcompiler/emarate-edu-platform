@@ -144,7 +144,12 @@ def fan_out(notification: Notification) -> int:
         NotificationRecipient.objects.bulk_create(inbox, batch_size=BATCH, ignore_conflicts=True)
         Outbox.objects.bulk_create(
             [
-                Outbox(to=address, subject=notification.title, body=_email_body(notification))
+                Outbox(
+                    notification=notification,
+                    to=address,
+                    subject=notification.title,
+                    body=_email_body(notification),
+                )
                 for address in emails
             ],
             batch_size=BATCH,
