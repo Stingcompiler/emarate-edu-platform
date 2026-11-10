@@ -1230,3 +1230,6 @@ msgstr "اكتب الاسم."
 
 msgid "Only staff appear on the public pages."
 msgstr "يظهر الموظفون فقط في صفحات الموقع."
+
+msgid "Send every group once, in the new order."
+msgstr "أرسل كل التصنيفات مرة واحدة بالترتيب الجديد."

@@ -327,6 +327,26 @@ class StaffGroupsView(_Manage):
         return Response(StaffGroupSerializer(group).data, status=status.HTTP_201_CREATED)
 
 
+class StaffGroupOrderSerializer(S.Serializer):
+    ids = S.ListField(child=S.IntegerField(), allow_empty=False)
+
+
+@extend_schema(tags=["content"])
+class StaffGroupOrderView(_Manage):
+    """The groups in a new order, in one write."""
+
+    @extend_schema(
+        operation_id="site_staff_groups_order",
+        request=StaffGroupOrderSerializer,
+        responses=StaffGroupSerializer(many=True),
+    )
+    def put(self, request):
+        data = StaffGroupOrderSerializer(data=request.data)
+        data.is_valid(raise_exception=True)
+        groups = staff.reorder_groups(_meta(request), data.validated_data["ids"])
+        return Response(StaffGroupSerializer(groups, many=True).data)
+
+
 @extend_schema(tags=["content"])
 class StaffGroupView(_Manage):
     @extend_schema(

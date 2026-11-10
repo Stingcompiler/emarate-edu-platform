@@ -539,6 +539,7 @@ class PublicStaffPhotoView(_PublicRead):
         from django.db.models import Exists, OuterRef
         from django.http import FileResponse, Http404
 
+        from content import staff as site_staff
         from content.models import StaffPlacement
 
         # Only someone «الكوادر» lists: a department head or a member of a department. A
@@ -551,7 +552,8 @@ class PublicStaffPhotoView(_PublicRead):
                 )
             )
             | Q(Exists(DepartmentMembership.objects.filter(user=OuterRef("pk"))))
-            # Placed by the site team, while still a staff account (review 2026-11-09).
+            # Placed by the site team, while still a staff account: the same rule as the
+            # public list (content.staff.staff_q; review 2026-11-10, K5).
             | (
                 Q(
                     Exists(
@@ -560,8 +562,7 @@ class PublicStaffPhotoView(_PublicRead):
                         )
                     )
                 )
-                & Q(Exists(RoleAssignment.objects.filter(user=OuterRef("pk"))))
-                & ~Q(Exists(RoleAssignment.objects.filter(user=OuterRef("pk"), role=Role.STUDENT)))
+                & site_staff.staff_q()
             )
         )
         user = (
