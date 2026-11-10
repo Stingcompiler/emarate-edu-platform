@@ -51,6 +51,9 @@ Older rounds: `.claude/handoff/archive/2026-10-24_to_2026-11-02.md`, `.claude/ha
   /register report form; larger text for every role. Bundle 148.5 kB JS first load (budget 200).
   #277 merged. fit.csv filled (inventory/fit_run.spec.ts + fit_fill.py, run with CI=1): 276 ok,
   30 unreachable by link, 0 fail after R89 (application print email overflow, fixed).
+  #278 merged. Journeys (§3) as permanent E2E: journey-admission / journey-coursework /
+  journey-site-event; the dev site now re-reads the API per request (astro dev cache hid new
+  content). Left: results→student and deletion-request journeys in the browser; Lighthouse.
   Findings continue from R90.
 - **Staff review fixes** (2026-11-09; `fix/site-staff-review`): any staff account (not only
   teachers) may now choose to appear (`accounts.staff_profile.on_staff`, Settings card for all
