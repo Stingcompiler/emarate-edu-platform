@@ -139,6 +139,13 @@ export function StudentForm({
           {errors.program?.[0] && (
             <span className="mt-1 block text-xs text-danger-strong">{errors.program[0]}</span>
           )}
+          {/* Owner, 2026-11-10 (R61): a stopped programme still takes a student added by hand —
+              someone already studying in it — and says what stopping means. */}
+          {!student && program && program.is_active === false && (
+            <span className="mt-1 block text-xs text-warning-strong">
+              هذا البرنامج موقوف ولا يقبل متقدمين جددًا. أضف إليه طالبًا يدرس فيه فعلًا فقط.
+            </span>
+          )}
         </label>
         {/* One choice: the plan's semester (1–10) carries the level (owner, 2026-11-07). */}
         <label className="block border-b border-border-soft px-4 py-2.5">

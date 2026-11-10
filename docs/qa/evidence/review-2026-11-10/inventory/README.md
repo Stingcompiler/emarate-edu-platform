@@ -1,6 +1,6 @@
 # جرد النسخة قيد المراجعة
 
-النسخة `b42a842`. يُعاد توليده بـ `bash scripts/qa/inventory.sh <مجلد>`؛ لا يُحرَّر باليد.
+النسخة `496fdeb`. يُعاد توليده بـ `bash scripts/qa/inventory.sh <مجلد>`؛ لا يُحرَّر باليد.
 المصدر: قوالب `apps/landing/src/pages`، مسارات `apps/portal/src/main.tsx` وقواعد
 `ROUTE_ACCESS` مقيَّمة على رد `/api/v1/me` لمستخدم من كل دور، ومخطط OpenAPI مع صفوف
 `core/tests/test_permission_matrix.py`.

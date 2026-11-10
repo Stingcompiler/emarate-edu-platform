@@ -1,12 +1,14 @@
 # مواصفة الصفحات — Pages Specification
 
-> إصدار 1.0 — 2026-09-27. خريطة كل صفحة في الموقع العام والبوابة، بما يكفي لبنائها من `06-design-system.md` دون قرارات إضافية. الصلاحيات من `03-roles-and-permissions.md` v2.1.
+> إصدار 1.1 — 2026-11-10. خريطة كل صفحة في الموقع العام والبوابة، بما يكفي لبنائها من `06-design-system.md` دون قرارات إضافية. الصلاحيات من `roles-matrix.md` ثم `03-roles-and-permissions.md`.
+>
+> **المسارات:** أسماء المسارات في §2.3–2.15 هي الخطة الأصلية، وكثير منها تغيّر اسمه عند البناء (`/system/…`، `/department/…`، `/admissions/…`). **المسارات الفعلية ومن يفتح كلًّا منها في §2.18**، وتُولَّد من الكود (`bash scripts/qa/inventory.sh`). ما في §2.3–2.15 يبقى مرجعًا لمحتوى كل صفحة.
 
 الترميز في الجداول: **الكتل** = المكوّنات بالترتيب من الأعلى؛ **البيانات** = مصدر الـ API؛ **الإجراءات** = ما يفعله المستخدم.
 
 ---
 
-## 1. الموقع العام — `eust.edu.sd` (Astro)
+## 1. الموقع العام — `ecst.stingdev.pro` الآن، ثم `ecst.edu.sd` (Astro)
 
 المسارات بصيغة `/ar/...` و`/en/...` (الافتراضي عربي). كل صفحة: `title`, `description`, `canonical`, `hreflang`, OG, JSON-LD حسب النوع، Breadcrumb.
 
@@ -56,7 +58,7 @@ TopBar: شعار (mark + اسم)، بحث نطاقي، جرس الإشعارات
 | `/today` | اليوم | عنوان كبير بالتاريخ؛ بطاقة "الآن" (بث جارٍ/اختبار مفتوح)؛ مستحق اليوم → غدًا؛ إشعارات مهمة؛ تنبيه حالة/لائحة تتطلب إقرارًا؛ حالة فارغة مطمئنة | سحب للتحديث |
 | `/tasks` | المهام عبر المواد | Segmented (الكل/واجبات/اختبارات)؛ مجموعات: متأخر / اليوم / هذا الأسبوع / لاحقًا / مكتمل؛ مؤشر حجم العمل الأسبوعي | سحب "تم" للمهام بلا تسليم |
 | `/me` | أنا | بطاقة الملف؛ قائمة مجمّعة: النتائج، السجل الأكاديمي، اللوائح، حالتي، التنزيلات، الإعدادات، تثبيت التطبيق | – |
-| `/me/downloads` | التنزيلات | استخدام التخزين؛ المواد المنزّلة؛ طابور التنزيل؛ Wi-Fi فقط؛ حذف تلقائي | سحب لحذف |
+| `/me/downloads` | التنزيلات — **مؤجَّل، لم يُبنَ** (D25، المالك 2026-11-10) | استخدام التخزين؛ المواد المنزّلة؛ طابور التنزيل؛ Wi-Fi فقط؛ حذف تلقائي | سحب لحذف |
 | `/courses` | موادي | بطاقات مواد Term الحالي (رمز، اسم، أستاذ، تقدم المحاضرات، واجبات معلقة)؛ تبويب Terms سابقة | فتح المادة |
 | `/courses/[id]` | المادة | Header (اسم، أستاذ، معيد)؛ تبويبات: المحاضرات، الواجبات، الاختبارات، البث، الإعلانات، درجاتي | – |
 | `/courses/[id]/lectures/[lid]` | محاضرة | عنوان/وصف؛ الموارد (فيديو مضمَّن، ملفات بروابط موقّعة، روابط)؛ السابق/التالي | تنزيل/مشاهدة |
@@ -213,6 +215,123 @@ Drawer بالقائمة الكاملة + تبويبات: الرئيسية / ال
 | `/system/structure` | sys | الأقسام: إضافة، تعديل (رمز، اسم، نبذة)، إيقاف، حذف ما لم يُستعمل؛ البرامج: إضافة مع «فتح التقديم في الدورة الحالية»، تعديل، نقل إلى قسم آخر ما دام بلا طلاب/مواد/طلبات، إيقاف، حذف؛ الأعوام: «+ عام أكاديمي»؛ الفصول: إضافة، تعديل، «تعيين كحالي» (#222، #223، #226) |
 | `/settings` | الكل | الوضع: فاتح · دافئ · داكن · النظام (#193)؛ الصورة الشخصية (3 MB، تُحفظ 512 px WebP) |
 | `/me` (ملف الأستاذ) | t/ta/dm | المؤهلات، الروابط، الموافقة على الظهور في الموقع |
+
+### 2.18 المسارات الفعلية في البوابة (من الكود، 2026-11-10)
+
+يُولَّد من `apps/portal/src/main.tsx` و`ROUTE_ACCESS` برد `/api/v1/me` لمستخدم من كل دور (`docs/qa/evidence/review-2026-11-10/inventory/portal.csv`). الأدوار القسمية تفتح الصفحة لقسمها. الاختصارات كما في docs/03 §7، ومعها ss = مشرف النظام، saf = أمين شؤون الطلاب.
+
+| المسار | من يفتحه |
+|---|---|
+| `/login` | بلا دخول |
+| `/register` | بلا دخول |
+| `/forgot-password` | بلا دخول |
+| `/activate/:token` | بلا دخول |
+| `/change-password` | بلا دخول |
+| `/apply` | بلا دخول |
+| `/apply/guide` | بلا دخول |
+| `/track` | بلا دخول |
+| `/` | الكل |
+| `/courses` | sys، ss، aa، dm، ds، t، ta، st |
+| `/courses/:id` | sys، ss، aa، dm، ds، t، ta، st |
+| `/courses/:id/students` | sys، ss، aa، dm، ds، t، ta |
+| `/lectures/new` | sys، ss، dm، ds، t، ta |
+| `/lectures/:id` | sys، ss، aa، dm، ds، t، ta، st |
+| `/lectures/:id/edit` | sys، ss، dm، ds، t، ta |
+| `/assignments/new` | sys، ss، dm، ds، t، ta |
+| `/assignments/:id` | sys، ss، aa، dm، ds، t، ta، st |
+| `/assignments/:id/edit` | sys، ss، dm، ds، t، ta |
+| `/submissions/:id` | sys، ss، aa، dm، ds، t، ta |
+| `/grading` | sys، ss، dm، ds، t، ta |
+| `/tasks` | st |
+| `/me` | st |
+| `/me/status` | st |
+| `/results-office` | sys، ss، res |
+| `/academic` | sys، ss، aa |
+| `/staff-profiles` | sys، ss، aa |
+| `/affairs` | sys، ss، saf |
+| `/notifications` | الكل |
+| `/notifications/new` | sys، ss، hreg، aa، saf، dm، ds، t، ta، sm، em |
+| `/settings` | الكل |
+| `/install` | الكل |
+| `/results` | st |
+| `/results/search` | sys، ss، res |
+| `/results/settings` | sys، ss، res |
+| `/result-imports` | sys، ss، res، dm، ds |
+| `/result-imports/:id` | sys، ss، res، dm، ds |
+| `/result-corrections` | sys، ss، res، aa |
+| `/regulations` | الكل |
+| `/regulations/new` | sys، ss، saf |
+| `/regulations/:id` | الكل |
+| `/exams` | sys، ss، aa، dm، ds، t، ta، st |
+| `/exams/new` | sys، ss، dm، ds، t، ta |
+| `/exams/:id` | sys، ss، aa، dm، ds، t، ta، st |
+| `/exams/:id/edit` | sys، ss، dm، ds، t، ta |
+| `/exams/:id/monitor` | sys، ss، aa، dm، ds، t، ta |
+| `/exams/:id/stats` | sys، ss، aa، dm، ds، t، ta |
+| `/exam-attempts/:id` | sys، ss، aa، dm، ds، t، ta، st |
+| `/exam-attempts/:id/result` | sys، ss، aa، dm، ds، t، ta، st |
+| `/live` | sys، ss، aa، dm، ds، t، ta، st |
+| `/live/new` | sys، ss، dm، ds، t، ta |
+| `/announcements` | الكل |
+| `/announcements/new` | sys، ss، hreg، reg، aa، dm، ds، t، ta، sm، em |
+| `/inquiries` | sys، ss، hreg، reg، sm |
+| `/inquiries/:id` | sys، ss، hreg، reg، sm |
+| `/site` | sys، ss، sm |
+| `/site/pages/:id` | sys، ss، sm |
+| `/site/news/:id` | sys، ss، sm، em |
+| `/site/media` | sys، ss، sm |
+| `/site/redirects` | sys، ss، sm |
+| `/site-staff` | sys، ss، sm |
+| `/site/staff` | بلا دخول |
+| `/events` | sys، ss، sm، em |
+| `/events/:id` | sys، ss، sm، em |
+| `/applications` | sys، ss، hreg، reg، dm، ds |
+| `/applications/:id` | sys، ss، hreg، reg، dm، ds |
+| `/applications/:id/print` | sys، ss، hreg، reg، dm، ds |
+| `/admissions/cycles` | sys، ss، hreg |
+| `/admissions/forms` | sys، ss، hreg، reg |
+| `/registrar` | sys، ss، hreg، reg |
+| `/students` | sys، ss، hreg، saf، dm، ds |
+| `/students/new` | sys، ss، hreg |
+| `/students/:id` | sys، ss، hreg، saf، dm، ds |
+| `/student-imports` | sys، ss، hreg |
+| `/student-promotion` | sys، ss، hreg |
+| `/student-imports/:id` | sys، ss، hreg |
+| `/registrars` | sys، ss، hreg |
+| `/department` | sys، ss، aa، dm، ds |
+| `/department/courses` | sys، ss، aa، dm، ds |
+| `/department/lectures` | sys، ss، aa، dm، ds |
+| `/department/teachers` | sys، ss، aa، dm، ds |
+| `/department/students` | sys، ss، aa، dm، ds |
+| `/department/approvals` | sys، ss، hreg، dm، ds |
+| `/department/audit` | sys، ss، dm، ds |
+| `/reports` | sys، ss، aa، dm، ds |
+| `/reports/admissions` | sys، ss، hreg، reg، dm، ds |
+| `/reports/affairs` | sys، ss، saf |
+| `/hr` | sys، ss، aa، hr |
+| `/hr/teachers` | sys، ss، aa، dm، ds، hr |
+| `/hr/teachers/:id` | sys، ss، aa، dm، ds، hr |
+| `/me/teaching` | t، ta |
+| `/hr/notices/new` | sys، ss، aa، hr |
+| `/hr/report` | sys، ss، aa، dm، ds، hr |
+| `/hr-notices/:id` | sys، ss، aa، t، ta، hr |
+| `/transcripts` | sys، ss، hreg، res، dm، ds |
+| `/print/report/:id` | sys، ss، hreg، reg، aa، saf، dm، ds، hr |
+| `/print/transcript/:number` | sys، ss، hreg، res، dm، ds، st |
+| `/print/my-results` | st |
+| `/cases` | sys، ss، hreg، aa، saf، dm، ds |
+| `/cases/new` | sys، ss، saf |
+| `/cases/:id` | sys، ss، hreg، aa، saf، dm، ds |
+| `/system` | sys، ss |
+| `/system/users` | sys، ss، hreg، aa |
+| `/system/users/:id` | sys، ss، hreg، aa |
+| `/system/roles` | sys، ss، hreg، aa |
+| `/system/structure` | sys، ss |
+| `/system/settings` | sys، ss |
+| `/system/deletions` | sys، ss |
+| `/audit` | sys، ss، hreg، reg، res، aa، dm، ds، sm |
+
+**لم يُبنَ مما في §2.3–2.15:** `/me/downloads` (مؤجَّل، D25)؛ `/help`؛ صفحة `/search` للبحث النطاقي (في الشريط العلوي بحث في صفحات الدور بدلها)؛ `/dev/styleguide`. و«التكاملات» قسم داخل `/system/settings`، والنسخ الاحتياطية كذلك؛ وطلبات الحذف في `/system/deletions`.
 
 ## 3. قواعد عامة للصفحات
 1. كل صفحة قائمة: `PageHeader` + `FilterBar` + `Table/CardList` + `Pagination`، الفلاتر في URL.

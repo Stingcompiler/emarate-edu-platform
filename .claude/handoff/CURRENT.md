@@ -1,6 +1,7 @@
-# Handoff — levels and semesters (3 phases); November review — 2026-11-05
+# Handoff — review of 10 November and the owner's decisions — 2026-11-10
 
-Older rounds (2026-10-24 → 11-02): `.claude/handoff/archive/2026-10-24_to_2026-11-02.md`.
+Older rounds: `.claude/handoff/archive/2026-10-24_to_2026-11-02.md`, `.claude/handoff/archive/2026-11-04_to_2026-11-08.md`
+(own name, pick-one control, self-registration, roles audit, levels and semesters, first November review).
 
 ## State
 
@@ -20,7 +21,14 @@ Older rounds (2026-10-24 → 11-02): `.claude/handoff/archive/2026-10-24_to_2026
   not lowered under students). **Round 3 done** (#270): axis 2 — the 19 writes added since the
   roles audit × 15 roles match the matrix (`tests/permissions/test_new_surface_writes.py`); R73:
   `/me` → `deletes` + `canDelete()` hide deletes the server refuses (structure, redirects, media,
-  result batch). Five matrix rows proposed to the owner in the report §4 (not added). **Next:**
+  result batch). **The owner's decisions («نفذ توصياتك», 2026-11-10; `feat/review-decisions`):**
+  five rows added to roles-matrix (`users.create`, `roles.grant` — new capabilities derived
+  from `CREATABLE_ACCOUNTS`/`GRANTS` —, `deletions.approve`, `site.news`,
+  `staff_profiles.moderate`); «staff» = holds a role other than student, the name still from the
+  student record; a stopped programme takes a hand-added student and the form warns (R61); the
+  download manager D25 is written as deferred (02, 07, 09); the docs differences are fixed (03
+  v2.5, 05 §6/§8.7/§12, 07 v1.1 with §2.18 «actual routes» generated from the inventory,
+  ui-profile, runbook §1). Not decided: an «undo the last promotion» button. **Next:**
   rest of 1.1/1.3 (admission cycles), axis 3 (migrations, writes without audit), 1.4–1.7, 4, 5,
   8; fill `fit.csv`. Never run probes or other work while E2E runs. Findings continue from R74.
 - **Staff review fixes** (2026-11-09; `fix/site-staff-review`): any staff account (not only
@@ -53,62 +61,11 @@ Older rounds (2026-10-24 → 11-02): `.claude/handoff/archive/2026-10-24_to_2026
   card «نقل حساب خريج»; reject keeps the account where it was); a move with no card notifies the
   department; the old record gets `account_moved_to` and is never offered an account again.
   `/students/new` is for college-scope `students.manage` only (`canEverywhere`).
-- **Own name** (owner, 2026-11-08): staff change their name in /settings («تعديل الاسم»,
-  `PATCH /api/v1/me/name`, audit `account.rename_self`, site rebuilt if they appear on it);
-  students get 403. The system admin renames any account from /system/users/:id, a student's
-  too (the record follows); a name corrected in the student record reaches the account.
-- **Pick-one control** (owner, 2026-11-07: «modernize the dropdowns, system-wide»):
-  `apps/portal/src/components/Select.tsx` — `Select` (drop-in for `<select>`, used by every former
-  select and by `SelectField`) and `ChoiceField` (form-card row, /register programme). Sheet on
-  phones, anchored menu on ≥1024, search from 9 options. e2e drive it with `choose()` in
-  `e2e/tests/helpers.ts`. The public site keeps native selects, restyled in `global.css`.
-- **Student self-registration** (owner, 2026-11-07; `feat/registration-program-check`): the
-  student picks the programme from the list; the record must match number + programme + name
-  (Arabic or English, as in the record). A record that already has an account answers 409
-  `already_registered` and the page offers «ليس حسابي — أبلّغ عن انتحال» →
-  `IdentityReport`; approvers decide on /department/approvals (uphold = disable that account,
-  drop the student role, free the record). The official email is alerted when an account is made
-  with another address. Level is not asked (the owner listed only name, programme and number).
-- **Plan numbering** #251 merged: semesters shown 1–10 through the programme.
-
-- **Roles audit** (owner, 2026-11-06; report `docs/مراجعه الادوار.md`, approved matrix
-  `docs/roles-matrix.md`, suite `backend/tests/permissions` reading the matrix): all confirmed gaps
-  fixed on `fix/roles-matrix-audit` with the owner's decisions — supervisor unlinks (members,
-  course instructors) but deletes nothing (draft regulations too); no one decides their own
-  deletion request or result correction (`is_mine` hides the buttons); `users.view` reads every
-  account; lectures/assignments/exams/results/HR-notice lists 403 for roles that neither hold the
-  capability nor teach/assist/study (`rbac.takes_part`, `core.permissions.capability_or_participant`).
-  The matrix now wins over docs/03 on who may do what (CLAUDE.md). Open for the owner: rows for the
-  operations outside the matrix (user creation, grants, deletion approval, news, staff profiles)
-  and PROF/TA/STD columns (`own`).
-
-- **Levels and semesters** (owner, 2026-11-05: levels 1–5, two semesters a level, no summer;
-  option B — the student's semester is stored and advanced by promotion):
-  - Phase 1 #246 merged: course semester (1|2) on /department/courses, terms named
-    «الفصل الدراسي الأول/الثاني <year>» in /system/structure, bulk enroll by `term.order`.
-  - Phase 2 #247 merged: `StudentRecord.semester`, forms, import
-    column, «يبدأ الطالب في» on registering an applicant, bulk enroll by student semester.
-  - Phase 3 #248 merged: `/student-promotion`
-    (`students.promote`: admin + head registrar; supervisor via admin), `PromotionRun` once per
-    term per scope; results «التقدم في الخطة» per semester; public study plan by semester.
-  - Owner's decisions: failing students move with their cohort (registrar unticks who stays);
-    mid-year admissions: the registrar picks the semester; department heads correct the
-    semester of existing production courses (all default to 1).
 - **Production department merges** (owner clicks «دمج القسم» in /system/structure, says «تم»):
   11 left — into تقنية المعلومات: نظم المعلومات، دبلوم تقنية معلومات، دبلوم نظم المعلومات،
   دبلوم شبكات الحاسوب؛ into علوم الحاسوب: علوم الحاسوب الشرف؛ into إدارة الأعمال: العلوم
   الإدارية، نظم معلومات إدارية، محاسبية، مصرفية، دبلوم تقنية معلومات محاسبية مصرفية، الاقتصاد
   والعلوم المصرفية. Production terms: rename «خريف/ربيع» to «الفصل الدراسي الأول/الثاني» there.
-
-- **November review** (owner's work order `docs/qa/comprehensive-review-plan-2026-11.md`),
-  round 1 report `docs/qa/comprehensive-review-2026-11.md`: baseline + axes 1.1, 1.2, 1.3, 2, 3
-  and part of 4. Findings R26–R56; fixed and merged in #225–#233. Evidence and probes:
-  `docs/qa/evidence/review-2026-11/` (one folder per axis; `bash scripts/qa/probe.sh <dir> sqlite`).
-- **Running (round 2, no server needed):** axes 1.4/1.5 (exams, notifications), 5 (performance),
-  8 (keyboard, contrast in warm/dark, Arabic text) — background audits, then fix PRs.
-- **Site UX review** (owner, 2026-11-04, `~/Documents/Codex/2026-11-04/.../website-design-ux-review-ar.md`):
-  code items in #234 (small fixes), #235 (programme finder), #236 (home order). Content items
-  are the owner's (below).
 
 ## Waiting on the owner
 

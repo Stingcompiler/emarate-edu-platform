@@ -71,6 +71,7 @@ ALIASES = {
     "site.content": "content.manage",
     "site.events": "events.manage",
     "site.staff": "site_staff.manage",
+    "site.news": "news.manage",
 }
 
 

@@ -270,6 +270,13 @@ CREATABLE_ACCOUNTS: dict[Role, frozenset[Role]] = {
 }
 
 
+# The two tables above as capabilities, so the approved matrix has a row for each and /me
+# names them (owner, 2026-11-10): whoever a table gives anything to holds the capability;
+# which roles they may create or grant stays the table's to say.
+CAPABILITIES["users.create"] = frozenset(CREATABLE_ACCOUNTS)
+CAPABILITIES["roles.grant"] = frozenset(GRANTS)
+
+
 @dataclass(frozen=True)
 class Scope:
     """Where a user may exercise a capability."""
