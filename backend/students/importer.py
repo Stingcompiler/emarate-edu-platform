@@ -221,7 +221,9 @@ def _normalize(raw: dict, programs: dict[str, Program]) -> tuple[dict, list[str]
     for field in REQUIRED:
         if not str(raw.get(field, "")).strip():
             errors.append(gettext("%(field)s: required") % {"field": column_label(field)})
-    number = str(raw.get("university_number", "")).strip()
+    # Upper case, as the add form stores it: «26-it-0001» is «26-IT-0001» (review 2026-11-10,
+    # R78: the import made a second record).
+    number = str(raw.get("university_number", "")).strip().upper()
     out["university_number"] = number
     out["full_name_ar"] = " ".join(str(raw.get("full_name_ar", "")).split())
     out["full_name_en"] = " ".join(str(raw.get("full_name_en", "")).split())
@@ -326,7 +328,9 @@ def validate_file(meta: RequestMeta, name: str, uploaded) -> StudentImportBatch:
     existing = {
         r.university_number: r
         for r in StudentRecord.objects.filter(
-            university_number__in=[str(r.get("university_number", "")).strip() for r in rows]
+            university_number__in=[
+                str(r.get("university_number", "")).strip().upper() for r in rows
+            ]
         )
     }
     seen: set[str] = set()

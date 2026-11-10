@@ -63,6 +63,51 @@ class IntakeSerializer(serializers.ModelSerializer):
     department_name = serializers.CharField(source="program.department.name_ar", read_only=True)
     applications_count = serializers.IntegerField(read_only=True, default=None)
 
+    def validate(self, attrs):
+        intake = self.instance
+        # Applications were made to this programme in this cycle: they do not move with a
+        # change of either (review 2026-11-10, R74/R75). Open a new intake instead.
+        if intake is not None and intake.applications.exists():
+            for field in ("program", "cycle"):
+                if field in attrs and attrs[field] != getattr(intake, field):
+                    raise serializers.ValidationError(
+                        {
+                            field: [
+                                gettext(
+                                    "Applications were made to this intake: it keeps its "
+                                    "programme and cycle. Open a new one instead."
+                                )
+                            ]
+                        }
+                    )
+        # Its own window, when it has one, closes after it opens (R76; the cycle's is checked).
+        opens = attrs.get("opens_at", getattr(intake, "opens_at", None))
+        closes = attrs.get("closes_at", getattr(intake, "closes_at", None))
+        if opens and closes and closes <= opens:
+            raise serializers.ValidationError(
+                {"closes_at": [gettext("The intake must close after it opens.")]}
+            )
+        # A stopped programme or department takes no applications (R26): it is not opened for
+        # applying either, so the registrar never sees «open» where visitors see nothing (R77).
+        program = attrs.get("program", getattr(intake, "program", None))
+        is_open = attrs.get("is_open", getattr(intake, "is_open", True))
+        if (
+            program is not None
+            and is_open
+            and not (program.is_active and program.department.is_active)
+        ):
+            raise serializers.ValidationError(
+                {
+                    "program": [
+                        gettext(
+                            "This programme or its department is stopped. Reactivate it in the "
+                            "academic structure first."
+                        )
+                    ]
+                }
+            )
+        return attrs
+
     class Meta:
         model = ProgramIntake
         fields = [

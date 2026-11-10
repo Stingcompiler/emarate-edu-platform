@@ -59,7 +59,8 @@ def _identity(university_number: str, full_name: str, program: str) -> StudentRe
     name may be typed as in the record in Arabic or in English.
     """
     record_ = (
-        StudentRecord.objects.filter(university_number=university_number.strip())
+        # Typed in any case (review 2026-11-10, R79: «26-it-0001» found nothing).
+        StudentRecord.objects.filter(university_number__iexact=university_number.strip())
         .select_related("user", "program")
         .first()
     )
@@ -503,6 +504,9 @@ def report_identity(
     same = open_.filter(contact_email=email).first()
     if same is not None:
         return same  # sent twice: one report is enough
+    # The approvers hear of the first open report on an account; later ones join the list
+    # quietly (review 2026-11-10, R80: one notification each, from as many addresses).
+    first = not open_.exists()
     with transaction.atomic():
         report = IdentityReport.objects.create(
             student_record=record_, account=record_.user, contact_email=email, note=note.strip()
@@ -514,7 +518,8 @@ def report_identity(
             new={"contact_email": email},
             department_id=record_.department_id,
         )
-        events.identity_reported(report)
+        if first:
+            events.identity_reported(report)
     return report
 
 

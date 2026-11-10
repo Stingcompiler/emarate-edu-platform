@@ -176,3 +176,19 @@ def test_commit_and_reject_decide_on_the_batch_they_lock(api, head, it_program, 
         importer.reject(meta, stale)
     assert StudentImportBatch.objects.get(pk=committed.pk).status == "committed"
     assert AuditLog.objects.filter(action="students.import_reject").count() == 1
+
+
+def test_an_import_finds_a_number_in_another_case(api, head, it_program):
+    """Review 2026-11-10, R78: «26-it-0001» is «26-IT-0001», as the add form stores it; the
+    import used to make a second record."""
+    StudentRecord.objects.create(
+        program=it_program, university_number="26-IT-0001", full_name_ar="أحمد", level=1
+    )
+    batch = _upload(
+        api(head), _csv("الرقم الجامعي,الاسم,رمز البرنامج,المستوى", "26-it-0001,أحمد محمد,BIT,2")
+    ).data
+    assert batch["summary"]["create"] == 0 and batch["summary"]["update"] == 1, batch["summary"]
+    assert api(head).post(f"{URL}/{batch['public_id']}/commit").status_code == 200
+    assert list(StudentRecord.objects.values_list("university_number", "level")) == [
+        ("26-IT-0001", 2)
+    ]
