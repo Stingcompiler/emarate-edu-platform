@@ -89,9 +89,11 @@ export function ApplicationPrint() {
               ["الهاتف", a.phone_e164 || "—"],
             ] as [string, string][]
           ).map(([k, v]) => (
-            <div key={k}>
+            // A long email on a 390px phone stayed on one line past the page (review 2026-11-10,
+            // fit.csv R89): the cell may shrink and the value wraps where it must.
+            <div key={k} className="min-w-0">
               <dt className="font-bold">{k}</dt>
-              <dd>
+              <dd className="wrap-anywhere">
                 <bdi>{v}</bdi>
               </dd>
             </div>
@@ -111,9 +113,9 @@ export function ApplicationPrint() {
             <h2 className="mb-2 bg-surface-alt px-2 py-1 text-sm font-bold">{section.title}</h2>
             <dl className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm">
               {items.map((f) => (
-                <div key={f.key} className={f.width === "half" ? "" : "col-span-2"}>
+                <div key={f.key} className={f.width === "half" ? "min-w-0" : "col-span-2 min-w-0"}>
                   <dt className="font-bold">{f.label}</dt>
-                  <dd className="min-h-5 border-b border-dotted border-border">
+                  <dd className="min-h-5 border-b border-dotted border-border wrap-anywhere">
                     <bdi>{value(f.key, f.audience)}</bdi>
                   </dd>
                 </div>
