@@ -116,43 +116,43 @@
   }
 }
 
-/* Warm (owner, 2026-10-30): between light and dark — a dim warm grey-brown that neither
-   glares nor goes black, for evenings. Chosen only from the theme switch, never automatic.
-   The college's navy, blue and single red stay. */
+/* Warm (owner, 2026-10-30; redone 2026-11-11 — owner: «الوضع الدافئ سيئ»): the first version
+   was a dim grey-brown that read as muddy. Now a warm paper — cream surfaces, a dark brown ink —
+   softer than the white of light mode without going dark: the reading mode phones call "warm".
+   Chosen only from the theme switch, never automatic. The college's navy header, blue and single
+   red stay. Every text pair is at least 4.5:1 (a11y.spec «warm mode keeps AA contrast»). */
 :root[data-theme="warm"] {
-  color-scheme: dark;
-  --bg: #35302a;
-  --bg-subtle: #3a352f;
-  --surface: #45403a;
-  --surface-alt: #4f4943;
-  --border: #6a6259;
-  --border-soft: #57514a;
-  --text: #f1ebe2;
-  --text-muted: #cfc6ba;
-  --primary: #a9c3e3;
-  --focus-ring: #a9c3e3;
-  --primary-hover: #cfdcee;
-  --primary-soft: #34465e;
-  --on-primary: #2a2520;
-  --accent: #e0a4b0;
-  --accent-hover: #ecc6ce;
-  --accent-soft: #5a2c36;
-  --header-bg: #2c2823;
-  --color-primary-700: #cfdcee;
-  --color-accent-700: #ecc6ce;
-  --color-success-soft: #3c4d3a;
-  --color-success-strong: #a8d6a0;
-  --color-warning-soft: #54452e;
-  --color-warning-strong: #f0cd8a;
-  --color-danger-soft: #5a3530;
-  --color-danger-strong: #f2b0a6;
-  --color-info-soft: #3a4a5e;
-  --color-info-strong: #bdd0e8;
-  --color-neutral-soft: #57514a;
-  --color-neutral-strong: #d6cdc1;
-  --color-pending: #8a8177;
-  --color-pending-soft: #4a443d;
-  --color-pending-strong: #d6cdc1;
+  color-scheme: only light;
+  --bg: #f3ebdd;
+  --bg-subtle: #eee5d5;
+  --surface: #faf5eb;
+  --surface-alt: #ebe1cf;
+  --border: #c2b298;
+  --border-soft: #ddd0bb;
+  --text: #33281d;
+  --text-muted: #64533f;
+  --primary: #285b98;
+  --focus-ring: #285b98;
+  --primary-hover: #1f4674;
+  --primary-soft: #e3e3df;
+  --on-primary: #ffffff;
+  --accent: #a42340;
+  --accent-hover: #8a1d36;
+  --accent-soft: #f3dcd9;
+  --header-bg: var(--color-navy-500);
+  --color-success-soft: #e3ecd8;
+  --color-success-strong: #2f5e2a;
+  --color-warning-soft: #f3e3c3;
+  --color-warning-strong: #7a5512;
+  --color-danger-soft: #f4ddd6;
+  --color-danger-strong: #8e2b1f;
+  --color-info-soft: #dde3ea;
+  --color-info-strong: #1f4674;
+  --color-neutral-soft: #e8dfd0;
+  --color-neutral-strong: #4d4134;
+  --color-pending: #8f8170;
+  --color-pending-soft: #ebe1cf;
+  --color-pending-strong: #4d4134;
 }
 
 /* List density (design review B9): comfortable is the default everywhere; «compact» is a choice
