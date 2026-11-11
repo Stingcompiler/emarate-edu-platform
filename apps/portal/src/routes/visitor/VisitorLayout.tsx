@@ -2,9 +2,9 @@ import { Check } from "lucide-react";
 import type { ReactNode } from "react";
 
 import { ConnectivityBar } from "../../components/ConnectivityBar";
-import { VisitorNav, siteLink } from "../../components/VisitorNav";
+import { VisitorNav } from "../../components/VisitorNav";
 import { ProgressRing } from "../../components/motion";
-import { SITE_URL, siteUrl } from "../../lib/site";
+import { SITE_URL, siteLink, siteUrl } from "../../lib/site";
 
 /**
  * Visitor pages (apply / track), redesigned 2026-10-30 (owner): the site's navigation on top
@@ -115,15 +115,14 @@ export function VisitorLayout({
                 مكتب القبول يجيب عن أسئلة التقديم والبرامج والرسوم.
               </p>
               <a
-                href={siteUrl("/ar/contact/")}
-                {...siteLink()}
+                {...siteLink(siteUrl("/ar/contact/"))}
                 className="tap-44 mt-2 inline-flex items-center font-semibold text-primary hover:underline"
               >
                 تواصل مع القبول
               </a>
             </section>
             <p className="text-center text-sm text-text-muted lg:text-start">
-              <a href={SITE_URL} {...siteLink()} className="font-semibold hover:text-text">
+              <a {...siteLink(SITE_URL)} className="font-semibold hover:text-text">
                 العودة إلى موقع الكلية
               </a>
             </p>
