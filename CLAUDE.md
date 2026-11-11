@@ -41,5 +41,5 @@ do what: that is `docs/roles-matrix.md` (the owner's approved matrix), which win
 | Lint and format the backend | `cd backend && uv run ruff check . && uv run ruff format .` |
 | Regenerate the API client | `pnpm api:generate` |
 | Typecheck, test and build the frontend | `pnpm typecheck && pnpm test && pnpm build` |
-| End-to-end tests (own API :8001 + portal :5174, fresh demo data) | `pnpm e2e` — first run locally uses the installed Google Chrome |
+| End-to-end tests (own API :8001 + portal :5174, fresh demo data) | `CI=1 pnpm e2e [spec]` — Playwright's own Chromium; plain `pnpm e2e` drives the installed Google Chrome, which closes mid-run on this Mac |
 | Find a page's design boards | `python3 scripts/boards.py list "<keyword>"` |
