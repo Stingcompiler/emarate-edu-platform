@@ -5,7 +5,7 @@ import { Link, NavLink } from "react-router";
 
 import { api } from "../lib/api";
 import { isStandalone } from "../lib/push";
-import { SITE_URL, siteUrl, useSiteLogo } from "../lib/site";
+import { SITE_URL, siteLink, siteUrl, useSiteLogo } from "../lib/site";
 import { useHideOnScroll } from "../lib/useHideOnScroll";
 
 /** The college site's main sections: a visitor applying or tracking keeps the site's navigation.
@@ -54,11 +54,7 @@ export function VisitorNav() {
     >
       <div className="mx-auto flex h-16 max-w-[1120px] items-center gap-4 px-4 lg:px-8">
         {/* Visitors came from the college's site: its name takes them back (review 🟢). */}
-        <a
-          href={SITE_URL}
-          {...siteLink()}
-          className="flex min-w-0 items-center gap-2 hover:opacity-80"
-        >
+        <a {...siteLink(SITE_URL)} className="flex min-w-0 items-center gap-2 hover:opacity-80">
           <img src={logo} alt="" width={32} height={32} className="size-8 object-contain" />
           <span className="truncate text-sm font-bold text-text sm:hidden">كلية الإمارات</span>
           <span className="hidden truncate text-sm font-bold text-text sm:inline">
@@ -69,8 +65,7 @@ export function VisitorNav() {
           {links.map(([label, path]) => (
             <a
               key={path}
-              href={siteUrl(path)}
-              {...siteLink()}
+              {...siteLink(siteUrl(path))}
               className="rounded-md px-3 py-2 text-sm font-semibold text-text-muted hover:bg-surface-alt hover:text-text"
             >
               {label}
@@ -105,8 +100,7 @@ export function VisitorNav() {
           {links.map(([label, path]) => (
             <a
               key={path}
-              href={siteUrl(path)}
-              {...siteLink()}
+              {...siteLink(siteUrl(path))}
               className="flex min-h-12 items-center rounded-lg px-3 text-[15px] text-text hover:bg-surface-alt"
             >
               {label}
@@ -138,10 +132,3 @@ function VisitorLink({ to, children }: { to: string; children: ReactNode }) {
     </NavLink>
   );
 }
-
-/**
- * A link to the college's site: from the installed app it opens in the browser, not inside the
- * app (owner, 2026-10-30); in a browser tab it stays an ordinary link.
- */
-export const siteLink = () =>
-  isStandalone() ? { target: "_blank", rel: "noopener noreferrer" } : {};

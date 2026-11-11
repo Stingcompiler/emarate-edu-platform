@@ -12,8 +12,8 @@ import { ChevronLeft, Eye, EyeOff, type LucideIcon } from "lucide-react";
 import { useEffect, useId, useRef, useState } from "react";
 import { Link } from "react-router";
 
-import { SITE_URL, useSiteLogo } from "../lib/site";
-import { VisitorNav, siteLink } from "./VisitorNav";
+import { SITE_URL, siteLink, useSiteLogo } from "../lib/site";
+import { VisitorNav } from "./VisitorNav";
 import { CountUp } from "./motion";
 import { Select } from "./Select";
 
@@ -302,7 +302,7 @@ export function AuthLayout({
             <div className="mt-7">{children}</div>
           </div>
           <footer className="mx-auto mt-10 flex w-full max-w-[400px] flex-wrap items-center justify-between gap-2 text-xs text-text-muted">
-            <a href={SITE_URL} {...siteLink()} className="font-semibold hover:text-text">
+            <a {...siteLink(SITE_URL)} className="font-semibold hover:text-text">
               العودة إلى موقع الكلية
             </a>
             <span>كلية الإمارات للعلوم والتكنولوجيا</span>

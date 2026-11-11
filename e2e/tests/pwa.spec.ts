@@ -26,3 +26,34 @@ test("the web app manifest, tab icon and home-screen icon are served from the lo
     expect(response.headers()["content-type"], src).toContain("image/png");
   }
 });
+
+// «العودة إلى موقع الكلية» from the installed app leaves for the phone's browser (owner,
+// 2026-11-11): the app's display mode and the phone are stood in for before the page loads.
+for (const [phone, userAgent, expected] of [
+  [
+    "iPhone",
+    "Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148",
+    /^x-safari-https?:\/\//,
+  ],
+  [
+    "Android",
+    "Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Mobile Safari/537.36",
+    /^intent:\/\/.+#Intent;.*S\.browser_fallback_url=.+;end$/,
+  ],
+] as const) {
+  test(`from the installed app on ${phone}, the way back to the site opens the browser`, async ({
+    page,
+  }) => {
+    await page.addInitScript((ua) => {
+      const real = window.matchMedia.bind(window);
+      window.matchMedia = (query: string) =>
+        query.includes("display-mode: standalone")
+          ? ({ ...real(query), matches: true, media: query } as MediaQueryList)
+          : real(query);
+      Object.defineProperty(navigator, "userAgent", { get: () => ua });
+    }, userAgent);
+    await page.goto("/login");
+    const back = page.getByRole("link", { name: "العودة إلى موقع الكلية" });
+    await expect(back).toHaveAttribute("href", expected);
+  });
+}
