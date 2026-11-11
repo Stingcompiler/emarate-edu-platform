@@ -56,7 +56,9 @@ Older rounds: `.claude/handoff/archive/2026-10-24_to_2026-11-02.md`, `.claude/ha
   content). Left: results→student and deletion-request journeys in the browser; Lighthouse.
   #279 merged (journeys + R91 audit column). Then R90 (university number case in results
   import, transcript address, admission staff number) + journey-results.spec.ts.
-  Findings continue from R92.
+  #280 merged (R90). Then journey-deletion.spec.ts and perf (docs/qa/evidence/review-2026-11-10/perf:
+  site LCP ok, portal login 2.7–2.9 s > 2.5 → R92 on the owner's list: 3 font weights, raw logo).
+  Review left: /qa-verify R57–R92, docs (axis 7). Findings continue from R93.
 - **Staff review fixes** (2026-11-09; `fix/site-staff-review`): any staff account (not only
   teachers) may now choose to appear (`accounts.staff_profile.on_staff`, Settings card for all
   staff); a placed account that is no longer staff drops off (`content.staff.shown`); the people

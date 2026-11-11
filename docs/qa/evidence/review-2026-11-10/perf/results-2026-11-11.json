@@ -1,0 +1,110 @@
+[
+ {
+  "url": "https://ecst.stingdev.pro/ar/",
+  "run": 1,
+  "lcp_ms": 2132,
+  "dcl_ms": 2112,
+  "load_ms": 3778,
+  "idle_ms": 4284,
+  "kb": 324
+ },
+ {
+  "url": "https://ecst.stingdev.pro/ar/",
+  "run": 2,
+  "lcp_ms": 1928,
+  "dcl_ms": 1901,
+  "load_ms": 3576,
+  "idle_ms": 4081,
+  "kb": 324
+ },
+ {
+  "url": "https://ecst.stingdev.pro/ar/",
+  "run": 3,
+  "lcp_ms": 1932,
+  "dcl_ms": 1913,
+  "load_ms": 3597,
+  "idle_ms": 4101,
+  "kb": 324
+ },
+ {
+  "url": "https://ecst.stingdev.pro/ar/programs/BBA/",
+  "run": 1,
+  "lcp_ms": 1768,
+  "dcl_ms": 1759,
+  "load_ms": 3471,
+  "idle_ms": 3974,
+  "kb": 273
+ },
+ {
+  "url": "https://ecst.stingdev.pro/ar/programs/BBA/",
+  "run": 2,
+  "lcp_ms": 1740,
+  "dcl_ms": 1731,
+  "load_ms": 3453,
+  "idle_ms": 3954,
+  "kb": 273
+ },
+ {
+  "url": "https://ecst.stingdev.pro/ar/programs/BBA/",
+  "run": 3,
+  "lcp_ms": 1752,
+  "dcl_ms": 1745,
+  "load_ms": 3460,
+  "idle_ms": 3964,
+  "kb": 273
+ },
+ {
+  "url": "https://portal.ecst.stingdev.pro/login",
+  "run": 1,
+  "lcp_ms": 2944,
+  "dcl_ms": 2762,
+  "load_ms": 2764,
+  "idle_ms": 5352,
+  "kb": 414
+ },
+ {
+  "url": "https://portal.ecst.stingdev.pro/login",
+  "run": 2,
+  "lcp_ms": 2676,
+  "dcl_ms": 2490,
+  "load_ms": 2491,
+  "idle_ms": 5082,
+  "kb": 414
+ },
+ {
+  "url": "https://portal.ecst.stingdev.pro/login",
+  "run": 3,
+  "lcp_ms": 2656,
+  "dcl_ms": 2471,
+  "load_ms": 2472,
+  "idle_ms": 5018,
+  "kb": 414
+ },
+ {
+  "url": "https://ecst.stingdev.pro/en/",
+  "run": 1,
+  "lcp_ms": 1896,
+  "dcl_ms": 1859,
+  "load_ms": 3143,
+  "idle_ms": 3650,
+  "kb": 236
+ },
+ {
+  "url": "https://ecst.stingdev.pro/en/",
+  "run": 2,
+  "lcp_ms": 1904,
+  "dcl_ms": 1861,
+  "load_ms": 3145,
+  "idle_ms": 3651,
+  "kb": 236
+ },
+ {
+  "url": "https://ecst.stingdev.pro/en/",
+  "run": 3,
+  "lcp_ms": 1860,
+  "dcl_ms": 1811,
+  "load_ms": 3096,
+  "idle_ms": 3598,
+  "kb": 236
+ }
+]
