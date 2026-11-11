@@ -158,7 +158,13 @@ jobs:
       - run: uv sync --locked --project backend
       - run: pnpm install --frozen-lockfile
       - run: pnpm api:generate
-      - run: pnpm exec playwright install --with-deps chromium
+      # The browser first, then its system libraries. When the runner cannot reach Ubuntu's
+      # archive (2026-11-11: an hour of «Temporary failure resolving archive.ubuntu.com»), the
+      # libraries already in the runner image are used rather than failing every test unrun.
+      - run: pnpm exec playwright install chromium
+      - run: >-
+          timeout 240 pnpm exec playwright install-deps chromium ||
+          echo "::warning::apt unavailable; Chromium runs on the runner image's libraries"
       - name: Critical flows on phone and desktop (sign-in, exam, application, layout)
         run: pnpm e2e --shard=${{ matrix.shard }}/3
       - name: The public site without the demo's sample texts
