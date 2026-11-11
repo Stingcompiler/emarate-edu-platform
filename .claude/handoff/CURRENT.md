@@ -1,4 +1,4 @@
-# Handoff — review of 10 November and the owner's decisions — 2026-11-10
+# Handoff — review of 10 November (closed) and the owner's decisions — 2026-11-11
 
 Older rounds: `.claude/handoff/archive/2026-10-24_to_2026-11-02.md`, `.claude/handoff/archive/2026-11-04_to_2026-11-08.md`
 (own name, pick-one control, self-registration, roles audit, levels and semesters, first November review).
@@ -58,7 +58,8 @@ Older rounds: `.claude/handoff/archive/2026-10-24_to_2026-11-02.md`, `.claude/ha
   import, transcript address, admission staff number) + journey-results.spec.ts.
   #280 merged (R90). Then journey-deletion.spec.ts and perf (docs/qa/evidence/review-2026-11-10/perf:
   site LCP ok, portal login 2.7–2.9 s > 2.5 → R92 on the owner's list: 3 font weights, raw logo).
-  Review left: /qa-verify R57–R92, docs (axis 7). Findings continue from R93.
+  #281 merged. **Review 2026-11-10 closed** (report §6): all 26 probes fail on 7848dd0
+  (verify-7848dd0.txt); only R92 open (owner: font weights, resized logo). Findings continue from R93.
 - **Staff review fixes** (2026-11-09; `fix/site-staff-review`): any staff account (not only
   teachers) may now choose to appear (`accounts.staff_profile.on_staff`, Settings card for all
   staff); a placed account that is no longer staff drops off (`content.staff.shown`); the people
@@ -104,8 +105,9 @@ Older rounds: `.claude/handoff/archive/2026-10-24_to_2026-11-02.md`, `.claude/ha
    applications.
 3. CSP for site and portal (R56): a line in `/etc/caddy/ecst.caddy` (the owner runs it), start
    with `Content-Security-Policy-Report-Only`.
-4. Round 2 on the server: load the SSH key (read-only checks), approve restoring the latest
-   backup into a local DB (moves, migrations, `purge_demo` on real data), a real `OPS_ALERT_EMAIL`.
+4. Server: done (read-only checks, restore rehearsal: the 11 merges are safe to press). Left: a
+   real `OPS_ALERT_EMAIL`; before `purge_demo`, create the real admin and keep wanted media.
+   R92: two font weights on first load? a resized-logo endpoint for the portal?
 5. Production content: publish the college admission form (blocks applying); move the 15
    programmes entered as departments and delete the empty ones; the duplicate IT diploma;
    2027/2028 year and terms; phone/email/address/hours in site settings (contact page and
