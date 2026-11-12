@@ -164,6 +164,8 @@ READS: dict[str, tuple[str, frozenset, frozenset]] = {
     "offering-list": ("/api/v1/offerings", COURSES, frozenset()),
     "offering-detail": ("/api/v1/offerings/{offering}", COURSES, frozenset()),
     "department-members": ("/api/v1/departments/{dept}/members", COURSES, frozenset()),
+    # Its head and supervisor, on the department's page (review 2026-11-12).
+    "department-leaders": ("/api/v1/departments/{dept}/leaders", COURSES, frozenset()),
     "enrollment-list": ("/api/v1/enrollments", ENROLLMENT, frozenset()),
     "enrollment-detail": ("/api/v1/enrollments/{enrollment}", ENROLLMENT, frozenset()),
     "student-list": ("/api/v1/students", STUDENTS, frozenset()),
@@ -886,6 +888,7 @@ def test_department_roles_cannot_reach_other_departments(role, api, users, other
         client.patch(f"/api/v1/courses/{other['course'].pk}", {"name_ar": "x"}).status_code == 404
     )
     assert client.get(f"/api/v1/departments/{other['dept'].pk}/members").status_code == 404
+    assert client.get(f"/api/v1/departments/{other['dept'].pk}/leaders").status_code == 404
     for url in ("/api/v1/courses", "/api/v1/students", "/api/v1/enrollments"):
         codes = str(client.get(url).data["results"])
         assert "BA101" not in codes and "26-BA-0001" not in codes, url
