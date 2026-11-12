@@ -257,19 +257,33 @@ function AddMember({ department }: { department: number }) {
         aria-label="ابحث بالاسم أو البريد"
         className="block min-h-10 w-full rounded-lg border border-border bg-surface px-3 text-sm"
       />
-      {(found.data ?? []).map((p) => (
-        <button
-          key={p.public_id}
-          type="button"
-          onClick={() => add.mutate(p.public_id)}
-          className="flex w-full items-center justify-between rounded-lg px-2 py-2 text-start text-sm hover:bg-surface-alt"
-        >
-          <span>
-            {p.full_name_ar} <bdi className="text-xs text-text-muted">{p.email}</bdi>
-          </span>
-          <span className="text-xs font-semibold text-primary">إضافة</span>
-        </button>
-      ))}
+      {(found.data ?? []).map((p) =>
+        // Academic affairs is found too (review 2026-11-12); without the role chosen above they
+        // cannot join yet, and the row says who grants it rather than failing on a tap.
+        p.kinds.includes(kind) ? (
+          <button
+            key={p.public_id}
+            type="button"
+            onClick={() => add.mutate(p.public_id)}
+            className="flex min-h-11 w-full items-center justify-between gap-3 rounded-lg px-2 py-2 text-start text-sm hover:bg-surface-alt"
+          >
+            <span className="min-w-0">
+              {p.full_name_ar} <bdi className="text-xs text-text-muted">{p.email}</bdi>
+            </span>
+            <span className="shrink-0 text-xs font-semibold text-primary">إضافة</span>
+          </button>
+        ) : (
+          <div key={p.public_id} className="rounded-lg px-2 py-2 text-sm">
+            <span className="block min-w-0">
+              {p.full_name_ar} <bdi className="text-xs text-text-muted">{p.email}</bdi>
+            </span>
+            <span className="block text-xs text-warning-strong">
+              لا يحمل دور «{kind === "teacher" ? "أستاذ" : "معيد"}» بعد: يمنحه مدير النظام أو أمين
+              الشؤون العلمية من «المستخدمون»، ثم تضيفه هنا.
+            </span>
+          </div>
+        ),
+      )}
       {add.isError && <Notice>{problemMessage(add.error)}</Notice>}
       <p className="text-xs text-text-muted">حسابات الأساتذة الجدد ينشئها أمين الشؤون العلمية.</p>
     </Card>

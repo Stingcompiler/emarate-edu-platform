@@ -39,17 +39,15 @@ msgstr "خارج نطاق قسمك."
 #: academic/services.py:38
 #, python-format
 msgid ""
-"This person does not have the %(kind)s role. Academic affairs creates it."
-msgstr "هذا الشخص لا يحمل دور %(kind)s؛ ينشئه أمين الشؤون العلمية."
+"This person does not hold the «%(role)s» role: the system admin or academic "
+"affairs grants it from Users."
+msgstr ""
+"هذا الشخص لا يحمل دور «%(role)s»: يمنحه مدير النظام أو أمين الشؤون العلمية "
+"من «المستخدمون»."
 
 #: academic/services.py:58
 msgid "Already a member of this department."
 msgstr "عضو في هذا القسم بالفعل."
-
-#: academic/services.py:92
-#, python-format
-msgid "This person does not have the %(role)s role."
-msgstr "هذا الشخص لا يحمل دور %(role)s."
 
 #: academic/services.py:100
 msgid "Add this person to the department first."
