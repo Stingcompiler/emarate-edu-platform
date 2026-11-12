@@ -2,6 +2,7 @@ import type { Schemas } from "@ecst/api";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Pencil } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { Link } from "react-router";
 
 import { PortalShell } from "../../components/PortalShell";
 import {
@@ -136,15 +137,21 @@ export function Structure() {
     },
   });
   const [dForm, setD] = useState({ code: "", name_ar: "", name_en: "" });
+  // The department just added: its page appoints its head and supervisor (review 2026-11-12 —
+  // they were only reachable from «المستخدمون», one person at a time).
+  const [created, setCreated] = useState<{ id: number; name: string } | null>(null);
   const addDept = useMutation({
     mutationFn: async () => {
       const { data, error } = await api.POST("/api/v1/departments", {
         body: { college: colleges.data![0]!.id, ...dForm },
       });
       if (!data) throw error;
+      return data;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       setD({ code: "", name_ar: "", name_en: "" });
+      setCreated({ id: data.id, name: data.name_ar });
+      setPicked(data.id);
       void refresh("departments");
     },
   });
@@ -264,6 +271,14 @@ export function Structure() {
             >
               إضافة القسم
             </Button>
+            {created && (
+              <Notice tone="success">
+                أُضيف قسم «{created.name}».{" "}
+                <Link to={`/departments/${created.id}`} className="font-semibold underline">
+                  عيّن مديره ومشرفه
+                </Link>
+              </Notice>
+            )}
           </Card>
           <SectionLabel>الأعوام والفصول</SectionLabel>
           <Card className="divide-y divide-border-soft">
@@ -422,6 +437,12 @@ export function Structure() {
                 >
                   {dept.is_active === false ? "إعادة تفعيل" : "إيقاف مؤقت"}
                 </Button>
+                <Link
+                  to={`/departments/${dept.id}`}
+                  className="inline-flex min-h-10 items-center rounded-lg border border-border px-3 text-sm font-semibold text-primary hover:bg-surface-alt"
+                >
+                  صفحة القسم
+                </Link>
                 <Button
                   variant="secondary"
                   aria-expanded={editingDept}

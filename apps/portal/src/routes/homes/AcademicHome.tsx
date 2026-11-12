@@ -1,5 +1,6 @@
 import { ListTodo, Zap } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
+import { Link } from "react-router";
 
 import { PortalShell } from "../../components/PortalShell";
 import { ActionLinks, Avatar, Card, SectionLabel } from "../../components/ui";
@@ -82,7 +83,14 @@ export function AcademicHome() {
               const heads = (leaders.data ?? []).filter((r) => r.department === d.id);
               return (
                 <Card key={d.id} className="px-4 py-3 text-sm">
-                  <b className="block text-text">{d.name_ar}</b>
+                  {/* Its own page: details, staff, and appointing its head and supervisor
+                      (review 2026-11-12). */}
+                  <Link
+                    to={`/departments/${d.id}`}
+                    className="block font-semibold text-primary hover:underline"
+                  >
+                    {d.name_ar}
+                  </Link>
                   {heads.map((r) => (
                     <p key={r.id} className="mt-1 flex items-center gap-2 text-xs">
                       <Avatar text={initials(r.user_name)} size="sm" tone="primary" />
@@ -129,7 +137,8 @@ export function AcademicHome() {
                           .join(" و")})`,
                     )
                     .join(" · "),
-                  to: "/system/users",
+                  // The first of them on its own page, where the head and supervisor are appointed.
+                  to: unled.length ? `/departments/${unled[0]!.id}` : "/system/users",
                   tone: "danger",
                 },
                 {

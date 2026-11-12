@@ -145,6 +145,9 @@ export const ROUTE_ACCESS: Record<string, Allow> = {
   "/department/courses": departmentPages,
   "/department/lectures": departmentPages,
   "/department/teachers": departmentPages,
+  // One department's own page (review 2026-11-12): whoever reads its members; the server
+  // answers 404 for a department outside the reader's scope.
+  "/departments/:id": cap("courses.view"),
   "/department/students": departmentPages,
   "/department/approvals": cap("registration.approve"),
   "/department/audit": cap("audit.view"),

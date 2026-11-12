@@ -179,6 +179,16 @@ class MembershipSerializer(serializers.ModelSerializer):
         read_only_fields = ["department", "created_at"]
 
 
+class LeaderSerializer(serializers.Serializer):
+    """A department's head or supervisor: the role assignment (revoked by its id) and the
+    person (review 2026-11-12, the department's own page)."""
+
+    id = serializers.IntegerField()
+    role = serializers.CharField()
+    role_label = serializers.CharField(source="get_role_display")
+    user = PersonSerializer()
+
+
 class MembershipAddSerializer(serializers.Serializer):
     user = serializers.SlugRelatedField(slug_field="public_id", queryset=User.objects.all())
     kind = serializers.ChoiceField(choices=DepartmentMembership.Kind.choices)

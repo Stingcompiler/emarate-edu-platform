@@ -35,6 +35,7 @@ from .serializers import (
     EnrollmentSerializer,
     InstructorAddSerializer,
     InstructorSerializer,
+    LeaderSerializer,
     MembershipAddSerializer,
     MembershipSerializer,
     MyCourseSerializer,
@@ -200,6 +201,31 @@ class DepartmentMembersView(APIView):
             data.validated_data["kind"],
         )
         return Response(MembershipSerializer(membership).data, status=status.HTTP_201_CREATED)
+
+
+class DepartmentLeadersView(APIView):
+    """A department's head and supervisor, for its page in the portal (review 2026-11-12: who
+    leads a department was only on the users page). Read by whoever reads its members."""
+
+    permission_classes = [IsAuthenticated, capability("courses.view")]
+
+    @extend_schema(responses=LeaderSerializer(many=True))
+    def get(self, request, department_id):
+        from accounts.models import RoleAssignment
+        from accounts.rbac import Role
+
+        department = get_object_or_404(Department, pk=department_id)
+        if not rbac.can(request.user, "courses.view", department.pk):
+            raise Http404
+        rows = (
+            RoleAssignment.objects.filter(
+                department=department,
+                role__in=[Role.DEPARTMENT_MANAGER, Role.DEPARTMENT_SUPERVISOR],
+            )
+            .select_related("user", "user__photo")
+            .order_by("role", "user__full_name_ar")
+        )
+        return Response(LeaderSerializer(rows, many=True).data)
 
 
 class DepartmentMemberDetailView(APIView):
