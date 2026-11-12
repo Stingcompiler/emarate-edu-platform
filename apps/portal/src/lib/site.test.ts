@@ -33,7 +33,7 @@ it("in a browser tab, a site link is an ordinary link", () => {
   });
 });
 
-it("from the installed app on iOS 17+, a site link opens the Safari app", () => {
+it("from the installed app on iOS 17+, a site link is the Safari app's address", () => {
   expect(siteLinkFor(SITE, app(IPHONE_17))).toEqual({ href: `x-safari-${SITE}` });
   expect(siteLinkFor(SITE, app(IPAD))).toEqual({ href: `x-safari-${SITE}` });
 });
@@ -57,7 +57,7 @@ it("on older iOS, which lacks that address, it keeps a new window", () => {
   });
 });
 
-it("on Android, the system's browser is asked for, with the page itself as the fallback", () => {
+it("on Android, a site link is an intent for a browser, with the page itself as the fallback", () => {
   const { href, target } = siteLinkFor(SITE, app(ANDROID));
   expect(target).toBeUndefined();
   expect(href).toMatch(/^intent:\/\/ecst\.stingdev\.pro\/ar\/contact\/\?from=portal#Intent;/);
@@ -65,7 +65,7 @@ it("on Android, the system's browser is asked for, with the page itself as the f
   expect(href).toContain(`S.browser_fallback_url=${encodeURIComponent(SITE)};end`);
 });
 
-it("on a computer, the installed app opens a browser window (a Mac without touch is no iPad)", () => {
+it("on a computer, a site link asks for a new browser window (a Mac without touch is no iPad)", () => {
   expect(siteLinkFor(SITE, app(MAC, 0))).toEqual({
     href: SITE,
     target: "_blank",
