@@ -1,4 +1,4 @@
-# Handoff — review of 10 November (closed) and the owner's decisions — 2026-11-11
+# Handoff — review of 10 November (closed) and the owner's decisions — 2026-11-12
 
 Older rounds: `.claude/handoff/archive/2026-10-24_to_2026-11-02.md`, `.claude/handoff/archive/2026-11-04_to_2026-11-08.md`
 (own name, pick-one control, self-registration, roles audit, levels and semesters, first November review).
@@ -60,6 +60,15 @@ Older rounds: `.claude/handoff/archive/2026-10-24_to_2026-11-02.md`, `.claude/ha
   site LCP ok, portal login 2.7–2.9 s > 2.5 → R92 on the owner's list: 3 font weights, raw logo).
   #281 merged. **Review 2026-11-10 closed** (report §6): all 26 probes fail on 7848dd0
   (verify-7848dd0.txt); only R92 open (owner: font weights, resized logo). Findings continue from R93.
+- **After the review (2026-11-11/12):** #283 — from the installed app, links to the college site
+  leave for the phone's browser (`siteLink()` in `apps/portal/src/lib/site.ts`: iOS 17+
+  `x-safari-https://…`, an installed iPad without a version judged by `Object.groupBy`; Android
+  `intent://…#Intent;…;S.browser_fallback_url=…;end`; computer `target=_blank`). Not yet tried on a
+  real phone: ask the owner which phone if it still stays in the app. #284 — the warm mode is a
+  warm paper (cream + dark brown ink, brand blue/red), owner: «الوضع الدافئ سيئ»; first version
+  was a muddy dark grey-brown. #285 — CI E2E survives apt outages (Chromium must still start).
+  #286 — code-review fixes of #283–#285 (one `isStandalone()` in `lib/push.ts`, E2E checks every
+  site link on /login and /track).
 - **Staff review fixes** (2026-11-09; `fix/site-staff-review`): any staff account (not only
   teachers) may now choose to appear (`accounts.staff_profile.on_staff`, Settings card for all
   staff); a placed account that is no longer staff drops off (`content.staff.shown`); the people
