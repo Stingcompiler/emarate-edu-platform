@@ -9,6 +9,7 @@ from rest_framework.exceptions import PermissionDenied, ValidationError
 
 from accounts import rbac
 from accounts.rbac import Role
+from accounts.staff_profile import site_changed
 from audit.services import RequestMeta, record
 from core.errors import Conflict
 from notifications import events
@@ -57,6 +58,8 @@ def add_member(meta: RequestMeta, department: Department, user, kind: str) -> De
         raise Conflict(
             gettext("Already a member of this department."), code="already_member"
         ) from None
+    # Department pages on the site list their members (review 2026-11-12).
+    site_changed()
     return membership
 
 
@@ -77,6 +80,7 @@ def remove_member(meta: RequestMeta, membership: DepartmentMembership) -> None:
             department_id=membership.department_id,
         )
         membership.delete()
+        site_changed()
 
 
 # ─── Instructors on an offering ───────────────────────────────────────────
