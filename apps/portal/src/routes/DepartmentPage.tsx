@@ -67,7 +67,7 @@ export function DepartmentPage() {
   const staff = members.data ?? [];
   return (
     <PortalShell
-      title={d ? `قسم ${d.name_ar}` : "القسم"}
+      title={d ? (d.name_ar.startsWith("قسم") ? d.name_ar : `قسم ${d.name_ar}`) : "القسم"}
       subtitle={
         d
           ? [d.code, d.is_active === false ? "موقوف مؤقتًا" : null, count(staff.length, N.member)]
