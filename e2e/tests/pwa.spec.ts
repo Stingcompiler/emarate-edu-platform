@@ -29,6 +29,8 @@ test("the web app manifest, tab icon and home-screen icon are served from the lo
 
 // «العودة إلى موقع الكلية» from the installed app leaves for the phone's browser (owner,
 // 2026-11-11): the app's display mode and the phone are stood in for before the page loads.
+// This checks the address each link carries, not that the phone obeys it: whether a tap really
+// leaves the installed app is only known on a phone (the checklist in .claude/handoff/CURRENT.md).
 for (const [phone, userAgent, expected] of [
   [
     "iPhone",
@@ -41,7 +43,7 @@ for (const [phone, userAgent, expected] of [
     /^intent:\/\/.+#Intent;.*S\.browser_fallback_url=.+;end$/,
   ],
 ] as const) {
-  test(`from the installed app on ${phone}, the way back to the site opens the browser`, async ({
+  test(`from the installed app on ${phone}, every link to the site carries the browser's address`, async ({
     page,
   }) => {
     await page.addInitScript((ua) => {
