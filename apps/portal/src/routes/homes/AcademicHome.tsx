@@ -161,7 +161,7 @@ export function AcademicHome() {
               icon={Zap}
               items={[
                 { to: "/hr/teachers", label: "تقارير الأداء" },
-                { to: "/system/users", label: "حساب أستاذ / معيد" },
+                { to: "/system/users", label: "المستخدمون والأدوار" },
               ]}
             />
           </div>

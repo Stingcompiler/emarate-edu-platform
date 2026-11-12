@@ -262,10 +262,17 @@ GRANTS: dict[Role, frozenset[Role]] = {
     R.SITE_MANAGER: frozenset({R.EVENTS_MANAGER}),
 }
 
-# Staff accounts each role may create (docs/03 §7 "المستخدمون").
+# Staff accounts each role may create (docs/03 §7 "المستخدمون"). Academic affairs no longer
+# creates accounts: it appoints from existing ones (owner, 2026-11-12).
 CREATABLE_ACCOUNTS: dict[Role, frozenset[Role]] = {
     R.SYSTEM_ADMIN: frozenset(Role) - {R.STUDENT},  # students come from records
     R.SYSTEM_SUPERVISOR: frozenset(Role) - {R.STUDENT} - TOP_ROLES,
+}
+
+# Accounts each role may disable and enable again: those it creates, and for academic affairs
+# the teaching accounts it used to create (owner, 2026-11-12: it keeps this).
+ACTIVATABLE_ACCOUNTS: dict[Role, frozenset[Role]] = {
+    **CREATABLE_ACCOUNTS,
     R.ACADEMIC_AFFAIRS: frozenset({R.TEACHER, R.TA}),
 }
 
@@ -392,11 +399,19 @@ def grantable_roles(user) -> frozenset[Role]:
     return frozenset(granted)
 
 
-def creatable_accounts(user) -> frozenset[Role]:
-    creatable: set[Role] = set()
+def _held(table: dict[Role, frozenset[Role]], user) -> frozenset[Role]:
+    found: set[Role] = set()
     for role in roles_of(user):
-        creatable |= CREATABLE_ACCOUNTS.get(Role(role), frozenset())
-    return frozenset(creatable)
+        found |= table.get(Role(role), frozenset())
+    return frozenset(found)
+
+
+def creatable_accounts(user) -> frozenset[Role]:
+    return _held(CREATABLE_ACCOUNTS, user)
+
+
+def activatable_accounts(user) -> frozenset[Role]:
+    return _held(ACTIVATABLE_ACCOUNTS, user)
 
 
 def capabilities_of(user) -> dict[str, Scope]:
