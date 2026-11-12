@@ -193,6 +193,8 @@ const Compose = page(() => import("./routes/Compose"), "Compose");
 const ForgotPassword = page(() => import("./routes/ForgotPassword"), "ForgotPassword");
 const ChangePassword = page(() => import("./routes/ChangePassword"), "ChangePassword");
 const Install = page(() => import("./routes/Install"), "Install");
+// TEMPORARY (plan 2026-11-12, phase 2): which site-link form leaves the installed app.
+const LinkTest = page(() => import("./routes/LinkTest"), "LinkTest");
 const NotFound = page(() => import("./routes/NotFound"), "NotFound");
 const Notifications = page(() => import("./routes/Notifications"), "Notifications");
 const Register = page(() => import("./routes/Register"), "Register");
@@ -241,6 +243,7 @@ const router = createBrowserRouter([
   { path: "/notifications/new", element: signedIn(<Compose />, "/notifications/new") },
   { path: "/settings", element: signedIn(<Settings />, "/settings") },
   { path: "/install", element: signedIn(<Install />, "/install") },
+  { path: "/link-test", element: signedIn(<LinkTest />, "/link-test") },
   { path: "/results", element: signedIn(<MyResults />, "/results") },
   { path: "/results/search", element: signedIn(<ResultSearch />, "/results/search") },
   { path: "/results/settings", element: signedIn(<ResultSettings />, "/results/settings") },

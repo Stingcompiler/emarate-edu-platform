@@ -78,6 +78,8 @@ export const ROUTE_ACCESS: Record<string, Allow> = {
   "/notifications/new": canCompose as Allow,
   "/settings": anyone,
   "/install": anyone,
+  // TEMPORARY (plan 2026-11-12, phase 2): the site-link test page.
+  "/link-test": role("system_admin"),
   "/results": student,
   "/results/search": cap("results.correct"),
   "/results/settings": cap("results.settings"),
