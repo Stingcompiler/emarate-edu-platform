@@ -1,4 +1,4 @@
-# Handoff — review of 10 November (closed) and the owner's decisions — 2026-11-12
+# Handoff — roles, departments and staff on the site (review 2026-11-12) — 2026-11-12
 
 Older rounds: `.claude/handoff/archive/2026-10-24_to_2026-11-02.md`, `.claude/handoff/archive/2026-11-04_to_2026-11-08.md`
 (own name, pick-one control, self-registration, roles audit, levels and semesters, first November review).
@@ -69,6 +69,32 @@ Older rounds: `.claude/handoff/archive/2026-10-24_to_2026-11-02.md`, `.claude/ha
   was a muddy dark grey-brown. #285 — CI E2E survives apt outages (Chromium must still start).
   #286 — code-review fixes of #283–#285 (one `isStandalone()` in `lib/push.ts`, E2E checks every
   site link on /login and /track).
+- **Roles, departments and staff review (owner, 2026-11-12; «راجع … قدّم خطة»، then «اوافقك
+  ابدأ التنفيذ»)** — five PRs:
+  - #290 the site rebuilds on writes that change who it shows: `add_member`/`remove_member`,
+    `grant_role`/`revoke_role`, `set_active`, `delete_account` (they waited for the 6-hourly
+    build). `rename_account` in `accounts/services.py` has no caller (renames go through
+    `update_profile`).
+  - #291 a department head is named only where their card shows: API `manager` needs consent
+    and an active account (settles R34: hidden until consent); the site takes the head's name
+    from the filtered faculty card (`lib/api.ts departments()`), so a sample («(مثال)» in the
+    title — `lib/sample.mjs` drops the whole person) is named nowhere; «تصنيف الكوادر» shows
+    `sample`. Seen on production: the demo head (title «(مثال) أستاذ مشارك») was missing from
+    the staff but named in the header — it goes with `purge_demo`, or once the title is fixed.
+  - #292 `teachers-directory` lists academic affairs with `kinds`; the add-member message
+    names the role in Arabic and who grants it.
+  - #293 matrix: `users.create` = `-` for academic affairs; `rbac.ACTIVATABLE_ACCOUNTS` keeps
+    its disable/enable of teacher and TA accounts; a programme follows its department's
+    leadership (no programme role); academic affairs teaches with «أستاذ» granted by the admin
+    or supervisor (nobody grants themselves a role). docs/03 v2.6.
+  - #294 `/departments/:id` (courses.view, scoped): details, programmes, staff, leadership;
+    SA/SS/ACA appoint and relieve the head and supervisor from existing accounts there
+    (`GET /api/v1/departments/{id}/leaders` + `/role-assignments`). Linked from «الهيكل
+    الأكاديمي» («صفحة القسم», and «عيّن مديره ومشرفه» after adding one) and the academic
+    affairs home. E2E `department-page.spec.ts`.
+  Not decided: whether the department supervisor appears on the public department page (today
+  only the head, teachers and TAs). Server check left: does a rebuild hook that arrives while
+  `ecst-site-build` is running get lost (units are on the server, not in the repo)?
 - **Phone checklist — links to the site from the installed app** (review 2026-11-12; the tests only
   check each link's address, never that a phone obeys it). Install the portal on the home screen,
   open it, tap «العودة إلى موقع الكلية» on the sign-in page and «تواصل مع القبول» on /track:
@@ -123,8 +149,7 @@ Older rounds: `.claude/handoff/archive/2026-10-24_to_2026-11-02.md`, `.claude/ha
 
 ## Waiting on the owner
 
-1. Department head's name on the site without `public_profile` (R34): hide until consent, or
-   institutional (then write it in docs/03).
+1. Whether the department supervisor shows on the public department page (review 2026-11-12).
 2. docs/03 wording (recommend: edit the doc): site manager reads cycles/intakes (D7); academic
    affairs hides a staff photo/qualification; head registrar deletes a cycle/intake without
    applications.
