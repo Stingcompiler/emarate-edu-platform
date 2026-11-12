@@ -904,6 +904,15 @@ def activate(token: str, password: str) -> User:
 # ─── Roles ────────────────────────────────────────────────────────────────
 
 
+def _site_staff_changed() -> None:
+    """Roles, names and whether an account is active decide who the site's department pages and
+    «الكوادر» show: rebuild it after the commit (review 2026-11-12: a new head or a disabled
+    account waited for the six-hourly build)."""
+    from .staff_profile import site_changed
+
+    site_changed()
+
+
 def _check_department_rule(role: Role, department_id: int | None) -> None:
     if role in DEPARTMENT_SCOPED_ROLES and department_id is None:
         raise ValidationError({"department": [gettext("This role requires a department.")]})
@@ -938,6 +947,7 @@ def grant_role(
         department_id=department_id,
     )
     rbac.clear_cache(user)
+    _site_staff_changed()
     return assignment
 
 
@@ -958,6 +968,7 @@ def revoke_role(meta: RequestMeta, assignment: RoleAssignment) -> None:
         )
         assignment.delete()
         rbac.clear_cache(user)
+        _site_staff_changed()
 
 
 def delete_account(meta: RequestMeta, user: User) -> None:
@@ -980,6 +991,7 @@ def delete_account(meta: RequestMeta, user: User) -> None:
             # it survives the account it names; it rolls back with the delete if that fails.
             record(meta, "account.delete", user, old=snapshot)
             user.delete()
+            _site_staff_changed()
     except (ProtectedError, RestrictedError):
         raise Conflict(
             gettext(
@@ -1158,4 +1170,5 @@ def set_active(meta: RequestMeta, user: User, active: bool) -> User:
             old={"is_active": not active},
             new={"is_active": active},
         )
+        _site_staff_changed()
     return user
