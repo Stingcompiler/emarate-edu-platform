@@ -31,6 +31,7 @@ from .serializers import (
     BulkEnrollResultSerializer,
     BulkEnrollSerializer,
     CourseSerializer,
+    DirectoryPersonSerializer,
     EnrollmentCreateSerializer,
     EnrollmentSerializer,
     InstructorAddSerializer,
@@ -39,7 +40,6 @@ from .serializers import (
     MembershipSerializer,
     MyCourseSerializer,
     OfferingSerializer,
-    PersonSerializer,
     TermSerializer,
 )
 
@@ -372,7 +372,8 @@ class TeacherDirectoryView(APIView):
     """Find teacher/TA accounts to add to a department (board DesktopDeptProfessors).
 
     Only for those who manage memberships; returns names and emails of active
-    teaching accounts, never other users.
+    teaching accounts, and academic affairs, who may teach too (review 2026-11-12: the
+    department could not find them) — never other users. ``kinds`` says what each may join as.
     """
 
     permission_classes = [IsAuthenticated, capability("membership.manage")]
@@ -380,7 +381,7 @@ class TeacherDirectoryView(APIView):
     @extend_schema(
         operation_id="teachers_directory",
         parameters=[OpenApiParameter("search", str, required=True)],
-        responses=PersonSerializer(many=True),
+        responses=DirectoryPersonSerializer(many=True),
     )
     def get(self, request):
         from accounts.models import User
@@ -390,9 +391,13 @@ class TeacherDirectoryView(APIView):
         if len(term) < 2:
             return Response([])
         people = (
-            User.objects.filter(is_active=True, role_assignments__role__in=[Role.TEACHER, Role.TA])
+            User.objects.filter(
+                is_active=True,
+                role_assignments__role__in=[Role.TEACHER, Role.TA, Role.ACADEMIC_AFFAIRS],
+            )
             .filter(Q(full_name_ar__icontains=term) | Q(email__icontains=term))
             .distinct()
+            .prefetch_related("role_assignments")
             .order_by("full_name_ar")[:20]
         )
-        return Response(PersonSerializer(people, many=True).data)
+        return Response(DirectoryPersonSerializer(people, many=True).data)

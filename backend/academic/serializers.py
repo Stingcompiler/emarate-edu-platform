@@ -119,6 +119,20 @@ class PersonSerializer(serializers.ModelSerializer):
         fields = ["public_id", "full_name_ar", "full_name_en", "email", "photo"]
 
 
+class DirectoryPersonSerializer(PersonSerializer):
+    """A person a department may add: ``kinds`` are the memberships their roles allow now
+    («teacher», «ta»); empty for academic affairs who does not teach yet (review 2026-11-12)."""
+
+    kinds = serializers.SerializerMethodField()
+
+    class Meta(PersonSerializer.Meta):
+        fields = [*PersonSerializer.Meta.fields, "kinds"]
+
+    def get_kinds(self, user) -> list[str]:
+        held = {r.role for r in user.role_assignments.all()}
+        return [kind for kind, role in (("teacher", "teacher"), ("ta", "ta")) if role in held]
+
+
 class InstructorSerializer(serializers.ModelSerializer):
     user = PersonSerializer(read_only=True)
 

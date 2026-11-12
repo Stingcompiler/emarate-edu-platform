@@ -20,6 +20,22 @@ from .models import CourseOffering, DepartmentMembership, Enrollment, OfferingIn
 _KIND_ROLE = {"teacher": Role.TEACHER, "ta": Role.TA}
 
 
+def _lacks_role(kind: str) -> ValidationError:
+    """In Arabic, naming the role and who grants it (review 2026-11-12: the message showed
+    «teacher» and sent the department to academic affairs, who cannot grant it to themselves)."""
+    return ValidationError(
+        {
+            "user": [
+                gettext(
+                    "This person does not hold the «%(role)s» role: the system admin or academic "
+                    "affairs grants it from Users."
+                )
+                % {"role": Role(_KIND_ROLE[kind]).label}
+            ]
+        }
+    )
+
+
 def _require(meta: RequestMeta, capability: str, department_id: int) -> None:
     if not rbac.can(meta.actor, capability, department_id):
         raise PermissionDenied(gettext("Outside your department scope."))
@@ -31,16 +47,7 @@ def _require(meta: RequestMeta, capability: str, department_id: int) -> None:
 def add_member(meta: RequestMeta, department: Department, user, kind: str) -> DepartmentMembership:
     _require(meta, "membership.manage", department.pk)
     if _KIND_ROLE[kind] not in rbac.roles_of(user):
-        raise ValidationError(
-            {
-                "user": [
-                    gettext(
-                        "This person does not have the %(kind)s role. Academic affairs creates it."
-                    )
-                    % {"kind": kind}
-                ]
-            }
-        )
+        raise _lacks_role(kind)
     try:
         with transaction.atomic():
             membership = DepartmentMembership.objects.create(
@@ -88,9 +95,7 @@ def add_instructor(
     department_id = offering.course.department_id
     _require(meta, "courses.manage", department_id)
     if _KIND_ROLE[role] not in rbac.roles_of(user):
-        raise ValidationError(
-            {"user": [gettext("This person does not have the %(role)s role.") % {"role": role}]}
-        )
+        raise _lacks_role(role)
     # Department roles assign their own members; academic affairs / admin assign anyone.
     college_wide = rbac.scope_for(meta.actor, "courses.manage").everything
     if (
