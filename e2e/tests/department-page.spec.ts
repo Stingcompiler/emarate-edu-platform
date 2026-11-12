@@ -45,6 +45,11 @@ test("the system admin creates a department and appoints its head and supervisor
     path: test.info().outputPath(`department-page-${size}.png`),
     fullPage: true,
   });
+  // A tablet in between keeps to the screen too, and the page reads in the dark theme.
+  await page.setViewportSize({ width: 768, height: 1024 });
+  await noSideScroll(page);
+  await page.emulateMedia({ colorScheme: "dark" });
+  await page.screenshot({ path: test.info().outputPath(`department-page-${size}-768-dark.png`) });
 });
 
 test("academic affairs opens a department from its home and sees who leads and teaches there", async ({
