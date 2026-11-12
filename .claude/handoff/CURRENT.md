@@ -76,8 +76,14 @@ Older rounds: `.claude/handoff/archive/2026-10-24_to_2026-11-02.md`, `.claude/ha
      when Safari is restricted under Screen Time — `x-safari-` has no fallback.
   2. Android, installed from Chrome: Chrome itself opens. Suspected (Chromium's
      external_intents README): Chrome keeps the `intent://` and loads the fallback inside the
-     app's own window. Plan phase 2: a temporary test page with four link forms, then the
-     form that works for Chrome only and a new window elsewhere.
+     app's own window. Phase 2 (2026-11-12): the TEMPORARY page `/link-test` (system admin
+     only; Settings ← «تجربة روابط الموقع من التطبيق المثبّت (مؤقت)») lists six forms
+     (current, intent, intent with package=com.android.chrome, googlechrome://, x-safari-,
+     new window). Waiting for the owner's answer per number (أ browser app / ب sheet over the
+     app / ج replaced the app's page / د nothing). Then: put the winning form in
+     `siteLinkFor()` (Chrome only; a new window elsewhere), add a fall-back to a new window
+     when nothing opens within ~1s, and delete `routes/LinkTest.tsx`, its route, its
+     `ROUTE_ACCESS` row, the Settings link and its test in `pwa.spec.ts`.
   3. A computer: a new browser window opens; the app's window stays the portal.
 - **Staff review fixes** (2026-11-09; `fix/site-staff-review`): any staff account (not only
   teachers) may now choose to appear (`accounts.staff_profile.on_staff`, Settings card for all

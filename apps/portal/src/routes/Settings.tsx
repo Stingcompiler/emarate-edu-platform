@@ -125,6 +125,15 @@ export function Settings() {
         }
       >
         <PushCard />
+        {/* TEMPORARY (plan 2026-11-12, phase 2): reachable from inside the installed app. */}
+        {hasRole(me.data, "system_admin") && (
+          <Link
+            to="/link-test"
+            className="block rounded-xl border border-border-soft bg-surface px-4 py-3 text-sm font-semibold text-primary hover:bg-surface-alt"
+          >
+            تجربة روابط الموقع من التطبيق المثبّت (مؤقت)
+          </Link>
+        )}
         {/* Any staff member — whoever holds a role other than student — may choose to appear on
             the site (owner, 2026-11-09: the administration too): a teacher on their department's
             page, anyone the site team placed on «الكوادر». A teaching assistant who also studies

@@ -1,5 +1,7 @@
 import { expect, test } from "@playwright/test";
 
+import { signIn } from "./helpers";
+
 // The installed web app follows the logo in the site settings (owner, 2026-10-17): its manifest,
 // home-screen icon and tab icon are served by the API from the current logo, and the portal's
 // built-in icons stand in until a logo is set.
@@ -74,3 +76,17 @@ for (const [phone, userAgent, expected] of [
     }
   });
 }
+
+// TEMPORARY (plan 2026-11-12, phase 2): the system admin's page of site-link forms, reached from
+// Settings inside the installed app; removed with it once a form is chosen.
+test("the site-link test page lists its six forms for the system admin", async ({ page }) => {
+  await signIn(page, "admin@demo.ecst.test");
+  await page.goto("/settings");
+  await page.getByRole("link", { name: /تجربة روابط الموقع/ }).click();
+  await expect(page).toHaveURL(/\/link-test$/);
+  const links = page.getByRole("main").locator("a[href]").filter({ hasText: /^\d/ });
+  await expect(links).toHaveCount(6);
+  await expect(links.nth(2)).toHaveAttribute("href", /package=com\.android\.chrome;end$/);
+  await expect(links.nth(4)).toHaveAttribute("href", /^x-safari-https?:\/\//);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+});
