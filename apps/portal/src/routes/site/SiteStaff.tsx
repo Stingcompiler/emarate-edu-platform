@@ -604,10 +604,16 @@ function Person({ row: r }: { row: Row }) {
           <span className="rounded-full bg-warning-soft px-2 py-0.5 text-[11px] text-warning-strong">
             لم يعد موظفًا — لن يظهر
           </span>
+        ) : !r.consent ? (
+          <span className="rounded-full bg-warning-soft px-2 py-0.5 text-[11px] text-warning-strong">
+            لم يوافق على الظهور — لن يظهر
+          </span>
         ) : (
-          !r.consent && (
+          // The site hides the demo's examples from visitors (review 2026-11-12: a head placed
+          // here stayed missing with no word why).
+          r.sample && (
             <span className="rounded-full bg-warning-soft px-2 py-0.5 text-[11px] text-warning-strong">
-              لم يوافق على الظهور — لن يظهر
+              لقبه نص تجريبي «(مثال)» — لن يظهر حتى يُصحَّح
             </span>
           )
         )}

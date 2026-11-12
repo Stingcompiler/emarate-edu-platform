@@ -266,7 +266,17 @@ export const site = () =>
   });
 export const programs = () => get<Program[]>("programs", []);
 export const intakes = () => get<PublicIntake[]>("intakes", []);
-export const departments = () => get<Department[]>("departments", []);
+/** The head's name comes from their card in the faculty, which went through the same filters
+ * (consent, and a sample hidden in production): the API's `manager` never names a head the
+ * page leaves out (review 2026-11-12 — the demo head showed in the header, not among the staff). */
+export const departments = () =>
+  get<Department[]>("departments", []).then((all) =>
+    all.map((d) =>
+      d.faculty
+        ? { ...d, manager: d.faculty.find((m) => m.role === "manager")?.name_ar ?? null }
+        : d,
+    ),
+  );
 
 export type FacultyMember = NonNullable<Department["faculty"]>[number];
 /** A staff member as the site shows them: their departments gathered (one may teach in two). */

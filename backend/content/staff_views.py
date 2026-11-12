@@ -18,6 +18,7 @@ from core.permissions import capability
 
 from . import staff
 from .models import StaffEntry, StaffGroup, StaffPlacement
+from .placeholder import MARK
 from .views import PUBLIC_CACHE, _PublicRead
 
 CAPABILITY = "site_staff.manage"
@@ -63,6 +64,8 @@ class StaffRowSerializer(S.Serializer):
     staff = S.BooleanField()
     teaching = S.BooleanField()
     automatic = S.BooleanField()
+    # The title says it is an example («(مثال)»): the site hides the person (lib/sample.mjs).
+    sample = S.BooleanField()
     placements = PlacementSerializer(many=True)
 
 
@@ -139,6 +142,12 @@ def _person(entry: StaffEntry | None, user: User | None, request) -> dict:
     }
 
 
+def _sample(person: dict) -> bool:
+    """The site drops a person whose title carries the demo's mark (apps/landing/src/lib/
+    sample.mjs, «IDENTITY»); the board says so instead of leaving them silently missing."""
+    return any(MARK.search(person[k] or "") for k in ("title_ar", "title_en"))
+
+
 def _placement(p: StaffPlacement) -> dict:
     return {
         "group": p.group_id,
@@ -156,9 +165,11 @@ def _entries():
 
 def _row(entry: StaffEntry, request, *, teaching: bool, on_staff: bool) -> dict:
     user = entry.user
+    person = _person(entry, user, request)
     return {
         "entry": str(entry.public_id),
-        **_person(entry, user, request),
+        **person,
+        "sample": _sample(person),
         "account": user is not None,
         # Shows on the site: an account while it is active, staff, and agrees to appear.
         "consent": user is None or (user.is_active and user.public_profile),
@@ -196,10 +207,12 @@ def board(request) -> dict:
             )
         )
     for user in staff.automatic_faculty():
+        person = _person(None, user, request)
         rows.append(
             {
                 "entry": None,
-                **_person(None, user, request),
+                **person,
+                "sample": _sample(person),
                 "account": True,
                 "consent": True,
                 "staff": True,
