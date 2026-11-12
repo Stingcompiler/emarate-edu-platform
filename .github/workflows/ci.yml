@@ -162,9 +162,13 @@ jobs:
       # archive (2026-11-11: an hour of «Temporary failure resolving archive.ubuntu.com»), the
       # libraries already in the runner image are used rather than failing every test unrun.
       - run: pnpm exec playwright install chromium
-      - run: >-
-          timeout 240 pnpm exec playwright install-deps chromium ||
-          echo "::warning::apt unavailable; Chromium runs on the runner image's libraries"
+      # Only when apt fails AND Chromium still starts on what the image has: a library really
+      # missing fails here, by name, not later as a browser that will not launch.
+      - run: |
+          timeout --kill-after=20 240 pnpm exec playwright install-deps chromium && exit 0
+          sudo pkill -x apt-get || true
+          node -e "import('@playwright/test').then(({ chromium }) => chromium.launch()).then((b) => b.close())"
+          echo "::warning::apt unavailable; Chromium starts on the runner image's libraries"
       - name: Critical flows on phone and desktop (sign-in, exam, application, layout)
         run: pnpm e2e --shard=${{ matrix.shard }}/3
       - name: The public site without the demo's sample texts

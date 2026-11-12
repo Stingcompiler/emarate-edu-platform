@@ -52,8 +52,23 @@ for (const [phone, userAgent, expected] of [
           : real(query);
       Object.defineProperty(navigator, "userAgent", { get: () => ua });
     }, userAgent);
-    await page.goto("/login");
-    const back = page.getByRole("link", { name: "العودة إلى موقع الكلية" });
-    await expect(back).toHaveAttribute("href", expected);
+    // Every link to the site on the sign-in page and the visitor's tracking page (its «تواصل مع
+    // القبول» and «العودة إلى موقع الكلية»), not only the first one.
+    for (const [path, least] of [
+      ["/login", 1],
+      ["/track", 2],
+    ] as const) {
+      await page.goto(path);
+      const back = page.getByRole("link", { name: "العودة إلى موقع الكلية" });
+      await expect(back).toHaveAttribute("href", expected);
+      // The site's host, read from that link (x-safari-https://host/… or intent://host/…).
+      const site = /\/\/([^/#]+)/.exec((await back.getAttribute("href"))!)![1]!;
+      const hrefs = await page
+        .locator("a[href]")
+        .evaluateAll((links) => links.map((a) => a.getAttribute("href") ?? ""));
+      const toSite = hrefs.filter((href) => href.includes(site));
+      expect(toSite.length, path).toBeGreaterThanOrEqual(least);
+      for (const href of toSite) expect(href, path).toMatch(expected);
+    }
   });
 }
