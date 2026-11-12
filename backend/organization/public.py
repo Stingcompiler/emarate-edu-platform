@@ -294,8 +294,15 @@ class PublicProgramView(_PublicRead):
 
 def _departments(queryset, request=None) -> list[dict]:
     ids = list(queryset.values_list("id", flat=True))
+    # The head's name too only with their consent, like their card below (review 2026-11-12:
+    # the header named a head the faculty list left out).
     managers = dict(
-        RoleAssignment.objects.filter(role=Role.DEPARTMENT_MANAGER, department_id__in=ids)
+        RoleAssignment.objects.filter(
+            role=Role.DEPARTMENT_MANAGER,
+            department_id__in=ids,
+            user__public_profile=True,
+            user__is_active=True,
+        )
         .order_by("id")
         .values_list("department_id", "user__full_name_ar")
     )

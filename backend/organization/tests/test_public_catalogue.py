@@ -10,7 +10,9 @@ from content.models import Page
 def test_departments_programs_and_plan(
     api, it_dept, it_program, ba_dept, make_user, make_student, term
 ):
-    manager = make_user(Role.DEPARTMENT_MANAGER, department=it_dept, full_name_ar="د. مدير")
+    manager = make_user(
+        Role.DEPARTMENT_MANAGER, department=it_dept, full_name_ar="د. مدير", public_profile=True
+    )
     teacher = make_user(Role.TEACHER)
     DepartmentMembership.objects.create(department=it_dept, user=teacher, kind="teacher")
     make_student(it_program, "26-IT-0500")
@@ -232,3 +234,22 @@ def test_a_department_manager_publishes_the_departments_public_news(
     # The college-wide list stays college-scoped.
     titles = [a["title"] for a in api().get("/api/public/announcements").data]
     assert "افتتاح معمل الشبكات" not in titles
+
+
+def test_the_head_is_named_only_with_their_consent(api, it_dept, make_user):
+    """Like their card among the staff (review 2026-11-12): no consent, no name in the header."""
+    from django.core.cache import cache
+
+    head = make_user(Role.DEPARTMENT_MANAGER, department=it_dept, full_name_ar="د. رئيس")
+
+    def named():
+        cache.clear()
+        return api().get(f"/api/public/departments/{it_dept.code}").data["manager"]
+
+    assert named() is None
+    head.public_profile = True
+    head.save(update_fields=["public_profile"])
+    assert named() == "د. رئيس"
+    head.is_active = False
+    head.save(update_fields=["is_active"])
+    assert named() is None

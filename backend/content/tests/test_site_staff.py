@@ -249,3 +249,17 @@ def test_groups_reorder_in_one_write(api, make_user):
         .status_code
         == 403
     )
+
+
+def test_the_board_says_when_the_site_hides_a_sample_title(api, teacher, make_user):
+    """The site drops a person whose title says «(مثال)» (lib/sample.mjs); the board says why
+    instead of leaving them silently missing (review 2026-11-12)."""
+    site = api(make_user(Role.SITE_MANAGER))
+    assert [r["sample"] for r in site.get(BOARD).data["rows"]] == [False]
+    teacher.academic_title_ar = "(مثال) أستاذ مشارك"
+    teacher.save(update_fields=["academic_title_ar"])
+    assert [r["sample"] for r in site.get(BOARD).data["rows"]] == [True]
+    placed = site.post(ENTRIES, {"name_ar": "عميد", "title_en": "Dean (Example)"}, format="json")
+    assert placed.status_code == 201, placed.data
+    rows = {r["name_ar"]: r["sample"] for r in site.get(BOARD).data["rows"]}
+    assert rows["عميد"] is True
