@@ -3,8 +3,10 @@ import { api } from "./api";
 export type PushState = "unsupported" | "needs-install" | "denied" | "off" | "on";
 
 const isIOS = () => /iphone|ipad|ipod/i.test(navigator.userAgent);
+/** Running as the installed app (home screen / desktop app), not in a browser tab. The one
+ *  test of it: iOS before 16.4 tells only through `navigator.standalone`. */
 export const isStandalone = () =>
-  window.matchMedia("(display-mode: standalone)").matches ||
+  window.matchMedia?.("(display-mode: standalone)").matches === true ||
   (navigator as Navigator & { standalone?: boolean }).standalone === true;
 
 export async function pushState(): Promise<PushState> {

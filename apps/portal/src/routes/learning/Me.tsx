@@ -18,6 +18,7 @@ import { Link, useNavigate } from "react-router";
 import { PortalShell } from "../../components/PortalShell";
 import { Avatar, Button, Card, SectionLabel } from "../../components/ui";
 import { api, ok } from "../../lib/api";
+import { isStandalone } from "../../lib/push";
 import { useMe, useSignOut } from "../../lib/auth";
 import { initials, num } from "../../lib/reports";
 import { count, N, levelSemester } from "../../lib/format";
@@ -67,8 +68,7 @@ export function Me() {
   const pendingAck = (regulations.data ?? []).filter(
     (r) => r.requires_acknowledgement && r.acknowledged === false,
   ).length;
-  const installed =
-    typeof window !== "undefined" && window.matchMedia?.("(display-mode: standalone)").matches;
+  const installed = isStandalone();
   return (
     <PortalShell title="أنا">
       <Card className="flex flex-wrap items-center gap-x-4 gap-y-3 p-4">

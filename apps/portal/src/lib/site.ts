@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 
 import { api } from "./api";
+import { isStandalone } from "./push";
 
 /** The public website (links back from the portal's sign-in and visitor screens). */
 export const SITE_URL: string =
@@ -15,7 +16,13 @@ export const SITE_URL: string =
 export const siteUrl = (path: string): string => new URL(path, SITE_URL).href;
 
 export type SiteLink = { href: string; target?: string; rel?: string };
-type Device = { standalone: boolean; userAgent: string; touchPoints: number };
+type Device = {
+  standalone: boolean;
+  userAgent: string;
+  touchPoints: number;
+  /** WebKit 17.4 or later (`Object.groupBy`): the version an installed iPad's agent omits. */
+  webkit17?: boolean;
+};
 
 /**
  * A link to the college's site as an anchor's props. In a browser tab it is an ordinary link.
@@ -36,12 +43,16 @@ export function siteLinkFor(url: string, device: Device): SiteLink {
   if (!/^https?:$/.test(target.protocol)) return away;
   // iPadOS asks for the desktop site: a Mac with a touch screen is an iPad.
   if (/iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && device.touchPoints > 1)) {
-    const major = Number(/ OS (\d+)_/.exec(ua)?.[1] ?? /Version\/(\d+)/.exec(ua)?.[1] ?? 0);
-    return major >= 17 ? { href: `x-safari-${url}` } : away;
+    // An iPhone names its system (" OS 17_5"); an iPad asking for the desktop site does not, and
+    // its installed app drops Safari's "Version/18.0" too, so the engine itself is asked.
+    const named = / OS (\d+)_/.exec(ua)?.[1] ?? /Version\/(\d+)/.exec(ua)?.[1];
+    const recent = named ? Number(named) >= 17 : device.webkit17 === true;
+    return recent ? { href: `x-safari-${url}` } : away;
   }
   if (/Android/.test(ua)) {
     const scheme = target.protocol.slice(0, -1);
-    const address = `${target.host}${target.pathname}${target.search}`;
+    // The page's own #part goes before «#Intent;» (Android reads the intent from the last «#»).
+    const address = `${target.host}${target.pathname}${target.search}${target.hash}`;
     return {
       href:
         `intent://${address}#Intent;scheme=${scheme};action=android.intent.action.VIEW;` +
@@ -54,11 +65,10 @@ export function siteLinkFor(url: string, device: Device): SiteLink {
 /** `siteLinkFor` on this device. */
 export const siteLink = (url: string): SiteLink =>
   siteLinkFor(url, {
-    standalone:
-      window.matchMedia?.("(display-mode: standalone)").matches ||
-      (navigator as Navigator & { standalone?: boolean }).standalone === true,
+    standalone: isStandalone(),
     userAgent: navigator.userAgent,
     touchPoints: navigator.maxTouchPoints ?? 0,
+    webkit17: typeof (Object as { groupBy?: unknown }).groupBy === "function",
   });
 
 /**
