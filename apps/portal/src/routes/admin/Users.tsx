@@ -354,6 +354,9 @@ function NewUser() {
       void client.invalidateQueries({ queryKey: ["users"] });
     },
   });
+  // Academic affairs reads the accounts and appoints from them, but creates none (owner,
+  // 2026-11-12): no form for a role the server would refuse.
+  if (!offered.length) return null;
   return (
     <>
       <SectionLabel>

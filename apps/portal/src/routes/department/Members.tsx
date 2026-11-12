@@ -271,7 +271,7 @@ function AddMember({ department }: { department: number }) {
         </button>
       ))}
       {add.isError && <Notice>{problemMessage(add.error)}</Notice>}
-      <p className="text-xs text-text-muted">حسابات الأساتذة الجدد ينشئها أمين الشؤون العلمية.</p>
+      <p className="text-xs text-text-muted">حسابات الأساتذة الجدد ينشئها مدير النظام أو مشرفه.</p>
     </Card>
   );
 }

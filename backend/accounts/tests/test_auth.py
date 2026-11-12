@@ -161,9 +161,9 @@ def test_forgot_password_is_uniform(db, django_capture_on_commit_callbacks):
 def test_staff_account_invitation_and_activation(
     make_user, api, it_dept, django_capture_on_commit_callbacks
 ):
-    affairs = make_user(Role.ACADEMIC_AFFAIRS)
+    supervisor = make_user(Role.SYSTEM_SUPERVISOR)
     with django_capture_on_commit_callbacks(execute=True):
-        response = api(affairs).post(
+        response = api(supervisor).post(
             "/api/v1/users",
             {"email": "Teacher@ECST.test", "full_name_ar": "د. سلمى", "role": "teacher"},
         )
@@ -178,16 +178,20 @@ def test_staff_account_invitation_and_activation(
     assert reuse.status_code == 400
 
 
-def test_academic_affairs_cannot_create_admins(make_user, api):
+def test_academic_affairs_creates_no_accounts_and_appoints_from_existing_ones(make_user, api):
+    """Owner, 2026-11-12: creating accounts is the system admin's and supervisor's; academic
+    affairs chooses heads, supervisors and teachers among existing accounts."""
     affairs = make_user(Role.ACADEMIC_AFFAIRS)
-    response = api(affairs).post(
-        "/api/v1/users", {"email": "x@ecst.test", "full_name_ar": "س", "role": "system_admin"}
-    )
-    assert response.status_code == 403
-    assert not User.objects.filter(email="x@ecst.test").exists()
-    # The portal offers only the roles the server will accept.
+    for role in ("system_admin", "teacher", "ta"):
+        response = api(affairs).post(
+            "/api/v1/users", {"email": f"{role}@ecst.test", "full_name_ar": "س", "role": role}
+        )
+        assert response.status_code == 403, role
+        assert not User.objects.filter(email=f"{role}@ecst.test").exists()
+    # The portal offers only what the server will accept: no account to create, roles to grant.
     me = api(affairs).get("/api/v1/me").data
-    assert me["creatable_roles"] == ["ta", "teacher"]
+    assert me["creatable_roles"] == []
+    assert "users.create" not in me["capabilities"]
     assert me["grantable_roles"] == [
         "department_manager",
         "department_supervisor",
