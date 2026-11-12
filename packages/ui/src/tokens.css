@@ -120,7 +120,9 @@
    was a dim grey-brown that read as muddy. Now a warm paper — cream surfaces, a dark brown ink —
    softer than the white of light mode without going dark: the reading mode phones call "warm".
    Chosen only from the theme switch, never automatic. The college's navy header, blue and single
-   red are the light mode's own (4.6:1 or more on every cream surface). Every text pair is at least 4.5:1 (a11y.spec «warm mode keeps AA contrast»). */
+   red are the light mode's own: 4.55:1 at the least (blue on --color-neutral-soft). Every ink on
+   every warm ground keeps 4.5:1 — apps/portal/src/lib/warm-contrast.test.ts computes them all,
+   and a11y.spec «warm mode keeps AA contrast» audits the pages. */
 :root[data-theme="warm"] {
   color-scheme: only light;
   --bg: #f3ebdd;

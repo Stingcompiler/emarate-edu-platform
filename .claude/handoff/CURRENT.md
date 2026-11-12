@@ -69,6 +69,16 @@ Older rounds: `.claude/handoff/archive/2026-10-24_to_2026-11-02.md`, `.claude/ha
   was a muddy dark grey-brown. #285 — CI E2E survives apt outages (Chromium must still start).
   #286 — code-review fixes of #283–#285 (one `isStandalone()` in `lib/push.ts`, E2E checks every
   site link on /login and /track).
+- **Phone checklist — links to the site from the installed app** (review 2026-11-12; the tests only
+  check each link's address, never that a phone obeys it). Install the portal on the home screen,
+  open it, tap «العودة إلى موقع الكلية» on the sign-in page and «تواصل مع القبول» on /track:
+  1. iPhone/iPad, iOS 17+: the Safari app opens (not a sheet over the app). Note what happens
+     when Safari is restricted under Screen Time — `x-safari-` has no fallback.
+  2. Android, installed from Chrome: Chrome itself opens. Suspected (Chromium's
+     external_intents README): Chrome keeps the `intent://` and loads the fallback inside the
+     app's own window. Plan phase 2: a temporary test page with four link forms, then the
+     form that works for Chrome only and a new window elsewhere.
+  3. A computer: a new browser window opens; the app's window stays the portal.
 - **Staff review fixes** (2026-11-09; `fix/site-staff-review`): any staff account (not only
   teachers) may now choose to appear (`accounts.staff_profile.on_staff`, Settings card for all
   staff); a placed account that is no longer staff drops off (`content.staff.shown`); the people

@@ -11,6 +11,8 @@ async function audit(page: Page, path: string) {
   await page.waitForLoadState("networkidle");
   const { violations } = await new AxeBuilder({ page })
     .withTags(["wcag2a", "wcag2aa", "wcag21aa"])
+    // Astro's own dev toolbar on the public site is not the college's page.
+    .exclude("astro-dev-toolbar")
     .analyze();
   const blocking = violations
     .filter((v) => v.impact === "serious" || v.impact === "critical")
@@ -105,11 +107,31 @@ test("dark mode keeps AA contrast", async ({ page }) => {
   for (const path of ["/", "/courses", "/tasks", "/me"]) await audit(page, path);
 });
 
-// The warm mode (owner, 2026-10-30) is only ever chosen: the same audits with it pinned.
-test("warm mode keeps AA contrast", async ({ page }) => {
+// The warm mode (owner, 2026-10-30) is only ever chosen: the same audits with it pinned — the
+// student's pages, a teacher's, the system admin's and the public site (review 2026-11-12: the
+// student's five alone left the rest of the portal and the site unchecked in this mode).
+// warm-contrast.test.ts computes every token pair; these catch what a page combines itself.
+const WARM: Record<string, string[]> = {
+  "26-IT-0001": ["/", "/courses", "/tasks", "/me"],
+  "teacher@demo.ecst.test": ["/", "/grading"],
+  "admin@demo.ecst.test": ["/system", "/system/users", "/system/settings"],
+};
+for (const [account, paths] of Object.entries(WARM)) {
+  test(`warm mode keeps AA contrast — ${account}`, async ({ page }) => {
+    test.setTimeout(60_000);
+    await page.addInitScript(() => localStorage.setItem("ecst-theme", "warm"));
+    if (account === "26-IT-0001") await audit(page, "/login");
+    await signIn(page, account);
+    for (const path of paths) await audit(page, path);
+  });
+}
+
+test("warm mode keeps AA contrast — the public site", async ({ page }) => {
   test.setTimeout(60_000);
+  const site = process.env.E2E_SITE_URL ?? "http://localhost:4322";
   await page.addInitScript(() => localStorage.setItem("ecst-theme", "warm"));
-  await audit(page, "/login");
-  await signIn(page, "26-IT-0001");
-  for (const path of ["/", "/courses", "/tasks", "/me"]) await audit(page, path);
+  for (const path of ["/ar/", "/ar/admissions/", "/ar/contact/"]) {
+    await audit(page, `${site}${path}`);
+    await expect(page.locator("html")).toHaveAttribute("data-theme", "warm");
+  }
 });
