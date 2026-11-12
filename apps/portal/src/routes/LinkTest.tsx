@@ -73,7 +73,7 @@ export function LinkTest() {
               {...(f.blank ? { target: "_blank", rel: "noopener noreferrer" } : {})}
               className="flex min-h-14 items-start gap-3 px-4 py-3 hover:bg-surface-alt"
             >
-              <span className="grid size-8 shrink-0 place-items-center rounded-full bg-primary-soft text-sm font-bold text-primary">
+              <span className="w-6 shrink-0 pt-0.5 text-lg font-bold tabular-nums text-primary">
                 {f.n}
               </span>
               <span className="min-w-0">
