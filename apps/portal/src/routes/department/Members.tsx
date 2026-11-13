@@ -22,6 +22,8 @@ import { can } from "../../lib/nav";
 import { TeacherStatus, days, initials, num } from "../../lib/reports";
 import { count, N } from "../../lib/format";
 import { useConfirm } from "../../components/Confirm";
+import { ALL } from "../../components/Pager";
+import { Select } from "../../components/Select";
 
 /** Board: DesktopDeptProfessors (desktop, list + detail); phone derived — list then detail. */
 export function Members() {
@@ -52,7 +54,18 @@ export function Members() {
   const [picked, setPicked] = useState<string | null>(null);
   const courseOf = (user: string) =>
     (offerings.data ?? []).filter((o) => o.instructors.some((i) => i.user.public_id === user));
-  const rows = (members.data ?? []).filter((m) =>
+  // Staff are linked to programmes, as many as they teach in (owner, 2026-11-13): one row a
+  // person, with their programmes; a teacher in one of them is listed as a teacher.
+  type Link = NonNullable<typeof members.data>[number];
+  const byUser = new Map<string, Link[]>();
+  for (const m of members.data ?? [])
+    byUser.set(m.user.public_id, [...(byUser.get(m.user.public_id) ?? []), m]);
+  const all = [...byUser.values()].map((links) => ({
+    ...links[0]!,
+    kind: links.some((l) => l.kind === "teacher") ? ("teacher" as const) : ("ta" as const),
+    links,
+  }));
+  const rows = all.filter((m) =>
     filter === "all"
       ? true
       : filter === "idle"
@@ -61,9 +74,7 @@ export function Members() {
   );
   const metric = new Map((metrics.data?.rows ?? []).map((r) => [r.public_id, r]));
   // Large screens open the first member in the side panel rather than leaving it empty.
-  const selected =
-    (members.data ?? []).find((m) => m.user.public_id === picked) ??
-    (isWide() ? rows[0] : undefined);
+  const selected = all.find((m) => m.user.public_id === picked) ?? (isWide() ? rows[0] : undefined);
   const remove = useMutation({
     mutationFn: async (membership: number) => {
       const { error, response } = await api.DELETE(
@@ -73,11 +84,9 @@ export function Members() {
       if (!response.ok) throw error;
     },
     onSuccess: () => {
-      setPicked(null);
       void client.invalidateQueries({ queryKey: ["members"] });
     },
   });
-  const all = members.data ?? [];
   return (
     <PortalShell
       title={`الأساتذة والمعيدون · ${num(all.length)}`}
@@ -120,6 +129,9 @@ export function Members() {
                   <span className="block text-xs text-text-muted sm:truncate">
                     {m.kind === "ta" ? "معيد" : "أستاذ"} ·{" "}
                     {courses.map((o) => o.course_detail.code).join(" · ") || "بلا مواد"}
+                  </span>
+                  <span className="block text-xs text-text-muted sm:truncate">
+                    {m.links.map((l) => l.program_name ?? "القسم").join("، ")}
                   </span>
                 </span>
                 {t ? <TeacherStatus status={t.status} /> : null}
@@ -183,24 +195,33 @@ export function Members() {
                     تقرير الأداء
                   </Button>
                 </Link>
-                {can(me.data, "membership.remove") && (
-                  <Button
-                    variant="secondary"
-                    className="min-h-9 px-3 text-danger-strong"
-                    onClick={async () =>
-                      (await confirm({
-                        title: `إزالة ${selected.user.full_name_ar} من القسم؟`,
-                        body: "تُفك عضويته في القسم فقط؛ لا يُحذف حسابه.",
-                        confirm: "إزالة من القسم",
-                      })) && remove.mutate(selected.id)
-                    }
-                  >
-                    إزالة من القسم
-                  </Button>
-                )}
               </div>
+              <SectionLabel>برامجه في القسم</SectionLabel>
+              {selected.links.map((l) => (
+                <p key={l.id} className="flex items-center justify-between gap-2 text-sm">
+                  <span className="min-w-0">
+                    {l.program_name ?? "القسم كله"} · {l.kind === "ta" ? "معيد" : "أستاذ"}
+                  </span>
+                  {can(me.data, "membership.remove") && (
+                    <Button
+                      variant="ghost"
+                      className="min-h-10 shrink-0 px-3 text-sm text-danger-strong"
+                      disabled={remove.isPending}
+                      onClick={async () =>
+                        (await confirm({
+                          title: `إزالة ${selected.user.full_name_ar} من «${l.program_name ?? "القسم"}»؟`,
+                          body: "يُفك ارتباطه بهذا البرنامج ومواده المفتوحة فيه فقط؛ لا يُحذف حسابه.",
+                          confirm: "إزالة",
+                        })) && remove.mutate(l.id)
+                      }
+                    >
+                      إزالة
+                    </Button>
+                  )}
+                </p>
+              ))}
               <p className="text-xs text-text-muted">
-                الإزالة تفكّ ارتباطه بالقسم فقط؛ لا تحذف حسابه.
+                الإزالة تفكّ ارتباطه بالبرنامج فقط؛ لا تحذف حسابه.
               </p>
               {remove.isError && <Notice>{problemMessage(remove.error)}</Notice>}
             </Card>
@@ -218,6 +239,15 @@ function AddMember({ department }: { department: number }) {
   const client = useQueryClient();
   const [q, setQ] = useState("");
   const [kind, setKind] = useState<"teacher" | "ta">("teacher");
+  // The programme the person joins (owner, 2026-11-13); a department with one means that one.
+  const programs = useQuery({
+    queryKey: ["programs", department],
+    queryFn: async () =>
+      ok(await api.GET("/api/v1/programs", { params: { query: { ...ALL, department } as never } }))
+        ?.results ?? [],
+  });
+  const [picked, setPicked] = useState("");
+  const program = picked || (programs.data?.length === 1 ? String(programs.data[0]!.id) : "");
   const found = useQuery({
     queryKey: ["teachers-directory", q],
     enabled: q.trim().length >= 2,
@@ -230,7 +260,7 @@ function AddMember({ department }: { department: number }) {
     mutationFn: async (user: string) => {
       const { data, error } = await api.POST("/api/v1/departments/{department_id}/members", {
         params: { path: { department_id: department } },
-        body: { user, kind },
+        body: { user, kind, program: program ? Number(program) : null },
       });
       if (!data) throw error;
     },
@@ -250,6 +280,21 @@ function AddMember({ department }: { department: number }) {
           معيد
         </Chip>
       </div>
+      {(programs.data?.length ?? 0) > 1 && (
+        <Select
+          value={program}
+          onChange={(e) => setPicked(e.target.value)}
+          aria-label="البرنامج"
+          className="block min-h-10 w-full rounded-lg border border-border bg-surface px-3 text-sm"
+        >
+          <option value="">اختر البرنامج…</option>
+          {(programs.data ?? []).map((p) => (
+            <option key={p.id} value={p.id}>
+              {p.name_ar}
+            </option>
+          ))}
+        </Select>
+      )}
       <input
         value={q}
         onChange={(e) => setQ(e.target.value)}

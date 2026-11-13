@@ -289,7 +289,7 @@ head_registrar ─▶ StudentRecord → تفعيل → student
 - **ResultCorrection:** `result, requested_by, old_value, new_value, reason, status pending|approved|rejected, decided_by, decided_at, decision_note` — تُطبَّق على النتيجة فقط عند `approved`.
 - **Regulation / RegulationAcknowledgement**, **StudentCase / StudentCaseEvent / ExamMisconductReport** — مملوكة لـ `student_affairs`.
 - **RoleAssignment:** `user, role, college NULL, department NULL, created_by, created_at`؛ قيود: `registrar/dm/ds` تتطلب `department`.
-- **DepartmentMembership:** `user, department, kind teacher|ta, added_by, added_at`.
+- **DepartmentMembership:** `user, program, department (مشتق من البرنامج), kind teacher|ta, added_by, added_at` — الأستاذ يُربط بالبرامج التي يدرّس فيها، في أي قسم (المالك 2026-11-13).
 - **OfferingInstructor:** `offering, user, role, ta_can_grade`.
 - **ApplicationAssignment:** `application, registrar, assigned_by, assigned_at` (التولّي/التوزيع).
 - **Contact + ContactOTP + VisitorSession** (JWT قصير موقّع بنطاق `contact:{id}`) لصفحة المتابعة.

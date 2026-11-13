@@ -51,12 +51,12 @@ def test_anonymous_is_401(db):
     assert response["Content-Type"].startswith("application/problem+json")
 
 
-def test_cookie_writes_need_csrf(staff, it_dept):
+def test_cookie_writes_need_csrf(staff, it_program):
     client = APIClient(enforce_csrf_checks=True)
     client.get("/api/public/csrf")
     token = client.cookies["csrftoken"].value
     assert _login(client).status_code == 200  # no session yet, so nothing to forge
-    body = {"department": it_dept.pk, "code": "IT200", "name_ar": "هياكل البيانات"}
+    body = {"program": it_program.pk, "code": "IT200", "name_ar": "هياكل البيانات"}
     assert client.post("/api/v1/courses", body).status_code == 403
     response = client.post("/api/v1/courses", body, HTTP_X_CSRFTOKEN=token)
     assert response.status_code == 201, response.data

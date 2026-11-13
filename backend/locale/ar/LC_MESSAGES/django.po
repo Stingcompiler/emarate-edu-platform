@@ -46,12 +46,21 @@ msgstr ""
 "من «المستخدمون»."
 
 #: academic/services.py:58
-msgid "Already a member of this department."
-msgstr "عضو في هذا القسم بالفعل."
+msgid "Already a member of this programme."
+msgstr "مرتبط بهذا البرنامج بالفعل."
+
+msgid "Choose the programme this person joins."
+msgstr "اختر البرنامج الذي ينضم إليه."
+
+msgid "This programme already has a course with this code."
+msgstr "في هذا البرنامج مادة بهذا الرمز."
+
+msgid "Choose the programme this course belongs to."
+msgstr "اختر البرنامج الذي تنتمي إليه المادة."
 
 #: academic/services.py:100
-msgid "Add this person to the department first."
-msgstr "أضف هذا الشخص إلى القسم أولًا."
+msgid "Add this person to the programme first."
+msgstr "أضف هذا الشخص إلى البرنامج أولًا."
 
 #: academic/services.py:114
 msgid "Already assigned to this course."
