@@ -15,7 +15,16 @@ export function Home() {
   if (hasRole(m, "teacher", "ta")) return <TeacherToday />;
   const rules: [boolean, string][] = [
     [hasRole(m, "system_admin", "system_supervisor"), "/system"],
-    [hasRole(m, "department_manager", "department_supervisor"), "/department"],
+    [
+      hasRole(
+        m,
+        "department_manager",
+        "department_supervisor",
+        "program_manager",
+        "program_supervisor",
+      ),
+      "/department",
+    ],
     [hasRole(m, "hr"), "/hr"],
     [can(m, "admissions.view"), "/registrar"],
     [hasRole(m, "results_officer"), "/results-office"],

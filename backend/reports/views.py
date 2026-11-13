@@ -19,7 +19,7 @@ from accounts import rbac
 from accounts.rbac import Role
 from audit.services import RequestMeta
 from core.permissions import capability
-from organization.models import Department
+from organization.models import Department, Program
 
 from . import metrics, services
 from .models import ReportSnapshot
@@ -56,16 +56,36 @@ def _term(value) -> Term:
     return term
 
 
-def _departments(scope: rbac.Scope, value) -> list[int]:
-    """Departments to report on: the one asked for (if in scope) or all in scope."""
+def _places(scope: rbac.Scope, value) -> tuple[list[int], list[int] | None]:
+    """Departments to report on — the one asked for (if in scope) or all in scope — and, for a
+    programme's head or supervisor, the programmes of them the report is limited to (``None``:
+    the whole departments). Owner, 2026-11-13: a programme is reported like a department."""
     department_id = _int(value, "department")
     if department_id is not None:
-        if not scope.allows(department_id):
+        if scope.allows(department_id):
+            return [department_id], None
+        programs = list(
+            Program.objects.filter(department_id=department_id, pk__in=scope.programs).values_list(
+                "id", flat=True
+            )
+        )
+        if not programs:
             raise PermissionDenied()
-        return [department_id]
+        return [department_id], programs
     if scope.everything:
-        return list(Department.objects.values_list("id", flat=True))
-    return sorted(scope.departments)
+        return list(Department.objects.values_list("id", flat=True)), None
+    if scope.departments:
+        return sorted(scope.departments), None
+    programs = sorted(scope.programs)
+    departments = Program.objects.filter(pk__in=programs).values_list("department_id", flat=True)
+    return sorted(set(departments)), programs
+
+
+def _whole_departments(programs: list[int] | None) -> None:
+    """A saved report is filed under a department, for that department's roles to find: one
+    limited to some of its programmes is read on the page, not saved."""
+    if programs is not None:
+        raise PermissionDenied(gettext("Saved reports are kept by department."))
 
 
 def _term_ref(term: Term) -> dict:
@@ -75,11 +95,16 @@ def _term_ref(term: Term) -> dict:
 # ─── Department ───────────────────────────────────────────────────────────
 
 
-def build_department(user, term_value, department_value) -> tuple[dict, Term, list[int]]:
+def build_department(
+    user, term_value, department_value
+) -> tuple[dict, Term, list[int], list[int] | None]:
+    """The report, its term, its departments and — when it covers only some programmes of
+    them — those programmes."""
     scope = rbac.scope_for(user, "reports.department")
     term = _term(term_value)
-    dept_ids = _departments(scope, department_value)
-    return metrics.department_report(term, dept_ids), term, dept_ids
+    dept_ids, programs = _places(scope, department_value)
+    data = metrics.department_report(term, dept_ids, program_ids=programs)
+    return data, term, dept_ids, programs
 
 
 class DepartmentReportView(APIView):
@@ -87,7 +112,7 @@ class DepartmentReportView(APIView):
 
     @extend_schema(parameters=[TERM, DEPARTMENT], responses=DepartmentReportSerializer)
     def get(self, request):
-        data, _, _ = build_department(
+        data, *_ = build_department(
             request.user, request.query_params.get("term"), request.query_params.get("department")
         )
         return Response(DepartmentReportSerializer(data).data)
@@ -100,8 +125,8 @@ def build_teachers(user, term_value, department_value, kind) -> tuple[dict, Term
     scope = rbac.scope_for(user, "reports.teachers")
     term = _term(term_value)
     department_id = _int(department_value, "department")
-    if department_id is not None and not scope.allows(department_id):
-        raise PermissionDenied()
+    if department_id is not None:
+        _places(scope, department_value)  # in scope, as a department or through a programme
     if kind not in (None, "", "teacher", "ta"):
         raise ValidationError({"kind": [gettext("teacher or ta.")]})
     data = metrics.teachers_report(term, scope, department_id=department_id, kind=kind or None)
@@ -135,6 +160,7 @@ def teacher_profile(term, scope, teacher, *, notices) -> dict | None:
     offerings = scope.filter(
         CourseOffering.objects.filter(term=term, instructors__user=teacher),
         "course__department_id",
+        "course__program_id",
     ).select_related("course")
     stats = metrics._offering_stats([o.id for o in offerings], timezone.now())
     roles = dict(
@@ -344,7 +370,10 @@ class ReportSnapshotViewSet(
         }
         K = ReportSnapshot.Kind
         if kind == K.DEPARTMENT:
-            data, term, dept_ids = build_department(user, v.get("term"), v.get("department"))
+            data, term, dept_ids, programs = build_department(
+                user, v.get("term"), v.get("department")
+            )
+            _whole_departments(programs)
             links["term"] = term
             if len(dept_ids) == 1:
                 links["department"] = Department.objects.get(pk=dept_ids[0])
@@ -355,6 +384,7 @@ class ReportSnapshotViewSet(
             scope = rbac.scope_for(user, "reports.teachers")
             if not scope.everything and v.get("department") is None:
                 raise ValidationError({"department": [gettext("Choose a department.")]})
+            _whole_departments(_places(scope, v.get("department"))[1])
             data, term = build_teachers(user, v.get("term"), v.get("department"), None)
             links["term"] = term
             if v.get("department") is not None:

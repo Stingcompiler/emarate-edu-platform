@@ -32,7 +32,7 @@ from accounts.rbac import Role, Scope
 from exams.models import Exam
 from learning.models import Assignment, Lecture, Submission, SubmissionGrade
 from live.models import LiveSession
-from organization.models import Department, SystemSettings
+from organization.models import Department, Program, SystemSettings
 from students.models import StudentRecord
 
 STATUS_ORDER = {"below": 0, "warn": 1, "ok": 2, "none": 3}
@@ -222,15 +222,17 @@ def teacher_rows(
     """One row per teacher/TA in scope with this term's indicators."""
     now = now or timezone.now()
     limits = thresholds()
+    # A programme's head sees the staff and courses of their programme (owner, 2026-11-13).
     offerings = scope.filter(
         CourseOffering.objects.filter(term=term).exclude(status=CourseOffering.Status.DRAFT),
         "course__department_id",
+        "course__program_id",
     )
     offering_dept = dict(offerings.values_list("id", "course__department_id"))
     # A TA answers for grading only where the teacher allowed it (docs/03 §3.9).
     ta_grades = set(offerings.filter(ta_can_grade=True).values_list("id", flat=True))
     teaching = OfferingInstructor.objects.filter(offering_id__in=list(offering_dept))
-    members = scope.filter(DepartmentMembership.objects.all(), "department_id")
+    members = scope.filter(DepartmentMembership.objects.all(), "department_id", "program_id")
     if user_ids is not None:
         teaching = teaching.filter(user_id__in=user_ids)
         members = members.filter(user_id__in=user_ids)
@@ -379,9 +381,17 @@ def teachers_report(term: Term, scope: Scope, *, department_id=None, kind=None, 
 # ─── Department ───────────────────────────────────────────────────────────
 
 
-def _department_facts(term: Term, dept_ids: list[int], now) -> tuple[list, dict, dict]:
+def _department_facts(
+    term: Term, dept_ids: list[int], now, program_ids: list[int] | None = None
+) -> tuple[list, dict, dict]:
+    """``program_ids``: only these programmes of the departments (a programme's report)."""
+    inside = (
+        Q(course__department_id__in=dept_ids)
+        if program_ids is None
+        else Q(course__program_id__in=program_ids)
+    )
     offerings = list(
-        CourseOffering.objects.filter(term=term, course__department_id__in=dept_ids)
+        CourseOffering.objects.filter(inside, term=term)
         .exclude(status=CourseOffering.Status.DRAFT)
         .select_related("course")
     )
@@ -414,14 +424,18 @@ def _kpis(offerings, stats, extra, planned_each) -> dict:
     }
 
 
-def department_report(term: Term, dept_ids: list[int], now=None) -> dict:
+def department_report(
+    term: Term, dept_ids: list[int], now=None, program_ids: list[int] | None = None
+) -> dict:
+    """``program_ids``: the report of these programmes only — what a programme's head reads of
+    the department that holds them (owner, 2026-11-13)."""
     now = now or timezone.now()
     limits = thresholds()
     planned_each = weeks_elapsed(term, now) * limits["lectures_per_week"]
-    offerings, stats, extra = _department_facts(term, dept_ids, now)
+    offerings, stats, extra = _department_facts(term, dept_ids, now, program_ids)
     kpis = _kpis(offerings, stats, extra, planned_each)
-    students = StudentRecord.objects.filter(
-        department_id__in=dept_ids, status=StudentRecord.Status.ACTIVE
+    students = StudentRecord.objects.filter(status=StudentRecord.Status.ACTIVE).filter(
+        Q(department_id__in=dept_ids) if program_ids is None else Q(program_id__in=program_ids)
     )
     total = students.count()
     enrolled = (
@@ -467,7 +481,7 @@ def department_report(term: Term, dept_ids: list[int], now=None) -> dict:
     before = previous_term(term)
     previous = None
     if before is not None:
-        p_offerings, p_stats, p_extra = _department_facts(before, dept_ids, now)
+        p_offerings, p_stats, p_extra = _department_facts(before, dept_ids, now, program_ids)
         previous = _kpis(
             p_offerings,
             p_stats,
@@ -475,7 +489,11 @@ def department_report(term: Term, dept_ids: list[int], now=None) -> dict:
             weeks_elapsed(before, now) * limits["lectures_per_week"],
         )
         previous["term"] = before.name_ar
-    names = list(Department.objects.filter(id__in=dept_ids).values_list("name_ar", flat=True))
+    names = list(
+        Department.objects.filter(id__in=dept_ids).values_list("name_ar", flat=True)
+        if program_ids is None
+        else Program.objects.filter(id__in=program_ids).values_list("name_ar", flat=True)
+    )
     return {
         "term": {"id": term.id, "name": term.name_ar, "week": weeks_elapsed(term, now)},
         "departments": names,

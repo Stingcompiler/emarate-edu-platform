@@ -52,6 +52,8 @@ const SENDERS = [
   "student_affairs",
   "department_manager",
   "department_supervisor",
+  "program_manager",
+  "program_supervisor",
   "teacher",
   "ta",
   "site_manager",
@@ -88,15 +90,29 @@ export function canEverywhere(me: Me | null | undefined, capability: string): bo
  */
 function departmentNav(me: Me | null | undefined, unread: number): NavItem[] {
   const teaches = hasRole(me, "teacher", "ta");
+  // A programme's head and supervisor get the same pages, narrowed to the programme (owner,
+  // 2026-11-13); those built by department only — the results files, the audit log, the
+  // admissions report — are the department's roles' until they are built per programme.
+  const department = hasRole(me, "department_manager", "department_supervisor");
   return [
     { label: "الرئيسية", to: "/department", icon: LayoutDashboard },
     { label: "المواد", to: "/department/courses", icon: BookOpen },
     { label: "المحاضرات", to: "/department/lectures", icon: Library },
     { label: "الأساتذة", to: "/department/teachers", icon: UserCheck },
-    { label: "طلاب القسم", to: "/department/students", icon: Users },
+    {
+      label: department ? "طلاب القسم" : "طلاب البرنامج",
+      to: "/department/students",
+      icon: Users,
+    },
     { label: "التقارير", to: "/reports", icon: BarChart3 },
-    { label: "النتائج", to: "/result-imports", icon: FileUp, end: false },
-    { label: "سجل العمليات", to: "/department/audit", icon: History },
+    // The department's own sections never change (docs/02 D20); a programme role gets them
+    // only where it holds the capability.
+    ...(department || can(me, "results.manage")
+      ? [{ label: "النتائج", to: "/result-imports", icon: FileUp, end: false }]
+      : []),
+    ...(department || can(me, "audit.view")
+      ? [{ label: "سجل العمليات", to: "/department/audit", icon: History }]
+      : []),
     ...(teaches ? [{ label: "موادي", to: "/courses", icon: BookOpen, end: false }] : []),
     // Additions (never replace the sections above).
     ...(teaches ? [{ label: "أدائي", to: "/me/teaching", icon: Gauge }] : []),
@@ -104,7 +120,9 @@ function departmentNav(me: Me | null | undefined, unread: number): NavItem[] {
     { label: "الاختبارات", to: "/exams", icon: ClipboardList, end: false },
     { label: "جلسات البث", to: "/live", icon: Radio, end: false },
     // The department's admissions (docs/03 §7; review 2026-10-25 decisions, item 7).
-    { label: "تقارير القبول", to: "/reports/admissions", icon: BarChart3 },
+    ...(department || can(me, "reports.admissions")
+      ? [{ label: "تقارير القبول", to: "/reports/admissions", icon: BarChart3 }]
+      : []),
     { label: "الإعلانات", to: "/announcements", icon: Megaphone, end: false },
     { label: "الإشعارات", to: "/notifications", icon: Bell, badge: unread },
     { label: "إشعار جديد", to: "/notifications/new", icon: Send },
@@ -114,7 +132,16 @@ function departmentNav(me: Me | null | undefined, unread: number): NavItem[] {
 }
 
 export function navFor(me: Me | null | undefined, unread: number): NavItem[] {
-  if (hasRole(me, "department_manager", "department_supervisor")) return departmentNav(me, unread);
+  if (
+    hasRole(
+      me,
+      "department_manager",
+      "department_supervisor",
+      "program_manager",
+      "program_supervisor",
+    )
+  )
+    return departmentNav(me, unread);
   const items: NavItem[] = [];
   if (hasRole(me, "system_admin", "system_supervisor")) {
     items.push({ label: "إدارة النظام", short: "الرئيسية", to: "/system", icon: LayoutDashboard });

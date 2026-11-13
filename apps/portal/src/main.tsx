@@ -150,6 +150,7 @@ const DepartmentDashboard = page(
 const DepartmentLectures = page(() => import("./routes/department/Lectures"), "DepartmentLectures");
 const Members = page(() => import("./routes/department/Members"), "Members");
 const DepartmentPage = page(() => import("./routes/DepartmentPage"), "DepartmentPage");
+const ProgramPage = page(() => import("./routes/ProgramPage"), "ProgramPage");
 const Offerings = page(() => import("./routes/department/Offerings"), "Offerings");
 const DepartmentStudents = page(() => import("./routes/department/Students"), "DepartmentStudents");
 const Assignment = page(() => import("./routes/learning/Assignment"), "Assignment");
@@ -309,6 +310,7 @@ const router = createBrowserRouter([
   },
   { path: "/department/teachers", element: signedIn(<Members />, "/department/teachers") },
   { path: "/departments/:id", element: signedIn(<DepartmentPage />, "/departments/:id") },
+  { path: "/programs/:id", element: signedIn(<ProgramPage />, "/programs/:id") },
   {
     path: "/department/students",
     element: signedIn(<DepartmentStudents />, "/department/students"),

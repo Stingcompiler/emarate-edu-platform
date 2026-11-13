@@ -6,7 +6,8 @@ import { DepartmentSwitch } from "../../components/DepartmentSwitch";
 import { PortalShell } from "../../components/PortalShell";
 import { Avatar, Card, CodeTile, SectionLabel, Summary, splitCode } from "../../components/ui";
 import { api, ok } from "../../lib/api";
-import { useMe } from "../../lib/auth";
+import { ROUTE_ACCESS } from "../../lib/access";
+import { hasRole, useMe } from "../../lib/auth";
 import { useCurrentTerm, useDepartment, useOfferings } from "../../lib/department";
 import { days, initials, num } from "../../lib/reports";
 import { ALL } from "../../components/Pager";
@@ -51,6 +52,12 @@ export function DepartmentDashboard() {
         }),
       )?.results ?? [],
   });
+  // A programme's head or supervisor reads the same page about their programme (owner,
+  // 2026-11-13): the server counts the programme only; pages still built by department alone
+  // (results files, the audit log) are left out of the links for them.
+  const programme =
+    hasRole(me.data, "program_manager", "program_supervisor") &&
+    !hasRole(me.data, "department_manager", "department_supervisor");
   const k = report.data?.kpis;
   const list = offerings.data ?? [];
   const noTeacher = list.filter((o) => !o.instructors.some((i) => i.role === "teacher"));
@@ -110,7 +117,11 @@ export function DepartmentDashboard() {
       label: "الأساتذة",
       note: `${num(teachers.data?.summary.members ?? 0)}`,
     },
-    { to: "/department/students", label: "طلاب القسم", note: `${num(k?.students ?? 0)}` },
+    {
+      to: "/department/students",
+      label: programme ? "طلاب البرنامج" : "طلاب القسم",
+      note: `${num(k?.students ?? 0)}`,
+    },
     { to: "/reports", label: "التقارير", note: "" },
     { to: "/result-imports", label: "النتائج", note: "رفع ملف" },
     { to: "/department/audit", label: "سجل العمليات", note: "" },
@@ -123,13 +134,27 @@ export function DepartmentDashboard() {
     { to: "/exams", label: "الاختبارات", note: "" },
     { to: "/live", label: "جلسات البث", note: "" },
     { to: "/announcements", label: "الإعلانات", note: "" },
-  ];
+  ].filter((s) => !me.data || (ROUTE_ACCESS[s.to]?.(me.data) ?? true));
   return (
     <PortalShell
-      title={department ? `قسم ${department.name_ar}` : "لوحة القسم"}
+      title={
+        programme
+          ? (report.data?.departments.join("، ") ?? "برنامجي")
+          : department
+            ? `قسم ${department.name_ar}`
+            : "لوحة القسم"
+      }
       subtitle={
         term.data
-          ? `${me.data?.roles.some((r) => r.role === "department_supervisor") ? "مشرف القسم" : "مدير القسم"} · ${term.data.name_ar}`
+          ? `${
+              programme
+                ? hasRole(me.data, "program_manager")
+                  ? "رئيس البرنامج"
+                  : "مشرف البرنامج"
+                : me.data?.roles.some((r) => r.role === "department_supervisor")
+                  ? "مشرف القسم"
+                  : "مدير القسم"
+            } · ${term.data.name_ar}`
           : undefined
       }
     >
@@ -145,7 +170,7 @@ export function DepartmentDashboard() {
         </section>
         <aside className="order-2 space-y-4 lg:col-start-2 lg:row-span-2 lg:row-start-1">
           <Summary
-            title="القسم بالأرقام"
+            title={programme ? "البرنامج بالأرقام" : "القسم بالأرقام"}
             rows={[
               {
                 label: "طلاب منتظمون",
@@ -230,7 +255,7 @@ export function DepartmentDashboard() {
               كل المواد
             </Link>
           </Card>
-          <SectionLabel>صفحات القسم</SectionLabel>
+          <SectionLabel>{programme ? "صفحات البرنامج" : "صفحات القسم"}</SectionLabel>
           <Card className="grid grid-cols-2 divide-border-soft sm:grid-cols-3 xl:grid-cols-4">
             {sections.map((s) => (
               <Link

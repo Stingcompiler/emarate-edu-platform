@@ -77,3 +77,50 @@ test("the system admin appoints a programme's head from an existing account", as
   await expect(page.getByRole("main")).toContainText(`البرنامج: ${programme}`);
   await noSideScroll(page);
 });
+
+// A programme's head works on the department's pages, narrowed to the programme.
+test("a programme's head sees their programme and nothing of its siblings", async ({ page }) => {
+  const size = test.info().project.name;
+  await signIn(page, "program.manager@demo.ecst.test");
+  await expect(page).toHaveURL(/\/department$/);
+  await expect(page.getByRole("heading", { level: 1 })).toContainText("بكالوريوس تقنية المعلومات");
+  await expect(page.getByRole("main")).toContainText("البرنامج بالأرقام");
+  await noSideScroll(page);
+  await page.screenshot({
+    path: test.info().outputPath(`programme-head-home-${size}.png`),
+    fullPage: true,
+  });
+  await page.goto("/department/courses");
+  const main = page.getByRole("main");
+  await expect(main).toContainText("مقدمة في البرمجة"); // IT101, the IT bachelor's
+  await expect(main).not.toContainText("مقدمة في نظم المعلومات"); // IS101, a sibling's
+  await expect(main).not.toContainText("صيانة الحاسوب"); // DIT101, a sibling's
+  await page.goto("/department/students");
+  await expect(page.getByRole("main")).not.toContainText("نظم المعلومات");
+  await noSideScroll(page);
+});
+
+test("a programme opens on its own page, where its head is appointed", async ({ page }) => {
+  const size = test.info().project.name;
+  await signIn(page, "academic@demo.ecst.test");
+  // Programmes with no head of their own, in departments with no manager, wait on the home.
+  await expect(page.getByRole("main")).toContainText("برامج بلا رئيس");
+  await page.goto("/academic");
+  await page.getByRole("link", { name: "علوم الحاسوب", exact: true }).first().click();
+  const programme = size === "phone" ? "بكالوريوس علوم الحاسوب" : "بكالوريوس الذكاء الاصطناعي";
+  await page.getByRole("link", { name: new RegExp(programme) }).click();
+  await expect(page).toHaveURL(/\/programs\/\d+$/);
+  await expect(page.getByRole("heading", { level: 1 })).toContainText(programme);
+  const card = page.locator("[data-lead]").filter({ hasText: "رئيس البرنامج" }).first();
+  await expect(card).toContainText("لم يُعيَّن بعد");
+  await card.getByRole("button", { name: /^تعيين رئيس البرنامج/ }).click();
+  await card.getByLabel("ابحث عن رئيس البرنامج").fill("سلمى");
+  await card.getByRole("button", { name: /د\. سلمى الخضر/ }).click();
+  await expect(card).toContainText("د. سلمى الخضر");
+  await expect(card).not.toContainText("لم يُعيَّن بعد");
+  await noSideScroll(page);
+  await page.screenshot({
+    path: test.info().outputPath(`programme-page-${size}.png`),
+    fullPage: true,
+  });
+});

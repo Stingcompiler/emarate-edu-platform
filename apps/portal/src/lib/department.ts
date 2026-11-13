@@ -9,22 +9,25 @@ import { ALL } from "../components/Pager";
  * The department the dashboard is about: a department role's own department
  * (the first, if several); college-wide roles see the first department and switch with
  * `?department=` — read from the router, so the switcher (DepartmentSwitch) and links
- * update the page (review 2026-09-29, P6).
+ * update the page (review 2026-09-29, P6). A programme's head or supervisor (owner,
+ * 2026-11-13) works in the department that holds their programme: the server lists that
+ * department to them and narrows every list on these pages to the programme.
  */
 export function useDepartment() {
   const me = useMe();
   const [params] = useSearchParams();
   const scope = me.data?.capabilities?.["courses.view"] as
-    { everything?: boolean; departments?: number[] } | undefined;
+    { everything?: boolean; departments?: number[]; programs?: number[] } | undefined;
   const departments = useQuery({
     queryKey: ["departments"],
     queryFn: async () =>
       ok(await api.GET("/api/v1/departments", { params: { query: ALL } }))?.results ?? [],
   });
   const fromUrl = Number(params.get("department")) || undefined;
-  const allowed = scope?.everything
-    ? (departments.data ?? []).map((d) => d.id)
-    : (scope?.departments ?? []);
+  const allowed =
+    scope?.everything || scope?.programs?.length
+      ? (departments.data ?? []).map((d) => d.id)
+      : (scope?.departments ?? []);
   const id = fromUrl && allowed.includes(fromUrl) ? fromUrl : allowed[0];
   const department = departments.data?.find((d) => d.id === id);
   return {

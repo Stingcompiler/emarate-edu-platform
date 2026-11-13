@@ -30,13 +30,21 @@ export function AcademicHome() {
   const leaders = useQuery({
     queryKey: ["role-assignments", "leaders"],
     queryFn: async () => {
-      const get = async (role: "department_manager" | "department_supervisor") =>
+      const get = async (
+        role:
+          "department_manager" | "department_supervisor" | "program_manager" | "program_supervisor",
+      ) =>
         ok(
           await api.GET("/api/v1/role-assignments", {
             params: { query: { role, page_size: 100 } },
           }),
         )?.results ?? [];
-      return [...(await get("department_manager")), ...(await get("department_supervisor"))];
+      return [
+        ...(await get("department_manager")),
+        ...(await get("department_supervisor")),
+        ...(await get("program_manager")),
+        ...(await get("program_supervisor")),
+      ];
     },
   });
   const teachers = useQuery({
@@ -55,9 +63,19 @@ export function AcademicHome() {
   });
   const has = (id: number, role: string) =>
     (leaders.data ?? []).some((r) => r.role === role && r.department === id);
-  // A department missing its manager or its supervisor needs an appointment.
-  const unled = (departments.data ?? []).filter(
-    (d) => !has(d.id, "department_manager") || !has(d.id, "department_supervisor"),
+  // Coordination is by programme (owner, 2026-11-13): every programme has its head, unless its
+  // department has a manager, who then runs all its programmes. One with neither needs an
+  // appointment.
+  const programs = useQuery({
+    queryKey: ["programs", "all"],
+    queryFn: async () =>
+      ok(await api.GET("/api/v1/programs", { params: { query: { page_size: 100 } as never } }))
+        ?.results ?? [],
+  });
+  const headed = (program: number) =>
+    (leaders.data ?? []).some((r) => r.role === "program_manager" && r.program === program);
+  const unled = (programs.data ?? []).filter(
+    (p) => p.is_active !== false && !headed(p.id) && !has(p.department, "department_manager"),
   );
   const slow = (teachers.data?.rows ?? []).filter(
     (t) => t.grading_days != null && t.grading_days > (teachers.data?.thresholds.grading_days ?? 3),
@@ -81,6 +99,8 @@ export function AcademicHome() {
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
             {(departments.data ?? []).map((d) => {
               const heads = (leaders.data ?? []).filter((r) => r.department === d.id);
+              const own = (programs.data ?? []).filter((p) => p.department === d.id);
+              const waiting = unled.filter((p) => p.department === d.id);
               return (
                 <Card key={d.id} className="px-4 py-3 text-sm">
                   {/* Its own page: details, staff, and appointing its head and supervisor
@@ -97,11 +117,11 @@ export function AcademicHome() {
                       {r.role === "department_manager" ? "مدير القسم" : "مشرف القسم"}: {r.user_name}
                     </p>
                   ))}
-                  {!has(d.id, "department_manager") && (
-                    <p className="mt-1 text-xs font-semibold text-danger-strong">بلا مدير</p>
-                  )}
-                  {!has(d.id, "department_supervisor") && (
-                    <p className="mt-1 text-xs font-semibold text-danger-strong">بلا مشرف</p>
+                  <p className="mt-1 text-xs text-text-muted">{count(own.length, N.program)}</p>
+                  {waiting.length > 0 && (
+                    <p className="mt-1 text-xs font-semibold text-danger-strong">
+                      بلا رئيس: {waiting.map((p) => p.name_ar).join("، ")}
+                    </p>
                   )}
                 </Card>
               );
@@ -125,20 +145,13 @@ export function AcademicHome() {
                 },
                 {
                   n: unled.length,
-                  title: "أقسام تنقصها قيادة",
+                  title: "برامج بلا رئيس",
                   meta: unled
-                    .map(
-                      (d) =>
-                        `${d.name_ar} (${[
-                          !has(d.id, "department_manager") && "مدير",
-                          !has(d.id, "department_supervisor") && "مشرف",
-                        ]
-                          .filter(Boolean)
-                          .join(" و")})`,
-                    )
+                    .slice(0, 4)
+                    .map((p) => p.name_ar)
                     .join(" · "),
-                  // The first of them on its own page, where the head and supervisor are appointed.
-                  to: unled.length ? `/departments/${unled[0]!.id}` : "/system/users",
+                  // The first of them on its own page, where its head is appointed.
+                  to: unled.length ? `/programs/${unled[0]!.id}` : "/system/users",
                   tone: "danger",
                 },
                 {

@@ -487,7 +487,14 @@ export function Structure() {
               >
                 <span className="min-w-0">
                   <bdi className="block font-mono text-xs text-text-muted">{p.code}</bdi>
-                  <b className="block">{p.name_ar}</b>
+                  {/* Its own page: its head and supervisor are appointed there (owner,
+                      2026-11-13). */}
+                  <Link
+                    to={`/programs/${p.id}`}
+                    className="block font-bold text-primary hover:underline"
+                  >
+                    {p.name_ar}
+                  </Link>
                   <span className="mt-0.5 flex flex-wrap gap-x-4">
                     {(
                       [

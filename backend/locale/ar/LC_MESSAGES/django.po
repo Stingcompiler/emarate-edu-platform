@@ -1774,3 +1774,7 @@ msgstr ""
 #: students/views.py:162
 msgid "Invalid department."
 msgstr "قسم غير صالح."
+
+#: reports/views.py
+msgid "Saved reports are kept by department."
+msgstr "التقارير المحفوظة تُحفظ للقسم كله، لا لبرنامج منه."
