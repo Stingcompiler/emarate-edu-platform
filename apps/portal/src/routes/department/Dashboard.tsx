@@ -57,7 +57,9 @@ export function DepartmentDashboard() {
   // (results files, the audit log) are left out of the links for them.
   const programme =
     hasRole(me.data, "program_manager", "program_supervisor") &&
-    !hasRole(me.data, "department_manager", "department_supervisor");
+    !hasRole(me.data, "department_manager", "department_supervisor") &&
+    // … and no college-wide role, which reads whole departments here.
+    !me.data?.capabilities?.["courses.view"]?.everything;
   const k = report.data?.kpis;
   const list = offerings.data ?? [];
   const noTeacher = list.filter((o) => !o.instructors.some((i) => i.role === "teacher"));

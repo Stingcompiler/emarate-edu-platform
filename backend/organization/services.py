@@ -117,9 +117,41 @@ def _refuse(found: dict):
     )
 
 
+def end_program_links(meta, program) -> None:
+    """A programme that is deleted takes its head, its supervisor and its staff links with it:
+    they are written to the log first, as a department's roles are (review 2026-11-13 — they
+    went silently, by the database's cascade). Nothing is removed if the delete then fails:
+    the caller's transaction rolls back."""
+    from academic.models import DepartmentMembership
+    from accounts.models import RoleAssignment
+    from audit.services import record
+
+    roles = RoleAssignment.objects.filter(program=program).select_related("user")
+    links = DepartmentMembership.objects.filter(program=program).select_related("user")
+    if not roles and not links:
+        return
+    record(
+        meta,
+        "program.links_end",
+        program,
+        old={
+            "roles_removed": [
+                {"user": r.user.full_name_ar, "role": r.get_role_display()} for r in roles
+            ],
+            "members_removed": [
+                {"user": m.user.full_name_ar, "kind": m.get_kind_display()} for m in links
+            ],
+        },
+        department_id=program.department_id,
+    )
+    roles.delete()
+    links.delete()
+
+
 def _delete_program(meta, program) -> None:
     from audit.services import record, snapshot
 
+    end_program_links(meta, program)
     program.intakes.filter(applications__isnull=True).delete()
     record(
         # department_id=None: the department goes too, and the log keeps no link to it.

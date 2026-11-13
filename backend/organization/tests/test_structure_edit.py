@@ -377,3 +377,35 @@ def test_levels_are_not_lowered_under_students_or_courses(
     # Raising it, or lowering it to where everyone still fits, is fine.
     assert admin.patch(url, {"levels_count": 5}, format="json").status_code == 200
     assert admin.patch(url, {"levels_count": 4}, format="json").status_code == 200
+
+
+def test_a_deleted_programme_takes_its_head_and_staff_links_on_the_record(
+    api, make_user, it_dept, it_program
+):
+    """Review 2026-11-13: they went with the programme by the database's cascade, unlogged. A
+    delete that is refused removes nothing."""
+    from academic.models import Course, DepartmentMembership
+    from accounts.models import RoleAssignment
+    from accounts.rbac import Role
+    from audit.models import AuditLog
+
+    admin = api(make_user(Role.SYSTEM_ADMIN))
+    head = make_user(Role.PROGRAM_MANAGER, program=it_program, full_name_ar="د. رئيس")
+    teacher = make_user(Role.TEACHER, full_name_ar="د. أستاذ")
+    DepartmentMembership.objects.create(program=it_program, user=teacher, kind="teacher")
+    course = Course.objects.create(program=it_program, code="X1", name_ar="م")
+    url = f"/api/v1/programs/{it_program.pk}"
+    assert admin.delete(url).status_code == 409  # a course is on it
+    assert RoleAssignment.objects.filter(user=head, program=it_program).exists()
+    assert DepartmentMembership.objects.filter(user=teacher).exists()
+    assert not AuditLog.objects.filter(action="program.links_end").exists()
+    course.delete()
+    assert admin.delete(url).status_code == 204
+    assert not RoleAssignment.objects.filter(user=head).exists()
+    assert not DepartmentMembership.objects.filter(user=teacher).exists()
+    entry = AuditLog.objects.get(action="program.links_end")
+    assert entry.old == {
+        "roles_removed": [{"user": "د. رئيس", "role": "رئيس البرنامج"}],
+        "members_removed": [{"user": "د. أستاذ", "kind": "أستاذ"}],
+    }
+    assert entry.department_id == it_dept.pk
