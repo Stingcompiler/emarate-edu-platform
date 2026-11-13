@@ -91,7 +91,10 @@ Older rounds: `.claude/handoff/archive/2026-10-24_to_2026-11-02.md`, `.claude/ha
     explicit `program_id` for people: staff links, programme roles; older entries carry none and
     stay the department's) and results files (`ResultImportBatch.program`, scope `program`;
     `importer.validate_file(scope=…, program=…)`). Every DH/DS `dept` cell is now `prog` for
-    PH/PS. Left: the public programme page naming its head.
+    PH/PS.
+  - The public programme page names who leads it (`head` in `/api/public/programs/<code>`:
+    its own head, else the department's manager, with consent; an object so the sample filter
+    hides it).
   - Demo: `program.manager@` / `program.supervisor@demo.ecst.test` on the IT bachelor's.
   - Gotcha: local `backend/media` (198 MB) made a backup test take minutes — test settings now
     use an unused `MEDIA_ROOT`. A lazy route changes the address before it renders: in E2E wait
@@ -221,6 +224,13 @@ Older rounds: `.claude/handoff/archive/2026-10-24_to_2026-11-02.md`, `.claude/ha
   baseline in the main checkout isn't disturbed.
 - E2E on ports 8011/5184/4332 (8001 belongs to another project); `E2E_BOOT_MS=480000` under load.
 - Local Postgres stops between sessions: `brew services start postgresql@16`.
+- **A migration that changes rows and then adds a constraint or index fails on PostgreSQL when
+  the table has rows** («cannot CREATE INDEX … pending trigger events»): CI and the suites
+  migrate an empty database and pass. `academic/0006` stopped every production deploy from #296
+  until #300 (it rolled back whole; the old release kept running). End the data step with
+  `SET CONSTRAINTS ALL IMMEDIATE` on PostgreSQL, and test it over rows through the executor
+  (`academic/tests/test_migration_with_rows.py`). After merging a migration, confirm the deploy
+  on the server — a green `main` does not mean deployed.
 - Old probes R03/R11 (review-2026-10-08) still "pass": they inject a write after the locked
   re-read, which real locking prevents — not a regression; their regression tests pass.
 

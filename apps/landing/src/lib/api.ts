@@ -141,6 +141,15 @@ export type Program = {
   intake: Intake | null;
 };
 export type ProgramDetail = Program & {
+  /** Who leads the programme — its own head, or its department's — with their consent
+   * (owner, 2026-11-13); absent from an older API. */
+  head?: {
+    name_ar: string;
+    name_en: string;
+    title_ar: string;
+    title_en: string;
+    role: "program_manager" | "department_manager";
+  } | null;
   description_ar: string;
   description_en: string;
   /** One item each; empty until the college writes them. */

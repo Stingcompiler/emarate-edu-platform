@@ -204,6 +204,16 @@ const feesPage = (await pages()).some((page) => page.path === "admissions/fees")
       [pick(lang, p.department_name, p.department_name_en), `departments/${p.department_code}/`],
     ]}
   >
+    {p.head && (
+      <p class="mt-4 text-sm">
+        <b>{pick(lang, p.head.name_ar, p.head.name_en)}</b> ·{" "}
+        <span class="text-text-muted">
+          {p.head.role === "program_manager"
+            ? L("رئيس البرنامج", "Head of programme")
+            : L("رئيس القسم", "Head of department")}
+        </span>
+      </p>
+    )}
     {open && (
       <div class="mt-5 flex flex-wrap items-center gap-3 rounded-2xl bg-success-soft p-4 text-sm text-success-strong">
         <span class="font-semibold">
