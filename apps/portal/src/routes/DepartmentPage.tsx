@@ -16,7 +16,11 @@ const LEADS = [
   { role: "department_manager", label: "مدير القسم" },
   { role: "department_supervisor", label: "مشرف القسم" },
 ] as const;
-type Lead = (typeof LEADS)[number]["role"];
+type Lead =
+  | (typeof LEADS)[number]["role"]
+  // A programme's own head and supervisor (owner, 2026-11-13): routes/ProgramPage.tsx.
+  | "program_manager"
+  | "program_supervisor";
 
 /**
  * One department on a page of its own (review 2026-11-12): its details, programmes, leadership
@@ -127,10 +131,14 @@ export function DepartmentPage() {
               </SectionLabel>
               <Card className="divide-y divide-border-soft">
                 {(programs.data ?? []).map((p) => (
-                  <div key={p.id} className="flex items-start justify-between gap-3 px-4 py-3">
+                  <Link
+                    key={p.id}
+                    to={`/programs/${p.id}`}
+                    className="flex items-start justify-between gap-3 px-4 py-3 hover:bg-surface-alt"
+                  >
                     <span className="min-w-0 text-sm">
                       <bdi className="block font-mono text-xs text-text-muted">{p.code}</bdi>
-                      <b className="block">{p.name_ar}</b>
+                      <b className="block text-primary">{p.name_ar}</b>
                       <span className="text-xs text-text-muted">
                         {DEGREE[p.degree] ?? p.degree} · المستويات: {num(p.levels_count)}
                       </span>
@@ -138,13 +146,16 @@ export function DepartmentPage() {
                     {p.is_active === false && (
                       <span className="shrink-0 text-xs text-text-muted">موقوف</span>
                     )}
-                  </div>
+                  </Link>
                 ))}
                 {!programs.data?.length && (
                   <p className="px-4 py-3 text-sm text-text-muted">لا برامج بعد.</p>
                 )}
               </Card>
-              <p className="mt-2 text-xs text-text-muted">يتولّى برامجَ القسم مديرُه ومشرفه.</p>
+              <p className="mt-2 text-xs text-text-muted">
+                لكل برنامج رئيسه ومشرفه، يُعيَّنان من صفحته؛ ومدير القسم، إن عُيّن، يدير برامجه
+                كلها.
+              </p>
             </section>
             <section aria-labelledby="dept-staff">
               <SectionLabel>
@@ -178,7 +189,7 @@ export function DepartmentPage() {
           </div>
           <aside className="min-w-0 space-y-3" aria-labelledby="dept-leads">
             <SectionLabel>
-              <span id="dept-leads">قيادة القسم</span>
+              <span id="dept-leads">قيادة القسم (اختيارية)</span>
             </SectionLabel>
             {LEADS.map((lead) => (
               <LeadCard
@@ -202,14 +213,18 @@ type Leader = {
   user: { public_id: string; full_name_ar: string; email: string };
 };
 
-function LeadCard({
+/** Who holds a leading role of a department — or of one programme, when `program` is given —
+ * and, for whoever may grant it, appointing from existing accounts and relieving. */
+export function LeadCard({
   department,
+  program,
   role,
   label,
   holders,
   canAppoint,
 }: {
   department: number;
+  program?: number;
   role: Lead;
   label: string;
   holders: Leader[];
@@ -221,6 +236,7 @@ function LeadCard({
   const [q, setQ] = useState("");
   const refresh = () => {
     void client.invalidateQueries({ queryKey: ["department-leaders", department] });
+    void client.invalidateQueries({ queryKey: ["program-leaders"] });
     void client.invalidateQueries({ queryKey: ["role-assignments"] });
     void client.invalidateQueries({ queryKey: ["users"] });
   };
@@ -240,7 +256,9 @@ function LeadCard({
   const appoint = useMutation({
     mutationFn: async (user: string) => {
       const { data, error } = await api.POST("/api/v1/role-assignments", {
-        body: { user, role: role as never, department },
+        body: program
+          ? { user, role: role as never, program }
+          : { user, role: role as never, department },
       });
       if (!data) throw error;
     },
@@ -277,7 +295,9 @@ function LeadCard({
               onClick={async () =>
                 (await confirm({
                   title: `إعفاء ${h.user.full_name_ar} من «${label}»؟`,
-                  body: "يُسحب الدور في هذا القسم فقط؛ لا يُحذف حسابه.",
+                  body: program
+                    ? "يُسحب الدور في هذا البرنامج فقط؛ لا يُحذف حسابه."
+                    : "يُسحب الدور في هذا القسم فقط؛ لا يُحذف حسابه.",
                   confirm: "إعفاء",
                 })) && revoke.mutate(h.id)
               }
@@ -288,7 +308,12 @@ function LeadCard({
         </div>
       ))}
       {!holders.length && (
-        <p className="text-sm font-semibold text-danger-strong">لم يُعيَّن بعد.</p>
+        // A department's head is optional (owner, 2026-11-13); a programme's is expected.
+        <p
+          className={`text-sm ${program ? "font-semibold text-danger-strong" : "text-text-muted"}`}
+        >
+          لم يُعيَّن بعد.
+        </p>
       )}
       {canAppoint &&
         (picking ? (

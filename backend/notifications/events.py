@@ -68,9 +68,10 @@ def instructor_assigned(instructor) -> None:
     )
 
 
-def _approvers(department_id):
-    """Who decides a student's registration: the department manager and supervisor of the
-    student's department, and the head registrar."""
+def _approvers(student):
+    """Who decides a student's registration: the head and supervisor of the student's
+    programme (owner, 2026-11-13), the manager and supervisor of the department that holds it,
+    and the head registrar."""
     from accounts.rbac import Role
 
     User = get_user_model()
@@ -78,7 +79,12 @@ def _approvers(department_id):
         User.objects.filter(
             is_active=True,
             role_assignments__role__in=[Role.DEPARTMENT_MANAGER, Role.DEPARTMENT_SUPERVISOR],
-            role_assignments__department=department_id,
+            role_assignments__department=student.department_id,
+        )
+        | User.objects.filter(
+            is_active=True,
+            role_assignments__role__in=[Role.PROGRAM_MANAGER, Role.PROGRAM_SUPERVISOR],
+            role_assignments__program=student.program_id,
         )
         | User.objects.filter(is_active=True, role_assignments__role=Role.HEAD_REGISTRAR)
     ).distinct()
@@ -87,7 +93,7 @@ def _approvers(department_id):
 def registration_pending(request) -> None:
     student = request.student_record
     notify(
-        _approvers(student.department_id),
+        _approvers(student),
         category=Category.ACCOUNT,
         title=(
             "طلب نقل حساب خريج بانتظار الاعتماد"
@@ -103,7 +109,7 @@ def account_moved(record) -> None:
     """A graduate's account moved to their new record with no card to decide (the official
     email): the department hears of it all the same (review 2026-11-08)."""
     notify(
-        _approvers(record.department_id),
+        _approvers(record),
         category=Category.ACCOUNT,
         title="انتقل حساب خريج إلى سجله الجديد",
         body=f"{record.full_name_ar} · {record.university_number} · {record.program.name_ar}",
@@ -128,7 +134,7 @@ def identity_reported(report) -> None:
     """Same approvers as a pending registration: they decide the report."""
     student = report.student_record
     notify(
-        _approvers(student.department_id),
+        _approvers(student),
         category=Category.ACCOUNT,
         title="بلاغ انتحال على حساب طالب",
         body=f"{student.full_name_ar} · {student.university_number}",

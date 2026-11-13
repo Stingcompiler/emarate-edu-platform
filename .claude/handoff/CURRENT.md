@@ -1,4 +1,4 @@
-# Handoff — roles, departments and staff on the site (review 2026-11-12) — 2026-11-12
+# Handoff — the department is a container; coordination by programme — 2026-11-13
 
 Older rounds: `.claude/handoff/archive/2026-10-24_to_2026-11-02.md`, `.claude/handoff/archive/2026-11-04_to_2026-11-08.md`
 (own name, pick-one control, self-registration, roles audit, levels and semesters, first November review).
@@ -69,6 +69,30 @@ Older rounds: `.claude/handoff/archive/2026-10-24_to_2026-11-02.md`, `.claude/ha
   was a muddy dark grey-brown. #285 — CI E2E survives apt outages (Chromium must still start).
   #286 — code-review fixes of #283–#285 (one `isStandalone()` in `lib/push.ts`, E2E checks every
   site link on /login and /track).
+- **The department is only a container (owner, 2026-11-13)** — «الأساس هو تنسيق البرامج، لكل
+  برنامج رئيس»: courses, lectures and students live in a programme; a department head is
+  optional and, where appointed, runs every programme of the department.
+  - #296 a course belongs to one programme (`Course.program` required for new ones, department
+    derived, code unique in the programme); staff are linked to programmes, many to many, any
+    department (`DepartmentMembership.program`). Migration `academic/0006` guesses nothing:
+    legacy rows with no programme keep working (a shared course, a department-wide member).
+  - #297 roles `program_manager` / `program_supervisor` (`RoleAssignment.program`),
+    `Scope.programs`: `allows(department, programme)`, `filter/q(dept_path, programme_path)` —
+    an endpoint that names no programme path shows a programme role nothing. Matrix columns
+    PH/PS with `prog`; `tests/permissions/test_programme_scope.py` checks every cell and a
+    sibling programme of the same department. Granted by SA, SS, ACA.
+  - Programme portal PR: the programme's report (`reports.department`, `reports.teachers`
+    limited to the programme; saved snapshots stay by department), the department pages
+    narrowed to the programme (`useDepartment` takes the department the server lists),
+    `/programs/:id` (leaders appointed there, `LeadCard` shared with `/departments/:id`), the
+    academic affairs home lists «برامج بلا رئيس» (no head of its own and no department manager).
+  - **Left for programme roles** (`-` in the matrix): uploading results files
+    (`ResultImportBatch` is by department), `reports.admissions`, the audit log
+    (`AuditLog` has no programme). Then the public programme page naming its head.
+  - Demo: `program.manager@` / `program.supervisor@demo.ecst.test` on the IT bachelor's.
+  - Gotcha: local `backend/media` (198 MB) made a backup test take minutes — test settings now
+    use an unused `MEDIA_ROOT`. A lazy route changes the address before it renders: in E2E wait
+    for the new page before picking a control whose label also exists on the old one.
 - **Roles, departments and staff review (owner, 2026-11-12; «راجع … قدّم خطة»، then «اوافقك
   ابدأ التنفيذ»)** — five PRs:
   - #290 the site rebuilds on writes that change who it shows: `add_member`/`remove_member`,
@@ -150,6 +174,8 @@ Older rounds: `.claude/handoff/archive/2026-10-24_to_2026-11-02.md`, `.claude/ha
 ## Waiting on the owner
 
 1. Whether the department supervisor shows on the public department page (review 2026-11-12).
+   Production: press the 11 merges first, then appoint each programme's head from its page
+   (a merge deletes the merged department's role assignments).
 2. docs/03 wording (recommend: edit the doc): site manager reads cycles/intakes (D7); academic
    affairs hides a staff photo/qualification; head registrar deletes a cycle/intake without
    applications.

@@ -299,3 +299,37 @@ def test_a_programme_head_addresses_the_programme_never_the_department(
     assert _local_grant(head, "offering", own["offering"].pk, "students")
     assert not _local_grant(head, "program", sibling.pk, "students")
     assert not _local_grant(head, "department", it_dept.pk, "students")
+
+
+def test_a_programme_head_reads_the_report_of_the_programme(
+    api, make_user, place, it_dept, ba_dept, it_program
+):
+    """reports.department and reports.faculty_kpi are `prog`: the department's report, counted
+    over their programme only; a saved report stays the whole department's."""
+    own = place["own"]
+    OfferingInstructor.objects.create(offering=own["offering"], user=own["teacher"], role="teacher")
+    OfferingInstructor.objects.create(
+        offering=place["other"]["offering"], user=place["other"]["teacher"], role="teacher"
+    )
+    head = api(make_user(Role.PROGRAM_MANAGER, program=it_program))
+    report = head.get(f"/api/v1/reports/department?department={it_dept.pk}")
+    assert report.status_code == 200, report.data
+    assert report.data["departments"] == [it_program.name_ar]
+    assert report.data["kpis"]["offerings"] == 1 and report.data["kpis"]["students"] == 1
+    assert [row["code"] for row in report.data["rows"]] == [own["course"].code]
+    # With no department named: the same, their programmes.
+    assert head.get("/api/v1/reports/department").data["kpis"]["offerings"] == 1
+    teachers = head.get(f"/api/v1/reports/teachers?department={it_dept.pk}")
+    assert teachers.status_code == 200, teachers.data
+    assert [row["name"] for row in teachers.data["rows"]] == [own["teacher"].full_name_ar]
+    assert head.get(f"/api/v1/reports/department?department={ba_dept.pk}").status_code == 403
+    assert head.get(f"/api/v1/reports/teachers?department={ba_dept.pk}").status_code == 403
+    saved = head.post(
+        "/api/v1/report-snapshots", {"kind": "department", "department": it_dept.pk}, format="json"
+    )
+    assert saved.status_code == 403
+    # The department's head still reads the whole department.
+    whole = api(make_user(Role.DEPARTMENT_MANAGER, department=it_dept)).get(
+        f"/api/v1/reports/department?department={it_dept.pk}"
+    )
+    assert whole.data["kpis"]["offerings"] == 2 and whole.data["kpis"]["students"] == 2

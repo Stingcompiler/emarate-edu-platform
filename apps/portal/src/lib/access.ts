@@ -34,6 +34,8 @@ const announcers = role(
   "academic_affairs",
   "department_manager",
   "department_supervisor",
+  "program_manager",
+  "program_supervisor",
   "teacher",
   "ta",
   "site_manager",
@@ -43,6 +45,9 @@ const departmentPages = either(
   role(
     "department_manager",
     "department_supervisor",
+    // A programme's head and supervisor: the same pages, narrowed to the programme.
+    "program_manager",
+    "program_supervisor",
     "academic_affairs",
     "system_admin",
     "system_supervisor",
@@ -148,6 +153,8 @@ export const ROUTE_ACCESS: Record<string, Allow> = {
   // One department's own page (review 2026-11-12): whoever reads its members; the server
   // answers 404 for a department outside the reader's scope.
   "/departments/:id": cap("courses.view"),
+  // One programme's page: its head and supervisor are appointed there (owner, 2026-11-13).
+  "/programs/:id": cap("courses.view"),
   "/department/students": departmentPages,
   "/department/approvals": cap("registration.approve"),
   "/department/audit": cap("audit.view"),

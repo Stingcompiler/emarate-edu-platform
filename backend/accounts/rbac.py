@@ -284,6 +284,9 @@ PROGRAMME_CAPABILITIES = frozenset(
         "results.view",
         "cases.view",
         "admissions.view",
+        # The programme's own report and its staff's indicators.
+        "reports.department",
+        "reports.teachers",
     }
 )
 for _name in PROGRAMME_CAPABILITIES:
