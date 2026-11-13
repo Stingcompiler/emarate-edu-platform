@@ -5,6 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
+from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 
 from .models import AuditLog
@@ -33,6 +34,34 @@ class RequestMeta:
 SYSTEM = RequestMeta()
 
 
+# Where the things the log names keep their programme: a course, a student record or a staff
+# link carry it; an offering, an enrolment, a lecture, a result reach it through their course.
+_PROGRAMME_PATHS = (
+    ("program_id",),
+    ("course", "program_id"),
+    ("offering", "course", "program_id"),
+    ("student_record", "program_id"),
+    ("intake", "program_id"),
+)
+
+
+def program_of(target: models.Model) -> int | None:
+    """The programme ``target`` lives in, when it lives in one (owner, 2026-11-13: courses,
+    lectures and students belong to a programme, whose head reads its log)."""
+    if target._meta.label_lower == "organization.program":
+        return target.pk
+    for path in _PROGRAMME_PATHS:
+        value = target
+        try:
+            for name in path:
+                value = getattr(value, name)
+        except (AttributeError, ObjectDoesNotExist):
+            continue
+        if isinstance(value, int):
+            return value
+    return None
+
+
 def record(
     meta: RequestMeta,
     action: str,
@@ -41,9 +70,16 @@ def record(
     old: dict | None = None,
     new: dict | None = None,
     department_id: int | None = None,
+    program_id: int | None = None,
     actor=None,
 ) -> AuditLog:
+    """``department_id`` files the entry under a department, for its roles to read. Filed
+    under a department, it is also filed under the programme the target lives in — or
+    ``program_id``, when the target is a person (a staff link, a programme role)."""
+    if program_id is None and department_id is not None:
+        program_id = program_of(target)
     return AuditLog.objects.create(
+        program_id=program_id,
         actor=actor if actor is not None else meta.actor,
         action=action,
         target_type=target._meta.label_lower,

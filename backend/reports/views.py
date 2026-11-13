@@ -257,20 +257,31 @@ def build_admissions(user, cycle_value, department_value):
 
     scope = rbac.scope_for(user, "reports.admissions")
     department_id = _int(department_value, "department")
-    if department_id is not None and not scope.allows(department_id):
-        raise PermissionDenied()
-    if department_id is None and not scope.everything:
+    programs = None
+    if department_id is not None or not scope.everything:
         # A department role reports on one of its departments, never the college: the first
-        # one unless the page picks another.
-        department_id = min(scope.departments)
+        # one unless the page picks another. A programme's head: their programmes of it.
+        dept_ids, programs = _places(scope, department_value)
+        if not dept_ids:
+            raise PermissionDenied()
+        department_id = department_id if department_id is not None else dept_ids[0]
+        if programs is not None:
+            programs = list(
+                Program.objects.filter(pk__in=programs, department_id=department_id).values_list(
+                    "id", flat=True
+                )
+            )
     cycle_id = _int(cycle_value, "cycle")
     cycles = scope.filter(
-        AdmissionCycle.objects.order_by("-opens_at"), "intakes__program__department"
+        AdmissionCycle.objects.order_by("-opens_at"),
+        "intakes__program__department",
+        "intakes__program",
     ).distinct()
     cycle = cycles.filter(pk=cycle_id).first() if cycle_id else cycles.first()
     if cycle is None:
         raise NotFound(gettext("No admission cycle."))
-    return metrics.admissions_report(cycle, department_id=department_id), cycle, department_id
+    data = metrics.admissions_report(cycle, department_id=department_id, program_ids=programs)
+    return data, cycle, department_id, programs
 
 
 class AdmissionsReportView(APIView):
@@ -281,7 +292,7 @@ class AdmissionsReportView(APIView):
         responses=AdmissionsReportSerializer,
     )
     def get(self, request):
-        data, _, _ = build_admissions(
+        data, *_ = build_admissions(
             request.user, request.query_params.get("cycle"), request.query_params.get("department")
         )
         return Response(AdmissionsReportSerializer(data).data)
@@ -391,7 +402,10 @@ class ReportSnapshotViewSet(
                 links["department"] = Department.objects.get(pk=v["department"])
             title = f"تقرير أداء هيئة التدريس — {term.name_ar}"
         elif kind == K.ADMISSIONS:
-            data, cycle, department_id = build_admissions(user, v.get("cycle"), v.get("department"))
+            data, cycle, department_id, programs = build_admissions(
+                user, v.get("cycle"), v.get("department")
+            )
+            _whole_departments(programs)
             if department_id is not None:
                 # Filed under its department, so that department's roles find it.
                 links["department"] = Department.objects.get(pk=department_id)

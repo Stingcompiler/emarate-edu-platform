@@ -527,7 +527,15 @@ def _daily_submissions(apps, cycle, now) -> tuple[list[dict], str]:
     return daily, "since_open" if start == opened else "last_30"
 
 
-def admissions_report(cycle, *, department_id: int | None = None, now=None) -> dict:
+def admissions_report(
+    cycle,
+    *,
+    department_id: int | None = None,
+    program_ids: list[int] | None = None,
+    now=None,
+) -> dict:
+    """``program_ids``: only the applications to these programmes — what a programme's head
+    reads of the department's admissions (owner, 2026-11-13)."""
     from admissions.models import (
         AdmissionCycle,
         Application,
@@ -540,6 +548,8 @@ def admissions_report(cycle, *, department_id: int | None = None, now=None) -> d
     apps = Application.objects.filter(intake__cycle=cycle).exclude(status=S.DRAFT)
     if department_id is not None:
         apps = apps.filter(intake__program__department_id=department_id)
+    if program_ids is not None:
+        apps = apps.filter(intake__program_id__in=program_ids)
     by_status: dict[str, int] = defaultdict(int)
     programs: dict[int, dict] = {}
     for row in (
@@ -657,6 +667,8 @@ def admissions_report(cycle, *, department_id: int | None = None, now=None) -> d
         p_apps = Application.objects.filter(intake__cycle=earlier).exclude(status=S.DRAFT)
         if department_id is not None:
             p_apps = p_apps.filter(intake__program__department_id=department_id)
+        if program_ids is not None:
+            p_apps = p_apps.filter(intake__program_id__in=program_ids)
         previous = {"cycle": earlier.name, "total": p_apps.count()}
     return {
         "cycle": {"id": cycle.id, "name": cycle.name},

@@ -30,6 +30,11 @@ class AuditLog(models.Model):
     department = models.ForeignKey(
         "organization.Department", on_delete=models.PROTECT, null=True, related_name="+"
     )
+    # Lets a programme's head and supervisor read the entries of their programme (owner,
+    # 2026-11-13). Entries from before that carry none: they stay the department's.
+    program = models.ForeignKey(
+        "organization.Program", on_delete=models.SET_NULL, null=True, related_name="+"
+    )
     ip = models.GenericIPAddressField(null=True, blank=True)
     user_agent = models.CharField(max_length=255, blank=True)
     at = models.DateTimeField(auto_now_add=True)
@@ -42,6 +47,7 @@ class AuditLog(models.Model):
             models.Index(fields=["target_type", "target_id"]),
             models.Index(fields=["actor", "at"]),
             models.Index(fields=["department", "at"]),
+            models.Index(fields=["program", "at"]),
         ]
 
     def __str__(self) -> str:

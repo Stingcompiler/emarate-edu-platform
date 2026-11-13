@@ -279,14 +279,18 @@ PROGRAMME_CAPABILITIES = frozenset(
         "learning.view",
         "learning.manage",
         "learning.delete",
-        # Reading results. Uploading a results file is still by department (the file and its
-        # batch belong to one): a programme head's upload follows with the programme's reports.
+        # Results: reading them, and uploading the programme's own file.
         "results.view",
+        "results.manage",
+        "results.delete",
         "cases.view",
         "admissions.view",
         # The programme's own report and its staff's indicators.
         "reports.department",
         "reports.teachers",
+        "reports.admissions",
+        # The log of what happened in the programme (entries carry it since 2026-11-13).
+        "audit.view",
     }
 )
 for _name in PROGRAMME_CAPABILITIES:

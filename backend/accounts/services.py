@@ -967,6 +967,7 @@ def grant_role(
         user,
         new={"role": role, "department_id": department_id, "program_id": program_id},
         department_id=logged,
+        program_id=program_id,
     )
     rbac.clear_cache(user)
     _site_staff_changed()
@@ -995,6 +996,7 @@ def revoke_role(meta: RequestMeta, assignment: RoleAssignment) -> None:
                 if assignment.program_id
                 else assignment.department_id
             ),
+            program_id=assignment.program_id,
         )
         assignment.delete()
         rbac.clear_cache(user)

@@ -333,3 +333,106 @@ def test_a_programme_head_reads_the_report_of_the_programme(
         f"/api/v1/reports/department?department={it_dept.pk}"
     )
     assert whole.data["kpis"]["offerings"] == 2 and whole.data["kpis"]["students"] == 2
+
+
+def test_a_programme_head_reads_the_log_of_the_programme(
+    api, make_user, place, it_dept, it_program, sibling
+):
+    """audit.view is `prog`: what happens to the programme's courses, students and staff is
+    filed under it; the sibling programme's entries, and the department's own, are not theirs."""
+    from audit.models import AuditLog
+
+    head_user = make_user(Role.PROGRAM_MANAGER, program=it_program)
+    head = api(head_user)
+    manager = api(make_user(Role.DEPARTMENT_MANAGER, department=it_dept))
+    own, other = place["own"], place["other"]
+    # The department manager writes in both programmes; the head in their own.
+    for item in (own, other):
+        code = f"L{item['program'].pk}"
+        made = manager.post(
+            "/api/v1/courses", {"program": item["program"].pk, "code": code, "name_ar": "م"}
+        )
+        assert made.status_code == 201, made.data
+        url = f"/api/v1/students/{item['student'].public_id}"
+        assert manager.patch(url, {"full_name_en": "X"}, format="json").status_code == 200
+    teacher = make_user(Role.TEACHER)
+    joined = head.post(
+        f"/api/v1/departments/{it_dept.pk}/members",
+        {"user": str(teacher.public_id), "kind": "teacher", "program": it_program.pk},
+        format="json",
+    )
+    assert joined.status_code == 201
+    admin = api(make_user(Role.SYSTEM_ADMIN))
+    grant = {"user": str(teacher.public_id), "role": "program_supervisor"}
+    for program in (it_program, sibling):
+        granted = admin.post(
+            "/api/v1/role-assignments", {**grant, "program": program.pk}, format="json"
+        )
+        assert granted.status_code == 201
+    seen = head.get("/api/v1/audit-logs?page_size=100")
+    assert seen.status_code == 200
+    programmes = set(
+        AuditLog.objects.filter(pk__in=[row["id"] for row in seen.data["results"]]).values_list(
+            "program_id", flat=True
+        )
+    )
+    assert programmes == {it_program.pk}
+    actions = {row["action"] for row in seen.data["results"]}
+    assert {"course.create", "students.update", "membership.add", "role.grant"} <= actions
+    hidden = AuditLog.objects.filter(program=sibling).first()
+    assert hidden is not None and head.get(f"/api/v1/audit-logs/{hidden.pk}").status_code == 404
+    # The department's manager reads both programmes' entries, as before.
+    whole = manager.get("/api/v1/audit-logs?page_size=100").data["results"]
+    assert {it_program.pk, sibling.pk} <= set(
+        AuditLog.objects.filter(pk__in=[row["id"] for row in whole]).values_list(
+            "program_id", flat=True
+        )
+    )
+
+
+def test_a_programme_head_uploads_the_results_of_the_programme(
+    api, make_user, make_student, place, it_dept, it_program, sibling, term
+):
+    """results.upload_publish is `prog` for PH and PS, results.delete_batch for PH only: the
+    programme's own file — a course of the sibling programme in it is refused."""
+    from conftest import csv_upload
+
+    own, other = place["own"], place["other"]
+    mine = make_student(it_program, "26-IT-0911")
+    theirs = make_student(sibling, "26-IT-0912")
+    Enrollment.objects.create(offering=own["offering"], student_record=mine)
+    Enrollment.objects.create(offering=other["offering"], student_record=theirs)
+    header = "الرقم الجامعي,رمز المقرر,الدرجة,التقدير,الحالة"
+    lines = (
+        f"{mine.university_number},{own['course'].code},90,,",
+        f"{theirs.university_number},{other['course'].code},80,,",
+    )
+
+    def upload(client, **where):
+        body = {"file": csv_upload("r.csv", header, *lines), "term": term.pk, **where}
+        return client.post("/api/v1/result-imports", body, format="multipart")
+
+    head = api(make_user(Role.PROGRAM_MANAGER, program=it_program))
+    supervisor = api(make_user(Role.PROGRAM_SUPERVISOR, program=it_program))
+    assert upload(head).status_code == 400  # which programme?
+    assert upload(head, department=it_dept.pk).status_code == 403  # never the department's
+    assert upload(head, program=sibling.pk).status_code == 403
+    made = upload(supervisor, program=it_program.pk)
+    assert made.status_code == 201, made.data
+    assert (made.data["program"], made.data["department"]) == (it_program.pk, it_dept.pk)
+    # Their own course goes in; the sibling programme's is not in this file's programme.
+    assert made.data["summary"] == {"rows": 2, "create": 1, "error": 1}
+    batch = f"/api/v1/result-imports/{made.data['public_id']}"
+    assert head.get(batch).status_code == 200
+    listed = head.get("/api/v1/result-imports").data["results"]
+    assert [row["public_id"] for row in listed] == [made.data["public_id"]]
+    # The department's manager sees the programme's file among the department's.
+    manager = api(make_user(Role.DEPARTMENT_MANAGER, department=it_dept))
+    assert manager.get(batch).status_code == 200
+    # Another programme's head does not.
+    stranger = api(make_user(Role.PROGRAM_MANAGER, program=sibling))
+    assert stranger.get(batch).status_code == 404
+    assert stranger.delete(batch).status_code == 404
+    # The supervisor deletes nothing; the head removes a file not yet committed.
+    assert supervisor.delete(batch).status_code == 403
+    assert head.delete(batch).status_code == 204

@@ -28,6 +28,8 @@ export function ResultImports() {
   const navigate = useNavigate();
   const scope = me.data?.capabilities?.["results.manage"];
   const collegeWide = !!scope?.everything;
+  // A programme's head or supervisor uploads their programme's own file (owner, 2026-11-13).
+  const programmeOnly = !collegeWide && !scope?.departments.length && !!scope?.programs?.length;
 
   const terms = useQuery({
     queryKey: ["terms"],
@@ -44,8 +46,15 @@ export function ResultImports() {
     ok(await api.GET("/api/v1/result-imports", { params: { query: { page } } })),
   );
 
+  const programs = useQuery({
+    queryKey: ["programs", "mine"],
+    enabled: programmeOnly,
+    queryFn: async () =>
+      ok(await api.GET("/api/v1/programs", { params: { query: ALL } }))?.results ?? [],
+  });
   const [term, setTerm] = useState("");
   const [department, setDepartment] = useState("");
+  const [program, setProgram] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const currentTerm = terms.data?.find((t) => t.is_current);
   const allowedDepartments = (departments.data ?? []).filter(
@@ -57,7 +66,12 @@ export function ResultImports() {
       const body = formData({
         file,
         term: term || String(currentTerm?.id ?? ""),
-        department: department || (collegeWide ? "" : String(allowedDepartments[0]?.id ?? "")),
+        ...(programmeOnly
+          ? { program: program || String(programs.data?.[0]?.id ?? "") }
+          : {
+              department:
+                department || (collegeWide ? "" : String(allowedDepartments[0]?.id ?? "")),
+            }),
       });
       const { data, error } = await api.POST("/api/v1/result-imports", {
         body: body as never,
@@ -95,21 +109,38 @@ export function ResultImports() {
                   ))}
                 </Select>
               </label>
-              <label className="block text-sm">
-                <span className="text-xs text-text-muted">القسم</span>
-                <Select
-                  className="mt-1 block min-h-11 w-full rounded-lg border border-border bg-surface px-3"
-                  value={department}
-                  onChange={(e) => setDepartment(e.target.value)}
-                >
-                  {collegeWide && <option value="">كل الأقسام (الكلية)</option>}
-                  {allowedDepartments.map((d) => (
-                    <option key={d.id} value={d.id}>
-                      {d.name_ar}
-                    </option>
-                  ))}
-                </Select>
-              </label>
+              {programmeOnly ? (
+                <label className="block text-sm">
+                  <span className="text-xs text-text-muted">البرنامج</span>
+                  <Select
+                    className="mt-1 block min-h-11 w-full rounded-lg border border-border bg-surface px-3"
+                    value={program || programs.data?.[0]?.id || ""}
+                    onChange={(e) => setProgram(e.target.value)}
+                  >
+                    {(programs.data ?? []).map((p) => (
+                      <option key={p.id} value={p.id}>
+                        {p.name_ar}
+                      </option>
+                    ))}
+                  </Select>
+                </label>
+              ) : (
+                <label className="block text-sm">
+                  <span className="text-xs text-text-muted">القسم</span>
+                  <Select
+                    className="mt-1 block min-h-11 w-full rounded-lg border border-border bg-surface px-3"
+                    value={department}
+                    onChange={(e) => setDepartment(e.target.value)}
+                  >
+                    {collegeWide && <option value="">كل الأقسام (الكلية)</option>}
+                    {allowedDepartments.map((d) => (
+                      <option key={d.id} value={d.id}>
+                        {d.name_ar}
+                      </option>
+                    ))}
+                  </Select>
+                </label>
+              )}
               <label className="flex min-h-24 cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed border-border bg-surface-alt px-4 py-4 text-center text-sm text-text-muted hover:border-primary">
                 <FileUp size={22} aria-hidden className="text-primary" />
                 {file ? (

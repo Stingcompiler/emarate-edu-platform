@@ -86,6 +86,7 @@ def add_member(
                     "kind": kind,
                 },
                 department_id=department.pk,
+                program_id=program.pk if program else None,
             )
     except IntegrityError:
         raise Conflict(
@@ -119,6 +120,7 @@ def remove_member(meta: RequestMeta, membership: DepartmentMembership) -> None:
                 "kind": membership.kind,
             },
             department_id=membership.department_id,
+            program_id=membership.program_id,
         )
         membership.delete()
         site_changed()

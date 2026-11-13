@@ -21,11 +21,16 @@ class ResultUploadSerializer(serializers.Serializer):
     department = serializers.PrimaryKeyRelatedField(
         queryset=Department.objects.all(), required=False, allow_null=True
     )
+    # The file is one programme's: what a programme's head uploads (owner, 2026-11-13).
+    program = serializers.PrimaryKeyRelatedField(
+        queryset=Program.objects.all(), required=False, allow_null=True
+    )
 
 
 class ResultBatchSerializer(serializers.ModelSerializer):
     uploaded_by = serializers.CharField(source="uploaded_by.full_name_ar", read_only=True)
     term_name = serializers.CharField(source="term.name_ar", read_only=True)
+    program_name = serializers.CharField(source="program.name_ar", read_only=True, default=None)
     department_name = serializers.CharField(
         source="department.name_ar", read_only=True, default=None
     )
@@ -38,6 +43,8 @@ class ResultBatchSerializer(serializers.ModelSerializer):
             "scope",
             "department",
             "department_name",
+            "program",
+            "program_name",
             "term",
             "term_name",
             "status",
