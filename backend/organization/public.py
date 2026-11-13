@@ -80,7 +80,20 @@ class RequiredDocumentSerializer(S.Serializer):
     required = S.BooleanField()
 
 
+class ProgramHeadSerializer(S.Serializer):
+    """Who leads the programme, named only with their consent: its own head, or — where the
+    programme has none — the manager of the department that holds it (owner, 2026-11-13). An
+    object, not a bare name, so the site's sample filter hides it like any staff card."""
+
+    name_ar = S.CharField()
+    name_en = S.CharField()
+    title_ar = S.CharField()
+    title_en = S.CharField()
+    role = S.ChoiceField(choices=["program_manager", "department_manager"])
+
+
 class PublicProgramDetailSerializer(PublicProgramSerializer):
+    head = ProgramHeadSerializer(allow_null=True)
     description_ar = S.CharField()
     description_en = S.CharField()
     # One item per line in the portal, a list here; empty until the college writes them.
@@ -279,6 +292,7 @@ class PublicProgramView(_PublicRead):
             levels[course.default_level].append(course)
         intake = row["intake"] or {}
         row.update(
+            head=_program_head(program),
             outcomes_ar=_lines(program.outcomes_ar),
             outcomes_en=_lines(program.outcomes_en),
             careers_ar=_lines(program.careers_ar),
@@ -290,6 +304,30 @@ class PublicProgramView(_PublicRead):
             ],
         )
         return Response(PublicProgramDetailSerializer(row).data)
+
+
+def _program_head(program) -> dict | None:
+    """The programme's own head, else its department's manager — whoever agreed to appear."""
+    consenting = RoleAssignment.objects.filter(
+        user__public_profile=True, user__is_active=True
+    ).select_related("user")
+    found = (
+        consenting.filter(role=Role.PROGRAM_MANAGER, program=program)
+        .order_by("user__full_name_ar")
+        .first()
+        or consenting.filter(role=Role.DEPARTMENT_MANAGER, department_id=program.department_id)
+        .order_by("id")
+        .first()
+    )
+    if found is None:
+        return None
+    return {
+        "name_ar": found.user.full_name_ar,
+        "name_en": found.user.full_name_en,
+        "title_ar": found.user.academic_title_ar,
+        "title_en": found.user.academic_title_en,
+        "role": found.role,
+    }
 
 
 def _departments(queryset, request=None) -> list[dict]:

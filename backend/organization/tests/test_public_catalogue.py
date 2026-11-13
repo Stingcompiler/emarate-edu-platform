@@ -253,3 +253,33 @@ def test_the_head_is_named_only_with_their_consent(api, it_dept, make_user):
     head.is_active = False
     head.save(update_fields=["is_active"])
     assert named() is None
+
+
+def test_a_programme_names_its_head_with_their_consent(api, it_dept, it_program, make_user):
+    """Its own head; where it has none, the manager of the department that holds it (owner,
+    2026-11-13). Nobody is named without agreeing to appear."""
+    from django.core.cache import cache
+
+    def head():
+        cache.clear()
+        return api().get(f"/api/public/programs/{it_program.code}").data["head"]
+
+    assert head() is None
+    manager = make_user(Role.DEPARTMENT_MANAGER, department=it_dept, full_name_ar="د. مدير القسم")
+    own = make_user(Role.PROGRAM_MANAGER, program=it_program, full_name_ar="د. رئيس البرنامج")
+    assert head() is None  # neither agreed
+    manager.public_profile = True
+    manager.save(update_fields=["public_profile"])
+    assert (head()["name_ar"], head()["role"]) == ("د. مدير القسم", "department_manager")
+    own.public_profile = True
+    own.academic_title_ar = "أستاذ مشارك"
+    own.save(update_fields=["public_profile", "academic_title_ar"])
+    named = head()
+    assert (named["name_ar"], named["role"], named["title_ar"]) == (
+        "د. رئيس البرنامج",
+        "program_manager",
+        "أستاذ مشارك",
+    )
+    own.is_active = False
+    own.save(update_fields=["is_active"])
+    assert head()["role"] == "department_manager"

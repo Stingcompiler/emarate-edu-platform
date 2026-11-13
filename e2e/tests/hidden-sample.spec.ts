@@ -52,7 +52,14 @@ test("the site shows no sample text, and still shows the real content", async ({
 // so not named in the department's header, its card or the about page either (review
 // 2026-11-12: the header named a head the staff list left out). The demo teacher still shows.
 test("a head hidden as a sample is named nowhere on the site", async ({ page }) => {
-  for (const path of ["/ar/departments/IT/", "/ar/departments/", "/ar/staff/", "/ar/about/"]) {
+  for (const path of [
+    "/ar/departments/IT/",
+    "/ar/departments/",
+    "/ar/staff/",
+    "/ar/about/",
+    // The programme's page names who leads it — never a sample (owner, 2026-11-13).
+    "/ar/programs/BIT/",
+  ]) {
     await page.goto(SITE + path, { waitUntil: "domcontentloaded" });
     await expect(page.locator("body"), path).not.toContainText("مصطفى الأمين");
   }

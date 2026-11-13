@@ -91,7 +91,10 @@ Older rounds: `.claude/handoff/archive/2026-10-24_to_2026-11-02.md`, `.claude/ha
     explicit `program_id` for people: staff links, programme roles; older entries carry none and
     stay the department's) and results files (`ResultImportBatch.program`, scope `program`;
     `importer.validate_file(scope=…, program=…)`). Every DH/DS `dept` cell is now `prog` for
-    PH/PS. Left: the public programme page naming its head.
+    PH/PS.
+  - The public programme page names who leads it (`head` in `/api/public/programs/<code>`:
+    its own head, else the department's manager, with consent; an object so the sample filter
+    hides it).
   - Demo: `program.manager@` / `program.supervisor@demo.ecst.test` on the IT bachelor's.
   - Gotcha: local `backend/media` (198 MB) made a backup test take minutes — test settings now
     use an unused `MEDIA_ROOT`. A lazy route changes the address before it renders: in E2E wait

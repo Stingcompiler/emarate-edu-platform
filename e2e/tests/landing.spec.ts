@@ -452,3 +452,14 @@ test("on a phone every control in the site header and menu is at least 44 px (de
   await page.waitForTimeout(400);
   expect(await small(), "menu controls under 44 px").toEqual([]);
 });
+
+// Owner, 2026-11-13: coordination is by programme. Its page names who leads it — its own head,
+// or the manager of the department that holds it — only someone who agreed to appear. In the
+// demo the IT bachelor's own head has not; the department's manager has.
+test("a programme's page names who leads it", async ({ page }) => {
+  await page.goto(`${SITE}/ar/programs/BIT/`);
+  const header = page.locator("main").first();
+  await expect(header).toContainText("د. مصطفى الأمين");
+  await expect(header).toContainText("رئيس القسم");
+  await expect(header).not.toContainText("د. إيمان عثمان");
+});
