@@ -121,8 +121,17 @@ export function Offerings() {
   });
   const rows = offerings.data ?? [];
   const stats = new Map((report.data?.rows ?? []).map((r) => [r.public_id, r]));
-  const teachersList = (members.data ?? []).filter((m) => m.kind === "teacher");
-  const tasList = (members.data ?? []).filter((m) => m.kind === "ta");
+  // A course is taught by the staff linked to its programme (owner, 2026-11-13); those who
+  // joined the department itself, before programmes, teach in any of them.
+  const staffOf = (kind: "teacher" | "ta", program: number | null | undefined) => [
+    ...new Map(
+      (members.data ?? [])
+        .filter(
+          (m) => m.kind === kind && (m.program == null || program == null || m.program === program),
+        )
+        .map((m) => [m.user.public_id, m]),
+    ).values(),
+  ];
   // Search and filters above the table; on large screens they stay under the top bar.
   const [q, setQ] = useState("");
   // ?filter= (teacher | ta | behind), so the dashboard's «بلا أستاذ» row opens this list filtered.
@@ -241,12 +250,15 @@ export function Offerings() {
                       o.course_detail.default_term_order,
                     )}
                   </span>
+                  <span className="block text-xs text-text-muted">
+                    {o.course_detail.program_name ?? "بلا برنامج — عدّل المادة لتحديد برنامجها"}
+                  </span>
                 </span>
               </span>
               <Slot
                 label="الأستاذ"
                 current={teacher}
-                options={teachersList.map((m) => ({
+                options={staffOf("teacher", o.course_detail.program).map((m) => ({
                   id: m.user.public_id,
                   name: m.user.full_name_ar,
                 }))}
@@ -261,7 +273,7 @@ export function Offerings() {
                 <Slot
                   label="المعيد"
                   current={ta}
-                  options={tasList.map((m) => ({
+                  options={staffOf("ta", o.course_detail.program).map((m) => ({
                     id: m.user.public_id,
                     name: m.user.full_name_ar,
                   }))}
@@ -331,6 +343,7 @@ export function Offerings() {
               {editing === o.id && (
                 <EditOffering
                   offering={o}
+                  department={id!}
                   onDone={() => {
                     setEditing(null);
                     refresh();
@@ -414,12 +427,24 @@ type CourseSummary = Schemas["CourseSummary"];
 /** Correct a course's details and its section in place (courses.manage, owner 2026-09-29). */
 function EditOffering({
   offering,
+  department,
   onDone,
 }: {
   offering: { id: number; section: string; course_detail: CourseSummary };
+  department: number;
   onDone: () => void;
 }) {
   const c = offering.course_detail;
+  // A course from before programmes owned them is given its programme here (owner,
+  // 2026-11-13); one that has a programme keeps it.
+  const programs = useQuery({
+    queryKey: ["programs", department],
+    enabled: c.program == null,
+    queryFn: async () =>
+      ok(await api.GET("/api/v1/programs", { params: { query: { ...ALL, department } as never } }))
+        ?.results ?? [],
+  });
+  const [program, setProgram] = useState("");
   const [f, setF] = useState({
     code: c.code,
     name_ar: c.name_ar,
@@ -438,6 +463,7 @@ function EditOffering({
           credit_hours: f.credit_hours,
           default_level: f.default_level,
           default_term_order: f.default_term_order,
+          ...(program ? { program: Number(program) } : {}),
         } as never,
       });
       if (!course.data) throw course.error;
@@ -492,6 +518,22 @@ function EditOffering({
         order={f.default_term_order}
         onChange={(level, order) => setF({ ...f, default_level: level, default_term_order: order })}
       />
+      {c.program == null && (
+        <Labeled label="البرنامج">
+          <Select
+            value={program}
+            onChange={(e) => setProgram(e.target.value)}
+            className={`${input} w-full min-w-0`}
+          >
+            <option value="">اختر البرنامج…</option>
+            {(programs.data ?? []).map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.name_ar}
+              </option>
+            ))}
+          </Select>
+        </Labeled>
+      )}
       <Labeled label="الشعبة">
         <input
           dir="ltr"
@@ -539,17 +581,20 @@ function NewOffering({
     program: "",
     section: "A",
   });
+  // A department with one programme means that one; with several, the head picks.
+  const only = programs.data?.length === 1 ? String(programs.data[0]!.id) : "";
+  const program = f.program || only;
   const create = useMutation({
     mutationFn: async () => {
       const course = await api.POST("/api/v1/courses", {
         body: {
-          department,
           code: f.code.trim().toUpperCase(),
           name_ar: f.name_ar,
           credit_hours: f.credit_hours,
           default_level: f.default_level,
           default_term_order: f.default_term_order,
-          program: f.program ? Number(f.program) : null,
+          // A course belongs to one programme (owner, 2026-11-13); its department follows.
+          program: Number(program),
         } as never,
       });
       if (!course.data) throw course.error;
@@ -585,11 +630,11 @@ function NewOffering({
         />
         <Labeled label="البرنامج">
           <Select
-            value={f.program}
+            value={program}
             onChange={(e) => setF({ ...f, program: e.target.value })}
             className={`${input} w-full min-w-0`}
           >
-            <option value="">كل البرامج</option>
+            <option value="">اختر البرنامج…</option>
             {(programs.data ?? []).map((p) => (
               <option key={p.id} value={p.id}>
                 {p.name_ar}
@@ -609,7 +654,7 @@ function NewOffering({
           />
         </label>
         <PlanSemesterPick
-          levels={(programs.data ?? []).find((p) => String(p.id) === f.program)?.levels_count ?? 5}
+          levels={(programs.data ?? []).find((p) => String(p.id) === program)?.levels_count ?? 5}
           level={f.default_level}
           order={f.default_term_order}
           onChange={(level, order) =>
@@ -624,7 +669,7 @@ function NewOffering({
           className={input}
         />
         <Button
-          disabled={!f.code.trim() || !f.name_ar.trim() || create.isPending}
+          disabled={!f.code.trim() || !f.name_ar.trim() || !program || create.isPending}
           onClick={() => create.mutate()}
         >
           <Plus size={16} aria-hidden /> إضافة

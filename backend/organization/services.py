@@ -48,6 +48,15 @@ def _program_use(program) -> dict:
     }
 
 
+def memberships_follow(program) -> None:
+    """Staff linked to a programme belong to its department: keep the two in step."""
+    from academic.models import DepartmentMembership
+
+    DepartmentMembership.objects.filter(program=program).exclude(
+        department_id=program.department_id
+    ).update(department_id=program.department_id)
+
+
 def usage(department) -> dict:
     """What hangs on a department, and what that allows."""
     from academic.models import Course, DepartmentMembership
@@ -72,7 +81,10 @@ def usage(department) -> dict:
         "programs": programs,
         "courses": courses,
         "students": students,
-        "members": DepartmentMembership.objects.filter(department=department).count(),
+        "members": DepartmentMembership.objects.filter(department=department)
+        .values("user")
+        .distinct()
+        .count(),
         "roles": roles,
         "history": history,
         # Deleted together with its programmes: nothing but free programmes, and no history.
@@ -185,13 +197,18 @@ def merge(meta, department, into) -> str:
                 new=snapshot(program),
                 department_id=into.pk,
             )
+            memberships_follow(program)
             moved.append(program.code)
-        # A member of both keeps their place in `into` (one membership a department; looking
-        # them up with their kind broke the merge for a teacher who assists there — R67).
+        # Staff linked to its programmes went with them. Someone who joined the department
+        # itself (before programmes) keeps a place in `into`; a member of both keeps the one
+        # there (looking them up with their kind broke the merge for a teacher who assists
+        # there — R67).
         there = set(
             DepartmentMembership.objects.filter(department=into).values_list("user_id", flat=True)
         )
-        for membership in DepartmentMembership.objects.filter(department=department):
+        for membership in DepartmentMembership.objects.filter(
+            department=department, program__isnull=True
+        ):
             if membership.user_id not in there:
                 DepartmentMembership.objects.create(
                     department=into, user_id=membership.user_id, kind=membership.kind

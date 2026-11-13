@@ -118,7 +118,7 @@ class OfferingViewSet(ScopedModelViewSet):
     delete_capability = "courses.delete"
     department_lookup = "course__department"
     audit_name = "offering"
-    filterset_fields = ["term", "course", "course__department", "status"]
+    filterset_fields = ["term", "course", "course__department", "course__program", "status"]
     search_fields = ["course__code", "course__name_ar"]
 
     def get_queryset(self):
@@ -186,7 +186,9 @@ class DepartmentMembersView(APIView):
     @extend_schema(responses=MembershipSerializer(many=True))
     def get(self, request, department_id):
         department = self._department(request, department_id)
-        rows = DepartmentMembership.objects.filter(department=department).select_related("user")
+        rows = DepartmentMembership.objects.filter(department=department).select_related(
+            "user", "program"
+        )
         return Response(MembershipSerializer(rows, many=True).data)
 
     @extend_schema(request=MembershipAddSerializer, responses={201: MembershipSerializer})
@@ -199,6 +201,7 @@ class DepartmentMembersView(APIView):
             department,
             data.validated_data["user"],
             data.validated_data["kind"],
+            data.validated_data.get("program"),
         )
         return Response(MembershipSerializer(membership).data, status=status.HTTP_201_CREATED)
 

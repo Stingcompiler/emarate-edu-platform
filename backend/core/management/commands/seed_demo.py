@@ -92,11 +92,12 @@ DEPARTMENTS = [
     ),
 ]
 
-# (department, program or None = shared, code, Arabic, English, level, term order)
+# (department, programme, code, Arabic, English, level, term order). Every course belongs to one
+# programme (owner, 2026-11-13): nothing is shared between the programmes of a department.
 COURSES = [
-    ("IT", None, "IT100", "مهارات الحاسوب", "Computer Skills", 1, 1),
-    ("IT", None, "MATH101", "الرياضيات المتقطعة", "Discrete Mathematics", 1, 1),
-    ("IT", None, "ENG101", "اللغة الإنجليزية 1", "English I", 1, 1),
+    ("IT", "BIT", "IT100", "مهارات الحاسوب", "Computer Skills", 1, 1),
+    ("IT", "BIT", "MATH101", "الرياضيات المتقطعة", "Discrete Mathematics", 1, 1),
+    ("IT", "BIT", "ENG101", "اللغة الإنجليزية 1", "English I", 1, 1),
     ("IT", "BIT", "IT101", "مقدمة في البرمجة", "Introduction to Programming", 1, 1),
     ("IT", "BIT", "IT102", "أساسيات تقنية المعلومات", "IT Fundamentals", 1, 1),
     ("IT", "BIT", "IT103", "البرمجة الكائنية", "Object-Oriented Programming", 1, 2),
@@ -106,16 +107,16 @@ COURSES = [
     ("IT", "BIS", "IS101", "مقدمة في نظم المعلومات", "Introduction to Information Systems", 1, 1),
     ("IT", "BIS", "IS201", "تحليل النظم", "Systems Analysis", 2, 1),
     ("IT", "DIT", "DIT101", "صيانة الحاسوب", "Computer Maintenance", 1, 1),
-    ("CS", None, "CS100", "التفكير الحسابي", "Computational Thinking", 1, 1),
+    ("CS", "BCS", "CS100", "التفكير الحسابي", "Computational Thinking", 1, 1),
     ("CS", "BCS", "CS101", "الخوارزميات 1", "Algorithms I", 1, 1),
     ("CS", "BAI", "AI101", "مقدمة في الذكاء الاصطناعي", "Introduction to AI", 1, 1),
-    ("ENG", None, "EN100", "الرسم الهندسي", "Engineering Drawing", 1, 1),
-    ("ENG", None, "EN101", "الفيزياء الهندسية", "Engineering Physics", 1, 1),
+    ("ENG", "BCE", "EN100", "الرسم الهندسي", "Engineering Drawing", 1, 1),
+    ("ENG", "BCE", "EN101", "الفيزياء الهندسية", "Engineering Physics", 1, 1),
     ("ENG", "BCE", "CE101", "مقاومة المواد", "Strength of Materials", 1, 1),
     ("ENG", "BEE", "EE101", "الدوائر الكهربائية", "Electric Circuits", 1, 1),
     ("ENG", "BME", "ME101", "الميكانيكا الهندسية", "Engineering Mechanics", 1, 1),
-    ("BA", None, "BA100", "مبادئ الإدارة", "Principles of Management", 1, 1),
-    ("BA", None, "BA101", "مبادئ المحاسبة", "Principles of Accounting", 1, 1),
+    ("BA", "BBA", "BA100", "مبادئ الإدارة", "Principles of Management", 1, 1),
+    ("BA", "BBA", "BA101", "مبادئ المحاسبة", "Principles of Accounting", 1, 1),
     ("BA", "BBA", "BA201", "السلوك التنظيمي", "Organizational Behaviour", 2, 1),
 ]
 
@@ -301,19 +302,22 @@ class Command(BaseCommand):
         admin = users[Role.SYSTEM_ADMIN]
         meta = RequestMeta(actor=admin, user_agent="seed_demo")
 
+        # Staff are linked to programmes (owner, 2026-11-13): the demo teacher and TA teach in
+        # the IT bachelor's.
         for role in (Role.TEACHER, Role.TA):
-            DepartmentMembership.objects.get_or_create(
-                department=departments["IT"],
-                user=users[role],
-                defaults={"kind": role.value, "added_by": admin},
-            )
+            if not DepartmentMembership.objects.filter(
+                department=departments["IT"], user=users[role]
+            ).exists():
+                DepartmentMembership.objects.create(
+                    program=programs["BIT"], user=users[role], kind=role.value, added_by=admin
+                )
 
         for dept, program, code, name_ar, name_en, level, term_order in COURSES:
             course, _ = Course.objects.get_or_create(
                 department=departments[dept],
                 code=code,
                 defaults={
-                    "program": programs[program] if program else None,
+                    "program": programs[program],
                     "name_ar": name_ar,
                     "name_en": name_en,
                     "default_level": level,
@@ -322,7 +326,7 @@ class Command(BaseCommand):
             )
             if term_order == semester_one.order:
                 offering, _ = CourseOffering.objects.get_or_create(course=course, term=semester_one)
-                if dept == "IT" and program in (None, "BIT"):
+                if program == "BIT":
                     offering.instructors.get_or_create(
                         user=users[Role.TEACHER], defaults={"role": "teacher"}
                     )

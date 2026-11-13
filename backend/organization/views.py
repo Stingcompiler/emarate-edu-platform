@@ -158,6 +158,13 @@ class ProgramViewSet(_CodedViewSet):
     filterset_fields = ["department", "degree", "is_active"]
     search_fields = ["name_ar", "name_en", "code"]
 
+    def perform_update(self, serializer):
+        with transaction.atomic():
+            super().perform_update(serializer)
+            # Its teaching staff follow it to another department (their department is the
+            # programme's — owner, 2026-11-13).
+            services.memberships_follow(serializer.instance)
+
     def perform_destroy(self, instance):
         # Intakes nobody applied to go with the programme (it may have been opened for
         # applying by mistake, #223); one with an application keeps it in use (R28).

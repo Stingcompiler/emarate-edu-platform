@@ -64,7 +64,20 @@ export function DepartmentPage() {
   const d = department.data;
   const grantable = me.data?.grantable_roles ?? [];
   const manageMembers = !!me.data && ROUTE_ACCESS["/department/teachers"]!(me.data);
-  const staff = members.data ?? [];
+  // One row a person: staff are linked to programmes, some to several (owner, 2026-11-13).
+  const staff = [
+    ...new Map(
+      (members.data ?? []).map((m) => [
+        m.user.public_id,
+        {
+          ...m,
+          programs: (members.data ?? [])
+            .filter((x) => x.user.public_id === m.user.public_id)
+            .map((x) => x.program_name ?? "القسم"),
+        },
+      ]),
+    ).values(),
+  ];
   return (
     <PortalShell
       title={d ? (d.name_ar.startsWith("قسم") ? d.name_ar : `قسم ${d.name_ar}`) : "القسم"}
@@ -143,8 +156,8 @@ export function DepartmentPage() {
                     <Avatar text={initials(m.user.full_name_ar)} size="sm" tone="primary" />
                     <span className="min-w-0 text-sm">
                       <b className="block truncate">{m.user.full_name_ar}</b>
-                      <span className="text-xs text-text-muted">
-                        {m.kind === "ta" ? "معيد" : "أستاذ"}
+                      <span className="block text-xs text-text-muted">
+                        {m.kind === "ta" ? "معيد" : "أستاذ"} · {m.programs.join("، ")}
                       </span>
                     </span>
                   </div>

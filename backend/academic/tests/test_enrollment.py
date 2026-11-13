@@ -79,8 +79,8 @@ def test_course_semester_is_one_or_two(api, manager, it_dept, value):
     assert "default_term_order" in made.data["errors"]
 
 
-def test_course_semester_two_is_kept(api, manager, it_dept):
-    body = {"department": it_dept.pk, "code": "IT998", "name_ar": "مادة", "default_term_order": 2}
+def test_course_semester_two_is_kept(api, manager, it_program):
+    body = {"program": it_program.pk, "code": "IT998", "name_ar": "مادة", "default_term_order": 2}
     made = api(manager).post("/api/v1/courses", body)
     assert made.status_code == 201, made.data
     assert Course.objects.get(code="IT998").default_term_order == 2

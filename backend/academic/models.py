@@ -62,8 +62,14 @@ class Term(BilingualNameModel, TimestampedModel):
 
 
 class Course(BilingualNameModel, TimestampedModel):
-    """Catalogue entry. What students take in a term is a CourseOffering."""
+    """Catalogue entry. What students take in a term is a CourseOffering.
 
+    A course belongs to one programme (owner, 2026-11-13: two programmes may name a course
+    alike and teach it differently, so nothing is shared); the department is only the
+    programme's container and is kept here, derived, for department-wide lists. Courses entered
+    before that with no programme stay as they were until someone gives them one."""
+
+    # Derived from the programme on save.
     department = models.ForeignKey(
         "organization.Department", on_delete=models.PROTECT, related_name="courses"
     )
@@ -73,7 +79,8 @@ class Course(BilingualNameModel, TimestampedModel):
         null=True,
         blank=True,
         related_name="courses",
-        help_text="Empty = shared by the department's programs.",
+        help_text="Empty only on courses entered before 2026-11-13 (then shared by the "
+        "department's programmes).",
     )
     code = models.CharField(max_length=20)
     credit_hours = models.PositiveSmallIntegerField(default=3)
@@ -86,7 +93,17 @@ class Course(BilingualNameModel, TimestampedModel):
     class Meta:
         ordering = ["code"]
         constraints = [
-            models.UniqueConstraint(fields=["department", "code"], name="uniq_course_code"),
+            # A code names one course of a programme; two programmes may use the same code.
+            models.UniqueConstraint(
+                fields=["program", "code"],
+                condition=models.Q(program__isnull=False),
+                name="uniq_program_course_code",
+            ),
+            models.UniqueConstraint(
+                fields=["department", "code"],
+                condition=models.Q(program__isnull=True),
+                name="uniq_department_course_code",
+            ),
             models.CheckConstraint(
                 condition=models.Q(credit_hours__gte=1, credit_hours__lte=12),
                 name="course_credit_hours_range",
@@ -99,6 +116,11 @@ class Course(BilingualNameModel, TimestampedModel):
 
     def __str__(self) -> str:
         return f"{self.code} {self.name_ar}"
+
+    def save(self, *args, **kwargs):
+        if self.program_id is not None:
+            self.department_id = self.program.department_id
+        super().save(*args, **kwargs)
 
 
 class CourseOffering(PublicIdModel, TimestampedModel):
@@ -154,7 +176,9 @@ class OfferingInstructor(TimestampedModel):
 
 
 class DepartmentMembership(TimestampedModel):
-    """A teacher or TA belonging to a department (managed by the department)."""
+    """A teacher or TA linked to a programme — any programme of any department, as many as they
+    teach in (owner, 2026-11-13). The department is the programme's, derived on save; a
+    membership from before that with no programme belongs to the whole department."""
 
     class Kind(models.TextChoices):
         TEACHER = "teacher", "أستاذ"
@@ -162,6 +186,13 @@ class DepartmentMembership(TimestampedModel):
 
     department = models.ForeignKey(
         "organization.Department", on_delete=models.CASCADE, related_name="memberships"
+    )
+    program = models.ForeignKey(
+        "organization.Program",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="memberships",
     )
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="department_memberships"
@@ -174,8 +205,22 @@ class DepartmentMembership(TimestampedModel):
     class Meta:
         ordering = ["id"]
         constraints = [
-            models.UniqueConstraint(fields=["department", "user"], name="uniq_department_member")
+            models.UniqueConstraint(
+                fields=["program", "user"],
+                condition=models.Q(program__isnull=False),
+                name="uniq_program_member",
+            ),
+            models.UniqueConstraint(
+                fields=["department", "user"],
+                condition=models.Q(program__isnull=True),
+                name="uniq_department_member",
+            ),
         ]
+
+    def save(self, *args, **kwargs):
+        if self.program_id is not None:
+            self.department_id = self.program.department_id
+        super().save(*args, **kwargs)
 
 
 class Enrollment(TimestampedModel):

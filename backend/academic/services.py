@@ -45,25 +45,48 @@ def _require(meta: RequestMeta, capability: str, department_id: int) -> None:
 # ─── Department membership ────────────────────────────────────────────────
 
 
-def add_member(meta: RequestMeta, department: Department, user, kind: str) -> DepartmentMembership:
+def _member_program(department: Department, program: Program | None) -> Program | None:
+    """The programme a new member joins: staff are linked to programmes, in any department
+    (owner, 2026-11-13). A department with one programme means that one; with none yet, the
+    person joins the department itself."""
+    if program is not None:
+        if program.department_id != department.pk:
+            raise ValidationError(
+                {"program": [gettext("The program belongs to another department.")]}
+            )
+        return program
+    own = list(department.programs.all()[:2])
+    if len(own) > 1:
+        raise ValidationError({"program": [gettext("Choose the programme this person joins.")]})
+    return own[0] if own else None
+
+
+def add_member(
+    meta: RequestMeta, department: Department, user, kind: str, program: Program | None = None
+) -> DepartmentMembership:
     _require(meta, "membership.manage", department.pk)
+    program = _member_program(department, program)
     if _KIND_ROLE[kind] not in rbac.roles_of(user):
         raise _lacks_role(kind)
     try:
         with transaction.atomic():
             membership = DepartmentMembership.objects.create(
-                department=department, user=user, kind=kind, added_by=meta.actor
+                department=department, program=program, user=user, kind=kind, added_by=meta.actor
             )
             record(
                 meta,
                 "membership.add",
                 user,
-                new={"department_id": department.pk, "kind": kind},
+                new={
+                    "department_id": department.pk,
+                    "program_id": program.pk if program else None,
+                    "kind": kind,
+                },
                 department_id=department.pk,
             )
     except IntegrityError:
         raise Conflict(
-            gettext("Already a member of this department."), code="already_member"
+            gettext("Already a member of this programme."), code="already_member"
         ) from None
     # Department pages on the site list their members (review 2026-11-12).
     site_changed()
@@ -73,17 +96,25 @@ def add_member(meta: RequestMeta, department: Department, user, kind: str) -> De
 def remove_member(meta: RequestMeta, membership: DepartmentMembership) -> None:
     _require(meta, "membership.remove", membership.department_id)
     with transaction.atomic():
-        # Removing someone from the department also removes their teaching
-        # assignments in that department's open offerings.
-        OfferingInstructor.objects.filter(
-            user=membership.user,
-            offering__course__department=membership.department,
-        ).exclude(offering__status=CourseOffering.Status.CLOSED).delete()
+        # Removing someone from a programme also removes their teaching assignments in that
+        # programme's open offerings (a membership with no programme: the department's).
+        theirs = (
+            Q(offering__course__program=membership.program)
+            if membership.program_id
+            else Q(offering__course__department=membership.department)
+        )
+        OfferingInstructor.objects.filter(theirs, user=membership.user).exclude(
+            offering__status=CourseOffering.Status.CLOSED
+        ).delete()
         record(
             meta,
             "membership.remove",
             membership.user,
-            old={"department_id": membership.department_id, "kind": membership.kind},
+            old={
+                "department_id": membership.department_id,
+                "program_id": membership.program_id,
+                "kind": membership.kind,
+            },
             department_id=membership.department_id,
         )
         membership.delete()
@@ -100,13 +131,20 @@ def add_instructor(
     _require(meta, "courses.manage", department_id)
     if _KIND_ROLE[role] not in rbac.roles_of(user):
         raise _lacks_role(role)
-    # Department roles assign their own members; academic affairs / admin assign anyone.
+    # Department roles assign the members of the course's programme (those who joined the
+    # department itself, before programmes, too); academic affairs / admin assign anyone.
     college_wide = rbac.scope_for(meta.actor, "courses.manage").everything
+    course = offering.course
+    linked = Q(program__isnull=True) | Q(program_id=course.program_id)
+    if course.program_id is None:
+        linked = Q()
     if (
         not college_wide
-        and not DepartmentMembership.objects.filter(department_id=department_id, user=user).exists()
+        and not DepartmentMembership.objects.filter(
+            linked, department_id=department_id, user=user
+        ).exists()
     ):
-        raise ValidationError({"user": [gettext("Add this person to the department first.")]})
+        raise ValidationError({"user": [gettext("Add this person to the programme first.")]})
     try:
         with transaction.atomic():
             instructor = OfferingInstructor.objects.create(offering=offering, user=user, role=role)

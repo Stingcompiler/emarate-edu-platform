@@ -894,23 +894,29 @@ def test_department_roles_cannot_reach_other_departments(role, api, users, other
         assert "BA101" not in codes and "26-BA-0001" not in codes, url
 
 
-def test_department_roles_cannot_create_in_other_departments(api, users, ba_dept):
-    body = {"department": ba_dept.pk, "code": "BA900", "name_ar": "مقرر"}
+def test_department_roles_cannot_create_in_other_departments(api, users, ba_program):
+    body = {"program": ba_program.pk, "code": "BA900", "name_ar": "مقرر"}
     for role in (R.DEPARTMENT_MANAGER, R.DEPARTMENT_SUPERVISOR):
         assert api(users[role]).post("/api/v1/courses", body).status_code == 403, role
 
 
-def test_course_moves_into_another_department_are_refused(api, users, it_course, ba_dept):
-    response = api(users[R.DEPARTMENT_MANAGER]).patch(
-        f"/api/v1/courses/{it_course.pk}", {"department": ba_dept.pk, "program": None}
-    )
-    assert response.status_code == 403
+def test_course_moves_into_another_department_are_refused(
+    api, users, it_course, ba_dept, ba_program
+):
+    """A course goes where its programme is: to another department's programme is outside the
+    department's scope, and the department alone cannot be changed (owner, 2026-11-13)."""
+    client = api(users[R.DEPARTMENT_MANAGER])
+    url = f"/api/v1/courses/{it_course.pk}"
+    assert client.patch(url, {"program": ba_program.pk}).status_code == 403
+    assert client.patch(url, {"department": ba_dept.pk}).status_code == 400
+    it_course.refresh_from_db()
+    assert it_course.department_id != ba_dept.pk
 
 
 # ─── Writes ───────────────────────────────────────────────────────────────
 
 
-def test_course_write_matrix(api, users, it_dept):
+def test_course_write_matrix(api, users, it_program):
     writers = {
         R.SYSTEM_ADMIN,
         R.SYSTEM_SUPERVISOR,
@@ -920,7 +926,7 @@ def test_course_write_matrix(api, users, it_dept):
     }
     wrong = []
     for n, role in enumerate(Role):
-        body = {"department": it_dept.pk, "code": f"IT9{n:02d}", "name_ar": "مقرر"}
+        body = {"program": it_program.pk, "code": f"IT9{n:02d}", "name_ar": "مقرر"}
         got = api(users[role]).post("/api/v1/courses", body).status_code
         expected = 201 if role in writers else 403
         if got != expected:

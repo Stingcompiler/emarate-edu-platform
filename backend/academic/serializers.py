@@ -83,6 +83,11 @@ class CourseSerializer(serializers.ModelSerializer):
             "is_active",
         ]
         read_only_fields = ["name"]
+        # The department is the programme's: sent or not, it is taken from the programme.
+        extra_kwargs = {"department": {"required": False}}
+        # The generated validators of the two code constraints would require the department:
+        # the code is checked in validate() instead.
+        validators = []
 
     def validate_default_term_order(self, value):
         if value not in (1, 2):
@@ -90,14 +95,33 @@ class CourseSerializer(serializers.ModelSerializer):
         return value
 
     def validate(self, attrs):
-        department = attrs.get("department", getattr(self.instance, "department", None))
         program = attrs.get("program", getattr(self.instance, "program", None))
         level = attrs.get("default_level", getattr(self.instance, "default_level", 1))
+        # A course belongs to one programme (owner, 2026-11-13). One entered before that with
+        # none keeps working until it is given one; it is never taken away again.
+        if program is None and (self.instance is None or "program" in attrs):
+            raise serializers.ValidationError(
+                {"program": [gettext("Choose the programme this course belongs to.")]}
+            )
         if program is not None:
-            if program.department_id != department.pk:
+            department = attrs.get("department")
+            if department is not None and program.department_id != department.pk:
                 raise serializers.ValidationError(
                     {"program": [gettext("The program belongs to another department.")]}
                 )
+            attrs["department"] = program.department
+        code = attrs.get("code", getattr(self.instance, "code", None))
+        same = (
+            Course.objects.filter(program=program, code=code)
+            if program is not None
+            else Course.objects.filter(
+                program__isnull=True, department=self.instance.department, code=code
+            )
+        )
+        if same.exclude(pk=getattr(self.instance, "pk", None)).exists():
+            raise serializers.ValidationError(
+                {"code": [gettext("This programme already has a course with this code.")]}
+            )
             if level > program.levels_count:
                 raise serializers.ValidationError(
                     {
@@ -147,10 +171,14 @@ class InstructorAddSerializer(serializers.Serializer):
 
 
 class CourseSummarySerializer(serializers.ModelSerializer):
+    program_name = serializers.CharField(source="program.name_ar", read_only=True, default=None)
+
     class Meta:
         model = Course
         fields = [
             "id",
+            "program",
+            "program_name",
             "code",
             "name_ar",
             "name_en",
@@ -186,11 +214,12 @@ class OfferingSerializer(serializers.ModelSerializer):
 
 class MembershipSerializer(serializers.ModelSerializer):
     user = PersonSerializer(read_only=True)
+    program_name = serializers.CharField(source="program.name_ar", read_only=True, default=None)
 
     class Meta:
         model = DepartmentMembership
-        fields = ["id", "department", "user", "kind", "created_at"]
-        read_only_fields = ["department", "created_at"]
+        fields = ["id", "department", "program", "program_name", "user", "kind", "created_at"]
+        read_only_fields = ["department", "program", "created_at"]
 
 
 class LeaderSerializer(serializers.Serializer):
@@ -206,6 +235,11 @@ class LeaderSerializer(serializers.Serializer):
 class MembershipAddSerializer(serializers.Serializer):
     user = serializers.SlugRelatedField(slug_field="public_id", queryset=User.objects.all())
     kind = serializers.ChoiceField(choices=DepartmentMembership.Kind.choices)
+    # The programme of this department the person joins (owner, 2026-11-13: staff are linked
+    # to programmes). Left out, a department with one programme means that one.
+    program = serializers.PrimaryKeyRelatedField(
+        queryset=Program.objects.all(), required=False, allow_null=True
+    )
 
 
 class StudentSummarySerializer(serializers.ModelSerializer):
