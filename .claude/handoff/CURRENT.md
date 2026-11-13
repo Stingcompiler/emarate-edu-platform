@@ -224,6 +224,13 @@ Older rounds: `.claude/handoff/archive/2026-10-24_to_2026-11-02.md`, `.claude/ha
   baseline in the main checkout isn't disturbed.
 - E2E on ports 8011/5184/4332 (8001 belongs to another project); `E2E_BOOT_MS=480000` under load.
 - Local Postgres stops between sessions: `brew services start postgresql@16`.
+- **A migration that changes rows and then adds a constraint or index fails on PostgreSQL when
+  the table has rows** («cannot CREATE INDEX … pending trigger events»): CI and the suites
+  migrate an empty database and pass. `academic/0006` stopped every production deploy from #296
+  until #300 (it rolled back whole; the old release kept running). End the data step with
+  `SET CONSTRAINTS ALL IMMEDIATE` on PostgreSQL, and test it over rows through the executor
+  (`academic/tests/test_migration_with_rows.py`). After merging a migration, confirm the deploy
+  on the server — a green `main` does not mean deployed.
 - Old probes R03/R11 (review-2026-10-08) still "pass": they inject a write after the locked
   re-read, which real locking prevents — not a regression; their regression tests pass.
 
