@@ -56,3 +56,24 @@ test("a new course is entered in one programme and shows it", async ({ page }) =
     fullPage: true,
   });
 });
+
+// Every programme has its own head and supervisor, appointed by whoever appoints a
+// department's — from existing accounts, on the user's page.
+test("the system admin appoints a programme's head from an existing account", async ({ page }) => {
+  const size = test.info().project.name;
+  await signIn(page, "admin@demo.ecst.test");
+  await page.goto("/system/users?role=ta");
+  await page
+    .getByRole("link", { name: /م\. ياسر عبد الباقي/ })
+    .first()
+    .click();
+  await expect(page).toHaveURL(/\/system\/users\/[\w-]+$/);
+  // The user's own page, not the list's «الدور» filter still on screen while it loads.
+  await expect(page.getByText("+ إضافة دور أو نطاق")).toBeVisible();
+  const programme = size === "phone" ? "دبلوم تقنية المعلومات" : "بكالوريوس نظم المعلومات";
+  await choose(page.getByLabel("الدور", { exact: true }), "رئيس برنامج");
+  await choose(page.getByLabel("البرنامج", { exact: true }), new RegExp(`^${programme}`));
+  await page.getByRole("button", { name: "إضافة", exact: true }).click();
+  await expect(page.getByRole("main")).toContainText(`البرنامج: ${programme}`);
+  await noSideScroll(page);
+});

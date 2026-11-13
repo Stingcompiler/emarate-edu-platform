@@ -162,9 +162,10 @@ class ResultViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.G
         teaching = OfferingInstructor.objects.filter(user=user, role="teacher").values(
             "offering_id"
         )
-        visible = Q(offering_id__in=teaching)
-        if scope.departments:
-            visible |= Q(offering__course__department__in=scope.departments)
+        # A department sees its courses' results; a programme head their programme's.
+        visible = Q(offering_id__in=teaching) | scope.q(
+            "offering__course__department", "offering__course__program"
+        )
         return queryset.filter(visible)
 
     @extend_schema(request=CorrectionRequestSerializer, responses={201: CorrectionSerializer})

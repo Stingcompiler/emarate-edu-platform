@@ -22,8 +22,13 @@ from students.models import StudentImportBatch
 
 R = Role
 EVERYONE = frozenset(Role)
+# A programme's head and supervisor: inside their programme, what the department's manager and
+# supervisor do inside their department (owner, 2026-11-13). The world's objects are in theirs.
+PROGRAMME = frozenset({R.PROGRAM_MANAGER, R.PROGRAM_SUPERVISOR})
 STRUCTURE = frozenset(
     {
+        R.PROGRAM_MANAGER,
+        R.PROGRAM_SUPERVISOR,
         R.SYSTEM_ADMIN,
         R.HR,
         R.HEAD_REGISTRAR,
@@ -37,6 +42,8 @@ STRUCTURE = frozenset(
 )
 COURSES = frozenset(
     {
+        R.PROGRAM_MANAGER,
+        R.PROGRAM_SUPERVISOR,
         R.SYSTEM_ADMIN,
         R.HEAD_REGISTRAR,
         R.ACADEMIC_AFFAIRS,
@@ -45,10 +52,19 @@ COURSES = frozenset(
     }
 )
 ENROLLMENT = frozenset(
-    {R.SYSTEM_ADMIN, R.HEAD_REGISTRAR, R.DEPARTMENT_MANAGER, R.DEPARTMENT_SUPERVISOR}
+    {
+        R.PROGRAM_MANAGER,
+        R.PROGRAM_SUPERVISOR,
+        R.SYSTEM_ADMIN,
+        R.HEAD_REGISTRAR,
+        R.DEPARTMENT_MANAGER,
+        R.DEPARTMENT_SUPERVISOR,
+    }
 )
 STUDENTS = frozenset(
     {
+        R.PROGRAM_MANAGER,
+        R.PROGRAM_SUPERVISOR,
         R.SYSTEM_ADMIN,
         R.HEAD_REGISTRAR,
         R.STUDENT_AFFAIRS,
@@ -63,6 +79,8 @@ REPORTS_DEPARTMENT = frozenset(
 REPORTS_TEACHERS = REPORTS_DEPARTMENT | {R.HR}
 RESULTS_VIEW = frozenset(
     {
+        R.PROGRAM_MANAGER,
+        R.PROGRAM_SUPERVISOR,
         R.SYSTEM_ADMIN,
         R.HEAD_REGISTRAR,
         R.RESULTS_OFFICER,
@@ -79,6 +97,8 @@ AUDIT_DOMAIN = frozenset(
 # In the world below, the teacher and TA are assigned to IT101 and the student is enrolled.
 LEARNING_STAFF = frozenset(
     {
+        R.PROGRAM_MANAGER,
+        R.PROGRAM_SUPERVISOR,
         R.SYSTEM_ADMIN,
         R.ACADEMIC_AFFAIRS,
         R.DEPARTMENT_MANAGER,
@@ -96,6 +116,8 @@ SHUT = frozenset()
 HR_READERS = frozenset({R.SYSTEM_ADMIN, R.HR, R.ACADEMIC_AFFAIRS, R.TEACHER, R.TA})
 RESULTS = frozenset(
     {
+        R.PROGRAM_MANAGER,
+        R.PROGRAM_SUPERVISOR,
         R.SYSTEM_ADMIN,
         R.HEAD_REGISTRAR,
         R.RESULTS_OFFICER,
@@ -108,6 +130,8 @@ CORRECTIONS = frozenset({R.SYSTEM_ADMIN, R.RESULTS_OFFICER, R.ACADEMIC_AFFAIRS})
 RESULT_SETTINGS = frozenset({R.SYSTEM_ADMIN, R.HEAD_REGISTRAR, R.RESULTS_OFFICER})
 CASES = frozenset(
     {
+        R.PROGRAM_MANAGER,
+        R.PROGRAM_SUPERVISOR,
         R.SYSTEM_ADMIN,
         R.STUDENT_AFFAIRS,
         R.HEAD_REGISTRAR,
@@ -118,7 +142,15 @@ CASES = frozenset(
 )
 ONLY_STUDENT = frozenset({R.STUDENT})
 ADMISSIONS = frozenset(
-    {R.SYSTEM_ADMIN, R.HEAD_REGISTRAR, R.REGISTRAR, R.DEPARTMENT_MANAGER, R.DEPARTMENT_SUPERVISOR}
+    {
+        R.PROGRAM_MANAGER,
+        R.PROGRAM_SUPERVISOR,
+        R.SYSTEM_ADMIN,
+        R.HEAD_REGISTRAR,
+        R.REGISTRAR,
+        R.DEPARTMENT_MANAGER,
+        R.DEPARTMENT_SUPERVISOR,
+    }
 )
 ADMISSION_REVIEW = frozenset({R.SYSTEM_ADMIN, R.HEAD_REGISTRAR, R.REGISTRAR})
 
@@ -166,6 +198,8 @@ READS: dict[str, tuple[str, frozenset, frozenset]] = {
     "department-members": ("/api/v1/departments/{dept}/members", COURSES, frozenset()),
     # Its head and supervisor, on the department's page (review 2026-11-12).
     "department-leaders": ("/api/v1/departments/{dept}/leaders", COURSES, frozenset()),
+    # A programme's head and supervisor (owner, 2026-11-13).
+    "program-leaders": ("/api/v1/programs/{program}/leaders", COURSES, frozenset()),
     "enrollment-list": ("/api/v1/enrollments", ENROLLMENT, frozenset()),
     "enrollment-detail": ("/api/v1/enrollments/{enrollment}", ENROLLMENT, frozenset()),
     "student-list": ("/api/v1/students", STUDENTS, frozenset()),
@@ -251,8 +285,18 @@ READS: dict[str, tuple[str, frozenset, frozenset]] = {
     "hr-notice-list": ("/api/v1/hr-notices", HR_READERS, frozenset()),
     # Results (the world's teacher teaches IT101, whose result is below)
     "result-import-list": ("/api/v1/result-imports", RESULTS, frozenset()),
-    "result-import-detail": ("/api/v1/result-imports/{result_batch}", RESULTS, frozenset()),
-    "result-import-rows": ("/api/v1/result-imports/{result_batch}/rows", RESULTS, frozenset()),
+    # A results file and its batch belong to a department: a programme head reads the results
+    # of their programme, not the department's files (docs/roles-matrix.md, 2026-11-13).
+    "result-import-detail": (
+        "/api/v1/result-imports/{result_batch}",
+        RESULTS - PROGRAMME,
+        PROGRAMME,
+    ),
+    "result-import-rows": (
+        "/api/v1/result-imports/{result_batch}/rows",
+        RESULTS - PROGRAMME,
+        PROGRAMME,
+    ),
     "result-list": ("/api/v1/results", RESULTS | {R.TEACHER, R.TA, R.STUDENT}, frozenset()),
     "result-detail": (
         "/api/v1/results/{result}",
@@ -416,7 +460,8 @@ READS: dict[str, tuple[str, frozenset, frozenset]] = {
         "/api/v1/teachers-directory?search=ab",
         frozenset(
             {R.SYSTEM_ADMIN, R.ACADEMIC_AFFAIRS, R.DEPARTMENT_MANAGER, R.DEPARTMENT_SUPERVISOR}
-        ),
+        )
+        | PROGRAMME,
         frozenset(),
     ),
     # Course gradebook: its instructors and department learning staff (docs/03 §3.6–3.9)
@@ -431,8 +476,10 @@ READS: dict[str, tuple[str, frozenset, frozenset]] = {
                 R.TEACHER,
                 R.TA,
             }
-        ),
+        )
+        | PROGRAMME,
         EVERYONE
+        - PROGRAMME
         - {
             R.SYSTEM_ADMIN,
             R.ACADEMIC_AFFAIRS,
@@ -923,6 +970,8 @@ def test_course_write_matrix(api, users, it_program):
         R.ACADEMIC_AFFAIRS,
         R.DEPARTMENT_MANAGER,
         R.DEPARTMENT_SUPERVISOR,
+        R.PROGRAM_MANAGER,  # in their programme (the body's)
+        R.PROGRAM_SUPERVISOR,
     }
     wrong = []
     for n, role in enumerate(Role):

@@ -11,10 +11,11 @@ from django.db import models
 
 from core.models import PublicIdModel, TimestampedModel
 
-from .rbac import DEPARTMENT_SCOPED_ROLES, Role
+from .rbac import DEPARTMENT_SCOPED_ROLES, PROGRAM_SCOPED_ROLES, Role
 
 # Sorted so the constraint is identical on every run (sets have no stable order).
 _SCOPED = sorted(r.value for r in DEPARTMENT_SCOPED_ROLES)
+_PROGRAMME = sorted(r.value for r in PROGRAM_SCOPED_ROLES)
 
 
 class UserManager(DjangoUserManager):
@@ -105,6 +106,14 @@ class RoleAssignment(TimestampedModel):
         blank=True,
         related_name="role_assignments",
     )
+    # The programme a programme head or supervisor runs (owner, 2026-11-13).
+    program = models.ForeignKey(
+        "organization.Program",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="role_assignments",
+    )
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="+"
     )
@@ -119,8 +128,13 @@ class RoleAssignment(TimestampedModel):
             ),
             models.UniqueConstraint(
                 fields=["user", "role"],
-                condition=models.Q(department__isnull=True),
+                condition=models.Q(department__isnull=True, program__isnull=True),
                 name="uniq_college_role",
+            ),
+            models.UniqueConstraint(
+                fields=["user", "role", "program"],
+                condition=models.Q(program__isnull=False),
+                name="uniq_role_per_program",
             ),
             # Registrar / manager / supervisor need a department; others must not have one.
             models.CheckConstraint(
@@ -130,10 +144,20 @@ class RoleAssignment(TimestampedModel):
                 ),
                 name="role_department_scope",
             ),
+            # Programme head / supervisor need a programme; others must not have one.
+            models.CheckConstraint(
+                condition=(
+                    models.Q(role__in=_PROGRAMME, program__isnull=False)
+                    | (~models.Q(role__in=_PROGRAMME) & models.Q(program__isnull=True))
+                ),
+                name="role_program_scope",
+            ),
         ]
 
     def __str__(self) -> str:
         suffix = f" @ {self.department_id}" if self.department_id else ""
+        if self.program_id:
+            suffix = f" @ programme {self.program_id}"
         return f"{self.user_id}: {self.role}{suffix}"
 
 

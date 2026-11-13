@@ -121,6 +121,11 @@ urlpatterns = [
         name="department-leaders",
     ),
     path(
+        "programs/<int:program_id>/leaders",
+        academic.ProgramLeadersView.as_view(),
+        name="program-leaders",
+    ),
+    path(
         "departments/<int:department_id>/members/<int:membership_id>",
         academic.DepartmentMemberDetailView.as_view(),
         name="department-member-detail",

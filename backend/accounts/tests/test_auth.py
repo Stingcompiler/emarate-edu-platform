@@ -195,6 +195,8 @@ def test_academic_affairs_creates_no_accounts_and_appoints_from_existing_ones(ma
     assert me["grantable_roles"] == [
         "department_manager",
         "department_supervisor",
+        "program_manager",
+        "program_supervisor",
         "ta",
         "teacher",
     ]

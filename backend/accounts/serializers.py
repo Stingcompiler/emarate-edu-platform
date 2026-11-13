@@ -5,7 +5,7 @@ from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
 from files.models import StoredFile
-from organization.models import Department
+from organization.models import Department, Program
 
 from . import rbac
 from .models import (
@@ -28,16 +28,28 @@ class RoleAssignmentSerializer(serializers.ModelSerializer):
     department_name = serializers.CharField(
         source="department.name_ar", read_only=True, default=None
     )
+    program_name = serializers.CharField(source="program.name_ar", read_only=True, default=None)
     role_label = serializers.CharField(source="get_role_display", read_only=True)
 
     class Meta:
         model = RoleAssignment
-        fields = ["id", "role", "role_label", "department", "department_name", "created_at"]
+        fields = [
+            "id",
+            "role",
+            "role_label",
+            "department",
+            "department_name",
+            "program",
+            "program_name",
+            "created_at",
+        ]
 
 
 class ScopeSerializer(serializers.Serializer):
     everything = serializers.BooleanField()
     departments = serializers.ListField(child=serializers.IntegerField())
+    # Programmes held one by one (programme head / supervisor — owner, 2026-11-13).
+    programs = serializers.ListField(child=serializers.IntegerField())
 
 
 class MeStudentSerializer(serializers.Serializer):
@@ -80,13 +92,17 @@ class MeSerializer(serializers.ModelSerializer):
 
     @extend_schema_field(RoleAssignmentSerializer(many=True))
     def get_roles(self, obj) -> list[dict]:
-        rows = obj.role_assignments.select_related("department")
+        rows = obj.role_assignments.select_related("department", "program")
         return RoleAssignmentSerializer(rows, many=True).data
 
     @extend_schema_field(serializers.DictField(child=ScopeSerializer()))
     def get_capabilities(self, obj) -> dict[str, dict]:
         return {
-            name: {"everything": scope.everything, "departments": sorted(scope.departments)}
+            name: {
+                "everything": scope.everything,
+                "departments": sorted(scope.departments),
+                "programs": sorted(scope.programs),
+            }
             for name, scope in rbac.capabilities_of(obj).items()
         }
 
@@ -224,6 +240,10 @@ class UserCreateSerializer(serializers.Serializer):
     department = serializers.PrimaryKeyRelatedField(
         queryset=Department.objects.all(), required=False, allow_null=True
     )
+    # For a programme head or supervisor: the programme they run.
+    program = serializers.PrimaryKeyRelatedField(
+        queryset=Program.objects.all(), required=False, allow_null=True
+    )
 
 
 class RoleGrantSerializer(serializers.Serializer):
@@ -231,6 +251,10 @@ class RoleGrantSerializer(serializers.Serializer):
     role = serializers.ChoiceField(choices=Role.choices)
     department = serializers.PrimaryKeyRelatedField(
         queryset=Department.objects.all(), required=False, allow_null=True
+    )
+    # For a programme head or supervisor: the programme they run.
+    program = serializers.PrimaryKeyRelatedField(
+        queryset=Program.objects.all(), required=False, allow_null=True
     )
 
 

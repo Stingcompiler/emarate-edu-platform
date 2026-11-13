@@ -133,7 +133,7 @@ class CaseViewSet(
         queryset = StudentCase.objects.select_related("student_record").prefetch_related(
             "events__by"
         )
-        return scope.filter(queryset, "student_record__department")
+        return scope.filter(queryset, "student_record__department", "student_record__program")
 
     def create(self, request, *args, **kwargs):
         data = self.get_serializer(data=request.data)
@@ -220,8 +220,7 @@ class MisconductReportViewSet(
         scope = rbac.scope_for(user, "cases.view")
         if scope.everything:
             return queryset
-        if scope.departments:
-            visible |= Q(offering__course__department__in=scope.departments)
+        visible |= scope.q("offering__course__department", "offering__course__program")
         return queryset.filter(visible)
 
     def create(self, request, *args, **kwargs):

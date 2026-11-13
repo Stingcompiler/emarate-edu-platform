@@ -22,7 +22,7 @@ import { api, ok } from "../../lib/api";
 import { hasRole, useMe } from "../../lib/auth";
 import { when } from "../../lib/format";
 import { initials, num, useDepartments } from "../../lib/reports";
-import { DEPARTMENT_ROLES, ROLE_LABEL } from "./roles";
+import { DEPARTMENT_ROLES, PROGRAM_ROLES, ROLE_LABEL } from "./roles";
 import { Pager } from "../../components/Pager";
 import { Select } from "../../components/Select";
 
@@ -200,7 +200,7 @@ export function AdminUsers() {
                       {u.roles
                         .map(
                           (r) =>
-                            `${ROLE_LABEL[r.role] ?? r.role}${r.department_name ? ` · ${r.department_name}` : ""}`,
+                            `${ROLE_LABEL[r.role] ?? r.role}${r.program_name ? ` · ${r.program_name}` : r.department_name ? ` · ${r.department_name}` : ""}`,
                         )
                         .join("، ") || "بلا دور"}{" "}
                       · {u.last_login ? `دخول ${when(u.last_login)}` : "لم يفعّل الحساب"}
@@ -291,7 +291,7 @@ export function AdminUsers() {
                   u.roles
                     .map(
                       (r) =>
-                        `${ROLE_LABEL[r.role] ?? r.role}${r.department_name ? ` · ${r.department_name}` : ""}`,
+                        `${ROLE_LABEL[r.role] ?? r.role}${r.program_name ? ` · ${r.program_name}` : r.department_name ? ` · ${r.department_name}` : ""}`,
                     )
                     .join("، ") || "بلا دور",
               },
@@ -333,10 +333,24 @@ function NewUser() {
   const departments = useDepartments();
   // Only the roles the server accepts from this user (rbac.CREATABLE_ACCOUNTS).
   const allowed = useMe().data?.creatable_roles ?? [];
-  const [f, setF] = useState({ full_name_ar: "", email: "", role: "", department: "" });
+  const [f, setF] = useState({
+    full_name_ar: "",
+    email: "",
+    role: "",
+    department: "",
+    program: "",
+  });
   // Never default to the most powerful role; the admin picks it deliberately.
   const offered = Object.keys(ROLE_LABEL).filter((k) => allowed.includes(k));
   const role = f.role || offered.find((k) => k !== "system_admin") || offered[0] || "";
+  // A programme's head or supervisor is created on one programme (owner, 2026-11-13).
+  const programs = useQuery({
+    queryKey: ["programs", "all"],
+    enabled: PROGRAM_ROLES.has(role),
+    queryFn: async () =>
+      ok(await api.GET("/api/v1/programs", { params: { query: { page_size: 100 } as never } }))
+        ?.results ?? [],
+  });
   const create = useMutation({
     mutationFn: async () => {
       const { data, error } = await api.POST("/api/v1/users", {
@@ -345,6 +359,7 @@ function NewUser() {
           email: f.email,
           role: role as never,
           department: DEPARTMENT_ROLES.has(role) && f.department ? Number(f.department) : null,
+          program: PROGRAM_ROLES.has(role) && f.program ? Number(f.program) : null,
         },
       });
       if (!data) throw error;
@@ -411,6 +426,21 @@ function NewUser() {
             ))}
           </SelectField>
         )}
+        {PROGRAM_ROLES.has(role) && (
+          <SelectField
+            label="البرنامج"
+            requiredMark
+            value={f.program}
+            onChange={(e) => setF({ ...f, program: e.target.value })}
+          >
+            <option value="">اختر البرنامج</option>
+            {(programs.data ?? []).map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.name_ar} — {p.department_name}
+              </option>
+            ))}
+          </SelectField>
+        )}
         <div className="space-y-2 p-4">
           {create.isError && <Notice>{problemMessage(create.error)}</Notice>}
           {create.isSuccess && (
@@ -424,6 +454,7 @@ function NewUser() {
               !f.full_name_ar.trim() ||
               !f.email.includes("@") ||
               (DEPARTMENT_ROLES.has(role) && !f.department) ||
+              (PROGRAM_ROLES.has(role) && !f.program) ||
               create.isPending
             }
             onClick={() => create.mutate()}

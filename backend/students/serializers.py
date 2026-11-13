@@ -76,7 +76,7 @@ class StudentRecordWriteSerializer(serializers.ModelSerializer):
         user = request.user if request else None
         # Only programs the caller may manage are choices; others read as "does not exist".
         self.fields["program"].queryset = rbac.scope_for(user, "students.manage").filter(
-            Program.objects.all(), "department"
+            Program.objects.all(), "department", "id"
         )
 
     def validate_university_number(self, value: str) -> str:

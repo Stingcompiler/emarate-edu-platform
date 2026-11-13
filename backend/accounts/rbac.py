@@ -4,13 +4,19 @@ docs/03-roles-and-permissions.md is the authority; this module encodes it.
 
 * A **role** is held through a ``RoleAssignment`` row. Registrar, department
   manager and department supervisor are *department-scoped* (one row per
-  department); every other role is college-wide.
+  department); programme head and programme supervisor are *programme-scoped*
+  (one row per programme); every other role is college-wide.
 * A **capability** is a named action (``"courses.manage"``). Each capability
   lists the roles that have it; college-wide roles get it everywhere,
-  department-scoped roles only inside their departments.
+  department-scoped roles only inside their departments, programme-scoped
+  roles only inside their programmes.
 * ``scope_for(user, capability)`` answers "where may this user do this?" as a
-  ``Scope`` (everything, or a set of department ids). Views and selectors use
-  it to check a single object or to filter a queryset.
+  ``Scope`` (everything, or department ids and programme ids). Views and
+  selectors use it to check a single object or to filter a queryset.
+
+The department is a container (owner, 2026-11-13): courses, lectures and
+students live in a programme, and the programme's head runs them. A department
+head, where one is appointed, runs every programme of the department.
 
 Server-side only: the portal may hide buttons, but every endpoint checks here.
 """
@@ -36,6 +42,10 @@ class Role(models.TextChoices):
     STUDENT_AFFAIRS = "student_affairs", "أمين شؤون الطلاب"
     DEPARTMENT_MANAGER = "department_manager", "مدير القسم"
     DEPARTMENT_SUPERVISOR = "department_supervisor", "مشرف القسم"
+    # The head of one programme and their supervisor (owner, 2026-11-13): what the department
+    # manager and supervisor do, inside the programme.
+    PROGRAM_MANAGER = "program_manager", "رئيس البرنامج"
+    PROGRAM_SUPERVISOR = "program_supervisor", "مشرف البرنامج"
     TEACHER = "teacher", "أستاذ"
     TA = "ta", "معيد"
     STUDENT = "student", "طالب"
@@ -48,6 +58,9 @@ class Role(models.TextChoices):
 DEPARTMENT_SCOPED_ROLES = frozenset(
     {Role.REGISTRAR, Role.DEPARTMENT_MANAGER, Role.DEPARTMENT_SUPERVISOR}
 )
+
+# Roles that must be tied to a programme.
+PROGRAM_SCOPED_ROLES = frozenset({Role.PROGRAM_MANAGER, Role.PROGRAM_SUPERVISOR})
 
 R = Role
 # Capability → roles holding it. Department-scoped roles hold it within their
@@ -246,6 +259,41 @@ for _name, _roles in list(CAPABILITIES.items()):
     if R.SYSTEM_ADMIN in _roles and _name not in DELETING:
         CAPABILITIES[_name] = _roles | {R.SYSTEM_SUPERVISOR}
 
+# The programme's head and supervisor hold, inside their programme, what the department's
+# manager and supervisor hold inside their department — where the endpoints know a programme
+# (PROGRAMME_CAPABILITIES; the rest follow as their endpoints learn it).
+PROGRAMME_CAPABILITIES = frozenset(
+    {
+        "structure.view",
+        "courses.view",
+        "courses.manage",
+        "courses.delete",
+        "courses.unassign",
+        "membership.manage",
+        "membership.remove",
+        "students.view",
+        "students.manage",
+        "students.delete",
+        "registration.approve",
+        "enrollment.manage",
+        "learning.view",
+        "learning.manage",
+        "learning.delete",
+        # Reading results. Uploading a results file is still by department (the file and its
+        # batch belong to one): a programme head's upload follows with the programme's reports.
+        "results.view",
+        "cases.view",
+        "admissions.view",
+    }
+)
+for _name in PROGRAMME_CAPABILITIES:
+    _roles = CAPABILITIES[_name]
+    if R.DEPARTMENT_MANAGER in _roles:
+        _roles = _roles | {R.PROGRAM_MANAGER}
+    if R.DEPARTMENT_SUPERVISOR in _roles:
+        _roles = _roles | {R.PROGRAM_SUPERVISOR}
+    CAPABILITIES[_name] = _roles
+
 # Removing a member from a department or a teacher from a course unlinks; nothing is deleted.
 # The DELETE method that does it counts the supervisor (docs/roles-matrix.md: SS `all`).
 UNLINKING = frozenset({"courses.unassign", "membership.remove"})
@@ -258,7 +306,16 @@ GRANTS: dict[Role, frozenset[Role]] = {
     R.SYSTEM_ADMIN: frozenset(Role),
     R.SYSTEM_SUPERVISOR: frozenset(Role) - TOP_ROLES,
     R.HEAD_REGISTRAR: frozenset({R.REGISTRAR}),
-    R.ACADEMIC_AFFAIRS: frozenset({R.DEPARTMENT_MANAGER, R.DEPARTMENT_SUPERVISOR, R.TEACHER, R.TA}),
+    R.ACADEMIC_AFFAIRS: frozenset(
+        {
+            R.DEPARTMENT_MANAGER,
+            R.DEPARTMENT_SUPERVISOR,
+            R.PROGRAM_MANAGER,
+            R.PROGRAM_SUPERVISOR,
+            R.TEACHER,
+            R.TA,
+        }
+    ),
     R.SITE_MANAGER: frozenset({R.EVENTS_MANAGER}),
 }
 
@@ -290,40 +347,54 @@ class Scope:
 
     everything: bool = False
     departments: frozenset[int] = field(default_factory=frozenset)
+    # Programmes held one by one (programme head / supervisor). A department in
+    # ``departments`` covers every programme of it.
+    programs: frozenset[int] = field(default_factory=frozenset)
 
     @property
     def none(self) -> bool:
-        return not self.everything and not self.departments
+        return not self.everything and not self.departments and not self.programs
 
-    def allows(self, department_id: int | None) -> bool:
+    def allows(self, department_id: int | None, program_id: int | None = None) -> bool:
+        """``program_id``: the programme the object belongs to, where it has one. Without it a
+        programme-scoped role is refused: it holds programmes, never a whole department."""
         if self.everything:
             return True
-        return department_id is not None and department_id in self.departments
+        if department_id is not None and department_id in self.departments:
+            return True
+        return program_id is not None and program_id in self.programs
 
-    def filter(self, queryset: QuerySet, department_field: str) -> QuerySet:
-        """Restrict ``queryset`` to rows whose department is in scope."""
-        if self.everything:
-            return queryset
-        if not self.departments:
-            return queryset.none()
-        return queryset.filter(**{f"{department_field}__in": self.departments})
-
-    def q(self, department_field: str) -> Q:
+    def q(self, department_field: str, program_field: str | None = None) -> Q:
+        """Rows in scope. ``program_field`` is the path to the row's programme; a list that
+        gives none shows a programme-scoped role nothing."""
         if self.everything:
             # Not Q(): an empty Q vanishes when OR-ed with another condition.
             return Q(pk__isnull=False)
-        return (
-            Q(**{f"{department_field}__in": self.departments}) if self.departments else Q(pk__in=[])
-        )
+        q = Q(pk__in=[])
+        if self.departments:
+            q |= Q(**{f"{department_field}__in": self.departments})
+        if self.programs and program_field:
+            q |= Q(**{f"{program_field}__in": self.programs})
+        return q
+
+    def filter(
+        self, queryset: QuerySet, department_field: str, program_field: str | None = None
+    ) -> QuerySet:
+        """Restrict ``queryset`` to rows whose department or programme is in scope."""
+        if self.everything:
+            return queryset
+        if not self.departments and not (self.programs and program_field):
+            return queryset.none()
+        return queryset.filter(self.q(department_field, program_field))
 
 
-def _assignments(user) -> list[tuple[str, int | None]]:
-    """(role, department_id) pairs for ``user``, cached on the instance per request."""
+def _assignments(user) -> list[tuple[str, int | None, int | None]]:
+    """(role, department_id, program_id) for ``user``, cached on the instance per request."""
     if user is None or not user.is_authenticated or not user.is_active:
         return []
     cached = getattr(user, "_rbac_assignments", None)
     if cached is None:
-        cached = list(user.role_assignments.values_list("role", "department_id"))
+        cached = list(user.role_assignments.values_list("role", "department_id", "program_id"))
         user._rbac_assignments = cached
     return cached
 
@@ -334,7 +405,7 @@ def clear_cache(user) -> None:
 
 
 def roles_of(user) -> set[str]:
-    return {role for role, _ in _assignments(user)}
+    return {role for role, *_ in _assignments(user)}
 
 
 def is_admin(user, *, deleting: bool = False) -> bool:
@@ -364,7 +435,9 @@ def takes_part(user) -> bool:
 
 def has_role_in(user, role: Role, department_id: int | None) -> bool:
     """True if ``user`` holds ``role`` for exactly this department."""
-    return department_id is not None and (role, department_id) in _assignments(user)
+    return department_id is not None and any(
+        held == role and department == department_id for held, department, _ in _assignments(user)
+    )
 
 
 def scope_for(user, capability: str, *, deleting: bool = False) -> Scope:
@@ -373,23 +446,41 @@ def scope_for(user, capability: str, *, deleting: bool = False) -> Scope:
     allowed = CAPABILITIES[capability]
     deleting = deleting and capability not in UNLINKING
     departments: set[int] = set()
-    for role, department_id in _assignments(user):
+    programs: set[int] = set()
+    for role, department_id, program_id in _assignments(user):
         if role not in allowed or (deleting and role == Role.SYSTEM_SUPERVISOR):
             continue
-        if role in DEPARTMENT_SCOPED_ROLES:
+        if role in PROGRAM_SCOPED_ROLES:
+            if program_id is not None:
+                programs.add(program_id)
+        elif role in DEPARTMENT_SCOPED_ROLES:
             if department_id is not None:
                 departments.add(department_id)
         else:
             return Scope(everything=True)
-    return Scope(departments=frozenset(departments))
+    return Scope(departments=frozenset(departments), programs=frozenset(programs))
 
 
-def can(user, capability: str, department_id: int | None = None, *, deleting: bool = False) -> bool:
-    """True if ``user`` holds ``capability`` for ``department_id`` (or anywhere, if None)."""
+def can(
+    user,
+    capability: str,
+    department_id: int | None = None,
+    program_id: int | None = None,
+    *,
+    deleting: bool = False,
+) -> bool:
+    """True if ``user`` holds ``capability`` for this department or this programme of it (or
+    anywhere, when neither is given)."""
     scope = scope_for(user, capability, deleting=deleting)
-    if department_id is None:
+    if department_id is None and program_id is None:
         return not scope.none
-    return scope.allows(department_id)
+    return scope.allows(department_id, program_id)
+
+
+def can_for(user, capability: str, obj, *, deleting: bool = False) -> bool:
+    """``can`` for something that lives in a programme: a course, a student record, an
+    offering, a membership — anything with ``department_id`` and ``program_id``."""
+    return can(user, capability, obj.department_id, obj.program_id, deleting=deleting)
 
 
 def grantable_roles(user) -> frozenset[Role]:

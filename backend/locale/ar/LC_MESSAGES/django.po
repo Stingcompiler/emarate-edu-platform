@@ -244,6 +244,15 @@ msgid "This role requires a department."
 msgstr "هذا الدور يتطلب تحديد القسم."
 
 #: accounts/services.py:911
+msgid "This role requires a programme."
+msgstr "هذا الدور يتطلب تحديد البرنامج."
+
+msgid "This role is held on a programme."
+msgstr "هذا الدور يُمنح على برنامج لا على قسم."
+
+msgid "This role is not held on a programme."
+msgstr "هذا الدور لا يُمنح على برنامج."
+
 msgid "This role is college-wide."
 msgstr "هذا الدور على مستوى الكلية ولا يُحدَّد له قسم."
 

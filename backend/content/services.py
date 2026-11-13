@@ -38,6 +38,20 @@ def department_of(scope: str, scope_id: int | None) -> int | None:
     return None
 
 
+def program_of(scope: str, scope_id: int | None) -> int | None:
+    """The programme an announcement is addressed inside: the programme itself, or a course's.
+    A programme head addresses those, never the whole department (owner, 2026-11-13)."""
+    if scope == A.Scope.PROGRAM:
+        return scope_id
+    if scope == A.Scope.OFFERING:
+        return (
+            CourseOffering.objects.filter(pk=scope_id)
+            .values_list("course__program_id", flat=True)
+            .first()
+        )
+    return None
+
+
 def _college_grant(roles, scope: str, audience: str) -> bool:
     """What a college-wide role may address on its own (docs/03 §7 «إعلانات»)."""
     if roles & {Role.SYSTEM_ADMIN, Role.SYSTEM_SUPERVISOR}:
@@ -106,7 +120,7 @@ def _local_grant(user, scope: str, scope_id: int | None, audience: str) -> bool:
     if (
         department
         and audience != A.Audience.PUBLIC
-        and rbac.can(user, "learning.manage", department)
+        and rbac.can(user, "learning.manage", department, program_of(scope, scope_id))
     ):
         return True
     # Owner decision 2026-09-30: a department manager publishes their department's news on
@@ -142,7 +156,9 @@ def may_delete_announcement(user, announcement) -> bool:
     department = department_of(scope, scope_id)
     if department is None:
         return False
-    if audience != A.Audience.PUBLIC and rbac.can(user, "learning.delete", department):
+    if audience != A.Audience.PUBLIC and rbac.can(
+        user, "learning.delete", department, program_of(scope, scope_id)
+    ):
         return True
     if (
         scope == A.Scope.DEPARTMENT
@@ -197,6 +213,18 @@ def feed_q(user) -> Q:
         for r, d in user.role_assignments.values_list("role", "department_id")
         if r in DEPARTMENT_SCOPED_ROLES and d
     }
+    # A programme's head and supervisor read what is addressed to their programme, and to the
+    # department that holds it; so do the staff linked to a programme.
+    for program_id, department_id in user.role_assignments.filter(
+        program__isnull=False
+    ).values_list("program_id", "program__department_id"):
+        programs.add(program_id)
+        departments.add(department_id)
+    programs |= set(
+        DepartmentMembership.objects.filter(user=user, program__isnull=False).values_list(
+            "program_id", flat=True
+        )
+    )
     offerings |= set(
         OfferingInstructor.objects.filter(user=user).values_list("offering_id", flat=True)
     )

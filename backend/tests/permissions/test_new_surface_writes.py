@@ -16,7 +16,11 @@ from students.models import StudentRecord
 world = fixture_world
 
 ADMINS = {R.SYSTEM_ADMIN, R.SYSTEM_SUPERVISOR}
-APPROVERS = ADMINS | {R.HEAD_REGISTRAR, R.DEPARTMENT_MANAGER, R.DEPARTMENT_SUPERVISOR}
+# A programme's head and supervisor do, inside their programme, what the department's manager
+# and supervisor do inside their department (docs/roles-matrix.md `prog`, owner 2026-11-13);
+# the world's student is in theirs.
+PROGRAMME = {R.PROGRAM_MANAGER, R.PROGRAM_SUPERVISOR}
+APPROVERS = ADMINS | {R.HEAD_REGISTRAR, R.DEPARTMENT_MANAGER, R.DEPARTMENT_SUPERVISOR} | PROGRAMME
 SITE = ADMINS | {R.SITE_MANAGER}
 STAFF = set(R) - {R.STUDENT}
 
@@ -112,13 +116,13 @@ WRITES = {
         "post",
         "/api/v1/students",
         lambda e: {"full_name_ar": "طالب جديد", "program": e["program"], "level": 1},
-        ADMINS | {R.HEAD_REGISTRAR, R.DEPARTMENT_MANAGER, R.DEPARTMENT_SUPERVISOR},
+        ADMINS | {R.HEAD_REGISTRAR, R.DEPARTMENT_MANAGER, R.DEPARTMENT_SUPERVISOR} | PROGRAMME,
     ),
     "student-update": (
         "patch",
         "/api/v1/students/{student}",
         {"full_name_en": "Ahmed"},
-        ADMINS | {R.HEAD_REGISTRAR, R.DEPARTMENT_MANAGER, R.DEPARTMENT_SUPERVISOR},
+        ADMINS | {R.HEAD_REGISTRAR, R.DEPARTMENT_MANAGER, R.DEPARTMENT_SUPERVISOR} | PROGRAMME,
     ),
     "student-status": (
         "post",

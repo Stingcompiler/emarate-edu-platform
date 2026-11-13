@@ -12,7 +12,7 @@ from rest_framework.test import APIClient
 
 from academic.models import AcademicYear, Course, CourseOffering, Term
 from accounts.models import RoleAssignment, User
-from accounts.rbac import DEPARTMENT_SCOPED_ROLES, Role
+from accounts.rbac import DEPARTMENT_SCOPED_ROLES, PROGRAM_SCOPED_ROLES, Role
 from organization.models import College, Department, Program
 from students.models import StudentRecord
 
@@ -110,7 +110,12 @@ _counter = iter(range(1, 1_000_000))
 
 @pytest.fixture
 def make_user(db):
-    def make(*roles: Role, department: Department | None = None, **extra) -> User:
+    def make(
+        *roles: Role,
+        department: Department | None = None,
+        program: Program | None = None,
+        **extra,
+    ) -> User:
         n = next(_counter)
         user = User.objects.create_user(
             email=extra.pop("email", f"user{n}@ecst.test"),
@@ -123,6 +128,7 @@ def make_user(db):
                 user=user,
                 role=role,
                 department=department if role in DEPARTMENT_SCOPED_ROLES else None,
+                program=program if role in PROGRAM_SCOPED_ROLES else None,
             )
         return user
 
@@ -130,9 +136,10 @@ def make_user(db):
 
 
 @pytest.fixture
-def users(make_user, it_dept):
-    """One user per role; department-scoped roles belong to IT."""
-    return {role: make_user(role, department=it_dept) for role in Role}
+def users(make_user, it_dept, it_program):
+    """One user per role; department-scoped roles belong to IT, programme-scoped ones to its
+    programme."""
+    return {role: make_user(role, department=it_dept, program=it_program) for role in Role}
 
 
 @pytest.fixture
