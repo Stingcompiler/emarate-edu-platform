@@ -68,6 +68,8 @@ test("the system admin appoints a programme's head from an existing account", as
     .first()
     .click();
   await expect(page).toHaveURL(/\/system\/users\/[\w-]+$/);
+  // The user's own page, not the list's «الدور» filter still on screen while it loads.
+  await expect(page.getByText("+ إضافة دور أو نطاق")).toBeVisible();
   const programme = size === "phone" ? "دبلوم تقنية المعلومات" : "بكالوريوس نظم المعلومات";
   await choose(page.getByLabel("الدور", { exact: true }), "رئيس برنامج");
   await choose(page.getByLabel("البرنامج", { exact: true }), new RegExp(`^${programme}`));
