@@ -15,23 +15,18 @@ export function Home() {
   if (hasRole(m, "teacher", "ta")) return <TeacherToday />;
   const rules: [boolean, string][] = [
     [hasRole(m, "system_admin", "system_supervisor"), "/system"],
-    [
-      hasRole(
-        m,
-        "department_manager",
-        "department_supervisor",
-        "program_manager",
-        "program_supervisor",
-      ),
-      "/department",
-    ],
+    [hasRole(m, "department_manager", "department_supervisor"), "/department"],
     [hasRole(m, "hr"), "/hr"],
-    [can(m, "admissions.view"), "/registrar"],
+    // Whoever reviews applications (a programme's head only reads those to the programme).
+    [can(m, "admissions.review"), "/registrar"],
     [hasRole(m, "results_officer"), "/results-office"],
     [hasRole(m, "student_affairs"), "/affairs"],
     [can(m, "content.manage"), "/site"],
     [can(m, "events.manage"), "/events"],
     [hasRole(m, "academic_affairs"), "/academic"],
+    // A programme's head or supervisor, when no college-wide role comes first (owner,
+    // 2026-11-13): the department's home, about their programme.
+    [hasRole(m, "program_manager", "program_supervisor"), "/department"],
   ];
   const to = rules.find(([ok]) => ok)?.[1] ?? "/notifications";
   return <Navigate to={to} replace />;

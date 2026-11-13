@@ -184,6 +184,8 @@ class ProgramViewSet(_CodedViewSet):
         # Intakes nobody applied to go with the programme (it may have been opened for
         # applying by mistake, #223); one with an application keeps it in use (R28).
         with transaction.atomic():
+            # Its head, supervisor and staff links end with it — on the record.
+            services.end_program_links(self.meta, instance)
             instance.intakes.filter(applications__isnull=True).delete()
             super().perform_destroy(instance)
 

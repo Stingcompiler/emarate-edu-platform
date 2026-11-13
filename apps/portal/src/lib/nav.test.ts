@@ -37,6 +37,32 @@ describe("navFor", () => {
     ]);
   });
 
+  it("gives a programme's head the department's pages, about the programme", () => {
+    const head = labels(
+      me(["program_manager"], { capabilities: { "results.manage": {} } } as never),
+    );
+    expect(head.slice(0, 7)).toEqual([
+      "الرئيسية",
+      "المواد",
+      "المحاضرات",
+      "الأساتذة",
+      "طلاب البرنامج",
+      "التقارير",
+      "النتائج",
+    ]);
+    // Pages the server gives them no capability for stay out.
+    expect(labels(me(["program_supervisor"]))).not.toContain("سجل العمليات");
+  });
+
+  it("keeps a college-wide role's nav when it also heads a programme", () => {
+    const holder = me(["academic_affairs", "program_manager"]);
+    holder.roles[1]!.program = 7;
+    const both = navFor(holder, 0);
+    expect(both.map((i) => i.to)).toContain("/academic");
+    expect(both.find((i) => i.to === "/programs/7")?.label).toBe("برنامجي");
+    expect(both.map((i) => i.label)).not.toContain("طلاب البرنامج");
+  });
+
   it("gives the supervisor the same sections as the manager", () => {
     expect(labels(me(["department_supervisor"]))).toEqual(labels(me(["department_manager"])));
   });

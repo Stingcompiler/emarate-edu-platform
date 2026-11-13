@@ -99,8 +99,8 @@ export function ResultsHome() {
                 <span className="min-w-0 flex-1">
                   <b className="block truncate text-sm text-text">{fileName(b.file_name)}</b>
                   <span className="text-xs text-text-muted">
-                    {b.department_name || "الكلية"} · {b.term_name} · {b.uploaded_by} ·{" "}
-                    {when(b.created_at)}
+                    {b.program_name || b.department_name || "الكلية"} · {b.term_name} ·{" "}
+                    {b.uploaded_by} · {when(b.created_at)}
                   </span>
                 </span>
                 <StatusBadge status={b.status} label={STATUS_LABELS[b.status] ?? b.status} />

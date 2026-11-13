@@ -3,7 +3,8 @@
 An audience is JSON:
     {"type": "offering",   "ids": [offering ids]}                       students of the course(s)
     {"type": "department", "ids": [...], "members": "students|staff|all", "level": 2?}
-    {"type": "program",    "ids": [...], "level": 2?}                   students
+    {"type": "program",    "ids": [...], "level": 2?, "members": "staff|all"?}
+                                    students; with members: the staff linked to the programme
     {"type": "college",    "members": "students|staff|all"}
     {"type": "role",       "roles": ["teacher", "ta"], "departments": [ids]?}
     {"type": "users",      "ids": [user public_ids]}
@@ -55,6 +56,18 @@ def normalize(audience: dict) -> dict:
                 }
             )
         clean["members"] = members
+    if kind == "program" and audience.get("members", "students") != "students":
+        # A programme's own staff — those linked to it, its head and supervisor (owner,
+        # 2026-11-13). Left out, a programme means its students, as it always did.
+        if audience["members"] not in MEMBERS:
+            raise ValidationError(
+                {
+                    "audience": [
+                        gettext("members must be one of %(sorted)s.") % {"sorted": sorted(MEMBERS)}
+                    ]
+                }
+            )
+        clean["members"] = audience["members"]
     if kind in {"department", "program"} and audience.get("level") is not None:
         level = audience["level"]
         if not isinstance(level, int) or not 1 <= level <= 10:
@@ -122,8 +135,10 @@ def _only_students(user_ids: list[str]) -> bool:
 
 def _students(audience: dict) -> bool:
     kind = audience["type"]
-    if kind in {"offering", "program"}:
+    if kind == "offering":
         return True
+    if kind == "program":
+        return audience.get("members", "students") == "students"
     if kind in {"department", "college"}:
         return audience["members"] == "students"
     if kind == "users":
@@ -211,15 +226,27 @@ def resolve(audience: dict) -> QuerySet:
             )
         )
     elif kind == "program":
-        q = _student_users(Q(student_record__program__in=audience["ids"]) & level_q)
+        students = _student_users(Q(student_record__program__in=audience["ids"]) & level_q)
+        member_ids = DepartmentMembership.objects.filter(program__in=audience["ids"]).values(
+            "user_id"
+        )
+        staff = Q(pk__in=member_ids) | Q(role_assignments__program__in=audience["ids"])
+        q = {"students": students, "staff": staff, "all": students | staff}[
+            audience.get("members", "students")
+        ]
     elif kind == "department":
         students = _student_users(Q(student_record__department__in=audience["ids"]) & level_q)
         member_ids = DepartmentMembership.objects.filter(department__in=audience["ids"]).values(
             "user_id"
         )
-        staff = Q(pk__in=member_ids) | Q(
-            role_assignments__role__in=sorted(DEPARTMENT_SCOPED_ROLES),
-            role_assignments__department__in=audience["ids"],
+        # Its own roles, and the heads and supervisors of its programmes.
+        staff = (
+            Q(pk__in=member_ids)
+            | Q(
+                role_assignments__role__in=sorted(DEPARTMENT_SCOPED_ROLES),
+                role_assignments__department__in=audience["ids"],
+            )
+            | Q(role_assignments__program__department__in=audience["ids"])
         )
         q = {"students": students, "staff": staff, "all": students | staff}[audience["members"]]
     elif kind == "college":
@@ -310,6 +337,11 @@ def options(sender) -> list[dict]:
                 "cohort",
                 f"كل طلاب {program.name_ar}",
                 {"type": "program", "ids": [program.pk]},
+            )
+            add(
+                "staff",
+                f"أساتذة ومعيدو {program.name_ar}",
+                {"type": "program", "ids": [program.pk], "members": "staff"},
             )
             for level in range(1, program.levels_count + 1):
                 add(

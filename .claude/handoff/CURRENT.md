@@ -95,6 +95,15 @@ Older rounds: `.claude/handoff/archive/2026-10-24_to_2026-11-02.md`, `.claude/ha
   - The public programme page names who leads it (`head` in `/api/public/programs/<code>`:
     its own head, else the department's manager, with consent; an object so the sample filter
     hides it).
+  - Review of #296–#301 (owner, 2026-11-13: «review last changes then fix»): a deleted
+    programme logs the head, supervisor and staff links that go with it
+    (`organization.services.end_program_links`, entry `program.links_end`) — they went by
+    cascade, unlogged; a programme's head addresses the programme's staff
+    (`{"type": "program", "members": "staff"}`), and a department's staff audience holds its
+    programmes' heads; a college-wide role that also heads a programme keeps its own nav and
+    home (`COLLEGE_ROLES` in `lib/nav.ts`; «برنامجي» → `/programs/<id>`); a programme's results
+    file names the programme; axe covers `/departments/1`, `/programs/1` and the programme
+    head's pages.
   - Demo: `program.manager@` / `program.supervisor@demo.ecst.test` on the IT bachelor's.
   - Gotcha: local `backend/media` (198 MB) made a backup test take minutes — test settings now
     use an unused `MEDIA_ROOT`. A lazy route changes the address before it renders: in E2E wait

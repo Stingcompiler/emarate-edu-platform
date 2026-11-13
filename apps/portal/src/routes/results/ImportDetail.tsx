@@ -99,7 +99,9 @@ export function ResultImportDetail() {
   return (
     <PortalShell
       title={b ? fileName(b.file_name) : "دفعة نتائج"}
-      subtitle={b ? `${b.term_name} · ${b.department_name ?? "الكلية"}` : undefined}
+      subtitle={
+        b ? `${b.term_name} · ${b.program_name ?? b.department_name ?? "الكلية"}` : undefined
+      }
       back={{ label: "رفع النتائج", to: "/result-imports" }}
     >
       {b && (

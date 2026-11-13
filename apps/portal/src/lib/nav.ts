@@ -131,15 +131,28 @@ function departmentNav(me: Me | null | undefined, unread: number): NavItem[] {
   ];
 }
 
+/** College-wide roles with a home and a nav of their own. */
+const COLLEGE_ROLES = [
+  "system_admin",
+  "system_supervisor",
+  "head_registrar",
+  "registrar",
+  "results_officer",
+  "academic_affairs",
+  "student_affairs",
+  "hr",
+  "site_manager",
+  "events_manager",
+];
+
 export function navFor(me: Me | null | undefined, unread: number): NavItem[] {
+  // A programme's head or supervisor works on the department's pages. One who is first a
+  // college-wide role — academic affairs heading a programme — keeps that role's nav and gets
+  // the programme as one more page (review 2026-11-13: it replaced their whole nav).
+  const programme = hasRole(me, "program_manager", "program_supervisor");
   if (
-    hasRole(
-      me,
-      "department_manager",
-      "department_supervisor",
-      "program_manager",
-      "program_supervisor",
-    )
+    hasRole(me, "department_manager", "department_supervisor") ||
+    (programme && !hasRole(me, ...COLLEGE_ROLES))
   )
     return departmentNav(me, unread);
   const items: NavItem[] = [];
@@ -211,6 +224,10 @@ export function navFor(me: Me | null | undefined, unread: number): NavItem[] {
     items.push({ label: "القبول", short: "الرئيسية", to: "/registrar", icon: LayoutDashboard });
     items.push({ label: "الطلبات", to: "/applications", icon: FileText, end: false });
   }
+  // Their programme's own page: the department's pages show such a role the whole college.
+  const mine = me?.roles.find((r) => r.program != null)?.program;
+  if (programme && mine != null)
+    items.push({ label: "برنامجي", to: `/programs/${mine}`, icon: Library });
   if (me?.student || hasRole(me, "teacher", "ta"))
     items.push({ label: "موادي", to: "/courses", icon: BookOpen, end: false });
   if (me?.student) items.push({ label: "المهام", to: "/tasks", icon: ListChecks });

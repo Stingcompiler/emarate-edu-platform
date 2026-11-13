@@ -299,6 +299,25 @@ def test_a_programme_head_addresses_the_programme_never_the_department(
     assert _local_grant(head, "offering", own["offering"].pk, "students")
     assert not _local_grant(head, "program", sibling.pk, "students")
     assert not _local_grant(head, "department", it_dept.pk, "students")
+    # The programme's own staff: those linked to it, its head and supervisor (review
+    # 2026-11-13: the department's manager could write to its staff, the programme's could not).
+    from notifications.audience import normalize, options, resolve
+
+    staff = {"type": "program", "ids": [it_program.pk], "members": "staff"}
+    assert is_allowed(head, staff)
+    assert not is_allowed(head, {**staff, "ids": [sibling.pk]})
+    assert not is_allowed(make_user(Role.HEAD_REGISTRAR), staff)  # students are theirs, not staff
+    assert normalize({"type": "program", "ids": [it_program.pk]}) == {
+        "type": "program",
+        "ids": [it_program.pk],
+    }  # a programme alone still means its students
+    reached = set(resolve(normalize(staff)).values_list("pk", flat=True))
+    assert reached == {own["teacher"].pk, head.pk}
+    assert other["teacher"].pk not in reached
+    assert ("staff", staff) in [(o["group"], o["audience"]) for o in options(head)]
+    # A department's staff holds the heads of its programmes too.
+    everyone = {"type": "department", "ids": [it_dept.pk], "members": "staff"}
+    assert head.pk in set(resolve(normalize(everyone)).values_list("pk", flat=True))
 
 
 def test_a_programme_head_reads_the_report_of_the_programme(

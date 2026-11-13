@@ -189,6 +189,7 @@ export function ResultImports() {
                         {fileName(b.file_name)}
                       </p>
                       <p className="text-xs text-text-muted">
+                        {b.program_name ? `${b.program_name} · ` : ""}
                         {b.term_name} · {count((b.summary as { rows?: number }).rows ?? 0, N.row)} ·{" "}
                         {b.uploaded_by} · {when(b.created_at)}
                       </p>

@@ -52,7 +52,10 @@ const PAGES: Record<string, string[]> = {
   // matrix, promotion and the staff profiles.
   "site@demo.ecst.test": ["/site-staff"],
   "head.registrar@demo.ecst.test": ["/student-promotion"],
-  "academic@demo.ecst.test": ["/staff-profiles"],
+  // The department's and the programme's own pages, and a programme head's (owner,
+  // 2026-11-13). In the demo, IT is department 1 and its bachelor's programme 1.
+  "academic@demo.ecst.test": ["/staff-profiles", "/academic", "/departments/1", "/programs/1"],
+  "program.manager@demo.ecst.test": ["/department", "/department/teachers", "/result-imports"],
 };
 
 for (const [account, paths] of Object.entries(PAGES)) {
