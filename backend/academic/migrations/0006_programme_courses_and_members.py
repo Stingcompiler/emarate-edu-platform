@@ -16,6 +16,16 @@ from django.db import migrations, models
 import django.db.models.deletion
 
 
+def _settle(schema_editor) -> None:
+    """PostgreSQL refuses to build an index on a table whose rows changed earlier in the same
+    transaction while their foreign-key checks are still deferred («cannot CREATE INDEX …
+    because it has pending trigger events»). The constraints added after this step need those
+    checks run now. An empty database never shows it: the first deploy on real data did
+    (2026-11-13), and rolled back whole."""
+    if schema_editor is not None and schema_editor.connection.vendor == "postgresql":
+        schema_editor.execute("SET CONSTRAINTS ALL IMMEDIATE")
+
+
 def forwards(apps, schema_editor):
     Course = apps.get_model("academic", "Course")
     Membership = apps.get_model("academic", "DepartmentMembership")
@@ -62,6 +72,7 @@ def forwards(apps, schema_editor):
                 kind=membership.kind,
                 added_by_id=membership.added_by_id,
             )
+    _settle(schema_editor)
 
 
 def backwards(apps, schema_editor):
@@ -75,6 +86,7 @@ def backwards(apps, schema_editor):
         else:
             seen.add(key)
     Membership.objects.update(program=None)
+    _settle(schema_editor)
 
 
 class Migration(migrations.Migration):
