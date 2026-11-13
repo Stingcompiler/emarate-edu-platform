@@ -17,6 +17,8 @@ ROLES = dict(
             "STU",
             "DH",
             "DS",
+            "PH",
+            "PS",
             "PROF",
             "TA",
             "STD",
@@ -34,6 +36,8 @@ ROLES = dict(
             Role.STUDENT_AFFAIRS,
             Role.DEPARTMENT_MANAGER,
             Role.DEPARTMENT_SUPERVISOR,
+            Role.PROGRAM_MANAGER,
+            Role.PROGRAM_SUPERVISOR,
             Role.TEACHER,
             Role.TA,
             Role.STUDENT,
@@ -44,7 +48,11 @@ ROLES = dict(
         strict=True,
     )
 )
-UNCOVERED = {"PROF", "TA", "STD"}
+# PH / PS (programme head and supervisor) hold `prog` cells: the generic tests below know
+# `all`, `dept` and `-`, so those two columns are checked cell by cell in
+# test_programme_scope.py instead.
+PROGRAMME = {"PH", "PS"}
+UNCOVERED = {"PROF", "TA", "STD"} | PROGRAMME
 ALIASES = {
     "system.settings": "settings.manage",
     "structure.edit": "structure.manage",
@@ -81,11 +89,11 @@ def read_matrix():
         if not text.startswith("|"):
             continue
         cells = [x.strip() for x in text.strip("|").split("|")]
-        if len(cells) != 17 or cells[2] not in {"all", "dept", "-"}:
+        if len(cells) != 19 or cells[2] not in {"all", "dept", "-"}:
             continue
         key, label, *values = cells
         assert key not in rows, f"duplicate policy key {key}"
-        assert set(values) <= {"all", "dept", "-"}
+        assert set(values) <= {"all", "dept", "prog", "-"}
         rows[key] = {"label": label, "line": line, "values": dict(zip(ROLES, values, strict=True))}
     assert rows, "Approved matrix has no operation rows"
     assert not ALIASES.keys() - rows.keys(), "Stale aliases"

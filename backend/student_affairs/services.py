@@ -277,7 +277,7 @@ def report_misconduct(
 ) -> MisconductReport:
     user = meta.actor
     teaches = OfferingInstructor.objects.filter(offering=offering, user=user).exists()
-    if not (teaches or rbac.can(user, "learning.manage", offering.course.department_id)):
+    if not (teaches or rbac.can_for(user, "learning.manage", offering.course)):
         raise PermissionDenied(gettext("You can report only in courses you teach or manage."))
     if not Enrollment.objects.filter(offering=offering, student_record=student_record).exists():
         raise ValidationError({"student_record": [gettext("This student is not in the course.")]})

@@ -1,6 +1,7 @@
 # تقرير الأدوار والصلاحيات — المنصة الجامعية
 
-> إصدار 2.6 — 2026-11-12. **مرجع الصلاحيات (من يملك ماذا وبأي نطاق) هو [roles-matrix.md](roles-matrix.md)** — المصفوفة المعتمدة من المالك؛ عند أي اختلاف فهي الحاكمة، وهذا الملف يصف الأدوار ومسؤولياتها وتسلسل التعيين والسياقات. يختبرها `backend/tests/permissions` في CI.
+> إصدار 2.7 — 2026-11-13. **مرجع الصلاحيات (من يملك ماذا وبأي نطاق) هو [roles-matrix.md](roles-matrix.md)** — المصفوفة المعتمدة من المالك؛ عند أي اختلاف فهي الحاكمة، وهذا الملف يصف الأدوار ومسؤولياتها وتسلسل التعيين والسياقات. يختبرها `backend/tests/permissions` في CI.
+> التغييرات عن 2.6 (المالك، 2026-11-13): القسم وعاء فقط — لكل برنامج رئيس ومشرف (`program_manager`، `program_supervisor`، §3.7أ) ومدير القسم ومشرفه اختياريان يديران كل برامج القسم؛ المادة تنتمي إلى برنامج واحد؛ الأستاذ يُربط بالبرامج في أي قسم.
 > التغييرات عن 2.5 (المالك بعد مراجعة 2026-11-12): أمين الشؤون العلمية لا ينشئ حسابات — يختار مديري الأقسام ومشرفيها والأساتذة من الحسابات الموجودة، ويعطّل حسابات الأساتذة والمعيدين ويعيد تفعيلها، ويدرّس بدور «أستاذ» يمنحه مدير النظام أو مشرفه؛ البرنامج يتبع قيادة قسمه (docs/roles-matrix.md).
 > التغييرات عن 2.4 (المالك بعد مراجعة 2026-11-10): كل موظف — من يحمل دورًا غير «طالب» — يختار الظهور على الموقع، ومدير الموقع يصنّف «الكوادر» (§3.8، §3.12)؛ التسجيل الذاتي يطابق البرنامج أيضًا، ومعه بلاغ الانتحال ونقل حساب الخريج (§3.10)؛ خمسة صفوف جديدة في المصفوفة (إنشاء الحسابات، منح الأدوار، اعتماد الحذف، الأخبار، مراجعة «الكوادر»).
 > التغييرات عن 2.3 (المالك بعد تدقيق الأدوار 2026-11-06): لا يعتمد أحد طلبًا قدّمه (حذف الإعلانات والإشعارات، وتصحيح النتائج)؛ مشرف النظام يزيل الأعضاء ويفك تعيين المواد (فك ربط لا حذف) ولا يحذف مسودات اللوائح؛ مسؤول المسجلين وأمين الشؤون العلمية يقرآن كل الحسابات؛ قوائم المحاضرات والواجبات والاختبارات والنتائج وتنبيهات الموارد البشرية ترفض (403) من لا يملك القدرة ولا يدرّس ولا يدرس.
@@ -32,7 +33,7 @@
 
 ---
 
-## 3. الأدوار (15 دورًا)
+## 3. الأدوار (17 دورًا)
 
 ### 3.1 مدير النظام — `system_admin`
 - **النطاق:** الكل. **يعيّنه:** لا أحد (تثبيت) / مدير نظام آخر.
@@ -104,6 +105,13 @@
 - **النطاق:** قسم أو أكثر. **يعيّنه:** أمين الشؤون العلمية أو مدير النظام؛ كل قسم يجب أن يحتوي على مشرف.
 - **الصلاحيات:** **كل صلاحيات مدير القسم عدا أي حذف**: لا حذف مادة/تقديم/محاضرة/واجب/اختبار/إعلان، ولا إزالة أستاذ من القسم، ولا إزالة تعيين على مادة (يضيف ويعدّل ويغلق ويؤرشف).
 - **التنفيذ:** Group بلا أي `delete_*`/`remove_*`؛ لا استثناءات في الكود.
+
+### 3.7أ رئيس البرنامج — `program_manager` ومشرف البرنامج — `program_supervisor` (قرار المالك، 2026-11-13)
+- **الأساس:** القسم وعاء فقط؛ المواد والمحاضرات والطلاب داخل البرنامج، و**لكل برنامج رئيس ومشرف**. مدير القسم ومشرفه اختياريان: إن عُيّنا أدارا كل برامج القسم، وإلا فكل برنامج برئيسه.
+- **النطاق:** برنامج أو أكثر (`RoleAssignment.program`). **يعيّنهما:** مدير النظام أو مشرفه أو أمين الشؤون العلمية، من الحسابات الموجودة.
+- **الصلاحيات:** لرئيس البرنامج داخل برنامجه ما لمدير القسم داخل قسمه، ولمشرف البرنامج ما لمشرف القسم (بلا أي حذف أو إزالة): مواد البرنامج وتقديماتها وتعيين أساتذته، ربط الأساتذة بالبرنامج وفكّهم، طلاب البرنامج (إضافة وتعديل)، اعتماد تسجيلهم وتسجيلهم في المواد، محتوى مواد البرنامج (محاضرات، واجبات، اختبارات، بث)، إعلانات وإشعارات للبرنامج ومواده، وقراءة نتائج البرنامج وحالات طلابه وطلبات التقديم إليه. **لا يرى شيئًا من برامج القسم الأخرى.**
+- **لم يصلهما بعد** (المصفوفة `-`): رفع ملفات النتائج، تقارير القسم ومؤشرات الأساتذة وتقارير القبول، وسجل العمليات — إلى أن تُبنى على مستوى البرنامج.
+- **التنفيذ:** `rbac.PROGRAM_SCOPED_ROLES`، `Scope.programs`؛ خلايا `prog` في [roles-matrix.md](roles-matrix.md) يختبرها `tests/permissions/test_programme_scope.py`.
 
 ### 3.8 الأستاذ — `teacher`
 - **النطاق:** التقديمات المعيّن عليها + عضوية قسم. **يعيّنه:** الحساب من مدير النظام أو مشرفه؛ العضوية والتعيين من مدير/مشرف القسم.
@@ -187,7 +195,7 @@
 ```
 system_admin ─▶ system_admin, head_registrar, results_officer, academic_affairs, student_affairs, hr, site_manager, events_manager, (وأي دور)
 head_registrar ─▶ registrar (+ ربطه بالأقسام)
-academic_affairs ─▶ department_manager, department_supervisor, teacher, ta (إنشاء الحساب)
+academic_affairs ─▶ department_manager, department_supervisor, program_manager, program_supervisor, teacher, ta (من الحسابات الموجودة)
 department_manager / department_supervisor ─▶ عضوية teacher/ta في القسم + تعيينهم على تقديمات القسم
 site_manager ─▶ events_manager
 head_registrar ─▶ StudentRecord → تفعيل → student
@@ -288,7 +296,7 @@ head_registrar ─▶ StudentRecord → تفعيل → student
 - **Groups** بالأسماء أعلاه؛ صلاحيات مخصصة في `Meta.permissions` (`publish_exam`, `approve_registration`, `import_students`, `import_results`, `release_results`, `request_result_correction`, `approve_result_correction`, `manage_result_display`, `manage_form_templates`, `assign_applications`, `decide_application`, `manage_department_membership`, `send_hr_notice`, `manage_regulations`, `manage_student_cases`, `publish_student_case`, `report_exam_misconduct`, `rebuild_site`, `route_inquiry`).
 - **ResultCorrection:** `result, requested_by, old_value, new_value, reason, status pending|approved|rejected, decided_by, decided_at, decision_note` — تُطبَّق على النتيجة فقط عند `approved`.
 - **Regulation / RegulationAcknowledgement**, **StudentCase / StudentCaseEvent / ExamMisconductReport** — مملوكة لـ `student_affairs`.
-- **RoleAssignment:** `user, role, college NULL, department NULL, created_by, created_at`؛ قيود: `registrar/dm/ds` تتطلب `department`.
+- **RoleAssignment:** `user, role, college NULL, department NULL, program NULL, created_by, created_at`؛ قيود: `registrar/dm/ds` تتطلب `department`، و`program_manager/program_supervisor` تتطلبان `program`.
 - **DepartmentMembership:** `user, program, department (مشتق من البرنامج), kind teacher|ta, added_by, added_at` — الأستاذ يُربط بالبرامج التي يدرّس فيها، في أي قسم (المالك 2026-11-13).
 - **OfferingInstructor:** `offering, user, role, ta_can_grade`.
 - **ApplicationAssignment:** `application, registrar, assigned_by, assigned_at` (التولّي/التوزيع).

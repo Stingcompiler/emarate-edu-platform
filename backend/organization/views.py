@@ -111,11 +111,19 @@ class DepartmentViewSet(_CodedViewSet):
 
     queryset = Department.objects.select_related("college")
     department_lookup = "pk"
+    # A programme's head sees the department that holds it (owner, 2026-11-13).
+    program_lookup = "programs"
     serializer_class = DepartmentSerializer
     audit_name = "department"
     site_section = "departments"
     filterset_fields = ["college", "is_active"]
     search_fields = ["name_ar", "name_en", "code"]
+
+    def get_queryset(self):
+        return super().get_queryset().distinct()  # one row, whatever programmes are held
+
+    def program_of(self, obj):
+        return None
 
     def _manager(self, *, deleting: bool = False):
         # Merging deletes the department: never the system supervisor's (rbac.scope_for).
@@ -152,11 +160,18 @@ class ProgramViewSet(_CodedViewSet):
 
     queryset = Program.objects.select_related("department")
     department_lookup = "department"
+    program_lookup = "pk"  # a programme's head sees their programme
     serializer_class = ProgramSerializer
     audit_name = "program"
     site_section = "programs"
     filterset_fields = ["department", "degree", "is_active"]
     search_fields = ["name_ar", "name_en", "code"]
+
+    def program_of(self, obj):
+        return obj.pk
+
+    def program_of_data(self, data):
+        return None
 
     def perform_update(self, serializer):
         with transaction.atomic():

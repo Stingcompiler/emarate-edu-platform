@@ -105,10 +105,10 @@ def allowed_transitions(user, application: Application, delegated: bool | None =
 
 
 def staff_q(user) -> Q:
-    scope = rbac.scope_for(user, "admissions.view")
-    if scope.everything:
-        return Q(pk__isnull=False)
-    return Q(intake__program__department__in=scope.departments)
+    # A department reads the applications to its programmes; a programme head to theirs.
+    return rbac.scope_for(user, "admissions.view").q(
+        "intake__program__department", "intake__program"
+    )
 
 
 def _record_move(

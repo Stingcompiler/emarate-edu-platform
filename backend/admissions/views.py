@@ -155,7 +155,9 @@ class CycleViewSet(_Audited):
         # the others (docs/03 §3.6: «دورات القبول … مقصورة على قسمه»; review 2026-10-25 R13).
         return (
             rbac.scope_for(self.request.user, "admissions.view")
-            .filter(AdmissionCycle.objects.all(), "intakes__program__department")
+            .filter(
+                AdmissionCycle.objects.all(), "intakes__program__department", "intakes__program"
+            )
             .distinct()
         )
 
@@ -174,7 +176,7 @@ class IntakeViewSet(_Audited):
             .order_by("cycle", "program__name_ar", "id")
         )
         return rbac.scope_for(self.request.user, "admissions.view").filter(
-            queryset, "program__department"
+            queryset, "program__department", "program"
         )
 
 

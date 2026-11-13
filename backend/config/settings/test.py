@@ -7,7 +7,7 @@ SQLite ↔ PostgreSQL compatibility rules honest.
 import dj_database_url
 
 from .base import *  # noqa: F403
-from .base import REST_FRAMEWORK, STORAGES
+from .base import BASE_DIR, REST_FRAMEWORK, STORAGES
 from .env import env
 
 SECRET_KEY = "test-secret-key-only-for-the-test-suite-0123456789"
@@ -44,7 +44,10 @@ REST_FRAMEWORK = {
 
 SERVE_API_DOCS = True
 
-# Uploaded files stay in memory; the suite never writes into media/.
+# Uploaded files stay in memory; the suite never writes into media/ — nor reads it: a backup
+# test archived the developer's own uploads (198 MB here, encrypted five bytes at a time), which
+# took minutes on a machine with real media and nothing on CI (found 2026-11-13).
+MEDIA_ROOT = BASE_DIR / ".test-media"  # never created: backups find no local media
 STORAGES = {
     **STORAGES,
     "default": {"BACKEND": "django.core.files.storage.InMemoryStorage"},

@@ -100,6 +100,7 @@ class CourseViewSet(ScopedModelViewSet):
 
     queryset = Course.objects.select_related("department", "program")
     serializer_class = CourseSerializer
+    program_lookup = "program"
     read_capability = "courses.view"
     write_capability = "courses.manage"
     delete_capability = "courses.delete"
@@ -117,6 +118,7 @@ class OfferingViewSet(ScopedModelViewSet):
     write_capability = "courses.manage"
     delete_capability = "courses.delete"
     department_lookup = "course__department"
+    program_lookup = "course__program"
     audit_name = "offering"
     filterset_fields = ["term", "course", "course__department", "course__program", "status"]
     search_fields = ["course__code", "course__name_ar"]
@@ -137,6 +139,13 @@ class OfferingViewSet(ScopedModelViewSet):
     def department_of_data(self, data):
         course = data.get("course")
         return course.department_id if course is not None else None
+
+    def program_of(self, obj):
+        return obj.course.program_id
+
+    def program_of_data(self, data):
+        course = data.get("course")
+        return course.program_id if course is not None else None
 
     @extend_schema(request=InstructorAddSerializer, responses={201: InstructorSerializer})
     @action(detail=True, methods=["post"], url_path="instructors")
@@ -167,6 +176,18 @@ class OfferingViewSet(ScopedModelViewSet):
         return super().get_permissions()
 
 
+def _programs_in(user, capability: str, department) -> bool | set[int]:
+    """Where ``user`` holds ``capability`` in this department: ``True`` for all of it (a
+    department or college-wide role), else the ids of its programmes they hold — empty when
+    none (owner, 2026-11-13: a programme head acts inside their programme)."""
+    scope = rbac.scope_for(user, capability)
+    if scope.allows(department.pk):
+        return True
+    if not scope.programs:
+        return set()
+    return set(department.programs.filter(pk__in=scope.programs).values_list("pk", flat=True))
+
+
 class DepartmentMembersView(APIView):
     """Teachers and TAs belonging to a department (docs/02 D13)."""
 
@@ -178,7 +199,7 @@ class DepartmentMembersView(APIView):
     def _department(self, request, department_id):
         department = get_object_or_404(Department, pk=department_id)
         name = "courses.view" if request.method == "GET" else "membership.manage"
-        if not rbac.can(request.user, name, department.pk):
+        if not _programs_in(request.user, name, department):
             # Hide departments outside the caller's scope entirely.
             raise Http404
         return department
@@ -189,6 +210,10 @@ class DepartmentMembersView(APIView):
         rows = DepartmentMembership.objects.filter(department=department).select_related(
             "user", "program"
         )
+        programs = _programs_in(request.user, "courses.view", department)
+        if programs is not True:
+            # A programme head sees the staff of their programmes, not the whole department.
+            rows = rows.filter(program_id__in=programs)
         return Response(MembershipSerializer(rows, many=True).data)
 
     @extend_schema(request=MembershipAddSerializer, responses={201: MembershipSerializer})
@@ -218,12 +243,37 @@ class DepartmentLeadersView(APIView):
         from accounts.rbac import Role
 
         department = get_object_or_404(Department, pk=department_id)
-        if not rbac.can(request.user, "courses.view", department.pk):
+        if not _programs_in(request.user, "courses.view", department):
             raise Http404
         rows = (
             RoleAssignment.objects.filter(
                 department=department,
                 role__in=[Role.DEPARTMENT_MANAGER, Role.DEPARTMENT_SUPERVISOR],
+            )
+            .select_related("user", "user__photo")
+            .order_by("role", "user__full_name_ar")
+        )
+        return Response(LeaderSerializer(rows, many=True).data)
+
+
+class ProgramLeadersView(APIView):
+    """A programme's head and supervisor (owner, 2026-11-13: every programme has its own), for
+    the programme's page. Read by whoever reads its courses."""
+
+    permission_classes = [IsAuthenticated, capability("courses.view")]
+
+    @extend_schema(responses=LeaderSerializer(many=True))
+    def get(self, request, program_id):
+        from accounts.models import RoleAssignment
+        from accounts.rbac import Role
+        from organization.models import Program
+
+        program = get_object_or_404(Program, pk=program_id)
+        if not rbac.can(request.user, "courses.view", program.department_id, program.pk):
+            raise Http404
+        rows = (
+            RoleAssignment.objects.filter(
+                program=program, role__in=[Role.PROGRAM_MANAGER, Role.PROGRAM_SUPERVISOR]
             )
             .select_related("user", "user__photo")
             .order_by("role", "user__full_name_ar")
@@ -239,7 +289,7 @@ class DepartmentMemberDetailView(APIView):
         membership = get_object_or_404(
             DepartmentMembership, pk=membership_id, department_id=department_id
         )
-        if not rbac.can(request.user, "courses.view", membership.department_id):
+        if not rbac.can_for(request.user, "courses.view", membership):
             raise Http404
         services.remove_member(RequestMeta.from_request(request), membership)
         return Response(status=status.HTTP_204_NO_CONTENT)
@@ -268,7 +318,7 @@ class EnrollmentViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewse
             )
         )
         scope = rbac.scope_for(self.request.user, "enrollment.manage")
-        return scope.filter(queryset, "offering__course__department")
+        return scope.filter(queryset, "offering__course__department", "offering__course__program")
 
     @extend_schema(request=EnrollmentCreateSerializer, responses={201: EnrollmentSerializer})
     def create(self, request):
@@ -353,7 +403,9 @@ class MyCoursesView(APIView):
             # Course pickers (new exam, live session, announcement): add every course of
             # the departments the user runs, as "manager".
             scope = rbac.scope_for(request.user, "learning.manage")
-            managed = scope.filter(base, "course__department").exclude(pk__in=teaching)
+            managed = scope.filter(base, "course__department", "course__program").exclude(
+                pk__in=teaching
+            )
             for offering in managed.order_by("course__code", "section"):
                 offering.my_role = "manager"
                 courses.append(offering)
@@ -378,8 +430,8 @@ class MyCoursesView(APIView):
             .values_list("role", flat=True)
             .first()
         )
-        department = offering.course.department_id
-        if role is None and rbac.can(user, "learning.manage", department):
+        department, program = offering.course.department_id, offering.course.program_id
+        if role is None and rbac.can(user, "learning.manage", department, program):
             role = "manager"
         if (
             role is None
@@ -388,7 +440,7 @@ class MyCoursesView(APIView):
             ).exists()
         ):
             role = "student"
-        if role is None and rbac.can(user, "learning.view", department):
+        if role is None and rbac.can(user, "learning.view", department, program):
             role = "viewer"
         if role is None:
             return Response([])

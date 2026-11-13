@@ -39,7 +39,7 @@ from .models import (
     RoleAssignment,
     User,
 )
-from .rbac import DEPARTMENT_SCOPED_ROLES, Role
+from .rbac import DEPARTMENT_SCOPED_ROLES, PROGRAM_SCOPED_ROLES, Role
 
 ACTIVATION_DAYS = 7
 
@@ -411,7 +411,7 @@ def decide_registration(
 ) -> RegistrationRequest:
     """Step 4 (when approval is on): department manager/supervisor or head registrar."""
     student = request.student_record
-    if not rbac.can(meta.actor, "registration.approve", student.department_id):
+    if not rbac.can_for(meta.actor, "registration.approve", student):
         raise PermissionDenied()
     already = Conflict(gettext("This request was already decided."), code="already_decided")
     if request.status != RegistrationRequest.Status.PENDING_APPROVAL:
@@ -531,7 +531,7 @@ def decide_identity_report(
     The account is disabled, never deleted: what was done with it stays on record.
     """
     student = report.student_record
-    if not rbac.can(meta.actor, "registration.approve", student.department_id):
+    if not rbac.can_for(meta.actor, "registration.approve", student):
         raise PermissionDenied()
     already = Conflict(gettext("This report was already decided."), code="already_decided")
     with transaction.atomic():
@@ -832,6 +832,7 @@ def create_staff_account(
     phone_e164: str = "",
     role: Role,
     department_id: int | None = None,
+    program_id: int | None = None,
 ) -> User:
     """Create a staff user with one role and email an activation link.
 
@@ -854,7 +855,7 @@ def create_staff_account(
         )
         user.set_unusable_password()
         user.save(update_fields=["password"])
-        grant_role(meta, user, role, department_id)
+        grant_role(meta, user, role, department_id, program_id)
         token = issue_activation(user)
         record(
             meta,
@@ -913,7 +914,18 @@ def _site_staff_changed() -> None:
     site_changed()
 
 
-def _check_department_rule(role: Role, department_id: int | None) -> None:
+def _check_department_rule(
+    role: Role, department_id: int | None, program_id: int | None = None
+) -> None:
+    if role in PROGRAM_SCOPED_ROLES:
+        # A programme head or supervisor runs one programme (owner, 2026-11-13).
+        if program_id is None:
+            raise ValidationError({"program": [gettext("This role requires a programme.")]})
+        if department_id is not None:
+            raise ValidationError({"department": [gettext("This role is held on a programme.")]})
+        return
+    if program_id is not None:
+        raise ValidationError({"program": [gettext("This role is not held on a programme.")]})
     if role in DEPARTMENT_SCOPED_ROLES and department_id is None:
         raise ValidationError({"department": [gettext("This role requires a department.")]})
     if role not in DEPARTMENT_SCOPED_ROLES and department_id is not None:
@@ -921,7 +933,11 @@ def _check_department_rule(role: Role, department_id: int | None) -> None:
 
 
 def grant_role(
-    meta: RequestMeta, user: User, role: Role, department_id: int | None = None
+    meta: RequestMeta,
+    user: User,
+    role: Role,
+    department_id: int | None = None,
+    program_id: int | None = None,
 ) -> RoleAssignment:
     if role not in rbac.grantable_roles(meta.actor):
         raise PermissionDenied(gettext("You cannot grant this role."))
@@ -931,20 +947,26 @@ def grant_role(
         raise PermissionDenied(gettext("You cannot grant a role to yourself."))
     if rbac.has_role(user, Role.STUDENT):
         raise ValidationError({"role": [gettext("A student account cannot hold a staff role.")]})
-    _check_department_rule(role, department_id)
+    _check_department_rule(role, department_id, program_id)
     try:
         with transaction.atomic():
             assignment = RoleAssignment.objects.create(
-                user=user, role=role, department_id=department_id, created_by=meta.actor
+                user=user,
+                role=role,
+                department_id=department_id,
+                program_id=program_id,
+                created_by=meta.actor,
             )
     except IntegrityError:
         raise Conflict(gettext("The user already has this role."), code="role_exists") from None
+    # The log files a programme's entries under its department.
+    logged = assignment.program.department_id if program_id else department_id
     record(
         meta,
         "role.grant",
         user,
-        new={"role": role, "department_id": department_id},
-        department_id=department_id,
+        new={"role": role, "department_id": department_id, "program_id": program_id},
+        department_id=logged,
     )
     rbac.clear_cache(user)
     _site_staff_changed()
@@ -963,8 +985,16 @@ def revoke_role(meta: RequestMeta, assignment: RoleAssignment) -> None:
             meta,
             "role.revoke",
             user,
-            old={"role": assignment.role, "department_id": assignment.department_id},
-            department_id=assignment.department_id,
+            old={
+                "role": assignment.role,
+                "department_id": assignment.department_id,
+                "program_id": assignment.program_id,
+            },
+            department_id=(
+                assignment.program.department_id
+                if assignment.program_id
+                else assignment.department_id
+            ),
         )
         assignment.delete()
         rbac.clear_cache(user)

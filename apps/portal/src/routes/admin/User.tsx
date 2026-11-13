@@ -21,7 +21,7 @@ import { formData, postWithProgress } from "../../lib/upload";
 import type { Schemas } from "@ecst/api";
 import { useMe } from "../../lib/auth";
 import { initials, useDepartments } from "../../lib/reports";
-import { DEPARTMENT_ROLES, ROLE_LABEL, ROLE_ORDER } from "./roles";
+import { DEPARTMENT_ROLES, PROGRAM_ROLES, ROLE_LABEL, ROLE_ORDER } from "./roles";
 import { useConfirm } from "../../components/Confirm";
 import { useToast } from "../../components/Toast";
 import { Select } from "../../components/Select";
@@ -49,6 +49,15 @@ export function AdminUser() {
   const [picked, setRole] = useState("");
   const role = picked; // nothing preselected: the admin chooses (review 2026-09-29)
   const [department, setDepartment] = useState("");
+  // A programme's head or supervisor is appointed on one programme (owner, 2026-11-13).
+  const [program, setProgram] = useState("");
+  const programs = useQuery({
+    queryKey: ["programs", "all"],
+    enabled: PROGRAM_ROLES.has(picked),
+    queryFn: async () =>
+      ok(await api.GET("/api/v1/programs", { params: { query: { page_size: 100 } as never } }))
+        ?.results ?? [],
+  });
   const toast = useToast();
   const grant = useMutation({
     mutationFn: async () => {
@@ -57,6 +66,7 @@ export function AdminUser() {
           user: id,
           role: role as never,
           department: DEPARTMENT_ROLES.has(role) && department ? Number(department) : null,
+          program: PROGRAM_ROLES.has(role) && program ? Number(program) : null,
         },
       });
       if (!data) throw error;
@@ -259,7 +269,11 @@ export function AdminUser() {
                   <span className="min-w-0 flex-1">
                     <b className="block">{ROLE_LABEL[r.role] ?? r.role}</b>
                     <span className="text-xs text-text-muted">
-                      {r.department_name ? `النطاق: ${r.department_name}` : "على مستوى الكلية"}
+                      {r.program_name
+                        ? `البرنامج: ${r.program_name}`
+                        : r.department_name
+                          ? `النطاق: ${r.department_name}`
+                          : "على مستوى الكلية"}
                     </span>
                   </span>
                   {grantable.includes(r.role) && (
@@ -300,8 +314,11 @@ export function AdminUser() {
                   {ROLE_ORDER.filter(
                     (k) =>
                       grantable.includes(k) &&
-                      // A department role can be held for several departments; others only once.
-                      (DEPARTMENT_ROLES.has(k) || !u.roles.some((r) => r.role === k)),
+                      // A department or programme role can be held for several of them; others
+                      // only once.
+                      (DEPARTMENT_ROLES.has(k) ||
+                        PROGRAM_ROLES.has(k) ||
+                        !u.roles.some((r) => r.role === k)),
                   ).map((k) => (
                     <option key={k} value={k}>
                       {ROLE_LABEL[k]}
@@ -323,9 +340,29 @@ export function AdminUser() {
                     ))}
                   </Select>
                 )}
+                {PROGRAM_ROLES.has(role) && (
+                  <Select
+                    value={program}
+                    onChange={(e) => setProgram(e.target.value)}
+                    className="block min-h-10 w-full rounded-lg border border-border bg-surface px-3 text-sm"
+                    aria-label="البرنامج"
+                  >
+                    <option value="">اختر البرنامج</option>
+                    {(programs.data ?? []).map((p) => (
+                      <option key={p.id} value={p.id}>
+                        {p.name_ar} — {p.department_name}
+                      </option>
+                    ))}
+                  </Select>
+                )}
                 <Button
                   className="w-full"
-                  disabled={!role || (DEPARTMENT_ROLES.has(role) && !department) || grant.isPending}
+                  disabled={
+                    !role ||
+                    (DEPARTMENT_ROLES.has(role) && !department) ||
+                    (PROGRAM_ROLES.has(role) && !program) ||
+                    grant.isPending
+                  }
                   onClick={() => grant.mutate()}
                 >
                   إضافة

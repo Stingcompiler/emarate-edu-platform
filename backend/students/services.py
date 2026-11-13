@@ -38,8 +38,11 @@ def issue_university_number(program) -> str:
             return number
 
 
-def _require(meta: RequestMeta, capability: str, department_id: int) -> None:
-    if not rbac.can(meta.actor, capability, department_id):
+def _require(
+    meta: RequestMeta, capability: str, department_id: int, program_id: int | None = None
+) -> None:
+    """``program_id``: the student's programme — its head acts there (owner, 2026-11-13)."""
+    if not rbac.can(meta.actor, capability, department_id, program_id):
         raise PermissionDenied(gettext("Outside your department scope."))
 
 
@@ -68,7 +71,7 @@ def _check_semester(semester: int) -> None:
 
 def create_record(meta: RequestMeta, **data) -> StudentRecord:
     program = data["program"]
-    _require(meta, "students.manage", program.department_id)
+    _require(meta, "students.manage", program.department_id, program.pk)
     _check_level(program, data["level"])
     data.setdefault("semester", current_semester())
     _check_semester(data["semester"])
@@ -87,11 +90,12 @@ def create_record(meta: RequestMeta, **data) -> StudentRecord:
 
 
 def update_record(meta: RequestMeta, obj: StudentRecord, **data) -> StudentRecord:
-    _require(meta, "students.manage", obj.department_id)
+    _require(meta, "students.manage", obj.department_id, obj.program_id)
     program = data.get("program", obj.program)
-    if program.department_id != obj.department_id:
-        # Moving a student to another department's program needs scope there too.
-        _require(meta, "students.manage", program.department_id)
+    if program.pk != obj.program_id:
+        # Moving a student to another programme needs scope there too: another department's
+        # for a department role, another programme's for a programme head.
+        _require(meta, "students.manage", program.department_id, program.pk)
     _check_level(program, data.get("level", obj.level))
     _check_semester(data.get("semester", obj.semester))
     number = data.pop("university_number", "")
@@ -126,7 +130,7 @@ def update_record(meta: RequestMeta, obj: StudentRecord, **data) -> StudentRecor
 
 
 def delete_record(meta: RequestMeta, obj: StudentRecord) -> None:
-    _require(meta, "students.delete", obj.department_id)
+    _require(meta, "students.delete", obj.department_id, obj.program_id)
     history = (
         obj.user_id is not None
         or obj.enrollments.exists()

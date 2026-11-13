@@ -49,10 +49,11 @@ class OfferingAccess:
 def for_offering(user, offering) -> OfferingAccess:
     if user is None or not user.is_authenticated:
         return OfferingAccess()
-    department_id = offering.course.department_id
-    view = rbac.can(user, "learning.view", department_id)
-    manage = rbac.can(user, "learning.manage", department_id)
-    delete = rbac.can(user, "learning.delete", department_id)
+    # A course lives in a programme: its head and supervisor act like the department's.
+    department_id, program_id = offering.course.department_id, offering.course.program_id
+    view = rbac.can(user, "learning.view", department_id, program_id)
+    manage = rbac.can(user, "learning.manage", department_id, program_id)
+    delete = rbac.can(user, "learning.delete", department_id, program_id)
     teaching = (
         OfferingInstructor.objects.filter(offering=offering, user=user)
         .values_list("role", flat=True)
@@ -86,6 +87,8 @@ def staff_offerings_q(user, field: str = "offering") -> Q:
     q = Q(**{f"{field}_id__in": teaching})
     if scope.departments:
         q |= Q(**{f"{field}__course__department__in": scope.departments})
+    if scope.programs:
+        q |= Q(**{f"{field}__course__program__in": scope.programs})
     return q
 
 

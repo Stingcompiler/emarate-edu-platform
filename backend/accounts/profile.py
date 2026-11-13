@@ -159,7 +159,7 @@ def _photo_readable(user, stored) -> bool:
     record_ = getattr(owner, "student_record", None)
     if record_ is None:
         return user.is_authenticated
-    return rbac.can(user, "students.view", record_.department_id)
+    return rbac.can_for(user, "students.view", record_)
 
 
 def register_file_policy() -> None:

@@ -30,16 +30,13 @@ def can_manage(user, session_or_data) -> bool:
     if offering is not None:
         return access.for_offering(user, offering).edit
     program = getattr(session_or_data, "program", None) or session_or_data.get("program")
-    return rbac.can(user, "learning.manage", program.department_id)
+    return rbac.can(user, "learning.manage", program.department_id, program.pk)
 
 
 def visible_q(user) -> Q:
     """Sessions a user may see: staff by course/department, students by enrollment/cohort."""
-    staff = access.staff_offerings_q(user) | Q(
-        program__department__in=rbac.scope_for(user, "learning.view").departments
-    )
-    if rbac.scope_for(user, "learning.view").everything:
-        staff = Q(pk__isnull=False)
+    scope = rbac.scope_for(user, "learning.view")
+    staff = access.staff_offerings_q(user) | scope.q("program__department", "program")
     return staff | _attending_q(user)
 
 

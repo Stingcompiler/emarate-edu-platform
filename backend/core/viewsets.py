@@ -22,6 +22,9 @@ class ScopedModelViewSet(viewsets.ModelViewSet):
       read_capability / write_capability / delete_capability — names in rbac.CAPABILITIES
       department_lookup — ORM path from the model to its department id
                           (e.g. "department", "course__department"); None = not scoped
+      program_lookup    — ORM path to its programme (e.g. "program", "course__program"),
+                          where rows live in a programme: a programme head or supervisor sees
+                          and changes those of their programmes (owner, 2026-11-13)
       audit_name        — prefix for audit actions, e.g. "course"
     and implement ``department_of(obj)`` and ``department_of_data(validated_data)``
     when the department is not a direct ``department`` field.
@@ -31,6 +34,7 @@ class ScopedModelViewSet(viewsets.ModelViewSet):
     write_capability: str | None = None
     delete_capability: str | None = None
     department_lookup: str | None = "department"
+    program_lookup: str | None = None
     audit_name: str = ""
 
     def get_permissions(self):
@@ -59,7 +63,7 @@ class ScopedModelViewSet(viewsets.ModelViewSet):
         # Finding the object is reading: a DELETE that unlinks (an instructor off a course) is
         # the supervisor's too; deleting itself is checked on the delete capability.
         return self.scope(self.read_capability, deleting=False).filter(
-            queryset, self.department_lookup
+            queryset, self.department_lookup, self.program_lookup
         )
 
     def department_of(self, obj) -> int | None:
@@ -69,10 +73,17 @@ class ScopedModelViewSet(viewsets.ModelViewSet):
         department = data.get("department")
         return department.pk if department is not None else None
 
-    def _require_scope(self, department_id: int | None) -> None:
+    def program_of(self, obj) -> int | None:
+        return getattr(obj, "program_id", None) if self.program_lookup else None
+
+    def program_of_data(self, data: dict) -> int | None:
+        program = data.get("program") if self.program_lookup else None
+        return program.pk if program is not None else None
+
+    def _require_scope(self, department_id: int | None, program_id: int | None = None) -> None:
         if self.department_lookup is None:
             return
-        if not self.scope().allows(department_id):
+        if not self.scope().allows(department_id, program_id):
             raise PermissionDenied(gettext("Outside your department scope."))
 
     @property
@@ -81,7 +92,8 @@ class ScopedModelViewSet(viewsets.ModelViewSet):
 
     # ── writes ─────────────────────────────────────────────────────────
     def perform_create(self, serializer):
-        self._require_scope(self.department_of_data(serializer.validated_data))
+        data = serializer.validated_data
+        self._require_scope(self.department_of_data(data), self.program_of_data(data))
         with transaction.atomic():
             obj = serializer.save()
             record(
@@ -94,10 +106,15 @@ class ScopedModelViewSet(viewsets.ModelViewSet):
 
     def perform_update(self, serializer):
         obj = serializer.instance
-        self._require_scope(self.department_of(obj))
-        moving_to = self.department_of_data(serializer.validated_data)
-        if moving_to is not None:
-            self._require_scope(moving_to)  # cannot move an item into another department
+        self._require_scope(self.department_of(obj), self.program_of(obj))
+        data = serializer.validated_data
+        moving_to = self.department_of_data(data)
+        if moving_to is not None or self.program_of_data(data) is not None:
+            # Cannot move an item into another department, or another programme's head's.
+            self._require_scope(
+                moving_to if moving_to is not None else self.department_of(obj),
+                self.program_of_data(data) or self.program_of(obj),
+            )
         old = snapshot(obj)
         with transaction.atomic():
             obj = serializer.save()
@@ -111,7 +128,7 @@ class ScopedModelViewSet(viewsets.ModelViewSet):
             )
 
     def perform_destroy(self, instance):
-        self._require_scope(self.department_of(instance))
+        self._require_scope(self.department_of(instance), self.program_of(instance))
         old = snapshot(instance)
         department_id = self.department_of(instance)
         try:

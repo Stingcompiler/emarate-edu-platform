@@ -53,7 +53,9 @@ class StudentRecordViewSet(
 
     def get_queryset(self):
         queryset = StudentRecord.objects.select_related("program", "department")
-        return rbac.scope_for(self.request.user, "students.view").filter(queryset, "department")
+        return rbac.scope_for(self.request.user, "students.view").filter(
+            queryset, "department", "program"
+        )
 
     def get_serializer_class(self):
         if self.request.method in ("POST", "PATCH"):

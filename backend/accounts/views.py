@@ -281,6 +281,7 @@ class RoleSummarySerializer(serializers.Serializer):
     key = serializers.CharField()
     label = serializers.CharField()
     department_scoped = serializers.BooleanField()
+    program_scoped = serializers.BooleanField()
     users = serializers.IntegerField()
 
 
@@ -315,6 +316,7 @@ class RolesView(APIView):
                 "key": role.value,
                 "label": role.label,
                 "department_scoped": role in rbac.DEPARTMENT_SCOPED_ROLES,
+                "program_scoped": role in rbac.PROGRAM_SCOPED_ROLES,
                 "users": counts.get(role.value, 0),
             }
             for role in Role
@@ -699,7 +701,7 @@ class UserViewSet(
 
     def get_queryset(self):
         queryset = User.objects.select_related("student_record", "photo").prefetch_related(
-            "role_assignments__department"
+            "role_assignments__department", "role_assignments__program"
         )
         # ?role=registrar: one role's accounts, filtered by the server (review 2026-09-29, P3).
         role = self.request.query_params.get("role")
@@ -717,10 +719,12 @@ class UserViewSet(
         data.is_valid(raise_exception=True)
         values = data.validated_data
         department = values.pop("department", None)
+        program = values.pop("program", None)
         user = services.create_staff_account(
             RequestMeta.from_request(request),
             role=Role(values.pop("role")),
             department_id=department.pk if department else None,
+            program_id=program.pk if program else None,
             **values,
         )
         return Response(UserSerializer(user).data, status=status.HTTP_201_CREATED)
@@ -782,7 +786,7 @@ class RoleAssignmentViewSet(
 
     def get_queryset(self):
         grantable = rbac.grantable_roles(self.request.user)
-        return RoleAssignment.objects.select_related("user", "department").filter(
+        return RoleAssignment.objects.select_related("user", "department", "program").filter(
             role__in=[r.value for r in grantable]
         )
 
@@ -809,11 +813,13 @@ class RoleAssignmentViewSet(
         data = RoleGrantSerializer(data=request.data)
         data.is_valid(raise_exception=True)
         department = data.validated_data.get("department")
+        program = data.validated_data.get("program")
         assignment = services.grant_role(
             RequestMeta.from_request(request),
             data.validated_data["user"],
             Role(data.validated_data["role"]),
             department.pk if department else None,
+            program.pk if program else None,
         )
         return Response(
             RoleAssignmentDetailSerializer(assignment).data, status=status.HTTP_201_CREATED
@@ -841,7 +847,7 @@ class RegistrationRequestViewSet(
             student_record__isnull=False,
         ).select_related("student_record__program")
         scope = rbac.scope_for(self.request.user, "registration.approve")
-        return scope.filter(queryset, "student_record__department")
+        return scope.filter(queryset, "student_record__department", "student_record__program")
 
     @extend_schema(
         request=RegistrationDecisionSerializer, responses={200: RegistrationRequestSerializer}
@@ -873,7 +879,7 @@ class IdentityReportViewSet(
     def get_queryset(self):
         queryset = IdentityReport.objects.select_related("student_record__program", "account")
         scope = rbac.scope_for(self.request.user, "registration.approve")
-        return scope.filter(queryset, "student_record__department")
+        return scope.filter(queryset, "student_record__department", "student_record__program")
 
     @extend_schema(request=IdentityDecisionSerializer, responses={200: IdentityReportSerializer})
     @action(detail=True, methods=["post"])

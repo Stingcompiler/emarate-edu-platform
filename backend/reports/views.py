@@ -398,7 +398,7 @@ class TranscriptView(APIView):
             StudentRecord.objects.select_related("program", "department"),
             university_number__iexact=university_number,  # a typed address (R90)
         )
-        if not rbac.can(request.user, "results.view", record_.department_id):
+        if not rbac.can_for(request.user, "results.view", record_):
             raise NotFound()
         view = results.transcript(record_)
         data = {

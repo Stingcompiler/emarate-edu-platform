@@ -125,7 +125,7 @@ backend/
 
 ### accounts
 - **User** (AbstractUser): email[u], full_name_ar/en, phone_e164, avatar, is_active, must_change_password, last_seen. لا حقل `role`.
-- **RoleAssignment**: user→, role (Group)→, college→(null), department→(null), created_by→; [u (user, role, department)].
+- **RoleAssignment**: user→, role (Group)→, college→(null), department→(null), program→(null؛ لرئيس البرنامج ومشرفه — المالك 2026-11-13), created_by→; [u (user, role, department)؛ u (user, role, program)].
 - **OTP**: purpose {register|login_reset|contact}, target (email/phone), code_hash, expires_at, attempts, used_at (idx target).
 - **RegistrationRequest**: student_record→, email, status {otp_pending|verified|pending_approval|approved|rejected}, moves_account (نقل حساب خريج ينتظر الاعتماد)، decided_by→, decided_at, reason.
 - **IdentityReport**: student_record→, account→(null), contact_email, note, status {open|upheld|dismissed}, decided_by→, decided_at, reason — بلاغ انتحال على حساب طالب (§8.1 بند 6).

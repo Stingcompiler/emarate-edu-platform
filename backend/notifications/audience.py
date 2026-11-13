@@ -93,6 +93,26 @@ def _departments_of(audience: dict) -> set[int] | None:
     return None
 
 
+def _places_of(audience: dict) -> set[tuple[int, int | None]]:
+    """(department, programme) of each thing a department, programme or course audience
+    names: a department head addresses any of them in the department, a programme head those
+    of their programme (owner, 2026-11-13)."""
+    kind = audience["type"]
+    if kind == "department":
+        return {(pk, None) for pk in audience["ids"]}
+    if kind == "program":
+        return set(
+            Program.objects.filter(pk__in=audience["ids"]).values_list("department_id", "id")
+        )
+    if kind == "offering":
+        return set(
+            CourseOffering.objects.filter(pk__in=audience["ids"]).values_list(
+                "course__department_id", "course__program_id"
+            )
+        )
+    return set()
+
+
 def _only_students(user_ids: list[str]) -> bool:
     users = get_user_model().objects.filter(public_id__in=user_ids)
     return (
@@ -138,12 +158,15 @@ def is_allowed(sender, audience: dict) -> bool:
         and set(audience["roles"]) <= {"teacher", "ta"}
     ):
         return True
-    # Department manager / supervisor: anything inside their departments.
+    # Department manager / supervisor: anything inside their departments; a programme's head
+    # and supervisor: their programme and its courses.
     scope = rbac.scope_for(sender, "learning.manage")
+    places = _places_of(audience)
     if (
         departments
+        and places
         and kind in {"department", "program", "offering"}
-        and all(scope.allows(d) for d in departments)
+        and all(scope.allows(d, p) for d, p in places)
     ):
         return True
     # Teachers (and TAs with permission): students of the courses they teach.
@@ -279,6 +302,31 @@ def options(sender) -> list[dict]:
                 f"أساتذة ومعيدو قسم {department.name_ar}",
                 {"type": "department", "ids": [department.pk], "members": "staff"},
             )
+        # A programme head: their programme, its levels and its courses.
+        for program in Program.objects.filter(pk__in=scope.programs, is_active=True).exclude(
+            department__in=scope.departments
+        ):
+            add(
+                "cohort",
+                f"كل طلاب {program.name_ar}",
+                {"type": "program", "ids": [program.pk]},
+            )
+            for level in range(1, program.levels_count + 1):
+                add(
+                    "cohort",
+                    f"{program.name_ar} — المستوى {level}",
+                    {"type": "program", "ids": [program.pk], "level": level},
+                    keep_empty=False,
+                )
+            for offering in CourseOffering.objects.filter(
+                course__program=program, term__is_current=True
+            ).select_related("course"):
+                add(
+                    "course",
+                    f"{offering.course.code} — {offering.course.name_ar} ({offering.section})",
+                    {"type": "offering", "ids": [offering.pk]},
+                    keep_empty=False,
+                )
     teaching = OfferingInstructor.objects.filter(
         user=sender, offering__term__is_current=True
     ).select_related("offering__course")

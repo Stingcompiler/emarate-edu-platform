@@ -8,6 +8,8 @@ export const ROLE_LABEL: Record<string, string> = {
   student_affairs: "أمين شؤون الطلاب",
   department_manager: "مدير قسم",
   department_supervisor: "مشرف قسم",
+  program_manager: "رئيس برنامج",
+  program_supervisor: "مشرف برنامج",
   teacher: "أستاذ",
   ta: "معيد",
   hr: "الموارد البشرية",
@@ -23,6 +25,10 @@ export const DEPARTMENT_ROLES = new Set([
   "department_supervisor",
 ]);
 
+/** Roles whose assignment names a programme (owner, 2026-11-13: every programme has its head
+ * and supervisor) — mirrors rbac.PROGRAM_SCOPED_ROLES. */
+export const PROGRAM_ROLES = new Set(["program_manager", "program_supervisor"]);
+
 /** Grantable roles from the least to the most privileged — «مدير النظام» last, never
  *  preselected (review 2026-09-29). */
 export const ROLE_ORDER = [
@@ -32,6 +38,8 @@ export const ROLE_ORDER = [
   "site_manager",
   "hr",
   "registrar",
+  "program_supervisor",
+  "program_manager",
   "department_supervisor",
   "department_manager",
   "student_affairs",

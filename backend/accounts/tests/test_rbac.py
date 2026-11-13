@@ -59,6 +59,8 @@ def test_appointment_rules(make_user, it_dept):
     assert rbac.grantable_roles(make_user(Role.ACADEMIC_AFFAIRS)) == {
         Role.DEPARTMENT_MANAGER,
         Role.DEPARTMENT_SUPERVISOR,
+        Role.PROGRAM_MANAGER,
+        Role.PROGRAM_SUPERVISOR,
         Role.TEACHER,
         Role.TA,
     }

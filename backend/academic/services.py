@@ -37,8 +37,11 @@ def _lacks_role(kind: str) -> ValidationError:
     )
 
 
-def _require(meta: RequestMeta, capability: str, department_id: int) -> None:
-    if not rbac.can(meta.actor, capability, department_id):
+def _require(
+    meta: RequestMeta, capability: str, department_id: int, program_id: int | None = None
+) -> None:
+    """``program_id``: the programme the thing lives in — a programme head acts there."""
+    if not rbac.can(meta.actor, capability, department_id, program_id):
         raise PermissionDenied(gettext("Outside your department scope."))
 
 
@@ -64,8 +67,8 @@ def _member_program(department: Department, program: Program | None) -> Program 
 def add_member(
     meta: RequestMeta, department: Department, user, kind: str, program: Program | None = None
 ) -> DepartmentMembership:
-    _require(meta, "membership.manage", department.pk)
     program = _member_program(department, program)
+    _require(meta, "membership.manage", department.pk, program.pk if program else None)
     if _KIND_ROLE[kind] not in rbac.roles_of(user):
         raise _lacks_role(kind)
     try:
@@ -94,7 +97,7 @@ def add_member(
 
 
 def remove_member(meta: RequestMeta, membership: DepartmentMembership) -> None:
-    _require(meta, "membership.remove", membership.department_id)
+    _require(meta, "membership.remove", membership.department_id, membership.program_id)
     with transaction.atomic():
         # Removing someone from a programme also removes their teaching assignments in that
         # programme's open offerings (a membership with no programme: the department's).
@@ -128,7 +131,7 @@ def add_instructor(
     meta: RequestMeta, offering: CourseOffering, user, role: str
 ) -> OfferingInstructor:
     department_id = offering.course.department_id
-    _require(meta, "courses.manage", department_id)
+    _require(meta, "courses.manage", department_id, offering.course.program_id)
     if _KIND_ROLE[role] not in rbac.roles_of(user):
         raise _lacks_role(role)
     # Department roles assign the members of the course's programme (those who joined the
@@ -165,7 +168,7 @@ def add_instructor(
 
 def remove_instructor(meta: RequestMeta, instructor: OfferingInstructor) -> None:
     department_id = instructor.offering.course.department_id
-    _require(meta, "courses.unassign", department_id)
+    _require(meta, "courses.unassign", department_id, instructor.offering.course.program_id)
     with transaction.atomic():
         record(
             meta,
@@ -182,11 +185,11 @@ def remove_instructor(meta: RequestMeta, instructor: OfferingInstructor) -> None
 
 def enroll(meta: RequestMeta, offering: CourseOffering, student: StudentRecord) -> Enrollment:
     department_id = offering.course.department_id
-    _require(meta, "enrollment.manage", department_id)
-    # A department role enrolls its own department's students; another department's
-    # student (a service course) goes through the head registrar (owner 2026-09-29: a
-    # department sees nothing of the others).
-    if not rbac.can(meta.actor, "students.view", student.department_id):
+    _require(meta, "enrollment.manage", department_id, offering.course.program_id)
+    # A department role enrolls its own department's students, a programme head their
+    # programme's; another department's student (a service course) goes through the head
+    # registrar (owner 2026-09-29: a department sees nothing of the others).
+    if not rbac.can_for(meta.actor, "students.view", student):
         raise PermissionDenied(gettext("This student belongs to another department."))
     if student.status != StudentRecord.Status.ACTIVE:
         raise ValidationError(
@@ -215,7 +218,7 @@ def enroll(meta: RequestMeta, offering: CourseOffering, student: StudentRecord) 
 
 def drop(meta: RequestMeta, enrollment: Enrollment) -> Enrollment:
     department_id = enrollment.offering.course.department_id
-    _require(meta, "enrollment.manage", department_id)
+    _require(meta, "enrollment.manage", department_id, enrollment.offering.course.program_id)
     if enrollment.status != Enrollment.Status.ACTIVE:
         raise Conflict(gettext("This enrollment is not active."), code="not_active")
     with transaction.atomic():
@@ -241,7 +244,7 @@ def bulk_enroll(meta: RequestMeta, term: Term, program: Program, level: int) -> 
     Idempotent: existing enrollments are left untouched, so running it again
     only picks up students or offerings added since.
     """
-    _require(meta, "enrollment.manage", program.department_id)
+    _require(meta, "enrollment.manage", program.department_id, program.pk)
     offerings = list(
         CourseOffering.objects.filter(
             term=term,

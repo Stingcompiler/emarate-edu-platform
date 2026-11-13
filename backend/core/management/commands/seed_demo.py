@@ -18,7 +18,7 @@ from django.db import transaction
 from academic import services as academic_services
 from academic.models import AcademicYear, Course, CourseOffering, DepartmentMembership, Term
 from accounts.models import RoleAssignment, User
-from accounts.rbac import DEPARTMENT_SCOPED_ROLES, Role
+from accounts.rbac import DEPARTMENT_SCOPED_ROLES, PROGRAM_SCOPED_ROLES, Role
 from audit.services import RequestMeta
 from learning.models import Lecture
 from organization.models import College, Department, Program, SystemSettings
@@ -131,6 +131,9 @@ STAFF = [
     (Role.STUDENT_AFFAIRS, "student.affairs", "أ. إخلاص بابكر"),
     (Role.DEPARTMENT_MANAGER, "dept.manager", "د. مصطفى الأمين"),
     (Role.DEPARTMENT_SUPERVISOR, "dept.supervisor", "د. هالة عبد الرحمن"),
+    # A programme's own head and supervisor (owner, 2026-11-13): the IT bachelor's.
+    (Role.PROGRAM_MANAGER, "program.manager", "د. إيمان عثمان"),
+    (Role.PROGRAM_SUPERVISOR, "program.supervisor", "أ. خالد يوسف"),
     (Role.TEACHER, "teacher", "د. سلمى الخضر"),
     (Role.TA, "ta", "م. ياسر عبد الباقي"),
     (Role.HR, "hr", "أ. رشا المكي"),
@@ -298,7 +301,9 @@ class Command(BaseCommand):
 
         users: dict[Role, User] = {}
         for role, handle, name in STAFF:
-            users[role] = self._user(f"{handle}@{DOMAIN}", name, password, role, departments["IT"])
+            users[role] = self._user(
+                f"{handle}@{DOMAIN}", name, password, role, departments["IT"], programs["BIT"]
+            )
         admin = users[Role.SYSTEM_ADMIN]
         meta = RequestMeta(actor=admin, user_agent="seed_demo")
 
@@ -950,7 +955,7 @@ class Command(BaseCommand):
             requires_ack=True,
         )
 
-    def _user(self, email, name, password, role, department) -> User:
+    def _user(self, email, name, password, role, department, program=None) -> User:
         user = User.objects.filter(email=email).first()
         if user is None:
             user = User.objects.create_user(email=email, password=password, full_name_ar=name)
@@ -958,5 +963,6 @@ class Command(BaseCommand):
             user=user,
             role=role,
             department=department if role in DEPARTMENT_SCOPED_ROLES else None,
+            program=program if role in PROGRAM_SCOPED_ROLES else None,
         )
         return user
