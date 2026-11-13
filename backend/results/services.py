@@ -35,7 +35,11 @@ def _dept(batch: ResultImportBatch) -> int | None:
 
 def require_batch_scope(user, batch: ResultImportBatch, capability: str = "results.manage") -> None:
     scope = rbac.scope_for(user, capability)
-    allowed = scope.everything if batch.department_id is None else scope.allows(batch.department_id)
+    allowed = (
+        scope.everything
+        if batch.department_id is None
+        else scope.allows(batch.department_id, batch.program_id)
+    )
     if not allowed:
         raise PermissionDenied(gettext("Outside your results scope."))
 

@@ -90,6 +90,8 @@ RESULTS_VIEW = frozenset(
     }
 )
 AUDIT = frozenset({R.SYSTEM_ADMIN, R.DEPARTMENT_MANAGER, R.DEPARTMENT_SUPERVISOR})
+# A programme's head and supervisor read the entries filed under their programme.
+AUDIT_PROGRAMME = frozenset({R.PROGRAM_MANAGER, R.PROGRAM_SUPERVISOR})
 # Roles that read the log of their own field of work (docs/03 §7 ◐; decisions item 8). The
 # world's entry ("test", IT) is in nobody's field, so its detail is 404 for them.
 AUDIT_DOMAIN = frozenset(
@@ -253,8 +255,9 @@ READS: dict[str, tuple[str, frozenset, frozenset]] = {
         ENROLLMENT,
         frozenset(),
     ),
-    "audit-log-list": ("/api/v1/audit-logs", AUDIT | AUDIT_DOMAIN, frozenset()),
-    "audit-log-detail": ("/api/v1/audit-logs/{audit}", AUDIT, AUDIT_DOMAIN),
+    "audit-log-list": ("/api/v1/audit-logs", AUDIT | AUDIT_DOMAIN | AUDIT_PROGRAMME, frozenset()),
+    # The world's entry is filed under the department only: not a programme's to read.
+    "audit-log-detail": ("/api/v1/audit-logs/{audit}", AUDIT, AUDIT_DOMAIN | AUDIT_PROGRAMME),
     "lecture-list": ("/api/v1/lectures", LEARNING, frozenset()),
     "lecture-detail": ("/api/v1/lectures/{lecture}", LEARNING, SHUT),
     "assignment-list": ("/api/v1/assignments", LEARNING, frozenset()),
@@ -435,7 +438,8 @@ READS: dict[str, tuple[str, frozenset, frozenset]] = {
                 R.DEPARTMENT_MANAGER,
                 R.DEPARTMENT_SUPERVISOR,
             }
-        ),
+        )
+        | PROGRAMME,  # the applications to their programme
         frozenset(),
     ),
     "report-affairs": (

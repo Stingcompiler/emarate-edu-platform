@@ -74,7 +74,8 @@ def visible_logs(user) -> Q:
     full = rbac.scope_for(user, "audit.view")
     if full.everything:
         return Q()
-    allowed = Q(department__in=full.departments) if full.departments else Q(pk__in=[])
+    # A department's roles read their department's entries, a programme's theirs.
+    allowed = full.q("department", "program")
     roles = rbac.roles_of(user)
     for role, actions in DOMAINS.items():
         if role not in roles:

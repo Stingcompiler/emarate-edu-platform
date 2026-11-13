@@ -86,9 +86,12 @@ Older rounds: `.claude/handoff/archive/2026-10-24_to_2026-11-02.md`, `.claude/ha
     narrowed to the programme (`useDepartment` takes the department the server lists),
     `/programs/:id` (leaders appointed there, `LeadCard` shared with `/departments/:id`), the
     academic affairs home lists «برامج بلا رئيس» (no head of its own and no department manager).
-  - **Left for programme roles** (`-` in the matrix): uploading results files
-    (`ResultImportBatch` is by department), `reports.admissions`, the audit log
-    (`AuditLog` has no programme). Then the public programme page naming its head.
+  - Programme parity PR: `reports.admissions` (`program_ids`), the audit log
+    (`AuditLog.program`, filed by `audit.services.record` from the target — `program_of` — or an
+    explicit `program_id` for people: staff links, programme roles; older entries carry none and
+    stay the department's) and results files (`ResultImportBatch.program`, scope `program`;
+    `importer.validate_file(scope=…, program=…)`). Every DH/DS `dept` cell is now `prog` for
+    PH/PS. Left: the public programme page naming its head.
   - Demo: `program.manager@` / `program.supervisor@demo.ecst.test` on the IT bachelor's.
   - Gotcha: local `backend/media` (198 MB) made a backup test take minutes — test settings now
     use an unused `MEDIA_ROOT`. A lazy route changes the address before it renders: in E2E wait

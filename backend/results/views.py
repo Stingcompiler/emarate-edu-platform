@@ -67,10 +67,11 @@ class ResultImportViewSet(
         if getattr(self, "swagger_fake_view", False):
             return ResultImportBatch.objects.none()
         scope = rbac.scope_for(self.request.user, "results.view")
-        queryset = ResultImportBatch.objects.select_related("uploaded_by", "term", "department")
-        if scope.everything:
-            return queryset
-        return queryset.filter(department__in=scope.departments)
+        queryset = ResultImportBatch.objects.select_related(
+            "uploaded_by", "term", "department", "program"
+        )
+        # A department's files and its programmes' files; a programme head their programme's.
+        return scope.filter(queryset, "department", "program")
 
     @extend_schema(
         request={"multipart/form-data": ResultUploadSerializer},
@@ -80,19 +81,29 @@ class ResultImportViewSet(
         data = ResultUploadSerializer(data=request.data)
         data.is_valid(raise_exception=True)
         department = data.validated_data.get("department")
+        program = data.validated_data.get("program")
         scope = rbac.scope_for(request.user, "results.manage")
-        if department is None and not scope.everything:
+        if program is not None:
+            # One programme's file: its head's, or its department's roles'.
+            if department is not None and department.pk != program.department_id:
+                raise ValidationError(
+                    {"program": [gettext("The program belongs to another department.")]}
+                )
+            department = program.department
+            if not scope.allows(department.pk, program.pk):
+                raise PermissionDenied(gettext("Outside your department."))
+        elif department is None and not scope.everything:
             raise ValidationError({"department": [gettext("Choose your department.")]})
-        if department is not None and not scope.allows(department.pk):
+        elif department is not None and not scope.allows(department.pk):
             raise PermissionDenied(gettext("Outside your department."))
-        allowed = None if scope.everything else set(scope.departments)
         file = data.validated_data["file"]
         try:
             batch = importer.validate_file(
                 _meta(request),
                 term=data.validated_data["term"],
                 department=department,
-                allowed_departments=allowed,
+                program=program,
+                scope=scope,
                 name=file.name,
                 uploaded=file,
             )

@@ -69,6 +69,8 @@ class ResultImportBatch(PublicIdModel, TimestampedModel):
     class Scope(models.TextChoices):
         COLLEGE = "college", "الكلية"
         DEPARTMENT = "department", "قسم"
+        # One programme's file, uploaded by its head or supervisor (owner, 2026-11-13).
+        PROGRAM = "program", "برنامج"
 
     class Status(models.TextChoices):
         VALIDATED = "validated", "جاهز للاعتماد"
@@ -83,6 +85,10 @@ class ResultImportBatch(PublicIdModel, TimestampedModel):
     scope = models.CharField(max_length=12, choices=Scope.choices)
     department = models.ForeignKey(
         "organization.Department", on_delete=models.PROTECT, null=True, blank=True, related_name="+"
+    )
+    # Set with its department when the file is one programme's.
+    program = models.ForeignKey(
+        "organization.Program", on_delete=models.PROTECT, null=True, blank=True, related_name="+"
     )
     term = models.ForeignKey("academic.Term", on_delete=models.PROTECT, related_name="+")
     uploaded_by = models.ForeignKey(

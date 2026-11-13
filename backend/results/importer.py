@@ -57,7 +57,7 @@ def _norm(value) -> str:
     return " ".join(str(value if value is not None else "").split())
 
 
-def _normalize(raw: dict, term, allowed_departments, cache) -> tuple[dict, list[str], tuple]:
+def _normalize(raw: dict, term, scope, cache) -> tuple[dict, list[str], tuple]:
     errors: list[str] = []
     number = _norm(raw.get("university_number")).upper()  # as the students import (R78, R90)
     code = _norm(raw.get("course_code")).upper()
@@ -75,10 +75,10 @@ def _normalize(raw: dict, term, allowed_departments, cache) -> tuple[dict, list[
             gettext("course_code: no offering %(code)s-%(section)s in this term")
             % {"code": code, "section": section}
         )
-    if (
-        offering is not None
-        and allowed_departments is not None
-        and offering.course.department_id not in allowed_departments
+    # A department's role uploads its department's courses, a programme's head their
+    # programme's (owner, 2026-11-13).
+    if offering is not None and not scope.allows(
+        offering.course.department_id, offering.course.program_id
     ):
         errors.append(gettext("course_code: outside your department"))
     if student and offering and (student.pk, offering.pk) not in cache["enrolled"]:
@@ -128,12 +128,16 @@ def _normalize(raw: dict, term, allowed_departments, cache) -> tuple[dict, list[
     return normalized, errors, key
 
 
-def validate_file(meta: RequestMeta, *, term, department, allowed_departments, name, uploaded):
+def validate_file(meta: RequestMeta, *, term, department, scope, name, uploaded, program=None):
+    """``scope``: where the uploader holds results.manage. ``program``: the file is this
+    programme's (its department is then the programme's)."""
     table_rows, columns = read_table(name, uploaded.read(), HEADERS, REQUIRED)
     uploaded.seek(0)
     numbers = {_norm(r.get("university_number")).upper() for r in table_rows}
     offerings = CourseOffering.objects.filter(term=term).select_related("course")
-    if department is not None:
+    if program is not None:
+        offerings = offerings.filter(course__program=program)
+    elif department is not None:
         offerings = offerings.filter(course__department=department)
     cache = {
         "students": {
@@ -154,7 +158,7 @@ def validate_file(meta: RequestMeta, *, term, department, allowed_departments, n
     seen: set[tuple] = set()
     rows, counts = [], {"create": 0, "error": 0}
     for index, raw in enumerate(table_rows, start=2):
-        normalized, errors, key = _normalize(raw, term, allowed_departments, cache)
+        normalized, errors, key = _normalize(raw, term, scope, cache)
         if None not in key:
             if key in seen:
                 errors.append(gettext("duplicated in this file"))
@@ -178,10 +182,15 @@ def validate_file(meta: RequestMeta, *, term, department, allowed_departments, n
         batch = ResultImportBatch.objects.create(
             file=uploaded,
             file_name=name[:255],
-            scope=ResultImportBatch.Scope.DEPARTMENT
-            if department
-            else ResultImportBatch.Scope.COLLEGE,
+            scope=(
+                ResultImportBatch.Scope.PROGRAM
+                if program
+                else ResultImportBatch.Scope.DEPARTMENT
+                if department
+                else ResultImportBatch.Scope.COLLEGE
+            ),
             department=department,
+            program=program,
             term=term,
             uploaded_by=meta.actor,
             status=(

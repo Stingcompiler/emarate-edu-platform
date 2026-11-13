@@ -124,3 +124,27 @@ test("a programme opens on its own page, where its head is appointed", async ({ 
     fullPage: true,
   });
 });
+
+// Results files, the admissions report and the log are the programme's too.
+test("a programme's head uploads results, and reads the admissions report and the log", async ({
+  page,
+}) => {
+  await signIn(page, "program.manager@demo.ecst.test");
+  await page.goto("/result-imports");
+  await expect(page.getByRole("heading", { level: 1 })).toContainText("رفع النتائج");
+  // Their programme, never the department, is what the file is for.
+  const form = page.locator("form");
+  await expect(form.getByText("البرنامج", { exact: true })).toBeVisible();
+  await expect(form.getByText("القسم", { exact: true })).toHaveCount(0);
+  await expect(form).toContainText("بكالوريوس تقنية المعلومات");
+  await noSideScroll(page);
+  for (const [path, title] of [
+    ["/reports/admissions", "القبول"],
+    ["/department/audit", "سجل العمليات"],
+  ] as const) {
+    await page.goto(path);
+    await expect(page.getByRole("heading", { level: 1 })).toContainText(title);
+    await expect(page.getByRole("main")).not.toContainText("غير مسموح");
+    await noSideScroll(page);
+  }
+});
