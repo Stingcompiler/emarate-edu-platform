@@ -5,6 +5,26 @@ Older rounds: `.claude/handoff/archive/2026-10-24_to_2026-11-02.md`, `.claude/ha
 
 ## State
 
+- **Backups: download and restore from the portal** (owner, 2026-11-14: «لا أرى من أين أحمّل النسخة،
+  ولا زر للاستعادة… قد ننقل النظام لاستضافة أخرى… أريد أزرارًا»; he approved my three
+  recommendations with «نفذ»): (1) the downloaded file is encrypted with a password typed at
+  download, not the server key; (2) download and restore are the **system admin's alone**
+  (`backups.download`, `backups.restore` in `rbac.ADMIN_ONLY` — the supervisor is not added;
+  two new matrix rows); (3) restoring an **uploaded** file only on an empty platform (no
+  students). Three phases, one PR each:
+  1. **Download — `feat/backup-download`.** `core/backups.py`: `package()`/`read_package()`
+     (format `ECSTPKG1`: scrypt salt + sealed records I/D/F/E), `iter_plain`, an
+     `ecst-info-<stamp>.json.enc` note of counts beside each copy, SQLite copies in dev
+     (`dump_to`). `organization/backups.py` (views moved out of `organization/views.py`):
+     `GET /backups` gains `copies` and `now`; `POST /backups/download` (own password again →
+     one-time link, audited `backup.download`, all admins notified) and
+     `GET /backups/file/<ticket>` (streamed). Portal: `components/FormDialog.tsx`, rows per copy
+     with «تنزيل». E2E `backups.spec.ts`; **E2E now has its own media folder**
+     (`backend/media-e2e`, emptied by `serve-api.sh`) and dev has a backup key.
+  2. **Restore a kept copy** (next): maintenance mode, an automatic copy first, all-or-nothing,
+     confirmation with the numbers (`copies[].counts` vs `now`), refuse a copy from newer code.
+  3. **Restore an uploaded file on an empty platform**, chunked upload, then a full move drill.
+
 - **Next review** (owner, 2026-11-10: «اكتب خطة مراجعة بعد قراءة الوثائق»): work order
   `docs/qa/comprehensive-review-plan-2026-11-10.md` — scope #234–#264 since report `c8479a8`;
   the owner added a full-round scope section (coverage registers, journeys, sizes) and sent it

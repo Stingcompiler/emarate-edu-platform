@@ -4,6 +4,8 @@ A throwaway SQLite file seeded with the demo data; the portal runs on :5174 and 
 :8001 so a developer's running `pnpm dev` is never touched. Never deploy.
 """
 
+from pathlib import Path
+
 from .dev import *  # noqa: F403
 from .dev import BASE_DIR, DATABASES, REST_FRAMEWORK, STORAGES
 from .env import env
@@ -31,13 +33,21 @@ REST_FRAMEWORK = {
     },
 }
 
+# Uploaded files of their own too (e2e/serve-api.sh empties the folder): the tests make
+# backups of them and restore them, which must never touch a developer's `media/`.
+MEDIA_ROOT = Path(env("E2E_MEDIA_ROOT", str(BASE_DIR / "media-e2e")))
 # The test API serves the public media on its own port (see dev.py).
 STORAGES = {
     **STORAGES,
+    "default": {
+        **STORAGES["default"],
+        "OPTIONS": {**STORAGES["default"]["OPTIONS"], "location": MEDIA_ROOT / "private"},
+    },
     "public": {
         **STORAGES["public"],
         "OPTIONS": {
             **STORAGES["public"]["OPTIONS"],
+            "location": MEDIA_ROOT / "public",
             "base_url": f"http://127.0.0.1:{_API}/media/public/",
         },
     },

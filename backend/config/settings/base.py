@@ -325,6 +325,8 @@ SITE_BUILD_TOKEN = env("SITE_BUILD_TOKEN", "")
 # Encrypted weekly database dumps (core.backups): keep this key offline too.
 BACKUP_ENCRYPTION_KEY = env("BACKUP_ENCRYPTION_KEY", "")
 BACKUP_KEEP = int(env("BACKUP_KEEP", "8"))
+# The work factor (log2) that turns a downloaded backup's password into its key (scrypt).
+BACKUP_SCRYPT_LOG_N = int(env("BACKUP_SCRYPT_LOG_N", "17"))
 # Who hears about a failed backup, site build or health check besides the system admins
 # (core notify_ops; review 2026-10-04 A9).
 OPS_ALERT_EMAIL = env("OPS_ALERT_EMAIL", "")

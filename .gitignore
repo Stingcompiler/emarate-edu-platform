@@ -15,6 +15,7 @@ backend/sent-emails/
 # End-to-end test runs (e2e/)
 backend/e2e.sqlite3*
 backend/sent-emails-e2e/
+backend/media-e2e/
 e2e/test-results/
 /test-results/
 playwright-report/

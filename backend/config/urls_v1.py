@@ -15,6 +15,7 @@ from inquiries import views as inquiries
 from learning import views as learning
 from live import views as live
 from notifications import views as notifications
+from organization import backups as backup_views
 from organization import views as organization
 from reports import views as reports
 from results import views as results
@@ -109,7 +110,9 @@ urlpatterns = [
     path("me/courses", academic.MyCoursesView.as_view(), name="me-courses"),
     path("system-settings", organization.SystemSettingsView.as_view(), name="system-settings"),
     path("system-status", organization.SystemStatusView.as_view(), name="system-status"),
-    path("backups", organization.BackupsView.as_view(), name="backups"),
+    path("backups", backup_views.BackupsView.as_view(), name="backups"),
+    path("backups/download", backup_views.BackupDownloadView.as_view(), name="backup-download"),
+    path("backups/file/<str:ticket>", backup_views.BackupFileView.as_view(), name="backup-file"),
     path(
         "departments/<int:department_id>/members",
         academic.DepartmentMembersView.as_view(),
