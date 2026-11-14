@@ -211,6 +211,7 @@ def fit_script(script: Path, known: set[str]) -> list[str]:
             preamble = (
                 not text
                 or text.startswith(b"--")
+                or text.startswith(b"\\")  # psql's own commands (\restrict, since 17.6)
                 or setting
                 or text.startswith(b"SELECT pg_catalog.set_config(")
             )
