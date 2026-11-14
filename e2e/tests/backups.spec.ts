@@ -141,3 +141,34 @@ test("the system admin restores a copy and what came after it is gone", async ({
   await page.goto("/audit");
   await expect(page.getByRole("main")).toContainText("استعاد نسخة احتياطية");
 });
+
+// While the platform is closed the API answers 503 «maintenance» to everyone; the portal puts
+// its waiting screen over the page and opens the page again by itself. (In these tests a
+// restore runs inside its own request, so the closed platform is played by the network here;
+// the middleware itself is tested in backend/core/tests/test_restore.py.)
+test("everyone sees the waiting screen while a restore runs", async ({ page }) => {
+  const size = test.info().project.name;
+  await signIn(page, "teacher@demo.ecst.test");
+  let closed = true;
+  await page.route("**/api/public/maintenance", (route) =>
+    route.fulfill({ json: { maintenance: closed } }),
+  );
+  await page.route("**/api/v1/**", (route) =>
+    closed
+      ? route.fulfill({
+          status: 503,
+          contentType: "application/problem+json",
+          body: JSON.stringify({ status: 503, code: "maintenance", detail: "تُستعاد نسخة." }),
+        })
+      : route.continue(),
+  );
+  await page.reload();
+  const screen = page.getByRole("alertdialog");
+  await expect(screen).toContainText("المنصة في صيانة قصيرة");
+  expect(await offscreen(page)).toEqual([]);
+  await page.screenshot({ path: test.info().outputPath(`maintenance-${size}.png`) });
+  closed = false;
+  // It asks every few seconds, then loads the page again.
+  await expect(screen).toHaveCount(0, { timeout: 20_000 });
+  await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+});

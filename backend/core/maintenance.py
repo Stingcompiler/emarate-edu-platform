@@ -8,6 +8,7 @@ restore never leaves the platform closed.
 
 from __future__ import annotations
 
+import contextlib
 import threading
 from contextlib import contextmanager
 
@@ -37,11 +38,14 @@ def end() -> None:
 def held(reason: str):
     """Maintenance for as long as the block runs, renewed every half minute."""
     begin(reason)
+    opened = state() or {"reason": reason}
     stop = threading.Event()
 
     def renew():
         while not stop.wait(BEAT):
-            cache.touch(KEY, SECONDS)
+            # A cache that hiccups once must not open the platform in the middle of a restore.
+            with contextlib.suppress(Exception):
+                cache.set(KEY, opened, timeout=SECONDS)
 
     keeper = threading.Thread(target=renew, daemon=True)
     keeper.start()
@@ -64,7 +68,10 @@ def check() -> dict | None:
     """Called on each request: is the platform closed? On the way, after a restore, this
     process forgets the content types it cached (their ids may differ in the restored rows)."""
     global _seen_epoch
-    found = cache.get_many([KEY, EPOCH])
+    try:
+        found = cache.get_many([KEY, EPOCH])
+    except Exception:  # the cache is down: that is the health check's to report, not a closure
+        return None
     epoch = found.get(EPOCH)
     if epoch != _seen_epoch:
         from django.contrib.contenttypes.models import ContentType

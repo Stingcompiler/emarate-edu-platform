@@ -11,7 +11,12 @@ const ASK_EVERY_MS = 4000;
  * page again when it is, on rows that are no longer the ones it was showing. The same on
  * phones and large screens: one centred message, no page behind it to act on.
  */
-export function MaintenanceGate() {
+export function MaintenanceGate({
+  reopen = () => window.location.reload(),
+}: {
+  /** What «the platform is back» does; the tests pass their own. */
+  reopen?: () => void;
+}) {
   const [closed, setClosed] = useState(false);
   useEffect(() => {
     const close = () => setClosed(true);
@@ -23,13 +28,13 @@ export function MaintenanceGate() {
     const timer = setInterval(async () => {
       try {
         const response = await fetch("/api/public/maintenance", { cache: "no-store" });
-        if (response.ok && (await response.json()).maintenance === false) window.location.reload();
+        if (response.ok && (await response.json()).maintenance === false) reopen();
       } catch {
         // Offline, or the server restarting: ask again at the next turn.
       }
     }, ASK_EVERY_MS);
     return () => clearInterval(timer);
-  }, [closed]);
+  }, [closed, reopen]);
   if (!closed) return null;
   return (
     <div

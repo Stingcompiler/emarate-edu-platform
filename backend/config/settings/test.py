@@ -55,3 +55,4 @@ STORAGES = {
 }
 
 BACKUP_SCRYPT_LOG_N = 4  # the real factor takes half a second and 128 MB per key
+RESTORE_DRAIN_SECONDS = 0  # no requests in flight to wait for

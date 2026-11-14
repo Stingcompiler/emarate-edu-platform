@@ -30,6 +30,7 @@ import sqlite3
 import subprocess
 import tarfile
 import tempfile
+import time
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -334,15 +335,22 @@ def _fetch(stamp: str, work: Path) -> tuple[Path, Path | None]:
 
 
 def _room_for(stamp: str, work: Path) -> None:
-    """Refuse before starting when the disk cannot hold the copy unpacked and a new copy of
-    what is there now."""
+    """Refuse before starting when the disk cannot hold the copy unpacked — the database as
+    the SQL it is loaded from, several times its compressed size — and a new copy of what is
+    there now."""
     names = backups.names_of(stamp)
-    size = 0
-    for name in (names["database"], names["files"]):
+    sizes = {}
+    for part in ("database", "files"):
+        sizes[part] = 0
         with contextlib.suppress(OSError, NotImplementedError):
-            size += default_storage.size(name) if default_storage.exists(name) else 0
-    places = [work] + ([media_root()] if media_root() and media_root().is_dir() else [])
-    if any(shutil.disk_usage(place).free < size * 3 + 64 * 1024 * 1024 for place in places):
+            if default_storage.exists(names[part]):
+                sizes[part] = default_storage.size(names[part])
+    spare = 64 * 1024 * 1024
+    needs = [(work, sizes["database"] * 12 + sizes["files"] + spare)]
+    root = media_root()
+    if root is not None and root.is_dir():
+        needs.append((root, sizes["database"] + sizes["files"] * 3 + spare))
+    if any(shutil.disk_usage(place).free < needed for place, needed in needs):
         raise RestoreRefused(
             "space", gettext("There is not enough free disk space on the server to restore.")
         )
@@ -405,6 +413,9 @@ def run(stamp: str, actor_id: int | None = None, actor_email: str = "") -> dict:
                 if archive is not None and root is not None:
                     staging = stage_files(archive, root)
                 with maintenance.held("restore"):
+                    # Requests that were already inside finish first: what they write is in
+                    # the copy of the present made next, not lost between it and the restore.
+                    time.sleep(getattr(settings, "RESTORE_DRAIN_SECONDS", 3))
                     _say(step="safety")
                     safety = _stamp_of(backups.create(keep=0)[0])
                     _say(step="database", kept_before=safety)
