@@ -230,7 +230,7 @@ def copy_with_files(fake_dump, own_storage, db, settings, tmp_path, monkeypatch)
     settings.MEDIA_BACKEND = "local"
     settings.MEDIA_ROOT = tmp_path / "media"
     (tmp_path / "media/public").mkdir(parents=True)
-    (tmp_path / "media/public/cover.jpg").write_bytes(b"jpg" * 7)
+    (tmp_path / "media/public/cover.jpg").write_bytes(b"cover-picture-bytes")
     monkeypatch.setattr(backups, "CHUNK", 4)  # several records for each part
     return _stamp_of(backups.create(keep=8)[0])
 
@@ -250,7 +250,8 @@ def test_the_downloaded_file_opens_with_its_password_alone(copy_with_files, sett
 
     packed = _package(copy_with_files)
     assert packed.startswith(backups.PACKAGE_MAGIC)
-    assert b"PGDMP" not in packed and b"jpg" not in packed
+    # Whole markers, not three letters: the file is base64 text, where «jpg» turns up by chance.
+    assert b"PGDMP-fake-dump" not in packed and b"cover-picture-bytes" not in packed
     # Another server: its own key, which never made this file.
     settings.BACKUP_ENCRYPTION_KEY = "another-server"
     assert backups.read_package(io.BytesIO(packed), FILE_PHRASE)["counts"] is not None
