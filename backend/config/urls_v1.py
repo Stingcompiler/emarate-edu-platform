@@ -113,6 +113,7 @@ urlpatterns = [
     path("backups", backup_views.BackupsView.as_view(), name="backups"),
     path("backups/download", backup_views.BackupDownloadView.as_view(), name="backup-download"),
     path("backups/file/<str:ticket>", backup_views.BackupFileView.as_view(), name="backup-file"),
+    path("backups/restore", backup_views.BackupRestoreView.as_view(), name="backup-restore"),
     path(
         "departments/<int:department_id>/members",
         academic.DepartmentMembersView.as_view(),

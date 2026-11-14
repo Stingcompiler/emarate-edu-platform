@@ -13,6 +13,7 @@ from . import views
 
 urlpatterns = [
     path("health", views.health, name="health"),
+    path("maintenance", views.maintenance, name="maintenance"),
     path("csrf", accounts.CsrfView.as_view(), name="csrf"),
     path("registration/start", accounts.RegistrationStartView.as_view(), name="registration-start"),
     path(

@@ -33,7 +33,7 @@ import shutil
 import subprocess
 import tarfile
 import tempfile
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 from cryptography.fernet import Fernet, InvalidToken
@@ -165,7 +165,9 @@ def media_archive_to(path: Path) -> bool:
     with tarfile.open(path, mode="w:gz") as tar:
         for item in sorted(root.rglob("*")):
             relative = item.relative_to(root)
-            if relative.parts[:2] == ("private", PREFIX) or not item.is_file():
+            # Not the backups themselves, nor what a restore set aside (.replaced-…).
+            aside = relative.parts[0].startswith(".")
+            if aside or relative.parts[:2] == ("private", PREFIX) or not item.is_file():
                 continue
             tar.add(item, arcname=str(relative))
     return True
@@ -200,7 +202,12 @@ def _encrypt_file(source: Path, target: Path, box: Fernet) -> None:
 def create(keep: int) -> list[str]:
     """Dump, encrypt, store (plus the uploaded files on a local disk); keep the newest ``keep``
     of each. Returns the stored names. Works through temporary files, chunk by chunk."""
-    stamp = datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ")
+    moment = datetime.now(UTC)
+    # Two copies in one second (the copy a restore makes of the present, right after another)
+    # must not share a name: the storage would rename the second and nothing would find it.
+    while default_storage.exists(names_of(moment.strftime("%Y%m%dT%H%M%SZ"))["database"]):
+        moment += timedelta(seconds=1)
+    stamp = moment.strftime("%Y%m%dT%H%M%SZ")
     box = fernet()
     stored = []
     with tempfile.TemporaryDirectory(prefix="ecst-backup-") as work:
@@ -224,6 +231,9 @@ def create(keep: int) -> list[str]:
             _owner_only(saved)
             sealed.unlink()
     prune(keep)
+    from core import restore
+
+    restore.purge_replaced()
     return stored
 
 

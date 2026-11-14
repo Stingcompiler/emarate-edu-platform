@@ -1790,3 +1790,48 @@ msgstr "هذه النسخة لم تعد محفوظة."
 #: organization/backups.py
 msgid "This download link has ended. Ask for the file again."
 msgstr "انتهت صلاحية رابط التنزيل. اطلب الملف من جديد."
+
+#: core/middleware.py
+msgid "The platform is being restored from a backup. Try again in a few minutes."
+msgstr "تُستعاد الآن نسخة احتياطية للمنصة. أعد المحاولة بعد دقائق."
+
+#: core/restore.py
+msgid "This copy was made on another kind of database and cannot be restored here."
+msgstr "أُنشئت هذه النسخة على نوع آخر من قواعد البيانات، ولا تُستعاد هنا."
+
+#: core/restore.py
+msgid "The database tools on this server cannot read this copy; it was probably made by a newer PostgreSQL."
+msgstr "أدوات قاعدة البيانات على هذا الخادم لا تقرأ هذه النسخة؛ الأرجح أنها أُنشئت بإصدار أحدث من PostgreSQL."
+
+#: core/restore.py
+msgid "This copy holds no database of the platform."
+msgstr "هذه النسخة لا تحمل قاعدة بيانات للمنصة."
+
+#: core/restore.py
+msgid "This copy was made by a newer version of the platform. Update the platform, then restore it."
+msgstr "أُنشئت هذه النسخة بإصدار أحدث من المنصة. حدّث المنصة أولًا ثم استعدها."
+
+#: core/restore.py
+msgid "This copy is incomplete or was changed. Choose an earlier one."
+msgstr "هذه النسخة ناقصة أو تغيّر محتواها. اختر نسخة أقدم."
+
+#: core/restore.py
+msgid "There is not enough free disk space on the server to restore."
+msgstr "لا تكفي المساحة الخالية على قرص الخادم للاستعادة."
+
+#: core/restore.py
+msgid "The database was restored, but a later step failed. The state before the restore is kept in the newest backup; see the server's log."
+msgstr "استُعيدت قاعدة البيانات، لكن خطوة بعدها تعثّرت. الوضع الذي كان قبل الاستعادة محفوظ في أحدث نسخة؛ التفاصيل في سجل الخادم."
+
+#: core/restore.py
+msgid "The restore failed and nothing was changed. Details are in the server's log."
+msgstr "تعذّرت الاستعادة ولم يتغيّر شيء. التفاصيل في سجل الخادم."
+
+#: organization/backups.py
+#, python-format
+msgid "The server lacks the database tools a restore needs: %(tools)s."
+msgstr "ينقص الخادم أدوات قاعدة البيانات اللازمة للاستعادة: %(tools)s."
+
+#: organization/backups.py
+msgid "A backup is being made or restored; wait for it to finish."
+msgstr "تُنشأ نسخة احتياطية أو تُستعاد الآن؛ انتظر حتى تكتمل."

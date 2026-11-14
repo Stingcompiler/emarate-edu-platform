@@ -52,3 +52,5 @@ STORAGES = {
         },
     },
 }
+
+RESTORE_DRAIN_SECONDS = 0  # one browser, and the restore runs inside its own request

@@ -21,8 +21,17 @@ Older rounds: `.claude/handoff/archive/2026-10-24_to_2026-11-02.md`, `.claude/ha
      `GET /backups/file/<ticket>` (streamed). Portal: `components/FormDialog.tsx`, rows per copy
      with «تنزيل». E2E `backups.spec.ts`; **E2E now has its own media folder**
      (`backend/media-e2e`, emptied by `serve-api.sh`) and dev has a backup key.
-  2. **Restore a kept copy** (next): maintenance mode, an automatic copy first, all-or-nothing,
-     confirmation with the numbers (`copies[].counts` vs `now`), refuse a copy from newer code.
+  2. **Restore a kept copy — `feat/backup-restore`.** `core/restore.py` (`run`: check →
+     maintenance → a copy of the present → database all or nothing → files swapped into
+     `media/.replaced-<time>` → migrate; state in the cache key `restore-state`),
+     `core/maintenance.py` + `MaintenanceMiddleware` (503 `maintenance` on `/api`; health and
+     `GET /api/public/maintenance` stay open; the switch expires 3 min after its keeper stops),
+     task `core.tasks.restore_backup`, `POST /backups/restore` (own password; queued with
+     `transaction.on_commit`). PostgreSQL: `pg_restore` to SQL, then
+     `psql --single-transaction` after dropping every table of the schema. Portal:
+     `MaintenanceGate` (signal `MAINTENANCE_EVENT` from `@ecst/api`), «استعادة» with the
+     numbers now/in the copy, the word «استعادة» and the password. Proven on real PostgreSQL
+     (`test_a_real_restore_on_postgresql`) and in E2E on SQLite.
   3. **Restore an uploaded file on an empty platform**, chunked upload, then a full move drill.
 
 - **Next review** (owner, 2026-11-10: «اكتب خطة مراجعة بعد قراءة الوثائق»): work order

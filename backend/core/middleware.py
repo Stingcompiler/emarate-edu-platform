@@ -109,3 +109,40 @@ class AtomicWritesMiddleware:
             if response.status_code >= 500:
                 transaction.set_rollback(True)
             return response
+
+
+class MaintenanceMiddleware:
+    """While a backup is being restored (core.maintenance) the API answers 503 «maintenance»
+    to everyone: every table is being replaced under the requests' feet. The health check and
+    the question «is it over?» stay open — the first so that monitoring does not take a
+    planned pause for a failure, the second for the portal's waiting screen."""
+
+    OPEN = frozenset({"/api/public/health", "/api/public/maintenance"})
+    CLOSED = ("/api/", "/admin")
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        from core import maintenance
+
+        closed = maintenance.check()
+        if closed and request.path not in self.OPEN and request.path.startswith(self.CLOSED):
+            from django.http import JsonResponse
+            from django.utils.translation import gettext
+
+            from core.exceptions import PROBLEM_CONTENT_TYPE, problem
+
+            return JsonResponse(
+                problem(
+                    503,
+                    detail=gettext(
+                        "The platform is being restored from a backup. Try again in a few minutes."
+                    ),
+                    code="maintenance",
+                ),
+                status=503,
+                content_type=PROBLEM_CONTENT_TYPE,
+                headers={"Retry-After": "60", "Cache-Control": "no-store"},
+            )
+        return self.get_response(request)

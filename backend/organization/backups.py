@@ -1,10 +1,12 @@
-"""«النسخ الاحتياطية» on the system admin's settings: the copies, one made now, and one
-downloaded as a single file (owner, 2026-11-05 and 2026-11-14)."""
+"""«النسخ الاحتياطية» on the system admin's settings: the copies, one made now, one
+downloaded as a single file, and one restored over the platform (owner, 2026-11-05 and
+2026-11-14)."""
 
 import secrets
 from datetime import UTC, datetime
 
 from django.core.cache import cache
+from django.db import transaction
 from django.http import StreamingHttpResponse
 from django.utils.translation import gettext
 from drf_spectacular.utils import extend_schema
@@ -19,6 +21,7 @@ from audit.services import RequestMeta, record
 from core import backups
 from core.errors import Conflict, Invalid
 from core.permissions import capability
+from notifications.services import notify_admins
 
 # A download waits this long for the browser to fetch it, once.
 TICKET_SECONDS = 120
@@ -46,12 +49,24 @@ class BackupCopySerializer(serializers.Serializer):
     counts = BackupCountsSerializer(allow_null=True)
 
 
+class RestoreStateSerializer(serializers.Serializer):
+    state = serializers.ChoiceField(choices=["queued", "running", "done", "failed"])
+    stamp = serializers.CharField()
+    step = serializers.CharField(allow_blank=True)
+    started = serializers.DateTimeField(allow_null=True)
+    finished = serializers.DateTimeField(allow_null=True)
+    error = serializers.CharField(allow_blank=True)
+    code = serializers.CharField(allow_blank=True)
+    kept_before = serializers.CharField(allow_null=True)
+
+
 class BackupsSerializer(serializers.Serializer):
     running = serializers.BooleanField()
     last_failed = serializers.BooleanField()
     items = BackupSerializer(many=True)
     copies = BackupCopySerializer(many=True)
     now = BackupCountsSerializer()
+    restore = RestoreStateSerializer(allow_null=True)
 
 
 def _stamp(name: str):
@@ -76,6 +91,16 @@ def _counts(details: dict | None) -> dict | None:
     if not isinstance(counts, dict) or set(counts) != set(backups.COUNTED):
         return None
     return counts
+
+
+def _restore_state() -> dict | None:
+    from core import restore
+
+    found = restore.state()
+    if not found:
+        return None
+    blank = {"step": "", "started": None, "finished": None, "error": "", "code": ""}
+    return {**blank, "kept_before": None, **found}
 
 
 @extend_schema(tags=["system"])
@@ -118,6 +143,7 @@ class BackupsView(APIView):
                     "items": items,
                     "copies": newest,
                     "now": backups.snapshot(),
+                    "restore": _restore_state(),
                 }
             ).data
         )
@@ -161,27 +187,6 @@ def check_own_password(user, password: str) -> None:
         raise Invalid({"password": [gettext("The password is wrong.")]}, code="wrong_password")
 
 
-def tell_the_admins(actor, title: str, body: str) -> None:
-    """Every system admin and supervisor hears of it, in the portal and by e-mail — the one
-    who did it too: a copy taken in their name is theirs to notice."""
-    from accounts.models import User
-    from accounts.rbac import Role
-    from notifications.models import Category, Channel
-    from notifications.services import notify
-
-    admins = User.objects.filter(
-        is_active=True, role_assignments__role__in=[Role.SYSTEM_ADMIN, Role.SYSTEM_SUPERVISOR]
-    ).distinct()
-    notify(
-        list(admins),
-        category=Category.OPS,
-        title=title,
-        body=body,
-        action_url="/system/settings",
-        channels=[Channel.INAPP, Channel.EMAIL],
-    )
-
-
 @extend_schema(tags=["system"])
 class BackupDownloadView(APIView):
     """«تنزيل»: one file holding a copy's database and files, encrypted with a password typed
@@ -219,8 +224,7 @@ class BackupDownloadView(APIView):
             request.user,
             new={"backup": stamp},
         )
-        tell_the_admins(
-            request.user,
+        notify_admins(
             "نُزّلت نسخة احتياطية من المنصة",
             f"نزّل {request.user.full_name_ar} نسخة {stamp} كاملةً (قاعدة البيانات والملفات) "
             "في ملف مشفّر بكلمة سر. إن لم يكن ذلك متوقعًا فراجع سجل العمليات وغيّر كلمات المرور.",
@@ -254,3 +258,68 @@ class BackupFileView(APIView):
         response["Content-Disposition"] = f'attachment; filename="{name}"'
         response["Cache-Control"] = "no-store"
         return response
+
+
+class BackupRestoreSerializer(serializers.Serializer):
+    stamp = serializers.RegexField(r"^\d{8}T\d{6}Z$")
+    password = serializers.CharField(write_only=True, trim_whitespace=False)
+
+
+@extend_schema(tags=["system"])
+class BackupRestoreView(APIView):
+    """«استعادة»: the platform goes back to a kept copy — everything entered since is gone.
+    The system admin's alone, with their own password again. The worker does it
+    (core.restore.run): the copy is checked first, the platform closes, a copy of the present
+    state is made, then the database is replaced all or nothing and the files swapped. The
+    page learns the outcome from ``GET /backups`` (``restore``) once the platform is open."""
+
+    permission_classes = [IsAuthenticated, capability("backups.restore")]
+    throttle_classes = [LoginThrottle]
+
+    @extend_schema(request=BackupRestoreSerializer, responses={202: RestoreStateSerializer})
+    def post(self, request):
+        from django.core.files.storage import default_storage
+
+        from core import restore
+        from core.tasks import RUNNING, restore_backup
+
+        data = BackupRestoreSerializer(data=request.data)
+        data.is_valid(raise_exception=True)
+        stamp = data.validated_data["stamp"]
+        check_own_password(request.user, data.validated_data["password"])
+        if not default_storage.exists(backups.names_of(stamp)["database"]):
+            raise NotFound(gettext("This backup is no longer kept."))
+        missing = restore.missing_tools()
+        if missing:
+            raise Conflict(
+                gettext("The server lacks the database tools a restore needs: %(tools)s.")
+                % {"tools": ", ".join(missing)},
+                code="no_tools",
+            )
+        # The same switch as «إنشاء نسخة الآن»: never a copy and a restore at once.
+        if not cache.add(RUNNING, request.user.pk, timeout=3600):
+            raise Conflict(
+                gettext("A backup is being made or restored; wait for it to finish."),
+                code="running",
+            )
+        record(
+            RequestMeta.from_request(request),
+            "backup.restore_request",
+            request.user,
+            new={"backup": stamp},
+        )
+        waiting = {
+            "state": "queued",
+            "stamp": stamp,
+            "step": "",
+            "started": None,
+            "finished": None,
+            "error": "",
+            "code": "",
+            "kept_before": None,
+        }
+        cache.set(restore.STATE, waiting, timeout=3600)
+        actor = (request.user.pk, request.user.email)
+        # After this request's own transaction: the restore replaces the very rows it wrote.
+        transaction.on_commit(lambda: restore_backup.delay(stamp, *actor))
+        return Response(RestoreStateSerializer(waiting).data, status=202)

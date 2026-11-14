@@ -14,6 +14,7 @@ import { Login } from "./routes/Login";
 import { ConfirmProvider } from "./components/Confirm";
 import { ToastProvider } from "./components/Toast";
 import { NoAccess } from "./components/NoAccess";
+import { MaintenanceGate } from "./components/MaintenanceGate";
 import { QueryErrorBanner } from "./components/QueryErrorBanner";
 import { ROUTE_ACCESS } from "./lib/access";
 import { queryClient } from "./lib/queryClient";
@@ -362,6 +363,7 @@ createRoot(root).render(
         </ToastProvider>
       </ConfirmProvider>
       <QueryErrorBanner />
+      <MaintenanceGate />
     </QueryClientProvider>
   </StrictMode>,
 );

@@ -24,6 +24,7 @@ QUIET_SECONDS = 3600
 # What each unit does, in words an administrator reads (the unit names stay in the e-mail).
 UNIT_LABELS = {
     "ecst-backup": "النسخ الاحتياطي اليومي",
+    "ecst-restore": "استعادة نسخة احتياطية",
     "ecst-site-build": "بناء الموقع العام",
     "ecst-autodeploy": "النشر التلقائي",
     "ecst-disk-watch": "مساحة القرص على الخادم (قاربت الامتلاء)",
