@@ -227,6 +227,7 @@ def test_settings_the_server_does_not_have_are_left_out_of_the_script(tmp_path):
     )
     script.write_bytes(
         b"--\n-- PostgreSQL database dump\n--\n\n"
+        b"\\restrict 5nYQkIdbAZ\n\n"  # the tools write this above the settings since 17.6
         b"SET statement_timeout = 0;\n"
         b"SET transaction_timeout = 0;\n"
         b"SELECT pg_catalog.set_config('search_path', '', false);\n"
