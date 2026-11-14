@@ -1,5 +1,6 @@
 """«النسخ الاحتياطية» on the system admin's settings: the list and a copy made now by the worker
-(owner, 2026-11-05); a copy downloaded as one file under its own password (owner, 2026-11-14)."""
+(owner, 2026-11-05); a copy downloaded as one file under its own password, and one restored
+over the platform (owner, 2026-11-14; the restore itself is in test_restore.py)."""
 
 import io
 
@@ -170,3 +171,87 @@ def test_only_the_system_admin_downloads(api, users, copy):
         if role != Role.SYSTEM_ADMIN:
             assert client.get("/api/v1/backups/file/made-up").status_code == 403, role
     assert api().post(DOWNLOAD, {}, format="json").status_code == 401
+
+
+# ─── «استعادة» (owner, 2026-11-14) ──────────────────────────────────────────────────────
+
+RESTORE = "/api/v1/backups/restore"
+
+
+@pytest.fixture
+def restores(monkeypatch):
+    """The engine is stood in for (test_restore.py runs it): what the page asks of it."""
+    from core import restore
+
+    asked = []
+
+    def run(stamp, actor_id=None, actor_email=""):
+        asked.append((stamp, actor_id, actor_email))
+        state = {**cache.get(restore.STATE), "state": "done", "kept_before": "20261114T040000Z"}
+        cache.set(restore.STATE, state)
+        return state
+
+    monkeypatch.setattr(restore, "run", run)
+    monkeypatch.setattr(restore, "missing_tools", lambda: [])
+    cache.delete(restore.STATE)
+    return asked
+
+
+def _restore(client, **changes):
+    return client.post(RESTORE, {"stamp": STAMP, "password": PASSWORD, **changes}, format="json")
+
+
+def test_the_admin_restores_a_kept_copy(
+    api, make_user, copy, restores, django_capture_on_commit_callbacks
+):
+    admin = make_user(Role.SYSTEM_ADMIN)
+    client = api(admin)
+    assert client.get(URL).data["restore"] is None
+    with django_capture_on_commit_callbacks(execute=True):
+        response = _restore(client)
+    assert response.status_code == 202 and response.data["state"] == "queued", response.data
+    # Asked of the worker once this request's own writes were committed.
+    assert restores == [(STAMP, admin.pk, admin.email)]
+    assert AuditLog.objects.filter(action="backup.restore_request", actor=admin).exists()
+    told = client.get(URL).data["restore"]
+    assert told["state"] == "done" and told["stamp"] == STAMP
+    assert told["kept_before"] == "20261114T040000Z"
+    assert not cache.get(RUNNING)  # a copy can be made again
+
+
+def test_a_restore_needs_the_admins_own_password_and_a_kept_copy(
+    api, make_user, copy, restores, django_capture_on_commit_callbacks
+):
+    client = api(make_user(Role.SYSTEM_ADMIN))
+    with django_capture_on_commit_callbacks(execute=True):
+        wrong = _restore(client, password="not-mine")
+        assert wrong.status_code == 400 and wrong.data["code"] == "wrong_password"
+        assert _restore(client, stamp="20000101T000000Z").status_code == 404
+        assert _restore(client, stamp="../../env").status_code == 400
+        cache.set(RUNNING, 1, timeout=60)  # a copy is being made
+        busy = _restore(client)
+        assert busy.status_code == 409 and busy.data["code"] == "running"
+    assert restores == [] and not AuditLog.objects.filter(action="backup.restore_request")
+
+
+def test_a_server_without_the_database_tools_says_so(api, make_user, copy, restores, monkeypatch):
+    from core import restore
+
+    monkeypatch.setattr(restore, "missing_tools", lambda: ["psql"])
+    response = _restore(api(make_user(Role.SYSTEM_ADMIN)))
+    assert response.status_code == 409 and response.data["code"] == "no_tools"
+    assert "psql" in response.data["detail"] and restores == []
+
+
+def test_only_the_system_admin_restores(
+    api, users, copy, restores, django_capture_on_commit_callbacks
+):
+    """docs/roles-matrix.md `backups.restore`: not the system supervisor."""
+    for role in Role:
+        if role != Role.SYSTEM_ADMIN:
+            assert _restore(api(users[role])).status_code == 403, role
+    assert api().post(RESTORE, {}, format="json").status_code == 401
+    assert restores == [] and cache.get(RUNNING) is None
+    with django_capture_on_commit_callbacks(execute=True):
+        assert _restore(api(users[Role.SYSTEM_ADMIN])).status_code == 202
+    assert len(restores) == 1

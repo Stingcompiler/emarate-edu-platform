@@ -79,6 +79,23 @@ function sessionRefresh(baseUrl: string): Middleware {
   };
 }
 
+/** The window event sent when the API answers «closed for maintenance» (503, code
+ *  `maintenance`): a backup is being restored. The portal shows its waiting screen on it. */
+export const MAINTENANCE_EVENT = "ecst:maintenance";
+
+const maintenanceSignal: Middleware = {
+  async onResponse({ response }) {
+    if (response.status === 503 && typeof window !== "undefined") {
+      const body = await response
+        .clone()
+        .json()
+        .catch(() => null);
+      if (body?.code === "maintenance") window.dispatchEvent(new Event(MAINTENANCE_EVENT));
+    }
+    return response;
+  },
+};
+
 /** `language` picks the API's message language (docs/05 §7); the portal is Arabic-only, so a
  *  browser set to English still gets Arabic errors. */
 export function createApiClient(baseUrl = "", language = "ar") {
@@ -89,6 +106,7 @@ export function createApiClient(baseUrl = "", language = "ar") {
   });
   client.use(csrf);
   client.use(sessionRefresh(baseUrl));
+  client.use(maintenanceSignal);
   return client;
 }
 

@@ -311,7 +311,17 @@ def test_a_copy_that_is_gone_is_refused_before_the_first_byte(fake_dump, db):
         backups.package("20000101T000000Z", backups.package_key(FILE_PHRASE))
 
 
-def test_development_copies_the_sqlite_file(settings, tmp_path):
+def _sqlite_at(monkeypatch, settings, path):
+    """Point the settings at a SQLite file for one test (undone after it: the dictionary is
+    shared, and a plain assignment into it would outlive the test)."""
+    monkeypatch.setitem(
+        settings.DATABASES,
+        "default",
+        {**settings.DATABASES["default"], "ENGINE": "django.db.backends.sqlite3", "NAME": path},
+    )
+
+
+def test_development_copies_the_sqlite_file(settings, tmp_path, monkeypatch):
     """Development runs on SQLite: the copy is the database file, so the flow needs no services."""
     import sqlite3
 
@@ -319,11 +329,7 @@ def test_development_copies_the_sqlite_file(settings, tmp_path):
     with sqlite3.connect(live) as connection:
         connection.execute("create table t (v text)")
         connection.execute("insert into t values ('kept')")
-    settings.DATABASES["default"] = {
-        **settings.DATABASES["default"],
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": live,
-    }
+    _sqlite_at(monkeypatch, settings, live)
     out = tmp_path / "copy.sqlite3"
     backups.dump_to(out)
     with sqlite3.connect(out) as connection:

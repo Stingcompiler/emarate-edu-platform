@@ -1,0 +1,453 @@
+"""Restore a backup over the running platform, from the portal (owner, 2026-11-14).
+
+What it promises:
+
+- **Nothing is touched until the copy is known to be good.** It is decrypted whole (every
+  record is authenticated and the end is sealed), read by the database's own tools, and
+  refused when it was made by newer code than is running, or by the other database engine.
+- **The state it replaces is kept.** With the platform closed (``core.maintenance``), a copy
+  of that state is made first; it appears in the list, so a restore is undone by another.
+- **The database is all or nothing.** On PostgreSQL every table is dropped and the copy loaded
+  in one transaction (``psql --single-transaction``): an error, a stuck lock or a killed
+  worker leaves the rows exactly as they were. On SQLite (development) the file is replaced
+  by SQLite's online backup, which is one transaction too.
+- **The uploaded files are swapped, not overwritten.** The copy's files are unpacked beside
+  the live ones first; the live ones are moved to ``.replaced-<time>`` (kept a week) and the
+  copy's moved in. The backups themselves are never part of it.
+- Then the migrations run, so a copy from older code is brought up to the code that runs.
+
+It writes what it is doing to the cache (``STATE``) — not to the database it is replacing —
+for the page to show when it opens again.
+"""
+
+from __future__ import annotations
+
+import contextlib
+import logging
+import re
+import shutil
+import sqlite3
+import subprocess
+import tarfile
+import tempfile
+from datetime import UTC, datetime
+from pathlib import Path
+
+from django.conf import settings
+from django.core.cache import cache
+from django.core.files.storage import default_storage
+from django.utils import timezone, translation
+from django.utils.translation import gettext
+
+from core import backups, maintenance
+
+logger = logging.getLogger(__name__)
+
+STATE = "restore-state"
+_STATE_SECONDS = 30 * 24 * 3600
+REPLACED_PREFIX = ".replaced-"
+STAGING_PREFIX = ".restore-"
+REPLACED_DAYS = 7
+
+
+class RestoreRefused(Exception):
+    """The copy cannot be restored here, and nothing was touched. ``code`` names why."""
+
+    def __init__(self, code: str, message: str):
+        super().__init__(message)
+        self.code = code
+
+
+def state() -> dict | None:
+    return cache.get(STATE)
+
+
+def _say(**changes) -> None:
+    cache.set(STATE, {**(cache.get(STATE) or {}), **changes}, timeout=_STATE_SECONDS)
+
+
+def missing_tools() -> list[str]:
+    """What the server lacks to restore (PostgreSQL's client programs)."""
+    if backups.engine() != "postgresql":
+        return []
+    return [tool for tool in ("pg_dump", "pg_restore", "psql") if shutil.which(tool) is None]
+
+
+# ─── Is the copy one this platform can take? ────────────────────────────────────────────
+
+
+def _migrations_in_code() -> set[tuple[str, str]]:
+    from django.db.migrations.loader import MigrationLoader
+
+    return set(MigrationLoader(None, ignore_no_migrations=True).disk_migrations)
+
+
+_COPY = re.compile(r"^COPY public\.django_migrations \(([^)]*)\) FROM stdin;$")
+
+
+def _migrations_in_dump(dump: Path) -> set[tuple[str, str]]:
+    if backups.engine() == "sqlite":
+        connection = sqlite3.connect(f"{dump.as_uri()}?mode=ro", uri=True)
+        try:
+            return set(connection.execute("select app, name from django_migrations"))
+        except sqlite3.DatabaseError:
+            return set()
+        finally:
+            connection.close()
+    result = subprocess.run(  # noqa: S603  (fixed binary, a path of our own)
+        [shutil.which("pg_restore"), "--data-only", "--table=django_migrations", "--file=-", dump],
+        check=False,
+        capture_output=True,
+    )
+    found, columns = set(), None
+    for line in result.stdout.decode(errors="replace").splitlines():
+        if columns is None:
+            header = _COPY.match(line)
+            if header:
+                columns = [name.strip() for name in header.group(1).split(",")]
+            continue
+        if line == "\\.":
+            break
+        row = dict(zip(columns, line.split("\t"), strict=False))
+        found.add((row.get("app", ""), row.get("name", "")))
+    return found
+
+
+def check_dump(dump: Path) -> None:
+    """RestoreRefused unless ``dump`` is a database copy this server and this code can load."""
+    with dump.open("rb") as handle:
+        head = handle.read(16)
+    kind = (
+        "sqlite"
+        if head.startswith(b"SQLite format 3\x00")
+        else "postgresql"
+        if head.startswith(b"PGDMP")
+        else None
+    )
+    if kind != backups.engine():
+        raise RestoreRefused(
+            "engine",
+            gettext("This copy was made on another kind of database and cannot be restored here."),
+        )
+    if kind == "postgresql":
+        listing = subprocess.run(  # noqa: S603
+            [shutil.which("pg_restore"), "--list", dump], check=False, capture_output=True
+        )
+        if listing.returncode != 0:
+            logger.error("pg_restore --list: %s", listing.stderr.decode(errors="replace").strip())
+            raise RestoreRefused(
+                "unreadable",
+                gettext(
+                    "The database tools on this server cannot read this copy; it was probably "
+                    "made by a newer PostgreSQL."
+                ),
+            )
+    applied = _migrations_in_dump(dump)
+    if not applied:
+        raise RestoreRefused("unreadable", gettext("This copy holds no database of the platform."))
+    if applied - _migrations_in_code():
+        raise RestoreRefused(
+            "newer",
+            gettext(
+                "This copy was made by a newer version of the platform. Update the platform, "
+                "then restore it."
+            ),
+        )
+
+
+# ─── The database ───────────────────────────────────────────────────────────────────────
+
+# Everything the application owns in the schema goes, in the same transaction that loads the
+# copy: tables a later migration added would otherwise outlive the restore and break the
+# migrations that follow. A lock held by anyone else for a minute fails the whole restore.
+_EMPTY_THE_SCHEMA = """
+SET lock_timeout = '60s';
+DO $$
+DECLARE item record;
+BEGIN
+  FOR item IN
+    SELECT c.relkind AS kind,
+           quote_ident(n.nspname) || '.' || quote_ident(c.relname) AS name
+    FROM pg_class c
+    JOIN pg_namespace n ON n.oid = c.relnamespace
+    WHERE n.nspname = 'public'
+      AND c.relkind IN ('v', 'm', 'f', 'r', 'p', 'S')
+      AND NOT EXISTS (SELECT 1 FROM pg_depend d WHERE d.objid = c.oid AND d.deptype = 'e')
+    ORDER BY position(c.relkind::text in 'vmfrpS')
+  LOOP
+    EXECUTE format(
+      'DROP %s IF EXISTS %s CASCADE',
+      CASE item.kind
+        WHEN 'v' THEN 'VIEW'
+        WHEN 'm' THEN 'MATERIALIZED VIEW'
+        WHEN 'f' THEN 'FOREIGN TABLE'
+        WHEN 'S' THEN 'SEQUENCE'
+        ELSE 'TABLE'
+      END,
+      item.name
+    );
+  END LOOP;
+END $$;
+SET lock_timeout = 0;
+"""
+
+
+def _postgres_restore(dump: Path, work: Path) -> None:
+    script, empty = work / "restore.sql", work / "empty.sql"
+    made = subprocess.run(  # noqa: S603
+        [
+            shutil.which("pg_restore"),
+            "--no-owner",
+            "--no-privileges",
+            f"--file={script}",
+            dump,
+        ],
+        check=False,
+        capture_output=True,
+    )
+    if made.returncode != 0:
+        raise RuntimeError(f"pg_restore: {made.stderr.decode(errors='replace').strip()}")
+    empty.write_text(_EMPTY_THE_SCHEMA)
+    env, target = backups._pg_env_and_args()
+    loaded = subprocess.run(  # noqa: S603
+        [
+            shutil.which("psql"),
+            "--no-psqlrc",
+            "--quiet",
+            "--single-transaction",
+            "--set=ON_ERROR_STOP=1",
+            "--output=/dev/null",
+            f"--file={empty}",
+            f"--file={script}",
+            *target,
+        ],
+        env=env,
+        check=False,
+        capture_output=True,
+    )
+    if loaded.returncode != 0:
+        raise RuntimeError(f"psql: {loaded.stderr.decode(errors='replace').strip()[-2000:]}")
+
+
+def _sqlite_restore(dump: Path) -> None:
+    source = sqlite3.connect(f"{dump.as_uri()}?mode=ro", uri=True)
+    target = sqlite3.connect(str(settings.DATABASES["default"]["NAME"]), timeout=60)
+    try:
+        source.backup(target)
+    finally:
+        source.close()
+        target.close()
+
+
+def restore_database(dump: Path, work: Path) -> None:
+    """Replace every row with the copy's, or change nothing."""
+    from django.db import connections
+
+    connections.close_all()  # this process holds no lock of its own on what is dropped
+    if backups.engine() == "sqlite":
+        _sqlite_restore(dump)
+    else:
+        _postgres_restore(dump, work)
+
+
+# ─── The uploaded files ─────────────────────────────────────────────────────────────────
+
+
+def media_root() -> Path | None:
+    """Where the uploaded files live on this disk; None when they are stored elsewhere."""
+    if getattr(settings, "MEDIA_BACKEND", "local") != "local":
+        return None
+    return Path(settings.MEDIA_ROOT)
+
+
+def stage_files(archive: Path, root: Path) -> Path:
+    """Unpack the copy's files beside the live ones (same disk, so the swap is a rename)."""
+    root.mkdir(parents=True, exist_ok=True)
+    staging = Path(tempfile.mkdtemp(prefix=STAGING_PREFIX, dir=root))
+    (staging / "new").mkdir()
+    with tarfile.open(archive, mode="r:gz") as tar:
+        # "data": no absolute paths, no «..», no links out of the folder, no devices.
+        tar.extractall(staging / "new", filter="data")
+    return staging
+
+
+def swap_files(staging: Path, root: Path) -> Path:
+    """The live files step aside into ``.replaced-<time>`` and the copy's take their place.
+    ``private/backups`` stays where it is: the backups are not part of any backup."""
+    new, old = staging / "new", staging / "old"
+    (old / "private").mkdir(parents=True)
+    if (root / "public").exists():
+        (root / "public").rename(old / "public")
+    if (new / "public").exists():
+        (new / "public").rename(root / "public")
+    else:
+        (root / "public").mkdir()
+    (root / "private").mkdir(exist_ok=True)
+    for child in list((root / "private").iterdir()):
+        if child.name != backups.PREFIX:
+            child.rename(old / "private" / child.name)
+    if (new / "private").exists():
+        for child in list((new / "private").iterdir()):
+            if child.name != backups.PREFIX:
+                child.rename(root / "private" / child.name)
+    kept = root / f"{REPLACED_PREFIX}{datetime.now(UTC).strftime('%Y%m%dT%H%M%SZ')}"
+    old.rename(kept)
+    shutil.rmtree(staging, ignore_errors=True)
+    return kept
+
+
+def purge_replaced(root: Path | None = None, days: int = REPLACED_DAYS) -> list[str]:
+    """Files a restore set aside more than a week ago, and what an interrupted one left."""
+    root = root or media_root()
+    if root is None or not root.is_dir():
+        return []
+    limit = datetime.now(UTC).timestamp() - days * 86400
+    gone = []
+    for folder in root.iterdir():
+        stale = folder.name.startswith(REPLACED_PREFIX) and folder.stat().st_mtime < limit
+        left = folder.name.startswith(STAGING_PREFIX) and folder.stat().st_mtime < limit
+        if folder.is_dir() and (stale or left):
+            shutil.rmtree(folder, ignore_errors=True)
+            gone.append(folder.name)
+    return gone
+
+
+# ─── The whole restore ──────────────────────────────────────────────────────────────────
+
+
+def _fetch(stamp: str, work: Path) -> tuple[Path, Path | None]:
+    """The copy's two parts, decrypted into ``work``."""
+    names = backups.names_of(stamp)
+    if not default_storage.exists(names["database"]):
+        raise RestoreRefused("gone", gettext("This backup is no longer kept."))
+    dump, archive = work / "database", work / "files.tar.gz"
+    try:
+        backups.decrypt_to(names["database"], dump)
+        if default_storage.exists(names["files"]):
+            backups.decrypt_to(names["files"], archive)
+    except backups.BackupCorrupt:
+        raise RestoreRefused(
+            "corrupt",
+            gettext("This copy is incomplete or was changed. Choose an earlier one."),
+        ) from None
+    return dump, archive if archive.exists() else None
+
+
+def _room_for(stamp: str, work: Path) -> None:
+    """Refuse before starting when the disk cannot hold the copy unpacked and a new copy of
+    what is there now."""
+    names = backups.names_of(stamp)
+    size = 0
+    for name in (names["database"], names["files"]):
+        with contextlib.suppress(OSError, NotImplementedError):
+            size += default_storage.size(name) if default_storage.exists(name) else 0
+    places = [work] + ([media_root()] if media_root() and media_root().is_dir() else [])
+    if any(shutil.disk_usage(place).free < size * 3 + 64 * 1024 * 1024 for place in places):
+        raise RestoreRefused(
+            "space", gettext("There is not enough free disk space on the server to restore.")
+        )
+
+
+def _stamp_of(name: str) -> str:
+    return name.rsplit("-", 1)[-1].split(".", 1)[0]
+
+
+def _on_the_record(stamp: str, safety: str, actor_id: int | None, actor_email: str) -> None:
+    """The restored rows know nothing of their own restore: say it in them."""
+    from accounts.models import User
+    from audit.models import AuditLog
+    from content.services import request_site_rebuild
+    from notifications.services import notify_admins
+
+    actor = User.objects.filter(pk=actor_id, email=actor_email).first() if actor_id else None
+    AuditLog.objects.create(
+        action="backup.restore",
+        actor=actor,
+        target_type="backup",
+        target_id=stamp,
+        target_repr=f"ecst-{stamp}",
+        new={"by": actor_email, "kept_before": safety},
+    )
+    notify_admins(
+        "استُعيدت نسخة احتياطية",
+        f"استعاد {actor.full_name_ar if actor else actor_email} نسخة {stamp}: المنصة الآن كما "
+        f"كانت عند أخذها. الوضع الذي كان قبل الاستعادة محفوظ في نسخة {safety}.",
+    )
+    request_site_rebuild()
+
+
+def run(stamp: str, actor_id: int | None = None, actor_email: str = "") -> dict:
+    """Restore the kept copy ``stamp``. Returns the final state (also in the cache)."""
+    from django.contrib.contenttypes.models import ContentType
+    from django.core.management import call_command
+
+    replaced = False
+    staging = None
+    with translation.override("ar"):
+        _say(
+            state="running",
+            stamp=stamp,
+            step="check",
+            started=timezone.now().isoformat(),
+            finished=None,
+            error="",
+            code="",
+            kept_before=None,
+        )
+        try:
+            purge_replaced()
+            with tempfile.TemporaryDirectory(prefix="ecst-restore-") as folder:
+                work = Path(folder)
+                _room_for(stamp, work)
+                dump, archive = _fetch(stamp, work)
+                check_dump(dump)
+                root = media_root()
+                if archive is not None and root is not None:
+                    staging = stage_files(archive, root)
+                with maintenance.held("restore"):
+                    _say(step="safety")
+                    safety = _stamp_of(backups.create(keep=0)[0])
+                    _say(step="database", kept_before=safety)
+                    restore_database(dump, work)
+                    replaced = True
+                    if staging is not None:
+                        _say(step="files")
+                        swap_files(staging, root)
+                        staging = None
+                    _say(step="upgrade")
+                    call_command("migrate", interactive=False, verbosity=0)
+                    ContentType.objects.clear_cache()
+                    maintenance.new_epoch()
+                    _on_the_record(stamp, safety, actor_id, actor_email)
+            _say(state="done", step="", finished=timezone.now().isoformat())
+        except RestoreRefused as refused:
+            _say(
+                state="failed",
+                step="",
+                error=str(refused),
+                code=refused.code,
+                finished=timezone.now().isoformat(),
+            )
+        except Exception:
+            logger.exception("restoring backup %s failed", stamp)
+            _say(
+                state="failed",
+                step="",
+                code="half" if replaced else "error",
+                error=(
+                    gettext(
+                        "The database was restored, but a later step failed. The state before "
+                        "the restore is kept in the newest backup; see the server's log."
+                    )
+                    if replaced
+                    else gettext(
+                        "The restore failed and nothing was changed. Details are in the "
+                        "server's log."
+                    )
+                ),
+                finished=timezone.now().isoformat(),
+            )
+        finally:
+            if staging is not None:
+                shutil.rmtree(staging, ignore_errors=True)
+    return state() or {}

@@ -87,6 +87,25 @@ def notify(
     return notification
 
 
+def notify_admins(title: str, body: str, action_url: str = "/system/settings") -> None:
+    """Every system admin and supervisor hears of it, in the portal and by e-mail — the one
+    who did it too: what is done in their name is theirs to notice."""
+    from accounts.models import User
+    from accounts.rbac import Role
+
+    admins = User.objects.filter(
+        is_active=True, role_assignments__role__in=[Role.SYSTEM_ADMIN, Role.SYSTEM_SUPERVISOR]
+    ).distinct()
+    notify(
+        list(admins),
+        category=Category.OPS,
+        title=title,
+        body=body,
+        action_url=action_url,
+        channels=[Channel.INAPP, Channel.EMAIL],
+    )
+
+
 def notify_audience(audience: dict, **kwargs) -> Notification:
     """A system notification to an audience (no sender, so no authorization)."""
     notification = Notification.objects.create(

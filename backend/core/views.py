@@ -75,6 +75,28 @@ def health(request: Request) -> Response:
     )
 
 
+class _MaintenanceSerializer(serializers.Serializer):
+    maintenance = serializers.BooleanField()
+
+
+@extend_schema(
+    operation_id="maintenance",
+    summary="Is the platform closed for a restore?",
+    responses=_MaintenanceSerializer,
+    tags=["system"],
+)
+@api_view(["GET"])
+@permission_classes([AllowAny])
+@throttle_classes([AnonRateThrottle])
+def maintenance(request: Request) -> Response:
+    """The portal's waiting screen asks this while a backup is restored; it says nothing else."""
+    from core import maintenance as switch
+
+    return Response(
+        {"maintenance": switch.state() is not None}, headers={"Cache-Control": "no-store"}
+    )
+
+
 def not_found(request: HttpRequest, exception: Exception | None = None) -> JsonResponse:
     return JsonResponse(
         problem(404, detail=gettext("No endpoint matches this path."), code="not_found"),

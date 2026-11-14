@@ -5,7 +5,8 @@ import { expect, test } from "@playwright/test";
 import { offscreen, PASSWORD, signIn } from "./helpers";
 
 // «النسخ الاحتياطية» (owner, 2026-11-14): a copy is made, then downloaded as one file under a
-// password typed in the dialog. The «phone» and «desktop» projects run this at both sizes.
+// password typed in the dialog, and a copy is restored over the platform. The «phone» and
+// «desktop» projects run these at both sizes.
 
 const FILE_PASSWORD = "e2e-backup-file-2026";
 
@@ -70,4 +71,73 @@ test("the system supervisor sees the copies but downloads none", async ({ page }
   await page.getByRole("button", { name: "إنشاء النسخة" }).click();
   await expect(section.locator("[data-backup]").first()).toBeVisible({ timeout: 30_000 });
   await expect(section.getByRole("button", { name: /^تنزيل/ })).toHaveCount(0);
+});
+
+// The whole way round: a copy, a change after it, the restore, and the change is gone — while
+// the state the restore replaced is itself kept as a copy.
+test("the system admin restores a copy and what came after it is gone", async ({ page }) => {
+  const size = test.info().project.name;
+  await signIn(page, "admin@demo.ecst.test");
+  await page.goto("/system/settings");
+  const section = page.locator("section", { has: page.locator("#backups") });
+  const lectures = page.getByLabel("المحاضرات المخططة أسبوعيًا لكل مادة");
+  const before = await lectures.inputValue();
+  const rows = section.locator("[data-backup]");
+  // The newest copy before this one, if any (older ones are pruned, so rows are not counted).
+  await expect(section.getByRole("list")).toHaveAttribute("aria-busy", "false");
+  const newest = (await rows.count()) ? await rows.first().getAttribute("data-backup") : null;
+  await section.getByRole("button", { name: "إنشاء نسخة الآن" }).click();
+  await page.getByRole("button", { name: "إنشاء النسخة" }).click();
+  await expect
+    .poll(async () => ((await rows.count()) ? rows.first().getAttribute("data-backup") : null), {
+      timeout: 30_000,
+    })
+    .not.toBe(newest);
+  const copy = await rows.first().getAttribute("data-backup");
+
+  // After the copy: a setting is changed and saved.
+  const changed = String(Number(before) + 3);
+  await lectures.fill(changed);
+  await page.getByRole("button", { name: "حفظ الإعدادات" }).click();
+  await expect(page.getByText("حُفظت الإعدادات")).toBeVisible();
+
+  await rows
+    .first()
+    .getByRole("button", { name: /^استعادة نسخة/ })
+    .click();
+  const dialog = page.getByRole("dialog");
+  await expect(dialog).toContainText("كل ما أُدخل بعدها يُمحى");
+  await expect(dialog.getByRole("columnheader", { name: "في النسخة" })).toBeVisible();
+  expect(await offscreen(page)).toEqual([]);
+  await page.waitForTimeout(400); // the sheet has risen
+  await page.screenshot({ path: test.info().outputPath(`backup-restore-${size}.png`) });
+
+  // Neither a click alone nor a wrong password restores anything.
+  await dialog.getByRole("button", { name: "استعادة النسخة" }).click();
+  await expect(dialog.getByRole("alert")).toContainText("اكتب كلمة «استعادة»");
+  await dialog.getByLabel(/^اكتب كلمة «استعادة»/).fill("استعادة");
+  await dialog.getByLabel("كلمة مرورك في المنصة").fill("not-my-password");
+  await dialog.getByRole("button", { name: "استعادة النسخة" }).click();
+  await expect(dialog.getByRole("alert")).toContainText("كلمة المرور غير صحيحة");
+  await expect(lectures).toHaveValue(changed);
+
+  await dialog.getByLabel("كلمة مرورك في المنصة").fill(PASSWORD);
+  await dialog.getByRole("button", { name: "استعادة النسخة" }).click();
+  // The page opens again on the restored rows and says what happened.
+  await expect(page.getByLabel("المحاضرات المخططة أسبوعيًا لكل مادة")).toHaveValue(before, {
+    timeout: 60_000,
+  });
+  const done = section.locator('[data-restore="done"]');
+  await expect(done).toContainText("الوضع الذي كان قبل الاستعادة محفوظ");
+  // The copy that was restored is still there, and above it the state it replaced.
+  await expect(section.locator(`[data-backup="${copy}"]`)).toBeVisible();
+  expect(await rows.first().getAttribute("data-backup")).not.toBe(copy);
+  expect(await offscreen(page)).toEqual([]);
+  await page.screenshot({
+    path: test.info().outputPath(`backup-restored-${size}.png`),
+    fullPage: true,
+  });
+
+  await page.goto("/audit");
+  await expect(page.getByRole("main")).toContainText("استعاد نسخة احتياطية");
 });

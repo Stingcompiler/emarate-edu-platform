@@ -615,6 +615,7 @@ COVERED_ELSEWHERE = {
     "hr-notice-acknowledge": _N + "test_hr_notice",
     "backup-download": "core.tests.test_backups_page::test_only_the_system_admin_downloads",
     "backup-file": "core.tests.test_backups_page::test_only_the_system_admin_downloads",
+    "backup-restore": "core.tests.test_backups_page::test_only_the_system_admin_restores",
     "user-set-active": "accounts.tests.test_accounts::test_set_active",
     "term-set-current": "academic.tests.test_academic::test_set_current_term",
     "report-snapshot-detail": "reports.tests.test_reports::test_snapshots_are_frozen_and_scoped",
