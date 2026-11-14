@@ -32,7 +32,19 @@ Older rounds: `.claude/handoff/archive/2026-10-24_to_2026-11-02.md`, `.claude/ha
      `MaintenanceGate` (signal `MAINTENANCE_EVENT` from `@ecst/api`), «استعادة» with the
      numbers now/in the copy, the word «استعادة» and the password. Proven on real PostgreSQL
      (`test_a_real_restore_on_postgresql`) and in E2E on SQLite.
-  3. **Restore an uploaded file on an empty platform**, chunked upload, then a full move drill.
+  3. **Restore an uploaded file on an empty platform — `feat/backup-restore-upload`.**
+     `backups.platform_is_empty()` (no StudentRecord), `package_unlock()` (the key the file's
+     password makes; the worker gets the key from the cache, never the password),
+     `restore.run(..., upload=, key=)` (refused `not_empty` otherwise; the uploaded file is
+     removed whatever happens). Endpoints: `POST /backups/uploads` → `PUT
+     /backups/uploads/<id>?offset=` (raw chunk, appended only where the file ends; 409 says
+     how much arrived) → `POST /backups/uploads/<id>/restore`. Portal:
+     `lib/backupUpload.ts` (4 MB chunks, five tries with a growing pause, resumes from the
+     server's count), «استعادة من ملف» shown only when `GET /backups` says `empty`. The move
+     itself is a test on real PostgreSQL (`test_a_real_move_to_another_host_on_postgresql`);
+     the runbook §5 has the owner's steps and what the file does not carry (VAPID, field key,
+     mail settings). **Lesson from CI (#304):** the runner's PostgreSQL tools are newer than
+     the service (17 vs 16) — `restore.fit_script` drops settings the server lacks.
 
 - **Next review** (owner, 2026-11-10: «اكتب خطة مراجعة بعد قراءة الوثائق»): work order
   `docs/qa/comprehensive-review-plan-2026-11-10.md` — scope #234–#264 since report `c8479a8`;

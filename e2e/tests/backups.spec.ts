@@ -172,3 +172,108 @@ test("everyone sees the waiting screen while a restore runs", async ({ page }) =
   await expect(screen).toHaveCount(0, { timeout: 20_000 });
   await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
 });
+
+// «استعادة من ملف» is how the platform moves to another host: offered only where there is no
+// student yet. The demo platform has students, so the empty one is played by the network here
+// (the real thing — a file uploaded in chunks and restored on an emptied PostgreSQL — is
+// backend/core/tests/test_restore.py::test_a_real_move_to_another_host_on_postgresql).
+test("a backup file is uploaded and restored only on an empty platform", async ({ page }) => {
+  const size = test.info().project.name;
+  await signIn(page, "admin@demo.ecst.test");
+  await page.goto("/system/settings");
+  const section = page.locator("section", { has: page.locator("#backups") });
+  await expect(section).toContainText("متاحة على منصة فارغة فقط");
+  await expect(section.locator("[data-from-file]")).toHaveCount(0);
+
+  // The same page on a platform with no students.
+  let asked = false;
+  await page.route("**/api/v1/backups", async (route) => {
+    if (route.request().method() !== "GET") return route.continue();
+    const real = await (await route.fetch()).json();
+    const restore = asked
+      ? { ...waiting, started: new Date().toISOString(), state: "running", step: "check" }
+      : null;
+    await route.fulfill({ json: { ...real, empty: true, restore } });
+  });
+  const waiting = {
+    state: "queued",
+    stamp: "20261101T031500Z",
+    step: "",
+    started: null,
+    finished: null,
+    error: "",
+    code: "",
+    kept_before: null,
+    source: "file",
+  };
+  const offsets: number[] = [];
+  let dropped = false;
+  await page.route("**/api/v1/backups/uploads", (route) =>
+    route.fulfill({
+      status: 201,
+      json: { id: "up1", size: 3_000_000, received: 0, chunk: 1_000_000 },
+    }),
+  );
+  await page.route("**/api/v1/backups/uploads/up1?offset=*", (route) => {
+    const offset = Number(new URL(route.request().url()).searchParams.get("offset"));
+    offsets.push(offset);
+    // The connection drops once in the middle: that chunk alone is sent again.
+    if (offset === 1_000_000 && !dropped) {
+      dropped = true;
+      return route.abort("connectionreset");
+    }
+    const received = offset + (route.request().postDataBuffer()?.length ?? 0);
+    return route.fulfill({ json: { id: "up1", size: 3_000_000, received, chunk: 1_000_000 } });
+  });
+  let tries = 0;
+  await page.route("**/api/v1/backups/uploads/up1/restore", (route) => {
+    tries += 1;
+    if (tries === 1)
+      return route.fulfill({
+        status: 400,
+        contentType: "application/problem+json",
+        body: JSON.stringify({
+          status: 400,
+          code: "wrong_file_password",
+          detail: "بيانات غير صالحة.",
+          errors: { file_password: ["هذه ليست كلمة سر هذا الملف."] },
+        }),
+      });
+    asked = true;
+    return route.fulfill({ status: 202, json: waiting });
+  });
+
+  await page.reload();
+  await section.getByRole("button", { name: "استعادة من ملف" }).click();
+  const dialog = page.getByRole("dialog");
+  await expect(dialog).toContainText("الحساب الذي تعمل به الآن يزول معها");
+  await dialog.getByRole("button", { name: "رفع واستعادة" }).click();
+  await expect(dialog.getByRole("alert")).toContainText("اختر ملف النسخة أولًا");
+  await dialog.getByLabel("ملف النسخة").setInputFiles({
+    name: "ecst-backup-20261101T031500Z.ecstbak",
+    mimeType: "application/octet-stream",
+    buffer: Buffer.alloc(3_000_000, 7),
+  });
+  await dialog.getByLabel(/^كلمة سر الملف/).fill("not-the-file-password");
+  await dialog.getByLabel("كلمة مرورك في المنصة").fill(PASSWORD);
+  expect(await offscreen(page)).toEqual([]);
+  await page.waitForTimeout(400); // the sheet has risen
+  await page.screenshot({ path: test.info().outputPath(`backup-from-file-${size}.png`) });
+
+  await dialog.getByRole("button", { name: "رفع واستعادة" }).click();
+  // Three chunks, the middle one twice; then the file's password is refused and the file kept.
+  await expect(dialog.getByRole("alert")).toContainText("ليست كلمة سر هذا الملف", {
+    timeout: 20_000,
+  });
+  expect(offsets).toEqual([0, 1_000_000, 1_000_000, 2_000_000]);
+  await expect(dialog).toContainText("وصل الملف كاملًا");
+  expect(await offscreen(page)).toEqual([]);
+
+  await dialog.getByLabel(/^كلمة سر الملف/).fill(FILE_PASSWORD);
+  await dialog.getByRole("button", { name: "رفع واستعادة" }).click();
+  await expect(dialog).toHaveCount(0);
+  expect(offsets).toHaveLength(4); // not uploaded a second time
+  await expect(section).toContainText("تُستعاد نسخة");
+  await expect(section).toContainText("فحص النسخة");
+  await expect(section.locator("[data-from-file]")).toHaveCount(0);
+});

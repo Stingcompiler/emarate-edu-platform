@@ -185,7 +185,7 @@ def restores(monkeypatch):
 
     asked = []
 
-    def run(stamp, actor_id=None, actor_email=""):
+    def run(stamp, actor_id=None, actor_email="", **source):
         asked.append((stamp, actor_id, actor_email))
         state = {**cache.get(restore.STATE), "state": "done", "kept_before": "20261114T040000Z"}
         cache.set(restore.STATE, state)

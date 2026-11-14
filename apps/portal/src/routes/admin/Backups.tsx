@@ -1,10 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { DatabaseBackup, Download, History } from "lucide-react";
+import { DatabaseBackup, Download, FileUp, History } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { useConfirm } from "../../components/Confirm";
 import { FormDialog } from "../../components/FormDialog";
 import { useToast } from "../../components/Toast";
+import { UploadStatus } from "../../components/UploadStatus";
 import {
   Button,
   Card,
@@ -16,9 +17,11 @@ import {
 } from "../../components/ui";
 import { api, ok } from "../../lib/api";
 import { useMe } from "../../lib/auth";
+import { uploadBackup } from "../../lib/backupUpload";
 import { count, fmtDateTime, N } from "../../lib/format";
 import { fmtSize } from "../../lib/learning";
 import { can } from "../../lib/nav";
+import type { UploadProgress } from "../../lib/upload";
 
 const FILE_PASSWORD_MIN = 10;
 
@@ -70,6 +73,9 @@ function stampDate(stamp: string): string {
  * alone. «استعادة» (the same message: «استعادة النسخة لا يوجد لها زر») puts the platform back
  * to a copy: its numbers beside today's, the confirmation word and the admin's password; the
  * worker does it and the page shows where it is, then what came of it.
+ * «استعادة من ملف» shows only on a platform with no students: there a file downloaded from
+ * the previous host is uploaded in chunks and restored with its own password — how the
+ * platform moves to another host.
  * No board: a list in a card on phones and on large screens alike (docs/06 §9).
  */
 export function Backups() {
@@ -78,6 +84,7 @@ export function Backups() {
   const me = useMe();
   const [downloading, setDownloading] = useState<Copy | null>(null);
   const [restoring, setRestoring] = useState<Copy | null>(null);
+  const [fromFile, setFromFile] = useState(false);
   const list = useQuery({
     queryKey: ["backups"],
     queryFn: async () => ok(await api.GET("/api/v1/backups")),
@@ -182,6 +189,20 @@ export function Backups() {
             </Notice>
           </div>
         )}
+        {mayRestore && data?.empty && !restoreRuns && (
+          <div className="flex flex-wrap items-center gap-3 px-4 py-3" data-from-file>
+            <FileUp size={20} aria-hidden className="shrink-0 text-primary" />
+            <p className="min-w-0 flex-1 basis-56 text-sm">
+              <b className="block">المنصة فارغة: استعد نسخة من استضافة سابقة</b>
+              <span className="text-text-muted">
+                ارفع ملف النسخة الذي نزّلته من هناك (<bdi dir="ltr">.ecstbak</bdi>) واكتب كلمة سره.
+              </span>
+            </p>
+            <Button variant="secondary" className="min-h-11 px-4" onClick={() => setFromFile(true)}>
+              استعادة من ملف
+            </Button>
+          </div>
+        )}
         <ul aria-busy={list.isLoading} className="divide-y divide-border-soft">
           {copies.slice(0, 10).map((copy) => (
             <li
@@ -240,9 +261,16 @@ export function Backups() {
             بعدها، وتتوقف المنصة دقائق. تُحفظ قبلها نسخة من الوضع الحالي، فتستطيع التراجع. لمدير
             النظام وحده.
           </p>
+          {mayRestore && data && !data.empty && (
+            <p>
+              <b className="text-text">استعادة ملف من استضافة أخرى</b> متاحة على منصة فارغة فقط (بلا
+              طلاب)؛ هنا تُستعاد نسخ هذا الخادم وحدها.
+            </p>
+          )}
         </div>
       </Card>
       {downloading && <DownloadDialog copy={downloading} onClose={() => setDownloading(null)} />}
+      {fromFile && <FileRestoreDialog onClose={() => setFromFile(false)} />}
       {restoring && data && (
         <RestoreDialog copy={restoring} now={data.now} onClose={() => setRestoring(null)} />
       )}
@@ -422,6 +450,119 @@ function RestoreDialog({ copy, now, onClose }: { copy: Copy; now: Counts; onClos
       {problem && <Notice>{problem}</Notice>}
       <p className="text-xs leading-6 text-text-muted">
         تُسجَّل الاستعادة في سجل العمليات، ويصل تنبيه بها إلى مديري النظام.
+      </p>
+    </FormDialog>
+  );
+}
+
+/** The file, its own password and the admin's; the file goes up in chunks with its progress
+ * shown, then the restore is asked. A wrong file password keeps what was uploaded. */
+function FileRestoreDialog({ onClose }: { onClose: () => void }) {
+  const client = useQueryClient();
+  const [file, setFile] = useState<File | null>(null);
+  const [uploaded, setUploaded] = useState<string | null>(null);
+  const [progress, setProgress] = useState<UploadProgress | null>(null);
+  const [filePassword, setFilePassword] = useState("");
+  const [password, setPassword] = useState("");
+  const [problem, setProblem] = useState("");
+  const ask = useMutation({
+    mutationFn: async () => {
+      const id = uploaded ?? (await uploadBackup(file!, setProgress));
+      setUploaded(id);
+      const { data, error, response } = await api.POST(
+        "/api/v1/backups/uploads/{upload_id}/restore",
+        {
+          params: { path: { upload_id: id } },
+          body: { password, file_password: filePassword },
+        },
+      );
+      if (!data) {
+        // The upload is gone (not a backup, or it ended): the file is sent again next time.
+        if (response.status === 404 || (error as { code?: string })?.code === "not_a_backup")
+          setUploaded(null);
+        throw error;
+      }
+    },
+    onSuccess: () => {
+      asked.set();
+      void client.invalidateQueries({ queryKey: ["backups"] });
+      onClose();
+    },
+    onError: (error) =>
+      setProblem(problemMessage(error, "تعذّر رفع الملف. تحقق من الاتصال ثم أعد المحاولة.")),
+  });
+  const submit = () => {
+    if (!file) return setProblem("اختر ملف النسخة أولًا.");
+    if (!filePassword) return setProblem("اكتب كلمة سر الملف.");
+    if (!password) return setProblem("اكتب كلمة مرورك في المنصة للتأكيد.");
+    setProblem("");
+    ask.mutate();
+  };
+  const sending = ask.isPending && !uploaded;
+  return (
+    <FormDialog
+      title="استعادة نسخة من ملف"
+      submit={ask.isPending ? (sending ? "جارٍ الرفع…" : "جارٍ الطلب…") : "رفع واستعادة"}
+      tone="danger"
+      busy={ask.isPending}
+      onSubmit={submit}
+      onClose={onClose}
+    >
+      <Notice tone="warning">
+        تُستبدل بيانات هذه المنصة كلها بما في الملف. <b>الحساب الذي تعمل به الآن يزول معها</b>: ادخل
+        بعد الاستعادة بحسابك في النسخة.
+      </Notice>
+      <label className="flex min-h-11 cursor-pointer flex-wrap items-center gap-x-3 gap-y-1 rounded-xl border border-border px-4 py-2.5 text-sm focus-within:shadow-[0_0_0_2px_var(--focus-ring)]">
+        <FileUp size={18} aria-hidden className="shrink-0 text-primary" />
+        <span className="min-w-0 flex-1">
+          <b className="block">ملف النسخة</b>
+          <bdi dir="ltr" className="block truncate text-xs text-text-muted">
+            {file ? `${file.name} · ${fmtSize(file.size)}` : "ecst-backup-….ecstbak"}
+          </bdi>
+        </span>
+        <span className="font-semibold text-primary">{file ? "تغيير" : "اختيار"}</span>
+        <input
+          type="file"
+          accept=".ecstbak"
+          aria-label="ملف النسخة"
+          className="sr-only"
+          disabled={ask.isPending}
+          onChange={(event) => {
+            setFile(event.target.files?.[0] ?? null);
+            setUploaded(null);
+            setProgress(null);
+            setProblem("");
+          }}
+        />
+      </label>
+      {file && (sending || uploaded) && (
+        <UploadStatus
+          upload={
+            uploaded
+              ? { state: "done", name: file.name, message: "وصل الملف كاملًا" }
+              : { state: "uploading", name: file.name, progress }
+          }
+        />
+      )}
+      <Card>
+        <PasswordField
+          label="كلمة سر الملف"
+          hint="التي كُتبت عند تنزيله."
+          autoComplete="off"
+          value={filePassword}
+          onChange={(event) => setFilePassword(event.target.value)}
+        />
+        <PasswordField
+          label="كلمة مرورك في المنصة"
+          autoComplete="current-password"
+          value={password}
+          onChange={(event) => setPassword(event.target.value)}
+        />
+      </Card>
+      {problem && <Notice>{problem}</Notice>}
+      <p className="text-xs leading-6 text-text-muted">
+        يُرفع الملف على دفعات: إن انقطع الاتصال أُعيدت الدفعة وحدها. أبقِ هذه الصفحة مفتوحة حتى
+        يكتمل.
       </p>
     </FormDialog>
   );

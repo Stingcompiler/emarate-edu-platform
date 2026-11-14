@@ -325,3 +325,110 @@ def test_the_platform_is_closed_only_while_maintenance_is_held(api, make_user, s
         assert client.get("/api/public/health").status_code == 200
         assert api().get("/api/public/maintenance").data == {"maintenance": True}
     assert client.get("/api/v1/me").status_code == 200
+
+
+# ─── A file from another installation, on an empty platform (owner, 2026-11-14) ─────────
+
+FILE_PHRASE = "a-long-file-password"
+
+
+def _packed(stamp, tmp_path):
+    """The copy as the file an admin downloads, on disk, and the key its password makes."""
+    path = tmp_path / "brought.ecstbak"
+    with path.open("wb") as out:
+        for piece in backups.package(stamp, backups.package_key(FILE_PHRASE)):
+            out.write(piece)
+    with path.open("rb") as handle:
+        _, key = backups.package_unlock(handle, FILE_PHRASE)
+    return path, key
+
+
+def test_an_uploaded_file_is_restored_on_an_empty_platform_only(
+    place, fake_database, db, tmp_path, make_student, it_program
+):
+    stamp = _copy()
+    _later(place)
+    path, key = _packed(stamp, tmp_path)
+    result = restore.run(stamp, None, "admin@x.test", upload=path, key=key)
+    assert result["state"] == "done" and result["source"] == "file", result
+    assert fake_database == [b"PGDMP-fake-dump"]
+    assert (place / "public/logo.png").read_bytes() == b"logo-then"
+    assert not path.exists()  # a whole college is not left lying in the uploads folder
+    from audit.models import AuditLog
+
+    assert AuditLog.objects.get(action="backup.restore").new["source"] == "file"
+
+    # With a student on the platform the same file is refused, and removed all the same.
+    path, key = _packed(stamp, tmp_path)
+    make_student(it_program, "26-IT-0001")
+    refused = restore.run(stamp, None, "admin@x.test", upload=path, key=key)
+    assert refused["state"] == "failed" and refused["code"] == "not_empty"
+    assert len(fake_database) == 1 and not path.exists()
+
+
+def test_an_uploaded_file_without_its_key_or_cut_short_is_refused(
+    place, fake_database, db, tmp_path
+):
+    stamp = _copy()
+    path, key = _packed(stamp, tmp_path)
+    data = path.read_bytes()
+    path.write_bytes(data[:-30])
+    assert restore.run(stamp, upload=path, key=key)["code"] == "corrupt"
+    path.write_bytes(data)
+    assert restore.run(stamp, upload=path, key=None)["code"] == "corrupt"  # the key expired
+    assert fake_database == [] and maintenance.state() is None
+
+
+@pytest.mark.django_db(transaction=True)
+def test_a_real_move_to_another_host_on_postgresql(
+    place, settings, tmp_path, api, make_user, make_student, it_program, django_user_model
+):
+    """The whole move, with the real tools: the old host's copy is downloaded as a file; on
+    the «new host» — other rows, other files, another server key — a first admin uploads it
+    in chunks through the API and restores it with the file's password alone."""
+    if not _postgres_tools_match():
+        pytest.skip("needs PostgreSQL and client tools no older than the server")
+    from accounts.rbac import Role
+    from conftest import PASSWORD
+    from students.models import StudentRecord
+
+    # The old host.
+    make_user(Role.TEACHER, email="teacher@old.test")
+    make_student(it_program, "26-IT-0042")
+    packed = b"".join(backups.package(_copy(), backups.package_key(FILE_PHRASE)))
+
+    # The new host: nothing of the college, its own key, its own first admin.
+    StudentRecord.objects.all().delete()
+    django_user_model.objects.all().delete()
+    (place / "public/logo.png").write_bytes(b"the new host's placeholder")
+    settings.BACKUP_ENCRYPTION_KEY = "the-new-server"
+    settings.BACKUP_UPLOAD_DIR = str(tmp_path / "uploads")
+    first = make_user(Role.SYSTEM_ADMIN, email="first@new.test")
+    client = api(first)
+
+    uploads = "/api/v1/backups/uploads"
+    upload = client.post(uploads, {"size": len(packed)}, format="json").data["id"]
+    for at in range(0, len(packed), 64 * 1024):
+        sent = client.put(
+            f"{uploads}/{upload}?offset={at}",
+            packed[at : at + 64 * 1024],
+            content_type="application/octet-stream",
+        )
+        assert sent.status_code == 200, sent.data
+    asked = client.post(
+        f"{uploads}/{upload}/restore",
+        {"password": PASSWORD, "file_password": FILE_PHRASE},
+        format="json",
+    )
+    assert asked.status_code == 202, asked.data
+
+    result = restore.state()
+    assert result["state"] == "done" and result["source"] == "file", result
+    # The college is here; the installation's own first admin went with the rows it replaced.
+    emails = set(django_user_model.objects.values_list("email", flat=True))
+    assert "teacher@old.test" in emails and "first@new.test" not in emails
+    assert StudentRecord.objects.filter(university_number="26-IT-0042").exists()
+    assert (place / "public/logo.png").read_bytes() == b"logo-then"
+    assert not list((tmp_path / "uploads").glob("*.part"))
+    # What the new host held before is kept, under the new server's own key.
+    assert backups.info(result["kept_before"])["counts"]["students"] == 0
