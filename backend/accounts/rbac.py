@@ -252,11 +252,18 @@ CAPABILITIES: dict[str, frozenset[Role]] = {
 # Approves (or refuses) a request to delete an announcement or a sent notification.
 CAPABILITIES["deletions.approve"] = frozenset({R.SYSTEM_ADMIN})
 
-# The system supervisor holds what the admin holds, but no capability that deletes; and the
+# A backup leaves the server as one file holding everything, and a restore replaces
+# everything: the system admin's alone, not the supervisor's (owner, 2026-11-14).
+CAPABILITIES["backups.download"] = frozenset({R.SYSTEM_ADMIN})
+CAPABILITIES["backups.restore"] = frozenset({R.SYSTEM_ADMIN})
+ADMIN_ONLY = frozenset({"backups.download", "backups.restore"})
+
+# The system supervisor holds what the admin holds, but no capability that deletes and none
+# of ADMIN_ONLY; and the
 # DELETE method never counts its role (scope_for(..., deleting=True)).
 DELETING = frozenset(name for name in CAPABILITIES if name.endswith(".delete"))
 for _name, _roles in list(CAPABILITIES.items()):
-    if R.SYSTEM_ADMIN in _roles and _name not in DELETING:
+    if R.SYSTEM_ADMIN in _roles and _name not in DELETING | ADMIN_ONLY:
         CAPABILITIES[_name] = _roles | {R.SYSTEM_SUPERVISOR}
 
 # The programme's head and supervisor hold, inside their programme, what the department's

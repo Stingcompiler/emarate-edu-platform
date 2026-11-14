@@ -196,3 +196,137 @@ def test_backups_on_the_server_disk_are_readable_by_their_owner_alone(
     assert stored
     for name in stored:
         assert stat.S_IMODE(os.stat(disk.path(name)).st_mode) == 0o600
+
+
+# ─── The downloadable file (owner, 2026-11-14) ──────────────────────────────────────────
+
+
+FILE_PHRASE = "a-long-file-password"
+
+
+def _package(stamp):
+    return b"".join(backups.package(stamp, backups.package_key(FILE_PHRASE)))
+
+
+@pytest.fixture
+def own_storage(settings, tmp_path):
+    """A storage of this test's own: the shared one keeps earlier tests' copies, and a second
+    copy of the same second is stored under another name."""
+    settings.STORAGES = {
+        **settings.STORAGES,
+        "default": {
+            "BACKEND": "django.core.files.storage.FileSystemStorage",
+            "OPTIONS": {"location": str(tmp_path / "stored")},
+        },
+    }
+
+
+def _stamp_of(name):
+    return name.rsplit("-", 1)[-1].split(".", 1)[0]
+
+
+@pytest.fixture
+def copy_with_files(fake_dump, own_storage, db, settings, tmp_path, monkeypatch):
+    settings.MEDIA_BACKEND = "local"
+    settings.MEDIA_ROOT = tmp_path / "media"
+    (tmp_path / "media/public").mkdir(parents=True)
+    (tmp_path / "media/public/cover.jpg").write_bytes(b"cover-picture-bytes")
+    monkeypatch.setattr(backups, "CHUNK", 4)  # several records for each part
+    return _stamp_of(backups.create(keep=8)[0])
+
+
+def test_a_copy_notes_what_the_platform_held(copy_with_files, django_user_model):
+    details = backups.info(copy_with_files)
+    assert details["stamp"] == copy_with_files and details["format"] == 1
+    assert details["counts"] == {"users": 0, "students": 0, "courses": 0, "applications": 0}
+    django_user_model.objects.create_user(email="a@x.test", password="x", full_name_ar="أ")
+    assert backups.snapshot()["users"] == 1  # today's number, beside the copy's
+    assert backups.info("20000101T000000Z") is None  # a copy older than the note
+
+
+def test_the_downloaded_file_opens_with_its_password_alone(copy_with_files, settings, tmp_path):
+    import io
+    import tarfile
+
+    packed = _package(copy_with_files)
+    assert packed.startswith(backups.PACKAGE_MAGIC)
+    # Whole markers, not three letters: the file is base64 text, where «jpg» turns up by chance.
+    assert b"PGDMP-fake-dump" not in packed and b"cover-picture-bytes" not in packed
+    # Another server: its own key, which never made this file.
+    settings.BACKUP_ENCRYPTION_KEY = "another-server"
+    assert backups.read_package(io.BytesIO(packed), FILE_PHRASE)["counts"] is not None
+    database, files = tmp_path / "db.dump", tmp_path / "media.tar.gz"
+    details = backups.read_package(io.BytesIO(packed), FILE_PHRASE, database, files)
+    assert details["stamp"] == copy_with_files and details["files"] is True
+    assert database.read_bytes() == b"PGDMP-fake-dump"
+    with tarfile.open(files) as archive:
+        assert archive.getnames() == ["public/cover.jpg"]
+
+
+def test_a_copy_without_files_packs_the_database_alone(fake_dump, own_storage, db, tmp_path):
+    import io
+
+    stamp = _stamp_of(backups.create(keep=8)[0])
+    database, files = tmp_path / "db.dump", tmp_path / "media.tar.gz"
+    details = backups.read_package(io.BytesIO(_package(stamp)), FILE_PHRASE, database, files)
+    assert details["files"] is False
+    assert database.read_bytes() == b"PGDMP-fake-dump" and not files.exists()
+
+
+def test_a_wrong_password_or_a_changed_file_opens_nothing(copy_with_files, tmp_path):
+    import io
+
+    packed = _package(copy_with_files)
+    database, files = tmp_path / "db.dump", tmp_path / "media.tar.gz"
+    with pytest.raises(backups.WrongPassword):
+        backups.read_package(io.BytesIO(packed), "another-password", database, files)
+
+    def records(data):
+        at, out = backups._PACKAGE_HEAD, []
+        while at < len(data):
+            size = int.from_bytes(data[at : at + 4], "big")
+            out.append(data[at : at + 4 + size])
+            at += 4 + size
+        return out
+
+    head, parts = packed[: backups._PACKAGE_HEAD], records(packed)
+    broken = {
+        "not a backup file": b"PK\x03\x04" + packed[4:],
+        "cut inside a record": packed[:-9],
+        "end record missing": head + b"".join(parts[:-1]),
+        "a record dropped": head + b"".join(parts[:2] + parts[3:]),
+        "records swapped": head + b"".join([parts[0], parts[2], parts[1], *parts[3:]]),
+        "a made-up work factor": packed[:8] + bytes([60]) + packed[9:],
+    }
+    for case, data in broken.items():
+        with pytest.raises(backups.BackupCorrupt):
+            backups.read_package(io.BytesIO(data), FILE_PHRASE, database, files)
+        assert not database.exists() and not files.exists(), case
+    # The details alone need the first record only, and the password all the same.
+    with pytest.raises(backups.WrongPassword):
+        backups.read_package(io.BytesIO(packed), "another-password")
+
+
+def test_a_copy_that_is_gone_is_refused_before_the_first_byte(fake_dump, db):
+    with pytest.raises(FileNotFoundError):
+        backups.package("20000101T000000Z", backups.package_key(FILE_PHRASE))
+
+
+def test_development_copies_the_sqlite_file(settings, tmp_path, monkeypatch):
+    """Development runs on SQLite: the copy is the database file, so the flow needs no services."""
+    import sqlite3
+
+    live = tmp_path / "live.sqlite3"
+    with sqlite3.connect(live) as connection:
+        connection.execute("create table t (v text)")
+        connection.execute("insert into t values ('kept')")
+    # Undone after the test: the dictionary is shared, a plain assignment would outlive it.
+    monkeypatch.setitem(
+        settings.DATABASES,
+        "default",
+        {**settings.DATABASES["default"], "ENGINE": "django.db.backends.sqlite3", "NAME": live},
+    )
+    out = tmp_path / "copy.sqlite3"
+    backups.dump_to(out)
+    with sqlite3.connect(out) as connection:
+        assert connection.execute("select v from t").fetchall() == [("kept",)]

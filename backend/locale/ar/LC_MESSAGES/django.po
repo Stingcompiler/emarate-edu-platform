@@ -1778,3 +1778,15 @@ msgstr "قسم غير صالح."
 #: reports/views.py
 msgid "Saved reports are kept by department."
 msgstr "التقارير المحفوظة تُحفظ للقسم كله، لا لبرنامج منه."
+
+#: organization/backups.py
+msgid "The password is wrong."
+msgstr "كلمة المرور غير صحيحة."
+
+#: organization/backups.py
+msgid "This backup is no longer kept."
+msgstr "هذه النسخة لم تعد محفوظة."
+
+#: organization/backups.py
+msgid "This download link has ended. Ask for the file again."
+msgstr "انتهت صلاحية رابط التنزيل. اطلب الملف من جديد."

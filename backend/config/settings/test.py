@@ -53,3 +53,5 @@ STORAGES = {
     "default": {"BACKEND": "django.core.files.storage.InMemoryStorage"},
     "public": {"BACKEND": "django.core.files.storage.InMemoryStorage"},
 }
+
+BACKUP_SCRYPT_LOG_N = 4  # the real factor takes half a second and 128 MB per key

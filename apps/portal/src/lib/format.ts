@@ -19,6 +19,21 @@ export function fmtDate(value: string | null | undefined): string {
   return Number.isNaN(d.getTime()) ? "—" : fullDate.format(d);
 }
 
+const fullDateTime = new Intl.DateTimeFormat("ar-u-nu-latn", {
+  day: "numeric",
+  month: "long",
+  year: "numeric",
+  hour: "numeric",
+  minute: "2-digit",
+});
+
+/** The exact moment, where «قبل 3 ساعات» would not do: which backup, which restore. */
+export function fmtDateTime(value: string | null | undefined): string {
+  if (!value) return "—";
+  const d = new Date(value);
+  return Number.isNaN(d.getTime()) ? "—" : fullDateTime.format(d);
+}
+
 /**
  * Past: "قبل 12 دقيقة", "قبل 3 ساعات" today, "أمس 3:05 م", the weekday this week, else the
  * date. Future (a due or opening time): "بعد 20 دقيقة", "بعد 3 ساعات" today, "غدًا 10:00 ص",
@@ -89,6 +104,7 @@ const noun = (one: string, two: string, few: string, many: string): Noun => ({
 
 /** Nouns the portal counts. Add here rather than writing number + noun by hand. */
 export const N = {
+  account: noun("حساب", "حسابان", "حسابات", "حسابًا"),
   application: noun("طلب", "طلبان", "طلبات", "طلبًا"),
   acknowledgement: noun("إقرار", "إقراران", "إقرارات", "إقرارًا"),
   assignment: noun("واجب", "واجبان", "واجبات", "واجبًا"),

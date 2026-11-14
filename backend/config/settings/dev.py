@@ -46,6 +46,9 @@ STORAGES = {
 
 CELERY_TASK_ALWAYS_EAGER = True
 
+# «النسخ الاحتياطية» work here too (a copy of the SQLite file), so the page can be tried.
+BACKUP_ENCRYPTION_KEY = env("BACKUP_ENCRYPTION_KEY", "dev-backup-key-not-for-production")
+
 MAILERS = {
     "default": {
         "BACKEND": "core.mail.DevEmailBackend",

@@ -137,6 +137,7 @@ const ACTIONS: Record<string, string> = {
   "settings.update": "عدّل إعدادات النظام",
   "reports.snapshot": "حفظ لقطة تقرير",
   "backup.create": "أنشأ نسخة احتياطية",
+  "backup.download": "نزّل نسخة احتياطية كاملة",
   "page.create": "أنشأ صفحة",
   "page.update": "عدّل صفحة",
   "page.delete": "حذف صفحة",
