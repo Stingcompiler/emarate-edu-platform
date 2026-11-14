@@ -11,7 +11,13 @@ Older rounds: `.claude/handoff/archive/2026-10-24_to_2026-11-02.md`, `.claude/ha
   download, not the server key; (2) download and restore are the **system admin's alone**
   (`backups.download`, `backups.restore` in `rbac.ADMIN_ONLY` — the supervisor is not added;
   two new matrix rows); (3) restoring an **uploaded** file only on an empty platform (no
-  students). Three phases, one PR each:
+  students). Three phases, one PR each — **all merged (#303, #304, #305) and deployed
+  2026-11-14** (checked on public pages only: `/api/public/maintenance` answers, the three
+  endpoints answer 401 to an anonymous caller, health ok; portal bundle `index-DpFUA77y.js`).
+  **Not tried on production by me** (no sign-in there): the owner's first download and, if he
+  wants, a restore on the demo are his to press. **Still open for the owner:** an automatic
+  copy off the server (the button depends on someone remembering); a real move drill on the
+  new host before any DNS switch (runbook §5).
   1. **Download — `feat/backup-download`.** `core/backups.py`: `package()`/`read_package()`
      (format `ECSTPKG1`: scrypt salt + sealed records I/D/F/E), `iter_plain`, an
      `ecst-info-<stamp>.json.enc` note of counts beside each copy, SQLite copies in dev
