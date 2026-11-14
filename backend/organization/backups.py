@@ -2,16 +2,22 @@
 downloaded as a single file, and one restored over the platform (owner, 2026-11-05 and
 2026-11-14)."""
 
+import fcntl
+import os
+import re
 import secrets
+import shutil
 from datetime import UTC, datetime
 
 from django.core.cache import cache
 from django.db import transaction
 from django.http import StreamingHttpResponse
 from django.utils.translation import gettext
-from drf_spectacular.utils import extend_schema
+from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework import serializers
 from rest_framework.exceptions import NotFound
+from rest_framework.parsers import BaseParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -58,6 +64,7 @@ class RestoreStateSerializer(serializers.Serializer):
     error = serializers.CharField(allow_blank=True)
     code = serializers.CharField(allow_blank=True)
     kept_before = serializers.CharField(allow_null=True)
+    source = serializers.ChoiceField(choices=["kept", "file"])
 
 
 class BackupsSerializer(serializers.Serializer):
@@ -67,6 +74,7 @@ class BackupsSerializer(serializers.Serializer):
     copies = BackupCopySerializer(many=True)
     now = BackupCountsSerializer()
     restore = RestoreStateSerializer(allow_null=True)
+    empty = serializers.BooleanField()
 
 
 def _stamp(name: str):
@@ -100,7 +108,7 @@ def _restore_state() -> dict | None:
     if not found:
         return None
     blank = {"step": "", "started": None, "finished": None, "error": "", "code": ""}
-    return {**blank, "kept_before": None, **found}
+    return {**blank, "kept_before": None, "source": "kept", **found}
 
 
 @extend_schema(tags=["system"])
@@ -144,6 +152,8 @@ class BackupsView(APIView):
                     "copies": newest,
                     "now": backups.snapshot(),
                     "restore": _restore_state(),
+                    # No student yet: a backup file from another installation may be restored.
+                    "empty": backups.platform_is_empty(),
                 }
             ).data
         )
@@ -260,6 +270,45 @@ class BackupFileView(APIView):
         return response
 
 
+def _queued(stamp: str, source: str) -> dict:
+    """«Asked for, not started yet», where the page looks for the restore's state."""
+    from core import restore
+
+    waiting = {
+        "state": "queued",
+        "stamp": stamp,
+        "step": "",
+        "started": None,
+        "finished": None,
+        "error": "",
+        "code": "",
+        "kept_before": None,
+        "source": source,
+    }
+    cache.set(restore.STATE, waiting, timeout=3600)
+    return waiting
+
+
+def _ready_to_restore(user) -> None:
+    """The server has the tools, and no copy is being made or restored (the same switch as
+    «إنشاء نسخة الآن»)."""
+    from core import restore
+    from core.tasks import RUNNING
+
+    missing = restore.missing_tools()
+    if missing:
+        raise Conflict(
+            gettext("The server lacks the database tools a restore needs: %(tools)s.")
+            % {"tools": ", ".join(missing)},
+            code="no_tools",
+        )
+    if not cache.add(RUNNING, user.pk, timeout=3600):
+        raise Conflict(
+            gettext("A backup is being made or restored; wait for it to finish."),
+            code="running",
+        )
+
+
 class BackupRestoreSerializer(serializers.Serializer):
     stamp = serializers.RegexField(r"^\d{8}T\d{6}Z$")
     password = serializers.CharField(write_only=True, trim_whitespace=False)
@@ -280,8 +329,7 @@ class BackupRestoreView(APIView):
     def post(self, request):
         from django.core.files.storage import default_storage
 
-        from core import restore
-        from core.tasks import RUNNING, restore_backup
+        from core.tasks import restore_backup
 
         data = BackupRestoreSerializer(data=request.data)
         data.is_valid(raise_exception=True)
@@ -289,37 +337,211 @@ class BackupRestoreView(APIView):
         check_own_password(request.user, data.validated_data["password"])
         if not default_storage.exists(backups.names_of(stamp)["database"]):
             raise NotFound(gettext("This backup is no longer kept."))
-        missing = restore.missing_tools()
-        if missing:
-            raise Conflict(
-                gettext("The server lacks the database tools a restore needs: %(tools)s.")
-                % {"tools": ", ".join(missing)},
-                code="no_tools",
-            )
-        # The same switch as «إنشاء نسخة الآن»: never a copy and a restore at once.
-        if not cache.add(RUNNING, request.user.pk, timeout=3600):
-            raise Conflict(
-                gettext("A backup is being made or restored; wait for it to finish."),
-                code="running",
-            )
+        _ready_to_restore(request.user)
         record(
             RequestMeta.from_request(request),
             "backup.restore_request",
             request.user,
             new={"backup": stamp},
         )
-        waiting = {
-            "state": "queued",
-            "stamp": stamp,
-            "step": "",
-            "started": None,
-            "finished": None,
-            "error": "",
-            "code": "",
-            "kept_before": None,
-        }
-        cache.set(restore.STATE, waiting, timeout=3600)
+        waiting = _queued(stamp, "kept")
         actor = (request.user.pk, request.user.email)
         # After this request's own transaction: the restore replaces the very rows it wrote.
         transaction.on_commit(lambda: restore_backup.delay(stamp, *actor))
+        return Response(RestoreStateSerializer(waiting).data, status=202)
+
+
+# ─── A backup file from another installation, on an empty platform ──────────────────────
+
+CHUNK_MAX = 8 * 1024 * 1024
+UPLOAD_SECONDS = 24 * 3600
+
+
+class OctetStreamParser(BaseParser):
+    """One chunk of a file as the request's body."""
+
+    media_type = "application/octet-stream"
+
+    def parse(self, stream, media_type=None, parser_context=None):
+        return stream.read(CHUNK_MAX + 1)
+
+
+class BackupUploadStartSerializer(serializers.Serializer):
+    size = serializers.IntegerField(min_value=1)
+
+
+class BackupUploadSerializer(serializers.Serializer):
+    id = serializers.CharField()
+    size = serializers.IntegerField()
+    received = serializers.IntegerField()
+    chunk = serializers.IntegerField()
+
+
+class BackupUploadRestoreSerializer(serializers.Serializer):
+    password = serializers.CharField(write_only=True, trim_whitespace=False)
+    file_password = serializers.CharField(write_only=True, trim_whitespace=False, max_length=128)
+
+
+def _only_when_empty() -> None:
+    if not backups.platform_is_empty():
+        raise Conflict(
+            gettext(
+                "An uploaded backup file is restored only on a platform with no students. "
+                "Here, restore one of the server's own copies."
+            ),
+            code="not_empty",
+        )
+
+
+def _upload(request, upload_id: str):
+    """This admin's unfinished upload and its file, or 404."""
+    from core import restore
+
+    found = cache.get(f"backup-upload:{upload_id}")
+    if not found or found["user"] != request.user.pk:
+        raise NotFound(gettext("This upload has ended. Choose the file again."))
+    path = restore.upload_dir() / f"{upload_id}.part"
+    if not path.is_file():
+        raise NotFound(gettext("This upload has ended. Choose the file again."))
+    return found, path
+
+
+def _upload_state(upload_id: str, found: dict, path) -> dict:
+    return {
+        "id": upload_id,
+        "size": found["size"],
+        "received": path.stat().st_size,
+        "chunk": CHUNK_MAX // 2,
+    }
+
+
+@extend_schema(tags=["system"])
+class BackupUploadsView(APIView):
+    """«استعادة من ملف», step one: say how large the file is. Only on an empty platform (no
+    student): there a file brought from the previous host, with its password, is how the
+    platform moves; anywhere else whoever holds a file would decide every row and every admin
+    account. The system admin's alone. The file then arrives in chunks, so a weak connection
+    resends one chunk, not the whole college."""
+
+    permission_classes = [IsAuthenticated, capability("backups.restore")]
+
+    @extend_schema(request=BackupUploadStartSerializer, responses={201: BackupUploadSerializer})
+    def post(self, request):
+        from core import restore
+
+        data = BackupUploadStartSerializer(data=request.data)
+        data.is_valid(raise_exception=True)
+        _only_when_empty()
+        restore.purge_uploads()
+        folder = restore.upload_dir()
+        size = data.validated_data["size"]
+        if shutil.disk_usage(folder).free < size * 16:
+            raise Conflict(
+                gettext("There is not enough free disk space on the server to restore."),
+                code="space",
+            )
+        upload_id = secrets.token_urlsafe(24)
+        path = folder / f"{upload_id}.part"
+        path.touch(mode=0o600)
+        found = {"user": request.user.pk, "size": size}
+        cache.set(f"backup-upload:{upload_id}", found, timeout=UPLOAD_SECONDS)
+        return Response(
+            BackupUploadSerializer(_upload_state(upload_id, found, path)).data, status=201
+        )
+
+
+@extend_schema(tags=["system"])
+class BackupUploadView(APIView):
+    """One chunk, appended where the file ends. ``offset`` is where the sender thinks that
+    is; when it is wrong (a chunk sent twice, or lost) nothing is written and the answer says
+    how much has arrived, for the sender to go on from there."""
+
+    permission_classes = [IsAuthenticated, capability("backups.restore")]
+    parser_classes = [OctetStreamParser]
+
+    @extend_schema(
+        request={"application/octet-stream": OpenApiTypes.BINARY},
+        parameters=[OpenApiParameter("offset", int, required=True)],
+        responses={200: BackupUploadSerializer, 409: BackupUploadSerializer},
+    )
+    def put(self, request, upload_id: str):
+        found, path = _upload(request, upload_id)
+        chunk = request.data if isinstance(request.data, bytes) else b""
+        try:
+            offset = int(request.query_params.get("offset", ""))
+        except ValueError:
+            raise Invalid({"offset": [gettext("Enter a whole number.")]}, code="invalid") from None
+        # One writer at a time: a chunk sent again while its first sending is still being
+        # written must not land twice.
+        with path.open("ab") as handle:
+            fcntl.flock(handle, fcntl.LOCK_EX)
+            have = handle.seek(0, os.SEEK_END)
+            too_much = len(chunk) > CHUNK_MAX or have + len(chunk) > found["size"]
+            if offset == have and chunk and not too_much:
+                handle.write(chunk)
+                wrote = True
+            else:
+                wrote = False
+        if not wrote:
+            return Response(
+                BackupUploadSerializer(_upload_state(upload_id, found, path)).data, status=409
+            )
+        return Response(BackupUploadSerializer(_upload_state(upload_id, found, path)).data)
+
+
+@extend_schema(tags=["system"])
+class BackupUploadRestoreView(APIView):
+    """Step three: the file's password opens it (checked here, before anything is asked of
+    the worker), the admin's own password confirms, and the restore goes the way of a kept
+    copy's (core.restore.run) — refused, again, unless the platform is still empty."""
+
+    permission_classes = [IsAuthenticated, capability("backups.restore")]
+    throttle_classes = [LoginThrottle]
+
+    @extend_schema(request=BackupUploadRestoreSerializer, responses={202: RestoreStateSerializer})
+    def post(self, request, upload_id: str):
+        from core.tasks import restore_backup
+
+        data = BackupUploadRestoreSerializer(data=request.data)
+        data.is_valid(raise_exception=True)
+        check_own_password(request.user, data.validated_data["password"])
+        found, path = _upload(request, upload_id)
+        _only_when_empty()
+        if path.stat().st_size != found["size"]:
+            raise Conflict(gettext("The file has not arrived whole yet."), code="incomplete")
+        try:
+            with path.open("rb") as handle:
+                details, key = backups.package_unlock(handle, data.validated_data["file_password"])
+        except backups.WrongPassword:
+            raise Invalid(
+                {"file_password": [gettext("This is not the password of this file.")]},
+                code="wrong_file_password",
+            ) from None
+        except backups.BackupCorrupt:
+            path.unlink(missing_ok=True)
+            raise Invalid(
+                {"file": [gettext("This is not a backup file of the platform.")]},
+                code="not_a_backup",
+            ) from None
+        stamp = str(details.get("stamp") or "")
+        if not re.fullmatch(r"\d{8}T\d{6}Z", stamp):
+            path.unlink(missing_ok=True)
+            raise Invalid(
+                {"file": [gettext("This is not a backup file of the platform.")]},
+                code="not_a_backup",
+            )
+        _ready_to_restore(request.user)
+        cache.delete(f"backup-upload:{upload_id}")
+        record(
+            RequestMeta.from_request(request),
+            "backup.restore_request",
+            request.user,
+            new={"backup": stamp, "source": "file"},
+        )
+        waiting = _queued(stamp, "file")
+        # The key waits in the cache for the worker; the task's arguments name it only.
+        handle_name = f"backup-upload-key:{upload_id}"
+        cache.set(handle_name, key, timeout=3600)
+        args = (stamp, request.user.pk, request.user.email, str(path), handle_name)
+        transaction.on_commit(lambda: restore_backup.delay(*args))
         return Response(RestoreStateSerializer(waiting).data, status=202)

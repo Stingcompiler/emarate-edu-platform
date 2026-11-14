@@ -114,6 +114,17 @@ urlpatterns = [
     path("backups/download", backup_views.BackupDownloadView.as_view(), name="backup-download"),
     path("backups/file/<str:ticket>", backup_views.BackupFileView.as_view(), name="backup-file"),
     path("backups/restore", backup_views.BackupRestoreView.as_view(), name="backup-restore"),
+    path("backups/uploads", backup_views.BackupUploadsView.as_view(), name="backup-uploads"),
+    path(
+        "backups/uploads/<str:upload_id>",
+        backup_views.BackupUploadView.as_view(),
+        name="backup-upload",
+    ),
+    path(
+        "backups/uploads/<str:upload_id>/restore",
+        backup_views.BackupUploadRestoreView.as_view(),
+        name="backup-upload-restore",
+    ),
     path(
         "departments/<int:department_id>/members",
         academic.DepartmentMembersView.as_view(),

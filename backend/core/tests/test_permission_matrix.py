@@ -511,6 +511,7 @@ _SS = "content.tests.test_site_staff::"
 _RS = "results.tests.test_results::"
 _SA = "student_affairs.tests.test_student_affairs::"
 _DELETIONS = "content.tests.test_deletion_requests::"
+_BACKUP_UPLOAD = "core.tests.test_backups_page::test_only_the_system_admin_uploads_a_backup"
 COVERED_ELSEWHERE = {
     # Deciding a deletion request; a sender's own notification (owner, 2026-11-05).
     "deletion-request-approve": _DELETIONS + "test_an_author_asks_and_the_supervisor_approves",
@@ -616,6 +617,9 @@ COVERED_ELSEWHERE = {
     "backup-download": "core.tests.test_backups_page::test_only_the_system_admin_downloads",
     "backup-file": "core.tests.test_backups_page::test_only_the_system_admin_downloads",
     "backup-restore": "core.tests.test_backups_page::test_only_the_system_admin_restores",
+    "backup-uploads": _BACKUP_UPLOAD,
+    "backup-upload": _BACKUP_UPLOAD,
+    "backup-upload-restore": _BACKUP_UPLOAD,
     "user-set-active": "accounts.tests.test_accounts::test_set_active",
     "term-set-current": "academic.tests.test_academic::test_set_current_term",
     "report-snapshot-detail": "reports.tests.test_reports::test_snapshots_are_frozen_and_scoped",

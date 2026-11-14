@@ -54,7 +54,13 @@ def create_backup(actor_id: int | None = None) -> list[str]:
 
 
 @shared_task
-def restore_backup(stamp: str, actor_id: int | None = None, actor_email: str = "") -> dict:
+def restore_backup(
+    stamp: str,
+    actor_id: int | None = None,
+    actor_email: str = "",
+    upload: str | None = None,
+    key_handle: str | None = None,
+) -> dict:
     """«استعادة» from the system admin's page (core.restore.run): one at a time, and never
     beside a copy being made — the view holds RUNNING until this ends. A failure tells the
     people who run the platform, like a failed backup."""
@@ -65,7 +71,16 @@ def restore_backup(stamp: str, actor_id: int | None = None, actor_email: str = "
     from core import restore
 
     try:
-        result = restore.run(stamp, actor_id, actor_email)
+        if upload:
+            # The key its password made waited in the cache, not in the task's arguments.
+            from pathlib import Path
+
+            key = cache.get(key_handle) if key_handle else None
+            if key_handle:
+                cache.delete(key_handle)
+            result = restore.run(stamp, actor_id, actor_email, upload=Path(upload), key=key)
+        else:
+            result = restore.run(stamp, actor_id, actor_email)
     finally:
         cache.delete(RUNNING)
     if result.get("state") == "failed" and result.get("code") in ("half", "error"):

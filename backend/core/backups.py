@@ -71,6 +71,14 @@ def snapshot() -> dict:
     return {key: apps.get_model(label).objects.count() for key, label in COUNTED.items()}
 
 
+def platform_is_empty() -> bool:
+    """No student yet: a new installation, the only place a backup file brought from elsewhere
+    may be restored (owner, 2026-11-14) — whoever holds such a file decides every row in it."""
+    from django.apps import apps
+
+    return not apps.get_model("students.StudentRecord").objects.exists()
+
+
 def names_of(stamp: str) -> dict[str, str]:
     """The stored names of one copy's parts."""
     return {
@@ -373,11 +381,6 @@ class WrongPassword(Exception):
     """The password does not open this file."""
 
 
-def _password_box(password: str, salt: bytes, log_n: int) -> Fernet:
-    key = Scrypt(salt=salt, length=32, n=2**log_n, r=8, p=1).derive(password.encode())
-    return Fernet(base64.urlsafe_b64encode(key))
-
-
 def package_key(password: str) -> dict:
     """The file's key, made from its password once (it costs memory and half a second), in a
     shape that can wait in the cache for the download to start — never the password itself."""
@@ -427,19 +430,45 @@ def package(stamp: str, key: dict):
     return stream()
 
 
-def read_package(handle, password: str, database: Path | None = None, files: Path | None = None):
-    """Open a downloaded file with its password. With no targets, only its details are read
-    (the password is checked on the way). With ``database`` (and ``files``), the two parts are
-    written there, chunk by chunk; ``files`` is left absent when the copy carried none.
-    WrongPassword when the password does not open it; BackupCorrupt when it is not a backup
-    file, or is incomplete or changed — and then nothing is left at the targets."""
+def _package_box(handle, password: str | None, key: str | None) -> tuple[Fernet, str]:
+    """The box that opens a downloaded file — from its password, or from the key made of it
+    earlier (``package_unlock``) — and that key."""
     head = handle.read(_PACKAGE_HEAD)
     if len(head) < _PACKAGE_HEAD or not head.startswith(PACKAGE_MAGIC):
         raise BackupCorrupt("This is not a backup file of the platform.")
     log_n = head[len(PACKAGE_MAGIC)]
     if not 1 <= log_n <= 20:  # a made-up header must not ask for all the memory there is
         raise BackupCorrupt("This is not a backup file of the platform.")
-    box = _password_box(password, head[len(PACKAGE_MAGIC) + 1 :], log_n)
+    if key is None:
+        salt = head[len(PACKAGE_MAGIC) + 1 :]
+        derived = Scrypt(salt=salt, length=32, n=2**log_n, r=8, p=1).derive(password.encode())
+        key = base64.urlsafe_b64encode(derived).decode()
+    return Fernet(key.encode()), key
+
+
+def package_unlock(handle, password: str) -> tuple[dict, str]:
+    """The details of a downloaded file and the key its password makes — what the worker is
+    handed instead of the password. WrongPassword / BackupCorrupt as ``read_package``."""
+    _, key = _package_box(handle, password, None)
+    handle.seek(0)
+    return read_package(handle, key=key), key
+
+
+def read_package(
+    handle,
+    password: str | None = None,
+    database: Path | None = None,
+    files: Path | None = None,
+    *,
+    key: str | None = None,
+):
+    """Open a downloaded file with its password (or the key from ``package_unlock``). With
+    no targets, only its details are read (the password is checked on the way). With
+    ``database`` (and ``files``), the two parts are written there, chunk by chunk; ``files``
+    is left absent when the copy carried none. WrongPassword when the password does not open
+    it; BackupCorrupt when it is not a backup file, or is incomplete or changed — and then
+    nothing is left at the targets."""
+    box, _ = _package_box(handle, password, key)
     records = _records(handle)
     try:
         first = box.decrypt(next(records, b""))
