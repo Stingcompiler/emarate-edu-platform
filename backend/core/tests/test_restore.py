@@ -216,6 +216,34 @@ def test_a_copy_from_newer_code_or_another_engine_is_refused(settings, tmp_path,
     assert refused.value.code == "unreadable"
 
 
+def test_settings_the_server_does_not_have_are_left_out_of_the_script(tmp_path):
+    """CI, 2026-11-14: client tools 17 against a 16 server wrote ``SET transaction_timeout``,
+    which the server refused — and with it the whole restore."""
+    script = tmp_path / "restore.sql"
+    rows = (
+        b"COPY public.notes (body) FROM stdin;\n"
+        b"SET transaction_timeout = 0;\n"  # a row that happens to read like a setting
+        b"\\.\n"
+    )
+    script.write_bytes(
+        b"--\n-- PostgreSQL database dump\n--\n\n"
+        b"SET statement_timeout = 0;\n"
+        b"SET transaction_timeout = 0;\n"
+        b"SELECT pg_catalog.set_config('search_path', '', false);\n"
+        b"SET row_security = off;\n\n"
+        b"CREATE TABLE public.notes (body text);\n" + rows
+    )
+    known = {"statement_timeout", "row_security"}
+    assert restore.fit_script(script, known) == ["transaction_timeout"]
+    fitted = script.read_bytes()
+    assert b"SET statement_timeout = 0;\nSELECT pg_catalog" in fitted  # the unknown one is gone
+    assert b"SET row_security = off;" in fitted and fitted.endswith(rows)  # rows untouched
+    # Nothing unknown: the file is not rewritten.
+    before = script.stat().st_mtime_ns
+    assert restore.fit_script(script, known | {"transaction_timeout"}) == []
+    assert script.stat().st_mtime_ns == before
+
+
 def test_development_restores_the_sqlite_file(settings, tmp_path, monkeypatch):
     live, copy = tmp_path / "live.sqlite3", tmp_path / "copy.sqlite3"
     for path, value in ((live, "now"), (copy, "then")):

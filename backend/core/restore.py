@@ -166,6 +166,7 @@ def check_dump(dump: Path) -> None:
 # copy: tables a later migration added would otherwise outlive the restore and break the
 # migrations that follow. A lock held by anyone else for a minute fails the whole restore.
 _EMPTY_THE_SCHEMA = """
+SET client_min_messages = warning;
 SET lock_timeout = '60s';
 DO $$
 DECLARE item record;
@@ -197,8 +198,55 @@ SET lock_timeout = 0;
 """
 
 
+_SETTING = re.compile(rb"^SET ([a-z_.]+) = ")
+
+
+def fit_script(script: Path, known: set[str]) -> list[str]:
+    """Drop from the head of the SQL script the settings this server does not have. The
+    client tools may be newer than the server (they write ``SET transaction_timeout`` since
+    17, which a 16 server refuses, failing the whole restore). Only the head is looked at —
+    below it are the rows themselves, which no rule about lines may touch. Returns the names
+    dropped; the file is rewritten only when there are any."""
+    head, dropped, kept = 0, [], []
+    with script.open("rb") as source:
+        for line in source:
+            text = line.strip()
+            setting = _SETTING.match(text)
+            preamble = (
+                not text
+                or text.startswith(b"--")
+                or setting
+                or text.startswith(b"SELECT pg_catalog.set_config(")
+            )
+            if not preamble:
+                break
+            head += len(line)
+            if setting and setting.group(1).decode() not in known:
+                dropped.append(setting.group(1).decode())
+            else:
+                kept.append(line)
+        if not dropped:
+            return []
+        fitted = script.with_suffix(".fitted")
+        with fitted.open("wb") as target:
+            target.writelines(kept)
+            source.seek(head)
+            shutil.copyfileobj(source, target, 8 * 1024 * 1024)
+    fitted.replace(script)
+    return dropped
+
+
+def _server_settings() -> set[str]:
+    from django.db import connection
+
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT name FROM pg_settings")
+        return {name for (name,) in cursor.fetchall()}
+
+
 def _postgres_restore(dump: Path, work: Path) -> None:
     script, empty = work / "restore.sql", work / "empty.sql"
+    known = _server_settings()
     made = subprocess.run(  # noqa: S603
         [
             shutil.which("pg_restore"),
@@ -212,7 +260,11 @@ def _postgres_restore(dump: Path, work: Path) -> None:
     )
     if made.returncode != 0:
         raise RuntimeError(f"pg_restore: {made.stderr.decode(errors='replace').strip()}")
+    dropped = fit_script(script, known)
+    if dropped:
+        logger.info("restore: settings this server does not have were left out: %s", dropped)
     empty.write_text(_EMPTY_THE_SCHEMA)
+    _close_connections()
     env, target = backups._pg_env_and_args()
     loaded = subprocess.run(  # noqa: S603
         [
@@ -246,13 +298,18 @@ def _sqlite_restore(dump: Path) -> None:
 
 def restore_database(dump: Path, work: Path) -> None:
     """Replace every row with the copy's, or change nothing."""
-    from django.db import connections
-
-    connections.close_all()  # this process holds no lock of its own on what is dropped
     if backups.engine() == "sqlite":
+        _close_connections()
         _sqlite_restore(dump)
     else:
         _postgres_restore(dump, work)
+
+
+def _close_connections() -> None:
+    """This process holds no lock of its own on what is dropped."""
+    from django.db import connections
+
+    connections.close_all()
 
 
 # ─── The uploaded files ─────────────────────────────────────────────────────────────────
