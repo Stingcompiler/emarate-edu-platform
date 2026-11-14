@@ -2,6 +2,8 @@
 downloaded as a single file, and one restored over the platform (owner, 2026-11-05 and
 2026-11-14)."""
 
+import fcntl
+import os
 import re
 import secrets
 import shutil
@@ -469,14 +471,21 @@ class BackupUploadView(APIView):
             offset = int(request.query_params.get("offset", ""))
         except ValueError:
             raise Invalid({"offset": [gettext("Enter a whole number.")]}, code="invalid") from None
-        have = path.stat().st_size
-        too_much = len(chunk) > CHUNK_MAX or have + len(chunk) > found["size"]
-        if offset != have or not chunk or too_much:
+        # One writer at a time: a chunk sent again while its first sending is still being
+        # written must not land twice.
+        with path.open("ab") as handle:
+            fcntl.flock(handle, fcntl.LOCK_EX)
+            have = handle.seek(0, os.SEEK_END)
+            too_much = len(chunk) > CHUNK_MAX or have + len(chunk) > found["size"]
+            if offset == have and chunk and not too_much:
+                handle.write(chunk)
+                wrote = True
+            else:
+                wrote = False
+        if not wrote:
             return Response(
                 BackupUploadSerializer(_upload_state(upload_id, found, path)).data, status=409
             )
-        with path.open("ab") as handle:
-            handle.write(chunk)
         return Response(BackupUploadSerializer(_upload_state(upload_id, found, path)).data)
 
 

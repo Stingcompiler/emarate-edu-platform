@@ -76,7 +76,8 @@ def restore_backup(
             from pathlib import Path
 
             key = cache.get(key_handle) if key_handle else None
-            cache.delete(key_handle)
+            if key_handle:
+                cache.delete(key_handle)
             result = restore.run(stamp, actor_id, actor_email, upload=Path(upload), key=key)
         else:
             result = restore.run(stamp, actor_id, actor_email)
