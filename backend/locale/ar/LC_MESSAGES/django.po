@@ -1835,3 +1835,23 @@ msgstr "ينقص الخادم أدوات قاعدة البيانات اللاز�
 #: organization/backups.py
 msgid "A backup is being made or restored; wait for it to finish."
 msgstr "تُنشأ نسخة احتياطية أو تُستعاد الآن؛ انتظر حتى تكتمل."
+
+#: core/restore.py organization/backups.py
+msgid "An uploaded backup file is restored only on a platform with no students. Here, restore one of the server's own copies."
+msgstr "ملف النسخة المرفوع يُستعاد على منصة بلا طلاب فقط. هنا استعد إحدى نسخ الخادم نفسه."
+
+#: organization/backups.py
+msgid "This upload has ended. Choose the file again."
+msgstr "انتهى هذا الرفع. اختر الملف من جديد."
+
+#: organization/backups.py
+msgid "The file has not arrived whole yet."
+msgstr "لم يصل الملف كاملًا بعد."
+
+#: organization/backups.py
+msgid "This is not the password of this file."
+msgstr "هذه ليست كلمة سر هذا الملف."
+
+#: organization/backups.py
+msgid "This is not a backup file of the platform."
+msgstr "هذا ليس ملف نسخة احتياطية للمنصة."

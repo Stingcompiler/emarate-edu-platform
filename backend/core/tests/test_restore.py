@@ -95,7 +95,7 @@ def test_a_restore_puts_the_copy_back_and_keeps_what_it_replaced(
 
     entry = AuditLog.objects.get(action="backup.restore")
     assert entry.actor == admin and entry.target_id == stamp
-    assert entry.new == {"by": "admin@x.test", "kept_before": kept}
+    assert entry.new == {"by": "admin@x.test", "kept_before": kept, "source": "kept"}
 
 
 def test_a_copy_that_cannot_be_taken_changes_nothing(place, fake_database, db, monkeypatch):

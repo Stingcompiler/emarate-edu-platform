@@ -16,6 +16,10 @@ What it promises:
   copy's moved in. The backups themselves are never part of it.
 - Then the migrations run, so a copy from older code is brought up to the code that runs.
 
+The copy is one the server kept, or — on an empty platform only — a file downloaded from
+another installation and uploaded here with its password (``upload``): the way the platform
+moves to another host.
+
 It writes what it is doing to the cache (``STATE``) — not to the database it is replacing —
 for the page to show when it opens again.
 """
@@ -313,38 +317,74 @@ def purge_replaced(root: Path | None = None, days: int = REPLACED_DAYS) -> list[
     return gone
 
 
+def upload_dir() -> Path:
+    """Where a backup file brought from another installation waits, a chunk at a time: beside
+    the backups (never part of a backup, never swapped by a restore), on this server's disk —
+    the worker that restores it must see the same disk as the API that received it."""
+    folder = Path(
+        getattr(settings, "BACKUP_UPLOAD_DIR", "")
+        or Path(settings.MEDIA_ROOT) / "private" / backups.PREFIX / "uploads"
+    )
+    folder.mkdir(parents=True, exist_ok=True)
+    with contextlib.suppress(OSError):
+        folder.chmod(0o700)
+    return folder
+
+
+def purge_uploads(hours: int = 24) -> None:
+    """Uploads nobody finished: they hold a whole college and are not left lying."""
+    limit = datetime.now(UTC).timestamp() - hours * 3600
+    for path in upload_dir().glob("*.part"):
+        with contextlib.suppress(OSError):
+            if path.stat().st_mtime < limit:
+                path.unlink()
+
+
 # ─── The whole restore ──────────────────────────────────────────────────────────────────
 
 
-def _fetch(stamp: str, work: Path) -> tuple[Path, Path | None]:
-    """The copy's two parts, decrypted into ``work``."""
+def _fetch(stamp: str, work: Path, upload: Path | None, key: str | None):
+    """The copy's two parts, decrypted into ``work``: from the server's own store, or from an
+    uploaded file opened with the key its password made."""
+    dump, archive = work / "database", work / "files.tar.gz"
+    refused = RestoreRefused(
+        "corrupt", gettext("This copy is incomplete or was changed. Choose an earlier one.")
+    )
+    if upload is not None:
+        if not key:  # it waited too long for the worker: the key is gone from the cache
+            raise refused
+        try:
+            with upload.open("rb") as handle:
+                backups.read_package(handle, None, dump, archive, key=key)
+        except (backups.BackupCorrupt, backups.WrongPassword, OSError):
+            raise refused from None
+        return dump, archive if archive.exists() else None
     names = backups.names_of(stamp)
     if not default_storage.exists(names["database"]):
         raise RestoreRefused("gone", gettext("This backup is no longer kept."))
-    dump, archive = work / "database", work / "files.tar.gz"
     try:
         backups.decrypt_to(names["database"], dump)
         if default_storage.exists(names["files"]):
             backups.decrypt_to(names["files"], archive)
     except backups.BackupCorrupt:
-        raise RestoreRefused(
-            "corrupt",
-            gettext("This copy is incomplete or was changed. Choose an earlier one."),
-        ) from None
+        raise refused from None
     return dump, archive if archive.exists() else None
 
 
-def _room_for(stamp: str, work: Path) -> None:
+def _room_for(stamp: str, work: Path, upload: Path | None) -> None:
     """Refuse before starting when the disk cannot hold the copy unpacked — the database as
     the SQL it is loaded from, several times its compressed size — and a new copy of what is
     there now."""
-    names = backups.names_of(stamp)
-    sizes = {}
-    for part in ("database", "files"):
-        sizes[part] = 0
-        with contextlib.suppress(OSError, NotImplementedError):
-            if default_storage.exists(names[part]):
-                sizes[part] = default_storage.size(names[part])
+    sizes = {"database": 0, "files": 0}
+    if upload is not None:
+        # Which part is which is not known before it is opened: count the file as both.
+        sizes = {"database": upload.stat().st_size, "files": upload.stat().st_size}
+    else:
+        names = backups.names_of(stamp)
+        for part in sizes:
+            with contextlib.suppress(OSError, NotImplementedError):
+                if default_storage.exists(names[part]):
+                    sizes[part] = default_storage.size(names[part])
     spare = 64 * 1024 * 1024
     needs = [(work, sizes["database"] * 12 + sizes["files"] + spare)]
     root = media_root()
@@ -360,7 +400,9 @@ def _stamp_of(name: str) -> str:
     return name.rsplit("-", 1)[-1].split(".", 1)[0]
 
 
-def _on_the_record(stamp: str, safety: str, actor_id: int | None, actor_email: str) -> None:
+def _on_the_record(
+    stamp: str, safety: str, actor_id: int | None, actor_email: str, source: str
+) -> None:
     """The restored rows know nothing of their own restore: say it in them."""
     from accounts.models import User
     from audit.models import AuditLog
@@ -374,18 +416,28 @@ def _on_the_record(stamp: str, safety: str, actor_id: int | None, actor_email: s
         target_type="backup",
         target_id=stamp,
         target_repr=f"ecst-{stamp}",
-        new={"by": actor_email, "kept_before": safety},
+        new={"by": actor_email, "kept_before": safety, "source": source},
     )
     notify_admins(
         "استُعيدت نسخة احتياطية",
-        f"استعاد {actor.full_name_ar if actor else actor_email} نسخة {stamp}: المنصة الآن كما "
+        f"استعاد {actor.full_name_ar if actor else actor_email} نسخة {stamp}"
+        f"{' من ملف مرفوع' if source == 'file' else ''}: المنصة الآن كما "
         f"كانت عند أخذها. الوضع الذي كان قبل الاستعادة محفوظ في نسخة {safety}.",
     )
     request_site_rebuild()
 
 
-def run(stamp: str, actor_id: int | None = None, actor_email: str = "") -> dict:
-    """Restore the kept copy ``stamp``. Returns the final state (also in the cache)."""
+def run(
+    stamp: str,
+    actor_id: int | None = None,
+    actor_email: str = "",
+    *,
+    upload: Path | None = None,
+    key: str | None = None,
+) -> dict:
+    """Restore the kept copy ``stamp`` — or the uploaded file ``upload`` (whose own stamp is
+    ``stamp``), opened with ``key``, on an empty platform. Returns the final state (also in
+    the cache). The uploaded file is removed whatever the outcome: it holds a whole college."""
     from django.contrib.contenttypes.models import ContentType
     from django.core.management import call_command
 
@@ -401,13 +453,22 @@ def run(stamp: str, actor_id: int | None = None, actor_email: str = "") -> dict:
             error="",
             code="",
             kept_before=None,
+            source="file" if upload is not None else "kept",
         )
         try:
             purge_replaced()
+            if upload is not None and not backups.platform_is_empty():
+                raise RestoreRefused(
+                    "not_empty",
+                    gettext(
+                        "An uploaded backup file is restored only on a platform with no "
+                        "students. Here, restore one of the server's own copies."
+                    ),
+                )
             with tempfile.TemporaryDirectory(prefix="ecst-restore-") as folder:
                 work = Path(folder)
-                _room_for(stamp, work)
-                dump, archive = _fetch(stamp, work)
+                _room_for(stamp, work, upload)
+                dump, archive = _fetch(stamp, work, upload, key)
                 check_dump(dump)
                 root = media_root()
                 if archive is not None and root is not None:
@@ -429,7 +490,9 @@ def run(stamp: str, actor_id: int | None = None, actor_email: str = "") -> dict:
                     call_command("migrate", interactive=False, verbosity=0)
                     ContentType.objects.clear_cache()
                     maintenance.new_epoch()
-                    _on_the_record(stamp, safety, actor_id, actor_email)
+                    _on_the_record(
+                        stamp, safety, actor_id, actor_email, "file" if upload else "kept"
+                    )
             _say(state="done", step="", finished=timezone.now().isoformat())
         except RestoreRefused as refused:
             _say(
@@ -461,4 +524,6 @@ def run(stamp: str, actor_id: int | None = None, actor_email: str = "") -> dict:
         finally:
             if staging is not None:
                 shutil.rmtree(staging, ignore_errors=True)
+            if upload is not None:
+                upload.unlink(missing_ok=True)
     return state() or {}

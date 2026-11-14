@@ -255,3 +255,147 @@ def test_only_the_system_admin_restores(
     with django_capture_on_commit_callbacks(execute=True):
         assert _restore(api(users[Role.SYSTEM_ADMIN])).status_code == 202
     assert len(restores) == 1
+
+
+# ─── «استعادة من ملف» on an empty platform (owner, 2026-11-14) ──────────────────────────
+
+UPLOADS = "/api/v1/backups/uploads"
+
+
+@pytest.fixture
+def packed(copy, settings, tmp_path):
+    """The file an admin downloaded from another installation, and a folder for uploads."""
+    settings.BACKUP_UPLOAD_DIR = str(tmp_path / "uploads")
+    return b"".join(backups.package(copy, backups.package_key(FILE_PHRASE)))
+
+
+def _send(client, data, chunk=700):
+    """Upload ``data`` in chunks, as the portal does; the upload's id."""
+    started = client.post(UPLOADS, {"size": len(data)}, format="json")
+    assert started.status_code == 201, started.data
+    upload = started.data["id"]
+    for at in range(0, len(data), chunk):
+        sent = client.put(
+            f"{UPLOADS}/{upload}?offset={at}",
+            data[at : at + chunk],
+            content_type="application/octet-stream",
+        )
+        assert sent.status_code == 200, sent.data
+    assert sent.data["received"] == len(data)
+    return upload
+
+
+def _restore_file(client, upload, **changes):
+    body = {"password": PASSWORD, "file_password": FILE_PHRASE, **changes}
+    return client.post(f"{UPLOADS}/{upload}/restore", body, format="json")
+
+
+def test_an_empty_platform_takes_a_file_from_another_installation(
+    api, make_user, packed, restores, monkeypatch, django_capture_on_commit_callbacks
+):
+    from core import restore
+
+    seen = {}
+
+    def run(stamp, actor_id=None, actor_email="", *, upload=None, key=None):
+        seen.update(stamp=stamp, email=actor_email, upload=upload, key=key)
+        seen["opens"] = backups.read_package(upload.open("rb"), key=key)["stamp"]
+        return {**cache.get(restore.STATE), "state": "done"}
+
+    monkeypatch.setattr(restore, "run", run)
+    admin = make_user(Role.SYSTEM_ADMIN)
+    client = api(admin)
+    assert client.get(URL).data["empty"] is True
+    upload = _send(client, packed)
+    with django_capture_on_commit_callbacks(execute=True):
+        response = _restore_file(client, upload)
+    assert response.status_code == 202, response.data
+    assert response.data["source"] == "file" and response.data["stamp"] == STAMP
+    # The worker was handed the file and the key its password made — never the password.
+    assert seen["stamp"] == STAMP and seen["email"] == admin.email
+    assert seen["opens"] == STAMP and FILE_PHRASE not in str(seen["key"])
+    entry = AuditLog.objects.get(action="backup.restore_request")
+    assert entry.new == {"backup": STAMP, "source": "file"}
+    # The link to the upload is used up.
+    assert (
+        client.put(
+            f"{UPLOADS}/{upload}?offset=0", b"x", content_type="application/octet-stream"
+        ).status_code
+        == 404
+    )
+
+
+def test_a_chunk_out_of_place_is_not_written(api, make_user, packed, restores):
+    client = api(make_user(Role.SYSTEM_ADMIN))
+    upload = client.post(UPLOADS, {"size": len(packed)}, format="json").data["id"]
+    octet = {"content_type": "application/octet-stream"}
+    assert client.put(f"{UPLOADS}/{upload}?offset=0", packed[:500], **octet).status_code == 200
+    # The same chunk again (its answer was lost on the way): nothing doubled, and the answer
+    # says where to go on from.
+    again = client.put(f"{UPLOADS}/{upload}?offset=0", packed[:500], **octet)
+    assert again.status_code == 409 and again.data["received"] == 500
+    skipped = client.put(f"{UPLOADS}/{upload}?offset=900", packed[900:], **octet)
+    assert skipped.status_code == 409 and skipped.data["received"] == 500
+    # More than the file was said to be.
+    over = client.put(f"{UPLOADS}/{upload}?offset=500", packed[500:] + b"extra", **octet)
+    assert over.status_code == 409
+    # Asked to restore before it has all arrived.
+    early = _restore_file(client, upload)
+    assert early.status_code == 409 and early.data["code"] == "incomplete"
+    assert client.put(f"{UPLOADS}/{upload}?offset=500", packed[500:], **octet).status_code == 200
+    assert restores == []
+
+
+def test_the_file_needs_its_own_password_and_must_be_a_backup(
+    api, make_user, packed, restores, django_capture_on_commit_callbacks
+):
+    client = api(make_user(Role.SYSTEM_ADMIN))
+    upload = _send(client, packed)
+    with django_capture_on_commit_callbacks(execute=True):
+        mine = _restore_file(client, upload, password="not-mine")
+        assert mine.status_code == 400 and mine.data["code"] == "wrong_password"
+        wrong = _restore_file(client, upload, file_password="another-password")
+        assert wrong.status_code == 400 and wrong.data["code"] == "wrong_file_password"
+        # The file stays for another try with the right password…
+        assert _restore_file(client, upload).status_code == 202
+        # …but something that is not a backup is thrown away at once.
+        other = _send(client, b"PK\x03\x04 a spreadsheet, not a backup" * 40)
+        refused = _restore_file(client, other)
+        assert refused.status_code == 400 and refused.data["code"] == "not_a_backup"
+        assert _restore_file(client, other).status_code == 404
+
+
+def test_a_platform_with_students_takes_no_uploaded_file(
+    api, make_user, make_student, it_program, packed, restores
+):
+    client = api(make_user(Role.SYSTEM_ADMIN))
+    upload = _send(client, packed)  # sent while the platform was still empty
+    make_student(it_program, "26-IT-0001")
+    assert client.get(URL).data["empty"] is False
+    started = client.post(UPLOADS, {"size": 10}, format="json")
+    assert started.status_code == 409 and started.data["code"] == "not_empty"
+    late = _restore_file(client, upload)
+    assert late.status_code == 409 and late.data["code"] == "not_empty"
+    assert restores == []
+
+
+def test_only_the_system_admin_uploads_a_backup(api, users, packed, restores):
+    """docs/roles-matrix.md `backups.restore`, for the three upload endpoints."""
+    mine = _send(api(users[Role.SYSTEM_ADMIN]), packed)
+    octet = {"content_type": "application/octet-stream"}
+    for role in Role:
+        if role == Role.SYSTEM_ADMIN:
+            continue
+        client = api(users[role])
+        assert client.post(UPLOADS, {"size": 10}, format="json").status_code == 403, role
+        assert client.put(f"{UPLOADS}/{mine}?offset=0", b"x", **octet).status_code == 403, role
+        assert _restore_file(client, mine).status_code == 403, role
+    assert api().post(UPLOADS, {"size": 10}, format="json").status_code == 401
+    # Another admin's upload is not this admin's.
+    from accounts.models import User
+
+    other = User.objects.create_user(email="other@x.test", password=PASSWORD, full_name_ar="آخر")
+    from accounts.models import RoleAssignment
+
+    RoleAssignment.objects.create(user=other, role=Role.SYSTEM_ADMIN)
+    assert _restore_file(api(other), mine).status_code == 404
