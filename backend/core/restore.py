@@ -15,6 +15,16 @@ What it promises:
   the live ones first; the live ones are moved to ``.replaced-<time>`` (kept a week) and the
   copy's moved in. The backups themselves are never part of it.
 - Then the migrations run, so a copy from older code is brought up to the code that runs.
+- **Every session ends** (review 2026-11-15, R115): the restored rows know nothing of the
+  sign-ins, sign-outs and password changes since the copy, so a new session epoch is drawn
+  and the users' numbering goes on past every number already given — an old token can
+  neither come back to life nor fall on someone who took its number.
+- **A step after the database that fails puts the state before back** (R120) — the copy of
+  the present made at the start, rows and files. If even that cannot be done, the platform
+  stays closed until whoever runs the server opens it: open, it would serve rows and files
+  that do not belong together.
+- **One at a time**: the worker holds the backups' lock throughout (core.backups.holding),
+  so neither the daily timer nor «إنشاء نسخة الآن» makes or prunes a copy meanwhile (R116).
 
 The copy is one the server kept, or — on an empty platform only — a file downloaded from
 another installation and uploaded here with its password (``upload``): the way the platform
@@ -34,7 +44,6 @@ import sqlite3
 import subprocess
 import tarfile
 import tempfile
-import time
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -65,6 +74,24 @@ class RestoreRefused(Exception):
 
 def state() -> dict | None:
     return cache.get(STATE)
+
+
+def interrupted(stamp: str) -> dict:
+    """The restore stopped without saying how it ended: its worker died or was restarted, or
+    it never started (R119)."""
+    with translation.override("ar"):
+        _say(
+            state="failed",
+            stamp=stamp,
+            step="",
+            code="interrupted",
+            error=gettext(
+                "The restore stopped before it ended: the server's worker was stopped. If the "
+                "platform is open, nothing was changed; the server's log has the details."
+            ),
+            finished=timezone.now().isoformat(),
+        )
+    return state() or {}
 
 
 def _say(**changes) -> None:
@@ -313,6 +340,66 @@ def _close_connections() -> None:
     connections.close_all()
 
 
+# ─── The sessions ───────────────────────────────────────────────────────────────────────
+
+
+def _users_table() -> str:
+    from accounts.models import User
+
+    return User._meta.db_table
+
+
+def users_high_water() -> int:
+    """The highest number ever given to an account here, including those deleted since."""
+    from django.db import connection
+    from django.db.models import Max
+
+    from accounts.models import User
+
+    table = _users_table()
+    with connection.cursor() as cursor:
+        if connection.vendor == "postgresql":
+            cursor.execute(
+                "SELECT pg_sequence_last_value(pg_get_serial_sequence(%s, 'id')::regclass)",
+                [table],
+            )
+        else:
+            cursor.execute("SELECT seq FROM sqlite_sequence WHERE name = %s", [table])
+        row = cursor.fetchone()
+    given = int(row[0]) if row and row[0] is not None else 0
+    return max(given, User.objects.aggregate(top=Max("id"))["top"] or 0)
+
+
+def end_every_session(high_water: int) -> None:
+    """After the rows were replaced: no session from before is valid any more (a new epoch),
+    and a new account never takes a number one had before (the numbering goes past it)."""
+    from django.db import connection
+
+    from accounts import services
+
+    table = _users_table()
+    with connection.cursor() as cursor:
+        if connection.vendor == "postgresql":
+            top = f"SELECT COALESCE(MAX(id), 0) FROM {connection.ops.quote_name(table)}"  # noqa: S608  (the model's own table)
+            cursor.execute(
+                f"SELECT setval(pg_get_serial_sequence(%s, 'id'), GREATEST(%s, ({top}), 1))",
+                [table, high_water],
+            )
+        else:
+            cursor.execute(
+                "UPDATE sqlite_sequence SET seq = MAX(seq, %s) WHERE name = %s",
+                [high_water, table],
+            )
+            if cursor.rowcount == 0:
+                cursor.execute(
+                    "INSERT INTO sqlite_sequence (name, seq) VALUES (%s, %s)", [table, high_water]
+                )
+    from django.contrib.sessions.models import Session
+
+    Session.objects.all().delete()  # the admin's own sign-ins (/admin), restored with the rows
+    services.new_session_epoch()
+
+
 # ─── The uploaded files ─────────────────────────────────────────────────────────────────
 
 
@@ -495,11 +582,9 @@ def run(
 ) -> dict:
     """Restore the kept copy ``stamp`` — or the uploaded file ``upload`` (whose own stamp is
     ``stamp``), opened with ``key``, on an empty platform. Returns the final state (also in
-    the cache). The uploaded file is removed whatever the outcome: it holds a whole college."""
-    from django.contrib.contenttypes.models import ContentType
-    from django.core.management import call_command
-
-    replaced = False
+    the cache). The uploaded file is removed whatever the outcome: it holds a whole college.
+    The caller holds the backups' lock (core.tasks.restore_backup)."""
+    source = "file" if upload is not None else "kept"
     staging = None
     with translation.override("ar"):
         _say(
@@ -511,7 +596,7 @@ def run(
             error="",
             code="",
             kept_before=None,
-            source="file" if upload is not None else "kept",
+            source=source,
         )
         try:
             purge_replaced()
@@ -531,27 +616,13 @@ def run(
                 root = media_root()
                 if archive is not None and root is not None:
                     staging = stage_files(archive, root)
-                with maintenance.held("restore"):
-                    # Requests that were already inside finish first: what they write is in
-                    # the copy of the present made next, not lost between it and the restore.
-                    time.sleep(getattr(settings, "RESTORE_DRAIN_SECONDS", 3))
-                    _say(step="safety")
-                    safety = _stamp_of(backups.create(keep=0)[0])
-                    _say(step="database", kept_before=safety)
-                    restore_database(dump, work)
-                    replaced = True
-                    if staging is not None:
-                        _say(step="files")
-                        swap_files(staging, root)
-                        staging = None
-                    _say(step="upgrade")
-                    call_command("migrate", interactive=False, verbosity=0)
-                    ContentType.objects.clear_cache()
-                    maintenance.new_epoch()
-                    _on_the_record(
-                        stamp, safety, actor_id, actor_email, "file" if upload else "kept"
-                    )
+                safety = _replace(dump, work, staging, root)
+                staging = None
             _say(state="done", step="", finished=timezone.now().isoformat())
+            try:
+                _on_the_record(stamp, safety, actor_id, actor_email, source)
+            except Exception:  # the restore is done; only its record is missing
+                logger.exception("restore of %s: could not put it on the record", stamp)
         except RestoreRefused as refused:
             _say(
                 state="failed",
@@ -560,22 +631,22 @@ def run(
                 code=refused.code,
                 finished=timezone.now().isoformat(),
             )
+        except _Failed as failed:
+            _say(
+                state="failed",
+                step="",
+                code=failed.code,
+                error=failed.message,
+                finished=timezone.now().isoformat(),
+            )
         except Exception:
             logger.exception("restoring backup %s failed", stamp)
             _say(
                 state="failed",
                 step="",
-                code="half" if replaced else "error",
-                error=(
-                    gettext(
-                        "The database was restored, but a later step failed. The state before "
-                        "the restore is kept in the newest backup; see the server's log."
-                    )
-                    if replaced
-                    else gettext(
-                        "The restore failed and nothing was changed. Details are in the "
-                        "server's log."
-                    )
+                code="error",
+                error=gettext(
+                    "The restore failed and nothing was changed. Details are in the server's log."
                 ),
                 finished=timezone.now().isoformat(),
             )
@@ -585,3 +656,91 @@ def run(
             if upload is not None:
                 upload.unlink(missing_ok=True)
     return state() or {}
+
+
+class _Failed(Exception):
+    """A step after the rows were replaced failed; ``code`` says what became of the platform."""
+
+    def __init__(self, code: str, message: str):
+        super().__init__(message)
+        self.code = code
+        self.message = message
+
+
+def _replace(dump: Path, work: Path, staging: Path | None, root: Path | None) -> str:
+    """With the platform closed: the copy of the present, then the rows, the files, the
+    migrations and the sessions. Returns the stamp of the copy of the present. Raises
+    ``_Failed`` when a step after the rows fails — having put the present back, or with the
+    platform kept closed when that could not be done."""
+    from django.contrib.contenttypes.models import ContentType
+    from django.core.management import call_command
+
+    with maintenance.held("restore") as hold:
+        # Requests that were already writing finish first: what they write is in the copy of
+        # the present made next, not lost between it and the restore.
+        maintenance.drain(getattr(settings, "RESTORE_DRAIN_SECONDS", 30))
+        _say(step="safety")
+        safety = _stamp_of(backups.create(keep=0)[0])
+        high_water = users_high_water()
+        _say(step="database", kept_before=safety)
+        restore_database(dump, work)
+        # From here on the platform stays closed unless it ends well or is put back: a
+        # worker killed now must not open it on rows without their files or migrations.
+        hold.keep_closed("restore-half")
+        aside = None
+        try:
+            if staging is not None:
+                _say(step="files")
+                aside = swap_files(staging, root)
+            _say(step="upgrade")
+            call_command("migrate", interactive=False, verbosity=0)
+            ContentType.objects.clear_cache()
+            end_every_session(high_water)
+        except Exception:
+            logger.exception("restore: a step after the database failed; putting the present back")
+            files_whole = staging is None or aside is not None or not staging.exists()
+            if files_whole and _put_back(safety, aside, root, work):
+                hold.reopen()
+                maintenance.new_epoch()
+                raise _Failed(
+                    "rolled_back",
+                    gettext(
+                        "A step after the database failed, so the platform was put back as it "
+                        "was before the restore. Nothing was changed; details are in the "
+                        "server's log."
+                    ),
+                ) from None
+            raise _Failed(
+                "half",
+                gettext(
+                    "The restore stopped halfway and the state before it could not be put "
+                    "back. The platform stays closed until whoever runs the server opens it "
+                    "(manage.py maintenance --open); the state before the restore is kept "
+                    "in backup %(stamp)s."
+                )
+                % {"stamp": safety},
+            ) from None
+        hold.reopen()
+        maintenance.new_epoch()
+    return safety
+
+
+def _put_back(safety: str, aside: Path | None, root: Path | None, work: Path) -> bool:
+    """The rows of the copy of the present made a moment ago, and the files set aside."""
+    from django.contrib.contenttypes.models import ContentType
+
+    try:
+        before = work / "before"
+        before.mkdir()
+        dump = before / "database"
+        backups.decrypt_to(backups.names_of(safety)["database"], dump)
+        restore_database(dump, before)
+        if aside is not None and root is not None:
+            staging = Path(tempfile.mkdtemp(prefix=STAGING_PREFIX, dir=root))
+            aside.rename(staging / "new")
+            swap_files(staging, root)
+        ContentType.objects.clear_cache()
+        return True
+    except Exception:
+        logger.exception("restore: the state before could not be put back")
+        return False
