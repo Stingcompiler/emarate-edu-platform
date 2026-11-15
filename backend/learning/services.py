@@ -509,6 +509,10 @@ def _rule_grade(submission: Submission, version: SubmissionVersion) -> None:
         details[str(index)] = str(points if met else 0)
         total += points if met else 0
     total = min(total, submission.assignment.max_grade)
+    # A grade the teacher approved is never replaced by the rules' suggestion (R95).
+    current = SubmissionGrade.objects.select_for_update().filter(submission=submission).first()
+    if current is not None and current.status == SubmissionGrade.Status.APPROVED:
+        return
     SubmissionGrade.objects.update_or_create(
         submission=submission,
         defaults={
@@ -536,6 +540,10 @@ def grade(
             }
         )
     with transaction.atomic():
+        # The submission's row is the one a resubmission locks too: the two never interleave,
+        # so the rules' suggestion of a new version cannot overwrite this grade (review
+        # 2026-11-15, R95).
+        Submission.objects.select_for_update().filter(pk=submission.pk).first()
         existing = SubmissionGrade.objects.filter(submission=submission).first()
         old = {"score": str(existing.score), "status": existing.status} if existing else None
         result, _ = SubmissionGrade.objects.update_or_create(
@@ -565,17 +573,20 @@ def grade(
 def approve_grade(meta: RequestMeta, submission: Submission) -> SubmissionGrade:
     assignment = submission.assignment
     require(meta.actor, assignment.offering, "grade")
-    result = SubmissionGrade.objects.filter(submission=submission).first()
-    if result is None or result.status != SubmissionGrade.Status.SUGGESTED:
-        raise Conflict(
-            gettext("There is no suggested grade to approve."), code="nothing_to_approve"
-        )
-    # docs/03 §3.9: a TA never gives final approval to an AI-suggested grade.
-    if result.source == SubmissionGrade.Source.AI_SUGGESTED and _is_ta(
-        meta.actor, assignment.offering
-    ):
-        raise PermissionDenied(gettext("Only the teacher approves AI-suggested grades."))
     with transaction.atomic():
+        # Under the submission's lock (R95): what is approved is the suggestion that is there,
+        # not one a resubmission is replacing at the same moment.
+        Submission.objects.select_for_update().filter(pk=submission.pk).first()
+        result = SubmissionGrade.objects.filter(submission=submission).first()
+        if result is None or result.status != SubmissionGrade.Status.SUGGESTED:
+            raise Conflict(
+                gettext("There is no suggested grade to approve."), code="nothing_to_approve"
+            )
+        # docs/03 §3.9: a TA never gives final approval to an AI-suggested grade.
+        if result.source == SubmissionGrade.Source.AI_SUGGESTED and _is_ta(
+            meta.actor, assignment.offering
+        ):
+            raise PermissionDenied(gettext("Only the teacher approves AI-suggested grades."))
         result.status = SubmissionGrade.Status.APPROVED
         result.graded_by = meta.actor
         result.graded_at = timezone.now()

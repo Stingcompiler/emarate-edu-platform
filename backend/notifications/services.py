@@ -160,6 +160,11 @@ def fan_out(notification: Notification) -> int:
         if Channel.EMAIL in channels and pref.email and email:
             emails.append(email)
     with transaction.atomic():
+        # Checked again under the notification's lock: two runs of the task at once (a retry,
+        # a redelivered message) write and send once (review 2026-11-15, R96).
+        locked = Notification.objects.select_for_update().get(pk=notification.pk)
+        if locked.fanned_out_at is not None:
+            return locked.recipients_count
         NotificationRecipient.objects.bulk_create(inbox, batch_size=BATCH, ignore_conflicts=True)
         Outbox.objects.bulk_create(
             [
