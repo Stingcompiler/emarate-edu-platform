@@ -5,6 +5,15 @@ Older rounds: `.claude/handoff/archive/2026-10-24_to_2026-11-02.md`, `.claude/ha
 
 ## State
 
+- **Review 2026-11-15 done — report and solution plan:** `docs/qa/comprehensive-review-2026-11-15.md`
+  (scope `7848dd0`→`1ddc672`, #283–#307), evidence and probes in `docs/qa/evidence/review-2026-11-15/`.
+  33 findings R93–R125: 🔴 R115 (an old JWT opens another account after a restore — user ids
+  reused, no epoch), R116 (the daily timer prunes the copy being restored), R93 (course level
+  check is dead code). **Do not use the restore buttons on production until fix PR 1 lands.**
+  The plan is six PRs in order: restore-safety, course-validation, concurrency-writes,
+  programme-logic, migrations-reversible, review-small. Owner decisions in §4 (R99 roster, R102
+  legacy shared courses, R111 link-test). The QA inventory tool learnt the programme roles.
+
 - **Backups: download and restore from the portal** (owner, 2026-11-14: «لا أرى من أين أحمّل النسخة،
   ولا زر للاستعادة… قد ننقل النظام لاستضافة أخرى… أريد أزرارًا»; he approved my three
   recommendations with «نفذ»): (1) the downloaded file is encrypted with a password typed at
