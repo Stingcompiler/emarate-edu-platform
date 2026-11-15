@@ -278,3 +278,57 @@ def test_the_workers_tasks_do_not_run_while_the_platform_is_restored():
         from core.tasks import ping
 
         assert ping() == "pong"  # the restore's own and the copies' are never put off
+
+
+# ─── Review 2026-11-15, fix 6: the upload and the archive (R122–R124) ──────────────────
+
+
+def test_an_upload_nobody_restored_goes_with_the_daily_backup(
+    place,  # noqa: F811
+    fake_database,  # noqa: F811
+    db,
+    settings,
+    tmp_path,
+):
+    import os
+    import time
+
+    settings.BACKUP_UPLOAD_DIR = str(tmp_path / "uploads")
+    part = restore.upload_dir() / "abandoned.part"
+    part.write_bytes(b"ECSTPKG1 a whole college")
+    old = time.time() - 3 * 86400
+    os.utime(part, (old, old))
+    call_command("backup_database", wait=0)
+    assert not part.exists()
+
+
+def test_a_link_inside_an_archive_is_left_out(place, tmp_path):  # noqa: F811
+    import io
+    import tarfile
+
+    hostile = tmp_path / "links.tar.gz"
+    with tarfile.open(hostile, mode="w:gz") as tar:
+        entry = tarfile.TarInfo("private/submissions/secret.pdf")
+        entry.size = 6
+        tar.addfile(entry, io.BytesIO(b"secret"))
+        for kind in (tarfile.SYMTYPE, tarfile.LNKTYPE):
+            link = tarfile.TarInfo(f"public/leak-{kind.decode()}.pdf")
+            link.type = kind
+            link.linkname = (
+                "../private/submissions/secret.pdf"
+                if kind == tarfile.SYMTYPE
+                else "private/submissions/secret.pdf"
+            )
+            tar.addfile(link)
+    staging = restore.stage_files(hostile, place)
+    restore.swap_files(staging, place)
+    assert (place / "private/submissions/secret.pdf").read_bytes() == b"secret"
+    assert not [p.name for p in (place / "public").iterdir() if p.name.startswith("leak")]
+
+
+def test_a_made_up_header_cannot_ask_for_a_gibibyte_of_memory():
+    import io
+
+    head = backups.PACKAGE_MAGIC + bytes([20]) + b"\0" * 16
+    with pytest.raises(backups.BackupCorrupt):
+        backups.read_package(io.BytesIO(head + b"\0" * 64), "password", None, None)

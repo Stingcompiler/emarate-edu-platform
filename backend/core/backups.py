@@ -524,6 +524,9 @@ class WrongPassword(Exception):
     """The password does not open this file."""
 
 
+SCRYPT_LOG_N_MAX = 18
+
+
 def package_key(password: str) -> dict:
     """The file's key, made from its password once (it costs memory and half a second), in a
     shape that can wait in the cache for the download to start — never the password itself."""
@@ -580,7 +583,9 @@ def _package_box(handle, password: str | None, key: str | None) -> tuple[Fernet,
     if len(head) < _PACKAGE_HEAD or not head.startswith(PACKAGE_MAGIC):
         raise BackupCorrupt("This is not a backup file of the platform.")
     log_n = head[len(PACKAGE_MAGIC)]
-    if not 1 <= log_n <= 20:  # a made-up header must not ask for all the memory there is
+    # A made-up header must not ask for all the memory there is: 2^18 (256 MiB with r=8) is
+    # twice what this platform writes (BACKUP_SCRYPT_LOG_N, 17) — review 2026-11-15, R124.
+    if not 1 <= log_n <= SCRYPT_LOG_N_MAX:
         raise BackupCorrupt("This is not a backup file of the platform.")
     if key is None:
         salt = head[len(PACKAGE_MAGIC) + 1 :]

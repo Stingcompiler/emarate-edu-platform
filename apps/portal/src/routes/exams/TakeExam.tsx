@@ -64,8 +64,20 @@ export function TakeExam() {
   const attempt = query.data;
 
   useEffect(() => {
-    if (attempt && attempt.status !== "in_progress")
-      navigate(`/exam-attempts/${id}/result`, { replace: true });
+    if (attempt && attempt.status !== "in_progress") {
+      // Closed while this device was offline (the time ran out, or the teacher closed it):
+      // what it kept unsent is said on the result, not dropped in silence (review 2026-11-15,
+      // R105). The server took none of it; the device need not keep it.
+      const pending = pendingStore(attempt.public_id);
+      const rejected = rejectedStore(attempt.public_id);
+      const unsent = Object.keys(pending.read()).length;
+      pending.clear();
+      rejected.clear();
+      navigate(`/exam-attempts/${id}/result`, {
+        replace: true,
+        state: unsent ? { unsent } : undefined,
+      });
+    }
   }, [attempt, id, navigate]);
 
   if (query.isError) {
