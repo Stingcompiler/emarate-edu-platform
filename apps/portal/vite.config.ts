@@ -24,7 +24,7 @@ function contentSecurityPolicy(): Plugin {
         const inline = [...html.matchAll(/<script(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/script>/g)];
         const policy = [
           "default-src 'self'",
-          `script-src 'self' ${inline.map((m) => hash(m[1])).join(" ")}`.trim(),
+          `script-src 'self' ${inline.map((m) => hash(m[1] ?? "")).join(" ")}`.trim(),
           "style-src 'self' 'unsafe-inline'",
           "img-src 'self' data: blob: https:",
           "media-src 'self' blob: https:",
