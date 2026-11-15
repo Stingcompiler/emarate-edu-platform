@@ -6,6 +6,7 @@ import { useState } from "react";
 
 import { DepartmentSwitch } from "../../components/DepartmentSwitch";
 import { PortalShell } from "../../components/PortalShell";
+import { ProgramLevelSelects, useProgramLevelFilter } from "../../components/ProgramLevelFilter";
 import {
   Button,
   Card,
@@ -119,7 +120,10 @@ export function Offerings() {
     onSuccess: refresh,
     onError: setError,
   });
-  const rows = offerings.data ?? [];
+  // The programme, its level and the semester (owner, 2026-11-15), before the other filters.
+  const placement = useProgramLevelFilter(id);
+  const all = offerings.data ?? [];
+  const rows = all.filter((o) => placement.matches(o.course_detail));
   const stats = new Map((report.data?.rows ?? []).map((r) => [r.public_id, r]));
   // A course is taught by the staff linked to its programme (owner, 2026-11-13); those who
   // joined the department itself, before programmes, teach in any of them.
@@ -174,7 +178,7 @@ export function Offerings() {
   const manage = can(me.data, "courses.manage") && id && term.data;
   return (
     <PortalShell
-      title={`المواد والتعيينات · ${num(rows.length)}`}
+      title={`المواد والتعيينات · ${num(all.length)}`}
       subtitle={`${department?.name_ar ?? ""}${term.data ? ` · ${term.data.name_ar}` : ""}`}
       back={{ label: "لوحة القسم", to: "/department" }}
     >
@@ -191,7 +195,11 @@ export function Offerings() {
           onChange={(e) => setQ(e.target.value)}
           placeholder="بحث برمز المادة أو اسمها أو الأستاذ"
           aria-label="بحث في المواد"
-          className="min-h-10 w-full rounded-full border border-border-soft bg-surface px-4 text-sm sm:max-w-sm sm:flex-1"
+          className="min-h-10 w-full rounded-full border border-border-soft bg-surface px-4 text-sm sm:max-w-sm sm:min-w-60 sm:flex-1"
+        />
+        <ProgramLevelSelects
+          filter={placement}
+          withoutProgramme={all.some((o) => o.course_detail.program == null)}
         />
         <div className="flex flex-wrap gap-2">
           {(Object.keys(FILTERS) as (keyof typeof FILTERS)[]).map((k) => (
@@ -232,6 +240,9 @@ export function Offerings() {
           return (
             <div
               key={o.id}
+              data-level={o.course_detail.default_level ?? 1}
+              data-semester={o.course_detail.default_term_order ?? 1}
+              data-program={o.course_detail.program ?? ""}
               className="grid gap-3 px-4 py-3 text-sm xl:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)_minmax(0,1fr)_70px_80px_72px] xl:items-center"
             >
               <span className="flex items-center gap-3">
@@ -353,7 +364,7 @@ export function Offerings() {
             </div>
           );
         })}
-        {!rows.length ? (
+        {!all.length ? (
           <p className="px-4 py-5 text-sm text-text-muted">لا مواد في هذا الفصل.</p>
         ) : (
           !shown.length && (
