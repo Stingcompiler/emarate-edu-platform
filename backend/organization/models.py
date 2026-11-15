@@ -33,7 +33,10 @@ class Program(BilingualNameModel, TimestampedModel):
         DIPLOMA = "diploma", "دبلوم"
         BACHELOR = "bachelor", "بكالوريوس"
         HONOURS = "honours", "بكالوريوس مرتبة الشرف"
+        # Postgraduate (owner, 2026-11-15).
+        HIGHER_DIPLOMA = "higher_diploma", "دبلوم عالٍ"
         MASTER = "master", "ماجستير"
+        PHD = "phd", "دكتوراه"
 
     department = models.ForeignKey(Department, on_delete=models.PROTECT, related_name="programs")
     code = models.CharField(max_length=20, unique=True)
