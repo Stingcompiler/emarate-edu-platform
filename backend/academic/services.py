@@ -100,6 +100,8 @@ def add_member(
 def remove_member(meta: RequestMeta, membership: DepartmentMembership) -> None:
     _require(meta, "membership.remove", membership.department_id, membership.program_id)
     with transaction.atomic():
+        # Locked first: an assignment being made from it waits, and is removed with the rest.
+        DepartmentMembership.objects.select_for_update().filter(pk=membership.pk).first()
         # Removing someone from a programme also removes their teaching assignments in that
         # programme's open offerings (a membership with no programme: the department's).
         theirs = (
@@ -143,15 +145,20 @@ def add_instructor(
     linked = Q(program__isnull=True) | Q(program_id=course.program_id)
     if course.program_id is None:
         linked = Q()
-    if (
-        not college_wide
-        and not DepartmentMembership.objects.filter(
-            linked, department_id=department_id, user=user
-        ).exists()
-    ):
-        raise ValidationError({"user": [gettext("Add this person to the programme first.")]})
     try:
         with transaction.atomic():
+            # The membership is locked while the assignment is made: removing it at the same
+            # moment (remove_member, which locks it too) waits, then takes this assignment
+            # with it — or this one waits, and finds it gone (review 2026-11-15, R98).
+            member = list(
+                DepartmentMembership.objects.select_for_update()
+                .filter(linked, department_id=department_id, user=user)
+                .values_list("pk", flat=True)[:1]
+            )
+            if not college_wide and not member:
+                raise ValidationError(
+                    {"user": [gettext("Add this person to the programme first.")]}
+                )
             instructor = OfferingInstructor.objects.create(offering=offering, user=user, role=role)
             events.instructor_assigned(instructor)
             record(
