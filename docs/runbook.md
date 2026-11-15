@@ -277,6 +277,8 @@ uv run python manage.py migrate --noinput
 **التنبيهات على VPS** (بعد عطل 4 أكتوبر الذي دام 12 ساعة دون أن يعلم أحد):
 - `ecst-healthcheck.timer` يشغّل `scripts/ops/healthcheck.sh` كل 5 دقائق بصفة `ecst`. يفحص `/api/public/health` (يجب أن يعيد 200) و`ecst-api` و`ecst-worker`.
 - `ecst-backup.service` و`ecst-site-build.service` لهما `OnFailure=ecst-alert@%n.service`.
+- **بناء الموقع لا يضيّع طلبًا (2026-11-15):** طلب إعادة البناء من البوابة يلمس `/opt/ecst/rebuild.flag`، فيشغّل `ecst-site-build.path` الخدمة. والطلب الذي يصل أثناء بناء جارٍ كان يندمج فيه ويضيع، فينتظر التغيير البناء الدوري (كل 6 ساعات). يعالج ذلك الملف `ecst-site-build.service.d/20-coalesce.conf`، فيشغّل `/opt/ecst/bin/build-site-coalesce` الذي يبني من جديد إن تغيّر الملف أثناء البناء (5 جولات على الأكثر). التثبيت: `ssh <الخادم> 'sudo bash -s' < scripts/vps/install-site-build-coalesce.sh`.
+- **Node الخاص بالمنصة** في `/opt/ecst/node` (لا Node النظام، فهو لمشاريع أخرى). نسخته تساوي `.node-version` في المستودع، وCI يعمل بها، فلا تصل إلى الخادم تبعية تتطلب أحدث منها. للترقية: غيّر `.node-version` في طلب دمج، ثم شغّل `ssh <الخادم> 'sudo bash -s -- <النسخة> <sha256>' < scripts/vps/upgrade-node.sh`، والبصمة من `https://nodejs.org/dist/v<النسخة>/SHASUMS256.txt`. يبقى Node السابق بجانبه، والسكربت يطبع أمر الرجوع.
 - **المسار العادي:** يُرسل `manage.py notify_ops` بريدًا مباشرًا (لا عبر العامل) إلى كل مدير نظام نشط وإلى `OPS_ALERT_EMAIL`، مع إشعار داخل البوابة، وتنبيه واحد لكل وحدة في الساعة.
 - **إن تعذّر تشغيل Django نفسه:** يرسل السكربت البريد عبر SMTP بـ `curl` إلى `OPS_ALERT_EMAIL` فقط. لذلك **اضبط `OPS_ALERT_EMAIL` في `/opt/ecst/env`**، وإلا فلا تنبيه في هذه الحالة.
 - **هذا لا يغني عن مراقبة خارجية** (UptimeRobot أو غيرها): إن تعطّل الخادم كله فلن يرسل شيئًا.
