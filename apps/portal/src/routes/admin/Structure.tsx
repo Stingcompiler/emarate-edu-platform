@@ -532,7 +532,7 @@ export function Structure() {
                 </span>
                 <span className="col-span-2 text-xs text-text-muted @2xl:col-span-1 @2xl:text-sm">
                   <span className="@2xl:hidden">{DEGREE[p.degree] ?? p.degree} · </span>
-                  {count(p.duration_terms, N.term)} · {num(p.levels_count)} مستويات
+                  {count(p.duration_terms, N.term)} · {count(p.levels_count, N.level)}
                 </span>
                 <span className="col-span-2 @2xl:col-span-1">
                   <HoursInput
@@ -956,8 +956,15 @@ function ProgramForm({
   // Only their bachelor's (and honours): a diploma or a master's there starts at four, and
   // the number follows the degree picked until someone types another (plan 2026-11-10, K4).
   const fiveYears = /^(الهندسة|الطب)(\s|$)/.test(department.name_ar.trim());
+  // A higher diploma is a year, a doctorate three (owner, 2026-11-15); both can be changed.
   const startLevels = (degree: string) =>
-    fiveYears && (degree === "bachelor" || degree === "honours") ? "5" : "4";
+    degree === "higher_diploma"
+      ? "1"
+      : degree === "phd"
+        ? "3"
+        : fiveYears && (degree === "bachelor" || degree === "honours")
+          ? "5"
+          : "4";
   const blank = {
     code: "",
     name_ar: "",

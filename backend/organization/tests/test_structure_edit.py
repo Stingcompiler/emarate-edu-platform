@@ -409,3 +409,27 @@ def test_a_deleted_programme_takes_its_head_and_staff_links_on_the_record(
         "members_removed": [{"user": "د. أستاذ", "kind": "أستاذ"}],
     }
     assert entry.department_id == it_dept.pk
+
+
+def test_a_higher_diploma_and_a_doctorate_are_programmes_too(api, make_user, it_dept):
+    """Owner, 2026-11-15: the degrees were four; the higher diploma and the PhD join them."""
+    client = api(make_user(Role.SYSTEM_ADMIN))
+    for code, degree, levels, label in (
+        ("HDIT", "higher_diploma", 1, "دبلوم عالٍ"),
+        ("PHDIT", "phd", 3, "دكتوراه"),
+    ):
+        made = client.post(
+            "/api/v1/programs",
+            {
+                "department": it_dept.pk,
+                "code": code,
+                "name_ar": f"برنامج {code}",
+                "degree": degree,
+                "levels_count": levels,
+            },
+            format="json",
+        )
+        assert made.status_code == 201, made.data
+        assert (made.data["degree"], made.data["duration_terms"]) == (degree, 2 * levels)
+        shown = api().get(f"/api/public/programs/{code}")
+        assert shown.status_code == 200 and shown.data["degree_label"] == label

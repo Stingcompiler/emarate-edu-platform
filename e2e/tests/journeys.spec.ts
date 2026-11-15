@@ -100,6 +100,17 @@ test("a new programme's levels follow its department and degree", async ({ page 
   await expect(levels).toHaveValue("4");
   await form.getByRole("button", { name: "بكالوريوس", exact: true }).click();
   await expect(levels).toHaveValue("5");
+  // Owner, 2026-11-15: a higher diploma starts at one level, a doctorate at three.
+  await form.getByRole("button", { name: "دبلوم عالٍ", exact: true }).click();
+  await expect(levels).toHaveValue("1");
+  await form.getByRole("button", { name: "دكتوراه", exact: true }).click();
+  await expect(levels).toHaveValue("3");
+  // Six degrees still fit the screen, on a phone too.
+  expect(
+    await page.evaluate(() => document.documentElement.scrollWidth - innerWidth),
+  ).toBeLessThanOrEqual(0);
+  await form.getByRole("button", { name: "بكالوريوس", exact: true }).click();
+  await expect(levels).toHaveValue("5");
   await levels.fill("3");
   await form.getByRole("button", { name: "دبلوم", exact: true }).click();
   await expect(levels).toHaveValue("3");

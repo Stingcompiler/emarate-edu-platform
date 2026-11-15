@@ -134,6 +134,7 @@ export const N = {
   task: noun("مهمة", "مهمتان", "مهام", "مهمة"),
   ta: noun("معيد", "معيدان", "معيدين", "معيدًا"),
   term: noun("فصل", "فصلان", "فصول", "فصلًا"),
+  level: noun("مستوى", "مستويان", "مستويات", "مستوى"),
   time: noun("مرة", "مرتان", "مرات", "مرة"),
 } satisfies Record<string, Noun>;
 
@@ -186,7 +187,9 @@ export const DEGREE: Record<string, string> = {
   diploma: "دبلوم",
   bachelor: "بكالوريوس",
   honours: "بكالوريوس مرتبة الشرف",
+  higher_diploma: "دبلوم عالٍ",
   master: "ماجستير",
+  phd: "دكتوراه",
 };
 
 export const SEMESTERS = [
