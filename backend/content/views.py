@@ -547,9 +547,9 @@ class PublicPortalIconView(_PublicRead):
     in the site settings; the built-in icon (a redirect) while no logo is set. An installed app
     and the browser's tab read it, so the app follows the logo (owner, 2026-10-17)."""
 
-    def get(self, request, kind):
+    def get(self, request, kind, ext="png"):
         spec = portal_icons.ICONS.get(kind)
-        if spec is None:
+        if spec is None or spec.format.lower() != ext:
             raise Http404
         logo = SiteSettings.load().logo
         if logo is None:
@@ -558,7 +558,7 @@ class PublicPortalIconView(_PublicRead):
             png = portal_icons.icon_png(logo, kind)
         except (OSError, ValueError):  # the file is gone or not an image: the built-in icon
             return HttpResponseRedirect(spec.fallback)
-        response = HttpResponse(png, content_type="image/png")
+        response = HttpResponse(png, content_type=f"image/{ext}")
         # An hour: a new logo reaches installed apps and tabs within it (the browsers re-read the
         # icon when they check the manifest), without every visit rendering or fetching it again.
         response["Cache-Control"] = "public, max-age=3600"

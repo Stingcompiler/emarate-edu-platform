@@ -81,8 +81,10 @@ export const LOGO_ICON = "/api/public/portal-icon/192.png";
 /** The built-in mark, shown until the site settings name a logo (and while they load). */
 export const DEFAULT_LOGO = "/favicon.svg";
 
-/** The college's logo as set in the site settings (owner request 2026-10-09). */
-export function useSiteLogo(): string {
+/** The college's logo as set in the site settings (owner request 2026-10-09). On screen a
+ * 128 px copy the API cuts from it (review 2026-11-10, R92: the upload itself weighed 41 KB on
+ * the sign-in page, on 3G); `full` for printed documents, which need the original. */
+export function useSiteLogo({ full = false }: { full?: boolean } = {}): string {
   const site = useQuery({
     queryKey: ["public", "site"],
     // Revalidated, not the browser's minute-old copy: a logo just changed shows after a reload.
@@ -91,5 +93,7 @@ export function useSiteLogo(): string {
     retry: false,
     meta: { silent: true },
   });
-  return site.data?.logo_url || DEFAULT_LOGO;
+  const logo = site.data?.logo_url;
+  if (!logo) return DEFAULT_LOGO;
+  return full ? logo : "/api/public/portal-icon/mark.webp";
 }

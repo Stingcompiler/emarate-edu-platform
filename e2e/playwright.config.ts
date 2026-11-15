@@ -68,7 +68,13 @@ export default defineConfig({
       stderr: "ignore",
     },
     {
-      command: `pnpm --filter @ecst/portal exec vite --port ${PORTAL_PORT} --strictPort`,
+      // The built portal by default: its Content-Security-Policy (vite.config.ts) applies to
+      // the build only, so every test also checks that nothing the portal does is blocked by it.
+      // `E2E_PORTAL_DEV=1` runs the dev server instead (faster to start while writing a test).
+      command:
+        process.env.E2E_PORTAL_DEV === "1"
+          ? `pnpm --filter @ecst/portal exec vite --port ${PORTAL_PORT} --strictPort`
+          : `pnpm --filter @ecst/portal exec vite build && pnpm --filter @ecst/portal exec vite preview --port ${PORTAL_PORT} --strictPort`,
       cwd: "..",
       url: PORTAL,
       env: { ECST_API_ORIGIN: API },

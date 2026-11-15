@@ -28,6 +28,8 @@ class IconSpec:
     # A notification badge: Android draws only its alpha, in one colour (an opaque logo became
     # a white square in the status bar — owner, 2026-11-05). White ink on transparent.
     monochrome: bool = False
+    # The file type served (the route's extension must match it).
+    format: str = "PNG"
 
 
 ICONS: dict[str, IconSpec] = {
@@ -36,6 +38,9 @@ ICONS: dict[str, IconSpec] = {
     "maskable-512": IconSpec(512, 0.64, True, "/icons/maskable-512.png"),
     "apple-touch": IconSpec(180, 0.84, True, "/icons/apple-touch-icon.png"),
     "badge": IconSpec(96, 0.9, False, "/icons/badge-96.png", monochrome=True),
+    # The logo the portal's pages show, at most 64 px wide (twice that for sharp screens): the
+    # original upload weighed 41 KB on the sign-in page, on 3G (review 2026-11-10, R92).
+    "mark": IconSpec(128, 1.0, False, "/favicon.svg", format="WEBP"),
 }
 
 CACHE_SECONDS = 24 * 60 * 60
@@ -53,7 +58,11 @@ def render(source: Image.Image, spec: IconSpec) -> bytes:
     canvas = Image.new("RGBA", (spec.size, spec.size), background)
     canvas.alpha_composite(logo, ((spec.size - logo.width) // 2, (spec.size - logo.height) // 2))
     out = BytesIO()
-    (canvas.convert("RGB") if spec.opaque else canvas).save(out, "PNG", optimize=True)
+    image = canvas.convert("RGB") if spec.opaque else canvas
+    if spec.format == "WEBP":
+        image.save(out, "WEBP", quality=85, method=6)
+    else:
+        image.save(out, "PNG", optimize=True)
     return out.getvalue()
 
 

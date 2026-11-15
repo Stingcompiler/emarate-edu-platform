@@ -22,7 +22,7 @@ export function PrintLayout({
   footer?: ReactNode;
 }) {
   const navigate = useNavigate();
-  const logo = useSiteLogo();
+  const logo = useSiteLogo({ full: true });
   useEffect(() => {
     document.title = `${title} — كلية الإمارات`;
   }, [title]);

@@ -18,20 +18,60 @@
     {
       "name": "portal",
       "runtimeExecutable": "pnpm",
-      "runtimeArgs": ["--filter", "@ecst/portal", "dev"],
+      "runtimeArgs": [
+        "--filter",
+        "@ecst/portal",
+        "dev"
+      ],
       "port": 5173
     },
     {
       "name": "landing",
       "runtimeExecutable": "pnpm",
-      "runtimeArgs": ["--filter", "@ecst/landing", "dev"],
+      "runtimeArgs": [
+        "--filter",
+        "@ecst/landing",
+        "dev"
+      ],
       "port": 4321
     },
     {
       "name": "boards",
       "runtimeExecutable": "python3",
-      "runtimeArgs": ["scripts/boards.py", "serve"],
+      "runtimeArgs": [
+        "scripts/boards.py",
+        "serve"
+      ],
       "port": 8799
+    },
+    {
+      "name": "landing-preview",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": [
+        "--filter",
+        "@ecst/landing",
+        "exec",
+        "astro",
+        "preview",
+        "--port",
+        "4399"
+      ],
+      "port": 4399
+    },
+    {
+      "name": "portal-preview",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": [
+        "--filter",
+        "@ecst/portal",
+        "exec",
+        "vite",
+        "preview",
+        "--port",
+        "4398",
+        "--strictPort"
+      ],
+      "port": 4398
     }
   ]
 }

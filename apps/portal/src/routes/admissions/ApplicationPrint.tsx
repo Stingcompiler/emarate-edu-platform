@@ -27,7 +27,7 @@ const show = (v: unknown) =>
  */
 export function ApplicationPrint() {
   const { id = "" } = useParams();
-  const logo = useSiteLogo();
+  const logo = useSiteLogo({ full: true });
   const app = useQuery({
     queryKey: ["applications", id],
     queryFn: async () =>
