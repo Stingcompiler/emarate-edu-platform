@@ -1,0 +1,45 @@
+// Throwaway review probe 2026-11-15 (never commit): reload of an attempt closed while offline.
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { cleanup, render, screen } from "@testing-library/react";
+import { MemoryRouter, Route, Routes, useLocation } from "react-router";
+import { afterEach, expect, it, vi } from "vitest";
+
+import { api } from "../../lib/api";
+import { pendingStore } from "../../lib/exam";
+import { TakeExam } from "./TakeExam";
+
+vi.mock("../../lib/api", () => ({
+  api: { GET: vi.fn(), PUT: vi.fn(), POST: vi.fn() },
+  ok: (reply: { data: unknown }) => reply.data,
+  ApiError: class extends Error {},
+}));
+afterEach(() => {
+  cleanup();
+  localStorage.clear();
+});
+
+function Result() {
+  const state = useLocation().state as { unsent?: number } | null;
+  return <p>result unsent={state?.unsent ?? 0}</p>;
+}
+
+it("S6: reload after the attempt closed offline still reports unsent answers", async () => {
+  pendingStore("r6").put(1, true); // answered offline, never reached the server
+  vi.mocked(api.GET).mockResolvedValue({
+    data: { public_id: "r6", status: "auto_submitted", questions: [], answers: {} },
+    response: new Response(null, { status: 200 }),
+  } as never);
+  render(
+    <QueryClientProvider client={new QueryClient()}>
+      <MemoryRouter initialEntries={["/exam-attempts/r6"]}>
+        <Routes>
+          <Route path="/exam-attempts/:id" element={<TakeExam />} />
+          <Route path="/exam-attempts/:id/result" element={<Result />} />
+        </Routes>
+      </MemoryRouter>
+    </QueryClientProvider>,
+  );
+  const shown = await screen.findByText(/result unsent=/);
+  const leftover = Object.keys(pendingStore("r6").read()).length;
+  expect([shown.textContent, leftover]).toEqual(["result unsent=1", 0]);
+});

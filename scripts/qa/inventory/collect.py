@@ -24,7 +24,7 @@ connection.creation.create_test_db(verbosity=0)
 from rest_framework.test import APIClient  # noqa: E402
 
 from accounts.models import RoleAssignment, User  # noqa: E402
-from accounts.rbac import DEPARTMENT_SCOPED_ROLES, Role  # noqa: E402
+from accounts.rbac import DEPARTMENT_SCOPED_ROLES, PROGRAM_SCOPED_ROLES, Role  # noqa: E402
 from core.tests.test_permission_matrix import COVERED_ELSEWHERE, READS  # noqa: E402
 from organization.models import College, Department, Program  # noqa: E402
 from students.models import StudentRecord  # noqa: E402
@@ -46,7 +46,10 @@ me = {}
 for n, role in enumerate(Role):
     user = User.objects.create_user(email=f"u{n}@x.test", password=None, full_name_ar=f"م {n}")
     RoleAssignment.objects.create(
-        user=user, role=role, department=dept if role in DEPARTMENT_SCOPED_ROLES else None
+        user=user,
+        role=role,
+        department=dept if role in DEPARTMENT_SCOPED_ROLES else None,
+        program=program if role in PROGRAM_SCOPED_ROLES else None,
     )
     if role == Role.STUDENT:
         StudentRecord.objects.create(
