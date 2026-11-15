@@ -13,6 +13,17 @@ Older rounds: `.claude/handoff/archive/2026-10-24_to_2026-11-02.md`, `.claude/ha
   The plan is six PRs in order: restore-safety, course-validation, concurrency-writes,
   programme-logic, migrations-reversible, review-small. Owner decisions in §4 (R99 roster, R102
   legacy shared courses, R111 link-test). The QA inventory tool learnt the programme roles.
+- **Scope review, 2026-11-15** (owner: «تأكد أن رئيس القسم ومشرفه يتحكمان على مستوى قسمهما فقط،
+  ومنسق البرنامج ومشرفه في برنامجهما فقط»): probed every endpoint as the head/supervisor of
+  another department, of a sibling programme and of a programme elsewhere — every read of
+  `READS` (with each scope filter in the query string), every write route with validation
+  switched off, the routes the generic pass cannot address, 22 creates into the programme, and
+  again with a teacher + TA role added. **No leak on SQLite or PostgreSQL.** Kept as a guard:
+  `tests/permissions/test_scope_isolation.py` (proven to fail when the scope is widened
+  either in `Scope.allows` or in `Scope.q`). Note: several actions validate the body before
+  looking the object up, so an out-of-scope caller gets 400 before 404 — not a leak, the test
+  switches validation off to see the scope alone; `users/{id}/set-active` is decided in the
+  service by `ACTIVATABLE_ACCOUNTS`, tried with a real body.
 
 - **Backups: download and restore from the portal** (owner, 2026-11-14: «لا أرى من أين أحمّل النسخة،
   ولا زر للاستعادة… قد ننقل النظام لاستضافة أخرى… أريد أزرارًا»; he approved my three
