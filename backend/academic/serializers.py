@@ -111,26 +111,28 @@ class CourseSerializer(serializers.ModelSerializer):
                 )
             attrs["department"] = program.department
         code = attrs.get("code", getattr(self.instance, "code", None))
-        same = (
-            Course.objects.filter(program=program, code=code)
-            if program is not None
-            else Course.objects.filter(
-                program__isnull=True, department=self.instance.department, code=code
-            )
-        )
+        if program is not None:
+            same = Course.objects.filter(program=program, code=code)
+            taken = gettext("This programme already has a course with this code.")
+        else:
+            # A course from before programmes, possibly moved to another department: the code
+            # must be free where it goes, not where it was (review 2026-11-15, R94).
+            department = attrs.get("department", self.instance.department)
+            same = Course.objects.filter(program__isnull=True, department=department, code=code)
+            taken = gettext("This department already has a course with this code.")
         if same.exclude(pk=getattr(self.instance, "pk", None)).exists():
+            raise serializers.ValidationError({"code": [taken]})
+        # Within the programme's levels (review 2026-11-15, R93: this check had ended up under
+        # the «raise» above since #296, and never ran).
+        if program is not None and level > program.levels_count:
             raise serializers.ValidationError(
-                {"code": [gettext("This programme already has a course with this code.")]}
+                {
+                    "default_level": [
+                        gettext("This program has %(levels_count)s levels.")
+                        % {"levels_count": program.levels_count}
+                    ]
+                }
             )
-            if level > program.levels_count:
-                raise serializers.ValidationError(
-                    {
-                        "default_level": [
-                            gettext("This program has %(levels_count)s levels.")
-                            % {"levels_count": program.levels_count}
-                        ]
-                    }
-                )
         return attrs
 
 

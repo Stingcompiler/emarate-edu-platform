@@ -169,3 +169,60 @@ def test_what_existed_is_carried_over(
     assert links(idle) == {it_program.pk, diploma.pk}  # nowhere yet: every programme
     migration.backwards(apps, None)
     assert DepartmentMembership.objects.count() == 2
+
+
+# ─── Review 2026-11-15: the course's level and a legacy course moved (R93, R94) ──────────
+
+
+@pytest.fixture
+def two_level_diploma(it_dept):
+    from organization.models import Program
+
+    return Program.objects.create(
+        department=it_dept,
+        code="DIT",
+        name_ar="دبلوم",
+        degree="diploma",
+        levels_count=2,
+        duration_terms=4,
+    )
+
+
+def test_a_course_level_beyond_its_programme_is_refused(api, make_user, two_level_diploma):
+    from academic.models import Course
+    from accounts.rbac import Role
+
+    client = api(make_user(Role.SYSTEM_ADMIN))
+    made = client.post(
+        "/api/v1/courses",
+        {"program": two_level_diploma.pk, "code": "L5", "name_ar": "م", "default_level": 4},
+        format="json",
+    )
+    assert made.status_code == 400 and "default_level" in made.data["errors"], made.data
+    course = Course.objects.create(
+        program=two_level_diploma, department=two_level_diploma.department, code="Q1", name_ar="م"
+    )
+    moved = client.patch(f"/api/v1/courses/{course.pk}", {"default_level": 5}, format="json")
+    assert moved.status_code == 400 and "عدد مستويات هذا البرنامج 2" in str(moved.data)
+    assert (
+        client.patch(
+            f"/api/v1/courses/{course.pk}", {"default_level": 2}, format="json"
+        ).status_code
+        == 200
+    )
+
+
+def test_a_legacy_course_moved_where_its_code_is_taken_is_refused_not_a_500(
+    api, make_user, it_dept, ba_dept
+):
+    from academic.models import Course
+    from accounts.rbac import Role
+
+    Course.objects.create(department=ba_dept, code="OLD1", name_ar="قديمة ب")
+    old = Course.objects.create(department=it_dept, code="OLD1", name_ar="قديمة أ")
+    client = api(make_user(Role.SYSTEM_ADMIN))
+    client.raise_request_exception = False
+    moved = client.patch(f"/api/v1/courses/{old.pk}", {"department": ba_dept.pk}, format="json")
+    assert moved.status_code == 400 and "في هذا القسم مادة بهذا الرمز" in str(moved.data)
+    old.refresh_from_db()
+    assert old.department == it_dept
