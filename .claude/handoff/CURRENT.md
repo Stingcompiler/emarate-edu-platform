@@ -16,6 +16,14 @@ Older rounds: `.claude/handoff/archive/2026-10-24_to_2026-11-02.md`, `.claude/ha
   are counted and drained; worker tasks skip while maintenance holds (`config.celery.PlatformTask`).
   Tests: `core/tests/test_restore_safety.py` + test_restore. Restore buttons are safe again once
   this is deployed. **Next: fix PR 2 `fix/course-validation` (R93, R94).**
+- **Review 2026-11-15 done — report and solution plan:** `docs/qa/comprehensive-review-2026-11-15.md`
+  (scope `7848dd0`→`1ddc672`, #283–#307), evidence and probes in `docs/qa/evidence/review-2026-11-15/`.
+  33 findings R93–R125: 🔴 R115 (an old JWT opens another account after a restore — user ids
+  reused, no epoch), R116 (the daily timer prunes the copy being restored), R93 (course level
+  check is dead code). **Do not use the restore buttons on production until fix PR 1 lands.**
+  The plan is six PRs in order: restore-safety, course-validation, concurrency-writes,
+  programme-logic, migrations-reversible, review-small. Owner decisions in §4 (R99 roster, R102
+  legacy shared courses, R111 link-test). The QA inventory tool learnt the programme roles.
 - **Scope review, 2026-11-15** (owner: «تأكد أن رئيس القسم ومشرفه يتحكمان على مستوى قسمهما فقط،
   ومنسق البرنامج ومشرفه في برنامجهما فقط»): probed every endpoint as the head/supervisor of
   another department, of a sibling programme and of a programme elsewhere — every read of
