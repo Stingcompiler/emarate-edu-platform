@@ -224,6 +224,13 @@ LOCK_BEAT = 30
 READING = "backup-reading:{}"  # a copy being streamed to a browser: prune leaves it
 
 
+def _now_iso() -> str:
+    # Not this module's ``datetime``: the tests stand a clock in for it, for the stamps.
+    from django.utils import timezone
+
+    return timezone.now().isoformat()
+
+
 class Busy(Exception):
     """The lock is someone else's."""
 
@@ -234,7 +241,7 @@ def lock_take(purpose: str, lease: int = LEASE) -> str | None:
     from django.core.cache import cache
 
     token = secrets.token_hex(12)
-    held = {"token": token, "purpose": purpose, "since": datetime.now(UTC).isoformat()}
+    held = {"token": token, "purpose": purpose, "since": _now_iso()}
     return token if cache.add(LOCK, held, timeout=lease) else None
 
 
@@ -252,7 +259,7 @@ def _lock_keep(token: str, purpose: str, lease: int = LEASE) -> bool:
 
     found = lock_holder()
     if found is None:
-        held = {"token": token, "purpose": purpose, "since": datetime.now(UTC).isoformat()}
+        held = {"token": token, "purpose": purpose, "since": _now_iso()}
         return cache.add(LOCK, held, timeout=lease)
     if found.get("token") != token:
         return False

@@ -5,25 +5,17 @@ Older rounds: `.claude/handoff/archive/2026-10-24_to_2026-11-02.md`, `.claude/ha
 
 ## State
 
-- **IN PROGRESS — fix PR 1 `fix/restore-safety` (local branch, WIP commit, not pushed, tests not run yet).**
-  Done in code: owned backup lock `core.backups.holding/lock_take/wait_for_lock` (views hand the
-  token to `create_backup`/`restore_backup(lock=)`); stamp reservation `_reserve`; prune spares
-  copies being downloaded (`reading`, `_marked` in organization/backups.py); `restore.interrupted`
-  and the page showing a stale «running» as interrupted; session epoch
-  (`SystemSettings.session_epoch`, migration organization/0008, claim `ep`,
-  `services.token_is_current`); `restore.end_every_session` (new epoch, users sequence past the
-  high water, Django sessions deleted); `_replace` with automatic put-back (`rolled_back`) or
-  platform kept closed (`half`, `maintenance.stay_closed`); write counter + `maintenance.drain`
-  in MaintenanceMiddleware; `_on_the_record` after maintenance.
-  **Next:** (1) `backup_database` takes the lock via `wait_for_lock` (`--wait`, default 3600,
-  exit non-zero when busy); (2) `manage.py maintenance --open/--status/--wait-idle`; release.sh
-  waits for the lock before rsync; (3) Celery base Task (config/celery.py) drops non-exempt
-  tasks while maintenance is on (not when eager), worker_ready alert for `restore-half`;
-  (4) Arabic .po entries for the new messages; (5) update tests (test_restore half → rolled_back,
-  new half test, lock/stamp/prune/interrupted/epoch tests from the probes p1–p4, p8), check the
-  E2E restore spec (the admin is now signed out after a restore); (6) runbook; tests SQLite+PG,
-  PR, merge. #308 (report) watcher was restarted after a merge conflict.
-
+- **Fix PR 1 `fix/restore-safety` (review 2026-11-15, R115–R121, R125) — done.** One owned
+  backup lock (`core.backups.holding`, taken by the page and handed to the worker, waited for by
+  `backup_database --wait`, by `release.sh` via `manage.py maintenance --wait-idle`); unique stamps
+  (`_reserve`); prune spares a copy being downloaded; a stale «running» shows `interrupted`;
+  every session ends after a restore (`SystemSettings.session_epoch`, claim `ep`,
+  `services.token_is_current`, users sequence past the high water, Django sessions deleted —
+  the admin signs in again; E2E adapted); a failure after the database puts the present back
+  (`rolled_back`) or keeps the platform closed (`half`, `maintenance --open`); writes in flight
+  are counted and drained; worker tasks skip while maintenance holds (`config.celery.PlatformTask`).
+  Tests: `core/tests/test_restore_safety.py` + test_restore. Restore buttons are safe again once
+  this is deployed. **Next: fix PR 2 `fix/course-validation` (R93, R94).**
 - **Scope review, 2026-11-15** (owner: «تأكد أن رئيس القسم ومشرفه يتحكمان على مستوى قسمهما فقط،
   ومنسق البرنامج ومشرفه في برنامجهما فقط»): probed every endpoint as the head/supervisor of
   another department, of a sibling programme and of a programme elsewhere — every read of

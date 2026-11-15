@@ -7,6 +7,7 @@ def ping() -> str:
     return "pong"
 
 
+RUNNING = "backup-running"  # the backups' lock: core.backups.LOCK (holding)
 LAST_ERROR = "backup-last-error"
 
 

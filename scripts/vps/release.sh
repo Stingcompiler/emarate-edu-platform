@@ -50,6 +50,9 @@ restore_backend() {
 }
 
 if [ "$action" = all ] || [ "$action" = backend ]; then
+  # A backup being made or restored by the worker would be cut short by the restart below
+  # (review 2026-11-15, R119): wait for it — two hours at most, then deploy anyway.
+  run maintenance --wait-idle 7200 2>/dev/null || echo "a backup or restore is still running (or the installed release predates the check); deploying anyway" >&2
   keep app backend; unpack backend
   rsync -a --delete --exclude media --exclude staticfiles --exclude __pycache__ /tmp/ecst-backend/ /opt/ecst/app/
   rm -rf /tmp/ecst-backend

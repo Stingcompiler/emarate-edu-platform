@@ -462,14 +462,18 @@ def purge_replaced(root: Path | None = None, days: int = REPLACED_DAYS) -> list[
     return gone
 
 
+def _upload_path() -> Path:
+    return Path(
+        getattr(settings, "BACKUP_UPLOAD_DIR", "")
+        or Path(settings.MEDIA_ROOT) / "private" / backups.PREFIX / "uploads"
+    )
+
+
 def upload_dir() -> Path:
     """Where a backup file brought from another installation waits, a chunk at a time: beside
     the backups (never part of a backup, never swapped by a restore), on this server's disk —
     the worker that restores it must see the same disk as the API that received it."""
-    folder = Path(
-        getattr(settings, "BACKUP_UPLOAD_DIR", "")
-        or Path(settings.MEDIA_ROOT) / "private" / backups.PREFIX / "uploads"
-    )
+    folder = _upload_path()
     folder.mkdir(parents=True, exist_ok=True)
     with contextlib.suppress(OSError):
         folder.chmod(0o700)
@@ -479,7 +483,7 @@ def upload_dir() -> Path:
 def purge_uploads(hours: int = 24) -> None:
     """Uploads nobody finished: they hold a whole college and are not left lying."""
     limit = datetime.now(UTC).timestamp() - hours * 3600
-    for path in upload_dir().glob("*.part"):
+    for path in _upload_path().glob("*.part"):  # nothing to make when there is no folder
         with contextlib.suppress(OSError):
             if path.stat().st_mtime < limit:
                 path.unlink()

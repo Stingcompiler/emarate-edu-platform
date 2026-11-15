@@ -404,7 +404,8 @@ function RestoreDialog({ copy, now, onClose }: { copy: Copy; now: Counts; onClos
     >
       <Notice tone="warning">
         تعود المنصة كلها إلى ما كانت عليه في {fmtDateTime(copy.at)}. <b>كل ما أُدخل بعدها يُمحى</b>:
-        تسجيلات، إجابات اختبارات، واجبات، نتائج، حسابات.
+        تسجيلات، إجابات اختبارات، واجبات، نتائج، حسابات. ويخرج الجميع من حساباتهم، وأنت منهم: سجّل
+        الدخول من جديد بعدها.
       </Notice>
       {copy.counts && (
         <table className="w-full text-sm">
