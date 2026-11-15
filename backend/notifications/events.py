@@ -165,19 +165,23 @@ def hr_notice(notice):
 
 
 def hr_notice_copy(notice):
-    """Copy to the teacher's department managers when the sender asks for it."""
+    """Copy to the teacher's leaders when the sender asks for it: the managers of their
+    departments and the heads of their programmes — in a department led by programme heads
+    alone, the copy reached nobody (review 2026-11-15, R109)."""
+    from django.db.models import Q
+
     from accounts.models import RoleAssignment
     from accounts.rbac import Role
 
-    departments = list(
-        notice.teacher.department_memberships.values_list("department_id", flat=True)
-    )
-    managers = [
-        ra.user
-        for ra in RoleAssignment.objects.filter(
-            role=Role.DEPARTMENT_MANAGER, department_id__in=departments
-        ).select_related("user")
-    ]
+    links = list(notice.teacher.department_memberships.values_list("department_id", "program_id"))
+    departments = {department for department, _ in links}
+    programs = {program for _, program in links if program is not None}
+    leaders = RoleAssignment.objects.filter(
+        Q(role=Role.DEPARTMENT_MANAGER, department_id__in=departments)
+        | Q(role=Role.PROGRAM_MANAGER, program_id__in=programs),
+        user__is_active=True,
+    ).select_related("user")
+    managers = list({ra.user_id: ra.user for ra in leaders}.values())
     return notify(
         managers,
         category=Category.HR,

@@ -104,11 +104,17 @@ def remove_member(meta: RequestMeta, membership: DepartmentMembership) -> None:
         DepartmentMembership.objects.select_for_update().filter(pk=membership.pk).first()
         # Removing someone from a programme also removes their teaching assignments in that
         # programme's open offerings (a membership with no programme: the department's).
-        theirs = (
-            Q(offering__course__program=membership.program)
-            if membership.program_id
-            else Q(offering__course__department=membership.department)
-        )
+        if membership.program_id:
+            theirs = Q(offering__course__program=membership.program)
+        else:
+            # Not the programmes the person still belongs to through a membership of their own
+            # (review 2026-11-15, R101): those assignments stand on that one.
+            kept = DepartmentMembership.objects.filter(
+                department=membership.department, user=membership.user, program__isnull=False
+            ).values("program_id")
+            theirs = Q(offering__course__department=membership.department) & ~Q(
+                offering__course__program__in=kept
+            )
         OfferingInstructor.objects.filter(theirs, user=membership.user).exclude(
             offering__status=CourseOffering.Status.CLOSED
         ).delete()
@@ -228,6 +234,11 @@ def enroll(meta: RequestMeta, offering: CourseOffering, student: StudentRecord) 
 def drop(meta: RequestMeta, enrollment: Enrollment) -> Enrollment:
     department_id = enrollment.offering.course.department_id
     _require(meta, "enrollment.manage", department_id, enrollment.offering.course.program_id)
+    # As enroll(): the student must be one this role manages. Another department's student in
+    # this department's course (enrolled by the head registrar) is seen in the list, not
+    # dropped from here (review 2026-11-15, R99; owner's decision 1).
+    if not rbac.can_for(meta.actor, "students.view", enrollment.student_record):
+        raise PermissionDenied(gettext("This student belongs to another department."))
     if enrollment.status != Enrollment.Status.ACTIVE:
         raise Conflict(gettext("This enrollment is not active."), code="not_active")
     with transaction.atomic():
@@ -254,16 +265,19 @@ def bulk_enroll(meta: RequestMeta, term: Term, program: Program, level: int) -> 
     only picks up students or offerings added since.
     """
     _require(meta, "enrollment.manage", program.department_id, program.pk)
+    # A course from before programmes (none) belongs to the whole department: its manager
+    # enrolls in it, a programme's head does not — they neither see it nor could drop anyone
+    # from it (review 2026-11-15, R102; owner's decision 2).
+    mine = Q(course__program=program)
+    if rbac.scope_for(meta.actor, "enrollment.manage").allows(program.department_id):
+        mine |= Q(course__program__isnull=True, course__department=program.department)
     offerings = list(
         CourseOffering.objects.filter(
             term=term,
             course__default_level=level,
             course__default_term_order=term.order,
             status=CourseOffering.Status.ACTIVE,
-        ).filter(
-            Q(course__program=program)
-            | Q(course__program__isnull=True, course__department=program.department)
-        )
+        ).filter(mine)
     )
     students = list(
         StudentRecord.objects.filter(
