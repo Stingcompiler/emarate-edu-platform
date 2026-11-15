@@ -57,6 +57,25 @@ def _norm(value) -> str:
     return " ".join(str(value if value is not None else "").split())
 
 
+def _offering(cache, code: str, section: str, student):
+    """The offering a row names. A department's file may hold two programmes' courses with the
+    same code (each programme numbers its own, owner 2026-11-13): then it is the one the
+    student is enrolled in, else the one of the student's programme (review 2026-11-15,
+    R100)."""
+    found = cache["offerings"].get((code, section), [])
+    if len(found) <= 1:
+        return found[0] if found else None
+    if student is not None:
+        for choose in (
+            lambda o: (student.pk, o.pk) in cache["enrolled"],
+            lambda o: o.course.program_id == student.program_id,
+        ):
+            chosen = [o for o in found if choose(o)]
+            if len(chosen) == 1:
+                return chosen[0]
+    return found[0]
+
+
 def _normalize(raw: dict, term, scope, cache) -> tuple[dict, list[str], tuple]:
     errors: list[str] = []
     number = _norm(raw.get("university_number")).upper()  # as the students import (R78, R90)
@@ -69,7 +88,7 @@ def _normalize(raw: dict, term, scope, cache) -> tuple[dict, list[str], tuple]:
     student = cache["students"].get(number)
     if number and student is None:
         errors.append(gettext("university_number: no such student"))
-    offering = cache["offerings"].get((code, section))
+    offering = _offering(cache, code, section, student)
     if code and offering is None:
         errors.append(
             gettext("course_code: no offering %(code)s-%(section)s in this term")
@@ -128,6 +147,13 @@ def _normalize(raw: dict, term, scope, cache) -> tuple[dict, list[str], tuple]:
     return normalized, errors, key
 
 
+def _by_code(offerings) -> dict[tuple[str, str], list]:
+    found: dict[tuple[str, str], list] = {}
+    for offering in offerings:
+        found.setdefault((offering.course.code.upper(), offering.section), []).append(offering)
+    return found
+
+
 def validate_file(meta: RequestMeta, *, term, department, scope, name, uploaded, program=None):
     """``scope``: where the uploader holds results.manage. ``program``: the file is this
     programme's (its department is then the programme's)."""
@@ -144,7 +170,7 @@ def validate_file(meta: RequestMeta, *, term, department, scope, name, uploaded,
             s.university_number: s
             for s in StudentRecord.objects.filter(university_number__in=numbers)
         },
-        "offerings": {(o.course.code.upper(), o.section): o for o in offerings},
+        "offerings": _by_code(offerings),
         "enrolled": set(
             Enrollment.objects.filter(offering__term=term)
             .exclude(status=Enrollment.Status.DROPPED)

@@ -270,7 +270,9 @@ def test_a_programme_names_its_head_with_their_consent(api, it_dept, it_program,
     assert head() is None  # neither agreed
     manager.public_profile = True
     manager.save(update_fields=["public_profile"])
-    assert (head()["name_ar"], head()["role"]) == ("د. مدير القسم", "department_manager")
+    # The programme has a head who did not agree: nobody else appears under its name
+    # (review 2026-11-15, R107) — the department's manager stands in only where there is none.
+    assert head() is None
     own.public_profile = True
     own.academic_title_ar = "أستاذ مشارك"
     own.save(update_fields=["public_profile", "academic_title_ar"])

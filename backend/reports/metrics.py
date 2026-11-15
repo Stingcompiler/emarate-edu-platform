@@ -162,21 +162,23 @@ def _offering_stats(offering_ids, now) -> dict[int, dict]:
     return stats
 
 
-def _live(term: Term, offering_ids, host_ids, now) -> tuple[dict, dict]:
-    """(held, planned) per host and per offering; cancelled sessions don't count."""
+def _live(term: Term, offering_ids, host_ids, now, scope: Scope | None = None) -> tuple[dict, dict]:
+    """(held, planned) per host and per offering; cancelled sessions don't count. A cohort's
+    session (no offering) counts only where its programme is in ``scope`` — not another
+    department's (review 2026-11-15, R104)."""
+    cohort = Q(
+        offering__isnull=True,
+        host_id__in=list(host_ids),
+        starts_at__date__gte=term.starts_on,
+        starts_at__date__lte=term.ends_on,
+    )
+    if scope is not None and not scope.everything:
+        cohort &= scope.q("program__department_id", "program_id")
     per_host: dict[int, list[int]] = defaultdict(lambda: [0, 0])
     per_offering: dict[int, list[int]] = defaultdict(lambda: [0, 0])
     sessions = (
         LiveSession.objects.exclude(status=LiveSession.Status.CANCELLED)
-        .filter(
-            Q(offering_id__in=list(offering_ids))
-            | Q(
-                offering__isnull=True,
-                host_id__in=list(host_ids),
-                starts_at__date__gte=term.starts_on,
-                starts_at__date__lte=term.ends_on,
-            )
-        )
+        .filter(Q(offering_id__in=list(offering_ids)) | cohort)
         .values_list("host_id", "offering_id", "starts_at")
     )
     for host, oid, starts in sessions:
@@ -243,12 +245,15 @@ def teacher_rows(
     for user_id, dept_id, member_kind in members.order_by("id").values_list(
         "user_id", "department_id", "kind"
     ):
-        home.setdefault(user_id, (dept_id, member_kind))
+        # The department asked for, when the person belongs to several in scope: their first
+        # one elsewhere must not drop them from this department's list (R108).
+        if user_id not in home or (dept_id == department_id != home[user_id][0]):
+            home[user_id] = (dept_id, member_kind)
     ids = set(by_user) | set(home)
     if not ids:
         return []
     stats = _offering_stats(list(offering_dept), now)
-    live_host, _ = _live(term, offering_dept, ids, now)
+    live_host, _ = _live(term, offering_dept, ids, now, scope)
     planned_each = weeks_elapsed(term, now) * limits["lectures_per_week"]
     users = {
         u["id"]: u
