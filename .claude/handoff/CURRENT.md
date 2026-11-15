@@ -14,7 +14,7 @@ Older rounds: `.claude/handoff/archive/2026-10-24_to_2026-11-02.md`, `.claude/ha
   locks, outbox claim-then-send); #312 programme logic (R99–R102, R104, R108, R109; **R107 left
   as built** — the demo and landing E2E rely on the department manager appearing as «رئيس
   القسم»); #313 migrations (R103, R106 + `core/tests/test_migrations_down_and_up.py`);
-  `fix/review-small` (R105 exam reopen says unsent answers, R110 Astro 7.4.12, R112 crawl skips
+  `fix/review-small` (R105 exam reopen says unsent answers, R110 Astro 7.4.12 — **reverted in #315**: every patched Astro needs Node ≥ 22.23.4 and the server's /opt/ecst/node is 22.23.3, so the site build failed after the deploy; CI now uses `.node-version` (the server's Node). Re-apply after the owner upgrades Node on the server. R112 crawl skips
   test-made departments, R114 docs, R122 daily purge of uploads, R123 no links in archives,
   R124 scrypt cap 2^18). Status table in the report §4.1.
   **Next:** R111 (`/link-test`, owner's phone results, then delete the page); open from
