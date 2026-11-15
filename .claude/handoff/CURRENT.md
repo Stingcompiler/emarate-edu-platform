@@ -5,6 +5,8 @@ Older rounds: `.claude/handoff/archive/2026-10-24_to_2026-11-02.md`, `.claude/ha
 
 ## State
 
+- **CSP and first paint (R56, R92), 2026-11-15 — owner: «توصياتك».** Site: Astro `security.csp` (hashes per page; img/connect/form to the API origin; style attributes allowed). Portal: `ecst-csp` Vite plugin (build only) with the inline theme script's hash; frames only youtube-nocookie and Bunny. E2E now runs the **built** portal (`E2E_PORTAL_DEV=1` for the dev server): 244 passed under CSP. Sign-in shell draws 600 as 700 and 500 as 400 (two weights, 123 KB); portal logo is `portal-icon/mark.webp` (128 px), print keeps the original (`useSiteLogo({ full: true })`).
+- **Owner requests 2026-11-15 — plan written, NOT approved yet:** `docs/plans/2026-11-15-owner-requests.md` (degrees higher diploma + PhD; course/lecture filters programme→level→semester; audit option «ب»; deletion requests by DH/PH approved by the system admin only; delete-with-everything + bulk for the admin, backup before a department or > 50 students). Results display needs no code: the owner turns off «الدرجة الكلية» and «النقاط» in /results/settings. Off-server backup waits for the owner's Cloudflare link; `OPS_ALERT_EMAIL` later.
 - **Review 2026-11-15 fixed — six PRs (owner: «أوافق», decisions 1 and 2 as recommended).**
   #309 restore safety (R115–R121, R125: one owned backup lock `core.backups.holding`, session
   epoch `SystemSettings.session_epoch`/claim `ep` — everyone signs in again after a restore,

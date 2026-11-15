@@ -290,7 +290,10 @@ export function AuthLayout({
 }) {
   const logo = useSiteLogo();
   return (
-    <div className="min-h-dvh bg-bg">
+    // Two font weights on the first screen a phone loads, as docs/09 asks (review 2026-11-10,
+    // R92: the sign-in page fetched 400, 600 and 700 — 188 KB on 3G): here 600 draws as 700
+    // and 500 as 400. The rest of the portal keeps its four.
+    <div className="min-h-dvh bg-bg [&_.font-medium]:font-normal [&_.font-semibold]:font-bold">
       {/* The site's navigation on every public page (owner, 2026-10-30). */}
       <VisitorNav />
       <div className="lg:grid lg:min-h-[calc(100dvh-4rem)] lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)]">
