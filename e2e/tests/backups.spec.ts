@@ -123,7 +123,11 @@ test("the system admin restores a copy and what came after it is gone", async ({
 
   await dialog.getByLabel("كلمة مرورك في المنصة").fill(PASSWORD);
   await dialog.getByRole("button", { name: "استعادة النسخة" }).click();
-  // The page opens again on the restored rows and says what happened.
+  // Every session from before the restore ends, the admin's own too (review 2026-11-15, R115).
+  await expect(page).toHaveURL(/\/login/, { timeout: 60_000 });
+  await signIn(page, "admin@demo.ecst.test");
+  await page.goto("/system/settings");
+  // The page opens on the restored rows and says what happened.
   await expect(page.getByLabel("المحاضرات المخططة أسبوعيًا لكل مادة")).toHaveValue(before, {
     timeout: 60_000,
   });

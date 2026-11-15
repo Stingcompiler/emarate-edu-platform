@@ -27,12 +27,14 @@ can be tried with no services. A copy is restored only on the engine that made i
 from __future__ import annotations
 
 import base64
+import contextlib
 import json
 import os
 import shutil
 import subprocess
 import tarfile
 import tempfile
+from contextlib import contextmanager
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
@@ -207,13 +209,144 @@ def _encrypt_file(source: Path, target: Path, box: Fernet) -> None:
         sealed.write(sealer.record(b"E", total.to_bytes(8, "big")))
 
 
+# ─── One at a time: the daily timer, «إنشاء نسخة الآن» and «استعادة» (review 2026-11-15) ───
+#
+# One lock in the cache, owned: whoever takes it gets a token, renews it while working and
+# lets it go only if it is still theirs — so an operation longer than the lease never loses
+# it to a second one, and the second one's end never frees the first's (R116–R118, R125).
+# The page takes it for the worker and hands the token over (``holding``); the timer waits
+# for it (``backup_database``); a deploy waits for it before restarting the worker.
+
+LOCK = "backup-running"
+LEASE = 5 * 60  # renewed every BEAT while held: a dead holder frees it within minutes
+QUEUED_LEASE = 60 * 60  # taken by the page, waiting for the worker to start
+LOCK_BEAT = 30
+READING = "backup-reading:{}"  # a copy being streamed to a browser: prune leaves it
+
+
+def _now_iso() -> str:
+    # Not this module's ``datetime``: the tests stand a clock in for it, for the stamps.
+    from django.utils import timezone
+
+    return timezone.now().isoformat()
+
+
+class Busy(Exception):
+    """The lock is someone else's."""
+
+
+def lock_take(purpose: str, lease: int = LEASE) -> str | None:
+    import secrets
+
+    from django.core.cache import cache
+
+    token = secrets.token_hex(12)
+    held = {"token": token, "purpose": purpose, "since": _now_iso()}
+    return token if cache.add(LOCK, held, timeout=lease) else None
+
+
+def lock_holder() -> dict | None:
+    from django.core.cache import cache
+
+    found = cache.get(LOCK)
+    return found if found is None or isinstance(found, dict) else {"token": None}
+
+
+def _lock_keep(token: str, purpose: str, lease: int = LEASE) -> bool:
+    """Renew the lease if the lock is still ``token``'s (or, lost to a cache that forgot it,
+    take it back when nobody else has); False when it is someone else's."""
+    from django.core.cache import cache
+
+    found = lock_holder()
+    if found is None:
+        held = {"token": token, "purpose": purpose, "since": _now_iso()}
+        return cache.add(LOCK, held, timeout=lease)
+    if found.get("token") != token:
+        return False
+    cache.set(LOCK, found, timeout=lease)
+    return True
+
+
+def lock_release(token: str | None) -> None:
+    from django.core.cache import cache
+
+    found = lock_holder()
+    if token and found is not None and found.get("token") == token:
+        cache.delete(LOCK)
+
+
+@contextmanager
+def holding(purpose: str, token: str | None = None):
+    """The lock for as long as the block runs, renewed every half minute: the one the page
+    took (``token``), or a new one. Busy when it is someone else's."""
+    import threading
+
+    if token is None:
+        token = lock_take(purpose)
+        if token is None:
+            raise Busy(purpose)
+    elif not _lock_keep(token, purpose):
+        raise Busy(purpose)
+    stop = threading.Event()
+
+    def renew():
+        while not stop.wait(LOCK_BEAT):
+            with contextlib.suppress(Exception):  # one hiccup of the cache is not the end
+                _lock_keep(token, purpose)
+
+    keeper = threading.Thread(target=renew, daemon=True)
+    keeper.start()
+    try:
+        yield token
+    finally:
+        stop.set()
+        keeper.join(timeout=5)
+        lock_release(token)
+
+
+def wait_for_lock(purpose: str, seconds: int, poll: float = 15) -> str | None:
+    """Take the lock as soon as it is free, waiting ``seconds`` at most."""
+    import time
+
+    deadline = time.monotonic() + seconds
+    while True:
+        token = lock_take(purpose)
+        if token is not None or time.monotonic() >= deadline:
+            return token
+        time.sleep(poll)
+
+
+def reading(stamp: str, seconds: int = 15 * 60) -> None:
+    """``stamp`` is being read (a download): prune leaves it alone while the mark lasts."""
+    from django.core.cache import cache
+
+    cache.set(READING.format(stamp), True, timeout=seconds)
+
+
+def done_reading(stamp: str) -> None:
+    from django.core.cache import cache
+
+    cache.delete(READING.format(stamp))
+
+
+def _reserve(stamp: str) -> bool:
+    """A stamp no other copy has, nor is about to have: the name is taken in the cache first,
+    so two copies started in the same second never share one (R118)."""
+    from django.core.cache import cache
+
+    if default_storage.exists(names_of(stamp)["database"]):
+        return False
+    return cache.add(f"backup-stamp:{stamp}", True, timeout=3600)
+
+
 def create(keep: int) -> list[str]:
     """Dump, encrypt, store (plus the uploaded files on a local disk); keep the newest ``keep``
     of each. Returns the stored names. Works through temporary files, chunk by chunk."""
     moment = datetime.now(UTC)
-    # Two copies in one second (the copy a restore makes of the present, right after another)
-    # must not share a name: the storage would rename the second and nothing would find it.
-    while default_storage.exists(names_of(moment.strftime("%Y%m%dT%H%M%SZ"))["database"]):
+    # Two copies in one second (the copy a restore makes of the present, right after another,
+    # or the timer and the page together) must not share a name: the storage would rename the
+    # second and nothing would find it.
+    while not _reserve(moment.strftime("%Y%m%dT%H%M%SZ")):
         moment += timedelta(seconds=1)
     stamp = moment.strftime("%Y%m%dT%H%M%SZ")
     box = fernet()
@@ -265,11 +398,21 @@ def existing(suffix: str = DB_SUFFIX) -> list[str]:
     return sorted(f"{PREFIX}/{f}" for f in files if f.endswith(suffix))
 
 
+def _stamp_in(name: str) -> str:
+    return name.rsplit("-", 1)[-1].split(".", 1)[0]
+
+
 def prune(keep: int) -> list[str]:
+    """Keep the newest ``keep`` of each part — but never a copy being downloaded: its file
+    would end in the middle (a restore holds the lock, so no copy is made while it runs)."""
+    from django.core.cache import cache
+
     stale = []
     for suffix in (DB_SUFFIX, MEDIA_SUFFIX, INFO_SUFFIX):
         names = existing(suffix)
         stale += names[:-keep] if keep > 0 else []
+    busy = cache.get_many([READING.format(_stamp_in(name)) for name in stale])
+    stale = [name for name in stale if READING.format(_stamp_in(name)) not in busy]
     for name in stale:
         default_storage.delete(name)
     return stale

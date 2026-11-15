@@ -797,10 +797,50 @@ def issue_tokens(user: User):
 
     refresh = RefreshToken.for_user(user)
     refresh[TOKEN_VERSION_CLAIM] = user.token_version
+    refresh[SESSION_EPOCH_CLAIM] = session_epoch()
     return refresh
 
 
 TOKEN_VERSION_CLAIM = "tv"  # noqa: S105 (a claim name, not a secret)
+SESSION_EPOCH_CLAIM = "ep"
+
+_session_epoch: str | None = None
+
+
+def session_epoch() -> str:
+    """The platform's session epoch (``SystemSettings.session_epoch``), read once per process
+    and again after a restore (core.maintenance.check forgets it)."""
+    global _session_epoch
+    if _session_epoch is None:
+        _session_epoch = (
+            SystemSettings.objects.filter(pk=1).values_list("session_epoch", flat=True).first()
+            or ""
+        )
+    return _session_epoch
+
+
+def forget_session_epoch() -> None:
+    global _session_epoch
+    _session_epoch = None
+
+
+def new_session_epoch() -> str:
+    """Every session issued so far ends (after a restore, R115)."""
+    import secrets
+
+    epoch = secrets.token_hex(16)
+    SystemSettings.load()
+    SystemSettings.objects.filter(pk=1).update(session_epoch=epoch)
+    forget_session_epoch()
+    return epoch
+
+
+def token_is_current(payload, user) -> bool:
+    """Issued to ``user`` as they are now: not signed out everywhere since (token version),
+    and not before a restore (session epoch)."""
+    return payload.get(TOKEN_VERSION_CLAIM, 0) == user.token_version and (
+        payload.get(SESSION_EPOCH_CLAIM, "") == session_epoch()
+    )
 
 
 def _revoke_refresh_tokens(user: User) -> None:

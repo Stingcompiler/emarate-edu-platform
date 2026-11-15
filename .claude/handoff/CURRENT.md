@@ -5,6 +5,17 @@ Older rounds: `.claude/handoff/archive/2026-10-24_to_2026-11-02.md`, `.claude/ha
 
 ## State
 
+- **Fix PR 1 `fix/restore-safety` (review 2026-11-15, R115–R121, R125) — done.** One owned
+  backup lock (`core.backups.holding`, taken by the page and handed to the worker, waited for by
+  `backup_database --wait`, by `release.sh` via `manage.py maintenance --wait-idle`); unique stamps
+  (`_reserve`); prune spares a copy being downloaded; a stale «running» shows `interrupted`;
+  every session ends after a restore (`SystemSettings.session_epoch`, claim `ep`,
+  `services.token_is_current`, users sequence past the high water, Django sessions deleted —
+  the admin signs in again; E2E adapted); a failure after the database puts the present back
+  (`rolled_back`) or keeps the platform closed (`half`, `maintenance --open`); writes in flight
+  are counted and drained; worker tasks skip while maintenance holds (`config.celery.PlatformTask`).
+  Tests: `core/tests/test_restore_safety.py` + test_restore. Restore buttons are safe again once
+  this is deployed. **Next: fix PR 2 `fix/course-validation` (R93, R94).**
 - **Review 2026-11-15 done — report and solution plan:** `docs/qa/comprehensive-review-2026-11-15.md`
   (scope `7848dd0`→`1ddc672`, #283–#307), evidence and probes in `docs/qa/evidence/review-2026-11-15/`.
   33 findings R93–R125: 🔴 R115 (an old JWT opens another account after a restore — user ids

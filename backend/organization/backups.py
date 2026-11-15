@@ -107,6 +107,10 @@ def _restore_state() -> dict | None:
     found = restore.state()
     if not found:
         return None
+    if found.get("state") in ("queued", "running") and backups.lock_holder() is None:
+        # Nobody holds the lock any more: the worker died or was restarted in the middle
+        # (R119). Without this the page would show «جارية» for the 30 days the state lasts.
+        found = restore.interrupted(found.get("stamp", ""))
     blank = {"step": "", "started": None, "finished": None, "error": "", "code": ""}
     return {**blank, "kept_before": None, "source": "kept", **found}
 
@@ -160,15 +164,16 @@ class BackupsView(APIView):
 
     @extend_schema(request=None, responses={202: BackupsSerializer})
     def post(self, request):
-        from core.tasks import RUNNING, create_backup
+        from core.tasks import create_backup
 
-        # An hour at most: a crashed worker never blocks the button for good.
-        if not cache.add(RUNNING, request.user.pk, timeout=3600):
+        # The worker takes the lock over and renews it; an hour if it never starts.
+        lock = backups.lock_take("create", backups.QUEUED_LEASE)
+        if lock is None:
             raise Conflict(
                 gettext("A backup is being made; wait for it to finish."), code="running"
             )
         record(RequestMeta.from_request(request), "backup.request", request.user)
-        create_backup.delay(request.user.pk)
+        create_backup.delay(request.user.pk, lock=lock)
         response = self.get(request)
         response.status_code = 202
         return response
@@ -259,15 +264,32 @@ class BackupFileView(APIView):
         if not waiting or waiting["user"] != request.user.pk:
             raise NotFound(gettext("This download link has ended. Ask for the file again."))
         cache.delete(key)
+        stamp = waiting["stamp"]
+        backups.reading(stamp)  # before the parts are looked up: the timer's prune leaves it
         try:
-            stream = backups.package(waiting["stamp"], waiting["key"])
+            stream = backups.package(stamp, waiting["key"])
         except FileNotFoundError:
+            backups.done_reading(stamp)
             raise NotFound(gettext("This backup is no longer kept.")) from None
-        response = StreamingHttpResponse(stream, content_type="application/octet-stream")
+        response = StreamingHttpResponse(
+            _marked(stamp, stream), content_type="application/octet-stream"
+        )
         name = f"ecst-backup-{waiting['stamp']}{backups.PACKAGE_SUFFIX}"
         response["Content-Disposition"] = f'attachment; filename="{name}"'
         response["Cache-Control"] = "no-store"
         return response
+
+
+def _marked(stamp: str, stream):
+    """The download's bytes, the copy marked as being read until the last one is sent (or
+    the browser goes away), so the daily prune does not cut it short."""
+    try:
+        for count, chunk in enumerate(stream):
+            if count % 64 == 63:
+                backups.reading(stamp)
+            yield chunk
+    finally:
+        backups.done_reading(stamp)
 
 
 def _queued(stamp: str, source: str) -> dict:
@@ -289,11 +311,10 @@ def _queued(stamp: str, source: str) -> dict:
     return waiting
 
 
-def _ready_to_restore(user) -> None:
-    """The server has the tools, and no copy is being made or restored (the same switch as
-    «إنشاء نسخة الآن»)."""
+def _ready_to_restore(user) -> str:
+    """The server has the tools, and no copy is being made or restored: the lock «إنشاء نسخة
+    الآن» and the daily timer take too, handed to the worker."""
     from core import restore
-    from core.tasks import RUNNING
 
     missing = restore.missing_tools()
     if missing:
@@ -302,11 +323,13 @@ def _ready_to_restore(user) -> None:
             % {"tools": ", ".join(missing)},
             code="no_tools",
         )
-    if not cache.add(RUNNING, user.pk, timeout=3600):
+    lock = backups.lock_take("restore", backups.QUEUED_LEASE)
+    if lock is None:
         raise Conflict(
             gettext("A backup is being made or restored; wait for it to finish."),
             code="running",
         )
+    return lock
 
 
 class BackupRestoreSerializer(serializers.Serializer):
@@ -337,7 +360,7 @@ class BackupRestoreView(APIView):
         check_own_password(request.user, data.validated_data["password"])
         if not default_storage.exists(backups.names_of(stamp)["database"]):
             raise NotFound(gettext("This backup is no longer kept."))
-        _ready_to_restore(request.user)
+        lock = _ready_to_restore(request.user)
         record(
             RequestMeta.from_request(request),
             "backup.restore_request",
@@ -347,7 +370,7 @@ class BackupRestoreView(APIView):
         waiting = _queued(stamp, "kept")
         actor = (request.user.pk, request.user.email)
         # After this request's own transaction: the restore replaces the very rows it wrote.
-        transaction.on_commit(lambda: restore_backup.delay(stamp, *actor))
+        transaction.on_commit(lambda: restore_backup.delay(stamp, *actor, lock=lock))
         return Response(RestoreStateSerializer(waiting).data, status=202)
 
 
@@ -530,7 +553,7 @@ class BackupUploadRestoreView(APIView):
                 {"file": [gettext("This is not a backup file of the platform.")]},
                 code="not_a_backup",
             )
-        _ready_to_restore(request.user)
+        lock = _ready_to_restore(request.user)
         cache.delete(f"backup-upload:{upload_id}")
         record(
             RequestMeta.from_request(request),
@@ -543,5 +566,5 @@ class BackupUploadRestoreView(APIView):
         handle_name = f"backup-upload-key:{upload_id}"
         cache.set(handle_name, key, timeout=3600)
         args = (stamp, request.user.pk, request.user.email, str(path), handle_name)
-        transaction.on_commit(lambda: restore_backup.delay(*args))
+        transaction.on_commit(lambda: restore_backup.delay(*args, lock=lock))
         return Response(RestoreStateSerializer(waiting).data, status=202)

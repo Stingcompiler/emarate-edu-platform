@@ -142,8 +142,8 @@ class RefreshView(APIView):
         try:
             old = RefreshToken(raw)
             user = User.objects.get(pk=old["user_id"], is_active=True)
-            if old.get(services.TOKEN_VERSION_CLAIM, 0) != user.token_version:
-                raise TokenError("revoked")  # signed out everywhere since it was issued
+            if not services.token_is_current(old, user):
+                raise TokenError("revoked")  # signed out everywhere, or restored, since
             old.blacklist()
             cache.set(_ROTATED.format(old["jti"]), (user.pk, time.time()), REFRESH_REUSE_GRACE)
         except (TokenError, User.DoesNotExist):
@@ -186,7 +186,7 @@ def _just_rotated(raw: str) -> User | None:
     if cut is not None and cut >= rotated_at:
         return None
     user = User.objects.filter(pk=user_id, is_active=True).first()
-    if user is None or payload.get(services.TOKEN_VERSION_CLAIM, 0) != user.token_version:
+    if user is None or not services.token_is_current(payload, user):
         return None
     return user
 

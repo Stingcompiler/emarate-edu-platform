@@ -1820,8 +1820,17 @@ msgid "There is not enough free disk space on the server to restore."
 msgstr "لا تكفي المساحة الخالية على قرص الخادم للاستعادة."
 
 #: core/restore.py
-msgid "The database was restored, but a later step failed. The state before the restore is kept in the newest backup; see the server's log."
-msgstr "استُعيدت قاعدة البيانات، لكن خطوة بعدها تعثّرت. الوضع الذي كان قبل الاستعادة محفوظ في أحدث نسخة؛ التفاصيل في سجل الخادم."
+msgid "The restore stopped before it ended: the server's worker was stopped. If the platform is open, nothing was changed; the server's log has the details."
+msgstr "توقفت الاستعادة قبل أن تكتمل: توقف عامل الخادم. إن كانت المنصة مفتوحة فلم يتغيّر شيء؛ التفاصيل في سجل الخادم."
+
+#: core/restore.py
+msgid "A step after the database failed, so the platform was put back as it was before the restore. Nothing was changed; details are in the server's log."
+msgstr "تعثّرت خطوة بعد قاعدة البيانات، فأُعيدت المنصة كما كانت قبل الاستعادة. لم يتغيّر شيء؛ التفاصيل في سجل الخادم."
+
+#: core/restore.py
+#, python-format
+msgid "The restore stopped halfway and the state before it could not be put back. The platform stays closed until whoever runs the server opens it (manage.py maintenance --open); the state before the restore is kept in backup %(stamp)s."
+msgstr "توقفت الاستعادة في منتصفها وتعذّرت إعادة الوضع الذي كان قبلها. تبقى المنصة مغلقة حتى يفتحها من يدير الخادم (manage.py maintenance --open)؛ الوضع الذي كان قبل الاستعادة محفوظ في نسخة %(stamp)s."
 
 #: core/restore.py
 msgid "The restore failed and nothing was changed. Details are in the server's log."
