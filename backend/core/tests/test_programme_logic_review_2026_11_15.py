@@ -1,7 +1,8 @@
-"""Review 2026-11-15, fix 4 (R99–R102, R104, R107–R109): departments and programmes, where
+"""Review 2026-11-15, fix 4 (R99–R102, R104, R108, R109): departments and programmes, where
 the two meet — a student of another department, two programmes' courses with one code, a
-membership from before programmes, a programme head's bulk enrolment, the reports, the
-programme's public page and an HR notice's copy."""
+membership from before programmes, a programme head's bulk enrolment, the reports and an HR
+notice's copy. (R107 is left as built: the department's manager is named on a programme's
+page under their own title, «رئيس القسم», which the demo and the E2E rely on.)"""
 
 from datetime import timedelta
 from unittest.mock import patch
@@ -174,22 +175,6 @@ def test_the_teachers_report_of_a_department_keeps_who_belongs_to_two(
     rows = teacher_rows(term, scope, department_id=it_dept.pk)
     assert [r["id"] for r in rows] == [teacher.pk]
     assert rows[0]["department_id"] == it_dept.pk
-
-
-# ─── R107: the programme's public page ─────────────────────────────────────────────────
-
-
-def test_a_programme_with_a_head_who_does_not_appear_names_nobody_else(
-    api, make_user, it_dept, it_program
-):
-    from django.core.cache import cache
-
-    manager = make_user(Role.DEPARTMENT_MANAGER, department=it_dept, full_name_ar="د. مدير")
-    manager.public_profile = True
-    manager.save(update_fields=["public_profile"])
-    make_user(Role.PROGRAM_MANAGER, program=it_program, full_name_ar="د. رئيس")
-    cache.clear()
-    assert api().get(f"/api/public/programs/{it_program.code}").data["head"] is None
 
 
 # ─── R109: an HR notice's copy ─────────────────────────────────────────────────────────

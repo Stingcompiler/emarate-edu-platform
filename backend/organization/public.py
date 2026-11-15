@@ -307,23 +307,18 @@ class PublicProgramView(_PublicRead):
 
 
 def _program_head(program) -> dict | None:
-    """The programme's own head, if they agreed to appear. The department's manager stands in
-    only for a programme that has no head: a head who chose not to appear is not replaced by
-    someone else under the programme's name (review 2026-11-15, R107)."""
-    leaders = RoleAssignment.objects.filter(user__is_active=True).select_related("user")
-    heads = leaders.filter(role=Role.PROGRAM_MANAGER, program=program)
-    if heads.exists():
-        found = heads.filter(user__public_profile=True).order_by("user__full_name_ar").first()
-    else:
-        found = (
-            leaders.filter(
-                role=Role.DEPARTMENT_MANAGER,
-                department_id=program.department_id,
-                user__public_profile=True,
-            )
-            .order_by("id")
-            .first()
-        )
+    """The programme's own head, else its department's manager — whoever agreed to appear."""
+    consenting = RoleAssignment.objects.filter(
+        user__public_profile=True, user__is_active=True
+    ).select_related("user")
+    found = (
+        consenting.filter(role=Role.PROGRAM_MANAGER, program=program)
+        .order_by("user__full_name_ar")
+        .first()
+        or consenting.filter(role=Role.DEPARTMENT_MANAGER, department_id=program.department_id)
+        .order_by("id")
+        .first()
+    )
     if found is None:
         return None
     return {
