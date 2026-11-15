@@ -5,6 +5,7 @@ import { Link } from "react-router";
 
 import { DepartmentSwitch } from "../../components/DepartmentSwitch";
 import { PortalShell } from "../../components/PortalShell";
+import { ProgramLevelSelects, useProgramLevelFilter } from "../../components/ProgramLevelFilter";
 import {
   Card,
   CodeTile,
@@ -38,6 +39,7 @@ export function DepartmentLectures() {
   const { id, department } = useDepartment();
   const term = useCurrentTerm();
   const offerings = useOfferings(id, term.data?.id);
+  const placement = useProgramLevelFilter(id);
   const lectures = useLectures("all");
   const remove = useMutation({
     mutationFn: async (publicId: string) => {
@@ -97,7 +99,9 @@ export function DepartmentLectures() {
       };
     })
     .sort((a, b) => a.done - b.done);
-  const shown = (offerings.data ?? []).filter((o) => course === "all" || o.id === course);
+  // The programme, its level and the semester (owner, 2026-11-15), then the course.
+  const placed = (offerings.data ?? []).filter((o) => placement.matches(o.course_detail));
+  const shown = placed.filter((o) => course === "all" || o.id === course);
   const matches = (title: string) => !q.trim() || title.includes(q.trim());
   return (
     <PortalShell
@@ -134,6 +138,10 @@ export function DepartmentLectures() {
       </div>
       <FilterBar className="mb-4">
         <div className="flex flex-wrap items-center gap-2">
+          <ProgramLevelSelects
+            filter={placement}
+            withoutProgramme={(offerings.data ?? []).some((o) => o.course_detail.program == null)}
+          />
           <input
             value={q}
             onChange={(e) => setQ(e.target.value)}
@@ -148,7 +156,7 @@ export function DepartmentLectures() {
             className="min-h-10 rounded-full border border-border-soft bg-surface px-3 text-sm"
           >
             <option value="all">كل المواد</option>
-            {(offerings.data ?? []).map((o) => (
+            {placed.map((o) => (
               <option key={o.id} value={o.id}>
                 {o.course_detail.code} · {o.course_detail.name_ar}
               </option>
@@ -201,7 +209,12 @@ export function DepartmentLectures() {
             if (q.trim() && !mine.length) return null;
             const [top, bottom] = splitCode(o.course_detail.code);
             return (
-              <section key={o.id}>
+              <section
+                key={o.id}
+                data-level={o.course_detail.default_level ?? 1}
+                data-semester={o.course_detail.default_term_order ?? 1}
+                data-program={o.course_detail.program ?? ""}
+              >
                 <div className="flex items-center gap-2">
                   <SectionLabel>
                     <Link
