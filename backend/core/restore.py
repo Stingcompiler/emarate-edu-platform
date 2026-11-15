@@ -410,14 +410,23 @@ def media_root() -> Path | None:
     return Path(settings.MEDIA_ROOT)
 
 
+def _files_only(member: tarfile.TarInfo, path: str):
+    if member.issym() or member.islnk():
+        logger.warning("restore: a link in the archive was left out: %s", member.name)
+        return None
+    return tarfile.data_filter(member, path)
+
+
 def stage_files(archive: Path, root: Path) -> Path:
     """Unpack the copy's files beside the live ones (same disk, so the swap is a rename)."""
     root.mkdir(parents=True, exist_ok=True)
     staging = Path(tempfile.mkdtemp(prefix=STAGING_PREFIX, dir=root))
     (staging / "new").mkdir()
     with tarfile.open(archive, mode="r:gz") as tar:
-        # "data": no absolute paths, no «..», no links out of the folder, no devices.
-        tar.extractall(staging / "new", filter="data")
+        # "data": no absolute paths, no «..», no links out of the folder, no devices — and no
+        # links at all: one inside the folder would still serve a private file from public/
+        # (review 2026-11-15, R123). The platform's own archives hold files only.
+        tar.extractall(staging / "new", filter=_files_only)  # noqa: S202  (the "data" filter, and no links)
     return staging
 
 

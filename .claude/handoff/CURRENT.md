@@ -5,22 +5,25 @@ Older rounds: `.claude/handoff/archive/2026-10-24_to_2026-11-02.md`, `.claude/ha
 
 ## State
 
-- **Fix PR 1 `fix/restore-safety` (review 2026-11-15, R115–R121, R125) — done.** One owned
-  backup lock (`core.backups.holding`, taken by the page and handed to the worker, waited for by
-  `backup_database --wait`, by `release.sh` via `manage.py maintenance --wait-idle`); unique stamps
-  (`_reserve`); prune spares a copy being downloaded; a stale «running» shows `interrupted`;
-  every session ends after a restore (`SystemSettings.session_epoch`, claim `ep`,
-  `services.token_is_current`, users sequence past the high water, Django sessions deleted —
-  the admin signs in again; E2E adapted); a failure after the database puts the present back
-  (`rolled_back`) or keeps the platform closed (`half`, `maintenance --open`); writes in flight
-  are counted and drained; worker tasks skip while maintenance holds (`config.celery.PlatformTask`).
-  Tests: `core/tests/test_restore_safety.py` + test_restore. Restore buttons are safe again once
-  this is deployed. **Next: fix PR 2 `fix/course-validation` (R93, R94).**
+- **Review 2026-11-15 fixed — six PRs (owner: «أوافق», decisions 1 and 2 as recommended).**
+  #309 restore safety (R115–R121, R125: one owned backup lock `core.backups.holding`, session
+  epoch `SystemSettings.session_epoch`/claim `ep` — everyone signs in again after a restore,
+  put-back or stay-closed `manage.py maintenance --open`, write drain, `PlatformTask` skips
+  worker tasks during maintenance, `release.sh` waits via `maintenance --wait-idle`); #310 course
+  level/legacy move (R93, R94); #311 concurrency (R95–R98: submission/membership/notification
+  locks, outbox claim-then-send); #312 programme logic (R99–R102, R104, R108, R109; **R107 left
+  as built** — the demo and landing E2E rely on the department manager appearing as «رئيس
+  القسم»); #313 migrations (R103, R106 + `core/tests/test_migrations_down_and_up.py`);
+  `fix/review-small` (R105 exam reopen says unsent answers, R110 Astro 7.4.12, R112 crawl skips
+  test-made departments, R114 docs, R122 daily purge of uploads, R123 no links in archives,
+  R124 scrypt cap 2^18). Status table in the report §4.1.
+  **Next:** R111 (`/link-test`, owner's phone results, then delete the page); open from
+  before: R56 CSP, R92, `OPS_ALERT_EMAIL`, an off-server backup.
 - **Review 2026-11-15 done — report and solution plan:** `docs/qa/comprehensive-review-2026-11-15.md`
   (scope `7848dd0`→`1ddc672`, #283–#307), evidence and probes in `docs/qa/evidence/review-2026-11-15/`.
   33 findings R93–R125: 🔴 R115 (an old JWT opens another account after a restore — user ids
   reused, no epoch), R116 (the daily timer prunes the copy being restored), R93 (course level
-  check is dead code). **Do not use the restore buttons on production until fix PR 1 lands.**
+  check is dead code). (Restore buttons: safe since #309 is deployed.)
   The plan is six PRs in order: restore-safety, course-validation, concurrency-writes,
   programme-logic, migrations-reversible, review-small. Owner decisions in §4 (R99 roster, R102
   legacy shared courses, R111 link-test). The QA inventory tool learnt the programme roles.
