@@ -29,7 +29,8 @@ function contentSecurityPolicy(): Plugin {
           "img-src 'self' data: blob: https:",
           "media-src 'self' blob: https:",
           "font-src 'self' data:",
-          "connect-src 'self'",
+          // A lecture's video goes from the browser straight to Bunny Stream (TUS).
+          "connect-src 'self' https://video.bunnycdn.com",
           "frame-src https://www.youtube-nocookie.com https://iframe.mediadelivery.net",
           "worker-src 'self'",
           "manifest-src 'self'",

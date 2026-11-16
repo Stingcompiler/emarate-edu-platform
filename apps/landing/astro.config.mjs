@@ -23,7 +23,9 @@ export default defineConfig({
     csp: {
       directives: [
         "default-src 'self'",
-        `img-src 'self' data: ${API}`,
+        // The site's images come from the API's origin, or from Bunny's public zone once the
+        // files live there (owner, 2026-11-16): any https address; an image runs no code.
+        `img-src 'self' data: https: ${API}`,
         `connect-src 'self' ${API}`,
         "font-src 'self' data:",
         "object-src 'none'",

@@ -1,7 +1,10 @@
-"""Bunny.net: private Storage (Django storage), CDN token links, Stream uploads.
+"""Bunny.net: Storage zones (Django storages), CDN token links, Stream uploads.
 
-Only used when ``MEDIA_BACKEND == "bunny"`` (production). Every function that
-talks to Bunny goes through ``_request`` so tests can replace it.
+Only used when ``MEDIA_BACKEND == "bunny"`` (production), and by ``move_files_to_bunny`` before
+the switch. Two zones (owner, 2026-11-16: «ننقل التخزين إلى bunny، كل الملفات»): the private one,
+read through token-signed links only, and the public one (the site's images, the people's
+photos, the logo) behind a plain pull zone. Every function that talks to Bunny goes through
+``_request`` so tests can replace it.
 """
 
 from __future__ import annotations
@@ -23,9 +26,11 @@ TUS_ENDPOINT = "https://video.bunnycdn.com/tusupload"
 EMBED = "https://iframe.mediadelivery.net/embed"
 
 
-def _request(method: str, url: str, *, headers: dict, data: bytes | None = None) -> bytes:
+def _request(method: str, url: str, *, headers: dict, data=None) -> bytes:
+    """``data`` is bytes, or an open file sent as it is read (its Content-Length in ``headers``):
+    a long video is not held in memory."""
     request = urllib.request.Request(url, data=data, method=method, headers=headers)  # noqa: S310
-    with urllib.request.urlopen(request, timeout=60) as response:  # noqa: S310  (https only)
+    with urllib.request.urlopen(request, timeout=600) as response:  # noqa: S310  (https only)
         return response.read()
 
 
@@ -69,6 +74,15 @@ def stream_tus_ticket(video_id: str, ttl_seconds: int = 6 * 3600) -> dict:
     }
 
 
+def stream_delete_video(video_id: str) -> None:
+    """The video leaves Bunny Stream with its row (core.deletions, a lecture's media)."""
+    _request(
+        "DELETE",
+        f"{STREAM_API}/library/{settings.BUNNY_STREAM_LIBRARY_ID}/videos/{quote(video_id)}",
+        headers={"AccessKey": settings.BUNNY_STREAM_API_KEY},
+    )
+
+
 def stream_embed_url(video_id: str, ttl_seconds: int) -> tuple[str, int]:
     expires = int(time.time()) + ttl_seconds
     token = hashlib.sha256(
@@ -80,22 +94,35 @@ def stream_embed_url(video_id: str, ttl_seconds: int) -> tuple[str, int]:
 
 @deconstructible
 class BunnyStorage(Storage):
-    """Private Bunny Storage zone. Files are read through signed CDN links only."""
+    """A Bunny Storage zone. The private zone (the default) is read through signed CDN links
+    only; the public zone has a ``base_url``, its pull zone's address."""
+
+    def __init__(
+        self, zone: str | None = None, key: str | None = None, base_url: str | None = None
+    ):
+        self.zone = zone
+        self.key = key
+        self.base_url = base_url
 
     def _url(self, name: str) -> str:
         host = settings.BUNNY_STORAGE_HOST.rstrip("/")
-        return f"{host}/{settings.BUNNY_STORAGE_ZONE}/{quote(name)}"
+        return f"{host}/{self.zone or settings.BUNNY_STORAGE_ZONE}/{quote(name)}"
 
     def _headers(self) -> dict:
-        return {"AccessKey": settings.BUNNY_STORAGE_KEY}
+        return {"AccessKey": self.key or settings.BUNNY_STORAGE_KEY}
 
     def _save(self, name, content):
         content.seek(0)
+        size = content.size
         _request(
             "PUT",
             self._url(name),
-            headers={**self._headers(), "Content-Type": "application/octet-stream"},
-            data=content.read(),
+            headers={
+                **self._headers(),
+                "Content-Type": "application/octet-stream",
+                "Content-Length": str(size),
+            },
+            data=content.file if hasattr(content, "file") and content.file else content.read(),
         )
         return name
 
@@ -109,13 +136,38 @@ class BunnyStorage(Storage):
         # Names are random UUIDs, so collisions are not a concern.
         return False
 
+    def _entries(self, path: str) -> list[dict]:
+        url = self._url(path.strip("/") + "/" if path.strip("/") else "")
+        if not url.endswith("/"):
+            url += "/"
+        return json.loads(_request("GET", url, headers={**self._headers(), "Accept": "*/*"}))
+
     def listdir(self, path):
         """(directories, files) directly under ``path`` (Bunny's list API)."""
-        url = self._url(path.rstrip("/") + "/")
-        entries = json.loads(_request("GET", url, headers={**self._headers(), "Accept": "*/*"}))
+        entries = self._entries(path)
         dirs = [e["ObjectName"] for e in entries if e.get("IsDirectory")]
         files = [e["ObjectName"] for e in entries if not e.get("IsDirectory")]
         return dirs, files
 
+    def inventory(self, path: str = "") -> dict[str, int]:
+        """Every file under ``path``, with its size: what is already there, for the move."""
+        found: dict[str, int] = {}
+        for entry in self._entries(path):
+            name = f"{path.strip('/')}/{entry['ObjectName']}".lstrip("/")
+            if entry.get("IsDirectory"):
+                found.update(self.inventory(name))
+            else:
+                found[name] = int(entry.get("Length", 0))
+        return found
+
+    def size(self, name):
+        folder, _, leaf = name.rpartition("/")
+        for entry in self._entries(folder):
+            if entry["ObjectName"] == leaf and not entry.get("IsDirectory"):
+                return int(entry.get("Length", 0))
+        raise FileNotFoundError(name)
+
     def url(self, name):
-        raise NotImplementedError("Private files are served through signed links only.")
+        if not self.base_url:
+            raise NotImplementedError("Private files are served through signed links only.")
+        return f"{self.base_url.rstrip('/')}/{quote(name)}"

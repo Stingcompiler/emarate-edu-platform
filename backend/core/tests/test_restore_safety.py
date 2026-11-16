@@ -96,9 +96,11 @@ def test_two_copies_started_in_the_same_second_get_two_names(
         calls.append(name)
         return False if len(calls) == 1 else real_exists(name)
 
-    monkeypatch.setattr(backups.default_storage, "exists", late)
+    # On the class: the backups' storage is a proxy that picks the disk on each call.
+    disk = type(backups.default_storage)
+    monkeypatch.setattr(disk, "exists", lambda self, name: late(name), raising=False)
     second = backups.create(keep=0)
-    monkeypatch.setattr(backups.default_storage, "exists", real_exists)
+    monkeypatch.delattr(disk, "exists")
     assert first != second
     data = api(make_user(Role.SYSTEM_ADMIN)).get("/api/v1/backups").data
     assert len(data["copies"]) == 2
