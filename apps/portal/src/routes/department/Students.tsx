@@ -1,9 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Pencil, Plus, Trash2 } from "lucide-react";
 import { useRef, useState } from "react";
+import { Link } from "react-router";
 
 import { DepartmentSwitch } from "../../components/DepartmentSwitch";
 import { PortalShell } from "../../components/PortalShell";
+import { RequestDeletionDialog } from "../../components/RequestDeletion";
 import {
   Avatar,
   Button,
@@ -57,6 +59,18 @@ export function DepartmentStudents() {
   const [status, setStatus] = useState<string>("active");
   const [page, setPage] = useState(1);
   const [picked, setPicked] = useState<string | null>(null);
+  // A department's or a programme's head asks the system admin to delete students with
+  // everything they hold — one, or several at once (owner, 2026-11-15).
+  const asks = can(me.data, "students.delete") && !can(me.data, "records.delete_all");
+  const [chosen, setChosen] = useState<Set<string>>(new Set());
+  const [asking, setAsking] = useState<{ ids: string[]; what: string } | null>(null);
+  const choose = (id: string) =>
+    setChosen((now) => {
+      const next = new Set(now);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
   const list = useQuery({
     queryKey: ["students", id, search, level, status, page],
     enabled: !!id,
@@ -148,38 +162,85 @@ export function DepartmentStudents() {
           ))}
         </div>
       </FilterBar>
+      {asks && (
+        <div className="mt-3 flex flex-wrap items-center gap-2" data-request-delete>
+          {chosen.size > 0 && (
+            <>
+              <Button
+                variant="danger"
+                className="min-h-10 px-3"
+                onClick={() =>
+                  setAsking({ ids: [...chosen], what: `${num(chosen.size)} من الطلاب` })
+                }
+              >
+                <Trash2 size={16} aria-hidden />
+                طلب حذف المحدَّدين ({num(chosen.size)})
+              </Button>
+              <button
+                type="button"
+                className="min-h-10 px-2 text-sm text-text-muted hover:text-text"
+                onClick={() => setChosen(new Set())}
+              >
+                إلغاء التحديد
+              </button>
+            </>
+          )}
+          <Link to="/deletion-requests" className="ms-auto text-sm font-semibold text-primary">
+            طلبات الحذف التي أرسلتها
+          </Link>
+        </div>
+      )}
+      {asking && (
+        <RequestDeletionDialog
+          kind="student"
+          ids={asking.ids}
+          what={asking.what}
+          onSent={() => setChosen(new Set())}
+          onClose={() => setAsking(null)}
+        />
+      )}
       <div className="mt-4 lg:grid lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start lg:gap-6">
         <div>
           <Card className="divide-y divide-border-soft">
             {rows.map((r) => (
-              <button
-                key={r.public_id}
-                type="button"
-                onClick={() => {
-                  setPicked(r.public_id);
-                  setMode("view");
-                }}
-                className={`flex w-full items-center gap-[var(--d-gap)] px-[var(--d-pad)] py-[var(--d-row)] text-start hover:bg-surface-alt ${s?.public_id === r.public_id ? "lg:bg-primary-soft/40" : ""}`}
-              >
-                <Avatar text={initials(r.full_name_ar)} size="md" tone="primary" />
-                <span className="min-w-0 flex-1">
-                  <b className="block truncate text-sm text-text">{r.full_name_ar}</b>
-                  <span className="text-xs text-text-muted">
-                    <bdi className="num">{r.university_number}</bdi> · {r.program_name} ·{" "}
-                    {levelSemester(r.level, r.semester)}
+              <div key={r.public_id} className="flex items-center gap-2 ps-[var(--d-pad)]">
+                {asks && (
+                  <input
+                    type="checkbox"
+                    aria-label={`تحديد ${r.full_name_ar}`}
+                    checked={chosen.has(r.public_id)}
+                    onChange={() => choose(r.public_id)}
+                    className="size-5 shrink-0 accent-danger"
+                  />
+                )}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setPicked(r.public_id);
+                    setMode("view");
+                  }}
+                  className={`flex w-full items-center gap-[var(--d-gap)] px-[var(--d-pad)] py-[var(--d-row)] text-start hover:bg-surface-alt ${s?.public_id === r.public_id ? "lg:bg-primary-soft/40" : ""}`}
+                >
+                  <Avatar text={initials(r.full_name_ar)} size="md" tone="primary" />
+                  <span className="min-w-0 flex-1">
+                    <b className="block truncate text-sm text-text">{r.full_name_ar}</b>
+                    <span className="text-xs text-text-muted">
+                      <bdi className="num">{r.university_number}</bdi> · {r.program_name} ·{" "}
+                      {levelSemester(r.level, r.semester)}
+                    </span>
                   </span>
-                </span>
-                <StatusBadge
-                  status={
-                    r.status === "active"
-                      ? "approved"
-                      : r.status === "suspended"
-                        ? "rejected"
-                        : "closed"
-                  }
-                  label={STATUS[r.status] ?? r.status}
-                />
-              </button>
+                  <StatusBadge
+                    status={
+                      r.status === "active"
+                        ? "approved"
+                        : r.status === "suspended"
+                          ? "rejected"
+                          : "closed"
+                    }
+                    label={STATUS[r.status] ?? r.status}
+                  />
+                </button>
+              </div>
             ))}
             {!rows.length && <p className="px-4 py-4 text-sm text-text-muted">لا طلاب مطابقون.</p>}
           </Card>
@@ -268,6 +329,15 @@ export function DepartmentStudents() {
                     </Button>
                   )}
                 </div>
+              )}
+              {asks && (
+                <Button
+                  variant="secondary"
+                  className="mt-2 min-h-10 px-3 text-danger-strong"
+                  onClick={() => setAsking({ ids: [s.public_id], what: s.full_name_ar })}
+                >
+                  طلب حذف الطالب مع كل ما يرتبط به
+                </Button>
               )}
               {remove.isError && <Notice>{problemMessage(remove.error)}</Notice>}
             </Card>

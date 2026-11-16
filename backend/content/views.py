@@ -10,7 +10,7 @@ from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
-from rest_framework.exceptions import PermissionDenied, ValidationError
+from rest_framework.exceptions import NotFound, PermissionDenied, ValidationError
 from rest_framework.parsers import JSONParser, MultiPartParser
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
@@ -47,6 +47,7 @@ from .serializers import (
     MenuSerializer,
     NewsSerializer,
     PageSerializer,
+    RecordDeletionRequestSerializer,
     RedirectSerializer,
     SiteSettingsSerializer,
 )
@@ -594,7 +595,45 @@ class DeletionRequestViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     filterset_fields = ["state", "kind"]
 
     def get_permissions(self):
+        # A head asks and follows their own requests; deciding is the approvers'.
+        if self.action in ("records", "mine"):
+            return [IsAuthenticated()]
         return [IsAuthenticated(), capability("deletions.approve")()]
+
+    @extend_schema(
+        request=RecordDeletionRequestSerializer, responses={201: DeletionRequestSerializer}
+    )
+    @action(detail=False, methods=["post"])
+    def records(self, request):
+        """Students, or a course, to delete with everything they hold (owner, 2026-11-15)."""
+        from core import deletions as engine
+
+        from . import deletions
+
+        body = RecordDeletionRequestSerializer(data=request.data)
+        body.is_valid(raise_exception=True)
+        kind = body.validated_data["kind"]
+        ids = body.validated_data["ids"]
+        if kind == "course" and (len(ids) != 1 or not ids[0].isdigit()):
+            raise ValidationError({"ids": [gettext("One at a time.")]})
+        rows = engine.find(kind, ids)
+        if len(rows) != len(set(ids)):
+            raise NotFound()
+        req = deletions.request_records(_meta(request), kind, rows, body.validated_data["reason"])
+        made = DeletionRequestSerializer(req, context={"request": request})
+        return Response(made.data, status=201)
+
+    @extend_schema(responses=DeletionRequestSerializer(many=True))
+    @action(detail=False, methods=["get"])
+    def mine(self, request):
+        """The caller's own requests to delete students or courses, newest first."""
+        from .deletions import RECORD_KINDS
+
+        rows = self.get_queryset().filter(requested_by=request.user, kind__in=RECORD_KINDS)
+        page = self.paginate_queryset(rows)
+        return self.get_paginated_response(
+            DeletionRequestSerializer(page, many=True, context={"request": request}).data
+        )
 
     def _decide(self, request, approve: bool):
         from . import deletions

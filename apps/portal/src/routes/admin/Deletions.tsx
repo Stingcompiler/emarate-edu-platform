@@ -3,24 +3,37 @@ import { Check, Trash2, X } from "lucide-react";
 import { useState } from "react";
 
 import { useConfirm } from "../../components/Confirm";
+import { DeleteEverythingDialog } from "../../components/DeleteEverything";
+import { FormDialog } from "../../components/FormDialog";
 import { PortalShell } from "../../components/PortalShell";
 import {
   Button,
   Card,
   Chip,
   EmptyState,
+  Field,
   Notice,
   StatusBadge,
   problemMessage,
 } from "../../components/ui";
 import { api, ok } from "../../lib/api";
+import { useMe } from "../../lib/auth";
 import { when } from "../../lib/format";
+import { can } from "../../lib/nav";
 
 const STATES = [
   { key: "pending", label: "بانتظار القرار" },
   { key: "", label: "الكل" },
 ] as const;
-const KIND: Record<string, string> = { announcement: "إعلان", notification: "إشعار" };
+const KIND: Record<string, string> = {
+  announcement: "إعلان",
+  notification: "إشعار",
+  student: "طلاب",
+  course: "مادة",
+};
+// A head's request to delete students or a course (owner, 2026-11-15): the system admin alone
+// decides; approving is the deletion itself, with its preview, confirmation and password.
+const RECORDS = new Set(["student", "course"]);
 const STATE: Record<string, [string, string]> = {
   pending: ["pending", "بانتظار القرار"],
   approved: ["approved", "حُذف"],
@@ -30,11 +43,18 @@ const STATE: Record<string, [string, string]> = {
 /**
  * «طلبات الحذف» (owner, 2026-11-05): announcements and sent notifications their authors asked
  * to delete. The system admin or the system supervisor approves (it is deleted, and the author
- * told) or refuses (it stays).
+ * told) or refuses (it stays). Since 2026-11-15 also students and courses a department's or a
+ * programme's head asked to delete with everything they hold: the system admin alone decides.
  */
 export function Deletions() {
   const confirm = useConfirm();
   const client = useQueryClient();
+  const decidesRecords = can(useMe().data, "deletions.approve_records");
+  const [approving, setApproving] = useState<{ id: number; kind: string; ids: string[] } | null>(
+    null,
+  );
+  const [rejecting, setRejecting] = useState<number | null>(null);
+  const [note, setNote] = useState("");
   const [state, setState] = useState<string>("pending");
   const list = useQuery({
     queryKey: ["deletion-requests", state],
@@ -46,11 +66,14 @@ export function Deletions() {
       )?.results ?? [],
   });
   const decide = useMutation({
-    mutationFn: async ({ id, approve }: { id: number; approve: boolean }) => {
+    mutationFn: async ({ id, approve, note }: { id: number; approve: boolean; note?: string }) => {
       const path = approve
         ? "/api/v1/deletion-requests/{id}/approve"
         : "/api/v1/deletion-requests/{id}/reject";
-      const { data, error } = await api.POST(path, { params: { path: { id } }, body: {} });
+      const { data, error } = await api.POST(path, {
+        params: { path: { id } },
+        body: note ? { note } : {},
+      });
       if (!data) throw error;
     },
     onSettled: () => client.invalidateQueries({ queryKey: ["deletion-requests"] }),
@@ -59,7 +82,7 @@ export function Deletions() {
   return (
     <PortalShell
       title="طلبات الحذف"
-      subtitle="إعلانات وإشعارات طلب أصحابها حذفها"
+      subtitle="إعلانات وإشعارات طلب أصحابها حذفها، وطلاب ومواد طلب رؤساء الأقسام والبرامج حذفها"
       back={{ label: "إدارة النظام", to: "/system" }}
     >
       <div className="mb-4 flex gap-2">
@@ -95,6 +118,25 @@ export function Deletions() {
                   طلبه {r.requested_by_name} · {when(r.created_at)}
                 </p>
                 {r.reason && <p className="mt-2 text-sm text-text">السبب: {r.reason}</p>}
+                {RECORDS.has(r.kind) && r.state === "pending" && (
+                  <ul
+                    className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-sm"
+                    data-request-preview
+                  >
+                    {Object.entries(r.preview ?? {}).map(([what, n]) => (
+                      <li
+                        key={what}
+                        className="flex justify-between border-b border-border-soft py-1"
+                      >
+                        <span className="text-text-muted">{what}</span>
+                        <b>{Number(n).toLocaleString("ar-u-nu-latn")}</b>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                {RECORDS.has(r.kind) && r.state === "rejected" && r.decision_note && (
+                  <p className="mt-2 text-sm text-text-muted">سبب الرفض: {r.decision_note}</p>
+                )}
                 {r.state !== "pending" && r.decided_by_name && (
                   <p className="mt-2 text-xs text-text-muted">
                     {r.state === "approved" ? "وافق" : "رفض"} {r.decided_by_name}
@@ -106,7 +148,36 @@ export function Deletions() {
                     طلبتَه بنفسك؛ يقرّر فيه معتمد آخر.
                   </p>
                 )}
-                {r.state === "pending" && !r.is_mine && (
+                {r.state === "pending" && !r.is_mine && RECORDS.has(r.kind) && !decidesRecords && (
+                  <p className="mt-3 border-t border-border-soft pt-3 text-xs text-text-muted">
+                    يقرّر في حذف الطلاب والمواد مدير النظام وحده.
+                  </p>
+                )}
+                {r.state === "pending" && !r.is_mine && RECORDS.has(r.kind) && decidesRecords && (
+                  <div className="mt-3 flex flex-wrap gap-2 border-t border-border-soft pt-3">
+                    <Button
+                      className="min-h-10"
+                      onClick={() =>
+                        setApproving({ id: r.id, kind: r.kind, ids: (r.targets ?? []).map(String) })
+                      }
+                    >
+                      <Check size={16} aria-hidden />
+                      موافقة وحذف
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      className="min-h-10"
+                      onClick={() => {
+                        setNote("");
+                        setRejecting(r.id);
+                      }}
+                    >
+                      <X size={16} aria-hidden />
+                      رفض
+                    </Button>
+                  </div>
+                )}
+                {r.state === "pending" && !r.is_mine && !RECORDS.has(r.kind) && (
                   <div className="mt-3 flex flex-wrap gap-2 border-t border-border-soft pt-3">
                     <Button
                       className="min-h-10"
@@ -143,6 +214,37 @@ export function Deletions() {
             );
           })}
         </div>
+      )}
+      {approving && (
+        <DeleteEverythingDialog
+          kind={approving.kind as "student" | "course"}
+          ids={approving.ids}
+          requestId={approving.id}
+          onDone={() => void client.invalidateQueries({ queryKey: ["deletion-requests"] })}
+          onClose={() => setApproving(null)}
+        />
+      )}
+      {rejecting != null && (
+        <FormDialog
+          title="رفض طلب الحذف"
+          submit={decide.isPending ? "جارٍ الرفض…" : "رفض الطلب"}
+          busy={decide.isPending}
+          onSubmit={() =>
+            decide.mutate(
+              { id: rejecting, approve: false, note: note.trim() },
+              { onSuccess: () => setRejecting(null) },
+            )
+          }
+          onClose={() => setRejecting(null)}
+        >
+          <Card>
+            <Field
+              label="سبب الرفض (يصل إلى صاحب الطلب)"
+              value={note}
+              onChange={(event) => setNote(event.target.value)}
+            />
+          </Card>
+        </FormDialog>
       )}
     </PortalShell>
   );
