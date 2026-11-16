@@ -45,6 +45,9 @@ class RecordDeletionSerializer(RecordDeletionTargetSerializer):
     reason = serializers.CharField(max_length=500, allow_blank=True, default="")
     confirm = serializers.CharField(max_length=200, trim_whitespace=True)
     password = serializers.CharField(write_only=True, trim_whitespace=False)
+    # A head's request this deletion approves (owner, 2026-11-15): it is approved only when the
+    # rows are gone, and its targets must be exactly these.
+    request = serializers.IntegerField(required=False, allow_null=True, default=None)
 
 
 class RecordDeletionItemSerializer(serializers.Serializer):
@@ -170,12 +173,34 @@ class DeletionView(APIView):
                 {"confirm": [gettext("Type exactly what is shown to confirm.")]}, code="confirm"
             )
         reason = data.validated_data["reason"]
+        asked = data.validated_data["request"]
+        ids = [_id(r) for r in rows]
         if not _in_background(kind, rows):
-            removed = deletions.delete(RequestMeta.from_request(request), kind, rows, reason=reason)
+            from django.db import transaction
+
+            from content import deletions as requests
+
+            meta = RequestMeta.from_request(request)
+            with transaction.atomic():
+                req = requests.pending_record_request(asked, kind, ids) if asked else None
+                removed = deletions.delete(
+                    meta,
+                    kind,
+                    rows,
+                    reason=reason or (req.reason if req else ""),
+                    request_id=asked,
+                )
+                if req is not None:
+                    requests.approved(meta, req)
             return Response(RecordDeletionResultSerializer({"removed": removed, "job": None}).data)
-        job = start_job(
-            request.user, kind, [str(getattr(r, "public_id", r.pk)) for r in rows], reason
-        )
+        if asked:
+            from django.db import transaction
+
+            from content import deletions as requests
+
+            with transaction.atomic():
+                requests.pending_record_request(asked, kind, ids)  # checked now, again at the end
+        job = start_job(request.user, kind, ids, reason, request_id=asked)
         return Response(
             RecordDeletionResultSerializer({"removed": None, "job": job}).data, status=202
         )

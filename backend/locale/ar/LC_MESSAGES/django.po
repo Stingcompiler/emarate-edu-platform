@@ -1897,3 +1897,15 @@ msgstr "تعذّرت النسخة الاحتياطية قبل الحذف، فل�
 #: core/tasks.py
 msgid "The deletion failed and nothing was deleted. Details are in the server's log."
 msgstr "تعذّر الحذف، فلم يُحذف شيء. التفاصيل في سجل الخادم."
+
+#: content/deletions.py
+msgid "Some of them are outside your department or programme."
+msgstr "بعضها خارج قسمك أو برنامجك."
+
+#: content/deletions.py
+msgid "The request asks for other records."
+msgstr "الطلب يخص سجلات أخرى."
+
+#: content/deletions.py
+msgid "Approve it from the deletion form, which shows what goes with it."
+msgstr "وافق عليه من نافذة الحذف، فهي تعرض ما يُحذف معه."

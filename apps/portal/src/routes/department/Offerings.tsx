@@ -5,6 +5,7 @@ import { Link, useSearchParams } from "react-router";
 import { useState } from "react";
 
 import { DeleteEverythingDialog } from "../../components/DeleteEverything";
+import { RequestDeletionDialog } from "../../components/RequestDeletion";
 import { DepartmentSwitch } from "../../components/DepartmentSwitch";
 import { PortalShell } from "../../components/PortalShell";
 import { ProgramLevelSelects, useProgramLevelFilter } from "../../components/ProgramLevelFilter";
@@ -82,8 +83,16 @@ export function Offerings() {
       await api.DELETE("/api/v1/courses/{id}", { params: { path: { id: o.course } } });
     },
     onSuccess: refresh,
-    onError: setError,
+    onError: (error, o) => {
+      setError(error);
+      // In use (students enrolled, results…): the head asks the system admin to delete it with
+      // everything it holds (owner, 2026-11-15).
+      setRefused(o.course);
+    },
   });
+  const asks = canDelete && !deletesAll;
+  const [refused, setRefused] = useState<number | null>(null);
+  const [asking, setAsking] = useState<number | null>(null);
   const assign = useMutation({
     mutationFn: async ({
       offering,
@@ -197,10 +206,31 @@ export function Offerings() {
         />
       )}
       {error ? (
-        <div className="mb-3">
+        <div className="mb-3 space-y-2">
           <Notice>{problemMessage(error)}</Notice>
+          {asks && refused != null && (
+            <Button
+              variant="secondary"
+              className="min-h-10 px-3 text-danger-strong"
+              onClick={() => setAsking(refused)}
+            >
+              اطلب حذفها مع كل ما يرتبط بها من مدير النظام
+            </Button>
+          )}
         </div>
       ) : null}
+      {asking != null && (
+        <RequestDeletionDialog
+          kind="course"
+          ids={[String(asking)]}
+          what={all.find((o) => o.course_detail.id === asking)?.course_detail.name_ar ?? "المادة"}
+          onSent={() => {
+            setRefused(null);
+            setError(null);
+          }}
+          onClose={() => setAsking(null)}
+        />
+      )}
       <FilterBar className="mb-3 flex flex-wrap items-center gap-2">
         <input
           type="search"

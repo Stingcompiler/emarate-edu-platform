@@ -103,6 +103,16 @@ def decide(meta: RequestMeta, req: DeletionRequest, *, approve: bool, note: str 
 
     if not rbac.can(meta.actor, "deletions.approve"):
         raise PermissionDenied()
+    if req.kind in RECORD_KINDS:
+        # Students and courses: the system admin alone decides; approving is the deletion
+        # itself (core.deletion_views), with its preview, confirmation and password.
+        if not rbac.can(meta.actor, "deletions.approve_records"):
+            raise PermissionDenied()
+        if approve:
+            raise Conflict(
+                gettext("Approve it from the deletion form, which shows what goes with it."),
+                code="use_deletion",
+            )
     with transaction.atomic():
         req = DeletionRequest.objects.select_for_update().get(pk=req.pk)
         if req.state != DeletionRequest.State.PENDING:
@@ -135,5 +145,121 @@ def decide(meta: RequestMeta, req: DeletionRequest, *, approve: bool, note: str 
             else f"لم يُوافَق على حذف {req.get_kind_display()} «{req.title}»"
         ),
         body=req.decision_note,
-        action_url="/announcements" if req.kind == K.ANNOUNCEMENT else "/notifications?tab=sent",
+        action_url=(
+            "/announcements"
+            if req.kind == K.ANNOUNCEMENT
+            else "/deletion-requests"
+            if req.kind in RECORD_KINDS
+            else "/notifications?tab=sent"
+        ),
+    )
+
+
+# ─── Students and courses (owner, 2026-11-15) ────────────────────────────────────────────
+#
+# A department's or a programme's head asks to delete students or a course of theirs, with
+# everything they hold; the system admin alone decides — approving through the same deletion as
+# their own (core.deletion_views, with the request's number), so the approval is the deletion and
+# the request is marked approved only once the rows are gone.
+
+RECORD_KINDS = {K.STUDENT, K.COURSE}
+_CAPABILITY = {K.STUDENT: "students.delete", K.COURSE: "courses.delete"}
+
+
+def _pending_targets(kind: str) -> set[str]:
+    found: set[str] = set()
+    for targets in DeletionRequest.objects.filter(
+        kind=kind, state=DeletionRequest.State.PENDING
+    ).values_list("targets", flat=True):
+        found.update(str(t) for t in targets)
+    return found
+
+
+def request_records(meta: RequestMeta, kind: str, rows: list, reason: str = "") -> DeletionRequest:
+    """Ask the system admin to delete ``rows`` (students, or one course) with everything they
+    hold. Each must be within the asker's scope; none may already wait in another request."""
+    from core import deletions
+    from notifications.models import Category
+    from notifications.services import notify
+
+    if kind not in RECORD_KINDS or not rows:
+        raise PermissionDenied()
+    scope = rbac.scope_for(meta.actor, _CAPABILITY[kind])
+    if scope.none or not all(scope.allows(r.department_id, r.program_id) for r in rows):
+        raise PermissionDenied(gettext("Some of them are outside your department or programme."))
+    ids = [str(r.public_id) if kind == K.STUDENT else str(r.pk) for r in rows]
+    with transaction.atomic():
+        if set(ids) & _pending_targets(kind):
+            raise Conflict(gettext("A deletion request is already waiting."), code="pending")
+        first = rows[0]
+        name = (
+            f"{first.full_name_ar} ({first.university_number})"
+            if kind == K.STUDENT
+            else f"{first.code} · {first.name_ar}"
+        )
+        title = name if len(rows) == 1 else f"{name} و{len(rows) - 1} غيره"
+        programs = {r.program_id for r in rows}
+        departments = {r.department_id for r in rows}
+        req = DeletionRequest.objects.create(
+            kind=kind,
+            object_id=first.pk,
+            title=title[:200],
+            reason=(reason or "").strip()[:2000],
+            requested_by=meta.actor,
+            targets=ids,
+            department_id=departments.pop() if len(departments) == 1 else None,
+            program_id=programs.pop() if len(programs) == 1 else None,
+            preview=deletions.preview(kind, rows),
+        )
+        record(
+            meta,
+            "deletion.request",
+            req,
+            new={"kind": kind, "title": req.title, "count": len(ids)},
+            department_id=req.department_id,
+            program_id=req.program_id,
+        )
+    admins = list(rbac_users_with(Role.SYSTEM_ADMIN).exclude(pk=meta.actor.pk))
+    if admins:
+        notify(
+            admins,
+            category=Category.COLLEGE,
+            title=f"طلب حذف {req.get_kind_display()}: {req.title}",
+            body=f"من {meta.actor.full_name_ar}" + (f" — {req.reason}" if req.reason else ""),
+            action_url="/system/deletions",
+        )
+    return req
+
+
+def pending_record_request(request_id: int, kind: str, ids: list[str]) -> DeletionRequest:
+    """The waiting request an approval names, locked; its targets must be exactly ``ids``."""
+    req = DeletionRequest.objects.select_for_update().filter(pk=request_id).first()
+    if req is None or req.kind != kind:
+        raise Conflict(gettext("This request was already decided."), code="decided")
+    if req.state != DeletionRequest.State.PENDING:
+        raise Conflict(gettext("This request was already decided."), code="decided")
+    if sorted(map(str, req.targets)) != sorted(map(str, ids)):
+        raise Conflict(gettext("The request asks for other records."), code="targets")
+    return req
+
+
+def approved(meta: RequestMeta, req: DeletionRequest) -> None:
+    """After the deletion went through: the request is approved, on the record, and its asker
+    told."""
+    from notifications.models import Category
+    from notifications.services import notify
+
+    req.state = DeletionRequest.State.APPROVED
+    req.decided_by = meta.actor
+    req.decided_at = timezone.now()
+    req.save(update_fields=["state", "decided_by", "decided_at"])
+    record(meta, "deletion.approve", req, new={"kind": req.kind, "title": req.title})
+    transaction.on_commit(
+        lambda: notify(
+            [req.requested_by],
+            category=Category.COLLEGE,
+            title=f"حُذف {req.get_kind_display()}: {req.title}",
+            body="وافق مدير النظام على طلبك، وحُذف مع كل ما يرتبط به.",
+            action_url="/deletion-requests",
+        )
     )
