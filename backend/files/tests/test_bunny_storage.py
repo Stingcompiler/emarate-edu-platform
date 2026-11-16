@@ -149,3 +149,36 @@ def test_a_deleted_video_leaves_bunny_stream(fake, make_user, it_offering):
     with TestCase.captureOnCommitCallbacks(execute=True):
         on_stream.delete()
     assert removed()
+
+
+def test_without_a_stream_library_a_video_is_a_file_in_the_private_zone(
+    fake, settings, api, classroom
+):
+    """Owner, 2026-11-16: «الفيديوهات تبقى على bunny storage»."""
+    from django.core.files.uploadedfile import SimpleUploadedFile
+
+    from files.models import VideoAsset
+
+    settings.MEDIA_BACKEND = "bunny"
+    settings.BUNNY_STREAM_LIBRARY_ID = ""
+    settings.BUNNY_PULL_ZONE_URL = "https://ecst-files.b-cdn.net"
+    settings.BUNNY_TOKEN_KEY = "token-key"
+    settings.STORAGES = {**settings.STORAGES, "default": {"BACKEND": "files.bunny.BunnyStorage"}}
+    teacher = api(classroom.teacher)
+    made = teacher.post(
+        "/api/v1/videos/upload-ticket",
+        {"offering": classroom.offering.pk, "title": "المحاضرة 1", "size": 12},
+    ).data
+    assert made["ticket"]["mode"] == "local"  # through the platform, not to Stream
+    assert not [c for c in fake.calls if "video.bunnycdn.com" in c[1]]
+    sent = teacher.post(
+        made["ticket"]["upload_url"],
+        {"file": SimpleUploadedFile("lecture.mp4", b"\x00\x00\x00\x18ftypmp42")},
+        format="multipart",
+    )
+    assert sent.status_code == 200, sent.data
+    video = VideoAsset.objects.get()
+    assert video.provider == "local"
+    assert fake.zones["ecst-private"][video.file.name] == b"\x00\x00\x00\x18ftypmp42"
+    link = teacher.get(f"/api/v1/videos/{video.public_id}/playback").data["url"]
+    assert link.startswith("https://ecst-files.b-cdn.net/") and "token=" in link
