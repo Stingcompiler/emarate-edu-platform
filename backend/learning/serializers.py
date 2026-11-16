@@ -101,6 +101,12 @@ class MySubmissionSummarySerializer(serializers.Serializer):
     score = serializers.DecimalField(max_digits=7, decimal_places=2, allow_null=True)
 
 
+class AssignmentPowersSerializer(serializers.Serializer):
+    delete = serializers.BooleanField()
+    delete_submissions = serializers.BooleanField()
+    submissions = serializers.IntegerField()
+
+
 class AssignmentSerializer(serializers.ModelSerializer):
     offering = serializers.PrimaryKeyRelatedField(queryset=CourseOffering.objects.all())
     lecture = serializers.SlugRelatedField(
@@ -116,6 +122,7 @@ class AssignmentSerializer(serializers.ModelSerializer):
     course_code = serializers.CharField(source="offering.course.code", read_only=True)
     course_name = serializers.CharField(source="offering.course.name_ar", read_only=True)
     mine = serializers.SerializerMethodField()
+    can = serializers.SerializerMethodField()
 
     class Meta:
         model = Assignment
@@ -125,6 +132,7 @@ class AssignmentSerializer(serializers.ModelSerializer):
             "course_code",
             "course_name",
             "mine",
+            "can",
             "lecture",
             "title",
             "description",
@@ -163,6 +171,22 @@ class AssignmentSerializer(serializers.ModelSerializer):
             "is_late": submission.is_late,
             "graded": approved,
             "score": grade.final_score if approved else None,
+        }
+
+    @extend_schema_field(AssignmentPowersSerializer(allow_null=True))
+    def get_can(self, obj):
+        """On the assignment's own page only (the view says so): may the caller delete it, and
+        delete a student's submission (owner, 2026-11-16)? And how many have submitted."""
+        if not self.context.get("powers"):
+            return None
+        from . import access
+
+        user = self.context["request"].user
+        found = access.for_offering(user, obj.offering)
+        return {
+            "delete": found.can_delete(user, obj),
+            "delete_submissions": found.delete_submissions,
+            "submissions": obj.submissions.count(),
         }
 
     def validate_rubric(self, value):

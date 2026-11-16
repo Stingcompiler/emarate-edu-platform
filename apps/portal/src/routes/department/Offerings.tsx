@@ -231,40 +231,45 @@ export function Offerings() {
           onClose={() => setAsking(null)}
         />
       )}
-      <FilterBar className="mb-3 flex flex-wrap items-center gap-2">
-        <input
-          type="search"
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-          placeholder="بحث برمز المادة أو اسمها أو الأستاذ"
-          aria-label="بحث في المواد"
-          className="min-h-10 w-full rounded-full border border-border-soft bg-surface px-4 text-sm sm:max-w-sm sm:min-w-60 sm:flex-1"
-        />
-        <ProgramLevelSelects
-          filter={placement}
-          withoutProgramme={all.some((o) => o.course_detail.program == null)}
-        />
-        <div className="flex flex-wrap gap-2">
+      {/* Two rows (owner, 2026-11-16: the bar had grown into one wrapping line): what to look
+          for — the search and the programme, level and semester — then the counters, with
+          «مادة جديدة» at their end. */}
+      <FilterBar className="mb-3 space-y-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <input
+            type="search"
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder="بحث برمز المادة أو اسمها أو الأستاذ"
+            aria-label="بحث في المواد"
+            className="min-h-10 w-full rounded-full border border-border-soft bg-surface px-4 text-sm sm:max-w-sm sm:min-w-60 sm:flex-1"
+          />
+          <ProgramLevelSelects
+            filter={placement}
+            withoutProgramme={all.some((o) => o.course_detail.program == null)}
+          />
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
           {(Object.keys(FILTERS) as (keyof typeof FILTERS)[]).map((k) => (
             <Chip key={k} active={filter === k} onClick={() => setFilter(k)}>
               {FILTERS[k].label} {num(rows.filter(FILTERS[k].test).length)}
             </Chip>
           ))}
+          {manage && (
+            <Button
+              variant="secondary"
+              className="min-h-9 px-3 ms-auto"
+              onClick={() => {
+                const form = document.getElementById("new-offering");
+                form?.scrollIntoView({ block: "center" });
+                form?.querySelector<HTMLInputElement>("input")?.focus({ preventScroll: true });
+              }}
+            >
+              <Plus size={16} aria-hidden />
+              مادة جديدة
+            </Button>
+          )}
         </div>
-        {manage && (
-          <Button
-            variant="secondary"
-            className="min-h-9 px-3 sm:ms-auto"
-            onClick={() => {
-              const form = document.getElementById("new-offering");
-              form?.scrollIntoView({ block: "center" });
-              form?.querySelector<HTMLInputElement>("input")?.focus({ preventScroll: true });
-            }}
-          >
-            <Plus size={16} aria-hidden />
-            مادة جديدة
-          </Button>
-        )}
       </FilterBar>
       <Card className="divide-y divide-border-soft">
         <div className="hidden grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)_minmax(0,1fr)_70px_80px_72px] gap-3 bg-surface-alt px-4 py-2 text-xs text-text-muted xl:grid">

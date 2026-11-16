@@ -34,7 +34,7 @@ test("the department's courses narrow to a programme, a level and a semester", a
   expect(levelOne.every((s) => s.startsWith("1/"))).toBe(true);
   expect(levelOne.length).toBeLessThanOrEqual(before);
 
-  await choose(filter.getByRole("combobox", { name: "الفصل الدراسي" }), "الفصل الدراسي الأول");
+  await choose(filter.getByRole("combobox", { name: "الفصل الدراسي" }), "الفصل الأول");
   await expect(page).toHaveURL(/semester=1/);
   const firstSemester = await shownLevels(page);
   expect(firstSemester.length).toBeGreaterThan(0);
