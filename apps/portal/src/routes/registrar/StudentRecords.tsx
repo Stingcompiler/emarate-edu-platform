@@ -147,6 +147,7 @@ export function StudentRecords() {
             variant="secondary"
             className="min-h-10 px-3"
             disabled={gathering || !(list.data?.count ?? 0)}
+            why={gathering ? "جارٍ التحديد" : "لا طلاب في نتائج التصفية"}
             onClick={() => void pickAllShown()}
           >
             {gathering ? "جارٍ التحديد…" : `تحديد كل نتائج التصفية (${num(list.data?.count ?? 0)})`}
