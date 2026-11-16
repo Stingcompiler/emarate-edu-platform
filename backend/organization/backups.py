@@ -97,7 +97,7 @@ def _stamp(name: str):
 
 
 def _size(name: str) -> int | None:
-    from django.core.files.storage import default_storage
+    from core.backups import default_storage
 
     try:
         return default_storage.size(name)
@@ -244,7 +244,7 @@ class BackupDownloadView(APIView):
         data.is_valid(raise_exception=True)
         stamp = data.validated_data["stamp"]
         check_own_password(request.user, data.validated_data["password"])
-        from django.core.files.storage import default_storage
+        from core.backups import default_storage
 
         if not default_storage.exists(backups.names_of(stamp)["database"]):
             raise NotFound(gettext("This backup is no longer kept."))
@@ -375,8 +375,7 @@ class BackupRestoreView(APIView):
 
     @extend_schema(request=BackupRestoreSerializer, responses={202: RestoreStateSerializer})
     def post(self, request):
-        from django.core.files.storage import default_storage
-
+        from core.backups import default_storage
         from core.tasks import restore_backup
 
         data = BackupRestoreSerializer(data=request.data)

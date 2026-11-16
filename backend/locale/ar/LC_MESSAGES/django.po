@@ -1922,3 +1922,6 @@ msgstr "سلّم %(n)s من الطلاب. احذف الواجب مع تسليم�
 #: learning/services.py
 msgid "You cannot delete this submission."
 msgstr "لا يمكنك حذف هذا التسليم."
+
+msgid "The copy's files could not all be sent to Bunny; nothing was changed."
+msgstr "تعذّر إرسال كل ملفات النسخة إلى Bunny، فلم يتغيّر شيء."

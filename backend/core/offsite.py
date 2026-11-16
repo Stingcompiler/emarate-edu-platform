@@ -20,7 +20,6 @@ import logging
 
 from django.conf import settings
 from django.core.cache import cache
-from django.core.files.storage import default_storage
 from django.utils import timezone
 
 from core import backups
@@ -99,7 +98,7 @@ def sync() -> dict:
                 continue
             backups.reading(stamp, seconds=3600)  # the daily prune leaves it while it goes up
             try:
-                with default_storage.open(name, "rb") as handle:
+                with backups.default_storage.open(name, "rb") as handle:
                     client.upload_fileobj(handle, bucket, key)
             finally:
                 backups.done_reading(stamp)

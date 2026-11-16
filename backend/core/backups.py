@@ -46,9 +46,28 @@ from cryptography.hazmat.primitives.kdf.scrypt import Scrypt
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.core.files import File
-from django.core.files.storage import default_storage
+from django.core.files.storage import FileSystemStorage
+from django.core.files.storage import default_storage as _files
 
 PREFIX = "backups"
+
+
+class _ServerDisk:
+    """Where the backups live: the server's own disk, always (owner, 2026-11-16: the uploaded
+    files move to Bunny, the backups stay — a restore reads a path, and the copy off the server
+    goes to R2). While the files are on this disk too it is their storage itself; on Bunny, the
+    same folder (MEDIA_ROOT/private). Every backup and restore module goes through it."""
+
+    def _target(self):
+        if getattr(settings, "MEDIA_BACKEND", "local") == "local":
+            return _files
+        return FileSystemStorage(location=Path(settings.MEDIA_ROOT) / "private")
+
+    def __getattr__(self, name):
+        return getattr(self._target(), name)
+
+
+default_storage = _ServerDisk()
 DB_SUFFIX = ".dump.enc"
 MEDIA_SUFFIX = ".tar.gz.enc"
 INFO_SUFFIX = ".json.enc"

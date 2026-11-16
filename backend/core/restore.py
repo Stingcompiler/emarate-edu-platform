@@ -49,11 +49,11 @@ from pathlib import Path
 
 from django.conf import settings
 from django.core.cache import cache
-from django.core.files.storage import default_storage
 from django.utils import timezone, translation
 from django.utils.translation import gettext
 
 from core import backups, maintenance
+from core.backups import default_storage
 
 logger = logging.getLogger(__name__)
 
@@ -417,6 +417,17 @@ def _files_only(member: tarfile.TarInfo, path: str):
     return tarfile.data_filter(member, path)
 
 
+def _push_to_bunny(archive: Path) -> None:
+    from files.move import push_archive
+
+    sent = push_archive(archive)
+    if sent["failed"] or sent["missing"]:
+        raise RestoreRefused(
+            "files",
+            gettext("The copy's files could not all be sent to Bunny; nothing was changed."),
+        )
+
+
 def stage_files(archive: Path, root: Path) -> Path:
     """Unpack the copy's files beside the live ones (same disk, so the swap is a rename)."""
     root.mkdir(parents=True, exist_ok=True)
@@ -629,6 +640,10 @@ def run(
                 root = media_root()
                 if archive is not None and root is not None:
                     staging = stage_files(archive, root)
+                elif archive is not None:
+                    # The files live on Bunny now: the copy's are sent there first (the same
+                    # names, what is already there is kept), before the database changes.
+                    _push_to_bunny(archive)
                 safety = _replace(dump, work, staging, root)
                 staging = None
             _say(state="done", step="", finished=timezone.now().isoformat())

@@ -47,21 +47,40 @@ ANYMAIL = {
 }
 INSTALLED_APPS = [*INSTALLED_APPS, "anymail"]  # noqa: F405
 
-# ─── Files: Bunny Storage (private zone) + signed CDN links + Bunny Stream ─
-# Set MEDIA_BACKEND=local only for a throwaway deployment; `check --deploy`
-# then warns (core.W001).
+# ─── Files: Bunny Storage (two zones) + signed CDN links + Bunny Stream ───
+# Every uploaded file lives on Bunny (owner, 2026-11-16): the private zone, read through
+# token-signed links only, and the public zone (the site's images, photos, the logo) behind a
+# plain pull zone. The keys are read even while MEDIA_BACKEND=local: `move_files_to_bunny` copies
+# the server's files there before the switch (scripts/vps/set-bunny-storage.sh). The backups stay
+# on the server's own disk either way (core.backups.default_storage). Set MEDIA_BACKEND=local
+# only for a throwaway deployment; `check --deploy` then warns (core.W001).
 MEDIA_BACKEND = env("MEDIA_BACKEND", "bunny")
-if MEDIA_BACKEND == "bunny":
-    BUNNY_STORAGE_HOST = env("BUNNY_STORAGE_HOST", "https://storage.bunnycdn.com")
-    BUNNY_STORAGE_ZONE = env("BUNNY_STORAGE_ZONE", required=True)
-    BUNNY_STORAGE_KEY = env("BUNNY_STORAGE_KEY", required=True)
-    BUNNY_PULL_ZONE_URL = env("BUNNY_PULL_ZONE_URL", required=True)
-    BUNNY_TOKEN_KEY = env("BUNNY_TOKEN_KEY", required=True)
-    BUNNY_STREAM_LIBRARY_ID = env("BUNNY_STREAM_LIBRARY_ID", required=True)
-    BUNNY_STREAM_API_KEY = env("BUNNY_STREAM_API_KEY", required=True)
-    BUNNY_STREAM_TOKEN_KEY = env("BUNNY_STREAM_TOKEN_KEY", required=True)
-    BUNNY_WEBHOOK_SECRET = env("BUNNY_WEBHOOK_SECRET", required=True)
-    STORAGES = {**STORAGES, "default": {"BACKEND": "files.bunny.BunnyStorage"}}  # noqa: F405
+_on_bunny = MEDIA_BACKEND == "bunny"
+BUNNY_STORAGE_HOST = env("BUNNY_STORAGE_HOST", "https://storage.bunnycdn.com")
+BUNNY_STORAGE_ZONE = env("BUNNY_STORAGE_ZONE", "", required=_on_bunny)
+BUNNY_STORAGE_KEY = env("BUNNY_STORAGE_KEY", "", required=_on_bunny)
+BUNNY_PULL_ZONE_URL = env("BUNNY_PULL_ZONE_URL", "", required=_on_bunny)
+BUNNY_TOKEN_KEY = env("BUNNY_TOKEN_KEY", "", required=_on_bunny)
+BUNNY_PUBLIC_STORAGE_ZONE = env("BUNNY_PUBLIC_STORAGE_ZONE", "", required=_on_bunny)
+BUNNY_PUBLIC_STORAGE_KEY = env("BUNNY_PUBLIC_STORAGE_KEY", "", required=_on_bunny)
+BUNNY_PUBLIC_URL = env("BUNNY_PUBLIC_URL", "", required=_on_bunny)
+BUNNY_STREAM_LIBRARY_ID = env("BUNNY_STREAM_LIBRARY_ID", "", required=_on_bunny)
+BUNNY_STREAM_API_KEY = env("BUNNY_STREAM_API_KEY", "", required=_on_bunny)
+BUNNY_STREAM_TOKEN_KEY = env("BUNNY_STREAM_TOKEN_KEY", "", required=_on_bunny)
+BUNNY_WEBHOOK_SECRET = env("BUNNY_WEBHOOK_SECRET", "", required=_on_bunny)
+if _on_bunny:
+    STORAGES = {
+        **STORAGES,  # noqa: F405
+        "default": {"BACKEND": "files.bunny.BunnyStorage"},
+        "public": {
+            "BACKEND": "files.bunny.BunnyStorage",
+            "OPTIONS": {
+                "zone": BUNNY_PUBLIC_STORAGE_ZONE,
+                "key": BUNNY_PUBLIC_STORAGE_KEY,
+                "base_url": BUNNY_PUBLIC_URL,
+            },
+        },
+    }
 
 FIELD_ENCRYPTION_KEY = env("FIELD_ENCRYPTION_KEY", required=True)
 VAPID_PUBLIC_KEY = env("VAPID_PUBLIC_KEY", required=True)
