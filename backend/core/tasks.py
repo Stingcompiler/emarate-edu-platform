@@ -182,3 +182,29 @@ def delete_records(
             logging.getLogger(__name__).exception("deletion job %s failed", job_id)
             return say(state="failed", error=gettext(FAILED))
     return say(state="done", removed=removed)
+
+
+@shared_task
+def sync_offsite_backups() -> dict:
+    """Every backup kept on the server, copied to the bucket off it (core.offsite); after each
+    backup and every six hours. A failure alerts the people who run the platform."""
+    import logging
+
+    from core import offsite
+
+    if not offsite.configured():
+        return {"configured": False}
+    try:
+        return offsite.sync()
+    except Exception:
+        try:
+            from django.core.management import call_command
+
+            call_command(
+                "notify_ops",
+                unit="ecst-offsite-backup",
+                detail="تعذّر نسخ النسخ الاحتياطية إلى التخزين خارج الخادم (Cloudflare R2).",
+            )
+        except Exception:
+            logging.getLogger(__name__).exception("could not send the off-server backup alert")
+        return offsite.status() or {}

@@ -26,6 +26,8 @@ prod = [
     "redis>=6,<7",
     "django-anymail[brevo,resend]>=15,<16",
     "gunicorn>=23,<24",
+    # The copies of the backups off the server, on Cloudflare R2 (S3's API; owner, 2026-11-16).
+    "boto3>=1.40,<2",
     "sentry-sdk[django]>=2,<3",
     "whitenoise>=6.8,<7",
 ]
