@@ -129,6 +129,9 @@ CAPABILITIES: dict[str, frozenset[Role]] = {
     # A student, a course or a department with everything it holds, and many students at once
     # (owner, 2026-11-15): the system admin alone (core.deletions).
     "records.delete_all": frozenset({R.SYSTEM_ADMIN}),
+    # Deciding a head's request to delete students or a course (owner, 2026-11-15): the
+    # system admin alone — approving it is that deletion.
+    "deletions.approve_records": frozenset({R.SYSTEM_ADMIN}),
     "registration.approve": frozenset(
         {R.SYSTEM_ADMIN, R.HEAD_REGISTRAR, R.DEPARTMENT_MANAGER, R.DEPARTMENT_SUPERVISOR}
     ),
@@ -259,7 +262,7 @@ CAPABILITIES["deletions.approve"] = frozenset({R.SYSTEM_ADMIN})
 # everything: the system admin's alone, not the supervisor's (owner, 2026-11-14).
 CAPABILITIES["backups.download"] = frozenset({R.SYSTEM_ADMIN})
 CAPABILITIES["backups.restore"] = frozenset({R.SYSTEM_ADMIN})
-ADMIN_ONLY = frozenset({"backups.download", "backups.restore"})
+ADMIN_ONLY = frozenset({"backups.download", "backups.restore", "deletions.approve_records"})
 
 # The system supervisor holds what the admin holds, but no capability that deletes and none
 # of ADMIN_ONLY; and the

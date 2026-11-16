@@ -33,11 +33,14 @@ export function DeleteEverythingDialog(props: Parameters<typeof Dialog>[0]): Rea
 function Dialog({
   kind,
   ids,
+  requestId,
   onDone,
   onClose,
 }: {
   kind: DeletionKind;
   ids: string[];
+  /** A head's request this deletion approves (approved only once the rows are gone). */
+  requestId?: number;
   /** After a deletion that went through (the rows are gone). */
   onDone: () => void;
   onClose: () => void;
@@ -69,7 +72,7 @@ function Dialog({
   const remove = useMutation({
     mutationFn: async () => {
       const { data, error } = await api.POST("/api/v1/deletions", {
-        body: { kind, ids, confirm: confirm.trim(), password, reason },
+        body: { kind, ids, confirm: confirm.trim(), password, reason, request: requestId ?? null },
       });
       if (!data) throw error;
       return data;

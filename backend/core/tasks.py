@@ -145,11 +145,13 @@ def delete_records(
     import logging
 
     from django.core.cache import cache
+    from django.db import transaction
     from django.utils import translation
     from django.utils.translation import gettext
 
     from accounts.models import User
     from audit.services import RequestMeta
+    from content import deletions as requests
     from core import backups, deletions
 
     key = f"deletion-job:{job_id}"
@@ -171,12 +173,22 @@ def delete_records(
                 say(backup=made.rsplit("-", 1)[-1].split(".", 1)[0])
                 rows = deletions.find(kind, ids)
                 actor = User.objects.filter(pk=actor_id).first()
-                removed = deletions.delete(
-                    RequestMeta(actor=actor), kind, rows, reason=reason, request_id=request_id
-                )
+                meta = RequestMeta(actor=actor)
+                with transaction.atomic():
+                    # A head's request is approved with the deletion, or not at all.
+                    req = (
+                        requests.pending_record_request(request_id, kind, ids)
+                        if request_id
+                        else None
+                    )
+                    removed = deletions.delete(
+                        meta, kind, rows, reason=reason, request_id=request_id
+                    )
+                    if req is not None:
+                        requests.approved(meta, req)
         except backups.Busy:
             return say(state="failed", error=gettext(BUSY))
-        except deletions.Refused as refused:
+        except (deletions.Refused, requests.Conflict) as refused:
             return say(state="failed", error=str(refused.detail))
         except Exception:
             logging.getLogger(__name__).exception("deletion job %s failed", job_id)

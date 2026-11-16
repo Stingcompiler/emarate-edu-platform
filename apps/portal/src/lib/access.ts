@@ -156,6 +156,8 @@ export const ROUTE_ACCESS: Record<string, Allow> = {
   // One programme's page: its head and supervisor are appointed there (owner, 2026-11-13).
   "/programs/:id": cap("courses.view"),
   "/department/students": departmentPages,
+  // A head's requests to delete students or courses (owner, 2026-11-15).
+  "/deletion-requests": either(cap("students.delete"), cap("courses.delete")),
   "/department/approvals": cap("registration.approve"),
   "/department/audit": cap("audit.view"),
   "/reports": cap("reports.department"),

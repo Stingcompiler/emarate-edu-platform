@@ -275,6 +275,10 @@ class DeletionRequest(models.Model):
     class Kind(models.TextChoices):
         ANNOUNCEMENT = "announcement", "إعلان"
         NOTIFICATION = "notification", "إشعار"
+        # A department's or a programme's head asks; the system admin alone decides, and the
+        # approval deletes them with everything they hold (owner, 2026-11-15; core.deletions).
+        STUDENT = "student", "طالب"
+        COURSE = "course", "مادة"
 
     class State(models.TextChoices):
         PENDING = "pending", "بانتظار الموافقة"
@@ -295,13 +299,27 @@ class DeletionRequest(models.Model):
     decided_at = models.DateTimeField(null=True, blank=True)
     decision_note = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    # Students and courses: what is asked for (public ids of students, the course's number), the
+    # department and programme it is filed under, and what would go with it when asked.
+    targets = models.JSONField(default=list, blank=True)
+    department = models.ForeignKey(
+        "organization.Department",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="+",
+    )
+    program = models.ForeignKey(
+        "organization.Program", on_delete=models.SET_NULL, null=True, blank=True, related_name="+"
+    )
+    preview = models.JSONField(default=dict, blank=True)
 
     class Meta:
         ordering = ["-created_at", "-id"]
         constraints = [
             models.UniqueConstraint(
                 fields=["kind", "object_id"],
-                condition=models.Q(state="pending"),
+                condition=models.Q(state="pending", kind__in=["announcement", "notification"]),
                 name="one_pending_deletion_per_item",
             )
         ]
