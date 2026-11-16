@@ -29,6 +29,7 @@ from __future__ import annotations
 import base64
 import contextlib
 import json
+import logging
 import os
 import shutil
 import subprocess
@@ -375,7 +376,23 @@ def create(keep: int) -> list[str]:
     from core import restore
 
     restore.purge_replaced()
+    _copy_off_the_server()
     return stored
+
+
+def _copy_off_the_server() -> None:
+    """Ask the worker to copy the new backup off the server (core.offsite), when set up. A
+    broker that is down only delays it: the six-hourly run catches up."""
+    from core import offsite
+
+    if not offsite.configured():
+        return
+    try:
+        from core.tasks import sync_offsite_backups
+
+        sync_offsite_backups.delay()
+    except Exception:
+        logging.getLogger(__name__).warning("could not ask for the off-server copy")
 
 
 def _owner_only(name: str) -> None:

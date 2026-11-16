@@ -170,6 +170,8 @@ CELERY_BEAT_SCHEDULE = {
     "expire-applications": {"task": "admissions.tasks.expire_applications", "schedule": 24 * 3600},
     # Scheduled site content goes live (or expires) on time, not at the six-hourly build.
     "rebuild-site-when-due": {"task": "content.tasks.rebuild_when_due", "schedule": 10 * 60},
+    # The off-server copies catch up (a failed upload is tried again; nothing if not set up).
+    "sync-offsite-backups": {"task": "core.tasks.sync_offsite_backups", "schedule": 6 * 3600},
 }
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
@@ -328,6 +330,15 @@ SITE_BUILD_TOKEN = env("SITE_BUILD_TOKEN", "")
 # Encrypted weekly database dumps (core.backups): keep this key offline too.
 BACKUP_ENCRYPTION_KEY = env("BACKUP_ENCRYPTION_KEY", "")
 BACKUP_KEEP = int(env("BACKUP_KEEP", "8"))
+# A copy of every backup off the server (owner, 2026-11-16: Cloudflare R2, which speaks S3).
+# The files go as they are, already encrypted with BACKUP_ENCRYPTION_KEY. Empty: not used.
+OFFSITE_BACKUP_ENDPOINT = env(
+    "OFFSITE_BACKUP_ENDPOINT", ""
+)  # https://<account>.r2.cloudflarestorage.com
+OFFSITE_BACKUP_BUCKET = env("OFFSITE_BACKUP_BUCKET", "")
+OFFSITE_BACKUP_ACCESS_KEY_ID = env("OFFSITE_BACKUP_ACCESS_KEY_ID", "")
+OFFSITE_BACKUP_SECRET_ACCESS_KEY = env("OFFSITE_BACKUP_SECRET_ACCESS_KEY", "")
+OFFSITE_BACKUP_KEEP = int(env("OFFSITE_BACKUP_KEEP", "30"))
 # The work factor (log2) that turns a downloaded backup's password into its key (scrypt).
 BACKUP_SCRYPT_LOG_N = int(env("BACKUP_SCRYPT_LOG_N", "17"))
 # Who hears about a failed backup, site build or health check besides the system admins

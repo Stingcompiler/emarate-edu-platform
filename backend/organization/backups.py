@@ -67,6 +67,16 @@ class RestoreStateSerializer(serializers.Serializer):
     source = serializers.ChoiceField(choices=["kept", "file"])
 
 
+class OffsiteSerializer(serializers.Serializer):
+    """The copies off the server (core.offsite): set up or not, and how the last sync went."""
+
+    configured = serializers.BooleanField()
+    ok = serializers.BooleanField(allow_null=True)
+    at = serializers.DateTimeField(allow_null=True)
+    newest = serializers.CharField(allow_blank=True)
+    copies = serializers.IntegerField()
+
+
 class BackupsSerializer(serializers.Serializer):
     running = serializers.BooleanField()
     last_failed = serializers.BooleanField()
@@ -75,6 +85,7 @@ class BackupsSerializer(serializers.Serializer):
     now = BackupCountsSerializer()
     restore = RestoreStateSerializer(allow_null=True)
     empty = serializers.BooleanField()
+    offsite = OffsiteSerializer()
 
 
 def _stamp(name: str):
@@ -99,6 +110,19 @@ def _counts(details: dict | None) -> dict | None:
     if not isinstance(counts, dict) or set(counts) != set(backups.COUNTED):
         return None
     return counts
+
+
+def _offsite() -> dict:
+    from core import offsite
+
+    found = offsite.status() or {}
+    return {
+        "configured": offsite.configured(),
+        "ok": found.get("ok"),
+        "at": found.get("at"),
+        "newest": found.get("newest", ""),
+        "copies": found.get("copies", 0),
+    }
 
 
 def _restore_state() -> dict | None:
@@ -158,6 +182,7 @@ class BackupsView(APIView):
                     "restore": _restore_state(),
                     # No student yet: a backup file from another installation may be restored.
                     "empty": backups.platform_is_empty(),
+                    "offsite": _offsite(),
                 }
             ).data
         )

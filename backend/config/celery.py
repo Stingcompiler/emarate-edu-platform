@@ -9,7 +9,15 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings.dev")
 logger = logging.getLogger(__name__)
 
 # Never put off: the restore itself and the copies (they hold the backups' lock instead).
-ALWAYS_RUN = frozenset({"core.tasks.restore_backup", "core.tasks.create_backup", "core.tasks.ping"})
+ALWAYS_RUN = frozenset(
+    {
+        "core.tasks.restore_backup",
+        "core.tasks.create_backup",
+        "core.tasks.ping",
+        # Reads the backups only: the copy a restore makes of the present goes off the server too.
+        "core.tasks.sync_offsite_backups",
+    }
+)
 
 
 class PlatformTask(Task):
