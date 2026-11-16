@@ -86,7 +86,7 @@ export function ProgramPage() {
         p && (deletesAll || asks) ? (
           <Button
             variant="secondary"
-            className="min-h-9 whitespace-nowrap px-3 text-danger-strong"
+            className="min-h-9 px-3 text-danger-strong"
             onClick={() => setDeleting({ id: p.id, department: p.department, name: p.name_ar })}
           >
             <Trash2 size={16} aria-hidden />
