@@ -4,6 +4,7 @@ import base64
 import hashlib
 import io
 import json
+import re
 import zipfile
 from urllib.parse import parse_qs, urlparse
 
@@ -171,7 +172,9 @@ def test_bunny_storage_writes_with_the_zone_key(bunny_mode):
     name = storage.save("lecture/x.pdf", ContentFile(b"%PDF-1"))
     put = bunny_mode[-1]
     assert put["method"] == "PUT"
-    assert put["url"] == "https://storage.bunnycdn.com/ecst-private/lecture/x.pdf"
+    # A random part in every name: a PUT would replace a file of the same name.
+    assert re.fullmatch(r"lecture/x-[0-9a-f]{12}\.pdf", name)
+    assert put["url"] == f"https://storage.bunnycdn.com/ecst-private/{name}"
     assert put["headers"]["AccessKey"] == "storage-key"
     assert storage.open(name).read() == b"stored bytes"
     with pytest.raises(NotImplementedError):

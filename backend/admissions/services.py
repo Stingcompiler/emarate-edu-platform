@@ -25,7 +25,7 @@ from accounts import rbac
 from accounts.rbac import Role
 from audit.services import SYSTEM, RequestMeta, record
 from core.errors import Conflict, Invalid
-from files import validation
+from files import trash, validation
 from notifications.models import Category, Outbox
 from notifications.services import notify
 from organization.models import SystemSettings
@@ -632,8 +632,8 @@ def add_document(contact, application: Application, doc_type: str, upload) -> Ap
                 mime=kind.mime,
             )
             ApplicationDocument.objects.filter(pk__in=[d.pk for d in replaced]).delete()
-            old_files = [(d.file.storage, d.file.name) for d in replaced if d.file]
-            transaction.on_commit(lambda: [storage.delete(name) for storage, name in old_files])
+            old_files = [d.file.name for d in replaced if d.file]
+            transaction.on_commit(lambda: trash.discard(old_files))
     except BaseException:
         if document is not None and document.file:
             document.file.storage.delete(document.file.name)  # not kept: no row points at it

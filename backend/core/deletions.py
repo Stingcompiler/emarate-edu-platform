@@ -219,13 +219,10 @@ def preview(kind: str, rows: list) -> dict[str, int]:
 
 
 def _remove_files(files: list) -> None:
-    from django.core.files.storage import default_storage
+    """On Bunny they wait before leaving it, so the backup taken first can bring them back."""
+    from files import trash
 
-    for _, name in files:
-        try:
-            default_storage.delete(name)
-        except Exception:  # a file already gone is not a failure of the deletion
-            logger.warning("deletion: could not remove the file %s", name)
+    trash.discard([name for _, name in files])
 
 
 def delete(meta, kind: str, rows: list, *, reason: str = "", request_id: int | None = None) -> dict:

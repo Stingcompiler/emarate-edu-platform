@@ -143,6 +143,10 @@ BUNNY_TOKEN_KEY = ""
 BUNNY_PUBLIC_STORAGE_ZONE = ""
 BUNNY_PUBLIC_STORAGE_KEY = ""
 BUNNY_PUBLIC_URL = ""
+# On Bunny a deleted file waits this long before it leaves the zone: the backups hold the
+# database only, and a copy restored within these days still finds its files (files.trash).
+# As long as the copies off the server are kept (OFFSITE_BACKUP_KEEP, one a day).
+FILES_KEEP_DELETED_DAYS = int(env("FILES_KEEP_DELETED_DAYS", "30"))
 BUNNY_STREAM_LIBRARY_ID = ""
 BUNNY_STREAM_API_KEY = ""
 BUNNY_STREAM_TOKEN_KEY = ""
@@ -175,6 +179,8 @@ CELERY_BEAT_SCHEDULE = {
     "rebuild-site-when-due": {"task": "content.tasks.rebuild_when_due", "schedule": 10 * 60},
     # The off-server copies catch up (a failed upload is tried again; nothing if not set up).
     "sync-offsite-backups": {"task": "core.tasks.sync_offsite_backups", "schedule": 6 * 3600},
+    # Deleted files leave Bunny once no kept copy can point at them (files.trash).
+    "purge-discarded-files": {"task": "files.tasks.purge_discarded_files", "schedule": 24 * 3600},
 }
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
