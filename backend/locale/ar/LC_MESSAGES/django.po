@@ -1909,3 +1909,12 @@ msgstr "الطلب يخص سجلات أخرى."
 #: content/deletions.py
 msgid "Approve it from the deletion form, which shows what goes with it."
 msgstr "وافق عليه من نافذة الحذف، فهي تعرض ما يُحذف معه."
+
+#: learning/services.py
+#, python-format
+msgid "%(n)s students have submitted. Delete the assignment with their submissions and grades, or close it instead."
+msgstr "سلّم %(n)s من الطلاب. احذف الواجب مع تسليماتهم ودرجاتهم، أو أغلقه بدلًا من ذلك."
+
+#: learning/services.py
+msgid "You cannot delete this submission."
+msgstr "لا يمكنك حذف هذا التسليم."

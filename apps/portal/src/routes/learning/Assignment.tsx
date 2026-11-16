@@ -1,8 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Paperclip, Pencil, Upload } from "lucide-react";
+import { Paperclip, Pencil, Trash2, Upload } from "lucide-react";
 import { useRef, useState } from "react";
-import { Link, useParams } from "react-router";
+import { Link, useNavigate, useParams } from "react-router";
 
+import { useConfirm } from "../../components/Confirm";
 import { PortalShell } from "../../components/PortalShell";
 import {
   Button,
@@ -40,17 +41,58 @@ export function Assignment() {
   const a = assignment.data;
   const course = useCourse(a?.offering).data;
   const staff = isCourseStaff(course);
+  const confirm = useConfirm();
+  const navigate = useNavigate();
+  // With its submissions and grades once students have submitted, said in so many words
+  // (owner, 2026-11-16).
+  const remove = useMutation({
+    mutationFn: async (withSubmissions: boolean) => {
+      const { error, response } = await api.DELETE("/api/v1/assignments/{public_id}", {
+        params: {
+          path: { public_id: id },
+          query: (withSubmissions ? { with_submissions: true } : {}) as never,
+        },
+      });
+      if (!response.ok) throw error;
+    },
+    onSuccess: () => navigate(a ? `/courses/${a.offering}` : "/", { replace: true }),
+  });
+  const submitted = a?.can?.submissions ?? 0;
   return (
     <PortalShell
       title={a?.title ?? "واجب"}
       titleAction={
         staff ? (
-          <Link to={`/assignments/${id}/edit`}>
-            <Button variant="secondary" className="min-h-9 px-3">
-              <Pencil size={16} aria-hidden />
-              تعديل
-            </Button>
-          </Link>
+          <span className="flex flex-wrap items-center gap-2">
+            <Link to={`/assignments/${id}/edit`}>
+              <Button variant="secondary" className="min-h-9 whitespace-nowrap px-3">
+                <Pencil size={16} aria-hidden />
+                تعديل
+              </Button>
+            </Link>
+            {a?.can?.delete && (
+              <Button
+                variant="secondary"
+                className="min-h-9 whitespace-nowrap px-3 text-danger-strong"
+                disabled={remove.isPending}
+                onClick={async () => {
+                  if (
+                    await confirm({
+                      title: `حذف الواجب «${a.title}»؟`,
+                      body: submitted
+                        ? `سلّم فيه ${count(submitted, N.student)}: تُحذف تسليماتهم ودرجاتهم وملفاتهم معه، ولا يمكن التراجع. ويبقى في سجل العمليات من سلّم ودرجته.`
+                        : "لم يسلّم فيه أحد بعد. لا يمكن التراجع.",
+                      confirm: submitted ? "حذف الواجب والتسليمات" : "حذف الواجب",
+                    })
+                  )
+                    remove.mutate(submitted > 0);
+                }}
+              >
+                <Trash2 size={16} aria-hidden />
+                حذف الواجب
+              </Button>
+            )}
+          </span>
         ) : undefined
       }
       subtitle={
@@ -60,7 +102,17 @@ export function Assignment() {
       }
       back={a ? { label: a.course_name, to: `/courses/${a.offering}` } : undefined}
     >
-      {a && (staff ? <Submissions id={id} max={a.max_grade ?? "0"} /> : <StudentView a={a} />)}
+      {remove.isError && (
+        <div className="mb-3">
+          <Notice>{problemMessage(remove.error)}</Notice>
+        </div>
+      )}
+      {a &&
+        (staff ? (
+          <Submissions id={id} max={a.max_grade ?? "0"} deletes={!!a.can?.delete_submissions} />
+        ) : (
+          <StudentView a={a} />
+        ))}
     </PortalShell>
   );
 }
@@ -399,7 +451,22 @@ function SubmitForm({ a, again, onDone }: { a: A; again: boolean; onDone: () => 
   );
 }
 
-function Submissions({ id, max }: { id: string; max: string }) {
+function Submissions({ id, max, deletes }: { id: string; max: string; deletes: boolean }) {
+  const confirm = useConfirm();
+  const client = useQueryClient();
+  // One student's submission (owner, 2026-11-16): the course's teacher, or whoever deletes
+  // coursework there. The student may then submit again.
+  const remove = useMutation({
+    mutationFn: async (publicId: string) => {
+      const { error, response } = await api.DELETE("/api/v1/submissions/{public_id}", {
+        params: { path: { public_id: publicId } },
+      });
+      if (!response.ok) throw error;
+    },
+    onSuccess: () => {
+      void client.invalidateQueries({ queryKey: ["assignment", id] });
+    },
+  });
   const list = useQuery({
     queryKey: ["assignment", id, "submissions"],
     queryFn: async () =>
@@ -417,35 +484,61 @@ function Submissions({ id, max }: { id: string; max: string }) {
         {count(rows.length, N.submission)} · {waiting.toLocaleString("ar-u-nu-latn")} بانتظار
         التصحيح
       </p>
+      {remove.isError && (
+        <div className="mb-3">
+          <Notice>{problemMessage(remove.error)}</Notice>
+        </div>
+      )}
       <Card className="divide-y divide-border-soft">
         {rows.map((r) => (
-          <Link
-            key={r.public_id}
-            to={`/submissions/${r.public_id}`}
-            className="flex items-center gap-3 px-4 py-3 hover:bg-surface-alt"
-          >
-            <span className="min-w-0 flex-1">
-              <span className="block truncate font-semibold text-text">
-                {r.student.full_name_ar}
+          <div key={r.public_id} className="flex items-center" data-submission>
+            <Link
+              to={`/submissions/${r.public_id}`}
+              className="flex min-w-0 flex-1 items-center gap-3 px-4 py-3 hover:bg-surface-alt"
+            >
+              <span className="min-w-0 flex-1">
+                <span className="block truncate font-semibold text-text">
+                  {r.student.full_name_ar}
+                </span>
+                <span className="text-xs text-text-muted">
+                  <bdi>{r.student.university_number}</bdi> ·{" "}
+                  {when(r.current_version?.submitted_at ?? r.first_submitted_at)}
+                  {r.is_late ? " · متأخر" : ""} · إصدار{" "}
+                  {r.versions_count.toLocaleString("ar-u-nu-latn")}
+                </span>
               </span>
-              <span className="text-xs text-text-muted">
-                <bdi>{r.student.university_number}</bdi> ·{" "}
-                {when(r.current_version?.submitted_at ?? r.first_submitted_at)}
-                {r.is_late ? " · متأخر" : ""} · إصدار{" "}
-                {r.versions_count.toLocaleString("ar-u-nu-latn")}
-              </span>
-            </span>
-            {r.grade?.status === "approved" ? (
-              <b className="text-sm text-success-strong">
-                {Number(r.grade.final_score).toLocaleString("ar-u-nu-latn")}/
-                {Number(max).toLocaleString("ar-u-nu-latn")}
-              </b>
-            ) : r.grade ? (
-              <StatusBadge status="suggested" label="مقترح" />
-            ) : (
-              <StatusBadge status="pending" label="للتصحيح" />
+              {r.grade?.status === "approved" ? (
+                <b className="text-sm text-success-strong">
+                  {Number(r.grade.final_score).toLocaleString("ar-u-nu-latn")}/
+                  {Number(max).toLocaleString("ar-u-nu-latn")}
+                </b>
+              ) : r.grade ? (
+                <StatusBadge status="suggested" label="مقترح" />
+              ) : (
+                <StatusBadge status="pending" label="للتصحيح" />
+              )}
+            </Link>
+            {deletes && (
+              <button
+                type="button"
+                aria-label={`حذف تسليم ${r.student.full_name_ar}`}
+                disabled={remove.isPending}
+                onClick={async () => {
+                  if (
+                    await confirm({
+                      title: `حذف تسليم ${r.student.full_name_ar}؟`,
+                      body: "تُحذف كل إصداراته ودرجته وملفاته، ويستطيع الطالب أن يسلّم من جديد ما دام الواجب مفتوحًا. يبقى في سجل العمليات أنه سلّم ودرجته.",
+                      confirm: "حذف التسليم",
+                    })
+                  )
+                    remove.mutate(r.public_id);
+                }}
+                className="me-2 grid size-11 shrink-0 place-items-center rounded-full text-text-muted hover:bg-surface-alt hover:text-danger-strong"
+              >
+                <Trash2 size={16} aria-hidden />
+              </button>
             )}
-          </Link>
+          </div>
         ))}
         {!rows.length && <p className="px-4 py-4 text-sm text-text-muted">لا تسليمات بعد.</p>}
       </Card>
