@@ -51,15 +51,14 @@ def local_files(root: Path, part: str) -> Iterator[tuple[str, Path]]:
     folder = root / part
     if not folder.is_dir():
         return
+    from core.backups import is_upload
+
     for item in sorted(folder.rglob("*")):
         if not item.is_file() or item.is_symlink():
             continue
         relative = item.relative_to(folder)
-        if relative.parts[0].startswith("."):
-            continue
-        if part == "private" and relative.parts[0] == "backups":
-            continue
-        yield relative.as_posix(), item
+        if is_upload(Path(part) / relative):
+            yield relative.as_posix(), item
 
 
 def move(
@@ -105,7 +104,11 @@ def push_archive(archive: Path) -> dict:
     restore does once the files live there."""
     from core.restore import _files_only
 
-    with tempfile.TemporaryDirectory(prefix="ecst-files-") as folder:
+    # Unpacked beside the files, not in the system's temporary folder (often small): a dot
+    # folder, which neither the backups nor the move take for uploaded files.
+    media = Path(settings.MEDIA_ROOT)
+    media.mkdir(parents=True, exist_ok=True)
+    with tempfile.TemporaryDirectory(prefix=".restore-files-", dir=media) as folder:
         with tarfile.open(archive, mode="r:gz") as tar:
             tar.extractall(folder, filter=_files_only)  # noqa: S202  (the "data" filter, no links)
         return move(Path(folder))

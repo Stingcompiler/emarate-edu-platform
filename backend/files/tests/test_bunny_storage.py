@@ -171,14 +171,82 @@ def test_without_a_stream_library_a_video_is_a_file_in_the_private_zone(
     ).data
     assert made["ticket"]["mode"] == "local"  # through the platform, not to Stream
     assert not [c for c in fake.calls if "video.bunnycdn.com" in c[1]]
-    sent = teacher.post(
-        made["ticket"]["upload_url"],
-        {"file": SimpleUploadedFile("lecture.mp4", b"\x00\x00\x00\x18ftypmp42")},
-        format="multipart",
-    )
+    from django.test import TestCase
+
+    body = b"\x00\x00\x00\x18ftypmp42"
+    with TestCase.captureOnCommitCallbacks() as later:
+        sent = teacher.post(
+            made["ticket"]["upload_url"],
+            {"file": SimpleUploadedFile("lecture.mp4", body)},
+            format="multipart",
+        )
     assert sent.status_code == 200, sent.data
     video = VideoAsset.objects.get()
     assert video.provider == "local"
-    assert fake.zones["ecst-private"][video.file.name] == b"\x00\x00\x00\x18ftypmp42"
+    # Not sent to Bunny inside the upload's request: it waits on the disk for the worker.
+    assert video.status == "processing" and not fake.zones.get("ecst-private")
+    on_disk = settings.MEDIA_ROOT / "private" / video.file.name
+    assert on_disk.read_bytes() == body
+    assert teacher.get(f"/api/v1/videos/{video.public_id}/playback").status_code == 400
+    for callback in later:
+        callback()
+    video.refresh_from_db()
+    assert video.status == "ready" and fake.zones["ecst-private"][video.file.name] == body
+    assert not on_disk.exists()
     link = teacher.get(f"/api/v1/videos/{video.public_id}/playback").data["url"]
     assert link.startswith("https://ecst-files.b-cdn.net/") and "token=" in link
+
+
+def test_two_files_of_the_same_name_stay_two_files(fake):
+    """Review 2026-11-16: a PUT replaces what is there, so every new name is unique."""
+    private = move.zones()["private"]
+    first = private.save("videos/2026/11/lecture.mp4", ContentFile(b"one"))
+    second = private.save("videos/2026/11/lecture.mp4", ContentFile(b"two"))
+    assert first != second
+    assert first.startswith("videos/2026/11/lecture-") and first.endswith(".mp4")
+    assert fake.zones["ecst-private"][first] == b"one"
+    assert fake.zones["ecst-private"][second] == b"two"
+    assert len(private.get_available_name("a/" + "x" * 300 + ".pdf", max_length=100)) <= 100
+
+
+def test_on_bunny_a_deleted_file_waits_as_long_as_the_copies_are_kept(fake, settings):
+    """Review 2026-11-16: the backups hold no files on Bunny, so a restored copy must still
+    find them — a deleted file leaves the zone only after FILES_KEEP_DELETED_DAYS."""
+    from datetime import timedelta
+
+    from django.utils import timezone
+
+    from files import trash
+    from files.models import DiscardedFile
+
+    settings.MEDIA_BACKEND = "bunny"
+    settings.STORAGES = {
+        **settings.STORAGES,
+        "default": {"BACKEND": "files.bunny.BunnyStorage"},
+    }
+    fake.zones["ecst-private"] = {"submissions/a.pdf": b"pdf"}
+    trash.discard(["submissions/a.pdf"])
+    assert fake.zones["ecst-private"] == {"submissions/a.pdf": b"pdf"}
+    waiting = DiscardedFile.objects.get()
+    assert waiting.due > timezone.now() + timedelta(days=settings.FILES_KEEP_DELETED_DAYS - 1)
+    assert trash.purge() == {"removed": 0, "failed": 0}
+    DiscardedFile.objects.update(due=timezone.now())
+    assert trash.purge() == {"removed": 1, "failed": 0}
+    assert fake.zones["ecst-private"] == {} and not DiscardedFile.objects.exists()
+
+
+def test_on_the_servers_disk_a_deleted_file_goes_at_once(settings, tmp_path):
+    from files import trash
+    from files.models import DiscardedFile
+
+    settings.MEDIA_BACKEND = "local"
+    settings.STORAGES = {
+        **settings.STORAGES,
+        "default": {
+            "BACKEND": "django.core.files.storage.FileSystemStorage",
+            "OPTIONS": {"location": tmp_path},
+        },
+    }
+    (tmp_path / "a.pdf").write_bytes(b"pdf")
+    trash.discard("a.pdf")
+    assert not (tmp_path / "a.pdf").exists() and not DiscardedFile.objects.exists()

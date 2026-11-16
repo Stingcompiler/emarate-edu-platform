@@ -88,3 +88,23 @@ class VideoAsset(PublicIdModel, TimestampedModel):
 
     def __str__(self) -> str:
         return self.title
+
+
+class DiscardedFile(models.Model):
+    """A file no row points at any more, waiting to leave Bunny (files.trash).
+
+    On Bunny the backups hold the database only, so a file deleted at once could never come back
+    with a restored copy. It stays until ``due`` instead — as long as the copies are kept — and a
+    restore, which brings back the database as it was, takes this list back with it.
+    """
+
+    storage = models.CharField(max_length=20, default="default")
+    name = models.CharField(max_length=255)
+    discarded_at = models.DateTimeField(auto_now_add=True)
+    due = models.DateTimeField(db_index=True)
+
+    class Meta:
+        ordering = ["due"]
+
+    def __str__(self) -> str:
+        return self.name

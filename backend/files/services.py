@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 import hashlib
+import logging
 from datetime import UTC, datetime, timedelta
+from pathlib import Path
 
 from django.conf import settings
 from django.core import signing
@@ -19,6 +21,7 @@ from core.errors import Invalid
 from . import access, bunny, validation
 from .models import StoredFile, VideoAsset
 
+logger = logging.getLogger(__name__)
 LINK_TTL = 10 * 60  # docs/02 Phase 2: a file link expires after 10 minutes
 _SALT = "files.download"
 
@@ -197,9 +200,19 @@ def local_video_upload(meta: RequestMeta, video: VideoAsset, uploaded) -> VideoA
         raise ValidationError({"detail": [gettext("This video was already uploaded.")]})
     if validation.extension_of(uploaded.name) not in validation.VIDEO_EXTENSIONS:
         raise ValidationError({"file": [gettext("Upload an MP4, MOV, MKV or WebM video.")]})
-    video.file = uploaded
     video.size = uploaded.size
-    video.status = VideoAsset.Status.READY
+    if _bunny():
+        # A long video is not sent to Bunny inside this request (review 2026-11-16): it is kept
+        # on the server's disk under its final name, and the worker sends it (files.tasks).
+        field = VideoAsset._meta.get_field("file")
+        name = field.storage.get_available_name(
+            field.generate_filename(video, uploaded.name), max_length=field.max_length
+        )
+        video.file.name = staging_disk().save(name, uploaded)
+        video.status = VideoAsset.Status.PROCESSING
+    else:
+        video.file = uploaded
+        video.status = VideoAsset.Status.READY
     with transaction.atomic():
         video.save(update_fields=["file", "size", "status", "updated_at"])
         record(
@@ -209,7 +222,48 @@ def local_video_upload(meta: RequestMeta, video: VideoAsset, uploaded) -> VideoA
             new={"size": video.size},
             department_id=video.offering.course.department_id if video.offering_id else None,
         )
+        if video.status == VideoAsset.Status.PROCESSING:
+            from .tasks import send_video_to_bunny
+
+            pk, name = video.pk, video.file.name
+            transaction.on_commit(lambda: send_video_to_bunny.delay(pk, name))
     return video
+
+
+def staging_disk():
+    """Where a video waits on the server's disk until the worker has sent it to Bunny."""
+    from django.core.files.storage import FileSystemStorage
+
+    return FileSystemStorage(location=Path(settings.MEDIA_ROOT) / "private")
+
+
+def send_video_to_bunny(video_id: int, name: str) -> None:
+    """The video waiting on the disk goes to the private zone under the same name, then is
+    ready; the disk's copy is removed. Raises when sending fails (the task tries again)."""
+    from django.core.files import File
+    from django.core.files.storage import storages
+
+    disk = staging_disk()
+    video = VideoAsset.objects.filter(pk=video_id).first()
+    if video is None or video.file.name != name:  # deleted, or replaced, meanwhile
+        if disk.exists(name):
+            disk.delete(name)
+        return
+    if video.status != VideoAsset.Status.PROCESSING:
+        return
+    with disk.open(name, "rb") as handle:
+        storages["default"]._save(name, File(handle, name=name))  # the same name, as is
+    VideoAsset.objects.filter(pk=video_id, status=VideoAsset.Status.PROCESSING).update(
+        status=VideoAsset.Status.READY, updated_at=timezone.now()
+    )
+    disk.delete(name)
+
+
+def video_failed(video_id: int, name: str) -> None:
+    VideoAsset.objects.filter(pk=video_id, status=VideoAsset.Status.PROCESSING).update(
+        status=VideoAsset.Status.FAILED, updated_at=timezone.now()
+    )
+    logger.error("video %s could not be sent to Bunny; it stays on the disk as %s", video_id, name)
 
 
 def video_playback(user, video: VideoAsset) -> tuple[str, datetime]:

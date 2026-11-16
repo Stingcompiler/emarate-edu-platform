@@ -12,11 +12,13 @@ from __future__ import annotations
 import base64
 import hashlib
 import json
+import secrets
 import time
 import urllib.request
 from urllib.parse import quote
 
 from django.conf import settings
+from django.core.exceptions import SuspiciousFileOperation
 from django.core.files.base import ContentFile
 from django.core.files.storage import Storage
 from django.utils.deconstruct import deconstructible
@@ -28,9 +30,11 @@ EMBED = "https://iframe.mediadelivery.net/embed"
 
 def _request(method: str, url: str, *, headers: dict, data=None) -> bytes:
     """``data`` is bytes, or an open file sent as it is read (its Content-Length in ``headers``):
-    a long video is not held in memory."""
+    a long video is not held in memory. Only sending a file may take long; anything else that
+    stalls gives up after a minute rather than hold a web worker (review 2026-11-16)."""
     request = urllib.request.Request(url, data=data, method=method, headers=headers)  # noqa: S310
-    with urllib.request.urlopen(request, timeout=600) as response:  # noqa: S310  (https only)
+    timeout = 600 if method == "PUT" else 60
+    with urllib.request.urlopen(request, timeout=timeout) as response:  # noqa: S310  (https only)
         return response.read()
 
 
@@ -132,8 +136,26 @@ class BunnyStorage(Storage):
     def delete(self, name):
         _request("DELETE", self._url(name), headers=self._headers())
 
+    def get_available_name(self, name, max_length=None):
+        """A name no other file has: a PUT replaces whatever is there, and some files keep the
+        uploader's own name (a video, a site image), so every new file gets a random part —
+        two «lecture.mp4» of the same month stay two files (review 2026-11-16)."""
+        folder, _, leaf = name.rpartition("/")
+        stem, dot, ext = leaf.rpartition(".")
+        if not dot or not stem:
+            stem, ext = leaf, ""
+        ext = f".{ext}" if ext else ""
+        tag = f"-{secrets.token_hex(6)}"
+        if max_length is not None:
+            room = max_length - len(folder) - 1 - len(tag) - len(ext)
+            if room < 1:
+                raise SuspiciousFileOperation(f"No room for a unique name: {name!r}.")
+            stem = stem[:room]
+        leaf = f"{stem}{tag}{ext}"
+        return f"{folder}/{leaf}" if folder else leaf
+
     def exists(self, name):
-        # Names are random UUIDs, so collisions are not a concern.
+        # Every new name is made unique above, so nothing is overwritten by an upload.
         return False
 
     def _entries(self, path: str) -> list[dict]:

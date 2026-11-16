@@ -6,7 +6,6 @@ import logging
 import re
 from decimal import Decimal
 
-from django.core.files.storage import default_storage
 from django.db import IntegrityError, transaction
 from django.db.models import F
 from django.utils import timezone
@@ -15,6 +14,7 @@ from rest_framework.exceptions import NotFound, PermissionDenied, ValidationErro
 
 from audit.services import RequestMeta, record, snapshot
 from core.errors import Conflict, Invalid
+from files import trash
 from files.models import Purpose, StoredFile, VideoAsset
 from files.validation import extension_of
 from notifications import events
@@ -391,14 +391,7 @@ def _remove_files(stored: list) -> None:
     for item in stored:
         item.delete()
 
-    def gone():
-        for name in names:
-            try:
-                default_storage.delete(name)
-            except Exception:  # a file already missing is not a failure of the deletion
-                logger.warning("could not remove the file %s", name)
-
-    transaction.on_commit(gone)
+    transaction.on_commit(lambda: trash.discard(names))
 
 
 def _work_of(submission: Submission) -> dict:

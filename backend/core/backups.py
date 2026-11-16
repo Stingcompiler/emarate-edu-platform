@@ -195,12 +195,18 @@ def media_archive_to(path: Path) -> bool:
     with tarfile.open(path, mode="w:gz") as tar:
         for item in sorted(root.rglob("*")):
             relative = item.relative_to(root)
-            # Not the backups themselves, nor what a restore set aside (.replaced-…).
-            aside = relative.parts[0].startswith(".")
-            if aside or relative.parts[:2] == ("private", PREFIX) or not item.is_file():
+            if not is_upload(relative) or not item.is_file():
                 continue
             tar.add(item, arcname=str(relative))
     return True
+
+
+def is_upload(relative: Path) -> bool:
+    """Whether a path under MEDIA_ROOT is an uploaded file — not the backups themselves, nor
+    what a restore set aside or unpacks (``.replaced-…``, ``.restore-…``). The backups' archive
+    and the move to Bunny (files.move) both go by it."""
+    parts = relative.parts
+    return not any(p.startswith(".") for p in parts[:2]) and parts[:2] != ("private", PREFIX)
 
 
 class _Sealer:

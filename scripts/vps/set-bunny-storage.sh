@@ -82,7 +82,9 @@ write_env() {  # $1: MEDIA_BACKEND
   tmp=$(mktemp "$env_file.XXXXXX")
   chmod --reference="$env_file" "$tmp"
   chown --reference="$env_file" "$tmp"
-  grep -v -e '^BUNNY_' -e '^MEDIA_BACKEND=' "$env_file" >"$tmp" || true
+  # Only the lines written below: any other BUNNY_ setting (Stream, the storage host) stays.
+  grep -v -E '^(MEDIA_BACKEND|BUNNY_(STORAGE_ZONE|STORAGE_KEY|PULL_ZONE_URL|TOKEN_KEY|PUBLIC_STORAGE_ZONE|PUBLIC_STORAGE_KEY|PUBLIC_URL))=' \
+    "$env_file" >"$tmp" || true
   {
     echo "MEDIA_BACKEND=$1"
     echo "BUNNY_STORAGE_ZONE=$private_zone"

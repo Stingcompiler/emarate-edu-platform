@@ -142,6 +142,10 @@ function Hosted({
   const [speed, setSpeed] = useState(1);
   const video = useRef<HTMLVideoElement>(null);
   const lastSaved = useRef(0);
+  // A signed link lasts ten minutes, a lecture longer: when the link stops answering mid-way,
+  // a new one is fetched and the video goes on from where it was (review 2026-11-16).
+  const resumeAt = useRef<number | null>(null);
+  const renewals = useRef(0);
   const saved = (() => {
     try {
       return Number(localStorage.getItem(POS(id)) ?? 0);
@@ -199,7 +203,24 @@ function Hosted({
           className="absolute inset-0 size-full bg-black"
           onLoadedMetadata={(e) => {
             const v = e.currentTarget;
-            if (saved > 5 && saved < v.duration - 10) v.currentTime = saved;
+            if (resumeAt.current !== null) {
+              v.currentTime = resumeAt.current;
+              resumeAt.current = null;
+            } else if (saved > 5 && saved < v.duration - 10) v.currentTime = saved;
+          }}
+          onError={(e) => {
+            if (renewals.current >= 5) return; // a real fault, not an expired link
+            renewals.current += 1;
+            resumeAt.current = e.currentTarget.currentTime;
+            void api
+              .GET("/api/v1/videos/{public_id}/playback", {
+                params: { path: { public_id: id } },
+              })
+              .then(({ data }) => {
+                if (data?.url) return setUrl(data.url);
+                setUrl(null);
+                setFailed(true);
+              });
           }}
           onTimeUpdate={(e) => {
             const t = e.currentTarget.currentTime;

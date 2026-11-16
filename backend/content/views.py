@@ -220,9 +220,12 @@ class MediaAssetViewSet(
                 gettext("The site uses this picture. Choose another in the site settings first."),
                 code="in_use",
             )
+        from files import trash
+
         record(_meta(self.request), "media.delete", instance)
-        instance.file.delete(save=False)
+        name = instance.file.name
         instance.delete()
+        trash.discard(name, storage="public")
 
 
 @extend_schema(tags=["content"])
