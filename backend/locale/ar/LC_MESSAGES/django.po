@@ -1864,3 +1864,36 @@ msgstr "هذه ليست كلمة سر هذا الملف."
 #: organization/backups.py
 msgid "This is not a backup file of the platform."
 msgstr "هذا ليس ملف نسخة احتياطية للمنصة."
+
+#: core/deletions.py
+#, python-format
+msgid "It cannot be deleted: %(what)s still refers to it. Nothing was changed."
+msgstr "لا يمكن حذفه: ما زال يرتبط به «%(what)s». لم يتغيّر شيء."
+
+#: core/deletion_views.py
+msgid "One at a time."
+msgstr "واحدًا في كل مرة."
+
+#: core/deletion_views.py
+msgid "Some of them no longer exist."
+msgstr "بعضها لم يعد موجودًا."
+
+#: core/deletion_views.py
+msgid "Type exactly what is shown to confirm."
+msgstr "اكتب ما هو ظاهر كما هو للتأكيد."
+
+#: core/deletion_views.py
+msgid "A backup is being made or restored; try again when it ends."
+msgstr "تُنشأ نسخة احتياطية أو تُستعاد الآن؛ أعد المحاولة حين تنتهي."
+
+#: core/tasks.py
+msgid "A backup is being made or restored; nothing was deleted. Try again when it ends."
+msgstr "تُنشأ نسخة احتياطية أو تُستعاد الآن، فلم يُحذف شيء. أعد المحاولة حين تنتهي."
+
+#: core/tasks.py
+msgid "The backup before the deletion could not be made, so nothing was deleted. Details are in the server's log."
+msgstr "تعذّرت النسخة الاحتياطية قبل الحذف، فلم يُحذف شيء. التفاصيل في سجل الخادم."
+
+#: core/tasks.py
+msgid "The deletion failed and nothing was deleted. Details are in the server's log."
+msgstr "تعذّر الحذف، فلم يُحذف شيء. التفاصيل في سجل الخادم."
