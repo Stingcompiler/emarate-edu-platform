@@ -226,7 +226,8 @@ SPECTACULAR_SETTINGS = {
     "ENUM_NAME_OVERRIDES": {
         "CheckResultEnum": ["ok", "error"],
         "RecordDeletionJobStateEnum": ["queued", "running", "done", "failed"],
-        "RecordDeletionKindEnum": ["student", "course", "department"],
+        "RecordDeletionKindEnum": ["student", "course", "program", "department"],
+        "RecordDeletionRequestKindEnum": ["student", "course", "program"],
         "RoleEnum": "accounts.rbac.Role",
         "ReportKindEnum": "reports.models.ReportSnapshot.Kind",
         "TeacherStatusEnum": ["below", "warn", "ok", "none"],

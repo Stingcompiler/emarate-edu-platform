@@ -1,12 +1,17 @@
 import { useQuery } from "@tanstack/react-query";
-import { Link, useParams } from "react-router";
+import { Trash2 } from "lucide-react";
+import { useState } from "react";
+import { Link, useNavigate, useParams } from "react-router";
 
+import { DeleteEverythingDialog } from "../components/DeleteEverything";
 import { PortalShell } from "../components/PortalShell";
-import { Avatar, Card, Notice, problemMessage, SectionLabel } from "../components/ui";
+import { RequestDeletionDialog } from "../components/RequestDeletion";
+import { Avatar, Button, Card, Notice, problemMessage, SectionLabel } from "../components/ui";
 import { ROUTE_ACCESS } from "../lib/access";
 import { api, ok } from "../lib/api";
 import { useMe } from "../lib/auth";
 import { count, DEGREE, N } from "../lib/format";
+import { can } from "../lib/nav";
 import { initials, num } from "../lib/reports";
 import { siteLink, siteUrl } from "../lib/site";
 import { LeadCard } from "./DepartmentPage";
@@ -64,9 +69,31 @@ export function ProgramPage() {
   const staff = (members.data ?? []).filter((m) => m.program === id);
   const grantable = me.data?.grantable_roles ?? [];
   const manage = !!me.data && ROUTE_ACCESS["/department/teachers"]!(me.data);
+  // «حذف برنامج يحذف كل ما به» (owner, 2026-11-16): the system admin deletes it with everything
+  // in it, after a backup; the department's head asks them to.
+  const navigate = useNavigate();
+  const deletesAll = can(me.data, "records.delete_all");
+  const asks = !deletesAll && can(me.data, "programs.delete");
+  // Kept while the dialog is open: the programme itself is gone once it is deleted.
+  const [deleting, setDeleting] = useState<{ id: number; department: number; name: string } | null>(
+    null,
+  );
+  const [gone, setGone] = useState(false);
   return (
     <PortalShell
       title={p?.name_ar ?? "البرنامج"}
+      titleAction={
+        p && (deletesAll || asks) ? (
+          <Button
+            variant="secondary"
+            className="min-h-9 px-3 text-danger-strong"
+            onClick={() => setDeleting({ id: p.id, department: p.department, name: p.name_ar })}
+          >
+            <Trash2 size={16} aria-hidden />
+            {deletesAll ? "حذف البرنامج وكل ما فيه" : "طلب حذف البرنامج"}
+          </Button>
+        ) : undefined
+      }
       subtitle={
         p
           ? [
@@ -185,6 +212,27 @@ export function ProgramPage() {
             ))}
           </aside>
         </div>
+      )}
+      {deleting && deletesAll && (
+        <DeleteEverythingDialog
+          kind="program"
+          ids={[String(deleting.id)]}
+          onDone={() => setGone(true)}
+          onClose={() =>
+            gone
+              ? navigate(`/departments/${deleting.department}`, { replace: true })
+              : setDeleting(null)
+          }
+        />
+      )}
+      {deleting && asks && (
+        <RequestDeletionDialog
+          kind="program"
+          ids={[String(deleting.id)]}
+          what={`برنامج «${deleting.name}»`}
+          onSent={() => undefined}
+          onClose={() => setDeleting(null)}
+        />
       )}
     </PortalShell>
   );

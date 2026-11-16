@@ -6,7 +6,7 @@ import { Card, EmptyState, StatusBadge } from "../../components/ui";
 import { api, ok } from "../../lib/api";
 import { when } from "../../lib/format";
 
-const KIND: Record<string, string> = { student: "طلاب", course: "مادة" };
+const KIND: Record<string, string> = { student: "طلاب", course: "مادة", program: "برنامج" };
 const STATE: Record<string, [string, string]> = {
   pending: ["pending", "بانتظار قرار مدير النظام"],
   approved: ["approved", "حُذف"],

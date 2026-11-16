@@ -150,19 +150,87 @@ def record_view(user, lecture: Lecture) -> bool:
     return True
 
 
+def _own_media(lecture: Lecture) -> tuple[list, list]:
+    """The files and videos of the lecture's resources that no other lecture uses."""
+    resources = list(lecture.resources.all())
+    files = {r.file_id for r in resources if r.file_id}
+    videos = {r.video_id for r in resources if r.video_id}
+    others = LectureResource.objects.exclude(lecture=lecture)
+    files -= set(others.filter(file_id__in=files).values_list("file_id", flat=True))
+    videos -= set(others.filter(video_id__in=videos).values_list("video_id", flat=True))
+    return (
+        list(StoredFile.objects.filter(pk__in=files)),
+        list(VideoAsset.objects.filter(pk__in=videos)),
+    )
+
+
+def lecture_holds(lecture: Lecture) -> dict:
+    """What deleting the lecture takes with it, for its confirmation (owner, 2026-11-16)."""
+    files, videos = _own_media(lecture)
+    return {
+        "assignments": lecture.assignments.count(),
+        "submissions": Submission.objects.filter(assignment__lecture=lecture).count(),
+        "files": len(files),
+        "videos": len(videos),
+    }
+
+
 def delete_lecture(meta: RequestMeta, lecture: Lecture) -> None:
+    """The lecture with everything in it (owner, 2026-11-16: «حذف محاضرة يحذف كل ما بها»): its
+    resources and views, the assignments linked to it with their submissions, grades and files,
+    and its files and videos no other lecture uses. The log keeps the assignments' submitters
+    and grades."""
+    from django.db.models.deletion import ProtectedError
+
     found = require(meta.actor, lecture.offering, "view_all")
     if not found.can_delete(meta.actor, lecture):
         raise PermissionDenied(gettext("You cannot delete this lecture."))
     with transaction.atomic():
+        assignments = list(lecture.assignments.all())
+        submissions = list(
+            Submission.objects.filter(assignment__in=assignments)
+            .select_related("student_record", "grade")
+            .select_for_update(of=("self",))
+        )
+        files, videos = _own_media(lecture)
         record(
             meta,
             "lecture.delete",
             lecture,
-            old=snapshot(lecture),
+            old={
+                **snapshot(lecture),
+                "assignments": [
+                    {
+                        "title": a.title,
+                        "submissions": [
+                            _work_of(s) for s in submissions if s.assignment_id == a.pk
+                        ],
+                    }
+                    for a in assignments
+                ],
+                "files": [f.name for f in files],
+                "videos": [v.title for v in videos],
+            },
             department_id=_dept(lecture.offering),
         )
-        lecture.delete()
+        stored = _uploaded_with(submissions)
+        for submission in submissions:
+            submission.delete()  # its versions and grade go with it (CASCADE)
+        _remove_files(stored)
+        for assignment in assignments:
+            assignment.delete()
+        lecture.delete()  # its resources and views (CASCADE)
+        # Its own files and videos — unless something else still holds one (a case's
+        # attachment, say): that one stays.
+        kept = []
+        for item in [*files, *videos]:
+            try:
+                with transaction.atomic():
+                    _remove_files([item])
+            except ProtectedError:
+                kept.append(item)
+        if kept:
+            logger.info("lecture.delete: %s media still used elsewhere were kept", len(kept))
 
 
 def add_resource(

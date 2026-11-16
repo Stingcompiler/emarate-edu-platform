@@ -30,10 +30,11 @@ const KIND: Record<string, string> = {
   notification: "إشعار",
   student: "طلاب",
   course: "مادة",
+  program: "برنامج",
 };
 // A head's request to delete students or a course (owner, 2026-11-15): the system admin alone
 // decides; approving is the deletion itself, with its preview, confirmation and password.
-const RECORDS = new Set(["student", "course"]);
+const RECORDS = new Set(["student", "course", "program"]);
 const STATE: Record<string, [string, string]> = {
   pending: ["pending", "بانتظار القرار"],
   approved: ["approved", "حُذف"],
@@ -82,7 +83,7 @@ export function Deletions() {
   return (
     <PortalShell
       title="طلبات الحذف"
-      subtitle="إعلانات وإشعارات طلب أصحابها حذفها، وطلاب ومواد طلب رؤساء الأقسام والبرامج حذفها"
+      subtitle="إعلانات وإشعارات طلب أصحابها حذفها، وطلاب ومواد وبرامج طلب رؤساء الأقسام والبرامج حذفها"
       back={{ label: "إدارة النظام", to: "/system" }}
     >
       <div className="mb-4 flex gap-2">
@@ -150,7 +151,7 @@ export function Deletions() {
                 )}
                 {r.state === "pending" && !r.is_mine && RECORDS.has(r.kind) && !decidesRecords && (
                   <p className="mt-3 border-t border-border-soft pt-3 text-xs text-text-muted">
-                    يقرّر في حذف الطلاب والمواد مدير النظام وحده.
+                    يقرّر في حذف الطلاب والمواد والبرامج مدير النظام وحده.
                   </p>
                 )}
                 {r.state === "pending" && !r.is_mine && RECORDS.has(r.kind) && decidesRecords && (
@@ -217,7 +218,7 @@ export function Deletions() {
       )}
       {approving && (
         <DeleteEverythingDialog
-          kind={approving.kind as "student" | "course"}
+          kind={approving.kind as "student" | "course" | "program"}
           ids={approving.ids}
           requestId={approving.id}
           onDone={() => void client.invalidateQueries({ queryKey: ["deletion-requests"] })}

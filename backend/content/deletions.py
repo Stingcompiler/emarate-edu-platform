@@ -162,8 +162,16 @@ def decide(meta: RequestMeta, req: DeletionRequest, *, approve: bool, note: str 
 # their own (core.deletion_views, with the request's number), so the approval is the deletion and
 # the request is marked approved only once the rows are gone.
 
-RECORD_KINDS = {K.STUDENT, K.COURSE}
-_CAPABILITY = {K.STUDENT: "students.delete", K.COURSE: "courses.delete"}
+RECORD_KINDS = {K.STUDENT, K.COURSE, K.PROGRAM}
+_CAPABILITY = {
+    K.STUDENT: "students.delete",
+    K.COURSE: "courses.delete",
+    K.PROGRAM: "programs.delete",
+}
+
+
+def _program_of(kind: str, row) -> int | None:
+    return row.pk if kind == K.PROGRAM else row.program_id
 
 
 def _pending_targets(kind: str) -> set[str]:
@@ -185,7 +193,7 @@ def request_records(meta: RequestMeta, kind: str, rows: list, reason: str = "") 
     if kind not in RECORD_KINDS or not rows:
         raise PermissionDenied()
     scope = rbac.scope_for(meta.actor, _CAPABILITY[kind])
-    if scope.none or not all(scope.allows(r.department_id, r.program_id) for r in rows):
+    if scope.none or not all(scope.allows(r.department_id, _program_of(kind, r)) for r in rows):
         raise PermissionDenied(gettext("Some of them are outside your department or programme."))
     ids = [str(r.public_id) if kind == K.STUDENT else str(r.pk) for r in rows]
     with transaction.atomic():
@@ -198,7 +206,7 @@ def request_records(meta: RequestMeta, kind: str, rows: list, reason: str = "") 
             else f"{first.code} · {first.name_ar}"
         )
         title = name if len(rows) == 1 else f"{name} و{len(rows) - 1} غيره"
-        programs = {r.program_id for r in rows}
+        programs = {_program_of(kind, r) for r in rows}
         departments = {r.department_id for r in rows}
         req = DeletionRequest.objects.create(
             kind=kind,

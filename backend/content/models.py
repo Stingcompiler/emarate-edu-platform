@@ -279,6 +279,9 @@ class DeletionRequest(models.Model):
         # approval deletes them with everything they hold (owner, 2026-11-15; core.deletions).
         STUDENT = "student", "طالب"
         COURSE = "course", "مادة"
+        # A department's head asks to delete a programme with everything in it (owner,
+        # 2026-11-16); the system admin alone decides, after a backup.
+        PROGRAM = "program", "برنامج"
 
     class State(models.TextChoices):
         PENDING = "pending", "بانتظار الموافقة"

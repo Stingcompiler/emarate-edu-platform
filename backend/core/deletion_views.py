@@ -26,7 +26,7 @@ from core.permissions import capability
 
 BACKUP_FROM = 50
 JOB_SECONDS = 7 * 24 * 3600
-KINDS = ["student", "course", "department"]
+KINDS = ["student", "course", "program", "department"]
 
 
 class RecordDeletionTargetSerializer(serializers.Serializer):
@@ -94,14 +94,14 @@ def _id(row) -> str:
 def _name(kind: str, row) -> str:
     if kind == "student":
         return f"{row.university_number} · {row.full_name_ar}"
-    if kind == "course":
+    if kind in ("course", "program"):
         return f"{row.code} · {row.name_ar}"
     return row.name_ar
 
 
 def _confirm_text(kind: str, rows: list) -> str:
     """What the admin types to confirm: the student's number, the course's code, the
-    department's name — or, for many students, how many."""
+    programme's or the department's name — or, for many students, how many."""
     if len(rows) > 1:
         return str(len(rows))
     row = rows[0]
@@ -111,7 +111,8 @@ def _confirm_text(kind: str, rows: list) -> str:
 
 
 def _in_background(kind: str, rows: list) -> bool:
-    return kind == "department" or len(rows) > BACKUP_FROM
+    # A programme or a department: always after a backup (owner, 2026-11-16).
+    return kind in ("program", "department") or len(rows) > BACKUP_FROM
 
 
 @extend_schema(tags=["system"])
@@ -150,8 +151,8 @@ class DeletionPreviewView(APIView):
 
 @extend_schema(tags=["system"])
 class DeletionView(APIView):
-    """The deletion. A department, or more than 50 students, goes to the worker after a backup
-    (202 and the job); the rest is done here (200 and what was removed)."""
+    """The deletion. A programme, a department, or more than 50 students, goes to the worker
+    after a backup (202 and the job); the rest is done here (200 and what was removed)."""
 
     permission_classes = [IsAuthenticated, capability("records.delete_all")]
     throttle_classes = [LoginThrottle]

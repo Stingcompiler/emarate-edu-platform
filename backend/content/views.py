@@ -605,7 +605,8 @@ class DeletionRequestViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     )
     @action(detail=False, methods=["post"])
     def records(self, request):
-        """Students, or a course, to delete with everything they hold (owner, 2026-11-15)."""
+        """Students, a course or a programme, to delete with everything they hold (owner,
+        2026-11-15; the programme since 2026-11-16)."""
         from core import deletions as engine
 
         from . import deletions
@@ -614,7 +615,7 @@ class DeletionRequestViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
         body.is_valid(raise_exception=True)
         kind = body.validated_data["kind"]
         ids = body.validated_data["ids"]
-        if kind == "course" and (len(ids) != 1 or not ids[0].isdigit()):
+        if kind in ("course", "program") and (len(ids) != 1 or not ids[0].isdigit()):
             raise ValidationError({"ids": [gettext("One at a time.")]})
         rows = engine.find(kind, ids)
         if len(rows) != len(set(ids)):

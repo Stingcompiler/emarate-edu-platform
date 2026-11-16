@@ -2,6 +2,7 @@ import type { Schemas } from "@ecst/api";
 import { useQuery } from "@tanstack/react-query";
 
 import { api, ok, openAfter } from "./api";
+import { count, N } from "./format";
 
 export type Assignment = Schemas["Assignment"];
 export type Lecture = Schemas["Lecture"];
@@ -132,3 +133,20 @@ export const fmtSize = (bytes: number) =>
   bytes > 1_048_576
     ? `${(bytes / 1_048_576).toLocaleString("ar-u-nu-latn", { maximumFractionDigits: 1 })} م.ب`
     : `${Math.max(1, Math.round(bytes / 1024)).toLocaleString("ar-u-nu-latn")} ك.ب`;
+
+/**
+ * What deleting a lecture takes with it, for its confirmation (owner, 2026-11-16: «حذف محاضرة
+ * يحذف كل ما بها»), from the lecture's `can` (its own page only).
+ */
+export function lectureGoesWith(holds: Schemas["LecturePowers"] | null | undefined): string {
+  if (!holds) return "تُحذف المحاضرة بكل ما فيها. لا يمكن التراجع.";
+  const parts = [
+    holds.assignments ? count(holds.assignments, N.assignment) : "",
+    holds.submissions ? count(holds.submissions, N.submission) + " للطلاب بدرجاتها" : "",
+    holds.files ? count(holds.files, N.file) : "",
+    holds.videos ? count(holds.videos, N.video) : "",
+  ].filter(Boolean);
+  return parts.length
+    ? `تُحذف معها: ${parts.join("، ")}. لا يمكن التراجع، ويبقى في سجل العمليات من سلّم ودرجته.`
+    : "تُحذف المحاضرة وموادها. لا يمكن التراجع.";
+}
