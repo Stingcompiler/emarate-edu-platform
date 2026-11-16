@@ -55,6 +55,10 @@ msgstr "اختر البرنامج الذي ينضم إليه."
 msgid "This programme already has a course with this code."
 msgstr "في هذا البرنامج مادة بهذا الرمز."
 
+#: academic/serializers.py
+msgid "This department already has a course with this code."
+msgstr "في هذا القسم مادة بهذا الرمز."
+
 msgid "Choose the programme this course belongs to."
 msgstr "اختر البرنامج الذي تنتمي إليه المادة."
 
