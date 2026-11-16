@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
 # Sets up the copy of every backup off the server, on Cloudflare R2 (owner, 2026-11-16;
-# backend/core/offsite.py). Run as root on the server, from a laptop, with a terminal (-t):
+# backend/core/offsite.py). Run as root on the server, with a terminal — it asks for the keys,
+# so the script is copied there first (piped in, it would take the terminal's place):
 #
-#   ssh -t <server> 'sudo bash -s -- <cloudflare-account-id> [bucket]' < scripts/vps/set-offsite-backup.sh
+#   scp scripts/vps/set-offsite-backup.sh <server>:/tmp/
+#   ssh -t <server> 'sudo bash /tmp/set-offsite-backup.sh <cloudflare-account-id> [bucket]; rm -f /tmp/set-offsite-backup.sh'
 #
 # It asks for the R2 API token's «Access Key ID» and «Secret Access Key» on the terminal (not
 # shown, never in the shell's history or in the repository), writes them to /opt/ecst/env (a copy
@@ -14,8 +16,11 @@ bucket="${2:-ecst-backup}"
 [[ "$account" =~ ^[0-9a-f]{32}$ ]] || { echo "that does not look like an account id" >&2; exit 1; }
 env_file=/opt/ecst/env
 
-read -r -p "R2 Access Key ID: " key_id </dev/tty
-read -r -s -p "R2 Secret Access Key: " secret </dev/tty
+[ -t 0 ] || { echo "run it with a terminal (ssh -t, the script copied first); nothing was changed" >&2; exit 1; }
+[ -x /opt/ecst/venv/bin/python ] && /opt/ecst/venv/bin/python -c "import boto3" 2>/dev/null \
+  || { echo "the platform's release with R2 support is not installed yet; nothing was changed" >&2; exit 1; }
+read -r -p "R2 Access Key ID: " key_id
+read -r -s -p "R2 Secret Access Key: " secret
 echo
 [ -n "$key_id" ] && [ -n "$secret" ] || { echo "both keys are needed" >&2; exit 1; }
 

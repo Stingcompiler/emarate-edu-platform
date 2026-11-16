@@ -151,8 +151,9 @@ journalctl -u ecst-backup -n 5                # نتيجة آخر نسخة
 - **التوقيت:** المزامنة بعد كل نسخة وكل ست ساعات (`core.tasks.sync_offsite_backups`)، فالرفع الذي يتعثّر يُعاد وحده. والفشل يرسل تنبيه التشغيل، وتعرض صفحة «النسخ الاحتياطية» حال آخر نسخ.
 - **الإعداد (مرة واحدة، بعد نشر هذا التغيير):**
   1. في Cloudflare: R2 ← Manage API tokens ← Create API token، بصلاحية «Object Read & Write» على الحاوية `ecst-backup` وحدها. احفظ «Access Key ID» و«Secret Access Key» في مدير كلمات المرور.
-  2. من جهازك، والطلب يسأل عن المفتاحين دون عرضهما:
-     `ssh -t <الخادم> 'sudo bash -s -- <رقم حساب Cloudflare>' < scripts/vps/set-offsite-backup.sh`
+  2. من جهازك: انسخ السكربت إلى الخادم، ثم شغّله بطرفية، وهو يسأل عن المفتاحين دون عرضهما:
+     `scp scripts/vps/set-offsite-backup.sh <الخادم>:/tmp/`
+     ثم `ssh -t <الخادم> 'sudo bash /tmp/set-offsite-backup.sh <رقم حساب Cloudflare>; rm -f /tmp/set-offsite-backup.sh'`
   3. رقم الحساب هو الجزء الذي بعد `dash.cloudflare.com/` في عنوان لوحة Cloudflare.
 - **لا يغني عن مفتاح التشفير:** النسخة في R2 لا تُقرأ بدون `BACKUP_ENCRYPTION_KEY`، فاحفظه في مدير كلمات المرور.
 - **الاستعادة بعد فقدان الخادم:**
