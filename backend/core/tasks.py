@@ -1,4 +1,5 @@
 from celery import shared_task
+from django.utils.translation import gettext_noop
 
 
 @shared_task
@@ -114,3 +115,70 @@ def _restore(stamp, actor_id, actor_email, upload, key_handle) -> dict:
     if key_handle:
         cache.delete(key_handle)
     return restore.run(stamp, actor_id, actor_email, upload=Path(upload), key=key)
+
+
+BUSY = gettext_noop(
+    "A backup is being made or restored; nothing was deleted. Try again when it ends."
+)
+NO_BACKUP = gettext_noop(
+    "The backup before the deletion could not be made, so nothing was deleted. Details are in "
+    "the server's log."
+)
+FAILED = gettext_noop(
+    "The deletion failed and nothing was deleted. Details are in the server's log."
+)
+
+
+@shared_task
+def delete_records(
+    job_id: str,
+    kind: str,
+    ids: list[str],
+    actor_id: int,
+    reason: str = "",
+    request_id: int | None = None,
+    lock: str | None = None,
+) -> dict:
+    """A department, or many students, deleted with everything they hold (core.deletions),
+    after a backup of the whole platform — under the backups' lock, so neither the daily copy
+    nor a restore runs meanwhile. Nothing is deleted when the backup fails."""
+    import logging
+
+    from django.core.cache import cache
+    from django.utils import translation
+    from django.utils.translation import gettext
+
+    from accounts.models import User
+    from audit.services import RequestMeta
+    from core import backups, deletions
+
+    key = f"deletion-job:{job_id}"
+
+    def say(**changes):
+        job = {**(cache.get(key) or {}), **changes}
+        cache.set(key, job, timeout=7 * 24 * 3600)
+        return job
+
+    say(state="running")
+    with translation.override("ar"):  # the page shows the job's errors as they are
+        try:
+            with backups.holding("deletion", lock):
+                try:
+                    made = backups.create(keep=0)[0]
+                except Exception:
+                    logging.getLogger(__name__).exception("deletion job %s: no backup", job_id)
+                    return say(state="failed", error=gettext(NO_BACKUP))
+                say(backup=made.rsplit("-", 1)[-1].split(".", 1)[0])
+                rows = deletions.find(kind, ids)
+                actor = User.objects.filter(pk=actor_id).first()
+                removed = deletions.delete(
+                    RequestMeta(actor=actor), kind, rows, reason=reason, request_id=request_id
+                )
+        except backups.Busy:
+            return say(state="failed", error=gettext(BUSY))
+        except deletions.Refused as refused:
+            return say(state="failed", error=str(refused.detail))
+        except Exception:
+            logging.getLogger(__name__).exception("deletion job %s failed", job_id)
+            return say(state="failed", error=gettext(FAILED))
+    return say(state="done", removed=removed)

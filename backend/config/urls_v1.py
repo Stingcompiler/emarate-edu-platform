@@ -9,6 +9,7 @@ from admissions import views as admissions
 from audit import views as audit
 from content import staff_views as site_staff
 from content import views as content
+from core import deletion_views
 from exams import views as exams
 from files import views as files
 from inquiries import views as inquiries
@@ -170,6 +171,13 @@ urlpatterns = [
         name="push-unsubscribe",
     ),
     path("me/results", results.MyResultsView.as_view(), name="me-results"),
+    path(
+        "deletions/preview", deletion_views.DeletionPreviewView.as_view(), name="deletion-preview"
+    ),
+    path("deletions", deletion_views.DeletionView.as_view(), name="deletions"),
+    path(
+        "deletions/jobs/<str:job_id>", deletion_views.DeletionJobView.as_view(), name="deletion-job"
+    ),
     path("gradebooks/<int:offering_id>", learning.GradebookView.as_view(), name="gradebook"),
     path("grading-queue", learning.GradingQueueView.as_view(), name="grading-queue"),
     path("teachers-directory", academic.TeacherDirectoryView.as_view(), name="teacher-directory"),

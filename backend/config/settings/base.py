@@ -223,6 +223,8 @@ SPECTACULAR_SETTINGS = {
     "SCHEMA_PATH_PREFIX": r"/api/(v1|public|visitor)",
     "ENUM_NAME_OVERRIDES": {
         "CheckResultEnum": ["ok", "error"],
+        "RecordDeletionJobStateEnum": ["queued", "running", "done", "failed"],
+        "RecordDeletionKindEnum": ["student", "course", "department"],
         "RoleEnum": "accounts.rbac.Role",
         "ReportKindEnum": "reports.models.ReportSnapshot.Kind",
         "TeacherStatusEnum": ["below", "warn", "ok", "none"],

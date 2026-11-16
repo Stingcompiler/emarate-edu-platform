@@ -4,6 +4,7 @@ import { Pencil, Plus, Trash2, X } from "lucide-react";
 import { Link, useSearchParams } from "react-router";
 import { useState } from "react";
 
+import { DeleteEverythingDialog } from "../../components/DeleteEverything";
 import { DepartmentSwitch } from "../../components/DepartmentSwitch";
 import { PortalShell } from "../../components/PortalShell";
 import { ProgramLevelSelects, useProgramLevelFilter } from "../../components/ProgramLevelFilter";
@@ -65,6 +66,10 @@ export function Offerings() {
   const [error, setError] = useState<unknown>(null);
   const refresh = () => client.invalidateQueries({ queryKey: ["offerings"] });
   const canDelete = can(me.data, "courses.delete");
+  // The system admin deletes a course with everything it holds — its offerings in every term,
+  // their enrolments, results and coursework (owner, 2026-11-15).
+  const deletesAll = can(me.data, "records.delete_all");
+  const [deletingCourse, setDeletingCourse] = useState<number | null>(null);
   const [editing, setEditing] = useState<number | null>(null);
   const removeOffering = useMutation({
     mutationFn: async (o: { id: number; course: number }) => {
@@ -183,6 +188,14 @@ export function Offerings() {
       back={{ label: "لوحة القسم", to: "/department" }}
     >
       <DepartmentSwitch />
+      {deletingCourse != null && (
+        <DeleteEverythingDialog
+          kind="course"
+          ids={[String(deletingCourse)]}
+          onDone={refresh}
+          onClose={() => setDeletingCourse(null)}
+        />
+      )}
       {error ? (
         <div className="mb-3">
           <Notice>{problemMessage(error)}</Notice>
@@ -338,11 +351,13 @@ export function Offerings() {
                       type="button"
                       aria-label={`حذف ${o.course_detail.name_ar}`}
                       onClick={async () =>
-                        (await confirm({
-                          title: `حذف «${o.course_detail.name_ar}» من هذا الفصل؟`,
-                          body: `شعبة ${o.section}. لا تُحذف مادة عليها تسجيل طلاب — يرفضها النظام.`,
-                          confirm: "حذف المادة",
-                        })) && removeOffering.mutate({ id: o.id, course: o.course_detail.id })
+                        deletesAll
+                          ? setDeletingCourse(o.course_detail.id)
+                          : (await confirm({
+                              title: `حذف «${o.course_detail.name_ar}» من هذا الفصل؟`,
+                              body: `شعبة ${o.section}. لا تُحذف مادة عليها تسجيل طلاب — يرفضها النظام.`,
+                              confirm: "حذف المادة",
+                            })) && removeOffering.mutate({ id: o.id, course: o.course_detail.id })
                       }
                       className="grid size-9 place-items-center rounded-full text-text-muted hover:bg-surface-alt hover:text-danger-strong"
                     >

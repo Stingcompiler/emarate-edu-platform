@@ -19,11 +19,12 @@ import {
   TextArea,
 } from "../../components/ui";
 import { useMe } from "../../lib/auth";
-import { canDelete } from "../../lib/nav";
+import { can, canDelete } from "../../lib/nav";
 import { api, ok } from "../../lib/api";
 import { num } from "../../lib/reports";
 import { count, DEGREE, N, SEMESTERS, fmtDate, termName } from "../../lib/format";
 import { ALL } from "../../components/Pager";
+import { DeleteEverythingDialog } from "../../components/DeleteEverything";
 import { useConfirm } from "../../components/Confirm";
 import { useUnsavedChanges } from "../../lib/useUnsavedChanges";
 import { Select } from "../../components/Select";
@@ -1442,7 +1443,12 @@ function DepartmentEnd({
   departments: Schemas["Department"][];
   onGone: (deleted?: boolean) => void;
 }) {
-  const deletes = canDelete(useMe().data, "structure.manage");
+  const me = useMe().data;
+  const deletes = canDelete(me, "structure.manage");
+  // With everything in it — programmes, courses, students and their records — after a backup
+  // (owner, 2026-11-15; core.deletions). The system admin's alone.
+  const deletesAll = can(me, "records.delete_all");
+  const [deletingAll, setDeletingAll] = useState(false);
   const confirm = useConfirm();
   const usage = useQuery({
     queryKey: ["department-usage", department.id],
@@ -1553,8 +1559,8 @@ function DepartmentEnd({
         </div>
       ) : (
         <p className="text-xs text-text-muted">
-          لا يُدمج ولا يُحذف وفيه {blocked.join(" و")}؛ أوقفه مؤقتًا بدلًا من ذلك، أو انقل هذه
-          أولًا.
+          لا يُدمج وفيه {blocked.join(" و")}؛ أوقفه مؤقتًا بدلًا من ذلك، أو انقل هذه أولًا
+          {deletesAll ? "، أو احذفه مع كل ما فيه" : ""}.
         </p>
       )}
       {deletes && u.can_delete && (
@@ -1586,10 +1592,18 @@ function DepartmentEnd({
           {u.programs.length ? "حذف القسم مع برامجه" : "حذف القسم"}
         </Button>
       )}
-      {deletes && u.can_merge && !u.can_delete && (
-        <p className="text-xs text-text-muted">
-          للقسم سجل في التدقيق، والسجل لا يُحذف: يُدمج أو يُوقف، ولا يُحذف.
-        </p>
+      {deletesAll && !u.can_delete && (
+        <Button variant="ghost" className="text-danger-strong" onClick={() => setDeletingAll(true)}>
+          حذف القسم وكل ما فيه
+        </Button>
+      )}
+      {deletingAll && (
+        <DeleteEverythingDialog
+          kind="department"
+          ids={[String(department.id)]}
+          onDone={() => onGone(true)}
+          onClose={() => setDeletingAll(false)}
+        />
       )}
     </div>
   );

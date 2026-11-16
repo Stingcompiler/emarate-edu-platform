@@ -1057,6 +1057,19 @@ def delete_account(meta: RequestMeta, user: User) -> None:
         "name": user.full_name_ar,
         "roles": sorted(rbac.roles_of(user)),
     }
+    from audit.models import AuditLog
+
+    history = Conflict(
+        gettext(
+            "This account has a history (records, grades or log entries): "
+            "disable it instead of deleting it."
+        ),
+        code="has_history",
+    )
+    # The log no longer holds its actors by a constraint (a student is deleted with everything,
+    # owner 2026-11-15, core.deletions): an account that acted is still not «made by mistake».
+    if AuditLog.objects.filter(actor=user).exists():
+        raise history
     try:
         with transaction.atomic():
             # The log entry first: it is a plain record (the target is text, not a link), so
@@ -1065,13 +1078,7 @@ def delete_account(meta: RequestMeta, user: User) -> None:
             user.delete()
             _site_staff_changed()
     except (ProtectedError, RestrictedError):
-        raise Conflict(
-            gettext(
-                "This account has a history (records, grades or log entries): "
-                "disable it instead of deleting it."
-            ),
-            code="has_history",
-        ) from None
+        raise history from None
 
 
 def rename_account(

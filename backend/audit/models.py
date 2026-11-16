@@ -17,8 +17,15 @@ class AuditLogQuerySet(models.QuerySet):
 
 
 class AuditLog(models.Model):
+    # The entries outlive what they name (owner, 2026-11-15: an account or a department may be
+    # deleted with everything it holds): the reference is kept as the number it was, with no
+    # constraint, so a deletion never has to touch an entry. Numbers are never given twice.
     actor = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.PROTECT, null=True, related_name="+"
+        settings.AUTH_USER_MODEL,
+        on_delete=models.DO_NOTHING,
+        db_constraint=False,
+        null=True,
+        related_name="+",
     )
     action = models.CharField(max_length=80)  # e.g. "registration.approve"
     target_type = models.CharField(max_length=80)  # "students.studentrecord"
@@ -28,12 +35,20 @@ class AuditLog(models.Model):
     new = models.JSONField(null=True, blank=True)
     # Lets department roles read the entries of their own department.
     department = models.ForeignKey(
-        "organization.Department", on_delete=models.PROTECT, null=True, related_name="+"
+        "organization.Department",
+        on_delete=models.DO_NOTHING,
+        db_constraint=False,
+        null=True,
+        related_name="+",
     )
     # Lets a programme's head and supervisor read the entries of their programme (owner,
     # 2026-11-13). Entries from before that carry none: they stay the department's.
     program = models.ForeignKey(
-        "organization.Program", on_delete=models.SET_NULL, null=True, related_name="+"
+        "organization.Program",
+        on_delete=models.DO_NOTHING,
+        db_constraint=False,
+        null=True,
+        related_name="+",
     )
     ip = models.GenericIPAddressField(null=True, blank=True)
     user_agent = models.CharField(max_length=255, blank=True)
