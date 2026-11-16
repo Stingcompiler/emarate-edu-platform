@@ -43,12 +43,35 @@ class ResourceCreateSerializer(serializers.Serializer):
     )
 
 
+class LecturePowersSerializer(serializers.Serializer):
+    delete = serializers.BooleanField()
+    assignments = serializers.IntegerField()
+    submissions = serializers.IntegerField()
+    files = serializers.IntegerField()
+    videos = serializers.IntegerField()
+
+
 class LectureSerializer(serializers.ModelSerializer):
     offering = serializers.PrimaryKeyRelatedField(queryset=CourseOffering.objects.all())
     resources = ResourceSerializer(many=True, read_only=True)
     views_count = serializers.SerializerMethodField(
         help_text="Students who opened the lecture; staff of the course only, else null."
     )
+    can = serializers.SerializerMethodField()
+
+    @extend_schema_field(LecturePowersSerializer(allow_null=True))
+    def get_can(self, lecture):
+        """On the lecture's own page only, for whoever may delete it: what deleting it takes
+        with it (owner, 2026-11-16)."""
+        if not self.context.get("powers"):
+            return None
+        from . import access, services
+
+        user = self.context["request"].user
+        found = access.for_offering(user, lecture.offering)
+        if not found.can_delete(user, lecture):
+            return None
+        return {"delete": True, **services.lecture_holds(lecture)}
 
     def get_views_count(self, lecture) -> int | None:
         staff = self.context.get("staff_offerings")
@@ -70,6 +93,7 @@ class LectureSerializer(serializers.ModelSerializer):
             "published_at",
             "resources",
             "views_count",
+            "can",
             "created_at",
         ]
         read_only_fields = ["public_id", "is_published", "published_at", "resources", "created_at"]

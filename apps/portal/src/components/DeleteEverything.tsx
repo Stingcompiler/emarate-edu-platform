@@ -6,18 +6,19 @@ import { api, ok } from "../lib/api";
 import { FormDialog } from "./FormDialog";
 import { Card, Field, Notice, PasswordField, problemMessage } from "./ui";
 
-export type DeletionKind = "student" | "course" | "department";
+export type DeletionKind = "student" | "course" | "program" | "department";
 
 const WHAT: Record<DeletionKind, [string, string]> = {
   student: ["الطالب", "الطلاب"],
   course: ["المادة", "المواد"],
+  program: ["البرنامج", "البرامج"],
   department: ["القسم", "الأقسام"],
 };
 
 const number = (n: number) => n.toLocaleString("ar-u-nu-latn");
 
 /**
- * The system admin deletes a student, many students, a course or a department **with
+ * The system admin deletes a student, many students, a course, a programme or a department **with
  * everything it holds** (owner, 2026-11-15; core.deletions). First what goes, counted by the
  * server, then the confirmation: what is shown typed again (the student's number, the course's
  * code, the department's name, or how many students) and the admin's own password. A

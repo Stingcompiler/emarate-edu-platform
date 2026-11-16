@@ -61,6 +61,7 @@ class LectureViewSet(viewsets.ModelViewSet):
     def get_serializer_context(self):
         # View counts go to the course's staff only (see LectureSerializer.views_count).
         context = super().get_serializer_context()
+        context["powers"] = self.action == "retrieve"
         user = self.request.user if self.request else None
         if user is not None and user.is_authenticated:
             context["staff_offerings"] = set(

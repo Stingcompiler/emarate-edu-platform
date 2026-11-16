@@ -1,11 +1,29 @@
-import { useQuery } from "@tanstack/react-query";
-import { ChevronLeft, ChevronRight, ExternalLink, FileText, Link2, Pencil } from "lucide-react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  ChevronLeft,
+  ChevronRight,
+  ExternalLink,
+  FileText,
+  Link2,
+  Pencil,
+  Trash2,
+} from "lucide-react";
 import { useEffect } from "react";
-import { Link, useParams } from "react-router";
+import { Link, useNavigate, useParams } from "react-router";
+
+import { useConfirm } from "../../components/Confirm";
 
 import { LecturePlayer, youTubeId } from "../../components/LecturePlayer";
 import { PortalShell } from "../../components/PortalShell";
-import { Button, Card, CourseCode, SectionLabel, WithSide } from "../../components/ui";
+import {
+  Button,
+  Card,
+  CourseCode,
+  Notice,
+  SectionLabel,
+  WithSide,
+  problemMessage,
+} from "../../components/ui";
 import { count, N } from "../../lib/format";
 import { api, ok } from "../../lib/api";
 import {
@@ -16,6 +34,7 @@ import {
   useLectures,
   useCourse,
   isCourseStaff,
+  lectureGoesWith,
 } from "../../lib/learning";
 
 type Resource = NonNullable<ReturnType<typeof useLectures>["data"]>[number]["resources"][number];
@@ -51,6 +70,24 @@ export function Lecture() {
   // opening is noted once per visit. Staff opening it are not counted.
   const opened = l?.public_id;
   const asStudent = course?.my_role === "student";
+  // «حذف محاضرة يحذف كل ما بها» (owner, 2026-11-16): its teacher, or whoever deletes
+  // coursework there, after a confirmation that says what goes with it.
+  const confirm = useConfirm();
+  const navigate = useNavigate();
+  const client = useQueryClient();
+  const remove = useMutation({
+    mutationFn: async () => {
+      const { error, response } = await api.DELETE("/api/v1/lectures/{public_id}", {
+        params: { path: { public_id: id } },
+      });
+      if (!response.ok) throw error;
+    },
+    onSuccess: () => {
+      void client.invalidateQueries({ queryKey: ["lectures"] });
+      void client.invalidateQueries({ queryKey: ["assignments"] });
+      if (l) navigate(`/courses/${l.offering}`, { replace: true });
+    },
+  });
   useEffect(() => {
     if (opened && asStudent)
       void api.POST("/api/v1/lectures/{public_id}/view", {
@@ -62,12 +99,35 @@ export function Lecture() {
       title={l?.title_ar ?? "المحاضرة"}
       titleAction={
         staff ? (
-          <Link to={`/lectures/${id}/edit`}>
-            <Button variant="secondary" className="min-h-9 px-3">
-              <Pencil size={16} aria-hidden />
-              تعديل
-            </Button>
-          </Link>
+          <span className="flex flex-wrap items-center gap-2">
+            <Link to={`/lectures/${id}/edit`}>
+              <Button variant="secondary" className="min-h-9 whitespace-nowrap px-3">
+                <Pencil size={16} aria-hidden />
+                تعديل
+              </Button>
+            </Link>
+            {l?.can?.delete && (
+              <Button
+                variant="secondary"
+                className="min-h-9 whitespace-nowrap px-3 text-danger-strong"
+                disabled={remove.isPending}
+                why="يُحذف الآن"
+                onClick={async () => {
+                  if (
+                    await confirm({
+                      title: `حذف المحاضرة «${l.title_ar}»؟`,
+                      body: lectureGoesWith(l.can),
+                      confirm: "حذف المحاضرة",
+                    })
+                  )
+                    remove.mutate();
+                }}
+              >
+                <Trash2 size={16} aria-hidden />
+                حذف المحاضرة
+              </Button>
+            )}
+          </span>
         ) : undefined
       }
       subtitle={
@@ -77,6 +137,11 @@ export function Lecture() {
       }
       back={l ? { label: "المادة", to: `/courses/${l.offering}` } : undefined}
     >
+      {remove.isError && (
+        <div className="mb-3">
+          <Notice>{problemMessage(remove.error)}</Notice>
+        </div>
+      )}
       {l && (
         <WithSide
           side={

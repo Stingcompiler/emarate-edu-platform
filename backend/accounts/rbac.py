@@ -126,9 +126,12 @@ CAPABILITIES: dict[str, frozenset[Role]] = {
     ),
     # A record added by mistake; never one with an account or history (students/services).
     "students.delete": frozenset({R.SYSTEM_ADMIN, R.DEPARTMENT_MANAGER}),
-    # A student, a course or a department with everything it holds, and many students at once
-    # (owner, 2026-11-15): the system admin alone (core.deletions).
+    # A student, a course, a programme or a department with everything it holds, and many
+    # students at once (owner, 2026-11-15/16): the system admin alone (core.deletions).
     "records.delete_all": frozenset({R.SYSTEM_ADMIN}),
+    # A programme with everything in it: the department's head asks, the system admin decides
+    # (owner, 2026-11-16); the programme's own head does not (not in PROGRAMME_CAPABILITIES).
+    "programs.delete": frozenset({R.SYSTEM_ADMIN, R.DEPARTMENT_MANAGER}),
     # Deciding a head's request to delete students or a course (owner, 2026-11-15): the
     # system admin alone — approving it is that deletion.
     "deletions.approve_records": frozenset({R.SYSTEM_ADMIN}),

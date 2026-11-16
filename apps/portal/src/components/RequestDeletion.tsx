@@ -16,7 +16,7 @@ const number = (n: number) => n.toLocaleString("ar-u-nu-latn");
  * any form (a form inside another submits the outer one).
  */
 export function RequestDeletionDialog(props: {
-  kind: "student" | "course";
+  kind: "student" | "course" | "program";
   ids: string[];
   /** What is asked for, as the head knows it («أحمد علي» or «3 طلاب»). */
   what: string;
@@ -33,7 +33,7 @@ function Dialog({
   onSent,
   onClose,
 }: {
-  kind: "student" | "course";
+  kind: "student" | "course" | "program";
   ids: string[];
   what: string;
   onSent: () => void;
@@ -86,9 +86,19 @@ function Dialog({
       onClose={onClose}
     >
       <Notice tone="warning">
-        إن وافق مدير النظام يُحذف {kind === "course" ? "المادة" : what} مع كل ما يرتبط به: التسجيلات
-        والنتائج والتسليمات{kind === "course" ? " والمحاضرات والواجبات والاختبارات" : ""}. والحذف
-        نهائي.
+        {kind === "program" ? (
+          <>
+            إن وافق مدير النظام يُحذف البرنامج مع كل ما فيه: طلابه وسجلاتهم، ومواده بمحاضراتها
+            وواجباتها واختباراتها ونتائجها، ودورات القبول وطلبات الالتحاق. تُؤخذ نسخة احتياطية قبل
+            الحذف، والحذف نهائي.
+          </>
+        ) : (
+          <>
+            إن وافق مدير النظام يُحذف {kind === "course" ? "المادة" : what} مع كل ما يرتبط به:
+            التسجيلات والنتائج والتسليمات
+            {kind === "course" ? " والمحاضرات والواجبات والاختبارات" : ""}. والحذف نهائي.
+          </>
+        )}
       </Notice>
       <Card>
         <Field

@@ -15,11 +15,11 @@ import {
   WithSide,
   splitCode,
 } from "../../components/ui";
-import { api } from "../../lib/api";
+import { api, ok } from "../../lib/api";
 import { useMe } from "../../lib/auth";
 import { useCurrentTerm, useDepartment, useOfferings } from "../../lib/department";
 import { when, count, N } from "../../lib/format";
-import { useLectures } from "../../lib/learning";
+import { lectureGoesWith, useLectures } from "../../lib/learning";
 import { can } from "../../lib/nav";
 import { Bars, Kpi, num, weeklyTitle } from "../../lib/reports";
 import { useConfirm } from "../../components/Confirm";
@@ -48,7 +48,10 @@ export function DepartmentLectures() {
       });
       if (!response.ok) throw error;
     },
-    onSuccess: () => client.invalidateQueries({ queryKey: ["lectures"] }),
+    onSuccess: () => {
+      void client.invalidateQueries({ queryKey: ["lectures"] });
+      void client.invalidateQueries({ queryKey: ["assignments"] });
+    },
   });
   const canDelete = can(me.data, "learning.delete");
   const canManage = can(me.data, "learning.manage");
@@ -293,13 +296,23 @@ export function DepartmentLectures() {
                           <button
                             type="button"
                             aria-label="حذف المحاضرة"
-                            onClick={async () =>
-                              (await confirm({
-                                title: `حذف «${l.title_ar}»؟`,
-                                body: "تختفي المحاضرة وموادها من صفحة المادة عند الطلاب.",
-                                confirm: "حذف المحاضرة",
-                              })) && remove.mutate(l.public_id)
-                            }
+                            onClick={async () => {
+                              // What goes with it (owner, 2026-11-16: «حذف محاضرة يحذف كل ما
+                              // بها»), counted by the server on the lecture's own page.
+                              const holds = ok(
+                                await api.GET("/api/v1/lectures/{public_id}", {
+                                  params: { path: { public_id: l.public_id } },
+                                }),
+                              )?.can;
+                              if (
+                                await confirm({
+                                  title: `حذف «${l.title_ar}»؟`,
+                                  body: lectureGoesWith(holds),
+                                  confirm: "حذف المحاضرة",
+                                })
+                              )
+                                remove.mutate(l.public_id);
+                            }}
                             className="grid size-10 place-items-center sm:size-8 text-danger-strong"
                           >
                             <Trash2 size={15} aria-hidden />

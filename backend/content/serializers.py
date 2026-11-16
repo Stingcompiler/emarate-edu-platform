@@ -180,9 +180,10 @@ class DeletionRequestSerializer(serializers.ModelSerializer):
 
 
 class RecordDeletionRequestSerializer(serializers.Serializer):
-    """A head asks the system admin to delete students, or a course, with everything."""
+    """A head asks the system admin to delete students, a course or a programme, with
+    everything."""
 
-    kind = serializers.ChoiceField(choices=["student", "course"])
+    kind = serializers.ChoiceField(choices=["student", "course", "program"])
     ids = serializers.ListField(
         child=serializers.CharField(max_length=64), min_length=1, max_length=5000
     )

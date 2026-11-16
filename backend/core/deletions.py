@@ -1,4 +1,5 @@
-"""Deleting a student, a course or a department **with everything it holds** (owner, 2026-11-15).
+"""Deleting a student, a course, a programme or a department **with everything it holds** (owner,
+2026-11-15; the programme since 2026-11-16: «حذف برنامج يحذف كل ما به»).
 
 Until then a record with history could not be deleted: the database protects enrolments,
 results, attempts and submissions from losing their student or their course. The owner decided
@@ -66,11 +67,16 @@ DEPARTMENT_ROWS = (
         "accounts.User",
     }
 )
+# A programme: its students, its courses, its intakes and applications — the department stays.
+PROGRAM_ROWS = DEPARTMENT_ROWS - {"organization.Department"}
 OWNED = {
     "student": STUDENT_ROWS | {"accounts.User"},
     "course": COURSE_ROWS,
+    "program": PROGRAM_ROWS,
     "department": DEPARTMENT_ROWS,
 }
+# The public site lists departments, programmes and their study plans (courses).
+ON_THE_SITE = {"course", "program", "department"}
 
 # What the preview counts, by name (the rest are parts of these: answers, versions, grades…).
 LABELS = {
@@ -171,6 +177,17 @@ def _remove(kind: str, rows: list) -> tuple[Counter, list]:
         for model in (StoredFile, VideoAsset):
             _purge(list(model.objects.filter(uploaded_by__in=accounts)), OWNED[kind], counts, files)
         _purge(accounts, OWNED[kind], counts, files)
+    elif kind == "program":
+        from academic.models import Course
+        from students.models import StudentRecord
+
+        for program in rows:
+            students = list(StudentRecord.objects.filter(program=program))
+            accounts = _accounts_of(students)
+            _purge(students, OWNED[kind], counts, files)
+            _purge(accounts, OWNED[kind], counts, files)
+            _purge(list(Course.objects.filter(program=program)), OWNED[kind], counts, files)
+        _purge(rows, OWNED[kind], counts, files)
     elif kind == "department":
         from academic.models import Course
         from students.models import StudentRecord
@@ -229,12 +246,27 @@ def delete(meta, kind: str, rows: list, *, reason: str = "", request_id: int | N
                 new={"reason": reason, "request": request_id},
                 department_id=_department_of(kind, row),
             )
+        if kind == "program":
+            from organization.services import end_program_links
+
+            # Its head, supervisor and staff links, on the record as a plain deletion does.
+            for program in rows:
+                end_program_links(meta, program)
         counts, files = _remove(kind, rows)
         transaction.on_commit(lambda: _remove_files(files))
+        if kind in ON_THE_SITE:
+            from content.services import request_site_rebuild
+
+            transaction.on_commit(request_site_rebuild)
     return _summary(counts)
 
 
-_ACTION = {"student": "students", "course": "course", "department": "department"}
+_ACTION = {
+    "student": "students",
+    "course": "course",
+    "program": "program",
+    "department": "department",
+}
 
 
 def _department_of(kind: str, row) -> int | None:
@@ -277,6 +309,7 @@ def find(kind: str, ids) -> list:
         {
             "student": "students.StudentRecord",
             "course": "academic.Course",
+            "program": "organization.Program",
             "department": "organization.Department",
         }[kind]
     )
