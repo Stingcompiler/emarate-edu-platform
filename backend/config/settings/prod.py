@@ -64,10 +64,13 @@ BUNNY_TOKEN_KEY = env("BUNNY_TOKEN_KEY", "", required=_on_bunny)
 BUNNY_PUBLIC_STORAGE_ZONE = env("BUNNY_PUBLIC_STORAGE_ZONE", "", required=_on_bunny)
 BUNNY_PUBLIC_STORAGE_KEY = env("BUNNY_PUBLIC_STORAGE_KEY", "", required=_on_bunny)
 BUNNY_PUBLIC_URL = env("BUNNY_PUBLIC_URL", "", required=_on_bunny)
-BUNNY_STREAM_LIBRARY_ID = env("BUNNY_STREAM_LIBRARY_ID", "", required=_on_bunny)
-BUNNY_STREAM_API_KEY = env("BUNNY_STREAM_API_KEY", "", required=_on_bunny)
-BUNNY_STREAM_TOKEN_KEY = env("BUNNY_STREAM_TOKEN_KEY", "", required=_on_bunny)
-BUNNY_WEBHOOK_SECRET = env("BUNNY_WEBHOOK_SECRET", "", required=_on_bunny)
+# Bunny Stream is optional: without a library the videos are files in the private zone
+# (owner, 2026-11-16: «الفيديوهات تبقى على bunny storage»). With one, all four are needed.
+BUNNY_STREAM_LIBRARY_ID = env("BUNNY_STREAM_LIBRARY_ID", "")
+_on_stream = _on_bunny and bool(BUNNY_STREAM_LIBRARY_ID)
+BUNNY_STREAM_API_KEY = env("BUNNY_STREAM_API_KEY", "", required=_on_stream)
+BUNNY_STREAM_TOKEN_KEY = env("BUNNY_STREAM_TOKEN_KEY", "", required=_on_stream)
+BUNNY_WEBHOOK_SECRET = env("BUNNY_WEBHOOK_SECRET", "", required=_on_stream)
 if _on_bunny:
     STORAGES = {
         **STORAGES,  # noqa: F405

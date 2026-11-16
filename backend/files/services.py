@@ -27,6 +27,13 @@ def _bunny() -> bool:
     return settings.MEDIA_BACKEND == "bunny"
 
 
+def _stream() -> bool:
+    """Videos go to Bunny Stream only when a library is set. Without one (the owner's choice,
+    2026-11-16: «الفيديوهات تبقى على bunny storage») a video is a file like the others: uploaded
+    through the platform into the private zone, played from a signed link."""
+    return _bunny() and bool(settings.BUNNY_STREAM_LIBRARY_ID)
+
+
 def _expiry(timestamp: int) -> datetime:
     return datetime.fromtimestamp(timestamp, tz=UTC)
 
@@ -157,10 +164,10 @@ def video_ticket(meta: RequestMeta, *, offering, title: str, size: int) -> tuple
             offering=offering,
             title=title,
             size=size,
-            provider=VideoAsset.Provider.BUNNY if _bunny() else VideoAsset.Provider.LOCAL,
+            provider=VideoAsset.Provider.BUNNY if _stream() else VideoAsset.Provider.LOCAL,
             uploaded_by=meta.actor,
         )
-        if _bunny():
+        if _stream():
             video.provider_id = bunny.stream_create_video(title)
             video.save(update_fields=["provider_id", "updated_at"])
             ticket = bunny.stream_tus_ticket(video.provider_id)
