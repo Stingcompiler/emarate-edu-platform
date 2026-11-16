@@ -76,7 +76,25 @@ def forwards(apps, schema_editor):
 
 
 def backwards(apps, schema_editor):
-    """One membership a department again: the first of each person's stays."""
+    """One membership a department again: the first of each person's stays. Refused, with
+    the courses named, when two programmes of a department use one code: before programmes a
+    code was the department's, and which course would keep it is not guessed (review
+    2026-11-15, R106)."""
+    from django.db.models import Count
+
+    Course = apps.get_model("academic", "Course")
+    shared = (
+        Course.objects.values("department__code", "code")
+        .annotate(n=Count("id"))
+        .filter(n__gt=1)
+        .order_by("department__code", "code")
+    )
+    if shared:
+        names = ", ".join(f"{row['department__code']}/{row['code']}" for row in shared[:10])
+        raise RuntimeError(
+            "Cannot go back before programme courses: these codes are used by more than one "
+            f"course of the same department: {names}. Give each a code of its own first."
+        )
     Membership = apps.get_model("academic", "DepartmentMembership")
     seen: set[tuple[int, int]] = set()
     for membership in Membership.objects.order_by("id"):

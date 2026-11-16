@@ -37,6 +37,7 @@ class OfferingAccess:
     grade: bool = False
     submit: bool = False
     publish: bool = False  # publish/close exams: not TAs (docs/03 §3.9)
+    delete_submissions: bool = False
 
     @property
     def any(self) -> bool:
@@ -71,6 +72,9 @@ def for_offering(user, offering) -> OfferingAccess:
         edit=manage or teaching is not None,
         delete=delete,
         delete_own=teaching == "teacher",
+        # A student's submission (owner, 2026-11-16): the course's teacher, or whoever deletes
+        # coursework in the department or the programme.
+        delete_submissions=delete or teaching == "teacher",
         grade=manage or teaching == "teacher" or (teaching == "ta" and offering.ta_can_grade),
         submit=enrolled,
         publish=manage or teaching == "teacher",

@@ -10,7 +10,7 @@
 
 ```
 [ الموقع العام ]  Astro (SSG) + React islands + Tailwind  ──▶  CDN ثابت (Cloudflare Pages / Bunny)
-[ البوابة ]       React 19 + Vite + TypeScript + Tailwind + PWA   ──▶  CDN ثابت (portal.eust.edu.sd)
+[ البوابة ]       React 19 + Vite + TypeScript + Tailwind + PWA   ──▶  CDN ثابت (portal.ecst.edu.sd)
         │ HTTPS (كوكيز HttpOnly + CSRF)                 │ HTTPS (بلا كوكيز، Throttled)
         ▼                                                ▼
 [ API ]  Django 6 + DRF + drf-spectacular  ──  /api/v1/* (مصادق)   /api/public/* (عام، Cache)

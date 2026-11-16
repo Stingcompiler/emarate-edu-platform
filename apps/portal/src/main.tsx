@@ -153,6 +153,10 @@ const Members = page(() => import("./routes/department/Members"), "Members");
 const DepartmentPage = page(() => import("./routes/DepartmentPage"), "DepartmentPage");
 const ProgramPage = page(() => import("./routes/ProgramPage"), "ProgramPage");
 const Offerings = page(() => import("./routes/department/Offerings"), "Offerings");
+const MyDeletionRequests = page(
+  () => import("./routes/department/MyDeletionRequests"),
+  "MyDeletionRequests",
+);
 const DepartmentStudents = page(() => import("./routes/department/Students"), "DepartmentStudents");
 const Assignment = page(() => import("./routes/learning/Assignment"), "Assignment");
 const AssignmentEditor = page(
@@ -305,6 +309,10 @@ const router = createBrowserRouter([
   { path: "/registrars", element: signedIn(<Registrars />, "/registrars") },
   { path: "/department", element: signedIn(<DepartmentDashboard />, "/department") },
   { path: "/department/courses", element: signedIn(<Offerings />, "/department/courses") },
+  {
+    path: "/deletion-requests",
+    element: signedIn(<MyDeletionRequests />, "/deletion-requests"),
+  },
   {
     path: "/department/lectures",
     element: signedIn(<DepartmentLectures />, "/department/lectures"),

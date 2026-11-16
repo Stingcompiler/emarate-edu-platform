@@ -1824,8 +1824,17 @@ msgid "There is not enough free disk space on the server to restore."
 msgstr "لا تكفي المساحة الخالية على قرص الخادم للاستعادة."
 
 #: core/restore.py
-msgid "The database was restored, but a later step failed. The state before the restore is kept in the newest backup; see the server's log."
-msgstr "استُعيدت قاعدة البيانات، لكن خطوة بعدها تعثّرت. الوضع الذي كان قبل الاستعادة محفوظ في أحدث نسخة؛ التفاصيل في سجل الخادم."
+msgid "The restore stopped before it ended: the server's worker was stopped. If the platform is open, nothing was changed; the server's log has the details."
+msgstr "توقفت الاستعادة قبل أن تكتمل: توقف عامل الخادم. إن كانت المنصة مفتوحة فلم يتغيّر شيء؛ التفاصيل في سجل الخادم."
+
+#: core/restore.py
+msgid "A step after the database failed, so the platform was put back as it was before the restore. Nothing was changed; details are in the server's log."
+msgstr "تعثّرت خطوة بعد قاعدة البيانات، فأُعيدت المنصة كما كانت قبل الاستعادة. لم يتغيّر شيء؛ التفاصيل في سجل الخادم."
+
+#: core/restore.py
+#, python-format
+msgid "The restore stopped halfway and the state before it could not be put back. The platform stays closed until whoever runs the server opens it (manage.py maintenance --open); the state before the restore is kept in backup %(stamp)s."
+msgstr "توقفت الاستعادة في منتصفها وتعذّرت إعادة الوضع الذي كان قبلها. تبقى المنصة مغلقة حتى يفتحها من يدير الخادم (manage.py maintenance --open)؛ الوضع الذي كان قبل الاستعادة محفوظ في نسخة %(stamp)s."
 
 #: core/restore.py
 msgid "The restore failed and nothing was changed. Details are in the server's log."
@@ -1859,3 +1868,57 @@ msgstr "هذه ليست كلمة سر هذا الملف."
 #: organization/backups.py
 msgid "This is not a backup file of the platform."
 msgstr "هذا ليس ملف نسخة احتياطية للمنصة."
+
+#: core/deletions.py
+#, python-format
+msgid "It cannot be deleted: %(what)s still refers to it. Nothing was changed."
+msgstr "لا يمكن حذفه: ما زال يرتبط به «%(what)s». لم يتغيّر شيء."
+
+#: core/deletion_views.py
+msgid "One at a time."
+msgstr "واحدًا في كل مرة."
+
+#: core/deletion_views.py
+msgid "Some of them no longer exist."
+msgstr "بعضها لم يعد موجودًا."
+
+#: core/deletion_views.py
+msgid "Type exactly what is shown to confirm."
+msgstr "اكتب ما هو ظاهر كما هو للتأكيد."
+
+#: core/deletion_views.py
+msgid "A backup is being made or restored; try again when it ends."
+msgstr "تُنشأ نسخة احتياطية أو تُستعاد الآن؛ أعد المحاولة حين تنتهي."
+
+#: core/tasks.py
+msgid "A backup is being made or restored; nothing was deleted. Try again when it ends."
+msgstr "تُنشأ نسخة احتياطية أو تُستعاد الآن، فلم يُحذف شيء. أعد المحاولة حين تنتهي."
+
+#: core/tasks.py
+msgid "The backup before the deletion could not be made, so nothing was deleted. Details are in the server's log."
+msgstr "تعذّرت النسخة الاحتياطية قبل الحذف، فلم يُحذف شيء. التفاصيل في سجل الخادم."
+
+#: core/tasks.py
+msgid "The deletion failed and nothing was deleted. Details are in the server's log."
+msgstr "تعذّر الحذف، فلم يُحذف شيء. التفاصيل في سجل الخادم."
+
+#: content/deletions.py
+msgid "Some of them are outside your department or programme."
+msgstr "بعضها خارج قسمك أو برنامجك."
+
+#: content/deletions.py
+msgid "The request asks for other records."
+msgstr "الطلب يخص سجلات أخرى."
+
+#: content/deletions.py
+msgid "Approve it from the deletion form, which shows what goes with it."
+msgstr "وافق عليه من نافذة الحذف، فهي تعرض ما يُحذف معه."
+
+#: learning/services.py
+#, python-format
+msgid "%(n)s students have submitted. Delete the assignment with their submissions and grades, or close it instead."
+msgstr "سلّم %(n)s من الطلاب. احذف الواجب مع تسليماتهم ودرجاتهم، أو أغلقه بدلًا من ذلك."
+
+#: learning/services.py
+msgid "You cannot delete this submission."
+msgstr "لا يمكنك حذف هذا التسليم."

@@ -29,11 +29,19 @@ def send_push(subscription_id: int, notification_id: int) -> bool:
     return push.send(subscription, services.push_payload(notification))
 
 
+# A claimed email not marked within this time is tried again (its worker died mid-send).
+CLAIM = timedelta(minutes=10)
+
+
 @shared_task
 def deliver_outbox(limit: int = 200) -> int:
-    """Send pending emails; failures retry with backoff (1, 2, 4, 8 minutes), then give up."""
+    """Send pending emails; failures retry with backoff (1, 2, 4, 8 minutes), then give up.
+
+    The batch is claimed in a short transaction, then each email is sent and marked on its
+    own: a worker stopped in the middle resends at most the one it was sending, not the
+    whole batch its rolled-back transaction would have left pending (review 2026-11-15, R97).
+    """
     now = timezone.now()
-    sent = 0
     with transaction.atomic():
         rows = list(
             Outbox.objects.select_for_update(skip_locked=True)
@@ -42,20 +50,25 @@ def deliver_outbox(limit: int = 200) -> int:
         )
         for row in rows:
             row.attempts += 1
-            try:
-                send_mail(row.subject, row.body, None, [row.to])
-            except Exception as error:
-                row.last_error = str(error)[:300]
-                if row.attempts >= MAX_ATTEMPTS:
-                    row.status = Outbox.Status.FAILED
-                else:
-                    row.next_try_at = now + timedelta(minutes=2 ** (row.attempts - 1))
+            row.next_try_at = now + CLAIM
+        Outbox.objects.bulk_update(rows, ["attempts", "next_try_at"])
+    sent = 0
+    for row in rows:
+        # Cancelled meanwhile (its notification hidden, R81): not sent.
+        if not Outbox.objects.filter(pk=row.pk, status=Outbox.Status.PENDING).exists():
+            continue
+        try:
+            send_mail(row.subject, row.body, None, [row.to])
+        except Exception as error:
+            changes = {"last_error": str(error)[:300]}
+            if row.attempts >= MAX_ATTEMPTS:
+                changes["status"] = Outbox.Status.FAILED
             else:
-                row.status = Outbox.Status.SENT
-                sent += 1
-            row.save(
-                update_fields=["attempts", "status", "next_try_at", "last_error", "updated_at"]
-            )
+                changes["next_try_at"] = timezone.now() + timedelta(minutes=2 ** (row.attempts - 1))
+        else:
+            changes = {"status": Outbox.Status.SENT, "next_try_at": None}
+            sent += 1
+        Outbox.objects.filter(pk=row.pk).update(**changes, updated_at=timezone.now())
     return sent
 
 

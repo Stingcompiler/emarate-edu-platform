@@ -141,18 +141,55 @@ def test_a_database_that_fails_to_load_leaves_everything(place, fake_database, d
     assert not [p for p in place.iterdir() if p.name.startswith(".")]
 
 
-def test_a_failure_after_the_database_says_where_the_old_state_is(
-    place, fake_database, db, monkeypatch
-):
+def test_a_failure_after_the_database_puts_the_present_back(place, fake_database, db, monkeypatch):
+    """Review 2026-11-15, R120: the rows and files of the present come back, and the
+    platform opens on them — not on the copy's rows with half its steps."""
     stamp = _copy()
+    _later(place)
 
     def broken(*args, **kwargs):
         raise RuntimeError("migrate failed")
 
     monkeypatch.setattr("django.core.management.call_command", broken)
     result = restore.run(stamp)
-    assert result["state"] == "failed" and result["code"] == "half"
+    assert result["state"] == "failed" and result["code"] == "rolled_back", result
     assert result["kept_before"] and maintenance.state() is None
+    # The copy's rows went in, then the present's (the copy made at the start) on top.
+    assert fake_database == [b"PGDMP-fake-dump", b"PGDMP-fake-dump"]
+    assert (place / "public/logo.png").read_bytes() == b"logo-now"
+    assert (place / "private/submissions/b.pdf").read_bytes() == b"pdf-later"
+
+
+def test_a_restore_that_cannot_be_put_back_keeps_the_platform_closed(
+    place, fake_database, db, monkeypatch, capsys
+):
+    stamp = _copy()
+    from django.core import management
+
+    real_call = management.call_command
+
+    def broken(name, *args, **kwargs):
+        if name == "migrate":
+            raise RuntimeError("migrate failed")
+        return real_call(name, *args, **kwargs)
+
+    loads = []
+
+    def load(dump, work):
+        loads.append(dump)
+        if len(loads) > 1:
+            raise RuntimeError("psql: the present cannot be loaded either")
+
+    monkeypatch.setattr("django.core.management.call_command", broken)
+    monkeypatch.setattr(restore, "restore_database", load)
+    result = restore.run(stamp)
+    assert result["code"] == "half" and result["kept_before"] in result["error"], result
+    assert maintenance.state()["reason"] == "restore-half"
+    # Whoever runs the server opens it after looking.
+    real_call("maintenance", status=True)
+    assert "restore-half" in capsys.readouterr().out
+    real_call("maintenance", open=True)
+    assert maintenance.state() is None
 
 
 def test_what_a_restore_set_aside_is_not_backed_up_and_goes_after_a_week(place, fake_database, db):

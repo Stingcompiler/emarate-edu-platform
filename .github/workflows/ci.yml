@@ -55,7 +55,9 @@ jobs:
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v5
         with:
-          node-version: 22
+          # The server's own Node (/opt/ecst/node): a dependency that needs a newer one fails
+          # here, not in the site build on the server (2026-11-15: Astro 7.4 needs 22.23.4).
+          node-version-file: .node-version
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm format:check
@@ -117,7 +119,9 @@ jobs:
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v5
         with:
-          node-version: 22
+          # The server's own Node (/opt/ecst/node): a dependency that needs a newer one fails
+          # here, not in the site build on the server (2026-11-15: Astro 7.4 needs 22.23.4).
+          node-version-file: .node-version
           cache: pnpm
       - run: uv sync --locked --project backend
       - run: pnpm install --frozen-lockfile
@@ -153,7 +157,9 @@ jobs:
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v5
         with:
-          node-version: 22
+          # The server's own Node (/opt/ecst/node): a dependency that needs a newer one fails
+          # here, not in the site build on the server (2026-11-15: Astro 7.4 needs 22.23.4).
+          node-version-file: .node-version
           cache: pnpm
       - run: uv sync --locked --project backend
       - run: pnpm install --frozen-lockfile

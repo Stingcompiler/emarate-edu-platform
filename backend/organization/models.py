@@ -33,7 +33,10 @@ class Program(BilingualNameModel, TimestampedModel):
         DIPLOMA = "diploma", "دبلوم"
         BACHELOR = "bachelor", "بكالوريوس"
         HONOURS = "honours", "بكالوريوس مرتبة الشرف"
+        # Postgraduate (owner, 2026-11-15).
+        HIGHER_DIPLOMA = "higher_diploma", "دبلوم عالٍ"
         MASTER = "master", "ماجستير"
+        PHD = "phd", "دكتوراه"
 
     department = models.ForeignKey(Department, on_delete=models.PROTECT, related_name="programs")
     code = models.CharField(max_length=20, unique=True)
@@ -88,6 +91,10 @@ class SystemSettings(SingletonModel, TimestampedModel):
     grading_days_limit = models.PositiveSmallIntegerField(default=3)
     upload_min_percent = models.PositiveSmallIntegerField(default=75)
     planned_lectures_per_week = models.PositiveSmallIntegerField(default=2)
+    # Every sign-in carries it (accounts.services.issue_tokens); a restore draws a new one, so
+    # each session from before it ends — the restored rows would otherwise accept tokens their
+    # own accounts never issued (review 2026-11-15, R115). Nobody edits it.
+    session_epoch = models.CharField(max_length=32, blank=True, default="", editable=False)
 
     class Meta:
         verbose_name = "system settings"

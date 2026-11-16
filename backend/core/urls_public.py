@@ -44,6 +44,12 @@ urlpatterns = [
         name="public-portal-icon",
     ),
     path(
+        "portal-icon/<str:kind>.webp",
+        content.PublicPortalIconView.as_view(),
+        {"ext": "webp"},
+        name="public-portal-icon-webp",
+    ),
+    path(
         "staff-photos/<uuid:public_id>.webp",
         catalogue.PublicStaffPhotoView.as_view(),
         name="public-staff-photo",

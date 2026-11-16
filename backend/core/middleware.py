@@ -119,6 +119,7 @@ class MaintenanceMiddleware:
 
     OPEN = frozenset({"/api/public/health", "/api/public/maintenance"})
     CLOSED = ("/api/", "/admin")
+    SAFE = frozenset({"GET", "HEAD", "OPTIONS"})
 
     def __init__(self, get_response):
         self.get_response = get_response
@@ -126,23 +127,36 @@ class MaintenanceMiddleware:
     def __call__(self, request):
         from core import maintenance
 
-        closed = maintenance.check()
-        if closed and request.path not in self.OPEN and request.path.startswith(self.CLOSED):
-            from django.http import JsonResponse
-            from django.utils.translation import gettext
+        # A request that may write is counted while it runs: the restore waits for those
+        # already inside before it copies the present (core.maintenance.drain).
+        counted = request.method not in self.SAFE and request.path.startswith(self.CLOSED)
+        if counted:
+            maintenance.writing()
+        try:
+            closed = maintenance.check()
+            if closed and request.path not in self.OPEN and request.path.startswith(self.CLOSED):
+                return self._closed()
+            return self.get_response(request)
+        finally:
+            if counted:
+                maintenance.written()
 
-            from core.exceptions import PROBLEM_CONTENT_TYPE, problem
+    @staticmethod
+    def _closed():
+        from django.http import JsonResponse
+        from django.utils.translation import gettext
 
-            return JsonResponse(
-                problem(
-                    503,
-                    detail=gettext(
-                        "The platform is being restored from a backup. Try again in a few minutes."
-                    ),
-                    code="maintenance",
+        from core.exceptions import PROBLEM_CONTENT_TYPE, problem
+
+        return JsonResponse(
+            problem(
+                503,
+                detail=gettext(
+                    "The platform is being restored from a backup. Try again in a few minutes."
                 ),
-                status=503,
-                content_type=PROBLEM_CONTENT_TYPE,
-                headers={"Retry-After": "60", "Cache-Control": "no-store"},
-            )
-        return self.get_response(request)
+                code="maintenance",
+            ),
+            status=503,
+            content_type=PROBLEM_CONTENT_TYPE,
+            headers={"Retry-After": "60", "Cache-Control": "no-store"},
+        )

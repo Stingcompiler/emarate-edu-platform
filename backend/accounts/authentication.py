@@ -28,8 +28,11 @@ class CookieJWTAuthentication(JWTAuthentication):
             raise exceptions.AuthenticationFailed(
                 gettext("User is inactive."), code="user_inactive"
             )
-        if validated.get("tv", 0) != user.token_version:
-            # Signed out everywhere since this token was issued (review 2026-10-08, R05).
+        from accounts.services import token_is_current
+
+        if not token_is_current(validated, user):
+            # Signed out everywhere since this token was issued (review 2026-10-08, R05), or
+            # issued before a backup was restored (review 2026-11-15, R115).
             raise exceptions.AuthenticationFailed(gettext("Session expired."), code="token_revoked")
         self._enforce_csrf(request)
         return user, validated

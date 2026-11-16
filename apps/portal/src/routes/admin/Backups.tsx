@@ -252,10 +252,22 @@ export function Backups() {
           )}
         </ul>
         <div className="space-y-1 bg-surface-alt px-4 py-3 text-xs leading-6 text-text-muted">
-          <p>
-            <b className="text-text">النسخ هنا على قرص الخادم نفسه.</b> نزّل نسخة بين حين وآخر
-            واحفظها خارجه: هي ما يبقى إن فُقد الخادم، وما تنقل به المنصة إلى استضافة أخرى.
-          </p>
+          {data?.offsite.configured ? (
+            // A copy of each backup off the server, on Cloudflare R2 (owner, 2026-11-16).
+            <p data-offsite={data.offsite.ok === false ? "failed" : "ok"}>
+              <b className="text-text">نسخة خارج الخادم:</b>{" "}
+              {data.offsite.ok === false
+                ? "تعذّر آخر نسخ إلى التخزين خارج الخادم؛ يُعاد كل ست ساعات، ووصل التنبيه إلى بريد التشغيل."
+                : data.offsite.newest
+                  ? `تُنسخ كل نسخة إلى التخزين خارج الخادم تلقائيًا. أحدثها هناك ${stampDate(data.offsite.newest)}، ويُحتفظ بآخر ${data.offsite.copies.toLocaleString("ar-u-nu-latn")}.`
+                  : "تُنسخ كل نسخة إلى التخزين خارج الخادم تلقائيًا؛ لم تصل أولاها بعد."}
+            </p>
+          ) : (
+            <p>
+              <b className="text-text">النسخ هنا على قرص الخادم نفسه.</b> نزّل نسخة بين حين وآخر
+              واحفظها خارجه: هي ما يبقى إن فُقد الخادم، وما تنقل به المنصة إلى استضافة أخرى.
+            </p>
+          )}
           <p>
             <b className="text-text">الاستعادة</b> تعيد المنصة كلها إلى لحظة النسخة: يُمحى ما أُدخل
             بعدها، وتتوقف المنصة دقائق. تُحفظ قبلها نسخة من الوضع الحالي، فتستطيع التراجع. لمدير
@@ -404,7 +416,8 @@ function RestoreDialog({ copy, now, onClose }: { copy: Copy; now: Counts; onClos
     >
       <Notice tone="warning">
         تعود المنصة كلها إلى ما كانت عليه في {fmtDateTime(copy.at)}. <b>كل ما أُدخل بعدها يُمحى</b>:
-        تسجيلات، إجابات اختبارات، واجبات، نتائج، حسابات.
+        تسجيلات، إجابات اختبارات، واجبات، نتائج، حسابات. ويخرج الجميع من حساباتهم، وأنت منهم: سجّل
+        الدخول من جديد بعدها.
       </Notice>
       {copy.counts && (
         <table className="w-full text-sm">

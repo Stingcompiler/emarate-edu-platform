@@ -35,7 +35,7 @@
 
 ---
 
-## 2. البوابة — `portal.eust.edu.sd` (React PWA)
+## 2. البوابة — `portal.ecst.edu.sd` (React PWA)
 
 ### 2.1 المصادقة (هيكل Auth)
 

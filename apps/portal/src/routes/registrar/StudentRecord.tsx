@@ -1,8 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
-import { Link, useParams } from "react-router";
+import { Trash2 } from "lucide-react";
+import { useState } from "react";
+import { Link, useNavigate, useParams } from "react-router";
 
+import { DeleteEverythingDialog } from "../../components/DeleteEverything";
 import { PortalShell } from "../../components/PortalShell";
-import { Avatar, Card, SectionLabel, StatusBadge } from "../../components/ui";
+import { Avatar, Button, Card, SectionLabel, StatusBadge } from "../../components/ui";
 import { api, ok } from "../../lib/api";
 import { useMe } from "../../lib/auth";
 import { can } from "../../lib/nav";
@@ -15,6 +18,9 @@ import { ALL } from "../../components/Pager";
 export function StudentRecord() {
   const { id = "" } = useParams();
   const me = useMe();
+  const navigate = useNavigate();
+  // The system admin deletes the student with everything they hold (owner, 2026-11-15).
+  const [deleting, setDeleting] = useState(false);
   const student = useQuery({
     queryKey: ["student", id],
     queryFn: async () =>
@@ -56,7 +62,23 @@ export function StudentRecord() {
           : undefined
       }
       back={{ label: "سجل الطلاب", to: "/students" }}
+      titleAction={
+        s && can(me.data, "records.delete_all") ? (
+          <Button variant="danger" className="min-h-10 px-3" onClick={() => setDeleting(true)}>
+            <Trash2 size={16} aria-hidden />
+            حذف الطالب
+          </Button>
+        ) : undefined
+      }
     >
+      {deleting && (
+        <DeleteEverythingDialog
+          kind="student"
+          ids={[id]}
+          onDone={() => navigate("/students", { replace: true })}
+          onClose={() => setDeleting(false)}
+        />
+      )}
       {s && (
         <div className="lg:grid lg:grid-cols-2 lg:items-start lg:gap-6">
           <div className="space-y-4">

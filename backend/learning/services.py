@@ -2,9 +2,11 @@
 
 from __future__ import annotations
 
+import logging
 import re
 from decimal import Decimal
 
+from django.core.files.storage import default_storage
 from django.db import IntegrityError, transaction
 from django.db.models import F
 from django.utils import timezone
@@ -28,6 +30,8 @@ from .models import (
     SubmissionGrade,
     SubmissionVersion,
 )
+
+logger = logging.getLogger(__name__)
 
 
 def _dept(offering) -> int:
@@ -301,23 +305,110 @@ def set_assignment_status(meta: RequestMeta, assignment: Assignment, status: str
     return assignment
 
 
-def delete_assignment(meta: RequestMeta, assignment: Assignment) -> None:
+def _uploaded_with(submissions) -> list:
+    """The files students uploaded with these submissions (every version)."""
+    ids = {
+        str(i)
+        for files in SubmissionVersion.objects.filter(submission__in=submissions).values_list(
+            "files", flat=True
+        )
+        for i in (files or [])
+    }
+    return list(StoredFile.objects.filter(public_id__in=ids)) if ids else []
+
+
+def _remove_files(stored: list) -> None:
+    """The rows now, the bytes once the transaction has committed."""
+    names = [f.file.name for f in stored if f.file]
+    for item in stored:
+        item.delete()
+
+    def gone():
+        for name in names:
+            try:
+                default_storage.delete(name)
+            except Exception:  # a file already missing is not a failure of the deletion
+                logger.warning("could not remove the file %s", name)
+
+    transaction.on_commit(gone)
+
+
+def _work_of(submission: Submission) -> dict:
+    """What the log keeps of a submission before it goes."""
+    grade = getattr(submission, "grade", None)
+    return {
+        "student": submission.student_record.university_number,
+        "name": submission.student_record.full_name_ar,
+        "versions": submission.versions.count(),
+        "late": submission.is_late,
+        "grade": str(grade.score) if grade is not None else None,
+        "grade_status": grade.status if grade is not None else None,
+    }
+
+
+def delete_assignment(
+    meta: RequestMeta, assignment: Assignment, *, with_submissions: bool = False
+) -> None:
+    """An assignment, and — when asked, once students have submitted (owner, 2026-11-16) — their
+    submissions, versions, grades and files with it. The log keeps who submitted and their
+    grades."""
     found = require(meta.actor, assignment.offering, "view_all")
     if not found.can_delete(meta.actor, assignment):
         raise PermissionDenied(gettext("You cannot delete this assignment."))
-    if assignment.submissions.exists():
+    submitted = assignment.submissions.count()
+    if submitted and not with_submissions:
         raise Conflict(
-            gettext("Students have submitted; close the assignment instead."), code="in_use"
+            gettext(
+                "%(n)s students have submitted. Delete the assignment with their submissions "
+                "and grades, or close it instead."
+            )
+            % {"n": submitted},
+            code="has_submissions",
         )
     with transaction.atomic():
+        submissions = list(
+            # Lock the submissions only: `grade` is the nullable side of an outer join (PostgreSQL).
+            assignment.submissions.select_related("student_record", "grade").select_for_update(
+                of=("self",)
+            )
+        )
         record(
             meta,
             "assignment.delete",
             assignment,
-            old=snapshot(assignment),
+            old={**snapshot(assignment), "submissions": [_work_of(s) for s in submissions]},
             department_id=_dept(assignment.offering),
         )
+        stored = _uploaded_with(submissions)
+        for submission in submissions:
+            submission.delete()  # its versions and grade go with it (CASCADE)
+        _remove_files(stored)
         assignment.delete()
+
+
+def delete_submission(meta: RequestMeta, submission: Submission) -> None:
+    """A student's submission, its versions, grade and files (owner, 2026-11-16): the course's
+    teacher, or whoever deletes coursework in the department or programme. The student may then
+    submit again while the assignment accepts it."""
+    found = require(meta.actor, submission.assignment.offering, "view_all")
+    if not found.delete_submissions:
+        raise PermissionDenied(gettext("You cannot delete this submission."))
+    with transaction.atomic():
+        submission = (
+            Submission.objects.select_for_update(of=("self",))
+            .select_related("student_record", "grade", "assignment__offering__course")
+            .get(pk=submission.pk)
+        )
+        record(
+            meta,
+            "submission.delete",
+            submission,
+            old={**_work_of(submission), "assignment": submission.assignment.title},
+            department_id=_dept(submission.assignment.offering),
+        )
+        stored = _uploaded_with([submission])
+        submission.delete()
+        _remove_files(stored)
 
 
 # ─── Submissions ──────────────────────────────────────────────────────────
@@ -509,6 +600,10 @@ def _rule_grade(submission: Submission, version: SubmissionVersion) -> None:
         details[str(index)] = str(points if met else 0)
         total += points if met else 0
     total = min(total, submission.assignment.max_grade)
+    # A grade the teacher approved is never replaced by the rules' suggestion (R95).
+    current = SubmissionGrade.objects.select_for_update().filter(submission=submission).first()
+    if current is not None and current.status == SubmissionGrade.Status.APPROVED:
+        return
     SubmissionGrade.objects.update_or_create(
         submission=submission,
         defaults={
@@ -536,6 +631,10 @@ def grade(
             }
         )
     with transaction.atomic():
+        # The submission's row is the one a resubmission locks too: the two never interleave,
+        # so the rules' suggestion of a new version cannot overwrite this grade (review
+        # 2026-11-15, R95).
+        Submission.objects.select_for_update().filter(pk=submission.pk).first()
         existing = SubmissionGrade.objects.filter(submission=submission).first()
         old = {"score": str(existing.score), "status": existing.status} if existing else None
         result, _ = SubmissionGrade.objects.update_or_create(
@@ -565,17 +664,20 @@ def grade(
 def approve_grade(meta: RequestMeta, submission: Submission) -> SubmissionGrade:
     assignment = submission.assignment
     require(meta.actor, assignment.offering, "grade")
-    result = SubmissionGrade.objects.filter(submission=submission).first()
-    if result is None or result.status != SubmissionGrade.Status.SUGGESTED:
-        raise Conflict(
-            gettext("There is no suggested grade to approve."), code="nothing_to_approve"
-        )
-    # docs/03 §3.9: a TA never gives final approval to an AI-suggested grade.
-    if result.source == SubmissionGrade.Source.AI_SUGGESTED and _is_ta(
-        meta.actor, assignment.offering
-    ):
-        raise PermissionDenied(gettext("Only the teacher approves AI-suggested grades."))
     with transaction.atomic():
+        # Under the submission's lock (R95): what is approved is the suggestion that is there,
+        # not one a resubmission is replacing at the same moment.
+        Submission.objects.select_for_update().filter(pk=submission.pk).first()
+        result = SubmissionGrade.objects.filter(submission=submission).first()
+        if result is None or result.status != SubmissionGrade.Status.SUGGESTED:
+            raise Conflict(
+                gettext("There is no suggested grade to approve."), code="nothing_to_approve"
+            )
+        # docs/03 §3.9: a TA never gives final approval to an AI-suggested grade.
+        if result.source == SubmissionGrade.Source.AI_SUGGESTED and _is_ta(
+            meta.actor, assignment.offering
+        ):
+            raise PermissionDenied(gettext("Only the teacher approves AI-suggested grades."))
         result.status = SubmissionGrade.Status.APPROVED
         result.graded_by = meta.actor
         result.graded_at = timezone.now()

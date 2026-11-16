@@ -40,7 +40,7 @@
 | المكوّن | التقنية | المسؤولية | لا يفعل |
 |---|---|---|---|
 | `apps/landing` | Astro SSG + React islands | صفحات عامة ثابتة من `/api/public` وقت البناء؛ جزر: التقديم، التواصل، متابعة الطلب | لا مصادقة، لا كوكيز |
-| `apps/portal` | React 19 + Vite + TS + PWA | كل شاشات الأدوار الـ 14؛ إشعارات Push | لا منطق أعمال، لا حساب صلاحيات |
+| `apps/portal` | React 19 + Vite + TS + PWA | كل شاشات الأدوار (17، `docs/roles-matrix.md`)؛ إشعارات Push | لا منطق أعمال، لا حساب صلاحيات |
 | `backend` | Django 6 + DRF | كل المنطق، الصلاحيات، الحالات، التدقيق، الملفات، الإشعارات، OpenAPI | لا HTML (إلا Admin وPDF) |
 | Celery | Eager (dev) / Redis (prod) | إشعارات، إغلاق اختبارات، PDF، إعادة بناء الموقع (تحليل ملفات الاستيراد يجري داخل الطلب ما دامت الملفات صغيرة؛ يُنقل إلى مهمة إن تجاوز زمن الطلب حدًّا يقيسه اختبار الحمل — قرار 2026-10-25) | – |
 | التخزين | `media/` (dev) / Bunny (prod) خلف واجهة `MediaService` | حفظ الملفات وإصدار روابط موقّعة | – |
@@ -93,11 +93,11 @@ backend/
   inquiries/         Inquiry, InquiryMessage, InquiryStatusHistory
   content/           Page, Announcement, News, Event, MediaAsset, Menu, Redirect
   notifications/     Notification, NotificationRecipient, PushSubscription, NotificationPreference, HRNotice, Outbox
-  reports/           selectors + PDF (WeasyPrint)
+  reports/           metrics (قراءات بنطاق `rbac.Scope`) + PDF (WeasyPrint)
   audit/             AuditLog
 ```
 
-**الطبقات داخل كل تطبيق:** `models.py` (بيانات وقيود فقط) → `selectors.py` (استعلامات قراءة، منها `for_user`) → `services.py` (عمليات الكتابة والانتقالات، داخل `transaction.atomic`، تكتب Audit وتطلق Events) → `serializers.py` → `views.py` (رقيقة: تحقق الصلاحية → استدعاء Service) → `tasks.py` → `permissions.py` (`required_perms` + `scope_of`) → `tests/`.
+**الطبقات داخل كل تطبيق:** `models.py` (بيانات وقيود فقط) → `services.py` (عمليات الكتابة والانتقالات، داخل `transaction.atomic`، تكتب Audit وتطلق Events) → `serializers.py` → `views.py` (رقيقة: تحقق الصلاحية → استدعاء Service) → `tasks.py` → `tests/`. القراءة في `get_queryset` بنطاق `accounts/rbac.py` (`scope_for(...).filter(...)`)، والصلاحيات كلها في `accounts/rbac.py` (القدرات ونطاق القسم أو البرنامج)؛ لا طبقة `selectors.py` ولا `permissions.py` لكل تطبيق (مراجعة 2026-11-15).
 
 **اتفاقيات:** كل Model يرث `Timestamped` (`created_at/updated_at`) و`PublicId` (`public_id` UUID للاستخدام في الروابط والـ API بدل الـ PK التسلسلي حيث تُعرض للخارج: الطلبات، الاستفسارات، الملفات). النصوص ثنائية اللغة بحقلين `name_ar`/`name_en` (الإنجليزية اختيارية وتعود للعربية). لا Soft delete عام؛ الكيانات التي تُحذف منطقيًا لها `status=archived`.
 
@@ -168,7 +168,7 @@ backend/
 - **StudentAnswer**: attempt→, question→, answer JSON, saved_at, is_correct, marks_awarded, needs_manual, graded_by→, graded_at; [u (attempt, question)].
 
 ### results
-- **ResultImportBatch**: file, scope {college|department}, department→(null), term→, uploaded_by→, status {uploaded|validated|has_errors|committed|published|unpublished|rejected}, detected_columns JSON, summary JSON. **ResultImportRow**: batch→, row_no, raw JSON, student_record→(null), offering→(null), normalized JSON, action, errors JSON.
+- **ResultImportBatch**: file, scope {college|department|program}, department→(null), program→(null), term→, uploaded_by→, status {uploaded|validated|has_errors|committed|published|unpublished|rejected}, detected_columns JSON, summary JSON. **ResultImportRow**: batch→, row_no, raw JSON, student_record→(null), offering→(null), normalized JSON, action, errors JSON.
 - **AcademicResult**: student_record→, offering→, term→ (denorm), score, letter, grade_points, status {pass|fail|incomplete|withdrawn|absent}, is_published, published_at, published_by→, import_batch→, version; [u (student_record, offering)].
 - **ResultCorrection**: result→, requested_by→, old JSON, new JSON, reason, status {pending|approved|rejected}, decided_by→, decided_at, decision_note.
 - **GradingScale**: program→(null=افتراضي), ranges JSON. **ResultDisplaySettings** (singleton per college). **TermResultRelease**: term→, program→(null), is_visible, released_at, released_by→.
@@ -191,7 +191,7 @@ backend/
 - **Notification**: sender→(null=النظام), kind {manual|system|hr_notice}, category, title, body, action_url, audience JSON, channels JSON. **NotificationRecipient**: notification→, user→, delivered_at, read_at; [u]. **PushSubscription**: user→, endpoint[u], p256dh, auth, user_agent, last_success_at. **NotificationPreference**: user→, category, inapp, push, email. **HRNotice**: teacher→, sent_by→, subject, body, requires_ack, acknowledged_at, notification→. **Outbox**: channel, payload JSON, status, attempts, next_try_at.
 
 ### audit
-- **AuditLog**: actor→(null), action, target_type, target_id, target_repr, old JSON, new JSON, ip, user_agent, at (idx target, actor, at). لا يُحذف أبدًا.
+- **AuditLog**: actor→(null), action, target_type, target_id, target_repr, old JSON, new JSON, ip, user_agent, department→(null), program→(null), at (idx target, actor, at). لا يُحذف أبدًا.
 
 ---
 
@@ -207,7 +207,7 @@ backend/
 | الأخطاء | `application/problem+json` (RFC 9457): `{type, title, status, detail, errors:{field:[...]}, code}`؛ رسائل عربية/إنجليزية حسب `Accept-Language`. |
 | الحالات | أفعال صريحة: `POST /applications/{id}/transition {to, note}`؛ الاستجابة تحمل `allowed_transitions`. |
 | Idempotency | Header `Idempotency-Key` على: تسليم اختبار، إرسال طلب تقديم، اعتماد استيراد (الطلاب والنتائج)، إرسال إشعار. يُخزَّن 24 ساعة لكل مستخدم ومفتاح (`core.IdempotencyRecord`، `core/idempotency.py`): التكرار يعيد الرد الأول دون تنفيذ ثانٍ؛ المفتاح نفسه لطلب مختلف → 422؛ أثناء تنفيذ الأول → 409؛ فشل الأول لا يحفظ شيئًا. تسليم محاولة أُعيد فتحها بعد التسليم الأول → 409 (`stale`). طلب التقديم يحفظ رده بمفتاح الجهة + الطلب + المفتاح. |
-| الحدود | Throttle: عام 60/دقيقة للمستخدم؛ OTP 5/ساعة للهدف؛ login 10/دقيقة للـ IP؛ التواصل 5/ساعة؛ Autosave 30/دقيقة للمحاولة. |
+| الحدود | Throttle: عام 240/دقيقة للمستخدم (صفحة البوابة نحو 10 طلبات، والاختبار يحفظ كل إجابة)، والزائر 30/دقيقة؛ OTP 5/ساعة للهدف؛ login 10/دقيقة للـ IP؛ التواصل 5/ساعة؛ Autosave 30/دقيقة للمحاولة. |
 | الملفات | الرفع عبر `POST /files` (multipart، تحقق نوع/حجم) يعيد `file_id`؛ الوصول عبر `GET /files/{id}/url` يعيد رابطًا موقّعًا (10 دقائق) بعد تحقق الصلاحية. الفيديو: `POST /videos/upload-ticket` (Bunny Stream TUS في الإنتاج؛ رفع محلي في التطوير). |
 | الإصدار والتوثيق | drf-spectacular → `/api/schema` + Swagger UI في التطوير؛ `packages/api` يولَّد منه في CI. |
 | الحقول ثنائية اللغة | تُرسل الحقول كلها (`name_ar`, `name_en`) + حقل مشتق `name` حسب اللغة. |
@@ -295,6 +295,8 @@ Service يطلق `Event(kind, payload)` → Task `fan_out`: حساب المست�
 ## 12. المراقبة والنسخ والنشر (إنتاج)
 
 > **الواقع منذ أكتوبر 2026:** الإنتاج على خادم خاص (VPS) خلف Caddy، بخدمات systemd، ونشر تلقائي لكل commit على `main` نجح CI له، ونسخ احتياطي يومي مشفّر — التفاصيل والأوامر في [runbook.md](runbook.md). الفقرة التالية هي الخطة الأصلية (Render وCloudflare) وتبقى مرجعًا إن تغيّر المضيف.
+
+**النسخ والاستعادة من البوابة (2026-11-14):** «إعدادات النظام ← النسخ الاحتياطية» تنزّل نسخة كاملة في ملف مشفّر بكلمة سر (`core.backups.package`)، وتستعيد نسخة فوق المنصة (`core.restore`): فحص، ثم إغلاق للصيانة (`core.maintenance`، `/api` يجيب 503)، ثم نسخة من الحاضر، ثم القاعدة كلها أو لا شيء، ثم الملفات بالتبديل، ثم الترحيلات، ثم إنهاء كل الجلسات. قفل واحد للنسخ اليومي والنسخ من البوابة والاستعادة؛ وفشل ما بعد القاعدة يعيد الحاضر أو يُبقي المنصة مغلقة (مراجعة 2026-11-15). التفاصيل في `runbook.md`.
 
 Sentry (API + الواجهة)، Logging JSON، Uptime، نسخ Postgres يومية + `pg_dump` أسبوعي مشفّر إلى Bunny + اختبار استعادة ربع سنوي، Runbook. النشر: Render (Web + Worker + Beat + Redis + Postgres) أو مكافئ، Cloudflare Pages للواجهتين، Cloudflare أمام الـ API (WAF/Rate). كل ذلك خارج نطاق التطوير الحالي.
 

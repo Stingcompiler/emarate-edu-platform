@@ -5,6 +5,11 @@ import { type Page, expect, test } from "@playwright/test";
 // broken, fits the screen, is accessible (WCAG AA) and carries its SEO basics.
 const SITE = process.env.E2E_SITE_URL ?? "http://localhost:4322";
 
+// Departments other specs create (department-page.spec: QAP, QAD) are linked from the site as
+// soon as they exist, but the Astro dev server knows only the pages that existed when it
+// started: crawled after them, they answer 404 (review 2026-11-15, R112). Not the site's pages.
+const madeByTests = (path: string) => /\/departments\/QA[PD]\//i.test(path);
+
 test("every public page loads, fits, is accessible and has its SEO basics", async ({
   page,
   isMobile,
@@ -69,7 +74,8 @@ test("every public page loads, fits, is accessible and has its SEO basics", asyn
         problems.push(`${path}: ${v.id} — ${v.nodes.map((n) => n.target.join(" ")).join(" | ")}`);
     for (const href of info.links) {
       const clean = href.split("#")[0];
-      if (clean && !clean.startsWith("//") && !seen.has(clean)) queue.push(clean);
+      if (clean && !clean.startsWith("//") && !seen.has(clean) && !madeByTests(clean))
+        queue.push(clean);
     }
   }
   expect(seen.size).toBeGreaterThan(20);

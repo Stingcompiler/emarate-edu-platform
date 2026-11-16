@@ -699,3 +699,35 @@ def test_a_staff_photo_is_not_deleted_from_the_library(api, make_user):
     entry.photo = None
     entry.save(update_fields=["photo"])
     assert api(manager).delete(f"/api/v1/content/media/{asset.public_id}").status_code == 204
+
+
+def test_the_portal_shows_a_small_copy_of_the_logo(api, site, make_user):
+    """Review 2026-11-10, R92: the portal's pages show the logo at 64 px at most; the original
+    upload weighed 41 KB on the sign-in page. `mark.webp` is it at 128 px, transparent."""
+    import io
+
+    from django.core.cache import cache
+    from PIL import Image
+
+    cache.clear()
+    response = api().get("/api/public/portal-icon/mark.webp")
+    assert response.status_code == 302 and response["Location"] == "/favicon.svg"
+    assert api().get("/api/public/portal-icon/mark.png").status_code == 404
+    assert api().get("/api/public/portal-icon/192.webp").status_code == 404
+    owner = make_user(Role.SITE_MANAGER)
+    buffer = io.BytesIO()
+    Image.effect_noise((1600, 800), 90).convert("RGB").save(buffer, "JPEG", quality=95)
+    uploaded = api(owner).post(
+        "/api/v1/content/media",
+        {"file": SimpleUploadedFile("logo.jpg", buffer.getvalue(), "image/jpeg")},
+        format="multipart",
+    )
+    assert uploaded.status_code == 201, uploaded.data
+    api(owner).patch(
+        "/api/v1/content/site-settings", {"logo": uploaded.data["public_id"]}, format="json"
+    )
+    response = api().get("/api/public/portal-icon/mark.webp")
+    assert response.status_code == 200 and response["Content-Type"] == "image/webp"
+    image = Image.open(io.BytesIO(response.content))
+    assert image.format == "WEBP" and image.size == (128, 128) and image.mode == "RGBA"
+    assert len(response.content) < len(buffer.getvalue()) // 10

@@ -11,6 +11,13 @@ from .models import AuditLog
 
 class AuditLogSerializer(serializers.ModelSerializer):
     actor = serializers.CharField(source="actor.full_name_ar", default=None, read_only=True)
+    # The address an action came from is the system admin's to read (owner, 2026-11-15).
+    ip = serializers.SerializerMethodField()
+
+    def get_ip(self, entry) -> str | None:
+        request = self.context.get("request")
+        user = getattr(request, "user", None)
+        return entry.ip if user is not None and rbac.has_role(user, Role.SYSTEM_ADMIN) else None
 
     class Meta:
         model = AuditLog
@@ -54,6 +61,25 @@ DOMAINS = {
 }
 
 
+# What the college's administration does — roles, accounts, the structure of departments and
+# programmes, backups, settings, the site, the current term, the results' scales and display —
+# is not a department's or a programme's business, even when it is filed under one: its roles
+# read what happened to their own students, courses and staff (owner, 2026-11-15, option «ب»).
+ADMINISTRATION = _starts(
+    "role.",
+    "account.",
+    "department.",
+    "program.",
+    "backup.",
+    "settings.",
+    "site.",
+    "term.",
+    "results.settings",
+    "results.scale_",
+    "deletion.",
+)
+
+
 def _admission_inquiries():
     from django.db.models import CharField
     from django.db.models.functions import Cast
@@ -74,8 +100,9 @@ def visible_logs(user) -> Q:
     full = rbac.scope_for(user, "audit.view")
     if full.everything:
         return Q()
-    # A department's roles read their department's entries, a programme's theirs.
-    allowed = full.q("department", "program")
+    # A department's roles read their department's entries, a programme's theirs — not the
+    # administration's (ADMINISTRATION), except what they did themselves.
+    allowed = full.q("department", "program") & (~ADMINISTRATION | Q(actor=user))
     roles = rbac.roles_of(user)
     for role, actions in DOMAINS.items():
         if role not in roles:

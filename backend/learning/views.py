@@ -179,8 +179,24 @@ class AssignmentViewSet(viewsets.ModelViewSet):
         )
         return Response(self.get_serializer(assignment).data)
 
-    def perform_destroy(self, instance):
-        services.delete_assignment(_meta(self.request), instance)
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context["powers"] = self.action == "retrieve"
+        return context
+
+    @extend_schema(
+        parameters=[OpenApiParameter("with_submissions", bool, required=False)],
+        responses={204: None},
+    )
+    def destroy(self, request, *args, **kwargs):
+        # Once students have submitted, only with their submissions, asked for in so many words
+        # (owner, 2026-11-16).
+        services.delete_assignment(
+            _meta(request),
+            self.get_object(),
+            with_submissions=request.query_params.get("with_submissions") in ("1", "true"),
+        )
+        return Response(status=204)
 
     @extend_schema(request=None, responses=AssignmentSerializer)
     @action(detail=True, methods=["post"])
@@ -236,8 +252,11 @@ class AssignmentViewSet(viewsets.ModelViewSet):
 
 
 @extend_schema(tags=["learning"])
-class SubmissionViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
-    """A student's submission: staff of the course or the student themself."""
+class SubmissionViewSet(
+    mixins.RetrieveModelMixin, mixins.DestroyModelMixin, viewsets.GenericViewSet
+):
+    """A student's submission: staff of the course or the student themself. The course's
+    teacher, or whoever deletes coursework there, deletes one (owner, 2026-11-16)."""
 
     serializer_class = SubmissionSerializer
     permission_classes = [IsAuthenticated]
@@ -266,6 +285,9 @@ class SubmissionViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
     def get_object(self):
         self._object = super().get_object()
         return self._object
+
+    def perform_destroy(self, instance):
+        services.delete_submission(_meta(self.request), instance)
 
     @extend_schema(request=GradeInputSerializer, responses=GradeSerializer)
     @action(detail=True, methods=["put"])

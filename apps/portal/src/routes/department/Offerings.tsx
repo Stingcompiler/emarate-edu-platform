@@ -4,8 +4,11 @@ import { Pencil, Plus, Trash2, X } from "lucide-react";
 import { Link, useSearchParams } from "react-router";
 import { useState } from "react";
 
+import { DeleteEverythingDialog } from "../../components/DeleteEverything";
+import { RequestDeletionDialog } from "../../components/RequestDeletion";
 import { DepartmentSwitch } from "../../components/DepartmentSwitch";
 import { PortalShell } from "../../components/PortalShell";
+import { ProgramLevelSelects, useProgramLevelFilter } from "../../components/ProgramLevelFilter";
 import {
   Button,
   Card,
@@ -64,6 +67,10 @@ export function Offerings() {
   const [error, setError] = useState<unknown>(null);
   const refresh = () => client.invalidateQueries({ queryKey: ["offerings"] });
   const canDelete = can(me.data, "courses.delete");
+  // The system admin deletes a course with everything it holds — its offerings in every term,
+  // their enrolments, results and coursework (owner, 2026-11-15).
+  const deletesAll = can(me.data, "records.delete_all");
+  const [deletingCourse, setDeletingCourse] = useState<number | null>(null);
   const [editing, setEditing] = useState<number | null>(null);
   const removeOffering = useMutation({
     mutationFn: async (o: { id: number; course: number }) => {
@@ -76,8 +83,16 @@ export function Offerings() {
       await api.DELETE("/api/v1/courses/{id}", { params: { path: { id: o.course } } });
     },
     onSuccess: refresh,
-    onError: setError,
+    onError: (error, o) => {
+      setError(error);
+      // In use (students enrolled, results…): the head asks the system admin to delete it with
+      // everything it holds (owner, 2026-11-15).
+      setRefused(o.course);
+    },
   });
+  const asks = canDelete && !deletesAll;
+  const [refused, setRefused] = useState<number | null>(null);
+  const [asking, setAsking] = useState<number | null>(null);
   const assign = useMutation({
     mutationFn: async ({
       offering,
@@ -119,7 +134,10 @@ export function Offerings() {
     onSuccess: refresh,
     onError: setError,
   });
-  const rows = offerings.data ?? [];
+  // The programme, its level and the semester (owner, 2026-11-15), before the other filters.
+  const placement = useProgramLevelFilter(id);
+  const all = offerings.data ?? [];
+  const rows = all.filter((o) => placement.matches(o.course_detail));
   const stats = new Map((report.data?.rows ?? []).map((r) => [r.public_id, r]));
   // A course is taught by the staff linked to its programme (owner, 2026-11-13); those who
   // joined the department itself, before programmes, teach in any of them.
@@ -174,46 +192,84 @@ export function Offerings() {
   const manage = can(me.data, "courses.manage") && id && term.data;
   return (
     <PortalShell
-      title={`المواد والتعيينات · ${num(rows.length)}`}
+      title={`المواد والتعيينات · ${num(all.length)}`}
       subtitle={`${department?.name_ar ?? ""}${term.data ? ` · ${term.data.name_ar}` : ""}`}
       back={{ label: "لوحة القسم", to: "/department" }}
     >
       <DepartmentSwitch />
+      {deletingCourse != null && (
+        <DeleteEverythingDialog
+          kind="course"
+          ids={[String(deletingCourse)]}
+          onDone={refresh}
+          onClose={() => setDeletingCourse(null)}
+        />
+      )}
       {error ? (
-        <div className="mb-3">
+        <div className="mb-3 space-y-2">
           <Notice>{problemMessage(error)}</Notice>
+          {asks && refused != null && (
+            <Button
+              variant="secondary"
+              className="min-h-10 px-3 text-danger-strong"
+              onClick={() => setAsking(refused)}
+            >
+              اطلب حذفها مع كل ما يرتبط بها من مدير النظام
+            </Button>
+          )}
         </div>
       ) : null}
-      <FilterBar className="mb-3 flex flex-wrap items-center gap-2">
-        <input
-          type="search"
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-          placeholder="بحث برمز المادة أو اسمها أو الأستاذ"
-          aria-label="بحث في المواد"
-          className="min-h-10 w-full rounded-full border border-border-soft bg-surface px-4 text-sm sm:max-w-sm sm:flex-1"
+      {asking != null && (
+        <RequestDeletionDialog
+          kind="course"
+          ids={[String(asking)]}
+          what={all.find((o) => o.course_detail.id === asking)?.course_detail.name_ar ?? "المادة"}
+          onSent={() => {
+            setRefused(null);
+            setError(null);
+          }}
+          onClose={() => setAsking(null)}
         />
-        <div className="flex flex-wrap gap-2">
+      )}
+      {/* Two rows (owner, 2026-11-16: the bar had grown into one wrapping line): what to look
+          for — the search and the programme, level and semester — then the counters, with
+          «مادة جديدة» at their end. */}
+      <FilterBar className="mb-3 space-y-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <input
+            type="search"
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder="بحث برمز المادة أو اسمها أو الأستاذ"
+            aria-label="بحث في المواد"
+            className="min-h-10 w-full rounded-full border border-border-soft bg-surface px-4 text-sm sm:max-w-sm sm:min-w-60 sm:flex-1"
+          />
+          <ProgramLevelSelects
+            filter={placement}
+            withoutProgramme={all.some((o) => o.course_detail.program == null)}
+          />
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
           {(Object.keys(FILTERS) as (keyof typeof FILTERS)[]).map((k) => (
             <Chip key={k} active={filter === k} onClick={() => setFilter(k)}>
               {FILTERS[k].label} {num(rows.filter(FILTERS[k].test).length)}
             </Chip>
           ))}
+          {manage && (
+            <Button
+              variant="secondary"
+              className="min-h-9 px-3 ms-auto"
+              onClick={() => {
+                const form = document.getElementById("new-offering");
+                form?.scrollIntoView({ block: "center" });
+                form?.querySelector<HTMLInputElement>("input")?.focus({ preventScroll: true });
+              }}
+            >
+              <Plus size={16} aria-hidden />
+              مادة جديدة
+            </Button>
+          )}
         </div>
-        {manage && (
-          <Button
-            variant="secondary"
-            className="min-h-9 px-3 sm:ms-auto"
-            onClick={() => {
-              const form = document.getElementById("new-offering");
-              form?.scrollIntoView({ block: "center" });
-              form?.querySelector<HTMLInputElement>("input")?.focus({ preventScroll: true });
-            }}
-          >
-            <Plus size={16} aria-hidden />
-            مادة جديدة
-          </Button>
-        )}
       </FilterBar>
       <Card className="divide-y divide-border-soft">
         <div className="hidden grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)_minmax(0,1fr)_70px_80px_72px] gap-3 bg-surface-alt px-4 py-2 text-xs text-text-muted xl:grid">
@@ -232,6 +288,9 @@ export function Offerings() {
           return (
             <div
               key={o.id}
+              data-level={o.course_detail.default_level ?? 1}
+              data-semester={o.course_detail.default_term_order ?? 1}
+              data-program={o.course_detail.program ?? ""}
               className="grid gap-3 px-4 py-3 text-sm xl:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)_minmax(0,1fr)_70px_80px_72px] xl:items-center"
             >
               <span className="flex items-center gap-3">
@@ -327,11 +386,13 @@ export function Offerings() {
                       type="button"
                       aria-label={`حذف ${o.course_detail.name_ar}`}
                       onClick={async () =>
-                        (await confirm({
-                          title: `حذف «${o.course_detail.name_ar}» من هذا الفصل؟`,
-                          body: `شعبة ${o.section}. لا تُحذف مادة عليها تسجيل طلاب — يرفضها النظام.`,
-                          confirm: "حذف المادة",
-                        })) && removeOffering.mutate({ id: o.id, course: o.course_detail.id })
+                        deletesAll
+                          ? setDeletingCourse(o.course_detail.id)
+                          : (await confirm({
+                              title: `حذف «${o.course_detail.name_ar}» من هذا الفصل؟`,
+                              body: `شعبة ${o.section}. لا تُحذف مادة عليها تسجيل طلاب — يرفضها النظام.`,
+                              confirm: "حذف المادة",
+                            })) && removeOffering.mutate({ id: o.id, course: o.course_detail.id })
                       }
                       className="grid size-9 place-items-center rounded-full text-text-muted hover:bg-surface-alt hover:text-danger-strong"
                     >
@@ -353,7 +414,7 @@ export function Offerings() {
             </div>
           );
         })}
-        {!rows.length ? (
+        {!all.length ? (
           <p className="px-4 py-5 text-sm text-text-muted">لا مواد في هذا الفصل.</p>
         ) : (
           !shown.length && (

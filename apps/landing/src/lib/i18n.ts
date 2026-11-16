@@ -153,7 +153,9 @@ const DEGREE_EN: Record<string, string> = {
   diploma: "Diploma",
   bachelor: "Bachelor",
   honours: "Honours",
+  higher_diploma: "Higher Diploma",
   master: "Master",
+  phd: "PhD",
 };
 export const degree = (lang: Lang, key: string, label: string) =>
   lang === "en" ? (DEGREE_EN[key] ?? label) : label;

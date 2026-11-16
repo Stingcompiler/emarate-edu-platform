@@ -4,6 +4,14 @@ import django.db.models.deletion
 from django.db import migrations, models
 
 
+def _programme_roles_go(apps, schema_editor):
+    """Back to before programmes: a programme's head or supervisor cannot exist without the
+    programme the field going away holds — left behind with no programme they would break
+    this migration applied again (review 2026-11-15, R103)."""
+    RoleAssignment = apps.get_model("accounts", "RoleAssignment")
+    RoleAssignment.objects.filter(role__in=["program_manager", "program_supervisor"]).delete()
+
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -38,4 +46,6 @@ class Migration(migrations.Migration):
             model_name='roleassignment',
             constraint=models.CheckConstraint(condition=models.Q(models.Q(('program__isnull', False), ('role__in', ['program_manager', 'program_supervisor'])), models.Q(models.Q(('role__in', ['program_manager', 'program_supervisor']), _negated=True), ('program__isnull', True)), _connector='OR'), name='role_program_scope'),
         ),
+        # Last, so that going back runs it first, while the field is still there.
+        migrations.RunPython(migrations.RunPython.noop, _programme_roles_go),
     ]

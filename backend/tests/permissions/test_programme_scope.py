@@ -397,7 +397,10 @@ def test_a_programme_head_reads_the_log_of_the_programme(
     )
     assert programmes == {it_program.pk}
     actions = {row["action"] for row in seen.data["results"]}
-    assert {"course.create", "students.update", "membership.add", "role.grant"} <= actions
+    assert {"course.create", "students.update", "membership.add"} <= actions
+    # The administration's grant of a role in the programme is not theirs to read (owner,
+    # 2026-11-15, docs/roles-matrix.md «سجل العمليات لأدوار القسم والبرنامج»).
+    assert "role.grant" not in actions
     hidden = AuditLog.objects.filter(program=sibling).first()
     assert hidden is not None and head.get(f"/api/v1/audit-logs/{hidden.pk}").status_code == 404
     # The department's manager reads both programmes' entries, as before.

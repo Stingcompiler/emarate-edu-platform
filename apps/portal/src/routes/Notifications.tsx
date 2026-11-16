@@ -215,7 +215,7 @@ function NotificationRow({ item, onOpen }: { item: Item; onOpen: () => void }) {
       <span className="min-w-0 flex-1">
         <span className="flex items-start justify-between gap-3">
           <span
-            className={`text-sm leading-snug text-text ${unread ? "font-bold" : "font-medium"}`}
+            className={`min-w-0 break-words text-sm leading-snug text-text [overflow-wrap:anywhere] ${unread ? "font-bold" : "font-medium"}`}
           >
             {item.priority === "urgent" && (
               <span className="me-1.5 rounded-full bg-danger-soft px-2 py-0.5 text-[11px] font-semibold text-danger-strong">
@@ -230,7 +230,7 @@ function NotificationRow({ item, onOpen }: { item: Item; onOpen: () => void }) {
           </span>
         </span>
         {item.body && (
-          <span className="mt-0.5 line-clamp-2 block text-sm leading-relaxed text-text-muted">
+          <span className="mt-0.5 line-clamp-2 block text-sm leading-relaxed text-text-muted [overflow-wrap:anywhere]">
             {item.body}
           </span>
         )}

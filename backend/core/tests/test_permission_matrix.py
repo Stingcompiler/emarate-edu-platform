@@ -512,6 +512,11 @@ _RS = "results.tests.test_results::"
 _SA = "student_affairs.tests.test_student_affairs::"
 _DELETIONS = "content.tests.test_deletion_requests::"
 _BACKUP_UPLOAD = "core.tests.test_backups_page::test_only_the_system_admin_uploads_a_backup"
+_DELETE_ALL = "core.tests.test_delete_with_everything::test_only_the_system_admin_deletes"
+_RECORD_REQUESTS = (
+    "content.tests.test_record_deletion_requests::"
+    "test_a_head_asks_within_their_scope_and_nothing_changes_until_decided"
+)
 COVERED_ELSEWHERE = {
     # Deciding a deletion request; a sender's own notification (owner, 2026-11-05).
     "deletion-request-approve": _DELETIONS + "test_an_author_asks_and_the_supervisor_approves",
@@ -614,6 +619,11 @@ COVERED_ELSEWHERE = {
     "push-subscribe": _N + "test_teacher_notifies_their_course_and_push_arrives",
     "push-unsubscribe": _N + "test_push_unsubscribe_and_config",
     "hr-notice-acknowledge": _N + "test_hr_notice",
+    "deletion-request-records": _RECORD_REQUESTS,
+    "deletion-request-mine": _RECORD_REQUESTS,
+    "deletion-preview": _DELETE_ALL,
+    "deletions": _DELETE_ALL,
+    "deletion-job": _DELETE_ALL,
     "backup-download": "core.tests.test_backups_page::test_only_the_system_admin_downloads",
     "backup-file": "core.tests.test_backups_page::test_only_the_system_admin_downloads",
     "backup-restore": "core.tests.test_backups_page::test_only_the_system_admin_restores",

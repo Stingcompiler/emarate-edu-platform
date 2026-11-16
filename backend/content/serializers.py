@@ -148,6 +148,8 @@ class DeletionRequestSerializer(serializers.ModelSerializer):
         source="decided_by.full_name_ar", read_only=True, default=None
     )
     is_mine = serializers.SerializerMethodField()
+    targets = serializers.ListField(child=serializers.CharField(), read_only=True)
+    preview = serializers.DictField(child=serializers.IntegerField(), read_only=True)
 
     class Meta:
         model = DeletionRequest
@@ -163,6 +165,11 @@ class DeletionRequestSerializer(serializers.ModelSerializer):
             "decided_at",
             "decision_note",
             "created_at",
+            # Students and courses (owner, 2026-11-15): what is asked for and what goes with it.
+            "targets",
+            "preview",
+            "department",
+            "program",
         ]
         read_only_fields = fields
 
@@ -170,6 +177,16 @@ class DeletionRequestSerializer(serializers.ModelSerializer):
         """The caller asked for it: someone else decides (roles review 2026-11-06)."""
         request = self.context.get("request")
         return bool(request and obj.requested_by_id == request.user.pk)
+
+
+class RecordDeletionRequestSerializer(serializers.Serializer):
+    """A head asks the system admin to delete students, or a course, with everything."""
+
+    kind = serializers.ChoiceField(choices=["student", "course"])
+    ids = serializers.ListField(
+        child=serializers.CharField(max_length=64), min_length=1, max_length=5000
+    )
+    reason = serializers.CharField(max_length=2000, trim_whitespace=True)
 
 
 class DeletionDecisionSerializer(serializers.Serializer):
