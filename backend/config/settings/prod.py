@@ -4,6 +4,9 @@ Every secret comes from the environment; missing required values fail at
 startup rather than at the first request.
 """
 
+import contextlib
+import os
+
 import dj_database_url
 
 from .base import *  # noqa: F403
@@ -84,6 +87,15 @@ if _on_bunny:
             },
         },
     }
+
+# An upload larger than 2.5 MB waits in a temporary file while it arrives. The server's /tmp is
+# in memory (tmpfs, 3.8 GB): a lecture video (up to VIDEO_MAX_MB) would not fit, or would take
+# the memory. It waits on the disk instead, beside the files — so keeping it is a rename. A dot
+# folder: neither the backups nor the move to Bunny count it as an upload (backups.is_upload).
+FILE_UPLOAD_TEMP_DIR = env("FILE_UPLOAD_TEMP_DIR", str(MEDIA_ROOT / ".uploading"))  # noqa: F405
+# A command run by another user may not create it; the API (MEDIA_ROOT's owner) does.
+with contextlib.suppress(OSError):
+    os.makedirs(FILE_UPLOAD_TEMP_DIR, mode=0o750, exist_ok=True)
 
 FIELD_ENCRYPTION_KEY = env("FIELD_ENCRYPTION_KEY", required=True)
 VAPID_PUBLIC_KEY = env("VAPID_PUBLIC_KEY", required=True)
