@@ -180,7 +180,9 @@ CELERY_BEAT_SCHEDULE = {
     # The off-server copies catch up (a failed upload is tried again; nothing if not set up).
     "sync-offsite-backups": {"task": "core.tasks.sync_offsite_backups", "schedule": 6 * 3600},
     # Deleted files leave Bunny once no kept copy can point at them (files.trash).
-    "purge-discarded-files": {"task": "files.tasks.purge_discarded_files", "schedule": 24 * 3600},
+    "purge-discarded-files": {"task": "files.tasks.purge_discarded_files", "schedule": 6 * 3600},
+    # A video whose sending to Bunny was lost with a restarted worker is sent again.
+    "resume-stuck-videos": {"task": "files.tasks.resume_stuck_videos", "schedule": 15 * 60},
 }
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"

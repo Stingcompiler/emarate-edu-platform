@@ -134,6 +134,9 @@ class BunnyStorage(Storage):
         return ContentFile(_request("GET", self._url(name), headers=self._headers()), name=name)
 
     def delete(self, name):
+        # A DELETE on a folder takes everything in it; on «» the whole zone. Files only.
+        if not name or not name.strip("/") or name.endswith("/"):
+            raise ValueError(f"Not a file name: {name!r}.")
         _request("DELETE", self._url(name), headers=self._headers())
 
     def get_available_name(self, name, max_length=None):

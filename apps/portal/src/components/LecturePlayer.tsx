@@ -143,7 +143,8 @@ function Hosted({
   const video = useRef<HTMLVideoElement>(null);
   const lastSaved = useRef(0);
   // A signed link lasts ten minutes, a lecture longer: when the link stops answering mid-way,
-  // a new one is fetched and the video goes on from where it was (review 2026-11-16).
+  // a new one is fetched and the video goes on from where it was (review 2026-11-16). Three
+  // failures in a row, with no playing between them, are a real fault (review 2026-11-18).
   const resumeAt = useRef<number | null>(null);
   const renewals = useRef(0);
   const saved = (() => {
@@ -208,8 +209,17 @@ function Hosted({
               resumeAt.current = null;
             } else if (saved > 5 && saved < v.duration - 10) v.currentTime = saved;
           }}
+          onPlaying={() => {
+            renewals.current = 0; // the link works: count only failures in a row
+          }}
           onError={(e) => {
-            if (renewals.current >= 5) return; // a real fault, not an expired link
+            if (renewals.current >= 3) {
+              // Not an expired link (a new one fails too): say so, with a retry.
+              renewals.current = 0;
+              setUrl(null);
+              setFailed(true);
+              return;
+            }
             renewals.current += 1;
             resumeAt.current = e.currentTarget.currentTime;
             void api

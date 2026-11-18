@@ -41,7 +41,7 @@ def discard(names, storage: str = "default") -> None:
     """``names`` (one or many) are no longer used by any row."""
     from .models import DiscardedFile
 
-    names = [names] if isinstance(names, str) else [n for n in names if n]
+    names = [n for n in ([names] if isinstance(names, str) else names) if n and n.strip("/")]
     if not names:
         return
     if not _on_bunny():
@@ -54,7 +54,7 @@ def discard(names, storage: str = "default") -> None:
     )
 
 
-def purge(limit: int = 2000) -> dict:
+def purge(limit: int = 500) -> dict:
     """Remove from Bunny what has waited long enough; what fails waits for the next run."""
     from .models import DiscardedFile
 
@@ -66,3 +66,24 @@ def purge(limit: int = 2000) -> dict:
         else:
             failed += 1
     return {"removed": removed, "failed": failed}
+
+
+def purge_unfinished_uploads(hours: int = 24) -> int:
+    """Uploads still arriving wait in FILE_UPLOAD_TEMP_DIR (on the disk in production, not the
+    in-memory /tmp); one cut off by a restarted worker would stay there for good."""
+    import time
+    from pathlib import Path
+
+    folder = getattr(settings, "FILE_UPLOAD_TEMP_DIR", None)
+    if not folder or not Path(folder).is_dir():
+        return 0
+    limit = time.time() - hours * 3600
+    removed = 0
+    for path in Path(folder).iterdir():
+        try:
+            if path.is_file() and not path.is_symlink() and path.stat().st_mtime < limit:
+                path.unlink()
+                removed += 1
+        except OSError:
+            continue
+    return removed
