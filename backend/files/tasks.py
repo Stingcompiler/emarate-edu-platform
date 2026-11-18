@@ -3,10 +3,19 @@ from celery import shared_task
 
 @shared_task
 def purge_discarded_files() -> dict:
-    """Daily: deleted files that waited their time leave Bunny (files.trash)."""
-    from .trash import purge
+    """Every six hours, a few hundred at a time (it shares the worker): deleted files that
+    waited their time leave Bunny, and uploads nobody finished leave the disk (files.trash)."""
+    from .trash import purge, purge_unfinished_uploads
 
-    return purge()
+    return {**purge(), "unfinished_uploads": purge_unfinished_uploads()}
+
+
+@shared_task
+def resume_stuck_videos() -> int:
+    """A video whose sending was lost (the worker restarted mid-way) is sent again."""
+    from .services import resume_stuck_videos as resume
+
+    return resume()
 
 
 @shared_task(bind=True, max_retries=5)

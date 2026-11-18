@@ -9,6 +9,7 @@ from pathlib import Path
 
 from django.conf import settings
 from django.core import signing
+from django.core.cache import cache
 from django.db import transaction
 from django.urls import reverse
 from django.utils import timezone
@@ -22,6 +23,7 @@ from . import access, bunny, validation
 from .models import StoredFile, VideoAsset
 
 logger = logging.getLogger(__name__)
+SEND_HOLD = 3 * 3600  # longer than any video takes to reach Bunny
 LINK_TTL = 10 * 60  # docs/02 Phase 2: a file link expires after 10 minutes
 _SALT = "files.download"
 
@@ -251,12 +253,42 @@ def send_video_to_bunny(video_id: int, name: str) -> None:
         return
     if video.status != VideoAsset.Status.PROCESSING:
         return
-    with disk.open(name, "rb") as handle:
-        storages["default"]._save(name, File(handle, name=name))  # the same name, as is
-    VideoAsset.objects.filter(pk=video_id, status=VideoAsset.Status.PROCESSING).update(
-        status=VideoAsset.Status.READY, updated_at=timezone.now()
-    )
-    disk.delete(name)
+    # One send at a time per video: the sweep (resume_stuck_videos) may queue one while another
+    # is still going. The hold outlives any send, and lapses if a worker dies holding it.
+    hold = f"video-send:{video_id}"
+    if not cache.add(hold, 1, timeout=SEND_HOLD):
+        return
+    try:
+        with disk.open(name, "rb") as handle:
+            storages["default"]._save(name, File(handle, name=name))  # the same name, as is
+        VideoAsset.objects.filter(pk=video_id, status=VideoAsset.Status.PROCESSING).update(
+            status=VideoAsset.Status.READY, updated_at=timezone.now()
+        )
+        disk.delete(name)
+    finally:
+        cache.delete(hold)
+
+
+def resume_stuck_videos() -> int:
+    """Videos still waiting on the disk an hour after their upload are queued again: a worker
+    restarted mid-send (every deploy restarts it) loses its task, and nothing else would send
+    them (review 2026-11-18). The task's own retries are over well within the hour."""
+    from .tasks import send_video_to_bunny as task
+
+    if not _bunny():
+        return 0
+    stuck = VideoAsset.objects.filter(
+        provider=VideoAsset.Provider.LOCAL,
+        status=VideoAsset.Status.PROCESSING,
+        updated_at__lt=timezone.now() - timedelta(hours=1),
+    ).exclude(file="")
+    disk = staging_disk()
+    queued = 0
+    for pk, name in stuck.values_list("pk", "file"):
+        if disk.exists(name) and not cache.get(f"video-send:{pk}"):
+            task.delay(pk, name)
+            queued += 1
+    return queued
 
 
 def video_failed(video_id: int, name: str) -> None:

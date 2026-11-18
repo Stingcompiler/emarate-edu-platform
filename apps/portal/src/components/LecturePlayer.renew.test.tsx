@@ -43,3 +43,41 @@ it("asks for a new link when the old one stops answering, and resumes at the sam
   fireEvent.loadedMetadata(video);
   expect(video.currentTime).toBe(754);
 });
+
+it("renews as often as a long lecture needs, but stops after three failures in a row", async () => {
+  const get = vi.mocked(api.GET);
+  let n = 0;
+  get.mockImplementation(
+    async () => ({ data: { url: `https://cdn.test/v.mp4?token=${++n}` } }) as never,
+  );
+  const { container } = render(
+    <LecturePlayer
+      title="المحاضرة 2"
+      source={{ kind: "hosted", id: "v2", provider: "local", status: "ready" }}
+    />,
+  );
+  fireEvent.click(screen.getByRole("button", { name: "تشغيل: المحاضرة 2" }));
+  const video = await waitFor(() => {
+    const found = container.querySelector("video");
+    expect(found).not.toBeNull();
+    return found as HTMLVideoElement;
+  });
+  // Six expiries over a long lecture, each followed by playing again: all renewed.
+  for (let i = 2; i <= 7; i++) {
+    fireEvent.error(video);
+    await waitFor(() =>
+      expect(video.getAttribute("src")).toBe(`https://cdn.test/v.mp4?token=${i}`),
+    );
+    fireEvent.playing(video);
+  }
+  // A fault no new link mends: three tries, then the retry screen.
+  for (let i = 8; i <= 10; i++) {
+    fireEvent.error(video);
+    await waitFor(() =>
+      expect(video.getAttribute("src")).toBe(`https://cdn.test/v.mp4?token=${i}`),
+    );
+  }
+  fireEvent.error(video);
+  expect(await screen.findByRole("button", { name: "أعد محاولة التشغيل" })).toBeTruthy();
+  expect(container.querySelector("video")).toBeNull();
+});

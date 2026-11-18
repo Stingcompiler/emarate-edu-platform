@@ -250,3 +250,74 @@ def test_on_the_servers_disk_a_deleted_file_goes_at_once(settings, tmp_path):
     (tmp_path / "a.pdf").write_bytes(b"pdf")
     trash.discard("a.pdf")
     assert not (tmp_path / "a.pdf").exists() and not DiscardedFile.objects.exists()
+
+
+def test_a_video_whose_sending_was_lost_is_sent_again(fake, settings, api, classroom):
+    """Review 2026-11-18: a worker restarted mid-send (every deploy) loses its task; the sweep
+    queues the video again an hour after its upload, unless a send is still going."""
+    from datetime import timedelta
+
+    from django.core.cache import cache
+    from django.core.files.uploadedfile import SimpleUploadedFile
+    from django.test import TestCase
+    from django.utils import timezone
+
+    from files import services
+    from files.models import VideoAsset
+
+    settings.MEDIA_BACKEND = "bunny"
+    settings.BUNNY_STREAM_LIBRARY_ID = ""
+    settings.STORAGES = {**settings.STORAGES, "default": {"BACKEND": "files.bunny.BunnyStorage"}}
+    teacher = api(classroom.teacher)
+    made = teacher.post(
+        "/api/v1/videos/upload-ticket",
+        {"offering": classroom.offering.pk, "title": "المحاضرة 1", "size": 12},
+    ).data
+    with TestCase.captureOnCommitCallbacks():  # the task is lost: never run
+        teacher.post(
+            made["ticket"]["upload_url"],
+            {"file": SimpleUploadedFile("lecture.mp4", b"video bytes")},
+            format="multipart",
+        )
+    video = VideoAsset.objects.get()
+    assert video.status == "processing"
+    assert services.resume_stuck_videos() == 0  # too soon: its own task may still be going
+    VideoAsset.objects.update(updated_at=timezone.now() - timedelta(hours=2))
+    cache.add(f"video-send:{video.pk}", 1)  # a send still going
+    assert services.resume_stuck_videos() == 0
+    cache.delete(f"video-send:{video.pk}")
+    assert services.resume_stuck_videos() == 1  # eager in the tests: sent at once
+    video.refresh_from_db()
+    assert video.status == "ready" and fake.zones["ecst-private"][video.file.name] == b"video bytes"
+    assert services.resume_stuck_videos() == 0
+
+
+def test_a_folder_or_an_empty_name_is_never_deleted_on_bunny(fake, settings):
+    """Review 2026-11-18: a DELETE on «» or a folder would take the whole zone with it."""
+    from files import trash
+    from files.models import DiscardedFile
+
+    private = move.zones()["private"]
+    for name in ("", "/", "submissions/"):
+        with pytest.raises(ValueError):
+            private.delete(name)
+    assert not [c for c in fake.calls if c[0] == "DELETE"]
+    settings.MEDIA_BACKEND = "bunny"
+    trash.discard("")
+    trash.discard(["", "/", "a.pdf"])
+    assert list(DiscardedFile.objects.values_list("name", flat=True)) == ["a.pdf"]
+
+
+def test_uploads_nobody_finished_leave_the_disk_after_a_day(settings, tmp_path):
+    import os
+    import time
+
+    from files import trash
+
+    settings.FILE_UPLOAD_TEMP_DIR = str(tmp_path)
+    old, fresh = tmp_path / "tmpa.upload.mp4", tmp_path / "tmpb.upload.mp4"
+    old.write_bytes(b"cut off")
+    fresh.write_bytes(b"arriving")
+    os.utime(old, (time.time() - 2 * 86400,) * 2)
+    assert trash.purge_unfinished_uploads() == 1
+    assert not old.exists() and fresh.exists()
