@@ -107,33 +107,37 @@ backend/
 
 الترميز: `→` FK، `⇄` 1:1، `[u]` فريد، `(idx)` فهرس.
 
+طوبق مع الكود في 2026-11-22. ما تكرّر من قيمة الأب على الصف للسرعة (قسم المادة والطالب والعضوية = قسم برنامجها، وفصل النتيجة = فصل شعبتها) وما يجب أن يبقى داخل شعبة واحدة لا يقوله قيد في قاعدة البيانات: يحفظه الكود، ويثبته `manage.py check_data` (للقراءة فقط، `core/integrity.py`) على أي نسخة، الإنتاج منها.
+
 ### organization
-- **College**: name_ar/en, code[u], logo, is_active — سجل واحد الآن.
+- **College**: name_ar/en, code[u], is_active — سجل واحد الآن (الشعار في SiteSettings).
 - **Department**: college→, name_ar/en, code[u per college], description, is_active.
-- **Program**: department→, name_ar/en, code[u], degree {diploma|bachelor|honours|master}, levels_count, duration_terms, is_active.
-- **SiteSettings** (singleton): institution names, contact, social, whatsapp_e164, seo defaults.
-- **SystemSettings** (singleton): student_registration_requires_approval, applications_fallback_to_head_registrar, delegate_decisions_to_registrars, otp_ttl, max_applications_per_cycle.
+- **Program**: department→(PROTECT), name_ar/en, code[u], degree {diploma|bachelor|honours|higher_diploma|master|phd}, levels_count 1–5, duration_terms (= 2 × levels_count)، total_credit_hours, description/outcomes/careers ar/en, annual_fee_sdg/usd, is_active.
+- **SiteSettings** (singleton، في تطبيق `content`): institution names, contact, social, whatsapp_e164, seo defaults، logo/hero_image/share_image→MediaAsset، figures، office hours، staff intro.
+- **SystemSettings** (singleton): student_registration_requires_approval, applications_fallback_to_head_registrar, delegate_decisions_to_registrars, otp_ttl_minutes, otp_max_attempts, max_applications_per_cycle, grading_days_limit, upload_min_percent, planned_lectures_per_week, session_epoch (يزيد مع كل استعادة فيُخرج الجميع).
 
 ### academic
 - **AcademicYear**: name "2026/2027"[u], starts_on, ends_on, is_current.
 - **Term**: academic_year→, name_ar/en, order, starts_on, ends_on, is_current (واحد فقط)، status {planned|active|closed}.
 - **Course**: program→ (المادة تنتمي إلى برنامج واحد — المالك 2026-11-13؛ الفارغ فقط لمواد أُدخلت قبل ذلك وتبقى مشتركة حتى تُعطى برنامجًا)، department→ (مشتق من البرنامج)، code, name_ar/en, credit_hours, default_level, default_term_order; [u (program, code)؛ وللمواد بلا برنامج u (department, code)]. موضع المادة في الخطة: المستوى 1–5 (سنة دراسية) والفصل الدراسي 1 أو 2 داخله (المالك 2026-11-05؛ لا فصل صيفي). **يُعرض ويُدخل برقمه في الخطة** 1–10 = (المستوى − 1) × 2 + الفصل: المستوى الأول فصلاه الأول والثاني، والثاني فصلاه الثالث والرابع… والخامس (الهندسة والطب) فصلاه التاسع والعاشر (المالك 2026-11-07)؛ `Program.levels_count` 1–5 و`duration_terms` = ضعفه دائمًا، و`Term.order` هو الفصل الدراسي نفسه (1 الأول، 2 الثاني)، فيسجّل Enrollment الجماعي مواد `default_term_order = term.order` لطلاب `semester = term.order` فقط.
-- **CourseOffering**: course→, term→, section "A", capacity, ta_can_grade, status {draft|active|closed}; [u (course, term, section)].
+- **CourseOffering**: public_id, course→, term→, section "A", capacity, ta_can_grade, ta_can_notify, status {draft|active|closed}; [u (course, term, section)].
 - **OfferingInstructor**: offering→, user→, role {teacher|ta}; [u (offering, user)].
 - **DepartmentMembership**: program→ (الأستاذ يُربط بالبرامج، متعدد لمتعدد، في أي قسم — المالك 2026-11-13)، department→ (مشتق من البرنامج)، user→, kind {teacher|ta}, added_by→; [u (program, user)؛ العضويات السابقة بلا برنامج: u (department, user)].
 - **Enrollment**: offering→, student_record→, status {active|dropped|completed}, source {manual|bulk|auto}; [u (offering, student_record)].
 
 ### accounts
-- **User** (AbstractUser): email[u], full_name_ar/en, phone_e164, avatar, is_active, must_change_password, last_seen. لا حقل `role`.
-- **RoleAssignment**: user→, role (Group)→, college→(null), department→(null), program→(null؛ لرئيس البرنامج ومشرفه — المالك 2026-11-13), created_by→; [u (user, role, department)؛ u (user, role, program)].
-- **OTP**: purpose {register|login_reset|contact}, target (email/phone), code_hash, expires_at, attempts, used_at (idx target).
-- **RegistrationRequest**: student_record→, email, status {otp_pending|verified|pending_approval|approved|rejected}, moves_account (نقل حساب خريج ينتظر الاعتماد)، decided_by→, decided_at, reason.
+- **User** (AbstractUser): public_id, email[u] (يُحفظ بأحرف صغيرة في كل مسار)، full_name_ar/en, phone_e164, photo→StoredFile(null), is_active, must_change_password, last_seen, token_version، وصفحة الأستاذ العامة: public_profile, academic_title_ar/en, public_photo(_hidden), research_interests. لا حقل `role`.
+- **Qualification**: user→, degree, field, institution, year, hidden. **StaffLink**: user→, label, url, public.
+- **RoleAssignment**: user→, role (نص من `accounts.rbac.Role`، لا Group)، department→(null), program→(null؛ لرئيس البرنامج ومشرفه — المالك 2026-11-13), created_by→; [u (user, role) على مستوى الكلية؛ u (user, role, department)؛ u (user, role, program)] وCHECK أن نطاق كل دور يناسبه.
+- **OneTimeCode**: purpose {register|password_reset|contact|email_change}, target (email/phone), code_hash, expires_at, attempts, used_at (idx purpose, target, created_at).
+- **RegistrationRequest**: public_id, student_record→(null), email, otp→(null), verified_at, status {otp_pending|verified|pending_approval|approved|rejected}, moves_account (نقل حساب خريج ينتظر الاعتماد)، decided_by→, decided_at, reason.
 - **IdentityReport**: student_record→, account→(null), contact_email, note, status {open|upheld|dismissed}, decided_by→, decided_at, reason — بلاغ انتحال على حساب طالب (§8.1 بند 6).
-- **ActivationToken**: student_record→, token_hash[u], expires_at, used_at.
+- **ActivationToken**: user→, token_hash[u], expires_at, used_at.
 
 ### students
-- **StudentRecord**: university_number[u], full_name_ar/en, program→, department→ (denormalized), level, semester (1|2، الفصل الدراسي داخل المستوى: يُحدَّد عند الإضافة والاستيراد — فارغًا = فصل Term الحالي — وعند التحويل من القبول يختاره المسجّل؛ والهجرة أعطت السجلات القائمة فصل Term الحالي)، status {active|suspended|graduated|withdrawn}, user⇄(null), application→(null), email, phone_e164, birth_date, gender, nationality, national_id_hash, admitted_term→, notes. (idx program, level, status)
+- **StudentRecord**: university_number[u], full_name_ar/en, program→, department→ (denormalized), level, semester (1|2، الفصل الدراسي داخل المستوى: يُحدَّد عند الإضافة والاستيراد — فارغًا = فصل Term الحالي — وعند التحويل من القبول يختاره المسجّل؛ والهجرة أعطت السجلات القائمة فصل Term الحالي)، status {active|suspended|graduated|withdrawn}, user⇄(null), email, phone_e164, birth_date, gender, nationality, national_id_hash, admitted_term→, notes. (idx program, level, status)
   ومعها `account_moved_to→(self, null)` و`account_moved_at`: سجل انتقل حسابه إلى سجل لاحق (الماجستير) مؤرشف، وعلامة الأرشفة هي وقت النقل.
+  والطلب الذي أتى منه السجل على الجهة الأخرى: `Application.student_record⇄(null)`.
 - **PromotionRun**: term→ (CASCADE), department_id (null = الكلية؛ رقم لا مفتاح لأن الدمج ينقل الأقسام)، run_by→(SET_NULL)، summary {promoted, kept, last_semester, moves}. ترفيع واحد لكل فصل لكل نطاق (`students/promotion.py`).
 - **StudentImportBatch**: file, uploaded_by→, status {uploaded|validated|has_errors|committed|rejected}, summary JSON. **StudentImportRow**: batch→, row_no, raw JSON, normalized JSON, action {create|update|skip|error}, errors JSON.
 - **UniversityNumberSequence**: college→, year, prefix, last_value; [u (college, year, prefix)].
@@ -153,8 +157,9 @@ backend/
 - **ApplicationAssignment**: application→, registrar→, assigned_by→, at.
 
 ### learning
-- **Lecture**: offering→, title_ar/en, description, order, type {theory|lab}, is_published, published_at.
-- **LectureResource**: lecture→, kind {file|video|link|recording}, file (خاص) / bunny_video_id / url, title, size, mime, order.
+- **Lecture**: public_id, offering→(CASCADE), title_ar/en, description, order, type {theory|lab}, is_published, published_at, created_by→.
+- **LectureView**: lecture→, student_record→, first_seen_at, last_seen_at, times; [u (lecture, student_record)].
+- **LectureResource**: lecture→, kind {file|video|link|recording}, file→StoredFile(PROTECT) أو video→VideoAsset(PROTECT) أو url (CHECK: واحد فقط)، title, order.
 - **Assignment**: offering→, lecture→(null), title, description, type, opens_at, due_at, late_until, late_policy {none|allow|penalty}, late_penalty_percent, max_grade, submission_types JSON, allowed_extensions JSON, max_file_size_mb, max_files, allow_resubmission, grading_mode {manual|rule|ai_assisted}, rubric JSON, status {draft|published|closed}.
 - **AssignmentLinkField**: assignment→, label, required, url_pattern.
 - **Submission**: assignment→, student_record→, current_version→, first_submitted_at, is_late; [u (assignment, student_record)].
@@ -162,36 +167,44 @@ backend/
 - **SubmissionGrade**: submission⇄, score, feedback, rubric_scores JSON, source {manual|rule|ai_suggested}, status {suggested|approved}, graded_by→, graded_at.
 
 ### exams
-- **Exam**: offering→, title, description, start_at, end_at, duration_minutes, total_marks, pass_marks, max_attempts, result_visibility {immediate|after_end|manual}, allow_backtrack, shuffle_questions, shuffle_choices, grace_seconds, status {draft|published|closed|archived}, created_by→.
+- **Exam**: public_id, offering→, title, description, opens_at, closes_at, duration_minutes, grace_seconds, pass_marks, max_attempts, result_visibility {immediate|after_end|manual}, show_answers, results_released, allow_backtrack, shuffle_questions, shuffle_choices, status {draft|published|closed|archived}, reminder_sent_at, created_by→. الدرجة الكلية مجموع درجات الأسئلة (لا حقل).
 - **Question**: exam→, order, type, text, marks, explanation, config JSON, is_required. **Choice**: question→, order, text, is_correct.
-- **ExamAttempt**: exam→, student_record→, attempt_no, started_at, deadline_at, submitted_at, status {in_progress|submitted|auto_submitted|expired|invalidated}, score, passed, question_order JSON, choice_orders JSON, client_meta JSON, last_saved_at; [u (exam, student_record, attempt_no)].
+- **ExamAttempt**: exam→, student_record→, attempt_no, started_at, deadline_at, submitted_at, status {in_progress|submitted|auto_submitted|expired|invalidated}, score, passed, question_order JSON, choice_orders JSON, client_meta JSON, last_saved_at; [u (exam, student_record, attempt_no)؛ ومحاولة جارية واحدة لكل طالب في الاختبار].
 - **StudentAnswer**: attempt→, question→, answer JSON, saved_at, is_correct, marks_awarded, needs_manual, graded_by→, graded_at; [u (attempt, question)].
 
 ### results
 - **ResultImportBatch**: file, scope {college|department|program}, department→(null), program→(null), term→, uploaded_by→, status {uploaded|validated|has_errors|committed|published|unpublished|rejected}, detected_columns JSON, summary JSON. **ResultImportRow**: batch→, row_no, raw JSON, student_record→(null), offering→(null), normalized JSON, action, errors JSON.
 - **AcademicResult**: student_record→, offering→, term→ (denorm), score, letter, grade_points, status {pass|fail|incomplete|withdrawn|absent}, is_published, published_at, published_by→, import_batch→, version; [u (student_record, offering)].
 - **ResultCorrection**: result→, requested_by→, old JSON, new JSON, reason, status {pending|approved|rejected}, decided_by→, decided_at, decision_note.
-- **GradingScale**: program→(null=افتراضي), ranges JSON. **ResultDisplaySettings** (singleton per college). **TermResultRelease**: term→, program→(null), is_visible, released_at, released_by→.
+- **GradingScale**: program⇄(null=افتراضي، واحد فقط), ranges JSON. **ResultDisplaySettings** (singleton): show_score/letter/points/gpa, history_open, notice_text. **TermResultRelease**: term→, program→(null), is_visible, released_by→ (وقت الإتاحة updated_at)؛ [u (term, program)؛ وللكلية u (term)].
 
 ### live
-- **LiveSession**: scope {offering|cohort}, offering→(null), department→/program→/level (للـ cohort), title, provider {teams|meet|zoom|other}, join_url (مشفّر في الراحة), starts_at, ends_at, host→, status {scheduled|live|ended|cancelled}, recording_url. CHECK: نطاق واحد بالضبط.
+- **LiveSession**: public_id, scope {offering|cohort}, offering→(null), program→ و level (للـ cohort), title, provider {teams|meet|zoom|other}, join_url (مشفّر في الراحة), starts_at, ends_at, host→, status {scheduled|live|ended|cancelled}, recording_url. CHECK: نطاق واحد بالضبط.
 
 ### student_affairs
 - **Regulation**: title, body, file, category, version, effective_from, requires_acknowledgement, status {draft|published|superseded}. **RegulationAcknowledgement**: regulation→, student_record→, at; [u].
 - **StudentCase**: student_record→, kind {academic|exam_misconduct|conduct|welfare}, title, description, attachments JSON (خاص), decision, sanction, effective_from, effective_to, status {open|decided|closed}, published_to_student, opened_by→. **StudentCaseEvent**: case→, kind, note, by→, at.
-- **ExamMisconductReport**: attempt→(null), exam→, student_record→, reported_by→, evidence, status {new|converted|dismissed}, case→(null).
+- **MisconductReport**: offering→ (أي غش في المادة، لا الاختبار وحده)، attempt→(null), student_record→, reported_by→, evidence, status {new|converted|dismissed}, case→(null).
 
 ### inquiries
 - **Inquiry**: public_id, reference_no[u], contact→, type {admission|registration|fees|programs|study|technical|general}, department→(null), subject, message, status {new|in_progress|waiting_for_user|resolved|closed}, assigned_to→, source, first_response_at, resolved_at. **InquiryMessage**: inquiry→, author→(null), channel, body, sent_at. **InquiryStatusHistory**.
 
 ### content
-- **Page**: slug[u], title_ar/en, blocks JSON, seo JSON, status {draft|scheduled|published|archived}, publish_at, author→. **Announcement**: scope {university|college|department|program|offering}, scope_id, audience {public|students|staff|all_internal}, title, body, status, publish_at, expires_at, is_featured, is_pinned, cover→, attachments JSON. **News**: slug, title, body, cover, status, publish_at. **Event**: slug, title, description, starts_at, ends_at, location, cover, registration_url, status. **MediaAsset**: file (عام), alt_ar/en, width, height. **Menu/MenuItem**. **Redirect**: from_path[u], to_path. **DeletionRequest**: kind {announcement|notification}, object_id, title, reason, state {pending|approved|rejected}, requested_by→, decided_by→ — طلب حذف يقرره مدير النظام أو مشرفه، ولا يقرره صاحبه. **StaffGroup**: name_ar/en, order, is_visible, holds_faculty (تصنيف واحد يضم هيئة التدريس تلقائيًا). **StaffEntry**: user⇄(null) أو name/title/photo→MediaAsset لشخص بلا حساب. **StaffPlacement**: entry→, group→, position_ar/en, order؛ [u (entry, group)].
+- **Page**: slug[u], title_ar/en, blocks JSON, seo JSON, status {draft|scheduled|published|archived}, publish_at, author→. **Announcement**: scope {university|college|department|program|offering}, scope_id, audience {public|students|staff|all_internal}, title, body, status, publish_at, expires_at, is_featured, is_pinned, cover→, attachments JSON. **News**: slug, title, body, cover, status, publish_at. **Event**: slug, title, description, starts_at, ends_at, location, cover, registration_url, status. **MediaAsset**: file (عام), alt_ar/en, width, height. **Menu/MenuItem**. **Redirect**: from_path[u], to_path. **DeletionRequest**: kind {announcement|notification|student|course|program}, object_id, targets JSON, preview JSON, department→/program→(null، لنطاق الطالب)، title, reason, state {pending|approved|rejected}, requested_by→, decided_by→, decision_note — طلب حذف لا يقرره صاحبه: الإعلان والإشعار لمدير النظام أو مشرفه، والسجلات (طالب، مادة، برنامج) لمدير النظام وحده (`docs/roles-matrix.md`). **StaffGroup**: name_ar/en, order, is_visible, holds_faculty (تصنيف واحد يضم هيئة التدريس تلقائيًا). **StaffEntry**: user⇄(null) أو name/title/photo→MediaAsset لشخص بلا حساب. **StaffPlacement**: entry→, group→, position_ar/en, order؛ [u (entry, group)].
 
 ### notifications
-- **Notification**: sender→(null=النظام), kind {manual|system|hr_notice}, category, title, body, action_url, audience JSON, channels JSON. **NotificationRecipient**: notification→, user→, delivered_at, read_at; [u]. **PushSubscription**: user→, endpoint[u], p256dh, auth, user_agent, last_success_at. **NotificationPreference**: user→, category, inapp, push, email. **HRNotice**: teacher→, sent_by→, subject, body, requires_ack, acknowledged_at, notification→. **Outbox**: channel, payload JSON, status, attempts, next_try_at.
+- **Notification**: sender→(null=النظام), kind {manual|system|hr_notice}, category, title, body, action_url, audience JSON, channels JSON. **NotificationRecipient**: notification→, user→, delivered_at, read_at; [u]. **PushSubscription**: user→, endpoint[u], p256dh, auth, user_agent, last_success_at. **NotificationPreference**: user→, category, inapp, push, email. **HRNotice**: teacher→, sent_by→, subject, body, requires_ack, acknowledged_at, notification→. **Outbox**: notification→(null), channel, to, subject, body, status, attempts, next_try_at, last_error.
+
+### files
+- **StoredFile**: public_id, purpose {lecture|submission|regulation|case|photo}, offering→(null), file (خاص؛ الاسم `purpose/سنة/شهر/uuid`)، name, size, mime, sha256, uploaded_by→. لا يُقرأ إلا برابط موقّع (§8.8).
+- **VideoAsset**: public_id, offering→, title, provider {local|bunny}, provider_id (Bunny Stream)، file (ملف في المنطقة الخاصة حين لا Stream)، size, status {uploading|processing|ready|failed}, uploaded_by→.
+- **DiscardedFile**: storage, name, discarded_at, due — ملف لم يعد يشير إليه صف، ينتظر `FILES_KEEP_DELETED_DAYS` قبل أن يغادر Bunny (`files/trash.py`).
+
+### core
+- **IdempotencyRecord**: user→, key, method, path, body_digest, status_code, response; [u (user, key)] — إعادة طلب الكتابة نفسه تعيد الجواب نفسه.
 
 ### audit
-- **AuditLog**: actor→(null), action, target_type, target_id, target_repr, old JSON, new JSON, ip, user_agent, department→(null), program→(null), at (idx target, actor, at). لا يُحذف أبدًا.
+- **AuditLog**: actor→/department→/program→ (null، بلا قيد مفتاح: يبقى السجل بعد حذف من يشير إليه)، action, target_type, target_id, target_repr, old JSON, new JSON, ip, user_agent, at (idx target؛ actor+at؛ department+at؛ program+at). لا يُحذف أبدًا.
 
 ---
 
